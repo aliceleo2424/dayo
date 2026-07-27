@@ -176,21 +176,6 @@
       text-align: center;
     }
 
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      padding: 0.45rem 1.1rem;
-      background: var(--sage-pale);
-      border: 1.5px solid rgba(135, 154, 128, 0.2);
-      border-radius: 999px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--sage);
-      margin-bottom: 1.5rem;
-      letter-spacing: 0.02em;
-    }
-
     .hero-title {
       font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
       font-size: clamp(2.1rem, 5.5vw, 3.5rem);
@@ -199,6 +184,23 @@
       margin-bottom: 1rem;
       color: var(--text);
       letter-spacing: -0.02em;
+    }
+
+    .title-rotator-wrap {
+      display: inline-block;
+      min-width: 12.5em;
+      text-align: center;
+      vertical-align: bottom;
+    }
+
+    .title-rotator {
+      display: inline-block;
+      transition: opacity 0.55s ease;
+      white-space: nowrap;
+    }
+
+    .title-rotator.fade-out {
+      opacity: 0;
     }
 
     .hero-title em {
@@ -513,11 +515,13 @@
   </header>
 
   <main>
-    <div class="hero-badge">🇰🇷 × 🇺🇸 AI 회화 코파일럿</div>
-    <h1 class="hero-title">영어, 이제<br><em>돼요!</em></h1>
+    <h1 class="hero-title">
+      <span class="title-rotator-wrap" aria-live="polite">
+        <span class="title-rotator" id="titleRotator">베트남어 🇻🇳</span>
+      </span>, 이제<br><em>돼요!</em>
+    </h1>
     <p class="hero-subtitle">
-      DayO가 옆에서 실시간으로 도와주는<br>
-      한국어·영어 AI 스피킹 코파일럿
+      원어민과 눈 마주치며 대화하는 화상 회화 플랫폼, 돼요!
     </p>
 
     <button class="cta-btn" id="startQuizBtn">
@@ -563,6 +567,35 @@
   <div class="result-toast" id="resultToast"></div>
 
   <script>
+    const languages = [
+      { name: '베트남어', flag: '🇻🇳' },
+      { name: '스페인어', flag: '🇪🇸' },
+      { name: '러시아어', flag: '🇷🇺' },
+      { name: '영어', flag: '🇺🇸' },
+      { name: '중국어', flag: '🇨🇳' },
+      { name: '일본어', flag: '🇯🇵' },
+      { name: '이탈리아어', flag: '🇮🇹' },
+      { name: '프랑스어', flag: '🇫🇷' },
+      { name: '독일어', flag: '🇩🇪' }
+    ];
+
+    const titleRotator = document.getElementById('titleRotator');
+    let langIndex = 0;
+    const FADE_MS = 550;
+    const INTERVAL_MS = 2000;
+
+    function rotateTitle() {
+      titleRotator.classList.add('fade-out');
+      setTimeout(() => {
+        langIndex = (langIndex + 1) % languages.length;
+        const { name, flag } = languages[langIndex];
+        titleRotator.textContent = `${name} ${flag}`;
+        titleRotator.classList.remove('fade-out');
+      }, FADE_MS);
+    }
+
+    setInterval(rotateTitle, INTERVAL_MS);
+
     const startBtn = document.getElementById('startQuizBtn');
     const modal = document.getElementById('quizModal');
     const closeBtn = document.getElementById('modalClose');
