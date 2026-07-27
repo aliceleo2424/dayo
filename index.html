@@ -15,18 +15,17 @@
       --peach: #FFE5B4;
       --yellow: #FFF9C4;
       --cream: #FFF8F5;
-      --coral: #FF7A59;
-      --coral-dark: #E8654A;
-      --coral-pale: #FFE8E0;
+      --coral: #FF6B57;
+      --coral-dark: #E55A45;
+      --coral-pale: #FFE8E3;
       --bg-card: #FFFCFA;
       --text: #5C4A42;
       --text-muted: #9A8580;
-      --shadow-soft: rgba(255, 122, 89, 0.15);
-      --shadow-warm: rgba(92, 74, 66, 0.08);
-      --radius-sm: 18px;
-      --radius-md: 26px;
-      --radius-lg: 34px;
-      --radius-xl: 44px;
+      --shadow-soft: rgba(255, 107, 87, 0.14);
+      --shadow-warm: rgba(92, 74, 66, 0.06);
+      --radius: 22px;
+      --radius-lg: 28px;
+      --section-gap: clamp(5rem, 12vw, 7rem);
       --mouse-x: 50vw;
       --mouse-y: 50vh;
     }
@@ -43,166 +42,98 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    /* Mesh gradient background */
-    .mesh-bg {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      overflow: hidden;
-      pointer-events: none;
-    }
+    .mesh-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .mesh-bg__layer { position: absolute; inset: -50%; width: 200%; height: 200%; opacity: 0.65; }
+    .mesh-bg__layer--1 { background: radial-gradient(circle at 30% 40%, var(--pink) 0%, transparent 42%); animation: meshDrift1 14s ease-in-out infinite alternate; }
+    .mesh-bg__layer--2 { background: radial-gradient(circle at 70% 25%, var(--peach) 0%, transparent 40%); animation: meshDrift2 16s ease-in-out infinite alternate; }
+    .mesh-bg__layer--3 { background: radial-gradient(circle at 55% 75%, var(--yellow) 0%, transparent 45%); animation: meshDrift3 18s ease-in-out infinite alternate; }
 
-    .mesh-bg__layer {
-      position: absolute;
-      inset: -50%;
-      width: 200%;
-      height: 200%;
-      opacity: 0.7;
-    }
+    @keyframes meshDrift1 { 0% { transform: translate(0,0); } 100% { transform: translate(5%,8%); } }
+    @keyframes meshDrift2 { 0% { transform: translate(0,0); } 100% { transform: translate(-6%,5%); } }
+    @keyframes meshDrift3 { 0% { transform: translate(0,0); } 100% { transform: translate(4%,-6%); } }
 
-    .mesh-bg__layer--1 {
-      background: radial-gradient(circle at 30% 40%, var(--pink) 0%, transparent 42%);
-      animation: meshDrift1 14s ease-in-out infinite alternate;
-    }
-
-    .mesh-bg__layer--2 {
-      background: radial-gradient(circle at 70% 25%, var(--peach) 0%, transparent 40%);
-      animation: meshDrift2 16s ease-in-out infinite alternate;
-    }
-
-    .mesh-bg__layer--3 {
-      background: radial-gradient(circle at 55% 75%, var(--yellow) 0%, transparent 45%);
-      animation: meshDrift3 18s ease-in-out infinite alternate;
-    }
-
-    @keyframes meshDrift1 {
-      0% { transform: translate(0, 0) rotate(0deg); }
-      100% { transform: translate(5%, 8%) rotate(3deg); }
-    }
-
-    @keyframes meshDrift2 {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(-6%, 5%); }
-    }
-
-    @keyframes meshDrift3 {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(4%, -6%); }
-    }
-
-    /* CSS variable cursor glow */
     .cursor-glow {
-      position: fixed;
-      left: var(--mouse-x);
-      top: var(--mouse-y);
-      width: 320px;
-      height: 320px;
-      border-radius: 50%;
-      pointer-events: none;
-      z-index: 1;
+      position: fixed; left: var(--mouse-x); top: var(--mouse-y);
+      width: 300px; height: 300px; border-radius: 50%; pointer-events: none; z-index: 1;
       transform: translate(-50%, -50%);
-      background: radial-gradient(circle, rgba(255, 198, 185, 0.35) 0%, rgba(255, 229, 180, 0.18) 40%, transparent 70%);
-      filter: blur(40px);
-      opacity: 0;
+      background: radial-gradient(circle, rgba(255,198,185,0.3) 0%, rgba(255,229,180,0.15) 45%, transparent 70%);
+      filter: blur(40px); opacity: 0;
       transition: opacity 0.4s ease, left 0.12s ease-out, top 0.12s ease-out;
-      will-change: left, top;
     }
-
     .cursor-glow.active { opacity: 1; }
-
-    @media (hover: none), (pointer: coarse) {
-      .cursor-glow { display: none; }
-    }
+    @media (hover: none), (pointer: coarse) { .cursor-glow { display: none; } }
 
     /* Header */
     header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1rem 2rem;
-      background: rgba(255, 248, 245, 0.78);
-      backdrop-filter: blur(18px);
-      border-bottom: 1px solid rgba(255, 209, 220, 0.35);
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.1rem clamp(1.25rem, 4vw, 2.5rem);
+      background: rgba(255,248,245,0.8); backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255,209,220,0.3);
     }
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.65rem;
-      text-decoration: none;
-      color: var(--text);
-    }
-
+    .logo { display: flex; align-items: center; gap: 0.65rem; text-decoration: none; color: var(--text); }
     .logo-icon {
-      width: 44px;
-      height: 44px;
-      background: linear-gradient(145deg, var(--coral), #FF9A7B);
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Quicksand', sans-serif;
-      font-size: 1.35rem;
-      font-weight: 700;
-      color: #fff;
-      box-shadow: 0 6px 20px var(--shadow-soft);
-      transform: rotate(-3deg);
+      width: 42px; height: 42px; background: var(--coral); border-radius: var(--radius);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Quicksand', sans-serif; font-size: 1.3rem; font-weight: 700; color: #fff;
+      box-shadow: 0 4px 16px var(--shadow-soft);
     }
-
-    .logo-text {
-      font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
-      font-size: 1.45rem;
-      font-weight: 700;
-    }
-
+    .logo-text { font-family: 'Quicksand', 'Gowun Dodum', sans-serif; font-size: 1.4rem; font-weight: 700; }
     .logo-text span { color: var(--coral); font-weight: 600; }
 
     .insta-link {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.6rem 1.2rem;
-      background: var(--bg-card);
-      border: 1.5px solid var(--coral-pale);
-      border-radius: 999px;
-      text-decoration: none;
-      color: var(--coral);
+      display: flex; align-items: center; gap: 0.45rem;
+      padding: 0.55rem 1.1rem; background: var(--bg-card);
+      border: 1px solid var(--coral-pale); border-radius: 999px;
+      text-decoration: none; color: var(--coral);
+      font-family: 'Quicksand', sans-serif; font-weight: 600; font-size: 0.9rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 3px 12px var(--shadow-warm);
+    }
+    .insta-link:hover { transform: translateY(-1px); box-shadow: 0 6px 18px var(--shadow-soft); }
+    .insta-link svg { width: 16px; height: 16px; fill: currentColor; }
+
+    /* Layout */
+    .page { position: relative; z-index: 2; }
+
+    .section-inner {
+      max-width: 1080px; margin: 0 auto;
+      padding: 0 clamp(1.5rem, 5vw, 2.5rem);
+    }
+
+    .section-label {
       font-family: 'Quicksand', sans-serif;
-      font-weight: 600;
-      font-size: 0.92rem;
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-      box-shadow: 0 4px 16px var(--shadow-warm);
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--coral); margin-bottom: 0.75rem;
     }
 
-    .insta-link:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px var(--shadow-soft);
+    .section-title {
+      font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
+      font-size: clamp(1.5rem, 3.5vw, 1.85rem); font-weight: 700;
+      line-height: 1.35; margin-bottom: 2.5rem;
     }
-
-    .insta-link svg { width: 17px; height: 17px; fill: currentColor; }
 
     /* Hero */
-    main {
-      position: relative;
-      z-index: 2;
+    .hero {
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 6rem 1.5rem 5rem;
-      text-align: center;
+      display: flex; align-items: center;
+      padding: 6.5rem 0 4rem;
     }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(2.5rem, 6vw, 4.5rem);
+      align-items: center;
+    }
+
+    .hero-copy { text-align: left; }
 
     .hero-title {
       font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
-      font-size: clamp(2.1rem, 5.5vw, 3.5rem);
-      font-weight: 700;
-      line-height: 1.25;
-      margin-bottom: 1rem;
+      font-size: clamp(2rem, 4.8vw, 3.2rem);
+      font-weight: 700; line-height: 1.22; margin-bottom: 1.25rem;
       letter-spacing: -0.02em;
     }
 
@@ -211,491 +142,314 @@
     .hero-title em { font-style: normal; color: var(--coral); }
 
     .hero-subtitle {
-      font-size: clamp(1rem, 2.5vw, 1.15rem);
-      color: var(--text-muted);
-      font-weight: 500;
-      max-width: 480px;
-      line-height: 1.75;
-      margin-bottom: 2.5rem;
+      font-size: clamp(0.98rem, 2vw, 1.1rem);
+      color: var(--text-muted); line-height: 1.8;
+      margin-bottom: 2.25rem; max-width: 420px;
+    }
+
+    .cta-wrap { display: flex; flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+
+    .cta-badge {
+      display: inline-block;
+      padding: 0.4rem 0.95rem;
+      background: var(--coral-pale);
+      color: var(--coral);
+      font-size: 0.82rem; font-weight: 600;
+      border-radius: 999px;
+      border: 1px solid rgba(255,107,87,0.15);
     }
 
     .cta-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.55rem;
-      padding: 1.25rem 2.5rem;
-      font-family: inherit;
-      font-size: clamp(1rem, 2.4vw, 1.15rem);
-      font-weight: 700;
-      color: #fff;
-      background: linear-gradient(145deg, #FF8F6B, var(--coral));
-      border: none;
-      border-radius: var(--radius-xl);
-      cursor: pointer;
-      box-shadow: 0 10px 32px var(--shadow-soft), 0 3px 10px var(--shadow-warm);
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-      max-width: 92vw;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 1.15rem 2rem;
+      font-family: inherit; font-size: clamp(0.95rem, 2vw, 1.05rem); font-weight: 700;
+      color: #fff; background: var(--coral); border: none;
+      border-radius: var(--radius-lg); cursor: pointer;
+      box-shadow: 0 5px 0 var(--coral-dark), 0 8px 24px var(--shadow-soft);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
-    .cta-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 16px 40px rgba(255, 122, 89, 0.28);
-    }
+    .cta-btn:hover { transform: translateY(-2px); box-shadow: 0 7px 0 var(--coral-dark), 0 12px 32px rgba(255,107,87,0.22); }
+    .cta-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--coral-dark), 0 4px 12px var(--shadow-soft); }
 
-    .cta-btn:active { transform: translateY(-1px); }
+    /* Hero visual — phone mockup */
+    .hero-visual { display: flex; justify-content: center; position: relative; }
 
-    .features {
-      display: flex;
-      gap: 0.85rem;
-      margin-top: 3rem;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .feature-chip {
-      padding: 0.55rem 1.1rem;
+    .visual-card {
+      position: relative;
+      width: min(280px, 85vw);
+      padding: 1.75rem 1.5rem 2rem;
       background: var(--bg-card);
-      border: 1.5px solid var(--coral-pale);
-      border-radius: var(--radius-md);
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: var(--text-muted);
+      border: 1px solid rgba(255,209,220,0.5);
+      border-radius: 32px;
+      box-shadow: 0 20px 48px var(--shadow-soft), 0 8px 20px var(--shadow-warm);
+    }
+
+    .live-badge {
+      position: absolute; top: -0.75rem; left: 50%; transform: translateX(-50%);
+      white-space: nowrap;
+      padding: 0.35rem 0.9rem;
+      background: linear-gradient(135deg, var(--pink), var(--peach));
+      border-radius: 999px;
+      font-size: 0.72rem; font-weight: 600; color: var(--text);
       box-shadow: 0 4px 14px var(--shadow-warm);
     }
 
-    .feature-chip--accent {
-      background: var(--coral-pale);
-      color: var(--coral);
-      border-color: rgba(255, 122, 89, 0.25);
+    .live-badge::before {
+      content: ''; display: inline-block;
+      width: 6px; height: 6px; background: var(--coral);
+      border-radius: 50%; margin-right: 0.4rem;
+      animation: pulse 2s ease-in-out infinite;
     }
 
-    /* Modal overlay */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .phone-frame {
+      background: linear-gradient(160deg, var(--pink) 0%, var(--peach) 100%);
+      border-radius: 24px;
+      padding: 1.5rem 1.25rem;
+      min-height: 260px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 1.25rem;
+    }
+
+    .tutor-profile { text-align: center; }
+
+    .tutor-avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--bg-card);
+      border: 3px solid rgba(255,255,255,0.8);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Quicksand', sans-serif; font-size: 1.5rem; font-weight: 700;
+      color: var(--coral); margin: 0 auto 0.5rem;
+      box-shadow: 0 6px 16px var(--shadow-warm);
+    }
+
+    .tutor-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+
+    .speech-bubble {
+      background: var(--bg-card);
+      padding: 0.85rem 1.1rem;
+      border-radius: 20px 20px 20px 6px;
+      font-size: 0.88rem; line-height: 1.55; color: var(--text);
+      box-shadow: 0 4px 14px var(--shadow-warm);
+      animation: bubbleFloat 3.5s ease-in-out infinite;
+      max-width: 210px;
+    }
+
+    @keyframes bubbleFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    /* Journey section */
+    .journey { padding: var(--section-gap) 0; }
+
+    .journey-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .journey-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,209,220,0.45);
+      border-radius: var(--radius-lg);
+      padding: 2rem 1.75rem;
+      box-shadow: 0 8px 28px var(--shadow-warm);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .journey-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 36px var(--shadow-soft);
+    }
+
+    .journey-step {
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--coral); letter-spacing: 0.06em;
+      margin-bottom: 0.85rem;
+    }
+
+    .journey-icon { font-size: 1.5rem; margin-bottom: 0.85rem; display: block; }
+
+    .journey-title {
+      font-size: 1.05rem; font-weight: 700;
+      line-height: 1.45; margin-bottom: 0.65rem;
+    }
+
+    .journey-desc {
+      font-size: 0.9rem; color: var(--text-muted); line-height: 1.7;
+    }
+
+    /* Reviews */
+    .reviews { padding: 0 0 var(--section-gap); }
+
+    .reviews-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .review-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,209,220,0.4);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem 1.5rem;
+      box-shadow: 0 6px 24px var(--shadow-warm);
+      transform: rotate(-0.5deg);
+    }
+
+    .review-card:nth-child(2) { transform: rotate(0.5deg); }
+    .review-card:nth-child(3) { transform: rotate(-0.3deg); }
+
+    .review-emoji { font-size: 1.25rem; margin-bottom: 0.85rem; }
+
+    .review-text {
+      font-size: 0.92rem; line-height: 1.75;
+      margin-bottom: 1.25rem; color: var(--text);
+    }
+
+    .review-author {
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.78rem; font-weight: 600; color: var(--text-muted);
+    }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    /* Modal, Quiz, Chat — preserved styles */
     .modal-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 300;
-      background: rgba(255, 248, 245, 0.72);
-      backdrop-filter: blur(12px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.5rem;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.35s ease, visibility 0.35s ease;
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(255,248,245,0.75); backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+      opacity: 0; visibility: hidden; transition: opacity 0.35s ease, visibility 0.35s ease;
     }
-
     .modal-overlay.active { opacity: 1; visibility: visible; }
 
     .modal {
-      position: relative;
-      background: var(--bg-card);
-      border: 1.5px solid var(--coral-pale);
-      border-radius: var(--radius-lg);
-      padding: 2rem 1.75rem;
-      max-width: 520px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
+      position: relative; background: var(--bg-card);
+      border: 1px solid var(--coral-pale); border-radius: var(--radius-lg);
+      padding: 2rem 1.75rem; max-width: 520px; width: 100%;
+      max-height: 90vh; overflow-y: auto;
       transform: scale(0.92) translateY(16px);
-      transition: transform 0.4s cubic-bezier(0.34, 1.4, 0.64, 1);
-      box-shadow: 0 24px 64px var(--shadow-soft), 0 8px 24px var(--shadow-warm);
+      transition: transform 0.4s cubic-bezier(0.34,1.4,0.64,1);
+      box-shadow: 0 24px 64px var(--shadow-soft);
     }
-
     .modal-overlay.active .modal { transform: scale(1) translateY(0); }
 
     .modal-close {
-      position: absolute;
-      top: 1.1rem;
-      right: 1.1rem;
-      width: 38px;
-      height: 38px;
-      background: var(--coral-pale);
-      border: none;
-      border-radius: 50%;
-      color: var(--coral);
-      font-size: 1.1rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s, transform 0.2s;
-      z-index: 2;
+      position: absolute; top: 1.1rem; right: 1.1rem;
+      width: 36px; height: 36px; background: var(--coral-pale);
+      border: none; border-radius: 50%; color: var(--coral);
+      font-size: 1rem; cursor: pointer; z-index: 2;
     }
+    .modal-close:hover { background: var(--coral); color: #fff; }
 
-    .modal-close:hover { background: var(--coral); color: #fff; transform: rotate(90deg); }
-
-    /* Quiz modal */
     .quiz-header { margin-bottom: 1.25rem; padding-right: 2rem; }
+    .quiz-badge { display: inline-block; font-size: 0.78rem; font-weight: 700; color: var(--coral); background: var(--coral-pale); padding: 0.3rem 0.85rem; border-radius: 999px; margin-bottom: 0.75rem; }
+    .quiz-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; }
+    .progress-wrap { height: 8px; background: var(--coral-pale); border-radius: 999px; overflow: hidden; margin-bottom: 0.35rem; }
+    .progress-bar { height: 100%; width: 20%; background: var(--coral); border-radius: 999px; transition: width 0.45s ease; }
+    .progress-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-align: right; }
 
-    .quiz-badge {
-      display: inline-block;
-      font-family: 'Quicksand', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: var(--coral);
-      background: var(--coral-pale);
-      padding: 0.3rem 0.85rem;
-      border-radius: 999px;
-      margin-bottom: 0.75rem;
-    }
+    .quiz-slides { position: relative; overflow: hidden; min-height: 300px; }
+    .quiz-slide { position: absolute; inset: 0; opacity: 0; transform: translateX(36px); pointer-events: none; transition: opacity 0.35s, transform 0.35s; }
+    .quiz-slide.active { position: relative; opacity: 1; transform: translateX(0); pointer-events: auto; }
+    .quiz-slide.exit-left { opacity: 0; transform: translateX(-36px); }
 
-    .quiz-title {
-      font-size: 1.35rem;
-      font-weight: 700;
-      line-height: 1.4;
-      margin-bottom: 1rem;
-    }
-
-    .progress-wrap {
-      height: 10px;
-      background: var(--coral-pale);
-      border-radius: 999px;
-      overflow: hidden;
-      margin-bottom: 0.4rem;
-    }
-
-    .progress-bar {
-      height: 100%;
-      width: 20%;
-      background: linear-gradient(90deg, var(--coral), #FF9A7B);
-      border-radius: 999px;
-      transition: width 0.45s cubic-bezier(0.34, 1.4, 0.64, 1);
-    }
-
-    .progress-label {
-      font-family: 'Quicksand', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-align: right;
-    }
-
-    .quiz-slides {
-      position: relative;
-      overflow: hidden;
-      min-height: 320px;
-    }
-
-    .quiz-slide {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      transform: translateX(40px);
-      pointer-events: none;
-      transition: opacity 0.35s ease, transform 0.35s ease;
-    }
-
-    .quiz-slide.active {
-      position: relative;
-      opacity: 1;
-      transform: translateX(0);
-      pointer-events: auto;
-    }
-
-    .quiz-slide.exit-left {
-      opacity: 0;
-      transform: translateX(-40px);
-    }
-
-    .situation-card {
-      background: linear-gradient(135deg, var(--pink), var(--peach));
-      border-radius: var(--radius-md);
-      padding: 1.25rem 1.35rem;
-      margin-bottom: 1.25rem;
-      text-align: left;
-      box-shadow: 0 6px 20px var(--shadow-warm);
-    }
-
-    .situation-tag {
-      font-family: 'Quicksand', sans-serif;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--coral);
-      margin-bottom: 0.5rem;
-    }
-
-    .situation-text {
-      font-size: 1rem;
-      line-height: 1.65;
-      color: var(--text);
-    }
-
-    .quiz-options {
-      display: flex;
-      flex-direction: column;
-      gap: 0.7rem;
-    }
-
+    .situation-card { background: linear-gradient(135deg, var(--pink), var(--peach)); border-radius: var(--radius); padding: 1.2rem 1.3rem; margin-bottom: 1.15rem; text-align: left; }
+    .situation-tag { font-size: 0.8rem; font-weight: 700; color: var(--coral); margin-bottom: 0.45rem; }
+    .situation-text { font-size: 0.95rem; line-height: 1.65; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.65rem; }
     .quiz-option {
-      padding: 1rem 1.15rem;
-      background: var(--cream);
-      border: 1.5px solid var(--coral-pale);
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      text-align: left;
-      font-family: inherit;
-      font-size: 0.95rem;
-      color: var(--text);
-      transition: transform 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s;
-      box-shadow: 0 3px 10px var(--shadow-warm);
+      padding: 0.95rem 1.1rem; background: var(--cream);
+      border: 1px solid var(--coral-pale); border-radius: var(--radius);
+      cursor: pointer; text-align: left; font-family: inherit; font-size: 0.92rem;
+      transition: transform 0.2s, border-color 0.2s, background 0.2s;
     }
+    .quiz-option:hover { transform: translateY(-1px); border-color: var(--coral); background: var(--coral-pale); }
 
-    .quiz-option:hover {
-      transform: translateY(-2px);
-      border-color: var(--coral);
-      background: var(--coral-pale);
-      box-shadow: 0 8px 20px var(--shadow-soft);
-    }
-
-    /* Email form step */
     .email-step { text-align: center; padding: 0.5rem 0; }
+    .email-step-title { font-size: 1.15rem; font-weight: 700; line-height: 1.5; margin-bottom: 0.65rem; }
+    .email-step-desc { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; margin-bottom: 1.25rem; }
+    .email-form { display: flex; flex-direction: column; gap: 0.65rem; }
+    .email-input { padding: 0.95rem 1.1rem; border: 1px solid var(--coral-pale); border-radius: var(--radius); font-family: inherit; font-size: 0.95rem; background: var(--cream); outline: none; }
+    .email-input:focus { border-color: var(--coral); box-shadow: 0 0 0 3px rgba(255,107,87,0.12); }
+    .email-submit { padding: 0.95rem; background: var(--coral); color: #fff; border: none; border-radius: var(--radius); font-family: inherit; font-weight: 700; cursor: pointer; box-shadow: 0 4px 0 var(--coral-dark); }
+    .email-submit:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--coral-dark); }
 
-    .email-step-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
-
-    .email-step-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      line-height: 1.5;
-      margin-bottom: 0.75rem;
-    }
-
-    .email-step-desc {
-      font-size: 0.92rem;
-      color: var(--text-muted);
-      line-height: 1.65;
-      margin-bottom: 1.5rem;
-    }
-
-    .email-form { display: flex; flex-direction: column; gap: 0.75rem; }
-
-    .email-input {
-      padding: 1rem 1.15rem;
-      border: 1.5px solid var(--coral-pale);
-      border-radius: var(--radius-sm);
-      font-family: inherit;
-      font-size: 1rem;
-      background: var(--cream);
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-
-    .email-input:focus {
-      border-color: var(--coral);
-      box-shadow: 0 0 0 3px rgba(255, 122, 89, 0.15);
-    }
-
-    .email-submit {
-      padding: 1rem;
-      background: linear-gradient(145deg, #FF8F6B, var(--coral));
-      color: #fff;
-      border: none;
-      border-radius: var(--radius-sm);
-      font-family: inherit;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 8px 24px var(--shadow-soft);
-    }
-
-    .email-submit:hover { transform: translateY(-2px); }
-
-    /* Chatbot widget */
     .chat-fab {
-      position: fixed;
-      bottom: 1.75rem;
-      right: 1.75rem;
-      z-index: 250;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      border: none;
-      background: linear-gradient(145deg, #FF9A7B, var(--coral));
-      color: #fff;
-      font-size: 1.6rem;
-      cursor: pointer;
-      box-shadow: 0 8px 28px var(--shadow-soft);
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      position: fixed; bottom: 1.75rem; right: 1.75rem; z-index: 250;
+      width: 56px; height: 56px; border-radius: 50%; border: none;
+      background: var(--coral); color: #fff; font-size: 1.4rem;
+      cursor: pointer; box-shadow: 0 6px 24px var(--shadow-soft);
+      transition: transform 0.2s;
     }
-
-    .chat-fab:hover {
-      transform: scale(1.08);
-      box-shadow: 0 12px 36px rgba(255, 122, 89, 0.35);
-    }
+    .chat-fab:hover { transform: scale(1.06); }
 
     .chat-panel {
-      position: fixed;
-      bottom: 5.5rem;
-      right: 1.75rem;
-      z-index: 260;
-      width: min(360px, calc(100vw - 2rem));
-      max-height: min(520px, calc(100vh - 8rem));
-      background: var(--bg-card);
-      border: 1.5px solid var(--coral-pale);
-      border-radius: var(--radius-lg);
-      box-shadow: 0 20px 56px var(--shadow-soft), 0 8px 24px var(--shadow-warm);
-      display: flex;
-      flex-direction: column;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(16px) scale(0.95);
-      transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
-      overflow: hidden;
+      position: fixed; bottom: 5.25rem; right: 1.75rem; z-index: 260;
+      width: min(340px, calc(100vw - 2rem)); max-height: min(480px, calc(100vh - 8rem));
+      background: var(--bg-card); border: 1px solid var(--coral-pale);
+      border-radius: var(--radius-lg); box-shadow: 0 20px 48px var(--shadow-soft);
+      display: flex; flex-direction: column;
+      opacity: 0; visibility: hidden; transform: translateY(12px);
+      transition: opacity 0.3s, visibility 0.3s, transform 0.3s; overflow: hidden;
     }
+    .chat-panel.open { opacity: 1; visibility: visible; transform: translateY(0); }
 
-    .chat-panel.open {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0) scale(1);
-    }
+    .chat-panel-header { padding: 1rem 1.15rem; background: linear-gradient(135deg, var(--pink), var(--peach)); display: flex; align-items: center; justify-content: space-between; }
+    .chat-panel-title { font-family: 'Quicksand', sans-serif; font-weight: 700; font-size: 0.95rem; }
+    .chat-panel-close { background: rgba(255,255,255,0.5); border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; color: var(--coral); }
 
-    .chat-panel-header {
-      padding: 1.1rem 1.25rem;
-      background: linear-gradient(135deg, var(--pink), var(--peach));
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.65rem; min-height: 160px; max-height: 220px; }
+    .chat-bubble { max-width: 88%; padding: 0.7rem 0.95rem; border-radius: var(--radius); font-size: 0.88rem; line-height: 1.6; animation: bubbleIn 0.3s ease; }
+    @keyframes bubbleIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .chat-bubble--bot { align-self: flex-start; background: var(--coral-pale); border-bottom-left-radius: 4px; }
+    .chat-bubble--user { align-self: flex-end; background: var(--coral); color: #fff; border-bottom-right-radius: 4px; }
+    .chat-bubble--typing { align-self: flex-start; background: var(--coral-pale); color: var(--text-muted); font-style: italic; }
 
-    .chat-panel-title {
-      font-family: 'Quicksand', sans-serif;
-      font-weight: 700;
-      font-size: 1rem;
-      color: var(--text);
-    }
-
-    .chat-panel-close {
-      background: rgba(255, 255, 255, 0.5);
-      border: none;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      cursor: pointer;
-      color: var(--coral);
-      font-size: 0.95rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .chat-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 1rem 1.15rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-      min-height: 180px;
-      max-height: 240px;
-    }
-
-    .chat-bubble {
-      max-width: 88%;
-      padding: 0.75rem 1rem;
-      border-radius: var(--radius-sm);
-      font-size: 0.9rem;
-      line-height: 1.6;
-      animation: bubbleIn 0.35s ease;
-    }
-
-    @keyframes bubbleIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .chat-bubble--bot {
-      align-self: flex-start;
-      background: var(--coral-pale);
-      color: var(--text);
-      border-bottom-left-radius: 4px;
-    }
-
-    .chat-bubble--user {
-      align-self: flex-end;
-      background: linear-gradient(135deg, var(--coral), #FF9A7B);
-      color: #fff;
-      border-bottom-right-radius: 4px;
-    }
-
-    .chat-bubble--typing {
-      align-self: flex-start;
-      background: var(--coral-pale);
-      color: var(--text-muted);
-      font-style: italic;
-    }
-
-    .chat-faq {
-      padding: 0.85rem 1.15rem 1.15rem;
-      border-top: 1px solid var(--coral-pale);
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .chat-faq-label {
-      font-family: 'Quicksand', sans-serif;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--text-muted);
-      letter-spacing: 0.03em;
-    }
-
-    .faq-chip {
-      padding: 0.65rem 0.9rem;
-      background: var(--cream);
-      border: 1.5px solid var(--coral-pale);
-      border-radius: var(--radius-sm);
-      font-family: inherit;
-      font-size: 0.82rem;
-      color: var(--text);
-      cursor: pointer;
-      text-align: left;
-      transition: background 0.2s, border-color 0.2s;
-    }
-
-    .faq-chip:hover {
-      background: var(--coral-pale);
-      border-color: var(--coral);
-    }
+    .chat-faq { padding: 0.75rem 1rem 1rem; border-top: 1px solid var(--coral-pale); display: flex; flex-direction: column; gap: 0.45rem; }
+    .chat-faq-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); }
+    .faq-chip { padding: 0.6rem 0.85rem; background: var(--cream); border: 1px solid var(--coral-pale); border-radius: var(--radius); font-family: inherit; font-size: 0.8rem; cursor: pointer; text-align: left; }
+    .faq-chip:hover { background: var(--coral-pale); border-color: var(--coral); }
 
     .result-toast {
-      position: fixed;
-      bottom: 2rem;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      z-index: 400;
-      background: var(--bg-card);
-      color: var(--text);
-      padding: 1rem 1.75rem;
-      border-radius: var(--radius-md);
-      border: 1.5px solid var(--coral-pale);
-      font-weight: 600;
-      font-size: 0.95rem;
-      box-shadow: 0 12px 36px var(--shadow-soft);
-      opacity: 0;
-      transition: transform 0.45s cubic-bezier(0.34, 1.4, 0.64, 1), opacity 0.3s;
-      pointer-events: none;
-      white-space: nowrap;
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(80px);
+      z-index: 400; background: var(--bg-card); padding: 0.95rem 1.5rem;
+      border-radius: var(--radius); border: 1px solid var(--coral-pale);
+      font-weight: 600; font-size: 0.92rem; box-shadow: 0 10px 32px var(--shadow-soft);
+      opacity: 0; transition: transform 0.4s ease, opacity 0.3s; pointer-events: none;
     }
+    .result-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-    .result-toast.show {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
+    @media (max-width: 860px) {
+      .hero-grid { grid-template-columns: 1fr; text-align: center; gap: 3rem; }
+      .hero-copy { text-align: center; }
+      .hero-subtitle { margin-left: auto; margin-right: auto; }
+      .cta-wrap { align-items: center; }
+      .journey-grid, .reviews-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
+      .review-card { transform: none !important; }
     }
 
     @media (max-width: 600px) {
       header { padding: 0.85rem 1.25rem; }
-      .logo-text { font-size: 1.2rem; }
+      .logo-text { font-size: 1.15rem; }
       .insta-link span.handle { display: none; }
-      .chat-fab { bottom: 1.25rem; right: 1.25rem; width: 54px; height: 54px; }
-      .chat-panel { right: 1rem; bottom: 5rem; }
-      .result-toast { white-space: normal; text-align: center; max-width: 85vw; }
+      .chat-fab { bottom: 1.25rem; right: 1.25rem; }
+      .chat-panel { right: 1rem; }
     }
   </style>
 </head>
@@ -721,26 +475,92 @@
     </a>
   </header>
 
-  <main>
-    <h1 class="hero-title">
-      <span class="title-rotator-wrap" aria-live="polite">
-        <span class="title-rotator" id="titleRotator">베트남어</span>
-      </span>, 이제<br><em>돼요!</em>
-    </h1>
-    <p class="hero-subtitle">
-      원어민과 눈 마주치며 대화하는 화상 회화 플랫폼, 돼요!
-    </p>
+  <div class="page">
 
-    <button class="cta-btn" id="startQuizBtn">
-      🍰 10초 스피킹 감각 테스트
-    </button>
+    <!-- Hero -->
+    <section class="hero">
+      <div class="section-inner">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <h1 class="hero-title">
+              <span aria-live="polite"><span class="title-rotator" id="titleRotator">베트남어</span></span>, 이제<br><em>돼요!</em>
+            </h1>
+            <p class="hero-subtitle">오픽부터 워홀까지, 눈 맞추며 시작하는 1:1 라이브 대화</p>
+            <div class="cta-wrap">
+              <span class="cta-badge">🍰 10초 만에 끝나는 내 회화 수준 진단</span>
+              <button class="cta-btn" id="startQuizBtn">🍰 내 스피킹 감각 무료로 테스트하기 &gt;</button>
+            </div>
+          </div>
+          <div class="hero-visual">
+            <div class="visual-card">
+              <span class="live-badge">AI 코파일럿 실시간 지원 중</span>
+              <div class="phone-frame">
+                <div class="tutor-profile">
+                  <div class="tutor-avatar">E</div>
+                  <div class="tutor-name">Emma · French Tutor</div>
+                </div>
+                <div class="speech-bubble">Bonjour! How was your day?</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    <div class="features">
-      <div class="feature-chip feature-chip--accent">🍰 10초 감각 테스트</div>
-      <div class="feature-chip">🎙️ 실시간 코칭</div>
-      <div class="feature-chip">💬 원어민 화상 회화</div>
-    </div>
-  </main>
+    <!-- 3Step Journey -->
+    <section class="journey">
+      <div class="section-inner">
+        <p class="section-label reveal">How it works</p>
+        <h2 class="section-title reveal">3단계로 완성하는 나만의 회화 여정</h2>
+        <div class="journey-grid">
+          <article class="journey-card reveal reveal-delay-1">
+            <span class="journey-step">STEP 01</span>
+            <span class="journey-icon">🍰</span>
+            <h3 class="journey-title">10초 감각 테스트</h3>
+            <p class="journey-desc">부담 없이 초단기로 확인하는 내 스피킹 위치</p>
+          </article>
+          <article class="journey-card reveal reveal-delay-2">
+            <span class="journey-step">STEP 02</span>
+            <span class="journey-icon">🎙️</span>
+            <h3 class="journey-title">AI 실시간 코칭</h3>
+            <p class="journey-desc">대화 중 막혀도 AI가 실시간으로 단어와 문장 지원</p>
+          </article>
+          <article class="journey-card reveal reveal-delay-3">
+            <span class="journey-step">STEP 03</span>
+            <span class="journey-icon">💬</span>
+            <h3 class="journey-title">1:1 원어민 눈맞춤 대화</h3>
+            <p class="journey-desc">울렁증 없이 친구처럼 다정하게 트이는 실전 회화</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Social Proof -->
+    <section class="reviews">
+      <div class="section-inner">
+        <p class="section-label reveal">Real Stories</p>
+        <h2 class="section-title reveal">2030, 직접 경험한 후기</h2>
+        <div class="reviews-grid">
+          <article class="review-card reveal reveal-delay-1">
+            <div class="review-emoji">🎓</div>
+            <p class="review-text">"워홀 가기 전 한 달 동안 했는데 외국인 울렁증 완전 사라졌어요!"</p>
+            <span class="review-author">워홀 준비생 20대 K님</span>
+          </article>
+          <article class="review-card reveal reveal-delay-2">
+            <div class="review-emoji">🎯</div>
+            <p class="review-text">"오픽 AL 한 번에 달성! 막힐 때 AI 코파일럿이 살려준 덕분이에요"</p>
+            <span class="review-author">취준생 20대 L님</span>
+          </article>
+          <article class="review-card reveal reveal-delay-3">
+            <div class="review-emoji">✈️</div>
+            <p class="review-text">"해외 여행 가서 현지인 카페 주문 완벽 성공! 진짜 돼요!"</p>
+            <span class="review-author">직장인 30대 P님</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+  </div>
 
   <!-- Quiz Modal -->
   <div class="modal-overlay" id="quizModal">
@@ -749,9 +569,7 @@
       <div class="quiz-header">
         <div class="quiz-badge">내 스피킹 감각 알아보기</div>
         <h2 class="quiz-title" id="quizTitle">10초 스피킹 감각 테스트</h2>
-        <div class="progress-wrap">
-          <div class="progress-bar" id="progressBar"></div>
-        </div>
+        <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
         <div class="progress-label" id="progressLabel">20%</div>
       </div>
       <div class="quiz-slides" id="quizSlides"></div>
@@ -762,11 +580,11 @@
   <button class="chat-fab" id="chatFab" aria-label="FAQ 챗봇 열기">💬</button>
   <div class="chat-panel" id="chatPanel" role="dialog" aria-label="FAQ 챗봇">
     <div class="chat-panel-header">
-      <span class="chat-panel-title">🧁 DayO 도우미</span>
+      <span class="chat-panel-title">DayO 도우미</span>
       <button class="chat-panel-close" id="chatClose" aria-label="닫기">✕</button>
     </div>
     <div class="chat-messages" id="chatMessages">
-      <div class="chat-bubble chat-bubble--bot">안녕하세요! DayO 도우미예요 🍰 궁금한 점을 골라주시면 친절히 알려드릴게요.</div>
+      <div class="chat-bubble chat-bubble--bot">안녕하세요! DayO 도우미예요. 궁금한 점을 골라주시면 알려드릴게요.</div>
     </div>
     <div class="chat-faq">
       <span class="chat-faq-label">자주 묻는 질문</span>
@@ -780,25 +598,27 @@
   <div class="result-toast" id="resultToast"></div>
 
   <script>
-    /* CSS variable cursor glow — lightweight, no rAF */
     (function initCursorGlow() {
       const glow = document.getElementById('cursorGlow');
       if (!glow || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
-
       document.addEventListener('mousemove', (e) => {
         document.documentElement.style.setProperty('--mouse-x', e.clientX + 'px');
         document.documentElement.style.setProperty('--mouse-y', e.clientY + 'px');
         glow.classList.add('active');
       }, { passive: true });
-
       document.documentElement.addEventListener('mouseleave', () => glow.classList.remove('active'));
     })();
 
+    /* Scroll reveal */
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
     /* Title rotator */
-    const languages = ['베트남어', '스페인어', '러시아어', '영어', '중국어', '일본어', '이탈리아어', '프랑스어', '독일어'];
+    const languages = ['베트남어','스페인어','러시아어','영어','중국어','일본어','이탈리아어','프랑스어','독일어'];
     const titleRotator = document.getElementById('titleRotator');
     let langIndex = 0;
-
     setInterval(() => {
       titleRotator.classList.add('fade-out');
       setTimeout(() => {
@@ -808,33 +628,13 @@
       }, 550);
     }, 2000);
 
-    /* Quiz — 5-question CAT skeleton */
+    /* Quiz */
     const quizQuestions = [
-      {
-        tag: '☕ 카페',
-        scene: '바리스타가 "What can I get for you today?"라고 물어봤어요. 가장 자연스러운 답은?',
-        options: ['I want coffee.', 'Can I have a latte, please?', 'Coffee me.', 'Give me latte now.']
-      },
-      {
-        tag: '✈️ 공항',
-        scene: '체크인 카운터에서 "May I see your passport?"라고 했어요. 어떻게 대답할까요?',
-        options: ['Here you are.', 'Passport is mine.', 'I have it somewhere.', 'Wait, why?']
-      },
-      {
-        tag: '🚕 택시',
-        scene: '택시 기사님이 "Where would you like to go?"라고 물어봤어요.',
-        options: ['To the airport, please.', 'Airport go.', 'I am airport.', 'Drive fast.']
-      },
-      {
-        tag: '🏨 호텔',
-        scene: '프론트에서 "Do you have a reservation?"라고 물었어요.',
-        options: ['Yes, under Kim.', 'Reservation yes me.', 'I booked maybe.', 'Hotel room give.']
-      },
-      {
-        tag: '🍽️ 레스토랑',
-        scene: '"Would you like a table for two?"라는 질문에 답해야 해요.',
-        options: ['Yes, please. A table for two.', 'Two table yes.', 'We are hungry.', 'Table now.']
-      }
+      { tag: '☕ 카페', scene: '바리스타가 "What can I get for you today?"라고 물어봤어요. 가장 자연스러운 답은?', options: ['I want coffee.', 'Can I have a latte, please?', 'Coffee me.', 'Give me latte now.'] },
+      { tag: '✈️ 공항', scene: '체크인 카운터에서 "May I see your passport?"라고 했어요.', options: ['Here you are.', 'Passport is mine.', 'I have it somewhere.', 'Wait, why?'] },
+      { tag: '🚕 택시', scene: '택시 기사님이 "Where would you like to go?"라고 물어봤어요.', options: ['To the airport, please.', 'Airport go.', 'I am airport.', 'Drive fast.'] },
+      { tag: '🏨 호텔', scene: '프론트에서 "Do you have a reservation?"라고 물었어요.', options: ['Yes, under Kim.', 'Reservation yes me.', 'I booked maybe.', 'Hotel room give.'] },
+      { tag: '🍽️ 레스토랑', scene: '"Would you like a table for two?"라는 질문에 답해야 해요.', options: ['Yes, please. A table for two.', 'Two table yes.', 'We are hungry.', 'Table now.'] }
     ];
 
     const quizModal = document.getElementById('quizModal');
@@ -844,84 +644,48 @@
     const startBtn = document.getElementById('startQuizBtn');
     const modalClose = document.getElementById('modalClose');
     const toast = document.getElementById('resultToast');
-
-    let currentStep = 0;
-    let isTransitioning = false;
+    let currentStep = 0, isTransitioning = false;
 
     function renderQuestion(index) {
       const q = quizQuestions[index];
       const pct = ((index + 1) / quizQuestions.length) * 100;
       progressBar.style.width = pct + '%';
       progressLabel.textContent = Math.round(pct) + '%';
-
       const slide = document.createElement('div');
       slide.className = 'quiz-slide active';
-      slide.innerHTML = `
-        <div class="situation-card">
-          <div class="situation-tag">${q.tag}</div>
-          <p class="situation-text">${q.scene}</p>
-        </div>
-        <div class="quiz-options">
-          ${q.options.map((opt, i) => `<button class="quiz-option" data-index="${i}">${opt}</button>`).join('')}
-        </div>
-      `;
-
-      slide.querySelectorAll('.quiz-option').forEach(btn => {
-        btn.addEventListener('click', () => handleAnswer(slide, index));
-      });
-
+      slide.innerHTML = `<div class="situation-card"><div class="situation-tag">${q.tag}</div><p class="situation-text">${q.scene}</p></div><div class="quiz-options">${q.options.map(o => `<button class="quiz-option">${o}</button>`).join('')}</div>`;
+      slide.querySelectorAll('.quiz-option').forEach(btn => btn.addEventListener('click', () => handleAnswer(slide, index)));
       return slide;
     }
 
     function renderEmailStep() {
       progressBar.style.width = '100%';
       progressLabel.textContent = '100%';
-
       const slide = document.createElement('div');
       slide.className = 'quiz-slide active';
-      slide.innerHTML = `
-        <div class="email-step">
-          <div class="email-step-icon">📊</div>
-          <h3 class="email-step-title">내 스피킹 약점 분석표 &<br>맞춤 코스 리포트 받아보기</h3>
-          <p class="email-step-desc">테스트 결과를 바탕으로 나만의 스피킹 코스를 추천해 드릴게요 🍰</p>
-          <form class="email-form" id="emailForm">
-            <input type="email" class="email-input" placeholder="이메일을 입력해 주세요" required id="emailInput">
-            <button type="submit" class="email-submit">리포트 받아보기</button>
-          </form>
-        </div>
-      `;
-
+      slide.innerHTML = `<div class="email-step"><h3 class="email-step-title">내 스피킹 약점 분석표 &<br>맞춤 코스 리포트 받아보기</h3><p class="email-step-desc">테스트 결과를 바탕으로 나만의 스피킹 코스를 추천해 드릴게요</p><form class="email-form" id="emailForm"><input type="email" class="email-input" placeholder="이메일을 입력해 주세요" required id="emailInput"><button type="submit" class="email-submit">리포트 받아보기</button></form></div>`;
       slide.querySelector('#emailForm').addEventListener('submit', (e) => {
         e.preventDefault();
-        const email = slide.querySelector('#emailInput').value;
         closeQuizModal();
-        showToast(`${email}로 리포트를 보내드릴게요! 🍰`);
+        showToast(slide.querySelector('#emailInput').value + '로 리포트를 보내드릴게요!');
       });
-
       return slide;
     }
 
     function handleAnswer(slide, index) {
       if (isTransitioning) return;
       isTransitioning = true;
-
       slide.classList.add('exit-left');
       setTimeout(() => {
         slide.remove();
         currentStep = index + 1;
-
-        if (currentStep < quizQuestions.length) {
-          quizSlides.appendChild(renderQuestion(currentStep));
-        } else {
-          quizSlides.appendChild(renderEmailStep());
-        }
+        quizSlides.appendChild(currentStep < quizQuestions.length ? renderQuestion(currentStep) : renderEmailStep());
         isTransitioning = false;
       }, 350);
     }
 
     function openQuizModal() {
-      currentStep = 0;
-      isTransitioning = false;
+      currentStep = 0; isTransitioning = false;
       quizSlides.innerHTML = '';
       quizSlides.appendChild(renderQuestion(0));
       quizModal.classList.add('active');
@@ -932,7 +696,6 @@
       quizModal.classList.remove('active');
       document.body.style.overflow = '';
       quizSlides.innerHTML = '';
-      currentStep = 0;
       progressBar.style.width = '20%';
       progressLabel.textContent = '20%';
     }
@@ -947,41 +710,30 @@
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        if (quizModal.classList.contains('active')) closeQuizModal();
-        if (chatPanel.classList.contains('open')) closeChat();
-      }
-    });
-
-    /* Chatbot FAQ */
+    /* Chatbot */
     const chatFab = document.getElementById('chatFab');
     const chatPanel = document.getElementById('chatPanel');
     const chatClose = document.getElementById('chatClose');
     const chatMessages = document.getElementById('chatMessages');
-
     const faqAnswers = {
-      class: 'DayO 수업은 1:1 화상 회화로 진행돼요! 원어민 강사와 눈을 마주치며 실제 상황 대화를 연습하고, AI 코파일럿이 실시간으로 표현을 도와드린답니다 🍰',
-      teachers: '미국, 영국, 호주 등 다양한 국적의 원어민 강사진이 함께해요. 모두 DayO 교육 과정을 이수한, 따뜻하고 전문적인 선생님들이에요 ✨',
-      beginner: '물론이죠! 영어를 처음 시작하셔도 괜찮아요. 한국어로 먼저 설명해 드리고, 천천히 영어로 전환하는 맞춤형 수업을 제공해요 💛',
-      free: '네, 10초 스피킹 감각 테스트는 완전 무료예요! 부담 없이 나의 스피킹 감각을 확인해 보세요 🎂'
+      class: 'DayO 수업은 1:1 화상 회화로 진행돼요! 원어민 강사와 눈을 마주치며 실제 상황 대화를 연습하고, AI 코파일럿이 실시간으로 표현을 도와드린답니다.',
+      teachers: '미국, 영국, 호주 등 다양한 국적의 원어민 강사진이 함께해요. 모두 DayO 교육 과정을 이수한, 따뜻하고 전문적인 선생님들이에요.',
+      beginner: '물론이죠! 영어를 처음 시작하셔도 괜찮아요. 한국어로 먼저 설명해 드리고, 천천히 영어로 전환하는 맞춤형 수업을 제공해요.',
+      free: '네, 10초 스피킹 감각 테스트는 완전 무료예요! 부담 없이 나의 스피킹 감각을 확인해 보세요.'
     };
 
     function openChat() { chatPanel.classList.add('open'); }
     function closeChat() { chatPanel.classList.remove('open'); }
-
-    chatFab.addEventListener('click', () => {
-      chatPanel.classList.contains('open') ? closeChat() : openChat();
-    });
+    chatFab.addEventListener('click', () => chatPanel.classList.contains('open') ? closeChat() : openChat());
     chatClose.addEventListener('click', closeChat);
 
     function addBubble(text, type) {
-      const bubble = document.createElement('div');
-      bubble.className = `chat-bubble chat-bubble--${type}`;
-      bubble.textContent = text;
-      chatMessages.appendChild(bubble);
+      const b = document.createElement('div');
+      b.className = `chat-bubble chat-bubble--${type}`;
+      b.textContent = text;
+      chatMessages.appendChild(b);
       chatMessages.scrollTop = chatMessages.scrollHeight;
-      return bubble;
+      return b;
     }
 
     function typeBotReply(text) {
@@ -991,20 +743,25 @@
         let i = 0;
         const bubble = addBubble('', 'bot');
         const timer = setInterval(() => {
-          bubble.textContent += text[i];
+          bubble.textContent += text[i++];
           chatMessages.scrollTop = chatMessages.scrollHeight;
-          i++;
           if (i >= text.length) clearInterval(timer);
         }, 18);
-      }, 600);
+      }, 500);
     }
 
     document.querySelectorAll('.faq-chip').forEach(chip => {
       chip.addEventListener('click', () => {
-        const key = chip.dataset.faq;
         addBubble(chip.textContent, 'user');
-        typeBotReply(faqAnswers[key]);
+        typeBotReply(faqAnswers[chip.dataset.faq]);
       });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (quizModal.classList.contains('active')) closeQuizModal();
+        if (chatPanel.classList.contains('open')) closeChat();
+      }
     });
   </script>
 </body>
