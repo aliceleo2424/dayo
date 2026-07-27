@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DayO (돼요) — AI 회화 코파일럿</title>
+  <title>DayO 돼요 — AI 회화 코파일럿</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
@@ -80,6 +80,40 @@
     @keyframes float {
       0%, 100% { transform: translate(0, 0) scale(1); }
       50% { transform: translate(16px, -24px) scale(1.04); }
+    }
+
+    /* Cursor glow */
+    .cursor-glow {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 360px;
+      height: 360px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(
+        circle,
+        rgba(255, 198, 185, 0.38) 0%,
+        rgba(255, 218, 195, 0.22) 32%,
+        rgba(255, 238, 210, 0.12) 52%,
+        transparent 72%
+      );
+      filter: blur(48px);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      will-change: transform, left, top;
+    }
+
+    .cursor-glow.active {
+      opacity: 1;
+    }
+
+    @media (hover: none), (pointer: coarse) {
+      .cursor-glow {
+        display: none;
+      }
     }
 
     /* Header */
@@ -496,11 +530,12 @@
 
   <div class="bg-blob bg-blob--sage"></div>
   <div class="bg-blob bg-blob--lavender"></div>
+  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
 
   <header>
     <a href="#" class="logo">
       <div class="logo-icon">D</div>
-      <div class="logo-text">DayO <span>(돼요)</span></div>
+      <div class="logo-text">DayO <span>돼요</span></div>
     </a>
     <a href="https://www.instagram.com/dayo.speak" target="_blank" rel="noopener noreferrer" class="insta-link">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -563,6 +598,43 @@
   <div class="result-toast" id="resultToast"></div>
 
   <script>
+    (function initCursorGlow() {
+      const glow = document.getElementById('cursorGlow');
+      if (!glow) return;
+
+      const hasFinePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+      if (!hasFinePointer) return;
+
+      let targetX = window.innerWidth / 2;
+      let targetY = window.innerHeight / 2;
+      let currentX = targetX;
+      let currentY = targetY;
+
+      document.addEventListener('mousemove', (e) => {
+        targetX = e.clientX;
+        targetY = e.clientY;
+        if (!glow.classList.contains('active')) {
+          glow.classList.add('active');
+          currentX = targetX;
+          currentY = targetY;
+        }
+      });
+
+      document.documentElement.addEventListener('mouseleave', () => {
+        glow.classList.remove('active');
+      });
+
+      function animate() {
+        currentX += (targetX - currentX) * 0.07;
+        currentY += (targetY - currentY) * 0.07;
+        glow.style.left = `${currentX}px`;
+        glow.style.top = `${currentY}px`;
+        requestAnimationFrame(animate);
+      }
+
+      animate();
+    })();
+
     const languages = [
       '베트남어', '스페인어', '러시아어', '영어', '중국어',
       '일본어', '이탈리아어', '프랑스어', '독일어'
