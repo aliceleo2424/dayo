@@ -187,16 +187,12 @@
     }
 
     .title-rotator-wrap {
-      display: inline-block;
-      min-width: 12.5em;
-      text-align: center;
-      vertical-align: bottom;
+      display: inline;
     }
 
     .title-rotator {
-      display: inline-block;
+      display: inline;
       transition: opacity 0.55s ease;
-      white-space: nowrap;
     }
 
     .title-rotator.fade-out {
@@ -517,7 +513,7 @@
   <main>
     <h1 class="hero-title">
       <span class="title-rotator-wrap" aria-live="polite">
-        <span class="title-rotator" id="titleRotator">베트남어 🇻🇳</span>
+        <span class="title-rotator" id="titleRotator">베트남어</span>
       </span>, 이제<br><em>돼요!</em>
     </h1>
     <p class="hero-subtitle">
@@ -568,15 +564,8 @@
 
   <script>
     const languages = [
-      { name: '베트남어', flag: '🇻🇳' },
-      { name: '스페인어', flag: '🇪🇸' },
-      { name: '러시아어', flag: '🇷🇺' },
-      { name: '영어', flag: '🇺🇸' },
-      { name: '중국어', flag: '🇨🇳' },
-      { name: '일본어', flag: '🇯🇵' },
-      { name: '이탈리아어', flag: '🇮🇹' },
-      { name: '프랑스어', flag: '🇫🇷' },
-      { name: '독일어', flag: '🇩🇪' }
+      '베트남어', '스페인어', '러시아어', '영어', '중국어',
+      '일본어', '이탈리아어', '프랑스어', '독일어'
     ];
 
     const titleRotator = document.getElementById('titleRotator');
@@ -588,8 +577,7 @@
       titleRotator.classList.add('fade-out');
       setTimeout(() => {
         langIndex = (langIndex + 1) % languages.length;
-        const { name, flag } = languages[langIndex];
-        titleRotator.textContent = `${name} ${flag}`;
+        titleRotator.textContent = languages[langIndex];
         titleRotator.classList.remove('fade-out');
       }, FADE_MS);
     }
