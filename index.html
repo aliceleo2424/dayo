@@ -627,7 +627,7 @@
               <div class="phone-frame">
                 <div class="partner-profile" id="partnerProfile">
                   <img class="partner-avatar" id="partnerAvatar"
-                       src="https://api.dicebear.com/7.x/notionists/svg?seed=Linh&backgroundColor=ffd1dc"
+                       src="https://api.dicebear.com/9.x/personas/svg?seed=LinhVietnam&gender=female&backgroundColor=ffd1dc"
                        alt="대화 파트너 아바타" width="72" height="72">
                   <div class="partner-name" id="partnerName">Linh from Vietnam</div>
                 </div>
@@ -813,26 +813,24 @@
 
     /* Title rotator synced with live partner card */
     const partners = [
-      { language: '베트남어', name: 'Linh from Vietnam', greeting: 'Xin chào! Bạn khỏe không? 🌿', seed: 'Linh' },
-      { language: '스페인어', name: 'Elena from Spain', greeting: '¡Hola! ¿Cómo estás? 💃', seed: 'Elena' },
-      { language: '러시아어', name: 'Sasha from Russia', greeting: 'Привет! Как дела? ❄️', seed: 'Sasha' },
-      { language: '영어', name: 'Kate from USA', greeting: 'Hi there! Ready to chat? ☕', seed: 'Kate' },
-      { language: '중국어', name: 'Mei from China', greeting: '你好！今天过得怎么样？ 🧋', seed: 'Mei' },
-      { language: '일본어', name: 'Yui from Japan', greeting: 'こんにちは！今日もお疲れ様です✨', seed: 'Yui' },
-      { language: '이탈리아어', name: 'Marco from Italy', greeting: 'Ciao! Come stai? 🍕', seed: 'Marco' },
-      { language: '프랑스어', name: 'Camille from France', greeting: 'Bonjour! Comment ça va? ☕', seed: 'Camille' },
-      { language: '독일어', name: 'Anna from Germany', greeting: "Guten Tag! Wie geht's? 🥨", seed: 'Anna' }
+      { language: '베트남어', name: 'Linh from Vietnam', greeting: 'Xin chào! Bạn khỏe không? 🌿', seed: 'LinhVietnam', gender: 'female', bg: 'ffd1dc' },
+      { language: '스페인어', name: 'Elena from Spain', greeting: '¡Hola! ¿Cómo estás? 💃', seed: 'ElenaSpain', gender: 'female', bg: 'ffe5b4' },
+      { language: '러시아어', name: 'Sasha from Russia', greeting: 'Привет! Как дела? ❄️', seed: 'SashaRussiaWoman', gender: 'female', bg: 'fff9c4' },
+      { language: '영어', name: 'Kate from USA', greeting: 'Hi there! Ready to chat? ☕', seed: 'KateUSA', gender: 'female', bg: 'ffe8e3' },
+      { language: '중국어', name: 'Mei from China', greeting: '你好！今天过得怎么样？ 🧋', seed: 'MeiChina', gender: 'female', bg: 'ffd1dc' },
+      { language: '일본어', name: 'Yui from Japan', greeting: 'こんにちは！今日もお疲れ様です✨', seed: 'YuiJapan', gender: 'female', bg: 'ffe5b4' },
+      { language: '이탈리아어', name: 'Marco from Italy', greeting: 'Ciao! Come stai? 🍕', seed: 'MarcoItalyMan', gender: 'male', bg: 'fff9c4' },
+      { language: '프랑스어', name: 'Camille from France', greeting: 'Bonjour! Comment ça va? ☕', seed: 'CamilleFrance', gender: 'female', bg: 'ffe8e3' },
+      { language: '독일어', name: 'Anna from Germany', greeting: "Guten Tag! Wie geht's? 🥨", seed: 'AnnaGermany', gender: 'female', bg: 'ffd1dc' }
     ];
 
-    const avatarBackgrounds = ['ffd1dc', 'ffe5b4', 'fff9c4', 'ffe8e3'];
-    function avatarUrl(seed, index) {
-      const bg = avatarBackgrounds[index % avatarBackgrounds.length];
-      return `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(seed)}&backgroundColor=${bg}`;
+    function avatarUrl(partner) {
+      return `https://api.dicebear.com/9.x/personas/svg?seed=${encodeURIComponent(partner.seed)}&gender=${partner.gender}&backgroundColor=${partner.bg}`;
     }
 
-    partners.forEach((p, i) => {
+    partners.forEach((p) => {
       const img = new Image();
-      img.src = avatarUrl(p.seed, i);
+      img.src = avatarUrl(p);
     });
 
     const titleRotator = document.getElementById('titleRotator');
@@ -845,7 +843,7 @@
     function renderPartner(index) {
       const partner = partners[index];
       titleRotator.textContent = partner.language;
-      partnerAvatar.src = avatarUrl(partner.seed, index);
+      partnerAvatar.src = avatarUrl(partner);
       partnerAvatar.alt = `${partner.name} 아바타`;
       partnerName.textContent = partner.name;
       partnerGreeting.textContent = partner.greeting;
