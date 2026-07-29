@@ -66,33 +66,132 @@
     /* Header */
     header {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 1.1rem clamp(1.25rem, 4vw, 2.5rem);
-      background: rgba(255,248,245,0.8); backdrop-filter: blur(18px);
+      background: rgba(255,248,245,0.85); backdrop-filter: blur(18px);
       border-bottom: 1px solid rgba(255,209,220,0.3);
     }
 
-    .logo { display: flex; align-items: center; gap: 0.65rem; text-decoration: none; color: var(--text); }
+    .header-inner {
+      max-width: 1120px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem;
+      padding: 0.95rem clamp(1.25rem, 4vw, 2.5rem);
+    }
+
+    .logo { display: flex; align-items: center; gap: 0.65rem; text-decoration: none; color: var(--text); flex-shrink: 0; }
     .logo-icon {
-      width: 42px; height: 42px; background: var(--coral); border-radius: var(--radius);
+      width: 42px; height: 42px;
+      background: linear-gradient(145deg, #FF9A8B, var(--coral));
+      border-radius: 16px;
       display: flex; align-items: center; justify-content: center;
       font-family: 'Quicksand', sans-serif; font-size: 1.3rem; font-weight: 700; color: #fff;
       box-shadow: 0 4px 16px var(--shadow-soft);
     }
-    .logo-text { font-family: 'Quicksand', 'Gowun Dodum', sans-serif; font-size: 1.4rem; font-weight: 700; }
+    .logo-text { font-family: 'Quicksand', 'Gowun Dodum', sans-serif; font-size: 1.35rem; font-weight: 700; }
     .logo-text span { color: var(--coral); font-weight: 600; }
 
-    .insta-link {
-      display: flex; align-items: center; gap: 0.45rem;
-      padding: 0.55rem 1.1rem; background: var(--bg-card);
-      border: 1px solid var(--coral-pale); border-radius: 999px;
-      text-decoration: none; color: var(--coral);
-      font-family: 'Quicksand', sans-serif; font-weight: 600; font-size: 0.9rem;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 3px 12px var(--shadow-warm);
+    .nav-desktop {
+      display: flex; align-items: center; gap: 0.25rem;
+      list-style: none;
     }
-    .insta-link:hover { transform: translateY(-1px); box-shadow: 0 6px 18px var(--shadow-soft); }
-    .insta-link svg { width: 16px; height: 16px; fill: currentColor; }
+
+    .nav-desktop a {
+      display: block;
+      padding: 0.55rem 0.9rem;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      font-weight: 600;
+      border-radius: 999px;
+      transition: color 0.2s, background 0.2s;
+      white-space: nowrap;
+    }
+
+    .nav-desktop a:hover {
+      color: var(--coral);
+      background: var(--coral-pale);
+    }
+
+    .header-actions {
+      display: flex; align-items: center; gap: 0.65rem; flex-shrink: 0;
+    }
+
+    .header-cta {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.7rem 1.25rem;
+      background: var(--coral);
+      color: #fff;
+      text-decoration: none;
+      font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 700;
+      border-radius: 999px;
+      box-shadow: 0 4px 16px var(--shadow-soft);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .header-cta:hover {
+      transform: translateY(-2px);
+      background: #FF7A68;
+      box-shadow: 0 8px 24px rgba(255, 107, 87, 0.28);
+    }
+
+    .header-cta:active {
+      transform: translateY(0);
+    }
+
+    .menu-toggle {
+      display: none;
+      width: 42px; height: 42px;
+      border: 1px solid var(--coral-pale);
+      border-radius: 14px;
+      background: var(--bg-card);
+      color: var(--coral);
+      font-size: 1.25rem;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .menu-toggle:hover { background: var(--coral-pale); }
+    .menu-toggle[aria-expanded="true"] { background: var(--coral-pale); }
+
+    .nav-mobile {
+      max-height: 0;
+      overflow: hidden;
+      background: rgba(255, 252, 250, 0.97);
+      border-top: 1px solid transparent;
+      transition: max-height 0.35s ease, padding 0.35s ease, border-color 0.35s ease;
+    }
+
+    .nav-mobile.open {
+      max-height: 360px;
+      padding: 0.75rem 1.25rem 1.25rem;
+      border-top-color: rgba(255, 209, 220, 0.35);
+    }
+
+    .nav-mobile a {
+      display: block;
+      padding: 0.85rem 1rem;
+      text-decoration: none;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: 16px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .nav-mobile a:hover {
+      background: var(--coral-pale);
+      color: var(--coral);
+    }
+
+    .nav-mobile .header-cta {
+      display: flex;
+      justify-content: center;
+      margin-top: 0.5rem;
+      width: 100%;
+    }
 
     /* Layout */
     .page { position: relative; z-index: 2; }
@@ -435,6 +534,12 @@
     }
     .result-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
+    @media (max-width: 900px) {
+      .nav-desktop { display: none; }
+      .header-actions .header-cta { display: none; }
+      .menu-toggle { display: inline-flex; }
+    }
+
     @media (max-width: 860px) {
       .hero-grid { grid-template-columns: 1fr; text-align: center; gap: 3rem; }
       .hero-copy { text-align: center; }
@@ -445,9 +550,8 @@
     }
 
     @media (max-width: 600px) {
-      header { padding: 0.85rem 1.25rem; }
+      .header-inner { padding: 0.75rem 1.15rem; }
       .logo-text { font-size: 1.15rem; }
-      .insta-link span.handle { display: none; }
       .chat-fab { bottom: 1.25rem; right: 1.25rem; }
       .chat-panel { right: 1rem; }
     }
@@ -463,16 +567,32 @@
   <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
 
   <header>
-    <a href="#" class="logo">
-      <div class="logo-icon">D</div>
-      <div class="logo-text">DayO <span>돼요</span></div>
-    </a>
-    <a href="https://www.instagram.com/dayo.speak" target="_blank" rel="noopener noreferrer" class="insta-link">
-      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-      </svg>
-      <span class="handle">@dayo.speak</span>
-    </a>
+    <div class="header-inner">
+      <a href="#" class="logo">
+        <div class="logo-icon">D</div>
+        <div class="logo-text">DayO <span>돼요</span></div>
+      </a>
+
+      <nav class="nav-desktop" aria-label="주요 메뉴">
+        <a href="#about">회사 소개</a>
+        <a href="#tutors">대화 파트너</a>
+        <a href="#booking">대화 예약하기</a>
+        <a href="#faq">자주 묻는 질문</a>
+      </nav>
+
+      <div class="header-actions">
+        <a href="room.html" class="header-cta">☕ 대화 시작해요!</a>
+        <button class="menu-toggle" id="menuToggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
+      </div>
+    </div>
+
+    <nav class="nav-mobile" id="mobileNav" aria-label="모바일 메뉴">
+      <a href="#about">회사 소개</a>
+      <a href="#tutors">대화 파트너</a>
+      <a href="#booking">대화 예약하기</a>
+      <a href="#faq">자주 묻는 질문</a>
+      <a href="room.html" class="header-cta">☕ 대화 시작해요!</a>
+    </nav>
   </header>
 
   <div class="page">
@@ -508,7 +628,7 @@
     </section>
 
     <!-- 3Step Journey -->
-    <section class="journey">
+    <section class="journey" id="about">
       <div class="section-inner">
         <p class="section-label reveal">How it works</p>
         <h2 class="section-title reveal">3단계로 완성하는 나만의 회화 여정</h2>
@@ -532,6 +652,41 @@
             <p class="journey-desc">울렁증 없이 친구처럼 다정하게 트이는 실전 회화</p>
           </article>
         </div>
+      </div>
+    </section>
+
+    <!-- Tutors teaser -->
+    <section class="journey" id="tutors" style="padding-top: 0;">
+      <div class="section-inner">
+        <p class="section-label reveal">Tutors</p>
+        <h2 class="section-title reveal">다정한 대화 파트너와 눈 맞추며</h2>
+        <div class="journey-grid">
+          <article class="journey-card reveal reveal-delay-1">
+            <span class="journey-icon">🥐</span>
+            <h3 class="journey-title">Emma · French</h3>
+            <p class="journey-desc">카페 같은 분위기로 천천히 이끌어 주는 프랑스어·영어 튜터</p>
+          </article>
+          <article class="journey-card reveal reveal-delay-2">
+            <span class="journey-icon">🍵</span>
+            <h3 class="journey-title">James · English</h3>
+            <p class="journey-desc">오픽·워홀 실전 상황으로 자연스럽게 말문이 트이는 코칭</p>
+          </article>
+          <article class="journey-card reveal reveal-delay-3">
+            <span class="journey-icon">🍰</span>
+            <h3 class="journey-title">Sakura · Japanese</h3>
+            <p class="journey-desc">친구처럼 다정한 일본어 대화로 울렁증 없이 시작해요</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Booking CTA -->
+    <section class="journey" id="booking" style="padding-top: 0; padding-bottom: var(--section-gap);">
+      <div class="section-inner" style="text-align: center;">
+        <p class="section-label reveal">Booking</p>
+        <h2 class="section-title reveal" style="margin-bottom: 1.25rem;">지금, 화상 회화 스튜디오에서 만나요</h2>
+        <p class="reveal" style="color: var(--text-muted); margin-bottom: 1.75rem; line-height: 1.7;">원어민과 눈 맞추며 대화하는 라이브 룸으로 바로 이동해요.</p>
+        <a href="room.html" class="header-cta reveal" style="display: inline-flex;">☕ 대화 시작해요!</a>
       </div>
     </section>
 
@@ -598,6 +753,35 @@
   <div class="result-toast" id="resultToast"></div>
 
   <script>
+    /* Mobile nav */
+    (function initMobileNav() {
+      const toggle = document.getElementById('menuToggle');
+      const mobileNav = document.getElementById('mobileNav');
+      if (!toggle || !mobileNav) return;
+
+      function closeMenu() {
+        mobileNav.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', '메뉴 열기');
+        toggle.textContent = '☰';
+      }
+
+      function openMenu() {
+        mobileNav.classList.add('open');
+        toggle.setAttribute('aria-expanded', 'true');
+        toggle.setAttribute('aria-label', '메뉴 닫기');
+        toggle.textContent = '✕';
+      }
+
+      toggle.addEventListener('click', () => {
+        mobileNav.classList.contains('open') ? closeMenu() : openMenu();
+      });
+
+      mobileNav.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', closeMenu);
+      });
+    })();
+
     (function initCursorGlow() {
       const glow = document.getElementById('cursorGlow');
       if (!glow || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
@@ -726,6 +910,13 @@
     function closeChat() { chatPanel.classList.remove('open'); }
     chatFab.addEventListener('click', () => chatPanel.classList.contains('open') ? closeChat() : openChat());
     chatClose.addEventListener('click', closeChat);
+
+    document.querySelectorAll('a[href="#faq"]').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        openChat();
+      });
+    });
 
     function addBubble(text, type) {
       const b = document.createElement('div');
