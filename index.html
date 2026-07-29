@@ -321,16 +321,16 @@
     }
 
     .partner-avatar {
-      width: 72px; height: 72px; border-radius: 50%;
+      width: 82px; height: 82px;
+      border-radius: 34%;
       background: var(--bg-card);
-      border: 3px solid rgba(255,255,255,0.9);
-      outline: 2px solid var(--pink);
-      outline-offset: 1px;
+      border: 3px solid var(--coral-pale);
+      outline: 2px solid rgba(255,255,255,0.9);
+      outline-offset: -5px;
       display: block;
       object-fit: cover;
-      object-position: center top;
-      margin: 0 auto 0.5rem;
-      box-shadow: 0 6px 16px var(--shadow-warm);
+      margin: 0 auto 0.55rem;
+      box-shadow: 0 6px 18px var(--shadow-warm);
     }
 
     .partner-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
@@ -630,8 +630,8 @@
               <div class="phone-frame">
                 <div class="partner-profile" id="partnerProfile">
                   <img class="partner-avatar" id="partnerAvatar"
-                       src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&amp;auto=format&amp;fit=crop&amp;q=80"
-                       alt="대화 파트너 아바타" width="72" height="72" loading="eager" decoding="async">
+                       src="https://api.dicebear.com/10.x/lorelei/svg?seed=Linh&amp;backgroundColor=ffd1dc&amp;hairColor=1a1110&amp;skinColor=f0c9a4&amp;beardProbability=0&amp;earringsProbability=70&amp;glassesProbability=0"
+                       alt="대화 파트너 아바타" width="82" height="82" loading="eager" decoding="async">
                   <div class="partner-name" id="partnerName">Linh from Vietnam</div>
                 </div>
                 <div class="speech-bubble" id="partnerGreeting">Xin chào! Bạn khỏe không? 🌿</div>
@@ -818,21 +818,44 @@
     document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
     /* Title rotator synced with live partner card */
+    /* 파스텔 벡터 일러스트 아바타 (DiceBear Lorelei, CC0) */
+    const AVATAR_API = 'https://api.dicebear.com/10.x/lorelei/svg';
+
     const partners = [
-      { language: '베트남어', name: 'Linh from Vietnam', greeting: 'Xin chào! Bạn khỏe không? 🌿', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&auto=format&fit=crop&q=80' },
-      { language: '스페인어', name: 'Elena from Spain', greeting: '¡Hola! ¿Cómo estás? 💃', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&auto=format&fit=crop&q=80' },
-      { language: '러시아어', name: 'Sasha from Russia', greeting: 'Привет! Как дела? ❄️', avatar: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&auto=format&fit=crop&q=80' },
-      { language: '영어', name: 'Kate from USA', greeting: 'Hi there! Ready to chat? ☕', avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&auto=format&fit=crop&q=80' },
-      { language: '중국어', name: 'Mei from China', greeting: '你好！今天过得怎么样？ 🧋', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80' },
-      { language: '일본어', name: 'Yui from Japan', greeting: 'こんにちは！今日もお疲れ様です✨', avatar: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&auto=format&fit=crop&q=80' },
-      { language: '이탈리아어', name: 'Marco from Italy', greeting: 'Ciao! Come stai? 🍕', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80' },
-      { language: '프랑스어', name: 'Camille from France', greeting: 'Bonjour! Comment ça va? ☕', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80' },
-      { language: '독일어', name: 'Anna from Germany', greeting: "Guten Tag! Wie geht's? 🥨", avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&auto=format&fit=crop&q=80' }
+      { language: '베트남어', name: 'Linh from Vietnam', greeting: 'Xin chào! Bạn khỏe không? 🌿',
+        seed: 'Linh', gender: 'female', hairColor: '1a1110', skinColor: 'f0c9a4', bg: 'ffd1dc' },
+      { language: '스페인어', name: 'Elena from Spain', greeting: '¡Hola! ¿Cómo estás? 💃',
+        seed: 'Elena', gender: 'female', hairColor: '3b2219', skinColor: 'e8b88a', bg: 'ffe5b4' },
+      { language: '러시아어', name: 'Sasha from Russia', greeting: 'Привет! Как дела? ❄️',
+        seed: 'Sasha', gender: 'female', hairColor: 'c9a86a', skinColor: 'f7e2cd', bg: 'fff9c4' },
+      { language: '영어', name: 'Kate from USA', greeting: 'Hi there! Ready to chat? ☕',
+        seed: 'Kate', gender: 'female', hairColor: 'e0b667', skinColor: 'f7e0c8', bg: 'ffe8e3' },
+      { language: '중국어', name: 'Mei from China', greeting: '你好！今天过得怎么样？ 🧋',
+        seed: 'Mei', gender: 'female', hairColor: '12100f', skinColor: 'f2d0ac', bg: 'ffd1dc' },
+      { language: '일본어', name: 'Yui from Japan', greeting: 'こんにちは！今日もお疲れ様です✨',
+        seed: 'Yui', gender: 'female', hairColor: '1c1512', skinColor: 'f5dcc0', bg: 'ffe5b4' },
+      { language: '이탈리아어', name: 'Marco from Italy', greeting: 'Ciao! Come stai? 🍕',
+        seed: 'Marco', gender: 'male', hairColor: '2f1b12', skinColor: 'e0aa7e', bg: 'fff9c4' },
+      { language: '프랑스어', name: 'Camille from France', greeting: 'Bonjour! Comment ça va? ☕',
+        seed: 'Camille', gender: 'female', hairColor: '8b5e3c', skinColor: 'f2d3b1', bg: 'ffe8e3' },
+      { language: '독일어', name: 'Anna from Germany', greeting: "Guten Tag! Wie geht's? 🥨",
+        seed: 'Anna', gender: 'female', hairColor: 'd9a05b', skinColor: 'f5dbc0', bg: 'ffd1dc' }
     ];
+
+    function avatarUrl(partner) {
+      const male = partner.gender === 'male';
+      return `${AVATAR_API}?seed=${encodeURIComponent(partner.seed)}` +
+        `&backgroundColor=${partner.bg}` +
+        `&hairColor=${partner.hairColor}` +
+        `&skinColor=${partner.skinColor}` +
+        `&beardProbability=${male ? 100 : 0}` +
+        `&earringsProbability=${male ? 0 : 70}` +
+        `&glassesProbability=0`;
+    }
 
     partners.forEach((p) => {
       const img = new Image();
-      img.src = p.avatar;
+      img.src = avatarUrl(p);
     });
 
     const titleRotator = document.getElementById('titleRotator');
@@ -845,7 +868,7 @@
     function renderPartner(index) {
       const partner = partners[index];
       titleRotator.textContent = partner.language;
-      partnerAvatar.src = partner.avatar;
+      partnerAvatar.src = avatarUrl(partner);
       partnerAvatar.alt = `${partner.name} 아바타`;
       partnerName.textContent = partner.name;
       partnerGreeting.textContent = partner.greeting;
