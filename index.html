@@ -315,19 +315,22 @@
       gap: 1.25rem;
     }
 
-    .tutor-profile { text-align: center; }
+    .partner-profile {
+      text-align: center;
+      transition: opacity 0.5s ease;
+    }
 
-    .tutor-avatar {
+    .partner-avatar {
       width: 72px; height: 72px; border-radius: 50%;
       background: var(--bg-card);
       border: 3px solid rgba(255,255,255,0.8);
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Quicksand', sans-serif; font-size: 1.5rem; font-weight: 700;
-      color: var(--coral); margin: 0 auto 0.5rem;
+      display: block;
+      object-fit: cover;
+      margin: 0 auto 0.5rem;
       box-shadow: 0 6px 16px var(--shadow-warm);
     }
 
-    .tutor-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+    .partner-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
 
     .speech-bubble {
       background: var(--bg-card);
@@ -337,7 +340,14 @@
       box-shadow: 0 4px 14px var(--shadow-warm);
       animation: bubbleFloat 3.5s ease-in-out infinite;
       max-width: 210px;
+      min-height: 3.4rem;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
+      transition: opacity 0.5s ease;
     }
+
+    .partner-profile.fade-out,
+    .speech-bubble.fade-out { opacity: 0; }
 
     @keyframes bubbleFloat {
       0%, 100% { transform: translateY(0); }
@@ -615,11 +625,13 @@
             <div class="visual-card">
               <span class="live-badge">AI 코파일럿 실시간 지원 중</span>
               <div class="phone-frame">
-                <div class="tutor-profile">
-                  <div class="tutor-avatar">E</div>
-                  <div class="tutor-name">Emma · French Tutor</div>
+                <div class="partner-profile" id="partnerProfile">
+                  <img class="partner-avatar" id="partnerAvatar"
+                       src="https://api.dicebear.com/7.x/notionists/svg?seed=Linh&backgroundColor=ffd1dc"
+                       alt="대화 파트너 아바타" width="72" height="72">
+                  <div class="partner-name" id="partnerName">Linh from Vietnam</div>
                 </div>
-                <div class="speech-bubble">Bonjour! How was your day?</div>
+                <div class="speech-bubble" id="partnerGreeting">Xin chào! Bạn khỏe không? 🌿</div>
               </div>
             </div>
           </div>
@@ -655,25 +667,25 @@
       </div>
     </section>
 
-    <!-- Tutors teaser -->
+    <!-- Partners teaser -->
     <section class="journey" id="tutors" style="padding-top: 0;">
       <div class="section-inner">
-        <p class="section-label reveal">Tutors</p>
+        <p class="section-label reveal">Partners</p>
         <h2 class="section-title reveal">다정한 대화 파트너와 눈 맞추며</h2>
         <div class="journey-grid">
           <article class="journey-card reveal reveal-delay-1">
             <span class="journey-icon">🥐</span>
-            <h3 class="journey-title">Emma · French</h3>
-            <p class="journey-desc">카페 같은 분위기로 천천히 이끌어 주는 프랑스어·영어 튜터</p>
+            <h3 class="journey-title">Camille from France</h3>
+            <p class="journey-desc">카페 같은 분위기로 천천히 이끌어 주는 프랑스어 대화 파트너</p>
           </article>
           <article class="journey-card reveal reveal-delay-2">
             <span class="journey-icon">🍵</span>
-            <h3 class="journey-title">James · English</h3>
+            <h3 class="journey-title">Kate from USA</h3>
             <p class="journey-desc">오픽·워홀 실전 상황으로 자연스럽게 말문이 트이는 코칭</p>
           </article>
           <article class="journey-card reveal reveal-delay-3">
             <span class="journey-icon">🍰</span>
-            <h3 class="journey-title">Sakura · Japanese</h3>
+            <h3 class="journey-title">Yui from Japan</h3>
             <p class="journey-desc">친구처럼 다정한 일본어 대화로 울렁증 없이 시작해요</p>
           </article>
         </div>
@@ -744,7 +756,7 @@
     <div class="chat-faq">
       <span class="chat-faq-label">자주 묻는 질문</span>
       <button class="faq-chip" data-faq="class">수업은 어떻게 진행되나요?</button>
-      <button class="faq-chip" data-faq="teachers">원어민 강사는 어떤 분들인가요?</button>
+      <button class="faq-chip" data-faq="teachers">대화 파트너는 어떤 분들인가요?</button>
       <button class="faq-chip" data-faq="beginner">영어를 아예 못해도 참여할 수 있나요?</button>
       <button class="faq-chip" data-faq="free">10초 스피킹 테스트는 무료인가요?</button>
     </div>
@@ -799,16 +811,59 @@
     }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
     document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-    /* Title rotator */
-    const languages = ['베트남어','스페인어','러시아어','영어','중국어','일본어','이탈리아어','프랑스어','독일어'];
+    /* Title rotator synced with live partner card */
+    const partners = [
+      { language: '베트남어', name: 'Linh from Vietnam', greeting: 'Xin chào! Bạn khỏe không? 🌿', seed: 'Linh' },
+      { language: '스페인어', name: 'Elena from Spain', greeting: '¡Hola! ¿Cómo estás? 💃', seed: 'Elena' },
+      { language: '러시아어', name: 'Sasha from Russia', greeting: 'Привет! Как дела? ❄️', seed: 'Sasha' },
+      { language: '영어', name: 'Kate from USA', greeting: 'Hi there! Ready to chat? ☕', seed: 'Kate' },
+      { language: '중국어', name: 'Mei from China', greeting: '你好！今天过得怎么样？ 🧋', seed: 'Mei' },
+      { language: '일본어', name: 'Yui from Japan', greeting: 'こんにちは！今日もお疲れ様です✨', seed: 'Yui' },
+      { language: '이탈리아어', name: 'Marco from Italy', greeting: 'Ciao! Come stai? 🍕', seed: 'Marco' },
+      { language: '프랑스어', name: 'Camille from France', greeting: 'Bonjour! Comment ça va? ☕', seed: 'Camille' },
+      { language: '독일어', name: 'Anna from Germany', greeting: "Guten Tag! Wie geht's? 🥨", seed: 'Anna' }
+    ];
+
+    const avatarBackgrounds = ['ffd1dc', 'ffe5b4', 'fff9c4', 'ffe8e3'];
+    function avatarUrl(seed, index) {
+      const bg = avatarBackgrounds[index % avatarBackgrounds.length];
+      return `https://api.dicebear.com/7.x/notionists/svg?seed=${encodeURIComponent(seed)}&backgroundColor=${bg}`;
+    }
+
+    partners.forEach((p, i) => {
+      const img = new Image();
+      img.src = avatarUrl(p.seed, i);
+    });
+
     const titleRotator = document.getElementById('titleRotator');
+    const partnerProfile = document.getElementById('partnerProfile');
+    const partnerAvatar = document.getElementById('partnerAvatar');
+    const partnerName = document.getElementById('partnerName');
+    const partnerGreeting = document.getElementById('partnerGreeting');
     let langIndex = 0;
+
+    function renderPartner(index) {
+      const partner = partners[index];
+      titleRotator.textContent = partner.language;
+      partnerAvatar.src = avatarUrl(partner.seed, index);
+      partnerAvatar.alt = `${partner.name} 아바타`;
+      partnerName.textContent = partner.name;
+      partnerGreeting.textContent = partner.greeting;
+    }
+
+    renderPartner(langIndex);
+
     setInterval(() => {
       titleRotator.classList.add('fade-out');
+      partnerProfile.classList.add('fade-out');
+      partnerGreeting.classList.add('fade-out');
+
       setTimeout(() => {
-        langIndex = (langIndex + 1) % languages.length;
-        titleRotator.textContent = languages[langIndex];
+        langIndex = (langIndex + 1) % partners.length;
+        renderPartner(langIndex);
         titleRotator.classList.remove('fade-out');
+        partnerProfile.classList.remove('fade-out');
+        partnerGreeting.classList.remove('fade-out');
       }, 550);
     }, 2000);
 
@@ -900,8 +955,8 @@
     const chatClose = document.getElementById('chatClose');
     const chatMessages = document.getElementById('chatMessages');
     const faqAnswers = {
-      class: 'DayO 수업은 1:1 화상 회화로 진행돼요! 원어민 강사와 눈을 마주치며 실제 상황 대화를 연습하고, AI 코파일럿이 실시간으로 표현을 도와드린답니다.',
-      teachers: '미국, 영국, 호주 등 다양한 국적의 원어민 강사진이 함께해요. 모두 DayO 교육 과정을 이수한, 따뜻하고 전문적인 선생님들이에요.',
+      class: 'DayO 수업은 1:1 화상 회화로 진행돼요! 원어민 대화 파트너와 눈을 마주치며 실제 상황 대화를 연습하고, AI 코파일럿이 실시간으로 표현을 도와드린답니다.',
+      teachers: 'DayO의 트레이닝을 수료한, 다양한 언어가 가능한 각 국가의 원어민들이에요!',
       beginner: '물론이죠! 영어를 처음 시작하셔도 괜찮아요. 한국어로 먼저 설명해 드리고, 천천히 영어로 전환하는 맞춤형 수업을 제공해요.',
       free: '네, 10초 스피킹 감각 테스트는 완전 무료예요! 부담 없이 나의 스피킹 감각을 확인해 보세요.'
     };

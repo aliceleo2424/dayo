@@ -71,7 +71,7 @@ export const userLifecycleEvents: UserLifecycleEvent[] = [
   { id: "e2", userId: "u001", type: "test_complete", label: "10초 스피킹 테스트 완료 (82점)", timestamp: "2026-07-15T10:05:00" },
   { id: "e3", userId: "u001", type: "coupon_received", label: "웰컴 쿠폰 WELCOME20 수령", timestamp: "2026-07-15T10:06:00" },
   { id: "e4", userId: "u001", type: "payment", label: "프리미엄 3개월 패키지 결제", timestamp: "2026-07-16T14:00:00" },
-  { id: "e5", userId: "u001", type: "first_class", label: "Emma 튜터와 첫 1:1 대화 완료", timestamp: "2026-07-17T19:00:00" },
+  { id: "e5", userId: "u001", type: "first_class", label: "Emma 대화 파트너와 첫 1:1 대화 완료", timestamp: "2026-07-17T19:00:00" },
 ];
 
 export const automationRules: AutomationRule[] = [

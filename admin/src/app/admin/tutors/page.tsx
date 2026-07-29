@@ -15,7 +15,7 @@ const statusLabels = { active: "활동중", on_leave: "휴가", inactive: "비�
 export default function TutorsPage() {
   const tutorColumns: Column<Tutor & Record<string, unknown>>[] = [
     {
-      key: "name", header: "튜터", sortable: true,
+      key: "name", header: "대화 파트너", sortable: true,
       render: (r) => (
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-navy text-xs text-white">{r.avatarInitial as string}</div>
@@ -32,7 +32,7 @@ export default function TutorsPage() {
 
   const reportColumns: Column<ClassReport & Record<string, unknown>>[] = [
     { key: "date", header: "날짜", sortable: true, render: (r) => formatDate(r.date as string) },
-    { key: "tutorName", header: "튜터", sortable: true },
+    { key: "tutorName", header: "대화 파트너", sortable: true },
     { key: "userName", header: "학생" },
     { key: "rating", header: "별점", render: (r) => r.noShow ? "—" : `⭐ ${r.rating}` },
     { key: "noShow", header: "노쇼", render: (r) => r.noShow ? <Badge variant="warning">노쇼</Badge> : <Badge variant="success">출석</Badge> },
@@ -44,17 +44,17 @@ export default function TutorsPage() {
 
   return (
     <>
-      <AdminHeader title="튜터 & 클래스 관리" />
+      <AdminHeader title="대화 파트너 & 클래스 관리" />
       <main className="p-6">
         <div className="mb-6 grid gap-4 sm:grid-cols-3">
-          <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">활동 튜터</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{tutors.filter((t) => t.status === "active").length}</p></CardContent></Card>
+          <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">활동 대화 파트너</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{tutors.filter((t) => t.status === "active").length}</p></CardContent></Card>
           <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">평균 만족도</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold">{avgRating}</p></CardContent></Card>
           <Card><CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">노쇼 비율</CardTitle></CardHeader><CardContent><p className="text-2xl font-bold text-coral">{avgNoShow}%</p></CardContent></Card>
         </div>
 
         <Tabs defaultValue="tutors">
           <TabsList>
-            <TabsTrigger value="tutors">튜터 프로필</TabsTrigger>
+            <TabsTrigger value="tutors">대화 파트너 프로필</TabsTrigger>
             <TabsTrigger value="reports">수업 리포트</TabsTrigger>
           </TabsList>
 

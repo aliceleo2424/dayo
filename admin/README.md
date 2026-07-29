@@ -29,7 +29,7 @@ Open [http://localhost:3000/admin/dashboard](http://localhost:3000/admin/dashboa
 | `/admin/users/automation` | CRM 자동화 Rule Engine |
 | `/admin/promotions` | 쿠폰, 제휴코드, Referral |
 | `/admin/cms` | 배너, 카피, 후기 CMS |
-| `/admin/tutors` | 튜터 & 클래스 리포트 |
+| `/admin/tutors` | 대화 파트너 & 클래스 리포트 |
 
 ## Mock Data
 

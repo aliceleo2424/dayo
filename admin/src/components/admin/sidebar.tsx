@@ -16,7 +16,7 @@ const navItems = [
   { href: "/admin/users/automation", label: "CRM 자동화", icon: Zap, sub: true },
   { href: "/admin/promotions", label: "프로모션", icon: Ticket },
   { href: "/admin/cms", label: "프론트 CMS", icon: Palette },
-  { href: "/admin/tutors", label: "튜터 & 클래스", icon: GraduationCap },
+  { href: "/admin/tutors", label: "대화 파트너 & 클래스", icon: GraduationCap },
 ];
 
 export function AdminSidebar() {
