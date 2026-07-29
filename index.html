@@ -589,7 +589,7 @@
       <nav class="nav-desktop" aria-label="주요 메뉴">
         <a href="#about">회사 소개</a>
         <a href="#tutors">대화 파트너</a>
-        <a href="#booking">대화 예약하기</a>
+        <a href="#booking" data-booking-open>대화 예약하기</a>
         <a href="#faq">자주 묻는 질문</a>
       </nav>
 
@@ -602,7 +602,7 @@
     <nav class="nav-mobile" id="mobileNav" aria-label="모바일 메뉴">
       <a href="#about">회사 소개</a>
       <a href="#tutors">대화 파트너</a>
-      <a href="#booking">대화 예약하기</a>
+      <a href="#booking" data-booking-open>대화 예약하기</a>
       <a href="#faq">자주 묻는 질문</a>
       <a href="room.html" class="header-cta">☕ 대화 시작해요!</a>
     </nav>
@@ -701,7 +701,10 @@
         <p class="section-label reveal">Booking</p>
         <h2 class="section-title reveal" style="margin-bottom: 1.25rem;">지금, 화상 회화 스튜디오에서 만나요</h2>
         <p class="reveal" style="color: var(--text-muted); margin-bottom: 1.75rem; line-height: 1.7;">원어민과 눈 맞추며 대화하는 라이브 룸으로 바로 이동해요.</p>
-        <a href="room.html" class="header-cta reveal" style="display: inline-flex;">☕ 대화 시작해요!</a>
+        <div class="reveal" style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center;">
+          <button type="button" class="header-cta" style="display: inline-flex; border: none; font-family: inherit; cursor: pointer;" data-booking-open>📅 대화 예약하기</button>
+          <a href="room.html" class="header-cta" style="display: inline-flex;">☕ 대화 시작해요!</a>
+        </div>
       </div>
     </section>
 
@@ -1007,5 +1010,6 @@
       }
     });
   </script>
+  <script src="booking-modal.js"></script>
 </body>
 </html>
