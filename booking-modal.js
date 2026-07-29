@@ -24,12 +24,35 @@
   var STYLES = [
     { id: 'slow', label: '🐢 말을 천천히 들어주고 리액션 잘해주는 파트너' },
     { id: 'fast', label: '⚡ 자연스럽고 빠른 실전 티키타카' },
-    { id: 'correct', label: '📝 교정과 피드백을 꼼꼼하게 해주는 파트너' }
+    { id: 'correct', label: '📝 교정과 피드백을 꼼꼼하게 해주는 파트너' },
+    { id: 'korean', label: '🇰🇷 한국어를 할 수 있는 파트너' }
   ];
 
   var TIME_SLOTS = ['10:00', '14:00', '19:30', '21:00', '22:00'];
+  var PARTNER_SLOTS_A = ['10:00', '19:30', '22:00'];
+  var PARTNER_SLOTS_B = ['14:00', '19:30', '21:00'];
+  var AVAILABLE_PARTNERS = [
+    { id: 'kate', language: 'en', name: 'Kate from USA', initial: 'K', rating: '4.9', korean: true, styles: ['fast', 'correct'], slots: PARTNER_SLOTS_A },
+    { id: 'olivia', language: 'en', name: 'Olivia from UK', initial: 'O', rating: '4.8', korean: true, styles: ['slow', 'casual'], slots: PARTNER_SLOTS_B },
+    { id: 'elena', language: 'es', name: 'Elena from Spain', initial: 'E', rating: '4.9', korean: true, styles: ['fast', 'slow'], slots: PARTNER_SLOTS_A },
+    { id: 'lucia', language: 'es', name: 'Lucía from Mexico', initial: 'L', rating: '4.8', korean: true, styles: ['correct', 'slow'], slots: PARTNER_SLOTS_B },
+    { id: 'camille', language: 'fr', name: 'Camille from France', initial: 'C', rating: '4.9', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
+    { id: 'chloe', language: 'fr', name: 'Chloé from Canada', initial: 'C', rating: '4.8', korean: true, styles: ['fast', 'slow'], slots: PARTNER_SLOTS_B },
+    { id: 'yui', language: 'ja', name: 'Yui from Japan', initial: 'Y', rating: '5.0', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
+    { id: 'aoi', language: 'ja', name: 'Aoi from Japan', initial: 'A', rating: '4.9', korean: true, styles: ['fast', 'correct'], slots: PARTNER_SLOTS_B },
+    { id: 'mei', language: 'zh', name: 'Mei from China', initial: 'M', rating: '4.9', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
+    { id: 'lili', language: 'zh', name: 'Lili from Taiwan', initial: 'L', rating: '4.8', korean: true, styles: ['fast', 'slow'], slots: PARTNER_SLOTS_B },
+    { id: 'linh', language: 'vi', name: 'Linh from Vietnam', initial: 'L', rating: '4.9', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
+    { id: 'an', language: 'vi', name: 'An from Vietnam', initial: 'A', rating: '4.8', korean: true, styles: ['fast', 'slow'], slots: PARTNER_SLOTS_B },
+    { id: 'anna', language: 'de', name: 'Anna from Germany', initial: 'A', rating: '4.9', korean: true, styles: ['correct', 'slow'], slots: PARTNER_SLOTS_A },
+    { id: 'lena', language: 'de', name: 'Lena from Germany', initial: 'L', rating: '4.8', korean: true, styles: ['fast', 'slow'], slots: PARTNER_SLOTS_B },
+    { id: 'marco', language: 'it', name: 'Marco from Italy', initial: 'M', rating: '4.9', korean: true, styles: ['fast', 'correct'], slots: PARTNER_SLOTS_A },
+    { id: 'giulia', language: 'it', name: 'Giulia from Italy', initial: 'G', rating: '4.8', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_B },
+    { id: 'sasha', language: 'ru', name: 'Sasha from Russia', initial: 'S', rating: '4.9', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
+    { id: 'mila', language: 'ru', name: 'Mila from Russia', initial: 'M', rating: '4.8', korean: true, styles: ['fast', 'slow'], slots: PARTNER_SLOTS_B }
+  ];
   var WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
-  var STEP_LABELS = ['언어와 목적', '파트너 스타일', '날짜와 시간', '예약 확인'];
+  var STEP_LABELS = ['언어와 목적', '대화 스타일', '날짜와 시간', '파트너 선택', '예약 확인'];
 
   var CSS = [
     '.bk-overlay{position:fixed;inset:0;z-index:900;display:flex;align-items:center;justify-content:center;',
@@ -46,7 +69,7 @@
     '.bk-eyebrow{font-size:.74rem;font-weight:700;letter-spacing:.04em;color:var(--coral,#FF6B57);}',
     '.bk-title{margin-top:.3rem;font-family:Quicksand,sans-serif;font-size:1.18rem;font-weight:700;line-height:1.45;}',
     '.bk-progress{margin-top:.9rem;height:7px;border-radius:999px;background:rgba(255,255,255,.65);overflow:hidden;}',
-    '.bk-progress-bar{height:100%;width:25%;border-radius:999px;background:var(--coral,#FF6B57);transition:width .4s ease;}',
+    '.bk-progress-bar{height:100%;width:20%;border-radius:999px;background:var(--coral,#FF6B57);transition:width .4s ease;}',
     '.bk-progress-label{margin-top:.35rem;font-size:.72rem;font-weight:700;color:var(--text-muted,#9A8580);text-align:right;}',
     '.bk-close{position:absolute;top:.9rem;right:.9rem;width:34px;height:34px;border:none;border-radius:50%;',
     'background:rgba(255,255,255,.75);color:var(--coral,#FF6B57);font-size:.95rem;cursor:pointer;line-height:1;}',
@@ -82,6 +105,18 @@
     '.bk-day.is-on{background:var(--coral,#FF6B57);border-color:var(--coral,#FF6B57);color:#fff;font-weight:700;}',
     '.bk-slots{margin-top:1.2rem;}',
     '.bk-slots[hidden]{display:none;}',
+    '.bk-partners{display:flex;flex-direction:column;gap:.65rem;}',
+    '.bk-partner{width:100%;display:flex;align-items:center;gap:.85rem;padding:.8rem;border:1px solid var(--coral-pale,#FFE8E3);',
+    'border-radius:var(--radius,18px);background:var(--cream,#FFF8F5);font-family:inherit;color:inherit;text-align:left;cursor:pointer;',
+    'transition:transform .2s,border-color .2s,background .2s;}',
+    '.bk-partner:hover{transform:translateY(-1px);border-color:var(--coral,#FF6B57);}',
+    '.bk-partner.is-on{border-color:var(--coral,#FF6B57);background:var(--coral-pale,#FFE8E3);box-shadow:0 0 0 2px rgba(255,107,87,.1);}',
+    '.bk-partner-avatar{flex:0 0 46px;height:46px;display:flex;align-items:center;justify-content:center;border-radius:50%;',
+    'background:linear-gradient(135deg,var(--pink,#FFD1DC),var(--peach,#FFE5B4));border:2px solid #fff;',
+    'font-family:Quicksand,sans-serif;font-size:1rem;font-weight:700;color:var(--coral,#FF6B57);box-shadow:0 4px 10px rgba(92,74,66,.08);}',
+    '.bk-partner-copy{min-width:0;flex:1;}.bk-partner-name{display:block;font-size:.88rem;font-weight:700;}',
+    '.bk-partner-meta{display:block;margin-top:.2rem;font-size:.72rem;color:var(--text-muted,#9A8580);line-height:1.45;}',
+    '.bk-partner-check{font-size:1rem;color:var(--coral,#FF6B57);opacity:0;}.bk-partner.is-on .bk-partner-check{opacity:1;}',
     '.bk-summary{padding:1.1rem 1.25rem;border-radius:var(--radius,18px);',
     'background:linear-gradient(135deg,var(--pink,#FFD1DC),var(--peach,#FFE5B4));}',
     '.bk-row{display:flex;gap:.75rem;padding:.5rem 0;font-size:.86rem;line-height:1.5;}',
@@ -118,6 +153,7 @@
     style: null,
     date: null,
     time: null,
+    partner: null,
     viewYear: 0,
     viewMonth: 0
   };
@@ -164,7 +200,7 @@
           '</section>' +
           '<section class="bk-step" data-step="1">' +
             '<div class="bk-group">' +
-              '<p class="bk-label">어떤 대화 파트너가 좋으세요?</p>' +
+              '<p class="bk-label">어떤 대화 스타일이 좋으세요?</p>' +
               '<p class="bk-hint">고른 스타일에 맞춰 파트너를 매칭해 드려요</p>' +
               '<div class="bk-chips bk-chips--stack" id="bkStyles">' + chipsMarkup(STYLES, 'style') + '</div>' +
             '</div>' +
@@ -186,6 +222,13 @@
             '</div>' +
           '</section>' +
           '<section class="bk-step" data-step="3">' +
+            '<div class="bk-group">' +
+              '<p class="bk-label">이 시간에 만날 대화 파트너를 골라주세요</p>' +
+              '<p class="bk-hint" id="bkPartnerHint"></p>' +
+              '<div class="bk-partners" id="bkPartners"></div>' +
+            '</div>' +
+          '</section>' +
+          '<section class="bk-step" data-step="4">' +
             '<div class="bk-group">' +
               '<p class="bk-label">이렇게 예약할게요 🎉</p>' +
               '<dl class="bk-summary" id="bkSummary"></dl>' +
@@ -230,6 +273,8 @@
       nextMonth: overlay.querySelector('#bkNextMonth'),
       slots: overlay.querySelector('#bkSlots'),
       times: overlay.querySelector('#bkTimes'),
+      partners: overlay.querySelector('#bkPartners'),
+      partnerHint: overlay.querySelector('#bkPartnerHint'),
       summary: overlay.querySelector('#bkSummary'),
       toast: toast
     };
@@ -253,6 +298,14 @@
       selectChip(chip);
     });
 
+    el.partners.addEventListener('click', function (e) {
+      var partner = e.target.closest('.bk-partner');
+      if (!partner) return;
+      state.partner = partner.dataset.id;
+      renderAvailablePartners();
+      updateFooter();
+    });
+
     el.prevMonth.addEventListener('click', function () { shiftMonth(-1); });
     el.nextMonth.addEventListener('click', function () { shiftMonth(1); });
 
@@ -261,6 +314,7 @@
       if (!day || day.disabled || !day.dataset.date) return;
       state.date = day.dataset.date;
       state.time = null;
+      state.partner = null;
       renderCalendar();
       el.slots.hidden = false;
       syncChips('time');
@@ -269,7 +323,7 @@
 
     el.prevBtn.addEventListener('click', function () { goTo(state.step - 1); });
     el.nextBtn.addEventListener('click', function () {
-      if (state.step === 3) { confirmBooking(); return; }
+      if (state.step === 4) { confirmBooking(); return; }
       goTo(state.step + 1);
     });
 
@@ -288,10 +342,13 @@
       else state.purposes.push(id);
     } else if (group === 'language') {
       state.language = id;
+      state.partner = null;
     } else if (group === 'style') {
       state.style = id;
+      state.partner = null;
     } else if (group === 'time') {
       state.time = id;
+      state.partner = null;
     } else {
       return;
     }
@@ -367,10 +424,45 @@
     return '';
   }
 
+  function getPartner(id) {
+    for (var i = 0; i < AVAILABLE_PARTNERS.length; i++) {
+      if (AVAILABLE_PARTNERS[i].id === id) return AVAILABLE_PARTNERS[i];
+    }
+    return null;
+  }
+
+  function getAvailablePartners() {
+    return AVAILABLE_PARTNERS.filter(function (partner) {
+      return partner.language === state.language && partner.slots.indexOf(state.time) > -1;
+    }).sort(function (a, b) {
+      var aStyle = a.styles.indexOf(state.style) > -1 ? 1 : 0;
+      var bStyle = b.styles.indexOf(state.style) > -1 ? 1 : 0;
+      return bStyle - aStyle || Number(b.rating) - Number(a.rating);
+    });
+  }
+
+  function renderAvailablePartners() {
+    var available = getAvailablePartners();
+    var language = labelOf(LANGUAGES, state.language);
+    el.partnerHint.textContent = formatDate(state.date) + ' ' + state.time + ' · ' + language + ' 가능';
+    el.partners.innerHTML = available.map(function (partner) {
+      var styleMatch = state.style === 'korean' ? partner.korean : partner.styles.indexOf(state.style) > -1;
+      var meta = '⭐ ' + partner.rating + ' · 한국어 가능' + (styleMatch ? ' · 선택한 스타일과 잘 맞아요' : '');
+      return '<button type="button" class="bk-partner' + (state.partner === partner.id ? ' is-on' : '') +
+        '" data-id="' + partner.id + '" aria-pressed="' + (state.partner === partner.id ? 'true' : 'false') + '">' +
+          '<span class="bk-partner-avatar" aria-hidden="true">' + partner.initial + '</span>' +
+          '<span class="bk-partner-copy"><span class="bk-partner-name">' + partner.name + '</span>' +
+          '<span class="bk-partner-meta">' + meta + '</span></span>' +
+          '<span class="bk-partner-check" aria-hidden="true">✓</span>' +
+        '</button>';
+    }).join('');
+  }
+
   function isStepReady(step) {
     if (step === 0) return !!state.language && state.purposes.length > 0;
     if (step === 1) return !!state.style;
     if (step === 2) return !!state.date && !!state.time;
+    if (step === 3) return !!state.partner;
     return true;
   }
 
@@ -383,7 +475,8 @@
       row('언어', labelOf(LANGUAGES, state.language)) +
       row('목적', purposeText) +
       row('스타일', labelOf(STYLES, state.style)) +
-      row('일시', formatDate(state.date) + ' · ' + state.time);
+      row('일시', formatDate(state.date) + ' · ' + state.time) +
+      row('파트너', getPartner(state.partner).name);
   }
 
   function row(term, value) {
@@ -391,24 +484,25 @@
   }
 
   function goTo(step) {
-    if (step < 0 || step > 3) return;
+    if (step < 0 || step > 4) return;
     if (step > state.step && !isStepReady(state.step)) return;
 
     state.step = step;
     Array.prototype.forEach.call(el.steps, function (section, i) {
       section.classList.toggle('is-active', i === step);
     });
-    if (step === 3) renderSummary();
+    if (step === 3) renderAvailablePartners();
+    if (step === 4) renderSummary();
 
-    el.progressBar.style.width = ((step + 1) / 4 * 100) + '%';
-    el.progressLabel.textContent = 'STEP ' + (step + 1) + '/4 · ' + STEP_LABELS[step];
+    el.progressBar.style.width = ((step + 1) / 5 * 100) + '%';
+    el.progressLabel.textContent = 'STEP ' + (step + 1) + '/5 · ' + STEP_LABELS[step];
     el.overlay.querySelector('.bk-body').scrollTop = 0;
     updateFooter();
   }
 
   function updateFooter() {
     el.prevBtn.style.display = state.step === 0 ? 'none' : '';
-    el.nextBtn.textContent = state.step === 3 ? '🍰 이 일정으로 대화 예약 확정하기' : '다음';
+    el.nextBtn.textContent = state.step === 4 ? '🍰 이 일정으로 대화 예약 확정하기' : '다음';
     el.nextBtn.disabled = !isStepReady(state.step);
   }
 
@@ -422,9 +516,9 @@
   }
 
   function confirmBooking() {
-    if (!isStepReady(2)) return;
+    if (!isStepReady(3)) return;
     close();
-    showToast('예약이 성공적으로 완료되었습니다! 피드백 조건에 맞는 파트너가 매칭됩니다 💖');
+    showToast('예약이 성공적으로 완료되었습니다! ' + getPartner(state.partner).name + ' 파트너와 만나요 💖');
   }
 
   function reset() {
@@ -434,6 +528,7 @@
     state.style = null;
     state.date = null;
     state.time = null;
+    state.partner = null;
     state.viewYear = today.getFullYear();
     state.viewMonth = today.getMonth();
 

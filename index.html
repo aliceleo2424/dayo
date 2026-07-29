@@ -321,17 +321,95 @@
     }
 
     .partner-avatar {
+      --avatar-bg: #FFD1DC;
+      --avatar-skin: #F2C7A5;
+      --avatar-hair: #38251F;
+      position: relative;
       width: 82px; height: 82px;
-      border-radius: 34%;
-      background: var(--bg-card);
+      border-radius: 50%;
+      background: var(--avatar-bg);
       border: 3px solid var(--coral-pale);
-      outline: 2px solid rgba(255,255,255,0.9);
-      outline-offset: -5px;
-      display: block;
-      object-fit: cover;
+      outline: 2px solid rgba(255,255,255,0.95);
+      outline-offset: -6px;
       margin: 0 auto 0.55rem;
-      box-shadow: 0 6px 18px var(--shadow-warm);
+      overflow: hidden;
+      box-shadow: 0 7px 18px var(--shadow-warm);
     }
+
+    .avatar-body {
+      position: absolute; left: 18px; bottom: -12px;
+      width: 46px; height: 33px;
+      border-radius: 50% 50% 12px 12px;
+      background: rgba(255,255,255,0.88);
+    }
+
+    .avatar-neck {
+      position: absolute; left: 35px; bottom: 18px;
+      width: 12px; height: 15px;
+      border-radius: 0 0 8px 8px;
+      background: var(--avatar-skin);
+    }
+
+    .avatar-face {
+      position: absolute; left: 20px; top: 15px;
+      width: 42px; height: 48px;
+      border-radius: 48% 48% 46% 46%;
+      background: var(--avatar-skin);
+      z-index: 2;
+    }
+
+    .avatar-hair {
+      position: absolute; left: 15px; top: 8px;
+      width: 52px; height: 48px;
+      border-radius: 52% 52% 42% 42%;
+      background: var(--avatar-hair);
+      z-index: 1;
+    }
+
+    .partner-avatar[data-hair="bob"] .avatar-hair { height: 55px; border-radius: 50% 50% 36% 36%; }
+    .partner-avatar[data-hair="wave"] .avatar-hair { left: 12px; width: 58px; height: 57px; border-radius: 48% 52% 40% 44%; }
+    .partner-avatar[data-hair="bun"] .avatar-hair::before {
+      content: ""; position: absolute; left: 17px; top: -9px;
+      width: 22px; height: 18px; border-radius: 50%;
+      background: var(--avatar-hair);
+    }
+    .partner-avatar[data-hair="short"] .avatar-hair { left: 18px; width: 47px; height: 29px; border-radius: 55% 55% 30% 30%; }
+
+    .avatar-fringe {
+      position: absolute; left: 18px; top: 11px;
+      width: 45px; height: 20px;
+      border-radius: 55% 55% 45% 20%;
+      background: var(--avatar-hair);
+      z-index: 3;
+      transform: rotate(-4deg);
+    }
+
+    .partner-avatar[data-hair="short"] .avatar-fringe { left: 20px; width: 42px; height: 17px; }
+
+    .avatar-eye {
+      position: absolute; top: 21px;
+      width: 7px; height: 4px;
+      border-bottom: 2px solid #5C4038;
+      border-radius: 0 0 9px 9px;
+    }
+    .avatar-eye--left { left: 9px; }
+    .avatar-eye--right { right: 9px; }
+
+    .avatar-smile {
+      position: absolute; left: 13px; top: 31px;
+      width: 16px; height: 9px;
+      border-bottom: 3px solid #C85D5D;
+      border-radius: 0 0 16px 16px;
+    }
+
+    .avatar-blush {
+      position: absolute; top: 29px;
+      width: 7px; height: 4px;
+      border-radius: 50%;
+      background: rgba(255,123,123,0.28);
+    }
+    .avatar-blush--left { left: 4px; }
+    .avatar-blush--right { right: 4px; }
 
     .partner-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
 
@@ -629,9 +707,20 @@
               <span class="live-badge">AI 코파일럿 실시간 지원 중</span>
               <div class="phone-frame">
                 <div class="partner-profile" id="partnerProfile">
-                  <img class="partner-avatar" id="partnerAvatar"
-                       src="https://api.dicebear.com/10.x/lorelei/svg?seed=Linh&amp;backgroundColor=ffd1dc&amp;hairColor=1a1110&amp;skinColor=f0c9a4&amp;beardProbability=0&amp;earringsProbability=70&amp;glassesProbability=0"
-                       alt="대화 파트너 아바타" width="82" height="82" loading="eager" decoding="async">
+                  <div class="partner-avatar" id="partnerAvatar" data-hair="bob"
+                       role="img" aria-label="미소 짓는 Linh 파스텔 아바타">
+                    <span class="avatar-body"></span>
+                    <span class="avatar-neck"></span>
+                    <span class="avatar-hair"></span>
+                    <span class="avatar-face">
+                      <span class="avatar-eye avatar-eye--left"></span>
+                      <span class="avatar-eye avatar-eye--right"></span>
+                      <span class="avatar-blush avatar-blush--left"></span>
+                      <span class="avatar-blush avatar-blush--right"></span>
+                      <span class="avatar-smile"></span>
+                    </span>
+                    <span class="avatar-fringe"></span>
+                  </div>
                   <div class="partner-name" id="partnerName">Linh from Vietnam</div>
                 </div>
                 <div class="speech-bubble" id="partnerGreeting">Xin chào! Bạn khỏe không? 🌿</div>
@@ -818,45 +907,26 @@
     document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
     /* Title rotator synced with live partner card */
-    /* 파스텔 벡터 일러스트 아바타 (DiceBear Lorelei, CC0) */
-    const AVATAR_API = 'https://api.dicebear.com/10.x/lorelei/svg';
-
     const partners = [
       { language: '베트남어', name: 'Linh from Vietnam', greeting: 'Xin chào! Bạn khỏe không? 🌿',
-        seed: 'Linh', gender: 'female', hairColor: '1a1110', skinColor: 'f0c9a4', bg: 'ffd1dc' },
+        avatar: { hair: 'bob', hairColor: '#211713', skin: '#F1C7A2', bg: '#FFD1DC' } },
       { language: '스페인어', name: 'Elena from Spain', greeting: '¡Hola! ¿Cómo estás? 💃',
-        seed: 'Elena', gender: 'female', hairColor: '3b2219', skinColor: 'e8b88a', bg: 'ffe5b4' },
+        avatar: { hair: 'wave', hairColor: '#4A2C24', skin: '#E8B78D', bg: '#FFE5B4' } },
       { language: '러시아어', name: 'Sasha from Russia', greeting: 'Привет! Как дела? ❄️',
-        seed: 'Sasha', gender: 'female', hairColor: 'c9a86a', skinColor: 'f7e2cd', bg: 'fff9c4' },
+        avatar: { hair: 'wave', hairColor: '#C79D62', skin: '#F3D8C1', bg: '#FFF9C4' } },
       { language: '영어', name: 'Kate from USA', greeting: 'Hi there! Ready to chat? ☕',
-        seed: 'Kate', gender: 'female', hairColor: 'e0b667', skinColor: 'f7e0c8', bg: 'ffe8e3' },
+        avatar: { hair: 'bun', hairColor: '#C98E52', skin: '#F2CDB1', bg: '#FFE8E3' } },
       { language: '중국어', name: 'Mei from China', greeting: '你好！今天过得怎么样？ 🧋',
-        seed: 'Mei', gender: 'female', hairColor: '12100f', skinColor: 'f2d0ac', bg: 'ffd1dc' },
+        avatar: { hair: 'bob', hairColor: '#181311', skin: '#F0C9A8', bg: '#FFD1DC' } },
       { language: '일본어', name: 'Yui from Japan', greeting: 'こんにちは！今日もお疲れ様です✨',
-        seed: 'Yui', gender: 'female', hairColor: '1c1512', skinColor: 'f5dcc0', bg: 'ffe5b4' },
+        avatar: { hair: 'bun', hairColor: '#261B18', skin: '#F2D2B7', bg: '#FFE5B4' } },
       { language: '이탈리아어', name: 'Marco from Italy', greeting: 'Ciao! Come stai? 🍕',
-        seed: 'Marco', gender: 'male', hairColor: '2f1b12', skinColor: 'e0aa7e', bg: 'fff9c4' },
+        avatar: { hair: 'short', hairColor: '#342119', skin: '#DFAB82', bg: '#FFF9C4' } },
       { language: '프랑스어', name: 'Camille from France', greeting: 'Bonjour! Comment ça va? ☕',
-        seed: 'Camille', gender: 'female', hairColor: '8b5e3c', skinColor: 'f2d3b1', bg: 'ffe8e3' },
+        avatar: { hair: 'wave', hairColor: '#8B5C3D', skin: '#F0CFB2', bg: '#FFE8E3' } },
       { language: '독일어', name: 'Anna from Germany', greeting: "Guten Tag! Wie geht's? 🥨",
-        seed: 'Anna', gender: 'female', hairColor: 'd9a05b', skinColor: 'f5dbc0', bg: 'ffd1dc' }
+        avatar: { hair: 'bob', hairColor: '#D3A05E', skin: '#F3D6BD', bg: '#FFD1DC' } }
     ];
-
-    function avatarUrl(partner) {
-      const male = partner.gender === 'male';
-      return `${AVATAR_API}?seed=${encodeURIComponent(partner.seed)}` +
-        `&backgroundColor=${partner.bg}` +
-        `&hairColor=${partner.hairColor}` +
-        `&skinColor=${partner.skinColor}` +
-        `&beardProbability=${male ? 100 : 0}` +
-        `&earringsProbability=${male ? 0 : 70}` +
-        `&glassesProbability=0`;
-    }
-
-    partners.forEach((p) => {
-      const img = new Image();
-      img.src = avatarUrl(p);
-    });
 
     const titleRotator = document.getElementById('titleRotator');
     const partnerProfile = document.getElementById('partnerProfile');
@@ -868,8 +938,11 @@
     function renderPartner(index) {
       const partner = partners[index];
       titleRotator.textContent = partner.language;
-      partnerAvatar.src = avatarUrl(partner);
-      partnerAvatar.alt = `${partner.name} 아바타`;
+      partnerAvatar.dataset.hair = partner.avatar.hair;
+      partnerAvatar.style.setProperty('--avatar-bg', partner.avatar.bg);
+      partnerAvatar.style.setProperty('--avatar-skin', partner.avatar.skin);
+      partnerAvatar.style.setProperty('--avatar-hair', partner.avatar.hairColor);
+      partnerAvatar.setAttribute('aria-label', `미소 짓는 ${partner.name} 파스텔 아바타`);
       partnerName.textContent = partner.name;
       partnerGreeting.textContent = partner.greeting;
     }
