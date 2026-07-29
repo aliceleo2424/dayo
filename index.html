@@ -323,9 +323,12 @@
     .partner-avatar {
       width: 72px; height: 72px; border-radius: 50%;
       background: var(--bg-card);
-      border: 3px solid rgba(255,255,255,0.8);
+      border: 3px solid rgba(255,255,255,0.9);
+      outline: 2px solid var(--pink);
+      outline-offset: 1px;
       display: block;
       object-fit: cover;
+      object-position: center top;
       margin: 0 auto 0.5rem;
       box-shadow: 0 6px 16px var(--shadow-warm);
     }
@@ -627,8 +630,8 @@
               <div class="phone-frame">
                 <div class="partner-profile" id="partnerProfile">
                   <img class="partner-avatar" id="partnerAvatar"
-                       src="https://api.dicebear.com/9.x/personas/svg?seed=LinhVietnam&gender=female&backgroundColor=ffd1dc"
-                       alt="대화 파트너 아바타" width="72" height="72">
+                       src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&amp;auto=format&amp;fit=crop&amp;q=80"
+                       alt="대화 파트너 아바타" width="72" height="72" loading="eager" decoding="async">
                   <div class="partner-name" id="partnerName">Linh from Vietnam</div>
                 </div>
                 <div class="speech-bubble" id="partnerGreeting">Xin chào! Bạn khỏe không? 🌿</div>
@@ -813,24 +816,20 @@
 
     /* Title rotator synced with live partner card */
     const partners = [
-      { language: '베트남어', name: 'Linh from Vietnam', greeting: 'Xin chào! Bạn khỏe không? 🌿', seed: 'LinhVietnam', gender: 'female', bg: 'ffd1dc' },
-      { language: '스페인어', name: 'Elena from Spain', greeting: '¡Hola! ¿Cómo estás? 💃', seed: 'ElenaSpain', gender: 'female', bg: 'ffe5b4' },
-      { language: '러시아어', name: 'Sasha from Russia', greeting: 'Привет! Как дела? ❄️', seed: 'SashaRussiaWoman', gender: 'female', bg: 'fff9c4' },
-      { language: '영어', name: 'Kate from USA', greeting: 'Hi there! Ready to chat? ☕', seed: 'KateUSA', gender: 'female', bg: 'ffe8e3' },
-      { language: '중국어', name: 'Mei from China', greeting: '你好！今天过得怎么样？ 🧋', seed: 'MeiChina', gender: 'female', bg: 'ffd1dc' },
-      { language: '일본어', name: 'Yui from Japan', greeting: 'こんにちは！今日もお疲れ様です✨', seed: 'YuiJapan', gender: 'female', bg: 'ffe5b4' },
-      { language: '이탈리아어', name: 'Marco from Italy', greeting: 'Ciao! Come stai? 🍕', seed: 'MarcoItalyMan', gender: 'male', bg: 'fff9c4' },
-      { language: '프랑스어', name: 'Camille from France', greeting: 'Bonjour! Comment ça va? ☕', seed: 'CamilleFrance', gender: 'female', bg: 'ffe8e3' },
-      { language: '독일어', name: 'Anna from Germany', greeting: "Guten Tag! Wie geht's? 🥨", seed: 'AnnaGermany', gender: 'female', bg: 'ffd1dc' }
+      { language: '베트남어', name: 'Linh from Vietnam', greeting: 'Xin chào! Bạn khỏe không? 🌿', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&auto=format&fit=crop&q=80' },
+      { language: '스페인어', name: 'Elena from Spain', greeting: '¡Hola! ¿Cómo estás? 💃', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&auto=format&fit=crop&q=80' },
+      { language: '러시아어', name: 'Sasha from Russia', greeting: 'Привет! Как дела? ❄️', avatar: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&auto=format&fit=crop&q=80' },
+      { language: '영어', name: 'Kate from USA', greeting: 'Hi there! Ready to chat? ☕', avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&auto=format&fit=crop&q=80' },
+      { language: '중국어', name: 'Mei from China', greeting: '你好！今天过得怎么样？ 🧋', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&auto=format&fit=crop&q=80' },
+      { language: '일본어', name: 'Yui from Japan', greeting: 'こんにちは！今日もお疲れ様です✨', avatar: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&auto=format&fit=crop&q=80' },
+      { language: '이탈리아어', name: 'Marco from Italy', greeting: 'Ciao! Come stai? 🍕', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80' },
+      { language: '프랑스어', name: 'Camille from France', greeting: 'Bonjour! Comment ça va? ☕', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80' },
+      { language: '독일어', name: 'Anna from Germany', greeting: "Guten Tag! Wie geht's? 🥨", avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&auto=format&fit=crop&q=80' }
     ];
-
-    function avatarUrl(partner) {
-      return `https://api.dicebear.com/9.x/personas/svg?seed=${encodeURIComponent(partner.seed)}&gender=${partner.gender}&backgroundColor=${partner.bg}`;
-    }
 
     partners.forEach((p) => {
       const img = new Image();
-      img.src = avatarUrl(p);
+      img.src = p.avatar;
     });
 
     const titleRotator = document.getElementById('titleRotator');
@@ -843,7 +842,7 @@
     function renderPartner(index) {
       const partner = partners[index];
       titleRotator.textContent = partner.language;
-      partnerAvatar.src = avatarUrl(partner);
+      partnerAvatar.src = partner.avatar;
       partnerAvatar.alt = `${partner.name} 아바타`;
       partnerName.textContent = partner.name;
       partnerGreeting.textContent = partner.greeting;
