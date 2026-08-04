@@ -165,7 +165,7 @@
     }
 
     .nav-mobile.open {
-      max-height: 360px;
+      max-height: 440px;
       padding: 0.75rem 1.25rem 1.25rem;
       border-top-color: rgba(255, 209, 220, 0.35);
     }
@@ -628,6 +628,7 @@
     @media (max-width: 900px) {
       .nav-desktop { display: none; }
       .header-actions .header-cta { display: none; }
+      .header-mode { display: none; }
       .menu-toggle { display: inline-flex; }
     }
 
@@ -648,7 +649,7 @@
     }
   </style>
 </head>
-<body>
+<body data-dayo-role="learner">
 
   <div class="mesh-bg" aria-hidden="true">
     <div class="mesh-bg__layer mesh-bg__layer--1"></div>
@@ -672,6 +673,7 @@
       </nav>
 
       <div class="header-actions">
+        <div class="header-mode" data-mode-switch="inline"></div>
         <a href="room.html" class="header-cta">☕ 대화 시작해요!</a>
         <button class="menu-toggle" id="menuToggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
       </div>
@@ -683,6 +685,7 @@
       <a href="#booking" data-booking-open>대화 예약하기</a>
       <a href="#faq">자주 묻는 질문</a>
       <a href="room.html" class="header-cta">☕ 대화 시작해요!</a>
+      <div data-mode-switch="block"></div>
     </nav>
   </header>
 
@@ -1107,5 +1110,6 @@
     });
   </script>
   <script src="booking-modal.js"></script>
+  <script src="mode-switch.js"></script>
 </body>
 </html>

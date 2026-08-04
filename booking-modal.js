@@ -552,6 +552,15 @@
     if (lastFocused && lastFocused.focus) lastFocused.focus();
   }
 
+  function openFromQuery() {
+    if (!/[?&]booking=open(&|$)/.test(window.location.search)) return;
+    open();
+    if (window.history && window.history.replaceState) {
+      var clean = window.location.search.replace(/([?&])booking=open(&|$)/, '$1').replace(/[?&]$/, '');
+      window.history.replaceState({}, '', window.location.pathname + clean + window.location.hash);
+    }
+  }
+
   function init() {
     mount();
     document.addEventListener('click', function (e) {
@@ -561,6 +570,7 @@
       open();
     });
     window.DayOBooking = { open: open, close: close };
+    openFromQuery();
   }
 
   if (document.readyState === 'loading') {

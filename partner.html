@@ -97,6 +97,12 @@
       letter-spacing: 0.08em;
     }
 
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+
     .welcome {
       display: flex;
       align-items: center;
@@ -354,6 +360,99 @@
 
     .schedule-card { padding: 1.5rem; }
 
+    .gcal-card {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      margin-bottom: 1.25rem;
+      padding: 0.95rem 1rem;
+      border: 1px solid #DCE4F2;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #FFFFFF, #F4F7FE);
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+    }
+
+    .gcal-card:hover {
+      transform: translateY(-1px);
+      border-color: #4285F4;
+      box-shadow: 0 10px 24px rgba(66, 133, 244, 0.14);
+    }
+
+    .gcal-badge {
+      flex: 0 0 40px;
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background:
+        linear-gradient(#fff, #fff) padding-box,
+        conic-gradient(from 210deg, #4285F4, #34A853, #FBBC05, #EA4335, #4285F4) border-box;
+      border: 3px solid transparent;
+      color: #4285F4;
+      font-family: Arial, sans-serif;
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .gcal-copy { flex: 1; min-width: 0; }
+    .gcal-title { display: block; font-size: 0.88rem; font-weight: 800; }
+    .gcal-desc {
+      display: block;
+      margin-top: 0.25rem;
+      color: var(--muted);
+      font-size: 0.75rem;
+      line-height: 1.5;
+    }
+
+    .gcal-arrow { color: #7C93BE; font-size: 1.2rem; }
+
+    .convert-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+      margin-top: 1.25rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255, 214, 223, 0.75);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, var(--pink-soft), var(--peach) 62%, var(--yellow));
+      box-shadow: var(--shadow);
+    }
+
+    .convert-eyebrow {
+      margin-bottom: 0.4rem;
+      color: var(--coral-dark);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+    }
+
+    .convert-copy {
+      font-size: 1.02rem;
+      font-weight: 800;
+      line-height: 1.5;
+      letter-spacing: -0.02em;
+    }
+
+    .convert-sub {
+      margin-top: 0.4rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+
+    .studio-link.convert-cta {
+      flex: 0 0 auto;
+      width: auto;
+      margin-top: 0;
+      padding: 0.9rem 1.35rem;
+      font-size: 0.86rem;
+    }
+
     .day-tabs {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -538,6 +637,8 @@
       .profile-card { grid-template-columns: 145px minmax(0, 1fr); }
       .dashboard-grid { grid-template-columns: 1fr; }
       .side-column { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .convert-banner { flex-direction: column; align-items: flex-start; }
+      .studio-link.convert-cta { width: 100%; }
     }
 
     @media (max-width: 620px) {
@@ -545,7 +646,8 @@
       .topbar-inner { min-height: 64px; }
       .brand-copy { font-size: 0.86rem; }
       .brand-copy small { display: none; }
-      .welcome { font-size: 0.76rem; }
+      .welcome { display: none; }
+      .ms-opt { padding: 0.4rem 0.55rem; font-size: 0.7rem; }
       .profile-card { grid-template-columns: 1fr; padding: 1rem; }
       .avatar-panel { min-height: 195px; }
       .profile-form { grid-template-columns: 1fr; }
@@ -558,7 +660,7 @@
     }
   </style>
 </head>
-<body>
+<body data-dayo-role="partner">
   <header class="topbar">
     <div class="topbar-inner">
       <a class="brand" href="index.html" aria-label="DayO 메인으로 이동">
@@ -568,9 +670,12 @@
           <small>CONVERSATION PARTNER PORTAL</small>
         </span>
       </a>
-      <div class="welcome">
-        <span class="welcome-dot" aria-hidden="true"></span>
-        <span>Camille 님, 반갑습니다! ☕</span>
+      <div class="topbar-right">
+        <div data-mode-switch="inline"></div>
+        <div class="welcome">
+          <span class="welcome-dot" aria-hidden="true"></span>
+          <span>Camille 님, 반갑습니다! ☕</span>
+        </div>
       </div>
     </div>
   </header>
@@ -640,6 +745,15 @@
           </div>
         </div>
 
+        <button class="gcal-card" type="button" id="gcalSync">
+          <span class="gcal-badge" aria-hidden="true">G</span>
+          <span class="gcal-copy">
+            <span class="gcal-title">📅 Google Calendar 연동하기</span>
+            <span class="gcal-desc">개인 일정이 있는 시간은 자동으로 예약 차단돼요!</span>
+          </span>
+          <span class="gcal-arrow" aria-hidden="true">›</span>
+        </button>
+
         <div class="day-tabs" role="tablist" aria-label="요일 선택" id="dayTabs"></div>
         <div class="schedule-guide" aria-hidden="true">
           <span class="guide-item"><span class="guide-dot open"></span>가능</span>
@@ -701,6 +815,15 @@
         </section>
       </aside>
     </div>
+
+    <section class="convert-banner" aria-labelledby="convertTitle">
+      <div>
+        <p class="convert-eyebrow">LEARN KOREAN WITH DAYO</p>
+        <p class="convert-copy" id="convertTitle">내가 활동하고 적립한 포인트로 한국어 회화 대화도 즐겨보세요! 💖</p>
+        <p class="convert-sub">학습자 모드로 전환하면 적립 포인트로 바로 대화를 예약할 수 있어요.</p>
+      </div>
+      <a class="studio-link convert-cta" href="index.html?booking=open">🎓 한국어 대화 예약하러 가기</a>
+    </section>
   </main>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -812,8 +935,13 @@
       showToast('스케줄이 성공적으로 업데이트되어 대화 예약 달력에 반영되었습니다!');
     });
 
+    document.getElementById('gcalSync').addEventListener('click', () => {
+      showToast('구글 계정과 연동되었습니다! 개인 일정 외 빈 시간대가 대화 예약 달력에 자동 등록됩니다 ⚡');
+    });
+
     renderDays();
     renderTimes();
   </script>
+  <script src="mode-switch.js"></script>
 </body>
 </html>
