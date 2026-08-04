@@ -1,6 +1,30 @@
-/* DayO 대화 자료함 모달 — mypage.html / partner.html 공용 */
+/* DayO 대화 자료함 & 지난 대화 리포트 모달 — mypage.html / partner.html 공용 */
 (function () {
   'use strict';
+
+  var REPORTS = {
+    'r-0802': {
+      date: '2026.08.02 (일)',
+      partner: 'Camille 🇫🇷',
+      topic: '☕ 여행 회화',
+      duration: '30분 대화',
+      feedback: 'Camille 파트너: 문장 구성력이 정말 훌륭하세요! 다음엔 주문 표현을 조금 더 연습해 봐요 💖',
+      words: ['hot americano', 'takeout', 'drip coffee'],
+      sentences: ['"I\'d like a hot americano for here, please."']
+    },
+    'r-0729': {
+      date: '2026.07.29 (수)',
+      partner: 'Kate 🇺🇸',
+      topic: '🎯 오픽/토스 준비',
+      duration: '30분 대화',
+      feedback: 'Kate 파트너: 답변을 두 문장으로 늘리는 연습이 잘 되고 있어요! 접속 표현을 조금만 더 써보면 완벽해요 ✨',
+      words: ['hybrid work', 'commute', 'flexible schedule'],
+      sentences: [
+        '"I usually work from home twice a week."',
+        '"What I like most about it is the flexibility."'
+      ]
+    }
+  };
 
   var MATERIALS = {
     'fr-travel': {
@@ -102,8 +126,24 @@
     'background:linear-gradient(145deg,#FFF9F3,var(--pink-soft,#FFF0F3));}',
     '.mt-phrase{font-size:.9rem;font-weight:800;line-height:1.5;}',
     '.mt-meaning{margin-top:.32rem;color:var(--muted,#927E77);font-size:.78rem;line-height:1.6;}',
+    /* 지난 대화 상세 리포트 */
+    '.mt-info{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem;}',
+    '.mt-info-item{padding:.8rem .9rem;border-radius:15px;background:var(--cream,#FFF8F3);}',
+    '.mt-info-label{color:var(--muted,#927E77);font-size:.7rem;font-weight:700;}',
+    '.mt-info-value{margin-top:.25rem;font-size:.86rem;font-weight:800;}',
+    '.mt-quote{margin-top:1rem;padding:1rem;border:1px solid rgba(255,229,196,.9);border-radius:18px;',
+    'background:linear-gradient(145deg,#FFF9F3,var(--pink-soft,#FFF0F3));font-size:.85rem;line-height:1.7;',
+    'font-weight:700;}',
+    '.mt-sec{margin-top:1.4rem;}',
+    '.mt-sec-title{font-size:.86rem;font-weight:800;}',
+    '.mt-sec-desc{margin-top:.3rem;color:var(--muted,#927E77);font-size:.74rem;line-height:1.6;}',
+    '.mt-chips{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.7rem;}',
+    '.mt-chip{padding:.5rem .8rem;border:1px solid var(--coral-pale,#FFE9E4);border-radius:999px;',
+    'background:var(--coral-pale,#FFE9E4);color:var(--coral-dark,#E85B48);font-size:.8rem;font-weight:800;}',
+    '.mt-sentence{margin-top:.55rem;padding:.85rem 1rem;border-radius:16px;background:var(--cream,#FFF8F3);',
+    'font-size:.85rem;font-weight:700;line-height:1.65;}',
     '@media (max-width:520px){.mt-head{padding:1.1rem 1.1rem .9rem;}.mt-tabs{padding:.8rem 1.1rem 0;}',
-    '.mt-body{padding:1rem 1.1rem 1.3rem;}}'
+    '.mt-body{padding:1rem 1.1rem 1.3rem;}.mt-info{grid-template-columns:1fr;}}'
   ].join('');
 
   var overlay;
@@ -111,6 +151,9 @@
   var elTitle;
   var elTabs;
   var elBody;
+  var reportOverlay;
+  var reportBody;
+  var reportBadge;
   var current = { id: null, view: 'article' };
   var lastFocused = null;
 
@@ -165,6 +208,74 @@
     });
   }
 
+  function mountReport() {
+    reportOverlay = document.createElement('div');
+    reportOverlay.className = 'mt-overlay';
+    reportOverlay.innerHTML = [
+      '<div class="mt-modal" role="dialog" aria-modal="true" aria-labelledby="mtReportTitle">',
+      '  <div class="mt-head">',
+      '    <div>',
+      '      <span class="mt-badge"></span>',
+      '      <p class="mt-title" id="mtReportTitle">📊 지난 대화 상세 리포트</p>',
+      '    </div>',
+      '    <button class="mt-close" type="button" aria-label="리포트 닫기">✕</button>',
+      '  </div>',
+      '  <div class="mt-body"></div>',
+      '</div>'
+    ].join('');
+    document.body.appendChild(reportOverlay);
+
+    reportBadge = reportOverlay.querySelector('.mt-badge');
+    reportBody = reportOverlay.querySelector('.mt-body');
+
+    reportOverlay.querySelector('.mt-close').addEventListener('click', closeReport);
+    reportOverlay.addEventListener('click', function (e) {
+      if (e.target === reportOverlay) closeReport();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && reportOverlay.classList.contains('is-open')) closeReport();
+    });
+  }
+
+  function openReport(id) {
+    var data = REPORTS[id];
+    if (!data) return;
+
+    reportBadge.textContent = data.date + ' · ' + data.duration;
+    reportBody.innerHTML = [
+      '<div class="mt-info">',
+      '  <div class="mt-info-item"><p class="mt-info-label">대화 파트너</p>',
+      '  <p class="mt-info-value">' + escapeHtml(data.partner) + '</p></div>',
+      '  <div class="mt-info-item"><p class="mt-info-label">대화 주제</p>',
+      '  <p class="mt-info-value">' + escapeHtml(data.topic) + '</p></div>',
+      '</div>',
+      '<p class="mt-quote">💬 ' + escapeHtml(data.feedback) + '</p>',
+      '<div class="mt-sec">',
+      '  <p class="mt-sec-title">✨ 수업 중 AI 코파일럿 활동 이력</p>',
+      '  <p class="mt-sec-desc">대화 중 도움받은 기록이에요. 복습하면 다음 대화가 훨씬 편해져요!</p>',
+      '  <p class="mt-sec-title" style="margin-top:1rem">💡 수업 중 찾은 단어</p>',
+      '  <div class="mt-chips">' + data.words.map(function (word) {
+        return '<span class="mt-chip">' + escapeHtml(word) + '</span>';
+      }).join('') + '</div>',
+      '  <p class="mt-sec-title" style="margin-top:1.1rem">📝 수업 중 도움받은 문장</p>',
+      data.sentences.map(function (sentence) {
+        return '<p class="mt-sentence">' + escapeHtml(sentence) + '</p>';
+      }).join(''),
+      '</div>'
+    ].join('');
+
+    lastFocused = document.activeElement;
+    reportOverlay.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+    reportOverlay.querySelector('.mt-close').focus();
+  }
+
+  function closeReport() {
+    reportOverlay.classList.remove('is-open');
+    document.body.style.overflow = '';
+    if (lastFocused && lastFocused.focus) lastFocused.focus();
+  }
+
   function renderBody() {
     var data = MATERIALS[current.id];
     if (!data) return;
@@ -214,13 +325,20 @@
 
   function init() {
     mount();
+    mountReport();
     document.addEventListener('click', function (e) {
+      var report = e.target.closest('[data-report]');
+      if (report) {
+        e.preventDefault();
+        openReport(report.dataset.report);
+        return;
+      }
       var trigger = e.target.closest('[data-material]');
       if (!trigger) return;
       e.preventDefault();
       open(trigger.dataset.material, trigger.dataset.materialView);
     });
-    window.DayOMaterials = { open: open, close: close };
+    window.DayOMaterials = { open: open, close: close, openReport: openReport };
   }
 
   if (document.readyState === 'loading') {

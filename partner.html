@@ -487,21 +487,86 @@
       font-weight: 800;
     }
 
-    .upload-row {
+    .modal-tabs {
       display: flex;
-      align-items: center;
-      gap: 0.7rem;
-      margin-top: 1.2rem;
-      padding-top: 1.2rem;
-      border-top: 1px solid var(--line);
+      gap: 0.4rem;
+      margin-bottom: 1.1rem;
     }
 
+    .modal-tab {
+      flex: 1;
+      padding: 0.6rem 0.5rem;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: var(--cream);
+      color: var(--muted);
+      font-size: 0.76rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: border-color 0.18s, background 0.18s, color 0.18s;
+    }
+
+    .modal-tab.is-active {
+      border-color: var(--coral);
+      color: var(--coral-dark);
+      background: var(--coral-pale);
+    }
+
+    .upload-drop {
+      padding: 1.4rem 1rem;
+      border: 2px dashed rgba(255, 107, 87, 0.35);
+      border-radius: 22px;
+      background: linear-gradient(145deg, #FFF9F3, var(--pink-soft));
+      text-align: center;
+    }
+
+    .upload-preview {
+      width: 96px;
+      height: 96px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 0.9rem;
+      overflow: hidden;
+      border: 4px solid rgba(255, 255, 255, 0.95);
+      border-radius: 50%;
+      background: var(--cream-deep) center / cover no-repeat;
+      box-shadow: 0 10px 22px rgba(113, 83, 72, 0.12);
+    }
+
+    .upload-preview-empty { font-size: 1.7rem; opacity: 0.55; }
+    .upload-preview.has-photo .upload-preview-empty { display: none; }
+
+    .upload-title { font-size: 0.88rem; font-weight: 800; }
+
     .upload-hint {
-      margin-top: 0.6rem;
+      margin-top: 0.5rem;
       color: var(--muted);
       font-size: 0.72rem;
       line-height: 1.6;
     }
+
+    .upload-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .photo-upload-btn {
+      padding: 0.75rem 1.15rem;
+      border: none;
+      border-radius: 16px;
+      color: #fff;
+      background: var(--coral);
+      box-shadow: 0 4px 0 var(--coral-dark);
+      font-size: 0.8rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .photo-upload-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--coral-dark); }
 
     .history-list { display: grid; gap: 0.6rem; }
 
@@ -681,13 +746,37 @@
       line-height: 1.6;
     }
 
-    .studio-link.convert-cta {
+    .convert-actions {
       flex: 0 0 auto;
+      display: grid;
+      gap: 0.55rem;
+      justify-items: stretch;
+    }
+
+    .studio-link.convert-cta {
       width: auto;
       margin-top: 0;
       padding: 0.9rem 1.35rem;
       font-size: 0.86rem;
     }
+
+    .mypage-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.8rem 1.35rem;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--coral-dark);
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: transform 0.18s, background 0.18s;
+    }
+
+    .mypage-link:hover { transform: translateY(-1px); background: #fff; }
 
     .day-tabs {
       display: grid;
@@ -896,7 +985,8 @@
       .profile-card { grid-template-columns: 170px minmax(0, 1fr); }
       .dashboard-grid { grid-template-columns: 1fr; }
       .side-column { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .convert-banner { flex-direction: column; align-items: flex-start; }
+      .convert-banner { flex-direction: column; align-items: stretch; }
+      .convert-actions { width: 100%; }
       .studio-link.convert-cta { width: 100%; }
     }
 
@@ -1104,7 +1194,10 @@
         <p class="convert-copy" id="convertTitle">내가 활동하고 적립한 포인트로 한국어 회화 대화도 즐겨보세요! 💖</p>
         <p class="convert-sub">학습자 모드로 전환하면 적립 포인트로 바로 대화를 예약할 수 있어요.</p>
       </div>
-      <a class="studio-link convert-cta" href="index.html?booking=open">🎓 한국어 대화 예약하러 가기</a>
+      <div class="convert-actions">
+        <a class="studio-link convert-cta" href="index.html?booking=open">🎓 한국어 대화 예약하러 가기</a>
+        <a class="mypage-link" href="mypage.html">🎓 학습자 마이페이지로 이동</a>
+      </div>
     </section>
   </main>
 
@@ -1118,13 +1211,30 @@
         <button class="modal-close" type="button" data-close-modal aria-label="닫기">✕</button>
       </div>
 
-      <div class="avatar-options" id="avatarOptions"></div>
-
-      <div class="upload-row">
-        <button class="mini-btn" type="button" id="uploadBtn">🖼️ 내 컴퓨터에서 사진 선택</button>
-        <input type="file" id="photoInput" accept="image/*" hidden>
+      <div class="modal-tabs" role="tablist" aria-label="프로필 타입 선택">
+        <button class="modal-tab is-active" type="button" role="tab" data-photo-tab="photo" aria-selected="true">📷 실제 얼굴 사진</button>
+        <button class="modal-tab" type="button" role="tab" data-photo-tab="avatar" aria-selected="false">🎨 파스텔 캐릭터 아바타</button>
       </div>
-      <p class="upload-hint">사진은 미리보기로만 적용되는 모크업이에요. 정사각형 이미지를 올리면 가장 예쁘게 보여요!</p>
+
+      <div data-photo-panel="photo">
+        <div class="upload-drop" id="uploadDrop">
+          <div class="upload-preview" id="photoPreview" role="img" aria-label="업로드한 프로필 사진 미리보기">
+            <span class="upload-preview-empty" aria-hidden="true">📷</span>
+          </div>
+          <p class="upload-title">내 얼굴 사진을 올려보세요</p>
+          <p class="upload-hint">JPG 또는 PNG 파일을 선택하면 바로 미리보기로 확인할 수 있어요.</p>
+          <div class="upload-actions">
+            <button class="photo-upload-btn" type="button" id="uploadBtn">📷 실제 얼굴 사진 업로드</button>
+            <button class="mini-btn" type="button" id="removePhotoBtn" hidden>🗑️ 사진 지우기</button>
+          </div>
+          <input type="file" id="photoInput" accept="image/*" hidden>
+        </div>
+      </div>
+
+      <div data-photo-panel="avatar" hidden>
+        <div class="avatar-options" id="avatarOptions"></div>
+        <p class="upload-hint">사진 대신 파스텔 캐릭터 아바타로 프로필을 꾸밀 수 있어요.</p>
+      </div>
     </div>
   </div>
 
@@ -1307,6 +1417,8 @@
     const profileAvatar = document.getElementById('profileAvatar');
     const avatarOptions = document.getElementById('avatarOptions');
     const photoInput = document.getElementById('photoInput');
+    const photoPreview = document.getElementById('photoPreview');
+    const removePhotoBtn = document.getElementById('removePhotoBtn');
     let selectedAvatar = 'peach';
 
     function renderAvatarOptions() {
@@ -1333,8 +1445,30 @@
       profileAvatar.style.setProperty('--av-bg', theme.bg);
       profileAvatar.style.setProperty('--av-hair', theme.hair);
       profileAvatar.style.setProperty('--av-skin', theme.skin);
+      photoPreview.classList.remove('has-photo');
+      photoPreview.style.backgroundImage = '';
+      removePhotoBtn.hidden = true;
       renderAvatarOptions();
     }
+
+    document.querySelectorAll('[data-photo-tab]').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const target = tab.dataset.photoTab;
+        document.querySelectorAll('[data-photo-tab]').forEach((item) => {
+          const active = item === tab;
+          item.classList.toggle('is-active', active);
+          item.setAttribute('aria-selected', String(active));
+        });
+        document.querySelectorAll('[data-photo-panel]').forEach((panel) => {
+          panel.hidden = panel.dataset.photoPanel !== target;
+        });
+      });
+    });
+
+    removePhotoBtn.addEventListener('click', () => {
+      applyAvatar(selectedAvatar || 'peach');
+      showToast('사진을 지우고 파스텔 아바타로 되돌렸어요 🎨');
+    });
 
     avatarOptions.addEventListener('click', (event) => {
       const option = event.target.closest('[data-avatar]');
@@ -1352,9 +1486,12 @@
       reader.onload = () => {
         profileAvatar.classList.add('has-photo');
         profileAvatar.style.backgroundImage = `url(${reader.result})`;
+        photoPreview.classList.add('has-photo');
+        photoPreview.style.backgroundImage = `url(${reader.result})`;
+        removePhotoBtn.hidden = false;
         selectedAvatar = '';
         renderAvatarOptions();
-        showToast('프로필 사진 미리보기가 적용되었습니다 📷');
+        showToast('실제 프로필 사진이 미리보기로 적용되었습니다 📷');
       };
       reader.readAsDataURL(file);
       photoInput.value = '';
