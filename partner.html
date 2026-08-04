@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="DayO 대화 파트너 프로필 및 스케줄 관리 포털">
-  <title>DayO Partner Studio — 대화 파트너 관리</title>
+  <title data-i18n="page.title.partner">DayO Partner Studio — 대화 파트너 관리</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1012,7 +1012,7 @@
 <body data-dayo-role="partner">
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="brand" href="index.html" aria-label="DayO 메인으로 이동">
+      <a class="brand" href="index.html" data-i18n="nav.homeAria" data-i18n-attr="aria-label" aria-label="DayO 메인으로 이동">
         <span class="brand-mark">D</span>
         <span class="brand-copy">
           <span data-i18n="partner.brand">DayO Partner Studio</span>
@@ -1039,7 +1039,7 @@
 
     <section class="card profile-card" aria-labelledby="profileTitle">
       <div class="avatar-panel">
-        <div class="avatar" id="profileAvatar" role="img" aria-label="환하게 미소 짓는 대화 파트너 파스텔 아바타">
+        <div class="avatar" id="profileAvatar" role="img" data-i18n="partner.profile.avatarAria" data-i18n-attr="aria-label" aria-label="환하게 미소 짓는 대화 파트너 파스텔 아바타">
           <span class="avatar-body"></span>
           <span class="avatar-neck"></span>
           <span class="avatar-hair"></span>
@@ -1069,19 +1069,19 @@
           <div class="field">
             <label class="field-label" for="origin" data-i18n="partner.profile.origin">대표 출신 국가 (Passport Origin)</label>
             <select class="select-input" id="origin" name="origin">
-              <option value="fr" selected>🇫🇷 프랑스</option>
-              <option value="ca">🇨🇦 캐나다</option>
-              <option value="be">🇧🇪 벨기에</option>
-              <option value="us">🇺🇸 미국</option>
-              <option value="gb">🇬🇧 영국</option>
-              <option value="es">🇪🇸 스페인</option>
-              <option value="de">🇩🇪 독일</option>
-              <option value="it">🇮🇹 이탈리아</option>
-              <option value="jp">🇯🇵 일본</option>
-              <option value="cn">🇨🇳 중국</option>
-              <option value="vn">🇻🇳 베트남</option>
-              <option value="ru">🇷🇺 러시아</option>
-              <option value="kr">🇰🇷 대한민국</option>
+              <option value="fr" selected data-i18n="partner.origin.fr">🇫🇷 프랑스</option>
+              <option value="ca" data-i18n="partner.origin.ca">🇨🇦 캐나다</option>
+              <option value="be" data-i18n="partner.origin.be">🇧🇪 벨기에</option>
+              <option value="us" data-i18n="partner.origin.us">🇺🇸 미국</option>
+              <option value="gb" data-i18n="partner.origin.gb">🇬🇧 영국</option>
+              <option value="es" data-i18n="partner.origin.es">🇪🇸 스페인</option>
+              <option value="de" data-i18n="partner.origin.de">🇩🇪 독일</option>
+              <option value="it" data-i18n="partner.origin.it">🇮🇹 이탈리아</option>
+              <option value="jp" data-i18n="partner.origin.jp">🇯🇵 일본</option>
+              <option value="cn" data-i18n="partner.origin.cn">🇨🇳 중국</option>
+              <option value="vn" data-i18n="partner.origin.vn">🇻🇳 베트남</option>
+              <option value="ru" data-i18n="partner.origin.ru">🇷🇺 러시아</option>
+              <option value="kr" data-i18n="partner.origin.kr">🇰🇷 대한민국</option>
             </select>
           </div>
           <div class="field field--wide">
@@ -1090,11 +1090,11 @@
               <span class="field-guide" data-i18n="partner.profile.langGuide">💡 선택하신 언어만 유저 대화 예약 서비스에 반영됩니다.</span>
             </div>
             <div class="chip-row" data-multi-select>
-              <button class="select-chip active" type="button" aria-pressed="true">🇫🇷 프랑스어</button>
-              <button class="select-chip active" type="button" aria-pressed="true">🇺🇸 영어</button>
-              <button class="select-chip" type="button" aria-pressed="false">🇰🇷 한국어</button>
-              <button class="select-chip" type="button" aria-pressed="false">🇪🇸 스페인어</button>
-              <button class="select-chip" type="button" aria-pressed="false">🇮🇹 이탈리아어</button>
+              <button class="select-chip active" type="button" aria-pressed="true">🇫🇷 <span data-i18n="book.lang.fr">프랑스어</span></button>
+              <button class="select-chip active" type="button" aria-pressed="true">🇺🇸 <span data-i18n="book.lang.en">영어</span></button>
+              <button class="select-chip" type="button" aria-pressed="false">🇰🇷 <span data-i18n="book.lang.ko">한국어</span></button>
+              <button class="select-chip" type="button" aria-pressed="false">🇪🇸 <span data-i18n="book.lang.es">스페인어</span></button>
+              <button class="select-chip" type="button" aria-pressed="false">🇮🇹 <span data-i18n="book.lang.it">이탈리아어</span></button>
             </div>
           </div>
           <div class="field field--wide">
@@ -1124,10 +1124,10 @@
           <span class="gcal-arrow" aria-hidden="true">›</span>
         </button>
 
-        <div class="day-tabs" role="tablist" aria-label="요일 선택" id="dayTabs"></div>
+        <div class="day-tabs" role="tablist" data-i18n="partner.schedule.tabsAria" data-i18n-attr="aria-label" aria-label="요일 선택" id="dayTabs"></div>
         <div class="schedule-guide" aria-hidden="true">
-          <span class="guide-item"><span class="guide-dot open"></span>가능</span>
-          <span class="guide-item"><span class="guide-dot"></span>불가능</span>
+          <span class="guide-item"><span class="guide-dot open"></span><span data-i18n="partner.schedule.guideOpen">가능</span></span>
+          <span class="guide-item"><span class="guide-dot"></span><span data-i18n="partner.schedule.guideClosed">불가능</span></span>
         </div>
         <div class="time-grid" id="timeGrid" aria-live="polite"></div>
         <button class="save-button" type="button" id="saveSchedule" data-i18n="partner.schedule.save">💾 변경된 스케줄 저장하기</button>
@@ -1143,10 +1143,10 @@
           </div>
 
           <article class="session">
-            <span class="session-status">● 30분 후 시작</span>
-            <h3 class="session-title">20대 K님</h3>
-            <p class="session-purpose">목적: ✈️ 프랑스 여행 회화</p>
-            <p class="session-time">오늘 20:00</p>
+            <span class="session-status" data-i18n="partner.session1.status">● 30분 후 시작</span>
+            <h3 class="session-title" data-i18n="partner.session1.title">20대 K님</h3>
+            <p class="session-purpose" data-i18n="partner.session1.purpose">목적: ✈️ 프랑스 여행 회화</p>
+            <p class="session-time" data-i18n="partner.session1.time">오늘 20:00</p>
             <div class="session-actions">
               <a class="studio-link" href="room.html" data-i18n="partner.sessions.enter">☕ 스튜디오 입장</a>
               <button class="material-link" type="button" data-material="fr-travel" data-i18n="partner.sessions.materials">📚 대화 자료 보기</button>
@@ -1206,27 +1206,27 @@
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="photoModalTitle">
       <div class="modal-head">
         <div>
-          <h2 class="card-title" id="photoModalTitle">📷 프로필 사진 변경</h2>
-          <p class="card-subtitle">파스텔 캐릭터 아바타를 고르거나 내 사진을 올려보세요.</p>
+          <h2 class="card-title" id="photoModalTitle" data-i18n="partner.photoModal.title">📷 프로필 사진 변경</h2>
+          <p class="card-subtitle" data-i18n="partner.photoModal.desc">파스텔 캐릭터 아바타를 고르거나 내 사진을 올려보세요.</p>
         </div>
-        <button class="modal-close" type="button" data-close-modal aria-label="닫기">✕</button>
+        <button class="modal-close" type="button" data-close-modal data-i18n="partner.photoModal.closeAria" data-i18n-attr="aria-label" aria-label="닫기">✕</button>
       </div>
 
-      <div class="modal-tabs" role="tablist" aria-label="프로필 타입 선택">
-        <button class="modal-tab is-active" type="button" role="tab" data-photo-tab="photo" aria-selected="true">📷 실제 얼굴 사진</button>
-        <button class="modal-tab" type="button" role="tab" data-photo-tab="avatar" aria-selected="false">🎨 파스텔 캐릭터 아바타</button>
+      <div class="modal-tabs" role="tablist" data-i18n="partner.photoModal.tabsAria" data-i18n-attr="aria-label" aria-label="프로필 타입 선택">
+        <button class="modal-tab is-active" type="button" role="tab" data-photo-tab="photo" aria-selected="true" data-i18n="partner.photoModal.tabPhoto">📷 실제 얼굴 사진</button>
+        <button class="modal-tab" type="button" role="tab" data-photo-tab="avatar" aria-selected="false" data-i18n="partner.photoModal.tabAvatar">🎨 파스텔 캐릭터 아바타</button>
       </div>
 
       <div data-photo-panel="photo">
         <div class="upload-drop" id="uploadDrop">
-          <div class="upload-preview" id="photoPreview" role="img" aria-label="업로드한 프로필 사진 미리보기">
+          <div class="upload-preview" id="photoPreview" role="img" data-i18n="partner.photoModal.previewAria" data-i18n-attr="aria-label" aria-label="업로드한 프로필 사진 미리보기">
             <span class="upload-preview-empty" aria-hidden="true">📷</span>
           </div>
-          <p class="upload-title">내 얼굴 사진을 올려보세요</p>
-          <p class="upload-hint">JPG 또는 PNG 파일을 선택하면 바로 미리보기로 확인할 수 있어요.</p>
+          <p class="upload-title" data-i18n="partner.photoModal.uploadTitle">내 얼굴 사진을 올려보세요</p>
+          <p class="upload-hint" data-i18n="partner.photoModal.uploadHint">JPG 또는 PNG 파일을 선택하면 바로 미리보기로 확인할 수 있어요.</p>
           <div class="upload-actions">
-            <button class="photo-upload-btn" type="button" id="uploadBtn">📷 실제 얼굴 사진 업로드</button>
-            <button class="mini-btn" type="button" id="removePhotoBtn" hidden>🗑️ 사진 지우기</button>
+            <button class="photo-upload-btn" type="button" id="uploadBtn" data-i18n="partner.photoModal.uploadBtn">📷 실제 얼굴 사진 업로드</button>
+            <button class="mini-btn" type="button" id="removePhotoBtn" hidden data-i18n="partner.photoModal.removeBtn">🗑️ 사진 지우기</button>
           </div>
           <input type="file" id="photoInput" accept="image/*" hidden>
         </div>
@@ -1234,7 +1234,7 @@
 
       <div data-photo-panel="avatar" hidden>
         <div class="avatar-options" id="avatarOptions"></div>
-        <p class="upload-hint">사진 대신 파스텔 캐릭터 아바타로 프로필을 꾸밀 수 있어요.</p>
+        <p class="upload-hint" data-i18n="partner.photoModal.avatarHint">사진 대신 파스텔 캐릭터 아바타로 프로필을 꾸밀 수 있어요.</p>
       </div>
     </div>
   </div>
@@ -1243,10 +1243,10 @@
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
       <div class="modal-head">
         <div>
-          <h2 class="card-title" id="historyModalTitle">📜 닉네임 변경 이력</h2>
-          <p class="card-subtitle">지금까지 사용한 닉네임 기록이에요.</p>
+          <h2 class="card-title" id="historyModalTitle" data-i18n="partner.historyModal.title">📜 닉네임 변경 이력</h2>
+          <p class="card-subtitle" data-i18n="partner.historyModal.desc">지금까지 사용한 닉네임 기록이에요.</p>
         </div>
-        <button class="modal-close" type="button" data-close-modal aria-label="닫기">✕</button>
+        <button class="modal-close" type="button" data-close-modal data-i18n="partner.historyModal.closeAria" data-i18n-attr="aria-label" aria-label="닫기">✕</button>
       </div>
 
       <div class="history-list" id="historyList"></div>
@@ -1256,15 +1256,15 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
-    const DAYS = [
-      { id: 'mon', label: '월' },
-      { id: 'tue', label: '화' },
-      { id: 'wed', label: '수' },
-      { id: 'thu', label: '목' },
-      { id: 'fri', label: '금' },
-      { id: 'sat', label: '토' },
-      { id: 'sun', label: '일' }
-    ];
+    function t(key, vars) {
+      if (!window.DayOI18n) return key;
+      return vars ? window.DayOI18n.tf(key, vars) : window.DayOI18n.t(key);
+    }
+
+    const DAY_IDS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+    function days() {
+      return DAY_IDS.map((id) => ({ id: id, label: t('partner.day.' + id) }));
+    }
 
     const TIMES = Array.from({ length: 15 }, (_, index) => {
       return String(index + 9).padStart(2, '0') + ':00';
@@ -1288,7 +1288,7 @@
     const toast = document.getElementById('toast');
 
     function renderDays() {
-      dayTabs.innerHTML = DAYS.map((day) => {
+      dayTabs.innerHTML = days().map((day) => {
         const selected = day.id === activeDay;
         return `
           <button class="day-tab${selected ? ' active' : ''}" type="button"
@@ -1300,14 +1300,15 @@
     }
 
     function renderTimes() {
-      timeGrid.setAttribute('aria-label', `${DAYS.find((day) => day.id === activeDay).label}요일 시간 선택`);
+      const dayLabel = days().find((day) => day.id === activeDay).label;
+      timeGrid.setAttribute('aria-label', t('partner.schedule.dayAriaFormat', { day: dayLabel }));
       timeGrid.innerHTML = TIMES.map((time) => {
         const isOpen = schedule[activeDay].has(time);
         return `
           <button class="time-chip${isOpen ? ' open' : ''}" type="button"
                   data-time="${time}" aria-pressed="${isOpen}">
             ${time}
-            <span>${isOpen ? 'Open' : 'Closed'}</span>
+            <span>${isOpen ? t('partner.schedule.timeOpen') : t('partner.schedule.timeClosed')}</span>
           </button>
         `;
       }).join('');
@@ -1347,11 +1348,11 @@
     });
 
     document.getElementById('saveSchedule').addEventListener('click', () => {
-      showToast('스케줄이 성공적으로 업데이트되어 대화 예약 달력에 반영되었습니다!');
+      showToast(t('partner.toast.scheduleSaved'));
     });
 
     document.getElementById('gcalSync').addEventListener('click', () => {
-      showToast('구글 계정과 연동되었습니다! 개인 일정 외 빈 시간대가 대화 예약 달력에 자동 등록됩니다 ⚡');
+      showToast(t('partner.toast.gcalSynced'));
     });
 
     /* 프로필 미니 카드 실시간 반영 */
@@ -1363,7 +1364,7 @@
     let savedNickname = nicknameInput.value.trim();
 
     const syncName = () => {
-      miniName.textContent = nicknameInput.value.trim() || '이름을 입력해 주세요';
+      miniName.textContent = nicknameInput.value.trim() || t('partner.profile.nicknamePlaceholder');
     };
 
     const syncIntro = () => {
@@ -1392,7 +1393,7 @@
     function renderHistory() {
       historyList.innerHTML = nicknameHistory.map((item, index) => `
         <div class="history-item">
-          <span><strong>${item.name}</strong>${index === 0 ? ' · 현재 사용 중' : ''}</span>
+          <span><strong>${item.name}</strong>${index === 0 ? t('partner.historyModal.current') : ''}</span>
           <span class="history-date">${item.date}</span>
         </div>
       `).join('');
@@ -1404,15 +1405,15 @@
       nicknameHistory.unshift({ name: next, date: formatToday() });
       savedNickname = next;
       renderHistory();
-      showToast(`닉네임이 '${next}'(으)로 변경되었습니다 ✨`);
+      showToast(t('partner.toast.nicknameChangedFormat', { name: next }));
     });
 
     /* 프로필 사진 & 아바타 변경 */
     const AVATARS = [
-      { id: 'peach', name: '피치', bg: '#FFE5C4', hair: '#85583F', skin: '#F0C9AA' },
-      { id: 'rose', name: '로즈', bg: '#FFD6DF', hair: '#3B2A24', skin: '#F6D3B4' },
-      { id: 'mint', name: '민트', bg: '#DDEFE4', hair: '#6B4A34', skin: '#EAC0A0' },
-      { id: 'butter', name: '버터', bg: '#FFF3C4', hair: '#2F2A28', skin: '#E8B992' }
+      { id: 'peach', key: 'partner.avatar.peach', bg: '#FFE5C4', hair: '#85583F', skin: '#F0C9AA' },
+      { id: 'rose', key: 'partner.avatar.rose', bg: '#FFD6DF', hair: '#3B2A24', skin: '#F6D3B4' },
+      { id: 'mint', key: 'partner.avatar.mint', bg: '#DDEFE4', hair: '#6B4A34', skin: '#EAC0A0' },
+      { id: 'butter', key: 'partner.avatar.butter', bg: '#FFF3C4', hair: '#2F2A28', skin: '#E8B992' }
     ];
 
     const profileAvatar = document.getElementById('profileAvatar');
@@ -1432,7 +1433,7 @@
             <span class="avatar-hair"></span>
             <span class="avatar-face"><span class="avatar-smile"></span></span>
           </span>
-          <span class="avatar-option-name">${item.name}</span>
+          <span class="avatar-option-name">${t(item.key)}</span>
         </button>
       `).join('');
     }
@@ -1468,14 +1469,14 @@
 
     removePhotoBtn.addEventListener('click', () => {
       applyAvatar(selectedAvatar || 'peach');
-      showToast('사진을 지우고 파스텔 아바타로 되돌렸어요 🎨');
+      showToast(t('partner.toast.photoRemoved'));
     });
 
     avatarOptions.addEventListener('click', (event) => {
       const option = event.target.closest('[data-avatar]');
       if (!option) return;
       applyAvatar(option.dataset.avatar);
-      showToast('파스텔 아바타가 적용되었습니다 🎨');
+      showToast(t('partner.toast.avatarApplied'));
     });
 
     document.getElementById('uploadBtn').addEventListener('click', () => photoInput.click());
@@ -1492,7 +1493,7 @@
         removePhotoBtn.hidden = false;
         selectedAvatar = '';
         renderAvatarOptions();
-        showToast('실제 프로필 사진이 미리보기로 적용되었습니다 📷');
+        showToast(t('partner.toast.photoApplied'));
       };
       reader.readAsDataURL(file);
       photoInput.value = '';
@@ -1537,6 +1538,14 @@
     renderTimes();
     renderAvatarOptions();
     renderHistory();
+
+    document.addEventListener('dayo:langchange', () => {
+      renderDays();
+      renderTimes();
+      renderAvatarOptions();
+      renderHistory();
+      syncName();
+    });
   </script>
   <script src="i18n.js"></script>
   <script src="materials.js"></script>

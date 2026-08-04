@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DayO 돼요 — 화상 회화 스튜디오</title>
+  <title data-i18n="page.title.room">DayO 돼요 — 화상 회화 스튜디오</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
@@ -898,6 +898,7 @@
   </style>
 </head>
 <body>
+  <script src="i18n.js"></script>
   <div class="studio">
     <header class="top-bar">
       <div class="top-left">
@@ -922,7 +923,7 @@
     <main class="main-stage chat-collapsed" id="mainStage">
       <div class="video-column" id="videoColumn">
         <div class="share-stage" id="shareStage">
-          <span class="share-label">🖥️ 화면 공유 중</span>
+          <span class="share-label" data-i18n="room.shareLabel">🖥️ 화면 공유 중</span>
           <video id="shareVideo" playsinline muted></video>
         </div>
 
@@ -937,42 +938,42 @@
           </div>
 
           <div class="self-pip" id="selfPip">
-            <span class="pip-label">나</span>
+            <span class="pip-label" data-i18n="room.selfPipLabel">나</span>
             <video id="selfVideo" playsinline muted autoplay></video>
             <div class="self-placeholder">
               <div class="self-placeholder-icon">👤</div>
-              <span>내 화면</span>
+              <span data-i18n="room.selfPlaceholderLabel">내 화면</span>
             </div>
           </div>
 
           <div class="sentence-overlay" id="sentenceOverlay">
-            <div class="sentence-overlay-label">📝 이렇게 말해 보세요</div>
+            <div class="sentence-overlay-label" data-i18n="room.sentenceOverlayLabel">📝 이렇게 말해 보세요</div>
             <div class="sentence-overlay-text" id="sentenceOverlayText"></div>
-            <button class="sentence-overlay-close" id="sentenceOverlayClose" type="button">닫기</button>
+            <button class="sentence-overlay-close" id="sentenceOverlayClose" type="button" data-i18n="room.sentenceOverlayClose">닫기</button>
           </div>
         </div>
       </div>
 
-      <aside class="chat-panel" id="chatPanel" aria-label="라이브 채팅">
+      <aside class="chat-panel" id="chatPanel" data-i18n="room.chatPanelAria" data-i18n-attr="aria-label" aria-label="라이브 채팅">
         <div class="chat-header">
-          <span>💬 라이브 채팅</span>
-          <button class="chat-close" id="chatClose" type="button" aria-label="채팅 닫기">✕</button>
+          <span data-i18n="room.chatHeaderTitle">💬 라이브 채팅</span>
+          <button class="chat-close" id="chatClose" type="button" data-i18n="room.chatCloseAria" data-i18n-attr="aria-label" aria-label="채팅 닫기">✕</button>
         </div>
         <div class="chat-messages" id="chatMessages">
           <div class="bubble bubble--tutor">Bonjour! Ready to practice today? ☕</div>
           <div class="bubble bubble--me">Hi Camille! Let's start 🍰</div>
         </div>
         <form class="chat-input-row" id="chatForm">
-          <input class="chat-input" id="chatInput" type="text" placeholder="메시지를 입력하세요" autocomplete="off">
-          <button class="chat-send" type="submit">전송</button>
+          <input class="chat-input" id="chatInput" type="text" placeholder="메시지를 입력하세요" data-i18n="room.chatInputPlaceholder" autocomplete="off">
+          <button class="chat-send" type="submit" data-i18n="room.chatSend">전송</button>
         </form>
       </aside>
     </main>
 
     <footer class="bottom-bar">
-      <button class="ctrl-btn" id="micBtn" type="button" aria-pressed="true">🎤 <span class="label">마이크 켜짐</span></button>
-      <button class="ctrl-btn" id="camBtn" type="button" aria-pressed="true">📹 <span class="label">카메라 켜짐</span></button>
-      <button class="ctrl-btn" id="chatToggle" type="button">💬 <span class="label">채팅</span></button>
+      <button class="ctrl-btn" id="micBtn" type="button" aria-pressed="true">🎤 <span class="label" data-i18n="room.micOn">마이크 켜짐</span></button>
+      <button class="ctrl-btn" id="camBtn" type="button" aria-pressed="true">📹 <span class="label" data-i18n="room.camOn">카메라 켜짐</span></button>
+      <button class="ctrl-btn" id="chatToggle" type="button">💬 <span class="label" data-i18n="room.chatLabel">채팅</span></button>
       <div class="ctrl-divider" aria-hidden="true"></div>
       <button class="ctrl-btn ctrl-btn--ai" id="wordHelpBtn" type="button" data-i18n="room.wordHelp">💡 단어도움</button>
       <button class="ctrl-btn ctrl-btn--ai" id="sentenceHelpBtn" type="button" data-i18n="room.sentenceHelp">📝 문장도움</button>
@@ -985,15 +986,15 @@
       <div class="sheet-handle"></div>
       <div class="sheet-header">
         <div>
-          <div class="sheet-badge">💡 단어도움</div>
-          <h2 class="sheet-title" id="wordSheetTitle">막히는 한국어 단어나 상황을 입력해 보세요</h2>
+          <div class="sheet-badge" data-i18n="room.wordSheetBadge">💡 단어도움</div>
+          <h2 class="sheet-title" id="wordSheetTitle" data-i18n="room.wordSheetTitle">막히는 한국어 단어나 상황을 입력해 보세요</h2>
         </div>
-        <button class="sheet-close" data-close-sheet="word" aria-label="닫기">✕</button>
+        <button class="sheet-close" data-close-sheet="word" data-i18n="room.wordSheetCloseAria" data-i18n-attr="aria-label" aria-label="닫기">✕</button>
       </div>
       <div class="sheet-body">
-        <p class="sheet-desc">예: 따뜻한 아메리카노</p>
-        <textarea class="sheet-input" id="wordInput" placeholder="한국어로 편하게 적어 주세요"></textarea>
-        <button class="sheet-submit" id="wordSubmit" type="button">추천받기</button>
+        <p class="sheet-desc" data-i18n="room.wordSheetDesc">예: 따뜻한 아메리카노</p>
+        <textarea class="sheet-input" id="wordInput" placeholder="한국어로 편하게 적어 주세요" data-i18n="room.wordSheetPlaceholder"></textarea>
+        <button class="sheet-submit" id="wordSubmit" type="button" data-i18n="room.wordSheetSubmit">추천받기</button>
         <div class="word-cards" id="wordCards" hidden></div>
       </div>
     </div>
@@ -1005,15 +1006,15 @@
       <div class="sheet-handle"></div>
       <div class="sheet-header">
         <div>
-          <div class="sheet-badge">📝 문장도움</div>
-          <h2 class="sheet-title" id="sentenceSheetTitle">하고 싶은 말을 모국어로 편하게 써보세요</h2>
+          <div class="sheet-badge" data-i18n="room.sentenceSheetBadge">📝 문장도움</div>
+          <h2 class="sheet-title" id="sentenceSheetTitle" data-i18n="room.sentenceSheetTitle">하고 싶은 말을 모국어로 편하게 써보세요</h2>
         </div>
-        <button class="sheet-close" data-close-sheet="sentence" aria-label="닫기">✕</button>
+        <button class="sheet-close" data-close-sheet="sentence" data-i18n="room.sentenceSheetCloseAria" data-i18n-attr="aria-label" aria-label="닫기">✕</button>
       </div>
       <div class="sheet-body">
-        <p class="sheet-desc">AI가 대화 파트너에게 바로 말할 수 있는 자연스러운 문장으로 바꿔 줄게요.</p>
-        <textarea class="sheet-input" id="sentenceInput" placeholder="예: 오늘 날씨가 좋아서 기분이 좋아요"></textarea>
-        <button class="sheet-submit" id="sentenceSubmit" type="button">문장 변환</button>
+        <p class="sheet-desc" data-i18n="room.sentenceSheetDesc">AI가 대화 파트너에게 바로 말할 수 있는 자연스러운 문장으로 바꿔 줄게요.</p>
+        <textarea class="sheet-input" id="sentenceInput" placeholder="예: 오늘 날씨가 좋아서 기분이 좋아요" data-i18n="room.sentenceSheetPlaceholder"></textarea>
+        <button class="sheet-submit" id="sentenceSubmit" type="button" data-i18n="room.sentenceSheetSubmit">문장 변환</button>
       </div>
     </div>
   </div>
@@ -1021,25 +1022,25 @@
   <!-- Feedback Modal -->
   <div class="modal-overlay" id="feedbackModal">
     <div class="feedback-modal" role="dialog" aria-labelledby="feedbackTitle" aria-modal="true">
-      <h2 class="feedback-title" id="feedbackTitle">오늘 수업은 어떠하셨나요? 🍰</h2>
-      <div class="stars" id="starRating" role="group" aria-label="별점">
-        <button class="star-btn" type="button" data-star="1" aria-label="1점">★</button>
-        <button class="star-btn" type="button" data-star="2" aria-label="2점">★</button>
-        <button class="star-btn" type="button" data-star="3" aria-label="3점">★</button>
-        <button class="star-btn" type="button" data-star="4" aria-label="4점">★</button>
-        <button class="star-btn" type="button" data-star="5" aria-label="5점">★</button>
+      <h2 class="feedback-title" id="feedbackTitle" data-i18n="room.feedbackTitle">오늘 수업은 어떠하셨나요? 🍰</h2>
+      <div class="stars" id="starRating" role="group" data-i18n="room.starAria" data-i18n-attr="aria-label" aria-label="별점">
+        <button class="star-btn" type="button" data-star="1" data-i18n="room.star1" data-i18n-attr="aria-label" aria-label="1점">★</button>
+        <button class="star-btn" type="button" data-star="2" data-i18n="room.star2" data-i18n-attr="aria-label" aria-label="2점">★</button>
+        <button class="star-btn" type="button" data-star="3" data-i18n="room.star3" data-i18n-attr="aria-label" aria-label="3점">★</button>
+        <button class="star-btn" type="button" data-star="4" data-i18n="room.star4" data-i18n-attr="aria-label" aria-label="4점">★</button>
+        <button class="star-btn" type="button" data-star="5" data-i18n="room.star5" data-i18n-attr="aria-label" aria-label="5점">★</button>
       </div>
-      <p class="feedback-section-label">다음 수업엔 대화 파트너가 이렇게 해주면 좋겠어요<br>(다중 선택 가능)</p>
+      <p class="feedback-section-label" data-i18n="room.feedbackSectionLabel" data-i18n-html="true">다음 수업엔 대화 파트너가 이렇게 해주면 좋겠어요<br>(다중 선택 가능)</p>
       <div class="chip-grid" id="feedbackChips">
-        <button class="feedback-chip" type="button" data-chip="meet">✨ 또 만나고 싶어요</button>
-        <button class="feedback-chip" type="button" data-chip="slower">🐢 말을 조금만 천천히 해주세요</button>
-        <button class="feedback-chip" type="button" data-chip="faster">⚡ 말을 조금 더 빨리 해주세요</button>
-        <button class="feedback-chip" type="button" data-chip="questions">❓ 질문을 더 자주 해주세요</button>
-        <button class="feedback-chip" type="button" data-chip="level-up">📈 레벨을 조금 올려주세요</button>
-        <button class="feedback-chip" type="button" data-chip="level-down">📉 레벨을 조금 내려주세요</button>
-        <button class="feedback-chip" type="button" data-chip="correction">📝 문장 교정을 더 많이 해주세요</button>
+        <button class="feedback-chip" type="button" data-chip="meet" data-i18n="room.feedbackChip.meet">✨ 또 만나고 싶어요</button>
+        <button class="feedback-chip" type="button" data-chip="slower" data-i18n="room.feedbackChip.slower">🐢 말을 조금만 천천히 해주세요</button>
+        <button class="feedback-chip" type="button" data-chip="faster" data-i18n="room.feedbackChip.faster">⚡ 말을 조금 더 빨리 해주세요</button>
+        <button class="feedback-chip" type="button" data-chip="questions" data-i18n="room.feedbackChip.questions">❓ 질문을 더 자주 해주세요</button>
+        <button class="feedback-chip" type="button" data-chip="level-up" data-i18n="room.feedbackChip.levelUp">📈 레벨을 조금 올려주세요</button>
+        <button class="feedback-chip" type="button" data-chip="level-down" data-i18n="room.feedbackChip.levelDown">📉 레벨을 조금 내려주세요</button>
+        <button class="feedback-chip" type="button" data-chip="correction" data-i18n="room.feedbackChip.correction">📝 문장 교정을 더 많이 해주세요</button>
       </div>
-      <button class="feedback-submit" id="feedbackSubmit" type="button">소중한 피드백 보내고 수업 종료하기</button>
+      <button class="feedback-submit" id="feedbackSubmit" type="button" data-i18n="room.feedbackSubmit">소중한 피드백 보내고 수업 종료하기</button>
     </div>
   </div>
 
@@ -1068,6 +1069,11 @@
       setTimeout(() => toast.classList.remove('show'), 2600);
     }
 
+    function t(key, vars) {
+      if (!window.DayOI18n) return key;
+      return vars ? window.DayOI18n.tf(key, vars) : window.DayOI18n.t(key);
+    }
+
     /* Media */
     let localStream = null;
     let shareStream = null;
@@ -1088,31 +1094,43 @@
         selfVideo.srcObject = localStream;
         selfPip.classList.add('has-stream');
       } catch (_) {
-        showToast('카메라/마이크 권한이 없어도 연습은 가능해요 ☕');
+        showToast(t('room.toastNoMedia'));
       }
     }
     initMedia();
 
+    function renderMicLabel() {
+      micBtn.innerHTML = micOn
+        ? '🎤 <span class="label">' + t('room.micOn').replace(/^🎤\s*/, '') + '</span>'
+        : '🎤 <span class="label">' + t('room.micOff').replace(/^🎤\s*/, '') + '</span>';
+    }
+    function renderCamLabel() {
+      camBtn.innerHTML = camOn
+        ? '📹 <span class="label">' + t('room.camOn').replace(/^📹\s*/, '') + '</span>'
+        : '📹 <span class="label">' + t('room.camOff').replace(/^📹\s*/, '') + '</span>';
+    }
+
     micBtn.addEventListener('click', () => {
       micOn = !micOn;
-      if (localStream) localStream.getAudioTracks().forEach((t) => { t.enabled = micOn; });
+      if (localStream) localStream.getAudioTracks().forEach((track) => { track.enabled = micOn; });
       micBtn.classList.toggle('off', !micOn);
       micBtn.setAttribute('aria-pressed', String(micOn));
-      micBtn.innerHTML = micOn
-        ? '🎤 <span class="label">마이크 켜짐</span>'
-        : '🎤 <span class="label">마이크 꺼짐</span>';
+      renderMicLabel();
     });
 
     camBtn.addEventListener('click', () => {
       camOn = !camOn;
-      if (localStream) localStream.getVideoTracks().forEach((t) => { t.enabled = camOn; });
+      if (localStream) localStream.getVideoTracks().forEach((track) => { track.enabled = camOn; });
       camBtn.classList.toggle('off', !camOn);
       camBtn.setAttribute('aria-pressed', String(camOn));
-      camBtn.innerHTML = camOn
-        ? '📹 <span class="label">카메라 켜짐</span>'
-        : '📹 <span class="label">카메라 꺼짐</span>';
+      renderCamLabel();
       if (!camOn) selfPip.classList.remove('has-stream');
       else if (localStream) selfPip.classList.add('has-stream');
+    });
+
+    document.addEventListener('dayo:langchange', () => {
+      renderMicLabel();
+      renderCamLabel();
     });
 
     function stopShare() {
@@ -1127,20 +1145,20 @@
     document.getElementById('shareBtn').addEventListener('click', async () => {
       if (shareStream) {
         stopShare();
-        showToast('화면 공유가 종료됐어요');
+        showToast(t('room.toastShareStop'));
         return;
       }
       try {
         shareStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
         shareVideo.srcObject = shareStream;
         videoColumn.classList.add('sharing');
-        showToast('화면 공유를 시작했어요 🖥️');
+        showToast(t('room.toastShareStart'));
         shareStream.getVideoTracks()[0].addEventListener('ended', () => {
           stopShare();
-          showToast('화면 공유가 종료됐어요');
+          showToast(t('room.toastShareStop'));
         });
       } catch (_) {
-        showToast('화면 공유가 취소되었어요');
+        showToast(t('room.toastShareCancel'));
       }
     });
 
@@ -1258,7 +1276,7 @@
       wordCards.querySelectorAll('.word-card').forEach((card) => {
         card.addEventListener('click', () => {
           navigator.clipboard?.writeText(card.dataset.phrase).catch(() => {});
-          showToast(`"${card.dataset.phrase}" 복사했어요 💡`);
+          showToast(t('room.wordCopiedFormat', { phrase: card.dataset.phrase }));
           closeSheet('word');
         });
       });
@@ -1338,7 +1356,7 @@
 
     document.getElementById('feedbackSubmit').addEventListener('click', () => {
       feedbackModal.classList.remove('active');
-      showToast('피드백이 전달되었습니다! 오늘도 수고하셨어요 💖');
+      showToast(t('room.toastFeedbackSent'));
       stopAllMedia();
       setTimeout(() => { window.location.href = 'index.html'; }, 1400);
     });
@@ -1355,7 +1373,6 @@
       }
     });
   </script>
-  <script src="i18n.js"></script>
   <script src="mode-switch.js"></script>
   <script src="booking-modal.js"></script>
 </body>

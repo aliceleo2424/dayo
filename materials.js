@@ -4,20 +4,20 @@
 
   var REPORTS = {
     'r-0802': {
-      date: '2026.08.02 (일)',
+      dateKey: 'mat.report.r0802.date',
       partner: 'Camille 🇫🇷',
-      topic: '☕ 여행 회화',
-      duration: '30분 대화',
-      feedback: 'Camille 파트너: 문장 구성력이 정말 훌륭하세요! 다음엔 주문 표현을 조금 더 연습해 봐요 💖',
+      topicKey: 'mat.report.r0802.topic',
+      durationMin: 30,
+      feedbackKey: 'mat.report.r0802.feedback',
       words: ['hot americano', 'takeout', 'drip coffee'],
       sentences: ['"I\'d like a hot americano for here, please."']
     },
     'r-0729': {
-      date: '2026.07.29 (수)',
+      dateKey: 'mat.report.r0729.date',
       partner: 'Kate 🇺🇸',
-      topic: '🎯 오픽/토스 준비',
-      duration: '30분 대화',
-      feedback: 'Kate 파트너: 답변을 두 문장으로 늘리는 연습이 잘 되고 있어요! 접속 표현을 조금만 더 써보면 완벽해요 ✨',
+      topicKey: 'mat.report.r0729.topic',
+      durationMin: 30,
+      feedbackKey: 'mat.report.r0729.feedback',
       words: ['hybrid work', 'commute', 'flexible schedule'],
       sentences: [
         '"I usually work from home twice a week."',
@@ -28,64 +28,55 @@
 
   var MATERIALS = {
     'fr-travel': {
-      badge: '🇫🇷 프랑스어 · 여행 회화',
-      title: '니스 여행에서 바로 쓰는 대화 준비',
+      badgeKey: 'mat.item.frtravel.badge',
+      titleKey: 'mat.item.frtravel.title',
       article: {
-        headline: '남프랑스 니스, 여름 축제로 붐비는 해변 도시',
-        source: 'DayO 큐레이션 · 3분 예습',
-        summary: '대화 파트너와 만나기 전에 한 번 읽어두면 좋은 배경 지식이에요. 모르는 단어는 표시해 두었다가 대화 중에 물어보세요.',
-        points: [
-          '니스의 해변 산책로 프롬나드 데 장글레는 여름마다 야외 공연장으로 변신합니다.',
-          '7월 재즈 페스티벌 기간에는 숙소 예약이 평소보다 두 배 이상 몰립니다.',
-          '현지 카페는 테라스 자리와 실내 자리의 가격이 다를 수 있어 주문 전에 확인이 필요합니다.'
-        ]
+        headlineKey: 'mat.item.frtravel.headline',
+        sourceKey: 'mat.item.frtravel.source',
+        summaryKey: 'mat.item.frtravel.summary',
+        pointsKey: 'mat.item.frtravel.points'
       },
+      meaningsKey: 'mat.item.frtravel.meanings',
       expressions: [
-        { phrase: 'Je voudrais un café, s\'il vous plaît.', meaning: '커피 한 잔 주세요.' },
-        { phrase: 'C\'est combien, la terrasse ?', meaning: '테라스 자리는 얼마인가요?' },
-        { phrase: 'Vous avez une recommandation ?', meaning: '추천해 주실 만한 게 있나요?' },
-        { phrase: 'Pourriez-vous parler un peu plus lentement ?', meaning: '조금만 더 천천히 말씀해 주시겠어요?' },
-        { phrase: 'Comment on dit ça en français ?', meaning: '이건 프랑스어로 뭐라고 하나요?' }
+        { phrase: 'Je voudrais un café, s\'il vous plaît.' },
+        { phrase: 'C\'est combien, la terrasse ?' },
+        { phrase: 'Vous avez une recommandation ?' },
+        { phrase: 'Pourriez-vous parler un peu plus lentement ?' },
+        { phrase: 'Comment on dit ça en français ?' }
       ]
     },
     'en-opic': {
-      badge: '🇺🇸 영어 · 오픽/토스',
-      title: '오픽 인터뷰 빈출 주제 예습',
+      badgeKey: 'mat.item.enopic.badge',
+      titleKey: 'mat.item.enopic.title',
       article: {
-        headline: '재택근무 이후 달라진 사무실 풍경',
-        source: 'DayO 큐레이션 · 4분 예습',
-        summary: '오픽에서 자주 나오는 "일과 일상" 주제예요. 내 경험과 연결해서 두세 문장으로 말해보는 연습을 해보세요.',
-        points: [
-          '많은 회사가 주 2~3일만 출근하는 하이브리드 방식을 유지하고 있습니다.',
-          '집중 업무 공간보다 협업과 회의를 위한 라운지형 공간이 늘어나는 추세입니다.',
-          '통근 시간이 줄면서 아침 시간을 학습이나 운동에 쓰는 사람이 많아졌습니다.'
-        ]
+        headlineKey: 'mat.item.enopic.headline',
+        sourceKey: 'mat.item.enopic.source',
+        summaryKey: 'mat.item.enopic.summary',
+        pointsKey: 'mat.item.enopic.points'
       },
+      meaningsKey: 'mat.item.enopic.meanings',
       expressions: [
-        { phrase: 'I usually work from home twice a week.', meaning: '보통 일주일에 이틀은 재택으로 일해요.' },
-        { phrase: 'What I like most about it is the flexibility.', meaning: '가장 마음에 드는 점은 유연함이에요.' },
-        { phrase: 'It took me a while to get used to it.', meaning: '익숙해지는 데 시간이 좀 걸렸어요.' },
-        { phrase: 'Compared to before, my mornings are much calmer.', meaning: '예전과 비교하면 아침이 훨씬 여유로워요.' }
+        { phrase: 'I usually work from home twice a week.' },
+        { phrase: 'What I like most about it is the flexibility.' },
+        { phrase: 'It took me a while to get used to it.' },
+        { phrase: 'Compared to before, my mornings are much calmer.' }
       ]
     },
     'ko-daily': {
-      badge: '🇰🇷 한국어 · 일상 수다',
-      title: '한국어 대화 파트너와의 첫 수다 준비',
+      badgeKey: 'mat.item.kodaily.badge',
+      titleKey: 'mat.item.kodaily.title',
       article: {
-        headline: '요즘 서울에서 인기 있는 동네 카페 산책',
-        source: 'DayO 큐레이션 · 3분 예습',
-        summary: '가볍게 읽고 대화 소재로 활용해 보세요. 발음이 어려운 표현은 대화 중에 파트너에게 물어봐도 좋아요.',
-        points: [
-          '성수동과 연남동은 오래된 주택을 고친 작은 카페가 많은 동네입니다.',
-          '주말 오전에는 대기가 길어 평일 낮 시간대를 추천하는 사람이 많습니다.',
-          '요즘은 디저트 한 가지만 전문으로 하는 작은 가게가 인기를 얻고 있습니다.'
-        ]
+        headlineKey: 'mat.item.kodaily.headline',
+        sourceKey: 'mat.item.kodaily.source',
+        summaryKey: 'mat.item.kodaily.summary',
+        pointsKey: 'mat.item.kodaily.points'
       },
+      meaningsKey: 'mat.item.kodaily.meanings',
       expressions: [
-        { phrase: '요즘 어떻게 지내세요?', meaning: '안부를 묻는 가장 편한 표현이에요.' },
-        { phrase: '이 근처에 괜찮은 카페 있어요?', meaning: '장소를 추천받을 때 쓰는 표현이에요.' },
-        { phrase: '조금만 천천히 말씀해 주세요.', meaning: '속도 조절을 부탁할 때 쓰는 표현이에요.' },
-        { phrase: '그건 한국어로 뭐라고 해요?', meaning: '모르는 단어를 물어볼 때 쓰는 표현이에요.' }
+        { phrase: '요즘 어떻게 지내세요?' },
+        { phrase: '이 근처에 괜찮은 카페 있어요?' },
+        { phrase: '조금만 천천히 말씀해 주세요.' },
+        { phrase: '그건 한국어로 뭐라고 해요?' }
       ]
     }
   };
@@ -155,6 +146,7 @@
   var reportBody;
   var reportBadge;
   var current = { id: null, view: 'article' };
+  var currentReportId = null;
   var lastFocused = null;
 
   function escapeHtml(value) {
@@ -177,11 +169,11 @@
       '      <span class="mt-badge"></span>',
       '      <p class="mt-title" id="mtTitle"></p>',
       '    </div>',
-      '    <button class="mt-close" type="button" aria-label="자료 닫기">✕</button>',
+      '    <button class="mt-close" type="button" data-i18n="mat.closeAria" data-i18n-attr="aria-label" aria-label="자료 닫기">✕</button>',
       '  </div>',
       '  <div class="mt-tabs" role="tablist">',
-      '    <button class="mt-tab" type="button" data-view="article" role="tab">📰 예습 자료</button>',
-      '    <button class="mt-tab" type="button" data-view="expressions" role="tab">💬 추천 표현</button>',
+      '    <button class="mt-tab" type="button" data-view="article" role="tab" data-i18n="mat.tabArticle">📰 예습 자료</button>',
+      '    <button class="mt-tab" type="button" data-view="expressions" role="tab" data-i18n="mat.tabExpressions">💬 추천 표현</button>',
       '  </div>',
       '  <div class="mt-body"></div>',
       '</div>'
@@ -218,7 +210,7 @@
       '      <span class="mt-badge"></span>',
       '      <p class="mt-title" id="mtReportTitle" data-i18n="report.title">📊 지난 대화 상세 리포트</p>',
       '    </div>',
-      '    <button class="mt-close" type="button" aria-label="리포트 닫기">✕</button>',
+      '    <button class="mt-close" type="button" data-i18n="report.closeAria" data-i18n-attr="aria-label" aria-label="리포트 닫기">✕</button>',
       '  </div>',
       '  <div class="mt-body"></div>',
       '</div>'
@@ -237,23 +229,25 @@
     });
   }
 
-  function t(key) {
-    return window.DayOI18n ? window.DayOI18n.t(key) : key;
+  function t(key, vars) {
+    if (!window.DayOI18n) return key;
+    return vars ? window.DayOI18n.tf(key, vars) : window.DayOI18n.t(key);
   }
 
   function openReport(id) {
     var data = REPORTS[id];
     if (!data) return;
+    currentReportId = id;
 
-    reportBadge.textContent = data.date + ' · ' + data.duration;
+    reportBadge.textContent = t(data.dateKey) + ' · ' + t('mat.durationFormat', { min: data.durationMin });
     reportBody.innerHTML = [
       '<div class="mt-info">',
       '  <div class="mt-info-item"><p class="mt-info-label">' + escapeHtml(t('report.partnerLabel')) + '</p>',
       '  <p class="mt-info-value">' + escapeHtml(data.partner) + '</p></div>',
       '  <div class="mt-info-item"><p class="mt-info-label">' + escapeHtml(t('report.topicLabel')) + '</p>',
-      '  <p class="mt-info-value">' + escapeHtml(data.topic) + '</p></div>',
+      '  <p class="mt-info-value">' + escapeHtml(t(data.topicKey)) + '</p></div>',
       '</div>',
-      '<p class="mt-quote">💬 ' + escapeHtml(data.feedback) + '</p>',
+      '<p class="mt-quote">💬 ' + escapeHtml(t(data.feedbackKey)) + '</p>',
       '<div class="mt-sec">',
       '  <p class="mt-sec-title">' + escapeHtml(t('report.aiTitle')) + '</p>',
       '  <p class="mt-sec-desc">' + escapeHtml(t('report.aiDesc')) + '</p>',
@@ -291,18 +285,20 @@
     });
 
     if (current.view === 'expressions') {
-      elBody.innerHTML = '<div class="mt-exp">' + data.expressions.map(function (item) {
+      var meanings = t(data.meaningsKey) || [];
+      elBody.innerHTML = '<div class="mt-exp">' + data.expressions.map(function (item, index) {
         return '<div class="mt-exp-item"><p class="mt-phrase">' + escapeHtml(item.phrase) +
-          '</p><p class="mt-meaning">' + escapeHtml(item.meaning) + '</p></div>';
+          '</p><p class="mt-meaning">' + escapeHtml(meanings[index] || '') + '</p></div>';
       }).join('') + '</div>';
       return;
     }
 
+    var points = t(data.article.pointsKey) || [];
     elBody.innerHTML = [
-      '<p class="mt-headline">' + escapeHtml(data.article.headline) + '</p>',
-      '<p class="mt-source">' + escapeHtml(data.article.source) + '</p>',
-      '<p class="mt-summary">' + escapeHtml(data.article.summary) + '</p>',
-      '<ul class="mt-points">' + data.article.points.map(function (point) {
+      '<p class="mt-headline">' + escapeHtml(t(data.article.headlineKey)) + '</p>',
+      '<p class="mt-source">' + escapeHtml(t(data.article.sourceKey)) + '</p>',
+      '<p class="mt-summary">' + escapeHtml(t(data.article.summaryKey)) + '</p>',
+      '<ul class="mt-points">' + points.map(function (point) {
         return '<li>' + escapeHtml(point) + '</li>';
       }).join('') + '</ul>'
     ].join('');
@@ -312,8 +308,8 @@
     if (!MATERIALS[id]) return;
     current.id = id;
     current.view = view === 'expressions' ? 'expressions' : 'article';
-    elBadge.textContent = MATERIALS[id].badge;
-    elTitle.textContent = MATERIALS[id].title;
+    elBadge.textContent = t(MATERIALS[id].badgeKey);
+    elTitle.textContent = t(MATERIALS[id].titleKey);
     renderBody();
     lastFocused = document.activeElement;
     overlay.classList.add('is-open');
@@ -330,6 +326,7 @@
   function init() {
     mount();
     mountReport();
+    if (window.DayOI18n) window.DayOI18n.apply();
     document.addEventListener('click', function (e) {
       var report = e.target.closest('[data-report]');
       if (report) {
@@ -343,6 +340,16 @@
       open(trigger.dataset.material, trigger.dataset.materialView);
     });
     window.DayOMaterials = { open: open, close: close, openReport: openReport };
+
+    document.addEventListener('dayo:langchange', function () {
+      window.DayOI18n.apply();
+      if (overlay.classList.contains('is-open') && current.id) {
+        elBadge.textContent = t(MATERIALS[current.id].badgeKey);
+        elTitle.textContent = t(MATERIALS[current.id].titleKey);
+        renderBody();
+      }
+      if (reportOverlay.classList.contains('is-open') && currentReportId) openReport(currentReportId);
+    });
   }
 
   if (document.readyState === 'loading') {

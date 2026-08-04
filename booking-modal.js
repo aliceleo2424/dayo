@@ -2,32 +2,28 @@
 (function () {
   'use strict';
 
-  var LANGUAGES = [
-    { id: 'en', label: '영어', flag: '🇺🇸' },
-    { id: 'es', label: '스페인어', flag: '🇪🇸' },
-    { id: 'fr', label: '프랑스어', flag: '🇫🇷' },
-    { id: 'ja', label: '일본어', flag: '🇯🇵' },
-    { id: 'zh', label: '중국어', flag: '🇨🇳' },
-    { id: 'vi', label: '베트남어', flag: '🇻🇳' },
-    { id: 'de', label: '독일어', flag: '🇩🇪' },
-    { id: 'it', label: '이탈리아어', flag: '🇮🇹' },
-    { id: 'ru', label: '러시아어', flag: '🇷🇺' },
-    { id: 'ko', label: '한국어', flag: '🇰🇷' }
-  ];
+  function t(key, vars) {
+    if (!window.DayOI18n) return key;
+    return vars ? window.DayOI18n.tf(key, vars) : window.DayOI18n.t(key);
+  }
 
-  var PURPOSES = [
-    { id: 'travel', label: '✈️ 여행/일상' },
-    { id: 'opic', label: '🎯 오픽/토스' },
-    { id: 'abroad', label: '💼 워홀/유학 준비' },
-    { id: 'casual', label: '☕ 자유 수다' }
-  ];
+  var LANG_IDS = ['en', 'es', 'fr', 'ja', 'zh', 'vi', 'de', 'it', 'ru', 'ko'];
+  var PURPOSE_IDS = ['travel', 'opic', 'abroad', 'casual'];
+  var STYLE_IDS = ['slow', 'fast', 'correct', 'korean'];
 
-  var STYLES = [
-    { id: 'slow', label: '🐢 말을 천천히 들어주고 리액션 잘해주는 파트너' },
-    { id: 'fast', label: '⚡ 자연스럽고 빠른 실전 티키타카' },
-    { id: 'correct', label: '📝 교정과 피드백을 꼼꼼하게 해주는 파트너' },
-    { id: 'korean', label: '🇰🇷 한국어를 할 수 있는 파트너' }
-  ];
+  function LANGUAGES() {
+    return LANG_IDS.map(function (id) {
+      return { id: id, label: t('book.lang.' + id), flag: window.DayOI18n ? window.DayOI18n.langFlag(id) : '' };
+    });
+  }
+
+  function PURPOSES() {
+    return PURPOSE_IDS.map(function (id) { return { id: id, label: t('book.purpose.' + id) }; });
+  }
+
+  function STYLES() {
+    return STYLE_IDS.map(function (id) { return { id: id, label: t('book.style.' + id) }; });
+  }
 
   var TIME_SLOTS = ['10:00', '14:00', '19:30', '21:00', '22:00'];
   var PARTNER_SLOTS_A = ['10:00', '19:30', '22:00'];
@@ -54,8 +50,12 @@
     { id: 'jiwoo', language: 'ko', name: 'Jiwoo from Seoul', initial: 'J', rating: '4.9', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
     { id: 'minseo', language: 'ko', name: 'Minseo from Busan', initial: 'M', rating: '4.8', korean: true, styles: ['fast', 'slow'], slots: PARTNER_SLOTS_B }
   ];
-  var WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
-  var STEP_LABELS = ['언어와 목적', '대화 스타일', '날짜와 시간', '파트너 선택', '예약 확인'];
+  function weekdays() {
+    return window.DayOI18n ? window.DayOI18n.weekdayNames() : ['일', '월', '화', '수', '목', '금', '토'];
+  }
+  function stepLabel(step) {
+    return t('book.step' + step);
+  }
 
   var CSS = [
     '.bk-overlay{position:fixed;inset:0;z-index:900;display:flex;align-items:center;justify-content:center;',
@@ -182,65 +182,65 @@
   function buildMarkup() {
     return '' +
       '<div class="bk-modal" role="dialog" aria-modal="true" aria-labelledby="bkTitle">' +
-        '<button type="button" class="bk-close" data-bk-close aria-label="예약 닫기">✕</button>' +
+        '<button type="button" class="bk-close" data-bk-close aria-label="' + t('book.closeAria') + '">✕</button>' +
         '<div class="bk-head">' +
           '<p class="bk-eyebrow">SMART BOOKING</p>' +
-          '<h2 class="bk-title" id="bkTitle">☕ 오늘의 대화, 예약해요</h2>' +
+          '<h2 class="bk-title" id="bkTitle">' + t('book.title') + '</h2>' +
           '<div class="bk-progress"><div class="bk-progress-bar" id="bkProgressBar"></div></div>' +
           '<p class="bk-progress-label" id="bkProgressLabel"></p>' +
         '</div>' +
         '<div class="bk-body">' +
           '<section class="bk-step" data-step="0">' +
             '<div class="bk-group">' +
-              '<p class="bk-label">어떤 언어로 대화할까요?</p>' +
-              '<div class="bk-chips" id="bkLanguages">' + chipsMarkup(LANGUAGES, 'language') + '</div>' +
+              '<p class="bk-label">' + t('book.languageQuestion') + '</p>' +
+              '<div class="bk-chips" id="bkLanguages">' + chipsMarkup(LANGUAGES(), 'language') + '</div>' +
             '</div>' +
             '<div class="bk-group">' +
-              '<p class="bk-label">대화 목적을 알려주세요</p>' +
-              '<p class="bk-hint">여러 개를 골라도 좋아요</p>' +
-              '<div class="bk-chips" id="bkPurposes">' + chipsMarkup(PURPOSES, 'purpose') + '</div>' +
+              '<p class="bk-label">' + t('book.purposeQuestion') + '</p>' +
+              '<p class="bk-hint">' + t('book.purposeHint') + '</p>' +
+              '<div class="bk-chips" id="bkPurposes">' + chipsMarkup(PURPOSES(), 'purpose') + '</div>' +
             '</div>' +
           '</section>' +
           '<section class="bk-step" data-step="1">' +
             '<div class="bk-group">' +
-              '<p class="bk-label">어떤 대화 스타일이 좋으세요?</p>' +
-              '<p class="bk-hint">고른 스타일에 맞춰 파트너를 매칭해 드려요</p>' +
-              '<div class="bk-chips bk-chips--stack" id="bkStyles">' + chipsMarkup(STYLES, 'style') + '</div>' +
+              '<p class="bk-label">' + t('book.styleQuestion') + '</p>' +
+              '<p class="bk-hint">' + t('book.styleHint') + '</p>' +
+              '<div class="bk-chips bk-chips--stack" id="bkStyles">' + chipsMarkup(STYLES(), 'style') + '</div>' +
             '</div>' +
           '</section>' +
           '<section class="bk-step" data-step="2">' +
             '<div class="bk-group">' +
-              '<p class="bk-label">언제 만날까요?</p>' +
-              '<p class="bk-hint">내일부터 예약할 수 있어요</p>' +
+              '<p class="bk-label">' + t('book.dateQuestion') + '</p>' +
+              '<p class="bk-hint">' + t('book.dateHint') + '</p>' +
               '<div class="bk-cal-head">' +
-                '<button type="button" class="bk-cal-nav" id="bkPrevMonth" aria-label="이전 달">‹</button>' +
+                '<button type="button" class="bk-cal-nav" id="bkPrevMonth" aria-label="' + t('book.prevMonthAria') + '">‹</button>' +
                 '<span class="bk-cal-title" id="bkCalTitle" aria-live="polite"></span>' +
-                '<button type="button" class="bk-cal-nav" id="bkNextMonth" aria-label="다음 달">›</button>' +
+                '<button type="button" class="bk-cal-nav" id="bkNextMonth" aria-label="' + t('book.nextMonthAria') + '">›</button>' +
               '</div>' +
               '<div class="bk-cal-grid" id="bkCalGrid"></div>' +
             '</div>' +
             '<div class="bk-slots" id="bkSlots" hidden>' +
-              '<p class="bk-label">가능한 시간대예요</p>' +
+              '<p class="bk-label">' + t('book.slotsLabel') + '</p>' +
               '<div class="bk-chips" id="bkTimes"></div>' +
             '</div>' +
           '</section>' +
           '<section class="bk-step" data-step="3">' +
             '<div class="bk-group">' +
-              '<p class="bk-label">이 시간에 만날 대화 파트너를 골라주세요</p>' +
+              '<p class="bk-label">' + t('book.partnerQuestion') + '</p>' +
               '<p class="bk-hint" id="bkPartnerHint"></p>' +
               '<div class="bk-partners" id="bkPartners"></div>' +
             '</div>' +
           '</section>' +
           '<section class="bk-step" data-step="4">' +
             '<div class="bk-group">' +
-              '<p class="bk-label">이렇게 예약할게요 🎉</p>' +
+              '<p class="bk-label">' + t('book.summaryTitle') + '</p>' +
               '<dl class="bk-summary" id="bkSummary"></dl>' +
             '</div>' +
           '</section>' +
         '</div>' +
         '<div class="bk-foot">' +
-          '<button type="button" class="bk-btn bk-btn--ghost" id="bkPrev">이전</button>' +
-          '<button type="button" class="bk-btn bk-btn--primary" id="bkNext">다음</button>' +
+          '<button type="button" class="bk-btn bk-btn--ghost" id="bkPrev">' + t('book.prev') + '</button>' +
+          '<button type="button" class="bk-btn bk-btn--primary" id="bkNext">' + t('book.next') + '</button>' +
         '</div>' +
       '</div>';
   }
@@ -253,7 +253,6 @@
     var overlay = document.createElement('div');
     overlay.className = 'bk-overlay';
     overlay.id = 'bkOverlay';
-    overlay.innerHTML = buildMarkup();
     document.body.appendChild(overlay);
 
     var toast = document.createElement('div');
@@ -262,34 +261,46 @@
     toast.setAttribute('aria-live', 'polite');
     document.body.appendChild(toast);
 
-    el = {
-      overlay: overlay,
-      modal: overlay.querySelector('.bk-modal'),
-      steps: overlay.querySelectorAll('.bk-step'),
-      progressBar: overlay.querySelector('#bkProgressBar'),
-      progressLabel: overlay.querySelector('#bkProgressLabel'),
-      prevBtn: overlay.querySelector('#bkPrev'),
-      nextBtn: overlay.querySelector('#bkNext'),
-      calTitle: overlay.querySelector('#bkCalTitle'),
-      calGrid: overlay.querySelector('#bkCalGrid'),
-      prevMonth: overlay.querySelector('#bkPrevMonth'),
-      nextMonth: overlay.querySelector('#bkNextMonth'),
-      slots: overlay.querySelector('#bkSlots'),
-      times: overlay.querySelector('#bkTimes'),
-      partners: overlay.querySelector('#bkPartners'),
-      partnerHint: overlay.querySelector('#bkPartnerHint'),
-      summary: overlay.querySelector('#bkSummary'),
-      toast: toast
-    };
+    el.overlay = overlay;
+    el.toast = toast;
 
-    el.times.innerHTML = TIME_SLOTS.map(function (t) {
-      return '<button type="button" class="bk-chip" data-group="time" data-id="' + t + '" aria-pressed="false">' + t + '</button>';
-    }).join('');
-
-    bindEvents();
+    renderMarkup();
+    bindStaticEvents();
   }
 
-  function bindEvents() {
+  function renderMarkup() {
+    el.overlay.innerHTML = buildMarkup();
+
+    el.modal = el.overlay.querySelector('.bk-modal');
+    el.steps = el.overlay.querySelectorAll('.bk-step');
+    el.progressBar = el.overlay.querySelector('#bkProgressBar');
+    el.progressLabel = el.overlay.querySelector('#bkProgressLabel');
+    el.prevBtn = el.overlay.querySelector('#bkPrev');
+    el.nextBtn = el.overlay.querySelector('#bkNext');
+    el.calTitle = el.overlay.querySelector('#bkCalTitle');
+    el.calGrid = el.overlay.querySelector('#bkCalGrid');
+    el.prevMonth = el.overlay.querySelector('#bkPrevMonth');
+    el.nextMonth = el.overlay.querySelector('#bkNextMonth');
+    el.slots = el.overlay.querySelector('#bkSlots');
+    el.times = el.overlay.querySelector('#bkTimes');
+    el.partners = el.overlay.querySelector('#bkPartners');
+    el.partnerHint = el.overlay.querySelector('#bkPartnerHint');
+    el.summary = el.overlay.querySelector('#bkSummary');
+
+    el.times.innerHTML = TIME_SLOTS.map(function (slot) {
+      return '<button type="button" class="bk-chip" data-group="time" data-id="' + slot + '" aria-pressed="false">' + slot + '</button>';
+    }).join('');
+
+    bindDynamicEvents();
+  }
+
+  function bindStaticEvents() {
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && el.overlay.classList.contains('is-open')) close();
+    });
+  }
+
+  function bindDynamicEvents() {
     el.overlay.addEventListener('click', function (e) {
       if (e.target === el.overlay) close();
       if (e.target.closest('[data-bk-close]')) close();
@@ -329,10 +340,23 @@
       if (state.step === 4) { confirmBooking(); return; }
       goTo(state.step + 1);
     });
+  }
 
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && el.overlay.classList.contains('is-open')) close();
+  function refreshOnLangChange() {
+    var wasOpen = el.overlay.classList.contains('is-open');
+    renderMarkup();
+    ['language', 'purpose', 'style', 'time'].forEach(syncChips);
+    el.slots.hidden = !state.date;
+    renderCalendar();
+    Array.prototype.forEach.call(el.steps, function (section, i) {
+      section.classList.toggle('is-active', i === state.step);
     });
+    if (state.step === 3) renderAvailablePartners();
+    if (state.step === 4) renderSummary();
+    el.progressBar.style.width = ((state.step + 1) / 5 * 100) + '%';
+    el.progressLabel.textContent = t('book.progressFormat', { step: state.step + 1, label: stepLabel(state.step) });
+    updateFooter();
+    if (wasOpen) el.overlay.classList.add('is-open');
   }
 
   function selectChip(chip) {
@@ -382,11 +406,12 @@
     var today = startOfToday();
     var first = new Date(state.viewYear, state.viewMonth, 1);
     var daysInMonth = new Date(state.viewYear, state.viewMonth + 1, 0).getDate();
+    var dow = weekdays();
 
-    el.calTitle.textContent = state.viewYear + '년 ' + (state.viewMonth + 1) + '월';
+    el.calTitle.textContent = window.DayOI18n ? window.DayOI18n.monthTitle(state.viewYear, state.viewMonth) : (state.viewYear + '년 ' + (state.viewMonth + 1) + '월');
     el.prevMonth.disabled = state.viewYear === today.getFullYear() && state.viewMonth === today.getMonth();
 
-    var cells = WEEKDAYS.map(function (d) {
+    var cells = dow.map(function (d) {
       return '<span class="bk-cal-dow">' + d + '</span>';
     });
 
@@ -401,7 +426,7 @@
       cells.push(
         '<button type="button" class="bk-day' + (state.date === iso ? ' is-on' : '') + '"' +
         ' data-date="' + iso + '"' + (selectable ? '' : ' disabled') +
-        ' aria-label="' + state.viewYear + '년 ' + (state.viewMonth + 1) + '월 ' + day + '일">' + day + '</button>'
+        ' aria-label="' + formatDate(iso) + '">' + day + '</button>'
       );
     }
 
@@ -417,10 +442,15 @@
   function formatDate(iso) {
     var parts = iso.split('-');
     var date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-    return Number(parts[1]) + '월 ' + Number(parts[2]) + '일 (' + WEEKDAYS[date.getDay()] + ')';
+    var lang = window.DayOI18n ? window.DayOI18n.getLang() : 'KO';
+    var dow = weekdays()[date.getDay()];
+    if (lang === 'KO') return Number(parts[1]) + '월 ' + Number(parts[2]) + '일 (' + dow + ')';
+    if (lang === 'ZH' || lang === 'JA') return Number(parts[1]) + '月 ' + Number(parts[2]) + '日 (' + dow + ')';
+    return window.DayOI18n.monthTitle(Number(parts[0]), Number(parts[1]) - 1).split(' ')[0] + ' ' + Number(parts[2]) + ' (' + dow + ')';
   }
 
-  function labelOf(list, id) {
+  function labelOf(getList, id) {
+    var list = getList();
     for (var i = 0; i < list.length; i++) {
       if (list[i].id === id) return list[i].flag ? list[i].flag + ' ' + list[i].label : list[i].label;
     }
@@ -447,10 +477,10 @@
   function renderAvailablePartners() {
     var available = getAvailablePartners();
     var language = labelOf(LANGUAGES, state.language);
-    el.partnerHint.textContent = formatDate(state.date) + ' ' + state.time + ' · ' + language + ' 가능';
+    el.partnerHint.textContent = t('book.partnerHintFormat', { date: formatDate(state.date), time: state.time, language: language });
     el.partners.innerHTML = available.map(function (partner) {
       var styleMatch = state.style === 'korean' ? partner.korean : partner.styles.indexOf(state.style) > -1;
-      var meta = '⭐ ' + partner.rating + ' · 한국어 가능' + (styleMatch ? ' · 선택한 스타일과 잘 맞아요' : '');
+      var meta = '⭐ ' + partner.rating + t('book.koreanAvailable') + (styleMatch ? t('book.styleMatchSuffix') : '');
       return '<button type="button" class="bk-partner' + (state.partner === partner.id ? ' is-on' : '') +
         '" data-id="' + partner.id + '" aria-pressed="' + (state.partner === partner.id ? 'true' : 'false') + '">' +
           '<span class="bk-partner-avatar" aria-hidden="true">' + partner.initial + '</span>' +
@@ -475,11 +505,11 @@
     }).join(', ');
 
     el.summary.innerHTML = '' +
-      row('언어', labelOf(LANGUAGES, state.language)) +
-      row('목적', purposeText) +
-      row('스타일', labelOf(STYLES, state.style)) +
-      row('일시', formatDate(state.date) + ' · ' + state.time) +
-      row('파트너', getPartner(state.partner).name);
+      row(t('book.summaryLanguage'), labelOf(LANGUAGES, state.language)) +
+      row(t('book.summaryPurpose'), purposeText) +
+      row(t('book.summaryStyle'), labelOf(STYLES, state.style)) +
+      row(t('book.summaryDatetime'), formatDate(state.date) + ' · ' + state.time) +
+      row(t('book.summaryPartner'), getPartner(state.partner).name);
   }
 
   function row(term, value) {
@@ -498,14 +528,14 @@
     if (step === 4) renderSummary();
 
     el.progressBar.style.width = ((step + 1) / 5 * 100) + '%';
-    el.progressLabel.textContent = 'STEP ' + (step + 1) + '/5 · ' + STEP_LABELS[step];
+    el.progressLabel.textContent = t('book.progressFormat', { step: step + 1, label: stepLabel(step) });
     el.overlay.querySelector('.bk-body').scrollTop = 0;
     updateFooter();
   }
 
   function updateFooter() {
     el.prevBtn.style.display = state.step === 0 ? 'none' : '';
-    el.nextBtn.textContent = state.step === 4 ? '🍰 이 일정으로 대화 예약 확정하기' : '다음';
+    el.nextBtn.textContent = state.step === 4 ? t('book.confirm') : t('book.next');
     el.nextBtn.disabled = !isStepReady(state.step);
   }
 
@@ -521,7 +551,7 @@
   function confirmBooking() {
     if (!isStepReady(3)) return;
     close();
-    showToast('예약이 성공적으로 완료되었습니다! ' + getPartner(state.partner).name + ' 파트너와 만나요 💖');
+    showToast(t('book.confirmToastFormat', { partner: getPartner(state.partner).name }));
   }
 
   function reset() {
@@ -572,6 +602,7 @@
       e.preventDefault();
       open();
     });
+    document.addEventListener('dayo:langchange', refreshOnLangChange);
     window.DayOBooking = { open: open, close: close };
     openFromQuery();
   }

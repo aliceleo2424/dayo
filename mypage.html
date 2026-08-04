@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="DayO 학습자 마이페이지 — 내 대화 현황과 예약 세션, 대화 자료를 한 곳에서 관리하세요.">
-  <title>DayO 마이페이지 — 내 대화 라운지</title>
+  <title data-i18n="page.title.mypage">DayO 마이페이지 — 내 대화 라운지</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -501,7 +501,7 @@
 <body data-dayo-role="member">
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="brand" href="index.html" aria-label="DayO 메인으로 이동">
+      <a class="brand" href="index.html" data-i18n="nav.homeAria" data-i18n-attr="aria-label" aria-label="DayO 메인으로 이동">
         <span class="brand-mark">D</span>
         <span class="brand-copy">
           <span data-i18n="mypage.brand">DayO 마이페이지</span>
@@ -575,7 +575,7 @@
           <div class="status-icon" aria-hidden="true">🎟️</div>
           <p class="status-label" data-i18n="mypage.status.remaining">잔여 대화 세션 이용권</p>
           <p class="status-value" data-i18n="mypage.status.remainingValue">4회 남음</p>
-          <div class="pass-bar" role="img" aria-label="8회 중 4회 사용">
+          <div class="pass-bar" role="img" data-i18n="mypage.status.passBarAria" data-i18n-attr="aria-label" aria-label="8회 중 4회 사용">
             <span></span>
           </div>
         </div>
@@ -603,11 +603,11 @@
             <div>
               <div class="session-top">
                 <p class="session-name">Camille from France</p>
-                <span class="tag">🇫🇷 프랑스어</span>
-                <span class="tag tag--soon">● 30분 후 시작</span>
+                <span class="tag">🇫🇷 <span data-i18n="book.lang.fr">프랑스어</span></span>
+                <span class="tag tag--soon" data-i18n="partner.session1.status">● 30분 후 시작</span>
               </div>
-              <p class="session-meta">목적: ✈️ 여행/일상 · 스타일: 🐢 천천히 들어주는 파트너</p>
-              <p class="session-time">오늘 20:00 · 30분</p>
+              <p class="session-meta" data-i18n="mypage.session1.meta">목적: ✈️ 여행/일상 · 스타일: 🐢 천천히 들어주는 파트너</p>
+              <p class="session-time" data-i18n="mypage.session1.time">오늘 20:00 · 30분</p>
               <div class="session-actions">
                 <a class="primary-btn" href="room.html" data-i18n="mypage.sessions.enter">☕ 대화 스튜디오 입장</a>
                 <button class="ghost-btn" type="button" data-material="fr-travel" data-i18n="mypage.sessions.materials">📚 대화 자료 보기</button>
@@ -620,10 +620,10 @@
             <div>
               <div class="session-top">
                 <p class="session-name">Kate from USA</p>
-                <span class="tag">🇺🇸 영어</span>
+                <span class="tag">🇺🇸 <span data-i18n="book.lang.en">영어</span></span>
               </div>
-              <p class="session-meta">목적: 🎯 오픽/토스 · 스타일: 📝 교정을 꼼꼼히 해주는 파트너</p>
-              <p class="session-time">8월 6일 (목) 21:00 · 30분</p>
+              <p class="session-meta" data-i18n="mypage.session2.meta">목적: 🎯 오픽/토스 · 스타일: 📝 교정을 꼼꼼히 해주는 파트너</p>
+              <p class="session-time" data-i18n="mypage.session2.time">8월 6일 (목) 21:00 · 30분</p>
               <div class="session-actions">
                 <a class="primary-btn" href="room.html" data-i18n="mypage.sessions.enter">☕ 대화 스튜디오 입장</a>
                 <button class="ghost-btn" type="button" data-material="en-opic" data-i18n="mypage.sessions.materials">📚 대화 자료 보기</button>
@@ -636,10 +636,10 @@
             <div>
               <div class="session-top">
                 <p class="session-name">Yui from Japan</p>
-                <span class="tag">🇯🇵 일본어</span>
+                <span class="tag">🇯🇵 <span data-i18n="book.lang.ja">일본어</span></span>
               </div>
-              <p class="session-meta">목적: ☕ 자유 수다 · 스타일: ⚡ 자연스러운 실전 티키타카</p>
-              <p class="session-time">8월 9일 (일) 11:00 · 30분</p>
+              <p class="session-meta" data-i18n="mypage.session3.meta">목적: ☕ 자유 수다 · 스타일: ⚡ 자연스러운 실전 티키타카</p>
+              <p class="session-time" data-i18n="mypage.session3.time">8월 9일 (일) 11:00 · 30분</p>
               <div class="session-actions">
                 <a class="primary-btn" href="room.html" data-i18n="mypage.sessions.enter">☕ 대화 스튜디오 입장</a>
                 <button class="ghost-btn" type="button" data-material="fr-travel" data-i18n="mypage.sessions.materials">📚 대화 자료 보기</button>
@@ -661,8 +661,8 @@
           <button class="library-item" type="button" data-material="fr-travel" data-material-view="article">
             <span class="library-icon" aria-hidden="true">📰</span>
             <span class="library-copy">
-              <span class="library-title">이번 주 예습 기사 · 니스 여름 축제</span>
-              <span class="library-desc">Camille 파트너와의 여행 회화 전에 3분만 읽어보세요.</span>
+              <span class="library-title" data-i18n="mypage.library.item1.title">이번 주 예습 기사 · 니스 여름 축제</span>
+              <span class="library-desc" data-i18n="mypage.library.item1.desc">Camille 파트너와의 여행 회화 전에 3분만 읽어보세요.</span>
             </span>
             <span class="library-arrow" aria-hidden="true">›</span>
           </button>
@@ -670,8 +670,8 @@
           <button class="library-item" type="button" data-material="fr-travel" data-material-view="expressions">
             <span class="library-icon" aria-hidden="true">💬</span>
             <span class="library-copy">
-              <span class="library-title">추천 표현 리뷰 · 카페와 주문</span>
-              <span class="library-desc">지난 대화에서 자주 막혔던 표현을 모았어요.</span>
+              <span class="library-title" data-i18n="mypage.library.item2.title">추천 표현 리뷰 · 카페와 주문</span>
+              <span class="library-desc" data-i18n="mypage.library.item2.desc">지난 대화에서 자주 막혔던 표현을 모았어요.</span>
             </span>
             <span class="library-arrow" aria-hidden="true">›</span>
           </button>
@@ -679,8 +679,8 @@
           <button class="library-item" type="button" data-material="en-opic" data-material-view="article">
             <span class="library-icon" aria-hidden="true">🎧</span>
             <span class="library-copy">
-              <span class="library-title">오픽 빈출 주제 · 재택근무 이야기</span>
-              <span class="library-desc">Kate 파트너와의 세션 전 예습 자료예요.</span>
+              <span class="library-title" data-i18n="mypage.library.item3.title">오픽 빈출 주제 · 재택근무 이야기</span>
+              <span class="library-desc" data-i18n="mypage.library.item3.desc">Kate 파트너와의 세션 전 예습 자료예요.</span>
             </span>
             <span class="library-arrow" aria-hidden="true">›</span>
           </button>
@@ -688,8 +688,8 @@
           <button class="library-item" type="button" data-material="ko-daily" data-material-view="expressions">
             <span class="library-icon" aria-hidden="true">🍰</span>
             <span class="library-copy">
-              <span class="library-title">지난 대화 복습 노트</span>
-              <span class="library-desc">파트너가 남긴 피드백 표현을 다시 확인해 보세요.</span>
+              <span class="library-title" data-i18n="mypage.library.item4.title">지난 대화 복습 노트</span>
+              <span class="library-desc" data-i18n="mypage.library.item4.desc">파트너가 남긴 피드백 표현을 다시 확인해 보세요.</span>
             </span>
             <span class="library-arrow" aria-hidden="true">›</span>
           </button>
@@ -711,9 +711,9 @@
           <div class="history-copy">
             <div class="session-top">
               <p class="session-name">Camille from France</p>
-              <span class="tag">🇫🇷 프랑스어</span>
+              <span class="tag">🇫🇷 <span data-i18n="book.lang.fr">프랑스어</span></span>
             </div>
-            <p class="session-meta">2026.08.02 (일) 20:00 · 30분 · 주제 ☕ 여행 회화</p>
+            <p class="session-meta" data-i18n="mypage.history1.meta">2026.08.02 (일) 20:00 · 30분 · 주제 ☕ 여행 회화</p>
           </div>
           <button class="ghost-btn" type="button" data-report="r-0802" data-i18n="mypage.history.report">📊 상세 리포트 보기</button>
         </article>
@@ -723,9 +723,9 @@
           <div class="history-copy">
             <div class="session-top">
               <p class="session-name">Kate from USA</p>
-              <span class="tag">🇺🇸 영어</span>
+              <span class="tag">🇺🇸 <span data-i18n="book.lang.en">영어</span></span>
             </div>
-            <p class="session-meta">2026.07.29 (수) 21:00 · 30분 · 주제 🎯 오픽/토스 준비</p>
+            <p class="session-meta" data-i18n="mypage.history2.meta">2026.07.29 (수) 21:00 · 30분 · 주제 🎯 오픽/토스 준비</p>
           </div>
           <button class="ghost-btn" type="button" data-report="r-0729" data-i18n="mypage.history.report">📊 상세 리포트 보기</button>
         </article>
