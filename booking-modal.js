@@ -11,7 +11,8 @@
     { id: 'vi', label: '베트남어', flag: '🇻🇳' },
     { id: 'de', label: '독일어', flag: '🇩🇪' },
     { id: 'it', label: '이탈리아어', flag: '🇮🇹' },
-    { id: 'ru', label: '러시아어', flag: '🇷🇺' }
+    { id: 'ru', label: '러시아어', flag: '🇷🇺' },
+    { id: 'ko', label: '한국어', flag: '🇰🇷' }
   ];
 
   var PURPOSES = [
@@ -49,7 +50,9 @@
     { id: 'marco', language: 'it', name: 'Marco from Italy', initial: 'M', rating: '4.9', korean: true, styles: ['fast', 'correct'], slots: PARTNER_SLOTS_A },
     { id: 'giulia', language: 'it', name: 'Giulia from Italy', initial: 'G', rating: '4.8', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_B },
     { id: 'sasha', language: 'ru', name: 'Sasha from Russia', initial: 'S', rating: '4.9', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
-    { id: 'mila', language: 'ru', name: 'Mila from Russia', initial: 'M', rating: '4.8', korean: true, styles: ['fast', 'slow'], slots: PARTNER_SLOTS_B }
+    { id: 'mila', language: 'ru', name: 'Mila from Russia', initial: 'M', rating: '4.8', korean: true, styles: ['fast', 'slow'], slots: PARTNER_SLOTS_B },
+    { id: 'jiwoo', language: 'ko', name: 'Jiwoo from Seoul', initial: 'J', rating: '4.9', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
+    { id: 'minseo', language: 'ko', name: 'Minseo from Busan', initial: 'M', rating: '4.8', korean: true, styles: ['fast', 'slow'], slots: PARTNER_SLOTS_B }
   ];
   var WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
   var STEP_LABELS = ['언어와 목적', '대화 스타일', '날짜와 시간', '파트너 선택', '예약 확인'];
