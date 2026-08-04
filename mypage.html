@@ -504,15 +504,16 @@
       <a class="brand" href="index.html" aria-label="DayO 메인으로 이동">
         <span class="brand-mark">D</span>
         <span class="brand-copy">
-          DayO 마이페이지
-          <small>MY CONVERSATION LOUNGE</small>
+          <span data-i18n="mypage.brand">DayO 마이페이지</span>
+          <small data-i18n="mypage.brandSub">MY CONVERSATION LOUNGE</small>
         </span>
       </a>
       <div class="topbar-right">
+        <div data-i18n-lang="inline"></div>
         <div data-mode-switch="inline"></div>
         <div class="welcome">
           <span class="welcome-dot" aria-hidden="true"></span>
-          <span>지민 님, 반갑습니다! 🍰</span>
+          <span data-i18n="mypage.welcome">지민 님, 반갑습니다! 🍰</span>
         </div>
       </div>
     </div>
@@ -520,22 +521,22 @@
 
   <main class="page">
     <div class="page-heading">
-      <p class="eyebrow">MY CONVERSATION LOUNGE</p>
-      <h1>오늘도 한 잔의 대화, 준비되셨나요? ☕</h1>
-      <p class="heading-desc">내 대화 현황과 예약한 세션, 예습 자료를 한 곳에서 확인할 수 있어요.</p>
+      <p class="eyebrow" data-i18n="mypage.eyebrow">MY CONVERSATION LOUNGE</p>
+      <h1 data-i18n="mypage.heading">오늘도 한 잔의 대화, 준비되셨나요? ☕</h1>
+      <p class="heading-desc" data-i18n="mypage.headingDesc">내 대화 현황과 예약한 세션, 예습 자료를 한 곳에서 확인할 수 있어요.</p>
     </div>
 
     <section class="card speaking-card" aria-labelledby="speakingTitle">
-      <p class="speaking-eyebrow">MONTHLY SPEAKING REPORT</p>
-      <h2 class="speaking-title" id="speakingTitle">
+      <p class="speaking-eyebrow" data-i18n="mypage.speaking.eyebrow">MONTHLY SPEAKING REPORT</p>
+      <h2 class="speaking-title" id="speakingTitle" data-i18n="mypage.speaking.title" data-i18n-html="true">
         🎉 이번 달 나는 <em>영어 🇺🇸 1시간 20분</em>, <em>프랑스어 🇫🇷 40분</em> 대화했어요!
       </h2>
-      <p class="speaking-desc">총 2시간, 지난달보다 45분 더 이야기했어요. 이 속도라면 다음 달엔 3시간도 문제없어요 💪</p>
+      <p class="speaking-desc" data-i18n="mypage.speaking.desc">총 2시간, 지난달보다 45분 더 이야기했어요. 이 속도라면 다음 달엔 3시간도 문제없어요 💪</p>
 
       <div class="gauge-list">
         <div class="gauge">
           <div class="gauge-top">
-            <span class="gauge-name">🇺🇸 영어</span>
+            <span class="gauge-name" data-i18n="mypage.speaking.en">🇺🇸 영어</span>
             <span class="gauge-value">80분 · 66%</span>
           </div>
           <div class="gauge-track">
@@ -544,7 +545,7 @@
         </div>
         <div class="gauge">
           <div class="gauge-top">
-            <span class="gauge-name">🇫🇷 프랑스어</span>
+            <span class="gauge-name" data-i18n="mypage.speaking.fr">🇫🇷 프랑스어</span>
             <span class="gauge-value">40분 · 34%</span>
           </div>
           <div class="gauge-track">
@@ -557,32 +558,32 @@
     <section class="card status-card" aria-labelledby="statusTitle">
       <div class="card-head">
         <div>
-          <h2 class="card-title" id="statusTitle">🎓 내 대화 현황</h2>
-          <p class="card-subtitle">이번 달 나의 대화 기록과 남은 이용권이에요.</p>
+          <h2 class="card-title" id="statusTitle" data-i18n="mypage.status.title">🎓 내 대화 현황</h2>
+          <p class="card-subtitle" data-i18n="mypage.status.sub">이번 달 나의 대화 기록과 남은 이용권이에요.</p>
         </div>
-        <a class="primary-btn" href="index.html?booking=open">📅 새 대화 예약하기</a>
+        <a class="primary-btn" href="index.html?booking=open" data-i18n="mypage.status.newBooking">📅 새 대화 예약하기</a>
       </div>
 
       <div class="status-grid">
         <div class="status-item">
           <div class="status-icon" aria-hidden="true">☕</div>
-          <p class="status-label">이번 달 참여 대화</p>
+          <p class="status-label" data-i18n="mypage.status.monthly">이번 달 참여 대화</p>
           <p class="status-value">8회</p>
-          <p class="status-note">지난달보다 3회 더 이야기했어요!</p>
+          <p class="status-note" data-i18n="mypage.status.monthlyNote">지난달보다 3회 더 이야기했어요!</p>
         </div>
         <div class="status-item">
           <div class="status-icon" aria-hidden="true">🎟️</div>
-          <p class="status-label">잔여 대화 세션 이용권</p>
-          <p class="status-value">4회 남음</p>
+          <p class="status-label" data-i18n="mypage.status.remaining">잔여 대화 세션 이용권</p>
+          <p class="status-value" data-i18n="mypage.status.remainingValue">4회 남음</p>
           <div class="pass-bar" role="img" aria-label="8회 중 4회 사용">
             <span></span>
           </div>
         </div>
         <div class="status-item">
           <div class="status-icon" aria-hidden="true">⏱️</div>
-          <p class="status-label">이번 달 대화 시간</p>
+          <p class="status-label" data-i18n="mypage.status.time">이번 달 대화 시간</p>
           <p class="status-value">240분</p>
-          <p class="status-note">연속 3주째 대화를 이어가는 중이에요 💖</p>
+          <p class="status-note" data-i18n="mypage.status.timeNote">연속 3주째 대화를 이어가는 중이에요 💖</p>
         </div>
       </div>
     </section>
@@ -591,8 +592,8 @@
       <section class="card sessions-card" aria-labelledby="sessionsTitle">
         <div class="card-head">
           <div>
-            <h2 class="card-title" id="sessionsTitle">📅 내 예약 세션</h2>
-            <p class="card-subtitle">예약한 대화 파트너와의 일정이에요.</p>
+            <h2 class="card-title" id="sessionsTitle" data-i18n="mypage.sessions.title">📅 내 예약 세션</h2>
+            <p class="card-subtitle" data-i18n="mypage.sessions.sub">예약한 대화 파트너와의 일정이에요.</p>
           </div>
         </div>
 
@@ -608,8 +609,8 @@
               <p class="session-meta">목적: ✈️ 여행/일상 · 스타일: 🐢 천천히 들어주는 파트너</p>
               <p class="session-time">오늘 20:00 · 30분</p>
               <div class="session-actions">
-                <a class="primary-btn" href="room.html">☕ 대화 스튜디오 입장</a>
-                <button class="ghost-btn" type="button" data-material="fr-travel">📚 대화 자료 보기</button>
+                <a class="primary-btn" href="room.html" data-i18n="mypage.sessions.enter">☕ 대화 스튜디오 입장</a>
+                <button class="ghost-btn" type="button" data-material="fr-travel" data-i18n="mypage.sessions.materials">📚 대화 자료 보기</button>
               </div>
             </div>
           </article>
@@ -624,8 +625,8 @@
               <p class="session-meta">목적: 🎯 오픽/토스 · 스타일: 📝 교정을 꼼꼼히 해주는 파트너</p>
               <p class="session-time">8월 6일 (목) 21:00 · 30분</p>
               <div class="session-actions">
-                <a class="primary-btn" href="room.html">☕ 대화 스튜디오 입장</a>
-                <button class="ghost-btn" type="button" data-material="en-opic">📚 대화 자료 보기</button>
+                <a class="primary-btn" href="room.html" data-i18n="mypage.sessions.enter">☕ 대화 스튜디오 입장</a>
+                <button class="ghost-btn" type="button" data-material="en-opic" data-i18n="mypage.sessions.materials">📚 대화 자료 보기</button>
               </div>
             </div>
           </article>
@@ -640,8 +641,8 @@
               <p class="session-meta">목적: ☕ 자유 수다 · 스타일: ⚡ 자연스러운 실전 티키타카</p>
               <p class="session-time">8월 9일 (일) 11:00 · 30분</p>
               <div class="session-actions">
-                <a class="primary-btn" href="room.html">☕ 대화 스튜디오 입장</a>
-                <button class="ghost-btn" type="button" data-material="fr-travel">📚 대화 자료 보기</button>
+                <a class="primary-btn" href="room.html" data-i18n="mypage.sessions.enter">☕ 대화 스튜디오 입장</a>
+                <button class="ghost-btn" type="button" data-material="fr-travel" data-i18n="mypage.sessions.materials">📚 대화 자료 보기</button>
               </div>
             </div>
           </article>
@@ -651,8 +652,8 @@
       <section class="card library-card" aria-labelledby="libraryTitle">
         <div class="card-head">
           <div>
-            <h2 class="card-title" id="libraryTitle">📚 수업 대화 자료함</h2>
-            <p class="card-subtitle">대화 전 예습하고, 끝난 뒤 복습해 보세요.</p>
+            <h2 class="card-title" id="libraryTitle" data-i18n="mypage.library.title">📚 수업 대화 자료함</h2>
+            <p class="card-subtitle" data-i18n="mypage.library.sub">대화 전 예습하고, 끝난 뒤 복습해 보세요.</p>
           </div>
         </div>
 
@@ -699,8 +700,8 @@
     <section class="card history-card" aria-labelledby="historyTitle">
       <div class="card-head">
         <div>
-          <h2 class="card-title" id="historyTitle">🕘 지난 대화</h2>
-          <p class="card-subtitle">대화가 끝난 뒤 리포트를 열어 복습해 보세요.</p>
+          <h2 class="card-title" id="historyTitle" data-i18n="mypage.history.title">🕘 지난 대화</h2>
+          <p class="card-subtitle" data-i18n="mypage.history.sub">대화가 끝난 뒤 리포트를 열어 복습해 보세요.</p>
         </div>
       </div>
 
@@ -714,7 +715,7 @@
             </div>
             <p class="session-meta">2026.08.02 (일) 20:00 · 30분 · 주제 ☕ 여행 회화</p>
           </div>
-          <button class="ghost-btn" type="button" data-report="r-0802">📊 상세 리포트 보기</button>
+          <button class="ghost-btn" type="button" data-report="r-0802" data-i18n="mypage.history.report">📊 상세 리포트 보기</button>
         </article>
 
         <article class="history-item">
@@ -726,21 +727,22 @@
             </div>
             <p class="session-meta">2026.07.29 (수) 21:00 · 30분 · 주제 🎯 오픽/토스 준비</p>
           </div>
-          <button class="ghost-btn" type="button" data-report="r-0729">📊 상세 리포트 보기</button>
+          <button class="ghost-btn" type="button" data-report="r-0729" data-i18n="mypage.history.report">📊 상세 리포트 보기</button>
         </article>
       </div>
     </section>
 
     <section class="switch-banner" aria-labelledby="switchTitle">
       <div>
-        <p class="switch-eyebrow">FOR CONVERSATION PARTNERS</p>
-        <p class="switch-copy" id="switchTitle">DayO의 대화 파트너이신가요? 파트너 전용 공간으로 이동합니다 ☕</p>
-        <p class="switch-sub">프로필과 대화 가능 시간을 관리하고, 예정된 세션을 확인할 수 있어요.</p>
+        <p class="switch-eyebrow" data-i18n="mypage.switch.eyebrow">FOR CONVERSATION PARTNERS</p>
+        <p class="switch-copy" id="switchTitle" data-i18n="mypage.switch.title">DayO의 대화 파트너이신가요? 파트너 전용 공간으로 이동합니다 ☕</p>
+        <p class="switch-sub" data-i18n="mypage.switch.sub">프로필과 대화 가능 시간을 관리하고, 예정된 세션을 확인할 수 있어요.</p>
       </div>
-      <a class="primary-btn" href="partner.html">☕ 파트너 스튜디오로 이동</a>
+      <a class="primary-btn" href="partner.html" data-i18n="nav.partnerStudio">☕ 파트너 스튜디오로 이동</a>
     </section>
   </main>
 
+  <script src="i18n.js"></script>
   <script src="materials.js"></script>
   <script src="mode-switch.js"></script>
 </body>

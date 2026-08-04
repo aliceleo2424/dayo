@@ -16,7 +16,6 @@
     'background:linear-gradient(135deg,var(--pink,#FFD6DF),var(--peach,#FFE5C4));font-size:.72rem;}',
     '[data-mode-switch="block"]{display:block;margin-top:.5rem;}',
     '[data-mode-switch="block"] a.ms-btn{display:flex;width:100%;justify-content:center;}',
-    /* 로그인 안내 모달 */
     '.ms-overlay{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;',
     'padding:1.25rem;background:rgba(89,72,66,.34);backdrop-filter:blur(6px);opacity:0;visibility:hidden;',
     'transition:opacity .25s;font-family:inherit;}',
@@ -42,7 +41,6 @@
     '.ms-foot a:hover{text-decoration:underline;}',
     '.ms-dismiss{margin-top:.9rem;border:none;background:none;cursor:pointer;font-family:inherit;',
     'color:var(--muted,#927E77);font-size:.78rem;font-weight:700;}',
-    /* 토스트 */
     '.ms-toast{position:fixed;left:50%;bottom:1.5rem;z-index:500;width:max-content;',
     'max-width:calc(100vw - 2rem);padding:.9rem 1.2rem;border-radius:16px;font-family:inherit;',
     'border:1px solid var(--coral-pale,#FFE9E4);background:#FFFCFA;color:var(--text,#594842);',
@@ -55,6 +53,14 @@
   var toastEl;
   var toastTimer;
 
+  function t(key) {
+    return window.DayOI18n ? window.DayOI18n.t(key) : key;
+  }
+
+  function applyI18n() {
+    if (window.DayOI18n) window.DayOI18n.apply();
+  }
+
   function isMember() {
     try {
       return window.localStorage.getItem(MEMBER_KEY) === 'active';
@@ -66,9 +72,7 @@
   function startMemberSession() {
     try {
       window.localStorage.setItem(MEMBER_KEY, 'active');
-    } catch (e) {
-      /* 저장소를 못 써도 현재 페이지 기준으로 회원 UI를 보여줍니다 */
-    }
+    } catch (e) { /* ignore */ }
   }
 
   function showToast(message) {
@@ -82,12 +86,12 @@
 
   function buttonFor(role) {
     if (role === 'partner') {
-      return { href: 'mypage.html', icon: '🎓', label: '학습자 마이페이지로 이동' };
+      return { href: 'mypage.html', icon: '🎓', i18n: 'nav.learnerMypage' };
     }
     if (role === 'member') {
-      return { href: 'partner.html', icon: '☕', label: '파트너 스튜디오로 이동' };
+      return { href: 'partner.html', icon: '☕', i18n: 'nav.partnerStudio' };
     }
-    return { href: 'mypage.html', label: '마이페이지', avatar: '👤', guard: true };
+    return { href: 'mypage.html', avatar: '👤', i18n: 'nav.mypage', guard: true };
   }
 
   function markup(config) {
@@ -95,7 +99,8 @@
       ? '<span class="ms-avatar" aria-hidden="true">' + config.avatar + '</span>'
       : '<span aria-hidden="true">' + config.icon + '</span>';
     return '<a class="ms-btn" href="' + config.href + '"' +
-      (config.guard ? ' data-ms-guard' : '') + '>' + lead + config.label + '</a>';
+      (config.guard ? ' data-ms-guard' : '') + '>' + lead +
+      '<span data-i18n="' + config.i18n + '">' + t(config.i18n) + '</span></a>';
   }
 
   function render() {
@@ -107,6 +112,7 @@
     Array.prototype.forEach.call(slots, function (slot) {
       slot.innerHTML = html;
     });
+    applyI18n();
   }
 
   function openLogin() {
@@ -123,7 +129,7 @@
   function mockLogin() {
     startMemberSession();
     closeLogin();
-    showToast('로그인되었습니다! 마이페이지로 이동할게요 💖');
+    showToast(t('login.success'));
     setTimeout(function () {
       window.location.href = 'mypage.html';
     }, 900);
@@ -135,14 +141,15 @@
     overlay.innerHTML = [
       '<div class="ms-modal" role="dialog" aria-modal="true" aria-labelledby="msLoginTitle">',
       '  <div class="ms-key" aria-hidden="true">🔑</div>',
-      '  <h2 id="msLoginTitle">로그인이 필요한 서비스예요</h2>',
-      '  <p>로그인하면 예약한 대화 세션과 나의 학습 리포트를<br>마이페이지에서 한눈에 확인할 수 있어요.</p>',
+      '  <h2 id="msLoginTitle" data-i18n="login.title">', t('login.title'), '</h2>',
+      '  <p data-i18n="login.desc" data-i18n-html="true">', t('login.desc'), '</p>',
       '  <div class="ms-actions">',
-      '    <button class="ms-login" type="button" data-ms-login>☕ 3초 만에 로그인하기</button>',
-      '    <button class="ms-login ms-login--soft" type="button" data-ms-login>✉️ 이메일로 로그인</button>',
+      '    <button class="ms-login" type="button" data-ms-login data-i18n="login.quick">', t('login.quick'), '</button>',
+      '    <button class="ms-login ms-login--soft" type="button" data-ms-login data-i18n="login.email">', t('login.email'), '</button>',
       '  </div>',
-      '  <p class="ms-foot">대화 파트너로 활동하고 싶다면? <a href="partner.html">파트너 스튜디오 둘러보기</a></p>',
-      '  <button class="ms-dismiss" type="button" data-ms-close>다음에 할게요</button>',
+      '  <p class="ms-foot"><span data-i18n="login.partnerPrompt">', t('login.partnerPrompt'), '</span> ',
+      '  <a href="partner.html" data-i18n="login.partnerLink">', t('login.partnerLink'), '</a></p>',
+      '  <button class="ms-dismiss" type="button" data-ms-close data-i18n="login.dismiss">', t('login.dismiss'), '</button>',
       '</div>'
     ].join('');
     document.body.appendChild(overlay);
@@ -178,8 +185,12 @@
       var guarded = e.target.closest('[data-ms-guard]');
       if (!guarded || isMember()) return;
       e.preventDefault();
-      showToast('로그인이 필요한 서비스입니다 🔑');
+      showToast(t('login.required'));
       openLogin();
+    });
+
+    document.addEventListener('dayo:langchange', function () {
+      render();
     });
 
     window.DayOMode = { isMember: isMember, refresh: render, toast: showToast };

@@ -1015,15 +1015,16 @@
       <a class="brand" href="index.html" aria-label="DayO 메인으로 이동">
         <span class="brand-mark">D</span>
         <span class="brand-copy">
-          DayO Partner Studio
-          <small>CONVERSATION PARTNER PORTAL</small>
+          <span data-i18n="partner.brand">DayO Partner Studio</span>
+          <small data-i18n="partner.brandSub">CONVERSATION PARTNER PORTAL</small>
         </span>
       </a>
       <div class="topbar-right">
+        <div data-i18n-lang="inline"></div>
         <div data-mode-switch="inline"></div>
         <div class="welcome">
           <span class="welcome-dot" aria-hidden="true"></span>
-          <span>Camille 님, 반갑습니다! ☕</span>
+          <span data-i18n="partner.welcome">Camille 님, 반갑습니다! ☕</span>
         </div>
       </div>
     </div>
@@ -1031,9 +1032,9 @@
 
   <main class="page">
     <div class="page-heading">
-      <p class="eyebrow">MY PARTNER STUDIO</p>
-      <h1>오늘도 다정한 대화를 준비해 볼까요? 🍰</h1>
-      <p class="heading-desc">프로필과 가능한 시간을 관리하고, 예정된 대화 세션을 확인할 수 있어요.</p>
+      <p class="eyebrow" data-i18n="partner.eyebrow">MY PARTNER STUDIO</p>
+      <h1 data-i18n="partner.heading">오늘도 다정한 대화를 준비해 볼까요? 🍰</h1>
+      <p class="heading-desc" data-i18n="partner.headingDesc">프로필과 가능한 시간을 관리하고, 예정된 대화 세션을 확인할 수 있어요.</p>
     </div>
 
     <section class="card profile-card" aria-labelledby="profileTitle">
@@ -1046,27 +1047,27 @@
         </div>
         <p class="avatar-name" id="miniName">Camille</p>
         <p class="avatar-intro" id="miniIntro"></p>
-        <button class="photo-btn" type="button" id="photoBtn">📷 사진 변경</button>
+        <button class="photo-btn" type="button" id="photoBtn" data-i18n="partner.profile.photoChange">📷 사진 변경</button>
       </div>
 
       <div>
         <div class="card-head">
           <div>
-            <h2 class="card-title" id="profileTitle">대화 파트너 프로필</h2>
-            <p class="card-subtitle">예약 화면에 표시될 정보를 편하게 다듬어 보세요.</p>
+            <h2 class="card-title" id="profileTitle" data-i18n="partner.profile.title">대화 파트너 프로필</h2>
+            <p class="card-subtitle" data-i18n="partner.profile.sub">예약 화면에 표시될 정보를 편하게 다듬어 보세요.</p>
           </div>
         </div>
 
         <form class="profile-form" id="profileForm">
           <div class="field">
             <div class="label-row">
-              <label class="field-label" for="nickname">닉네임</label>
-              <button class="mini-btn" type="button" id="historyBtn">📜 변경 이력</button>
+              <label class="field-label" for="nickname" data-i18n="partner.profile.nickname">닉네임</label>
+              <button class="mini-btn" type="button" id="historyBtn" data-i18n="partner.profile.history">📜 변경 이력</button>
             </div>
             <input class="input" id="nickname" name="nickname" value="Camille" autocomplete="nickname">
           </div>
           <div class="field">
-            <label class="field-label" for="origin">대표 출신 국가 (Passport Origin)</label>
+            <label class="field-label" for="origin" data-i18n="partner.profile.origin">대표 출신 국가 (Passport Origin)</label>
             <select class="select-input" id="origin" name="origin">
               <option value="fr" selected>🇫🇷 프랑스</option>
               <option value="ca">🇨🇦 캐나다</option>
@@ -1085,8 +1086,8 @@
           </div>
           <div class="field field--wide">
             <div class="label-row">
-              <span class="field-label">가능 언어</span>
-              <span class="field-guide">💡 선택하신 언어만 유저 대화 예약 서비스에 반영됩니다.</span>
+              <span class="field-label" data-i18n="partner.profile.languages">가능 언어</span>
+              <span class="field-guide" data-i18n="partner.profile.langGuide">💡 선택하신 언어만 유저 대화 예약 서비스에 반영됩니다.</span>
             </div>
             <div class="chip-row" data-multi-select>
               <button class="select-chip active" type="button" aria-pressed="true">🇫🇷 프랑스어</button>
@@ -1097,7 +1098,7 @@
             </div>
           </div>
           <div class="field field--wide">
-            <label class="field-label" for="intro">한 줄 소개</label>
+            <label class="field-label" for="intro" data-i18n="partner.profile.intro">한 줄 소개</label>
             <textarea class="textarea" id="intro" name="intro" rows="2"
               placeholder="Bonjour! 프랑스 니스에서 온 Camille이에요! 미술과 음악을 사랑해요. ☕">Bonjour! 프랑스 니스에서 온 Camille이에요! 미술과 음악을 사랑해요. ☕</textarea>
           </div>
@@ -1109,16 +1110,16 @@
       <section class="card schedule-card" aria-labelledby="scheduleTitle">
         <div class="card-head">
           <div>
-            <h2 class="card-title" id="scheduleTitle">📅 주간 대화 가능 시간</h2>
-            <p class="card-subtitle">요일을 고르고 예약을 받을 수 있는 시간을 열어주세요.</p>
+            <h2 class="card-title" id="scheduleTitle" data-i18n="partner.schedule.title">📅 주간 대화 가능 시간</h2>
+            <p class="card-subtitle" data-i18n="partner.schedule.sub">요일을 고르고 예약을 받을 수 있는 시간을 열어주세요.</p>
           </div>
         </div>
 
         <button class="gcal-card" type="button" id="gcalSync">
           <span class="gcal-badge" aria-hidden="true">G</span>
           <span class="gcal-copy">
-            <span class="gcal-title">📅 Google Calendar 연동하기</span>
-            <span class="gcal-desc">개인 일정이 있는 시간은 자동으로 예약 차단돼요!</span>
+            <span class="gcal-title" data-i18n="partner.gcal.title">📅 Google Calendar 연동하기</span>
+            <span class="gcal-desc" data-i18n="partner.gcal.desc">개인 일정이 있는 시간은 자동으로 예약 차단돼요!</span>
           </span>
           <span class="gcal-arrow" aria-hidden="true">›</span>
         </button>
@@ -1129,15 +1130,15 @@
           <span class="guide-item"><span class="guide-dot"></span>불가능</span>
         </div>
         <div class="time-grid" id="timeGrid" aria-live="polite"></div>
-        <button class="save-button" type="button" id="saveSchedule">💾 변경된 스케줄 저장하기</button>
+        <button class="save-button" type="button" id="saveSchedule" data-i18n="partner.schedule.save">💾 변경된 스케줄 저장하기</button>
       </section>
 
       <aside class="side-column">
         <section class="card sessions-card" aria-labelledby="sessionsTitle">
           <div class="card-head">
             <div>
-              <h2 class="card-title" id="sessionsTitle">⏰ 다가오는 대화</h2>
-              <p class="card-subtitle">곧 시작할 세션을 확인하세요.</p>
+              <h2 class="card-title" id="sessionsTitle" data-i18n="partner.sessions.title">⏰ 다가오는 대화</h2>
+              <p class="card-subtitle" data-i18n="partner.sessions.sub">곧 시작할 세션을 확인하세요.</p>
             </div>
           </div>
 
@@ -1147,8 +1148,8 @@
             <p class="session-purpose">목적: ✈️ 프랑스 여행 회화</p>
             <p class="session-time">오늘 20:00</p>
             <div class="session-actions">
-              <a class="studio-link" href="room.html">☕ 스튜디오 입장</a>
-              <button class="material-link" type="button" data-material="fr-travel">📚 대화 자료 보기</button>
+              <a class="studio-link" href="room.html" data-i18n="partner.sessions.enter">☕ 스튜디오 입장</a>
+              <button class="material-link" type="button" data-material="fr-travel" data-i18n="partner.sessions.materials">📚 대화 자료 보기</button>
             </div>
           </article>
         </section>
@@ -1156,29 +1157,29 @@
         <section class="card report-card" aria-labelledby="reportTitle">
           <div class="card-head">
             <div>
-              <h2 class="card-title" id="reportTitle">💰 활동 리포트</h2>
-              <p class="card-subtitle">이번 달의 따뜻한 성과예요.</p>
+              <h2 class="card-title" id="reportTitle" data-i18n="partner.report.title">💰 활동 리포트</h2>
+              <p class="card-subtitle" data-i18n="partner.report.sub">이번 달의 따뜻한 성과예요.</p>
             </div>
           </div>
 
           <div class="report-list">
             <div class="report-item">
               <div>
-                <p class="report-label">이번 달 완료한 대화</p>
+                <p class="report-label" data-i18n="partner.report.completed">이번 달 완료한 대화</p>
                 <p class="report-value">12회</p>
               </div>
               <span class="report-icon" aria-hidden="true">☕</span>
             </div>
             <div class="report-item">
               <div>
-                <p class="report-label">평균 수업 만족도</p>
+                <p class="report-label" data-i18n="partner.report.satisfaction">평균 수업 만족도</p>
                 <p class="report-value">⭐ 4.9 / 5.0</p>
               </div>
               <span class="report-icon" aria-hidden="true">💖</span>
             </div>
             <div class="report-item">
               <div>
-                <p class="report-label">정산 예정 포인트</p>
+                <p class="report-label" data-i18n="partner.report.points">정산 예정 포인트</p>
                 <p class="report-value">180,000 P</p>
               </div>
               <span class="report-icon" aria-hidden="true">🍰</span>
@@ -1190,13 +1191,13 @@
 
     <section class="convert-banner" aria-labelledby="convertTitle">
       <div>
-        <p class="convert-eyebrow">LEARN KOREAN WITH DAYO</p>
-        <p class="convert-copy" id="convertTitle">내가 활동하고 적립한 포인트로 한국어 회화 대화도 즐겨보세요! 💖</p>
-        <p class="convert-sub">학습자 모드로 전환하면 적립 포인트로 바로 대화를 예약할 수 있어요.</p>
+        <p class="convert-eyebrow" data-i18n="partner.convert.eyebrow">LEARN KOREAN WITH DAYO</p>
+        <p class="convert-copy" id="convertTitle" data-i18n="partner.convert.title">내가 활동하고 적립한 포인트로 한국어 회화 대화도 즐겨보세요! 💖</p>
+        <p class="convert-sub" data-i18n="partner.convert.sub">학습자 모드로 전환하면 적립 포인트로 바로 대화를 예약할 수 있어요.</p>
       </div>
       <div class="convert-actions">
-        <a class="studio-link convert-cta" href="index.html?booking=open">🎓 한국어 대화 예약하러 가기</a>
-        <a class="mypage-link" href="mypage.html">🎓 학습자 마이페이지로 이동</a>
+        <a class="studio-link convert-cta" href="index.html?booking=open" data-i18n="partner.convert.booking">🎓 한국어 대화 예약하러 가기</a>
+        <a class="mypage-link" href="mypage.html" data-i18n="nav.learnerMypage">🎓 학습자 마이페이지로 이동</a>
       </div>
     </section>
   </main>
@@ -1537,6 +1538,7 @@
     renderAvatarOptions();
     renderHistory();
   </script>
+  <script src="i18n.js"></script>
   <script src="materials.js"></script>
   <script src="mode-switch.js"></script>
 </body>

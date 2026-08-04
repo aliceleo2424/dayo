@@ -216,7 +216,7 @@
       '  <div class="mt-head">',
       '    <div>',
       '      <span class="mt-badge"></span>',
-      '      <p class="mt-title" id="mtReportTitle">📊 지난 대화 상세 리포트</p>',
+      '      <p class="mt-title" id="mtReportTitle" data-i18n="report.title">📊 지난 대화 상세 리포트</p>',
       '    </div>',
       '    <button class="mt-close" type="button" aria-label="리포트 닫기">✕</button>',
       '  </div>',
@@ -237,6 +237,10 @@
     });
   }
 
+  function t(key) {
+    return window.DayOI18n ? window.DayOI18n.t(key) : key;
+  }
+
   function openReport(id) {
     var data = REPORTS[id];
     if (!data) return;
@@ -244,20 +248,20 @@
     reportBadge.textContent = data.date + ' · ' + data.duration;
     reportBody.innerHTML = [
       '<div class="mt-info">',
-      '  <div class="mt-info-item"><p class="mt-info-label">대화 파트너</p>',
+      '  <div class="mt-info-item"><p class="mt-info-label">' + escapeHtml(t('report.partnerLabel')) + '</p>',
       '  <p class="mt-info-value">' + escapeHtml(data.partner) + '</p></div>',
-      '  <div class="mt-info-item"><p class="mt-info-label">대화 주제</p>',
+      '  <div class="mt-info-item"><p class="mt-info-label">' + escapeHtml(t('report.topicLabel')) + '</p>',
       '  <p class="mt-info-value">' + escapeHtml(data.topic) + '</p></div>',
       '</div>',
       '<p class="mt-quote">💬 ' + escapeHtml(data.feedback) + '</p>',
       '<div class="mt-sec">',
-      '  <p class="mt-sec-title">✨ 수업 중 AI 코파일럿 활동 이력</p>',
-      '  <p class="mt-sec-desc">대화 중 도움받은 기록이에요. 복습하면 다음 대화가 훨씬 편해져요!</p>',
-      '  <p class="mt-sec-title" style="margin-top:1rem">💡 수업 중 찾은 단어</p>',
+      '  <p class="mt-sec-title">' + escapeHtml(t('report.aiTitle')) + '</p>',
+      '  <p class="mt-sec-desc">' + escapeHtml(t('report.aiDesc')) + '</p>',
+      '  <p class="mt-sec-title" style="margin-top:1rem">' + escapeHtml(t('report.words')) + '</p>',
       '  <div class="mt-chips">' + data.words.map(function (word) {
         return '<span class="mt-chip">' + escapeHtml(word) + '</span>';
       }).join('') + '</div>',
-      '  <p class="mt-sec-title" style="margin-top:1.1rem">📝 수업 중 도움받은 문장</p>',
+      '  <p class="mt-sec-title" style="margin-top:1.1rem">' + escapeHtml(t('report.sentences')) + '</p>',
       data.sentences.map(function (sentence) {
         return '<p class="mt-sentence">' + escapeHtml(sentence) + '</p>';
       }).join(''),

@@ -906,14 +906,16 @@
           <div class="tutor-avatar">C</div>
           <div>
             <div class="tutor-name">Camille</div>
-            <div class="tutor-status">Live · 프랑스어 대화 파트너</div>
+            <div class="tutor-status" data-i18n="room.partnerStatus">Live · 프랑스어 대화 파트너</div>
           </div>
         </div>
       </div>
       <div class="top-right">
-        <button class="top-btn" type="button" data-booking-open>📅 대화 예약하기</button>
-        <button class="top-btn" id="shareBtn" type="button">🖥️ 화면 공유</button>
-        <button class="top-btn top-btn--end" id="endBtn" type="button">🚪 수업 종료</button>
+        <div data-i18n-lang="inline"></div>
+        <div data-mode-switch="inline"></div>
+        <button class="top-btn" type="button" data-booking-open data-i18n="room.booking">📅 대화 예약하기</button>
+        <button class="top-btn" id="shareBtn" type="button" data-i18n="room.share">🖥️ 화면 공유</button>
+        <button class="top-btn top-btn--end" id="endBtn" type="button" data-i18n="room.end">🚪 수업 종료</button>
       </div>
     </header>
 
@@ -930,7 +932,7 @@
             <div class="tutor-placeholder">
               <div class="tutor-placeholder-avatar">C</div>
               <div class="tutor-placeholder-name">Camille</div>
-              <div class="tutor-placeholder-sub">원어민 대화 파트너와 대화 중</div>
+              <div class="tutor-placeholder-sub" data-i18n="room.chatting">원어민 대화 파트너와 대화 중</div>
             </div>
           </div>
 
@@ -972,8 +974,8 @@
       <button class="ctrl-btn" id="camBtn" type="button" aria-pressed="true">📹 <span class="label">카메라 켜짐</span></button>
       <button class="ctrl-btn" id="chatToggle" type="button">💬 <span class="label">채팅</span></button>
       <div class="ctrl-divider" aria-hidden="true"></div>
-      <button class="ctrl-btn ctrl-btn--ai" id="wordHelpBtn" type="button">💡 <span class="label">단어도움</span></button>
-      <button class="ctrl-btn ctrl-btn--ai" id="sentenceHelpBtn" type="button">📝 <span class="label">문장도움</span></button>
+      <button class="ctrl-btn ctrl-btn--ai" id="wordHelpBtn" type="button" data-i18n="room.wordHelp">💡 단어도움</button>
+      <button class="ctrl-btn ctrl-btn--ai" id="sentenceHelpBtn" type="button" data-i18n="room.sentenceHelp">📝 문장도움</button>
     </footer>
   </div>
 
@@ -1353,6 +1355,8 @@
       }
     });
   </script>
+  <script src="i18n.js"></script>
+  <script src="mode-switch.js"></script>
   <script src="booking-modal.js"></script>
 </body>
 </html>

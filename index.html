@@ -165,7 +165,7 @@
     }
 
     .nav-mobile.open {
-      max-height: 440px;
+      max-height: 520px;
       padding: 0.75rem 1.25rem 1.25rem;
       border-top-color: rgba(255, 209, 220, 0.35);
     }
@@ -629,6 +629,7 @@
       .nav-desktop { display: none; }
       .header-actions .header-cta { display: none; }
       .header-mode { display: none; }
+      .header-actions [data-i18n-lang="inline"] { display: none; }
       .menu-toggle { display: inline-flex; }
     }
 
@@ -666,25 +667,27 @@
       </a>
 
       <nav class="nav-desktop" aria-label="주요 메뉴">
-        <a href="#about">회사 소개</a>
-        <a href="#tutors">대화 파트너</a>
-        <a href="#booking" data-booking-open>대화 예약하기</a>
-        <a href="#faq">자주 묻는 질문</a>
+        <a href="#about" data-i18n="nav.about">회사 소개</a>
+        <a href="#tutors" data-i18n="nav.partners">대화 파트너</a>
+        <a href="#booking" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
+        <a href="#faq" data-i18n="nav.faq">자주 묻는 질문</a>
       </nav>
 
       <div class="header-actions">
+        <div data-i18n-lang="inline"></div>
         <div class="header-mode" data-mode-switch="inline"></div>
-        <a href="room.html" class="header-cta">☕ 대화 시작해요!</a>
+        <a href="room.html" class="header-cta" data-i18n="nav.startChat">☕ 대화 시작해요!</a>
         <button class="menu-toggle" id="menuToggle" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
       </div>
     </div>
 
     <nav class="nav-mobile" id="mobileNav" aria-label="모바일 메뉴">
-      <a href="#about">회사 소개</a>
-      <a href="#tutors">대화 파트너</a>
-      <a href="#booking" data-booking-open>대화 예약하기</a>
-      <a href="#faq">자주 묻는 질문</a>
-      <a href="room.html" class="header-cta">☕ 대화 시작해요!</a>
+      <a href="#about" data-i18n="nav.about">회사 소개</a>
+      <a href="#tutors" data-i18n="nav.partners">대화 파트너</a>
+      <a href="#booking" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
+      <a href="#faq" data-i18n="nav.faq">자주 묻는 질문</a>
+      <a href="room.html" class="header-cta" data-i18n="nav.startChat">☕ 대화 시작해요!</a>
+      <div data-i18n-lang="block"></div>
       <div data-mode-switch="block"></div>
     </nav>
   </header>
@@ -1109,6 +1112,7 @@
       }
     });
   </script>
+  <script src="i18n.js"></script>
   <script src="booking-modal.js"></script>
   <script src="mode-switch.js"></script>
 </body>
