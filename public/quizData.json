@@ -1,0 +1,98 @@
+[
+  {
+    "id": 1,
+    "difficulty": "easy",
+    "category": "cafe",
+    "image": "cafe.png",
+    "scenario": "☕ 카페에서 커피를 주문하는 상황",
+    "question": "다음 중 점원이 손님에게 절대 하지 않을 어색한 말은?",
+    "options": [
+      "1. What can I get for you today?",
+      "2. For here or to go?",
+      "3. Can I take your passport, please?",
+      "4. Would you like any pastry with that?"
+    ],
+    "answer": 2,
+    "explanation": "3번 '여권을 보여주시겠어요?'는 공항이나 호텔에서 들을 수 있는 말입니다. 카페 점원은 절대 묻지 않죠!"
+  },
+  {
+    "id": 2,
+    "difficulty": "easy",
+    "category": "airport",
+    "image": "airport.png",
+    "scenario": "✈️ 공항 카운터에서 탑승 수속을 하는 상황",
+    "question": "다음 중 공항 직원(Agent)이 할 말로 가장 적절하지 않은 것은?",
+    "options": [
+      "1. May I see your passport and booking reference?",
+      "2. Do you have any bags to check in?",
+      "3. Would you like a window seat or an aisle seat?",
+      "4. Do you need a refill on your iced americano?"
+    ],
+    "answer": 3,
+    "explanation": "4번 '아이스 아메리카노 리필해 드릴까요?'는 카페나 식당 표현입니다."
+  },
+  {
+    "id": 3,
+    "difficulty": "medium",
+    "category": "taxi",
+    "image": "taxi.png",
+    "scenario": "🚕 해외에서 택시를 타고 목적지로 이동하는 상황",
+    "question": "택시 기사님이 'Where to?'라고 물었을 때, 내가 할 어색한 대답은?",
+    "options": [
+      "1. To the Hilton Hotel, please.",
+      "2. Could you drop me off near the station?",
+      "3. Yes, I would like medium rare, please.",
+      "4. How long will it take to get to the airport?"
+    ],
+    "answer": 2,
+    "explanation": "3번 '미디엄 레어로 부탁해요'는 레스토랑 스테이크 주문 시 표현입니다!"
+  },
+  {
+    "id": 4,
+    "difficulty": "medium",
+    "category": "hotel",
+    "image": "hotel.png",
+    "scenario": "🏨 호텔 리셉션에 도착해 체크인하는 상황",
+    "question": "호텔 직원과의 대화 중 어색한 문장을 골라주세요.",
+    "options": [
+      "1. I have a reservation under the name of Kim.",
+      "2. What time is breakfast served in the morning?",
+      "3. Is Wi-Fi free in the room?",
+      "4. Can I try this jacket on in size medium?"
+    ],
+    "answer": 3,
+    "explanation": "4번 '이 재킷 M 사이즈로 입어봐도 될까요?'는 옷가게(Shopping)에서 쓰는 말입니다."
+  },
+  {
+    "id": 5,
+    "difficulty": "hard",
+    "category": "restaurant",
+    "image": "restaurant.png",
+    "scenario": "🍽️ 해외 레스토랑에서 음식을 다 먹고 계산할 때",
+    "question": "서빙 직원이 다가왔을 때 분위기에 가장 어색한 표현은?",
+    "options": [
+      "1. Could we get the check, please?",
+      "2. Everything was delicious, thank you.",
+      "3. Do you accept credit cards here?",
+      "4. Where is the nearest boarding gate?"
+    ],
+    "answer": 3,
+    "explanation": "4번 '가장 가까운 탑승구가 어디죠?'는 공항(Airport)에서 길을 물을 때 쓰는 표현입니다."
+  },
+  {
+    "id": 6,
+    "difficulty": "hard",
+    "category": "shopping",
+    "image": "shopping.png",
+    "scenario": "🛍️ 옷가게에서 마음에 드는 옷을 발견했을 때",
+    "question": "점원(Clerk)과의 대화로 어색한 표현은?",
+    "options": [
+      "1. Do you have this in a smaller size?",
+      "2. Where is the fitting room?",
+      "3. Can I have a table for two, please?",
+      "4. Is this item currently on sale?"
+    ],
+    "answer": 2,
+    "explanation": "3번 '2명 자리 있나요?'는 식당(Restaurant) 입구에서 인원수를 말할 때 씁니다."
+  }
+]
