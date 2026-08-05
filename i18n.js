@@ -678,6 +678,12 @@
     'quiz.toastFormat': {
       KO: '{email}로 리포트를 보내드릴게요!', EN: "We'll send the report to {email}!", ZH: '将把报告发送到{email}！', JA: '{email}にレポートをお送りします！', FR: 'Nous enverrons le rapport à {email} !', ES: '¡Enviaremos el informe a {email}!'
     },
+    'quiz.nextBtn': {
+      KO: '➡️ 다음 문제로 넘어가기', EN: '➡️ Next Question', ZH: '➡️ 下一题', JA: '➡️ 次の問題へ', FR: '➡️ Question suivante', ES: '➡️ Siguiente pregunta'
+    },
+    'quiz.resultBtn': {
+      KO: '🎉 결과 확인하기', EN: '🎉 See My Result', ZH: '🎉 查看结果', JA: '🎉 結果を見る', FR: '🎉 Voir mon résultat', ES: '🎉 Ver mi resultado'
+    },
 
     /* ===== Chatbot FAQ (index.html) ===== */
     'chatbot.title': { KO: 'DayO 도우미', EN: 'DayO Helper', ZH: 'DayO 助手', JA: 'DayOヘルパー', FR: 'Assistant DayO', ES: 'Asistente DayO' },
