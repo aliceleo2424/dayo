@@ -559,6 +559,17 @@
     .quiz-slide.active { position: relative; opacity: 1; transform: translateX(0); pointer-events: auto; }
     .quiz-slide.exit-left { opacity: 0; transform: translateX(-36px); }
 
+    .quiz-illustration {
+      position: relative; width: 100%; height: 150px; margin-bottom: 1rem;
+      border-radius: var(--radius); overflow: hidden;
+      background: linear-gradient(135deg, var(--pink), var(--peach));
+      display: flex; align-items: center; justify-content: center;
+    }
+    .quiz-illustration img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .quiz-illustration-fallback { display: none; font-size: 2.6rem; line-height: 1; }
+    .quiz-illustration.is-fallback img { display: none; }
+    .quiz-illustration.is-fallback .quiz-illustration-fallback { display: block; }
+
     .situation-card { background: linear-gradient(135deg, var(--pink), var(--peach)); border-radius: var(--radius); padding: 1.2rem 1.3rem; margin-bottom: 1.15rem; text-align: left; }
     .situation-tag { font-size: 0.8rem; font-weight: 700; color: var(--coral); margin-bottom: 0.45rem; }
     .situation-text { font-size: 0.95rem; line-height: 1.65; }
@@ -570,6 +581,14 @@
       transition: transform 0.2s, border-color 0.2s, background 0.2s;
     }
     .quiz-option:hover { transform: translateY(-1px); border-color: var(--coral); background: var(--coral-pale); }
+    .quiz-option:disabled { cursor: default; }
+    .quiz-option:disabled:hover { transform: none; }
+    .quiz-option.is-correct { border-color: #75B987; background: #E7F5EB; color: #2E6B45; font-weight: 700; }
+    .quiz-option.is-wrong { border-color: var(--coral); background: var(--coral-pale); color: var(--coral); font-weight: 700; }
+    .quiz-explanation {
+      margin-top: 0.9rem; padding: 0.85rem 1rem; border-radius: var(--radius);
+      background: var(--cream); color: var(--text-muted); font-size: 0.85rem; line-height: 1.65;
+    }
 
     .email-step { text-align: center; padding: 0.5rem 0; }
     .email-step-title { font-size: 1.15rem; font-weight: 700; line-height: 1.5; margin-bottom: 0.65rem; }
@@ -989,13 +1008,45 @@
     }, 2000);
 
     /* Quiz */
-    const quizQuestions = [
+    // Fallback content (used only if quizData.json can't be fetched, e.g. offline file:// preview)
+    const FALLBACK_QUIZ_RAW = [
       { key: 'quiz.q1', quote: 'What can I get for you today?', options: ['I want coffee.', 'Can I have a latte, please?', 'Coffee me.', 'Give me latte now.'] },
       { key: 'quiz.q2', quote: 'May I see your passport?', options: ['Here you are.', 'Passport is mine.', 'I have it somewhere.', 'Wait, why?'] },
       { key: 'quiz.q3', quote: 'Where would you like to go?', options: ['To the airport, please.', 'Airport go.', 'I am airport.', 'Drive fast.'] },
       { key: 'quiz.q4', quote: 'Do you have a reservation?', options: ['Yes, under Kim.', 'Reservation yes me.', 'I booked maybe.', 'Hotel room give.'] },
       { key: 'quiz.q5', quote: 'Would you like a table for two?', options: ['Yes, please. A table for two.', 'Two table yes.', 'We are hungry.', 'Table now.'] }
     ];
+
+    function escapeHtml(str) {
+      return String(str == null ? '' : str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function scenarioEmoji(scenario) {
+      const match = String(scenario || '').match(/^\p{Extended_Pictographic}+/u);
+      return match ? match[0] : '🖼️';
+    }
+
+    function normalizeQuizItem(raw) {
+      return {
+        scenario: raw.scenario || '',
+        question: raw.question || '',
+        image: raw.image || null,
+        options: raw.options || [],
+        answerIndex: typeof raw.answer === 'number' ? raw.answer - 1 : null,
+        explanation: raw.explanation || null
+      };
+    }
+
+    function normalizeFallbackItem(item) {
+      return {
+        scenario: t(item.key + '.tag'),
+        question: t(item.key + '.scene', { quote: item.quote }),
+        image: null,
+        options: item.options,
+        answerIndex: null,
+        explanation: null
+      };
+    }
 
     const quizModal = document.getElementById('quizModal');
     const quizSlides = document.getElementById('quizSlides');
@@ -1005,16 +1056,30 @@
     const modalClose = document.getElementById('modalClose');
     const toast = document.getElementById('resultToast');
     let currentStep = 0, isTransitioning = false;
+    let quizItems = [];
+    let quizLoadPromise = null;
+
+    function loadQuizData() {
+      if (quizLoadPromise) return quizLoadPromise;
+      quizLoadPromise = fetch('quizData.json')
+        .then((res) => { if (!res.ok) throw new Error('quiz fetch failed: ' + res.status); return res.json(); })
+        .then((data) => { quizItems = (Array.isArray(data) ? data : []).map(normalizeQuizItem); })
+        .catch(() => { quizItems = FALLBACK_QUIZ_RAW.map(normalizeFallbackItem); });
+      return quizLoadPromise;
+    }
 
     function renderQuestion(index) {
-      const q = quizQuestions[index];
-      const pct = ((index + 1) / quizQuestions.length) * 100;
+      const q = quizItems[index];
+      const pct = ((index + 1) / quizItems.length) * 100;
       progressBar.style.width = pct + '%';
       progressLabel.textContent = Math.round(pct) + '%';
       const slide = document.createElement('div');
       slide.className = 'quiz-slide active';
-      slide.innerHTML = `<div class="situation-card"><div class="situation-tag">${t(q.key + '.tag')}</div><p class="situation-text">${t(q.key + '.scene', { quote: q.quote })}</p></div><div class="quiz-options">${q.options.map(o => `<button class="quiz-option">${o}</button>`).join('')}</div>`;
-      slide.querySelectorAll('.quiz-option').forEach(btn => btn.addEventListener('click', () => handleAnswer(slide, index)));
+      const imageBlock = q.image
+        ? `<div class="quiz-illustration"><img src="${escapeHtml(q.image)}" alt="${escapeHtml(q.scenario)}" loading="lazy" onerror="this.onerror=null;this.closest('.quiz-illustration').classList.add('is-fallback');this.remove();"><div class="quiz-illustration-fallback" aria-hidden="true">${scenarioEmoji(q.scenario)}</div></div>`
+        : '';
+      slide.innerHTML = `${imageBlock}<div class="situation-card"><div class="situation-tag">${escapeHtml(q.scenario)}</div><p class="situation-text">${escapeHtml(q.question)}</p></div><div class="quiz-options">${q.options.map((o, i) => `<button class="quiz-option" data-idx="${i}">${escapeHtml(o)}</button>`).join('')}</div><p class="quiz-explanation" hidden></p>`;
+      slide.querySelectorAll('.quiz-option').forEach(btn => btn.addEventListener('click', () => handleAnswer(slide, index, btn)));
       return slide;
     }
 
@@ -1032,31 +1097,57 @@
       return slide;
     }
 
-    function handleAnswer(slide, index) {
+    function handleAnswer(slide, index, btn) {
       if (isTransitioning) return;
+      const q = quizItems[index];
+      const idx = Number(btn.dataset.idx);
+      slide.querySelectorAll('.quiz-option').forEach((b) => { b.disabled = true; });
+
+      let holdMs = 350;
+      if (typeof q.answerIndex === 'number') {
+        const isCorrect = idx === q.answerIndex;
+        btn.classList.add(isCorrect ? 'is-correct' : 'is-wrong');
+        if (!isCorrect) {
+          const correctBtn = slide.querySelector(`.quiz-option[data-idx="${q.answerIndex}"]`);
+          if (correctBtn) correctBtn.classList.add('is-correct');
+        }
+        if (q.explanation) {
+          const exp = slide.querySelector('.quiz-explanation');
+          exp.textContent = '💡 ' + q.explanation;
+          exp.hidden = false;
+        }
+        holdMs = 1400;
+      }
+
       isTransitioning = true;
-      slide.classList.add('exit-left');
       setTimeout(() => {
-        slide.remove();
-        currentStep = index + 1;
-        quizSlides.appendChild(currentStep < quizQuestions.length ? renderQuestion(currentStep) : renderEmailStep());
-        isTransitioning = false;
-      }, 350);
+        slide.classList.add('exit-left');
+        setTimeout(() => {
+          slide.remove();
+          currentStep = index + 1;
+          quizSlides.appendChild(currentStep < quizItems.length ? renderQuestion(currentStep) : renderEmailStep());
+          isTransitioning = false;
+        }, 350);
+      }, holdMs);
     }
 
     function rerenderCurrentQuizSlide() {
-      if (!quizModal.classList.contains('active')) return;
+      if (!quizModal.classList.contains('active') || !quizItems.length) return;
       quizSlides.innerHTML = '';
-      quizSlides.appendChild(currentStep < quizQuestions.length ? renderQuestion(currentStep) : renderEmailStep());
+      quizSlides.appendChild(currentStep < quizItems.length ? renderQuestion(currentStep) : renderEmailStep());
     }
     document.addEventListener('dayo:langchange', rerenderCurrentQuizSlide);
 
     function openQuizModal() {
       currentStep = 0; isTransitioning = false;
       quizSlides.innerHTML = '';
-      quizSlides.appendChild(renderQuestion(0));
       quizModal.classList.add('active');
       document.body.style.overflow = 'hidden';
+      loadQuizData().then(() => {
+        if (!quizModal.classList.contains('active')) return;
+        quizSlides.innerHTML = '';
+        quizSlides.appendChild(renderQuestion(0));
+      });
     }
 
     function closeQuizModal() {
