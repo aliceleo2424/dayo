@@ -56,7 +56,7 @@
 
   var DICT = {
     'nav.about': {
-      KO: '회사 소개', EN: 'About', ZH: '公司介绍', JA: '会社紹介', FR: 'À propos', ES: 'Sobre nosotros'
+      KO: '서비스 소개', EN: 'About', ZH: '公司介绍', JA: '会社紹介', FR: 'À propos', ES: 'Sobre nosotros'
     },
     'nav.partners': {
       KO: '대화 파트너', EN: 'Partners', ZH: '对话伙伴', JA: '会話パートナー', FR: 'Partenaires', ES: 'Compañeros'
