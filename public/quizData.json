@@ -3,7 +3,7 @@
     "id": 1,
     "difficulty": "easy",
     "category": "cafe",
-    "image": "cafe.png",
+    "image": "/images/cafe.png",
     "scenario": "☕ 카페에서 커피를 주문하는 상황",
     "question": "다음 중 점원이 손님에게 절대 하지 않을 어색한 말은?",
     "options": [
@@ -19,7 +19,7 @@
     "id": 2,
     "difficulty": "easy",
     "category": "airport",
-    "image": "airport.png",
+    "image": "/images/airport.png",
     "scenario": "✈️ 공항 카운터에서 탑승 수속을 하는 상황",
     "question": "다음 중 공항 직원(Agent)이 할 말로 가장 적절하지 않은 것은?",
     "options": [
@@ -35,7 +35,7 @@
     "id": 3,
     "difficulty": "medium",
     "category": "taxi",
-    "image": "taxi.png",
+    "image": "/images/taxi.png",
     "scenario": "🚕 해외에서 택시를 타고 목적지로 이동하는 상황",
     "question": "택시 기사님이 'Where to?'라고 물었을 때, 내가 할 어색한 대답은?",
     "options": [
@@ -51,7 +51,7 @@
     "id": 4,
     "difficulty": "medium",
     "category": "hotel",
-    "image": "hotel.png",
+    "image": "/images/hotel.png",
     "scenario": "🏨 호텔 리셉션에 도착해 체크인하는 상황",
     "question": "호텔 직원과의 대화 중 어색한 문장을 골라주세요.",
     "options": [
@@ -67,7 +67,7 @@
     "id": 5,
     "difficulty": "hard",
     "category": "restaurant",
-    "image": "restaurant.png",
+    "image": "/images/restaurant.png",
     "scenario": "🍽️ 해외 레스토랑에서 음식을 다 먹고 계산할 때",
     "question": "서빙 직원이 다가왔을 때 분위기에 가장 어색한 표현은?",
     "options": [
@@ -83,7 +83,7 @@
     "id": 6,
     "difficulty": "hard",
     "category": "shopping",
-    "image": "shopping.png",
+    "image": "/images/shopping.png",
     "scenario": "🛍️ 옷가게에서 마음에 드는 옷을 발견했을 때",
     "question": "점원(Clerk)과의 대화로 어색한 표현은?",
     "options": [
