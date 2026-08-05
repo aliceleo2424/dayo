@@ -595,6 +595,7 @@
       font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer;
       transition: transform 0.2s, background 0.2s;
     }
+    .quiz-next-btn[hidden] { display: none; }
     .quiz-next-btn:hover { transform: translateY(-1px); background: #ff5741; }
 
     .email-step { text-align: center; padding: 0.5rem 0; }
@@ -1039,7 +1040,9 @@
         question: raw.question || '',
         image: raw.image || null,
         options: raw.options || [],
-        answerIndex: typeof raw.answer === 'number' ? raw.answer - 1 : null,
+        // quizData.json's `answer` field is already a 0-based index into `options`
+        // (e.g. answer: 2 -> options[2]), so it must NOT be shifted by -1 here.
+        answerIndex: typeof raw.answer === 'number' ? raw.answer : null,
         explanation: raw.explanation || null
       };
     }
@@ -1085,7 +1088,7 @@
       const imageBlock = q.image
         ? `<div class="quiz-illustration"><img src="${escapeHtml(q.image)}" alt="${escapeHtml(q.scenario)}" loading="lazy" onerror="this.onerror=null;this.closest('.quiz-illustration').classList.add('is-fallback');this.remove();"><div class="quiz-illustration-fallback" aria-hidden="true">${scenarioEmoji(q.scenario)}</div></div>`
         : '';
-      slide.innerHTML = `${imageBlock}<div class="situation-card"><div class="situation-tag">${escapeHtml(q.scenario)}</div><p class="situation-text">${escapeHtml(q.question)}</p></div><div class="quiz-options">${q.options.map((o, i) => `<button class="quiz-option" data-idx="${i}">${escapeHtml(o)}</button>`).join('')}</div><p class="quiz-explanation" hidden></p><button class="quiz-next-btn" type="button" hidden></button>`;
+      slide.innerHTML = `${imageBlock}<div class="situation-card"><div class="situation-tag">${escapeHtml(q.scenario)}</div><p class="situation-text">${escapeHtml(q.question)}</p></div><div class="quiz-options">${q.options.map((o, i) => `<button class="quiz-option" data-index="${i}">${escapeHtml(o)}</button>`).join('')}</div><p class="quiz-explanation" hidden></p><button class="quiz-next-btn" type="button" hidden></button>`;
       slide.querySelectorAll('.quiz-option').forEach(btn => btn.addEventListener('click', () => handleAnswer(slide, index, btn)));
       return slide;
     }
@@ -1107,14 +1110,14 @@
     function handleAnswer(slide, index, btn) {
       if (isTransitioning) return;
       const q = quizItems[index];
-      const idx = Number(btn.dataset.idx);
+      const clickedIndex = parseInt(btn.dataset.index, 10);
       slide.querySelectorAll('.quiz-option').forEach((b) => { b.disabled = true; });
 
       if (typeof q.answerIndex === 'number') {
-        const isCorrect = idx === q.answerIndex;
+        const isCorrect = clickedIndex === q.answerIndex;
         btn.classList.add(isCorrect ? 'is-correct' : 'is-wrong');
         if (!isCorrect) {
-          const correctBtn = slide.querySelector(`.quiz-option[data-idx="${q.answerIndex}"]`);
+          const correctBtn = slide.querySelector(`.quiz-option[data-index="${q.answerIndex}"]`);
           if (correctBtn) correctBtn.classList.add('is-correct');
         }
         if (q.explanation) {
