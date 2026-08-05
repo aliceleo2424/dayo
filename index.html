@@ -602,8 +602,21 @@
     .email-step-title { font-size: 1.15rem; font-weight: 700; line-height: 1.5; margin-bottom: 0.65rem; }
     .email-step-desc { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; margin-bottom: 1.25rem; }
     .email-form { display: flex; flex-direction: column; gap: 0.65rem; }
-    .email-input { padding: 0.95rem 1.1rem; border: 1px solid var(--coral-pale); border-radius: var(--radius); font-family: inherit; font-size: 0.95rem; background: var(--cream); outline: none; }
-    .email-input:focus { border-color: var(--coral); box-shadow: 0 0 0 3px rgba(255,107,87,0.12); }
+    .email-compose {
+      display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;
+    }
+    .email-input, .email-domain-select, .email-domain-custom {
+      padding: 0.95rem 1.1rem; border: 1px solid var(--coral-pale); border-radius: var(--radius);
+      font-family: inherit; font-size: 0.95rem; background: var(--cream); outline: none;
+    }
+    .email-input { flex: 1 1 120px; min-width: 0; }
+    .email-at { font-weight: 700; color: var(--text-muted); flex: 0 0 auto; }
+    .email-domain-select { flex: 1 1 140px; min-width: 0; cursor: pointer; appearance: auto; }
+    .email-domain-custom { flex: 1 1 140px; min-width: 0; }
+    .email-domain-custom[hidden] { display: none; }
+    .email-input:focus, .email-domain-select:focus, .email-domain-custom:focus {
+      border-color: var(--coral); box-shadow: 0 0 0 3px rgba(255,107,87,0.12);
+    }
     .email-submit { padding: 0.95rem; background: var(--coral); color: #fff; border: none; border-radius: var(--radius); font-family: inherit; font-weight: 700; cursor: pointer; box-shadow: 0 4px 0 var(--coral-dark); }
     .email-submit:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--coral-dark); }
 
@@ -1098,11 +1111,28 @@
       progressLabel.textContent = '100%';
       const slide = document.createElement('div');
       slide.className = 'quiz-slide active';
-      slide.innerHTML = `<div class="email-step"><h3 class="email-step-title" data-i18n-html="true">${t('quiz.emailTitle')}</h3><p class="email-step-desc">${t('quiz.emailDesc')}</p><form class="email-form" id="emailForm"><input type="email" class="email-input" placeholder="${t('quiz.emailPlaceholder')}" required id="emailInput"><button type="submit" class="email-submit">${t('quiz.emailSubmit')}</button></form></div>`;
+      slide.innerHTML = `<div class="email-step"><h3 class="email-step-title" data-i18n-html="true">${t('quiz.emailTitle')}</h3><p class="email-step-desc">${t('quiz.emailDesc')}</p><form class="email-form" id="emailForm"><div class="email-compose"><input type="text" class="email-input" id="emailLocal" placeholder="${t('quiz.emailLocalPlaceholder')}" required autocomplete="username" inputmode="email" spellcheck="false"><span class="email-at" aria-hidden="true">@</span><select class="email-domain-select" id="emailDomain" aria-label="${t('quiz.emailDomainAria')}"><option value="naver.com">${t('quiz.emailDomain.naver')}</option><option value="gmail.com">${t('quiz.emailDomain.gmail')}</option><option value="daum.net">${t('quiz.emailDomain.daum')}</option><option value="icloud.com">${t('quiz.emailDomain.icloud')}</option><option value="custom">${t('quiz.emailDomain.custom')}</option></select><input type="text" class="email-domain-custom" id="emailDomainCustom" placeholder="${t('quiz.emailDomainCustomPlaceholder')}" hidden autocomplete="off" spellcheck="false"></div><button type="submit" class="email-submit">${t('quiz.emailSubmit')}</button></form></div>`;
+
+      const domainSelect = slide.querySelector('#emailDomain');
+      const domainCustom = slide.querySelector('#emailDomainCustom');
+      domainSelect.addEventListener('change', () => {
+        const isCustom = domainSelect.value === 'custom';
+        domainCustom.hidden = !isCustom;
+        domainCustom.required = isCustom;
+        if (isCustom) domainCustom.focus();
+        else domainCustom.value = '';
+      });
+
       slide.querySelector('#emailForm').addEventListener('submit', (e) => {
         e.preventDefault();
+        const local = slide.querySelector('#emailLocal').value.trim().replace(/@/g, '');
+        const domain = domainSelect.value === 'custom'
+          ? domainCustom.value.trim().replace(/^@/, '')
+          : domainSelect.value;
+        if (!local || !domain) return;
+        const email = `${local}@${domain}`;
         closeQuizModal();
-        showToast(t('quiz.toastFormat', { email: slide.querySelector('#emailInput').value }));
+        showToast(t('quiz.toastFormat', { email }));
       });
       return slide;
     }

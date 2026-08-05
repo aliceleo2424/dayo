@@ -672,6 +672,30 @@
     'quiz.emailPlaceholder': {
       KO: '이메일을 입력해 주세요', EN: 'Enter your email', ZH: '请输入电子邮箱', JA: 'メールアドレスを入力してください', FR: 'Entrez votre e-mail', ES: 'Ingresa tu correo'
     },
+    'quiz.emailLocalPlaceholder': {
+      KO: '아이디', EN: 'Username', ZH: '用户名', JA: 'ユーザー名', FR: 'Identifiant', ES: 'Usuario'
+    },
+    'quiz.emailDomainAria': {
+      KO: '이메일 도메인 선택', EN: 'Select email domain', ZH: '选择邮箱域名', JA: 'メールドメインを選択', FR: 'Choisir le domaine e-mail', ES: 'Seleccionar dominio de correo'
+    },
+    'quiz.emailDomain.naver': {
+      KO: '네이버 (naver.com)', EN: 'Naver (naver.com)', ZH: 'Naver (naver.com)', JA: 'Naver (naver.com)', FR: 'Naver (naver.com)', ES: 'Naver (naver.com)'
+    },
+    'quiz.emailDomain.gmail': {
+      KO: '구글 (gmail.com)', EN: 'Google (gmail.com)', ZH: 'Google (gmail.com)', JA: 'Google (gmail.com)', FR: 'Google (gmail.com)', ES: 'Google (gmail.com)'
+    },
+    'quiz.emailDomain.daum': {
+      KO: '다음 (daum.net)', EN: 'Daum (daum.net)', ZH: 'Daum (daum.net)', JA: 'Daum (daum.net)', FR: 'Daum (daum.net)', ES: 'Daum (daum.net)'
+    },
+    'quiz.emailDomain.icloud': {
+      KO: '애플 (icloud.com)', EN: 'Apple (icloud.com)', ZH: 'Apple (icloud.com)', JA: 'Apple (icloud.com)', FR: 'Apple (icloud.com)', ES: 'Apple (icloud.com)'
+    },
+    'quiz.emailDomain.custom': {
+      KO: '직접 입력', EN: 'Enter manually', ZH: '手动输入', JA: '直接入力', FR: 'Saisie manuelle', ES: 'Escribir manualmente'
+    },
+    'quiz.emailDomainCustomPlaceholder': {
+      KO: '예: company.com', EN: 'e.g. company.com', ZH: '例如：company.com', JA: '例：company.com', FR: 'ex. company.com', ES: 'ej. company.com'
+    },
     'quiz.emailSubmit': {
       KO: '리포트 받아보기', EN: 'Get my report', ZH: '获取报告', JA: 'レポートを受け取る', FR: 'Recevoir le rapport', ES: 'Recibir el informe'
     },
