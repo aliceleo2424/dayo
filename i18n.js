@@ -690,6 +690,15 @@
     'quiz.emailDomain.icloud': {
       KO: '애플 (icloud.com)', EN: 'Apple (icloud.com)', ZH: 'Apple (icloud.com)', JA: 'Apple (icloud.com)', FR: 'Apple (icloud.com)', ES: 'Apple (icloud.com)'
     },
+    'quiz.emailDomain.outlook': {
+      KO: '아웃룩 (outlook.com)', EN: 'Outlook (outlook.com)', ZH: 'Outlook (outlook.com)', JA: 'Outlook (outlook.com)', FR: 'Outlook (outlook.com)', ES: 'Outlook (outlook.com)'
+    },
+    'quiz.emailDomain.yahoo': {
+      KO: '야후 (yahoo.com)', EN: 'Yahoo (yahoo.com)', ZH: 'Yahoo (yahoo.com)', JA: 'Yahoo (yahoo.com)', FR: 'Yahoo (yahoo.com)', ES: 'Yahoo (yahoo.com)'
+    },
+    'quiz.emailDomain.hanmail': {
+      KO: '한메일 (hanmail.net)', EN: 'Hanmail (hanmail.net)', ZH: 'Hanmail (hanmail.net)', JA: 'Hanmail (hanmail.net)', FR: 'Hanmail (hanmail.net)', ES: 'Hanmail (hanmail.net)'
+    },
     'quiz.emailDomain.custom': {
       KO: '직접 입력', EN: 'Enter manually', ZH: '手动输入', JA: '直接入力', FR: 'Saisie manuelle', ES: 'Escribir manualmente'
     },
