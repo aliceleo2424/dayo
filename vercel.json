@@ -1,9 +1,0 @@
-{
-  "version": 2,
-  "cleanUrls": true,
-  "routes": [
-    { "src": "/images/(.*)", "dest": "/public/images/$1" },
-    { "src": "/quizData.json", "dest": "/public/quizData.json" },
-    { "src": "/(.*)", "dest": "/$1" }
-  ]
-}
