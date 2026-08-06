@@ -701,6 +701,63 @@
       .chat-fab { bottom: 1.25rem; right: 1.25rem; }
       .chat-panel { right: 1rem; }
     }
+
+    /* Quiz modal: fit title + illustration + question + 4 options above the fold on phones */
+    @media (max-width: 640px) {
+      .modal-overlay { padding: 0.6rem; align-items: flex-start; }
+      .modal {
+        padding: 1rem 0.9rem 0.85rem;
+        max-height: 100dvh;
+        border-radius: 18px;
+      }
+      .modal-close { top: 0.65rem; right: 0.65rem; width: 30px; height: 30px; font-size: 0.85rem; }
+
+      .quiz-header { margin-bottom: 0.55rem; padding-right: 1.75rem; }
+      .quiz-badge { font-size: 0.68rem; padding: 0.18rem 0.6rem; margin-bottom: 0.3rem; }
+      .quiz-title { font-size: 1.05rem; margin-bottom: 0.4rem; }
+      .progress-wrap { height: 6px; margin-bottom: 0.2rem; }
+      .progress-label { font-size: 0.68rem; }
+
+      .quiz-slides { min-height: 0; }
+
+      .quiz-illustration {
+        height: 120px;
+        min-height: 100px;
+        max-height: 120px;
+        margin-bottom: 0.5rem;
+        border-radius: 14px;
+      }
+      .quiz-illustration img { max-height: 120px; object-fit: contain; }
+      .quiz-illustration-fallback { font-size: 1.8rem; }
+
+      .situation-card {
+        padding: 0.65rem 0.75rem;
+        margin-bottom: 0.55rem;
+        border-radius: 14px;
+      }
+      .situation-tag { font-size: 0.72rem; margin-bottom: 0.2rem; }
+      .situation-text { font-size: 0.82rem; line-height: 1.4; }
+
+      .quiz-options { gap: 0.4rem; }
+      .quiz-option {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.82rem;
+        border-radius: 14px;
+        line-height: 1.35;
+      }
+
+      .quiz-explanation {
+        margin-top: 0.5rem;
+        padding: 0.55rem 0.7rem;
+        font-size: 0.75rem;
+        line-height: 1.45;
+      }
+      .quiz-next-btn {
+        margin-top: 0.55rem;
+        padding: 0.7rem 0.85rem;
+        font-size: 0.85rem;
+      }
+    }
   </style>
 </head>
 <body data-dayo-role="learner">
