@@ -93,6 +93,12 @@
     'login.headerBtn': {
       KO: '로그인 / 회원가입', EN: 'Log in / Sign up', ZH: '登录 / 注册', JA: 'ログイン / 新規登録', FR: 'Connexion / Inscription', ES: 'Iniciar / Registrarse'
     },
+    'login.logout': {
+      KO: '로그아웃', EN: 'Log out', ZH: '退出登录', JA: 'ログアウト', FR: 'Se déconnecter', ES: 'Cerrar sesión'
+    },
+    'login.logoutToast': {
+      KO: '로그아웃되었습니다. 언제든 다시 만나요 ☕', EN: "You're logged out. See you again soon ☕", ZH: '已退出登录。随时欢迎回来 ☕', JA: 'ログアウトしました。またいつでもどうぞ ☕', FR: 'Déconnexion réussie. À bientôt ☕', ES: 'Sesión cerrada. Vuelve cuando quieras ☕'
+    },
     'login.greetingFormat': {
       KO: '{name}님', EN: '{name}', ZH: '{name}', JA: '{name}さん', FR: '{name}', ES: '{name}'
     },

@@ -17,6 +17,18 @@
     'border-radius:50%;background:linear-gradient(135deg,var(--pink,#FFD6DF),var(--peach,#FFE5C4));font-size:.72rem;}',
     '[data-mode-switch="block"]{display:block;margin-top:.5rem;}',
     '[data-mode-switch="block"] a.ms-btn,[data-mode-switch="block"] button.ms-btn{display:flex;width:100%;justify-content:center;}',
+    '.ms-profile{position:relative;display:inline-flex;}',
+    '.ms-menu{position:absolute;top:calc(100% + .4rem);right:0;z-index:320;min-width:160px;',
+    'padding:.4rem;border-radius:16px;border:1px solid var(--coral-pale,#FFE8E3);background:#fdfbf7;',
+    'box-shadow:0 12px 28px rgba(113,83,72,.16);display:none;flex-direction:column;gap:.2rem;}',
+    '.ms-profile.is-open .ms-menu{display:flex;}',
+    '.ms-menu a,.ms-menu button{display:flex;align-items:center;gap:.4rem;width:100%;padding:.7rem .85rem;',
+    'border:none;border-radius:12px;background:transparent;color:var(--text,#5C4A42);',
+    'font-family:inherit;font-size:.82rem;font-weight:700;text-decoration:none;cursor:pointer;text-align:left;}',
+    '.ms-menu a:hover,.ms-menu button:hover{background:var(--coral-pale,#FFE8E3);color:var(--coral,#FF6B57);}',
+    '[data-mode-switch="block"] .ms-profile{display:block;width:100%;}',
+    '[data-mode-switch="block"] .ms-profile > .ms-btn{width:100%;justify-content:center;}',
+    '[data-mode-switch="block"] .ms-menu{left:0;right:0;min-width:0;}',
     '.ms-overlay{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;',
     'padding:1.25rem;background:rgba(92,74,66,.28);backdrop-filter:blur(8px);opacity:0;visibility:hidden;',
     'transition:opacity .25s;font-family:inherit;}',
@@ -82,6 +94,28 @@
     } catch (e) { /* ignore */ }
   }
 
+  function clearMemberSession() {
+    try {
+      window.localStorage.removeItem(USER_KEY);
+      window.localStorage.removeItem(MEMBER_KEY);
+    } catch (e) { /* ignore */ }
+  }
+
+  function closeAllMenus() {
+    Array.prototype.forEach.call(document.querySelectorAll('.ms-profile.is-open'), function (el) {
+      el.classList.remove('is-open');
+      var toggle = el.querySelector('[data-ms-profile-toggle]');
+      if (toggle) toggle.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  function logout() {
+    closeAllMenus();
+    clearMemberSession();
+    render();
+    showToast(t('login.logoutToast'));
+  }
+
   function showToast(message) {
     toastEl.textContent = message;
     toastEl.classList.add('is-show');
@@ -136,8 +170,21 @@
       return '<button class="ms-btn" type="button" data-ms-open-login>' + lead + label + '</button>';
     }
 
-    return '<a class="ms-btn" href="' + config.href + '"' +
-      (config.loggedIn ? '' : ' data-ms-guard') + '>' + lead + label + '</a>';
+    if (config.loggedIn) {
+      return [
+        '<div class="ms-profile">',
+        '  <button class="ms-btn" type="button" data-ms-profile-toggle aria-expanded="false" aria-haspopup="true">',
+        lead, label,
+        '  </button>',
+        '  <div class="ms-menu" role="menu">',
+        '    <a href="mypage.html" role="menuitem" data-i18n="nav.mypage">', t('nav.mypage'), '</a>',
+        '    <button type="button" role="menuitem" data-ms-logout data-i18n="login.logout">', t('login.logout'), '</button>',
+        '  </div>',
+        '</div>'
+      ].join('');
+    }
+
+    return '<a class="ms-btn" href="' + config.href + '" data-ms-guard>' + lead + label + '</a>';
   }
 
   function render() {
@@ -216,7 +263,9 @@
     });
 
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && overlay.classList.contains('is-open')) closeLogin();
+      if (e.key !== 'Escape') return;
+      if (overlay.classList.contains('is-open')) closeLogin();
+      closeAllMenus();
     });
   }
 
@@ -237,9 +286,32 @@
     document.addEventListener('click', function (e) {
       if (e.target.closest('[data-ms-open-login]')) {
         e.preventDefault();
+        closeAllMenus();
         openLogin(null);
         return;
       }
+
+      var logoutBtn = e.target.closest('[data-ms-logout]');
+      if (logoutBtn) {
+        e.preventDefault();
+        logout();
+        return;
+      }
+
+      var profileToggle = e.target.closest('[data-ms-profile-toggle]');
+      if (profileToggle) {
+        e.preventDefault();
+        var wrap = profileToggle.closest('.ms-profile');
+        var willOpen = !wrap.classList.contains('is-open');
+        closeAllMenus();
+        if (willOpen) {
+          wrap.classList.add('is-open');
+          profileToggle.setAttribute('aria-expanded', 'true');
+        }
+        return;
+      }
+
+      if (!e.target.closest('.ms-profile')) closeAllMenus();
 
       var guarded = e.target.closest('[data-ms-guard]');
       if (!guarded || isMember()) return;
