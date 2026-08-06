@@ -29,6 +29,10 @@
     'border:none;border-radius:12px;background:transparent;color:var(--text,#5C4A42);',
     'font-family:inherit;font-size:.82rem;font-weight:700;text-decoration:none;cursor:pointer;text-align:left;}',
     '.ms-menu a:hover,.ms-menu button:hover{background:var(--coral-pale,#FFE8E3);color:var(--coral,#FF6B57);}',
+    '.ms-menu-status{display:flex;align-items:center;gap:.4rem;width:100%;padding:.65rem .85rem;',
+    'border-radius:12px;background:rgba(255,249,196,.55);color:var(--text,#5C4A42);',
+    'font-size:.8rem;font-weight:800;pointer-events:none;}',
+    '.ms-menu-sep{height:1px;margin:.15rem .35rem;background:rgba(255,209,220,.65);}',
     '[data-mode-switch="block"] .ms-profile{display:block;width:100%;}',
     '[data-mode-switch="block"] .ms-profile > .ms-btn{width:100%;justify-content:center;}',
     '[data-mode-switch="block"] .ms-menu{left:0;right:0;min-width:0;}',
@@ -289,6 +293,13 @@
     }
 
     if (config.loggedIn) {
+      var ticketLabel = '☕️ 보유 티켓: 1장';
+      try {
+        if (window.DayOTicketWallet && typeof window.DayOTicketWallet.getCount === 'function') {
+          ticketLabel = '☕️ 보유 티켓: ' + window.DayOTicketWallet.getCount() + '장';
+        }
+      } catch (e) { /* ignore */ }
+
       return [
         '<div class="ms-profile">',
         '  <button class="ms-btn" type="button" data-ms-profile-toggle aria-expanded="false" aria-haspopup="true">',
@@ -296,8 +307,11 @@
         '  <span class="ms-caret" aria-hidden="true">▾</span>',
         '  </button>',
         '  <div class="ms-menu" role="menu">',
-        '    <a href="mypage.html" role="menuitem" data-i18n="nav.mypage">', t('nav.mypage'), '</a>',
-        '    <button type="button" role="menuitem" data-ms-logout data-i18n="login.logout">', t('login.logout'), '</button>',
+        '    <div class="ms-menu-status" role="presentation"><span data-ticket-badge-text>', ticketLabel, '</span></div>',
+        '    <button type="button" role="menuitem" data-tickets-open>🎟️ 이용권 구매 / 충전</button>',
+        '    <div class="ms-menu-sep" aria-hidden="true"></div>',
+        '    <a href="mypage.html" role="menuitem">👤 ', t('nav.mypage'), '</a>',
+        '    <button type="button" role="menuitem" data-ms-logout>🚪 ', t('login.logout'), '</button>',
         '  </div>',
         '</div>'
       ].join('');
@@ -318,6 +332,9 @@
       slot.innerHTML = html;
     });
     applyI18n();
+    if (window.DayOTicketWallet && typeof window.DayOTicketWallet.syncUI === 'function') {
+      window.DayOTicketWallet.syncUI();
+    }
   }
 
   function openLogin(href) {
@@ -557,6 +574,10 @@
 
       if (!e.target.closest('.ms-profile')) closeAllMenus();
 
+      var ticketsOpen = e.target.closest('[data-tickets-open]');
+      if (ticketsOpen) {
+        closeAllMenus();
+      }
       var guarded = e.target.closest('[data-ms-guard]');
       if (!guarded || isMember()) return;
       e.preventDefault();

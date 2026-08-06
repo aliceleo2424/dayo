@@ -91,6 +91,20 @@
     window.addEventListener('storage', function (e) {
       if (!e.key || e.key === TICKET_KEY) syncUI();
     });
+
+    document.addEventListener('click', function (e) {
+      var gate = e.target.closest('[data-ticket-gate]');
+      if (!gate) return;
+      if (getCount() > 0) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var msg = '티켓이 부족해요! 이용권을 충전하고 바로 대화를 시작해 보세요 ☕️';
+      if (window.DayOTickets && typeof window.DayOTickets.promptPurchase === 'function') {
+        window.DayOTickets.promptPurchase(msg);
+      } else if (window.DayOTickets && typeof window.DayOTickets.open === 'function') {
+        window.DayOTickets.open();
+      }
+    }, true);
   }
 
   if (document.readyState === 'loading') {

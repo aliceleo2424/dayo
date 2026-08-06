@@ -246,18 +246,32 @@
     bindEvents();
   }
 
+  function promptPurchase(message) {
+    if (message) showToast(message);
+    open();
+  }
+
   function init() {
     mount();
     document.addEventListener('click', function (e) {
       var trigger = e.target.closest('[data-tickets-open]');
       if (!trigger) return;
       e.preventDefault();
+      e.stopPropagation();
+      open();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      var trigger = e.target.closest('[data-tickets-open]');
+      if (!trigger || trigger.tagName === 'BUTTON' || trigger.tagName === 'A') return;
+      e.preventDefault();
       open();
     });
     window.DayOTickets = {
       open: open,
       close: close,
-      plans: PLANS
+      plans: PLANS,
+      promptPurchase: promptPurchase
     };
     openFromQuery();
   }
