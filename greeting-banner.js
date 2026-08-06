@@ -1,4 +1,4 @@
-/* DayO 상단 인사말 배너 & 스트릭 카운트 — index.html 전용 (로그인 UI와 분리)
+/* DayO 로그인 홈 인사말 & 스트릭 — index.html auth dashboard 전용
  *
  * 시간/날짜는 항상 유저 브라우저·디바이스의 현지 시간대를 사용합니다.
  * (KST 고정 아님, UTC 변환 없음 — Date 로컬 getter만 사용)
@@ -85,29 +85,30 @@
     return streak;
   }
 
-  function buildGreeting(userName, streakCount) {
-    if (streakCount >= 2) {
-      return '🔥 연속 ' + streakCount + '일째! 대단해요, ' + userName + '님!';
-    }
-
-    // 디바이스 현지 시간대 기준 시(hour)
+  /** 시간대 인사말 (스트릭과 분리) */
+  function buildGreeting(userName) {
     var hour = localHour();
     if (hour >= 5 && hour < 12) {
-      return '좋은 아침이에요, ' + userName + '님! ☕';
+      return '👋 좋은 아침이에요, ' + userName + '님! ☕';
     }
     if (hour >= 12 && hour < 18) {
-      return '활기찬 오후예요, ' + userName + '님! 🌤️';
+      return '👋 활기찬 오후예요, ' + userName + '님! 🌤️';
     }
     if (hour >= 18 && hour < 22) {
-      return '편안한 저녁이에요, ' + userName + '님! 🌙';
+      return '👋 편안한 저녁이에요, ' + userName + '님! 🌙';
     }
-    // 22:00 ~ 04:59 (현지)
-    return '오늘 하루도 고생 많았어요, ' + userName + '님! ✨';
+    return '👋 오늘 하루도 고생 많았어요, ' + userName + '님! ✨';
+  }
+
+  function buildStreakLine(streakCount) {
+    var n = streakCount > 0 ? streakCount : 1;
+    return '🔥 연속 ' + n + '일째 대화 도전 중!';
   }
 
   function renderGreeting() {
     var banner = document.getElementById('greetingBanner');
     var textEl = document.getElementById('greetingBannerText');
+    var streakEl = document.getElementById('authStreakText');
     if (!banner || !textEl) return;
 
     var userName = getUserName();
@@ -115,11 +116,13 @@
       banner.hidden = true;
       banner.classList.remove('is-visible');
       textEl.textContent = '';
+      if (streakEl) streakEl.textContent = '';
       return;
     }
 
     var streak = updateStreakIfNeeded();
-    textEl.textContent = buildGreeting(userName, streak);
+    textEl.textContent = buildGreeting(userName);
+    if (streakEl) streakEl.textContent = buildStreakLine(streak);
     banner.hidden = false;
     banner.classList.add('is-visible');
   }
@@ -144,7 +147,6 @@
       renderGreeting();
     });
 
-    // 같은 탭에서 로그인/로그아웃 후 헤더가 바뀌면 배너도 동기화
     var slots = document.querySelectorAll('[data-mode-switch]');
     if (slots.length && typeof MutationObserver !== 'undefined') {
       var observer = new MutationObserver(function () {
