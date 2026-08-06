@@ -1,5 +1,5 @@
 /* DayO 로그인 유저 메인 대시보드 레이아웃 토글 — index.html 전용
- * (로그인/회원가입 모달·로그아웃·i18n 로직은 수정하지 않음)
+ * 로그인/로그아웃 시 dayo:authchange 이벤트로 즉시 랜딩 ↔ 대시보드 스왑
  */
 (function () {
   'use strict';
@@ -19,11 +19,13 @@
     document.body.classList.toggle('is-logged-in', loggedIn);
     document.body.setAttribute('data-auth', loggedIn ? 'logged-in' : 'guest');
 
-    // 모바일 메뉴가 열린 채 로그인되면 닫아 레이아웃 충돌 방지
     if (loggedIn) {
       var mobileNav = document.getElementById('mobileNav');
       var menuToggle = document.getElementById('menuToggle');
-      if (mobileNav) mobileNav.classList.remove('open');
+      if (mobileNav) {
+        mobileNav.classList.remove('open');
+        mobileNav.style.display = '';
+      }
       if (menuToggle) {
         menuToggle.setAttribute('aria-expanded', 'false');
       }
@@ -45,6 +47,10 @@
   function init() {
     syncLoggedInLayout();
     hookAuthRefresh();
+
+    document.addEventListener('dayo:authchange', function () {
+      syncLoggedInLayout();
+    });
 
     var slots = document.querySelectorAll('[data-mode-switch]');
     if (slots.length && typeof MutationObserver !== 'undefined') {

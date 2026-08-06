@@ -183,6 +183,16 @@
     } catch (e) { /* ignore */ }
   }
 
+  function notifyAuthChange() {
+    var loggedIn = isMember();
+    document.dispatchEvent(new CustomEvent('dayo:authchange', {
+      detail: {
+        loggedIn: loggedIn,
+        userName: getUserName()
+      }
+    }));
+  }
+
   function closeAllMenus() {
     Array.prototype.forEach.call(document.querySelectorAll('.ms-profile.is-open'), function (el) {
       el.classList.remove('is-open');
@@ -197,7 +207,19 @@
     closeWelcome();
     clearMemberSession();
     render();
+    notifyAuthChange();
     showToast(t('login.logoutToast'));
+
+    var leaf = (window.location.pathname || '').split('/').pop() || '';
+    if (leaf && leaf !== 'index.html' && leaf !== 'index.htm') {
+      window.location.href = 'index.html';
+      return;
+    }
+    try {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (e) {
+      window.scrollTo(0, 0);
+    }
   }
 
   function showToast(message) {
@@ -326,6 +348,7 @@
     startMemberSession(name, email);
     closeLogin();
     render();
+    notifyAuthChange();
 
     if (options.isNew) {
       clearTimeout(welcomeTimer);
@@ -542,7 +565,8 @@
       getUserName: getUserName,
       refresh: render,
       toast: showToast,
-      openLogin: openLogin
+      openLogin: openLogin,
+      notifyAuthChange: notifyAuthChange
     };
   }
 

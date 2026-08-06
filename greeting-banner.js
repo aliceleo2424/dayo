@@ -140,6 +140,10 @@
     hookAuthRefresh();
     renderGreeting();
 
+    document.addEventListener('dayo:authchange', function () {
+      renderGreeting();
+    });
+
     // 같은 탭에서 로그인/로그아웃 후 헤더가 바뀌면 배너도 동기화
     var slots = document.querySelectorAll('[data-mode-switch]');
     if (slots.length && typeof MutationObserver !== 'undefined') {
