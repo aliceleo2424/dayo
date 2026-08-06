@@ -213,46 +213,30 @@
       line-height: 1.35; margin-bottom: 2.5rem;
     }
 
-    /* Hero — compact home stage: greeting + CTA + lounge carousel */
+    /* Hero — guest landing (original 2-column). Logged-in overrides below. */
     .hero {
-      min-height: auto;
-      display: flex; align-items: flex-start;
-      padding: 4.85rem 0 1.75rem;
+      min-height: 100vh;
+      display: flex; align-items: center;
+      padding: 6.5rem 0 4rem;
     }
 
     .home-stage-inner {
       width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: 1.1rem;
-    }
-
-    .home-main {
-      width: min(560px, 100%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.85rem;
     }
 
     .hero-grid {
-      display: contents;
-    }
-
-    .hero-copy {
-      width: min(560px, 100%);
-      text-align: center;
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(2.5rem, 6vw, 4.5rem);
       align-items: center;
     }
 
+    .hero-copy { text-align: left; }
+
     .hero-title {
       font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
-      font-size: clamp(1.55rem, 4.2vw, 2.35rem);
-      font-weight: 700; line-height: 1.25; margin-bottom: 0.45rem;
+      font-size: clamp(2rem, 4.8vw, 3.2rem);
+      font-weight: 700; line-height: 1.22; margin-bottom: 1.25rem;
       letter-spacing: -0.02em;
     }
 
@@ -261,39 +245,35 @@
     .hero-title em { font-style: normal; color: var(--coral); }
 
     .hero-subtitle {
-      font-size: clamp(0.88rem, 2vw, 0.98rem);
-      color: var(--text-muted); line-height: 1.55;
-      margin-bottom: 0.15rem; max-width: 420px;
+      font-size: clamp(0.98rem, 2vw, 1.1rem);
+      color: var(--text-muted); line-height: 1.8;
+      margin-bottom: 2rem; max-width: 420px;
     }
 
     .cta-wrap {
-      display: flex; flex-direction: column; align-items: center; gap: 0.55rem;
-      width: 100%;
+      display: flex; flex-direction: column; align-items: flex-start; gap: 0.75rem;
     }
 
-    .cta-badge {
-      display: none;
-    }
+    .cta-badge { display: none; }
 
     .home-cta-btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;
-      width: min(100%, 420px);
-      padding: 1.2rem 1.5rem;
+      padding: 1.15rem 2rem;
       font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
-      font-size: clamp(1.02rem, 2.6vw, 1.2rem);
+      font-size: clamp(0.98rem, 2.4vw, 1.12rem);
       font-weight: 700;
       color: #fff;
       text-decoration: none;
       background: linear-gradient(135deg, #FF7A68 0%, var(--coral) 55%, #FF8A4C 100%);
       border: none;
-      border-radius: 999px;
+      border-radius: var(--radius-lg);
       cursor: pointer;
-      box-shadow: 0 6px 0 var(--coral-dark), 0 14px 32px rgba(255, 107, 87, 0.28);
+      box-shadow: 0 5px 0 var(--coral-dark), 0 10px 28px rgba(255, 107, 87, 0.26);
       transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
     .home-cta-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 0 var(--coral-dark), 0 18px 36px rgba(255, 107, 87, 0.32);
+      box-shadow: 0 7px 0 var(--coral-dark), 0 14px 32px rgba(255, 107, 87, 0.3);
     }
     .home-cta-btn:active {
       transform: translateY(3px);
@@ -302,8 +282,8 @@
 
     .cta-btn, .home-quiz-link {
       display: inline-flex; align-items: center; gap: 0.35rem;
-      padding: 0.45rem 0.2rem;
-      font-family: inherit; font-size: 0.82rem; font-weight: 600;
+      padding: 0.35rem 0.15rem;
+      font-family: inherit; font-size: 0.9rem; font-weight: 700;
       color: var(--coral); background: transparent; border: none;
       cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
       box-shadow: none;
@@ -313,8 +293,9 @@
     }
     .cta-btn:active, .home-quiz-link:active { transform: none; box-shadow: none; }
 
-    /* Lounge carousel banner */
+    /* Lounge carousel — logged-in dashboard only by default hidden for guests */
     .lounge-carousel {
+      display: none;
       width: min(560px, 100%);
       margin-top: 0.15rem;
       touch-action: pan-y;
@@ -362,15 +343,8 @@
       transform: scale(1.15);
     }
 
-    /* Partner card kept for language sync JS, tucked out of first fold */
     .hero-visual {
       display: flex; justify-content: center; position: relative;
-      width: 100%;
-      margin-top: 0.35rem;
-    }
-    .hero-visual .visual-card {
-      transform: scale(0.92);
-      transform-origin: top center;
     }
 
     .visual-card {
@@ -734,16 +708,11 @@
 
     .greeting-banner {
       display: none;
-      margin: 4.75rem auto 0;
-      max-width: 720px;
-      padding: 0 1.25rem;
+      margin: 0;
+      padding: 0;
       text-align: center;
     }
-    .greeting-banner.is-visible { display: block; }
-    .greeting-banner.is-visible + .hero.home-stage,
-    .dashboard-hub__header:has(.greeting-banner.is-visible) + .hero.home-stage {
-      padding-top: 0.7rem;
-    }
+    .greeting-banner.is-visible { display: none; } /* guest: never show; logged-in override below */
     .greeting-banner__text {
       display: inline-flex;
       align-items: center;
@@ -763,14 +732,13 @@
       text-overflow: ellipsis;
     }
 
-    .dashboard-shell {
-      width: 100%;
-    }
+    /* Guest: shell/hub are transparent wrappers — no dashboard chrome */
+    .dashboard-shell,
     .dashboard-hub {
       width: 100%;
     }
     .dashboard-hub__header {
-      display: contents;
+      display: none;
     }
     .dashboard-ticket-badge,
     .dashboard-hero-icon {
@@ -778,19 +746,9 @@
     }
 
     @media (max-width: 640px) {
-      .greeting-banner { margin-top: 4.35rem; padding: 0 1rem; }
-      .greeting-banner__text {
-        display: block;
-        width: 100%;
-        text-align: center;
-        font-size: 0.8rem;
-        padding: 0.45rem 0.8rem;
-        white-space: normal;
-      }
-      .hero-visual { display: none; }
       .lounge-slide { font-size: 0.84rem; padding: 0.95rem 1rem; }
       .lounge-viewport { min-height: 72px; }
-      .home-cta-btn { padding: 1.1rem 1.25rem; }
+      .home-cta-btn { width: 100%; padding: 1.1rem 1.25rem; }
     }
 
     .chat-fab {
@@ -925,11 +883,24 @@
     body.is-logged-in .home-stage-inner {
       padding: 0;
       max-width: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       gap: 0.95rem;
+    }
+    body.is-logged-in .hero-grid {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.95rem;
+      width: 100%;
     }
     body.is-logged-in .hero-copy,
     body.is-logged-in .cta-wrap {
       width: 100%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
       align-items: center;
     }
     body.is-logged-in .dashboard-hero-icon {
@@ -951,6 +922,7 @@
       border-radius: 20px;
     }
     body.is-logged-in .lounge-carousel {
+      display: block;
       width: 100%;
       margin-top: 0.15rem;
     }
@@ -998,6 +970,10 @@
     }
 
     @media (max-width: 860px) {
+      .hero-grid { grid-template-columns: 1fr; text-align: center; gap: 3rem; }
+      .hero-copy { text-align: center; }
+      .hero-subtitle { margin-left: auto; margin-right: auto; }
+      .cta-wrap { align-items: center; }
       .journey-grid, .reviews-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
       .review-card { transform: none !important; }
     }
