@@ -85,7 +85,7 @@
     return streak;
   }
 
-  /** 시간대 인사말 (스트릭과 분리) */
+  /** 시간대 인사말 — 메인 타이틀 1줄만 노출 */
   function buildGreeting(userName) {
     var hour = localHour();
     if (hour >= 5 && hour < 12) {
@@ -100,18 +100,9 @@
     return '👋 오늘 하루도 고생 많았어요, ' + userName + '님! ✨';
   }
 
-  function buildStreakLine(userName, streakCount) {
-    var n = streakCount > 0 ? streakCount : 1;
-    if (n <= 1) {
-      return '☕️ 오늘도 반가워요, ' + userName + '님!';
-    }
-    return '🔥 연속 ' + n + '일째 대화 도전 중!';
-  }
-
   function renderGreeting() {
     var banner = document.getElementById('greetingBanner');
     var textEl = document.getElementById('greetingBannerText');
-    var streakEl = document.getElementById('authStreakText');
     if (!banner || !textEl) return;
 
     var userName = getUserName();
@@ -119,17 +110,12 @@
       banner.hidden = true;
       banner.classList.remove('is-visible');
       textEl.textContent = '';
-      if (streakEl) streakEl.textContent = '';
       return;
     }
 
-    var streak = updateStreakIfNeeded();
+    // 스트릭은 접속일 카운트용으로만 갱신 (중복 인사 줄은 노출하지 않음)
+    updateStreakIfNeeded();
     textEl.textContent = buildGreeting(userName);
-    if (streakEl) {
-      streakEl.textContent = buildStreakLine(userName, streak);
-      // 1일차는 '연속' 없는 환영 문구, 2일 이상만 스트릭 강조
-      streakEl.classList.toggle('auth-streak--first', streak <= 1);
-    }
     banner.hidden = false;
     banner.classList.add('is-visible');
   }
