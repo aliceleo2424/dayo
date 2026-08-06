@@ -555,30 +555,32 @@
     }
     .auth-partner__bubble {
       position: relative;
-      max-width: 92px;
-      padding: 0.42rem 0.55rem;
-      border-radius: 14px;
-      background: linear-gradient(160deg, #FFF6F2 0%, #FFE8E3 55%, #FFF1D8 100%);
-      border: 1px solid rgba(255, 209, 220, 0.75);
-      box-shadow: 0 4px 12px rgba(113, 83, 72, 0.08);
-      color: var(--text);
-      font-size: 0.68rem;
-      font-weight: 700;
-      line-height: 1.35;
-      letter-spacing: -0.03em;
+      max-width: 96px;
+      padding: 0.32rem 0.55rem;
+      border-radius: 999px;
+      background: linear-gradient(160deg, #FFF7F3 0%, #FFE9E3 55%, #FFF2DC 100%);
+      border: 1px solid rgba(255, 209, 220, 0.8);
+      box-shadow: 0 3px 10px rgba(113, 83, 72, 0.08);
+      color: var(--coral);
+      font-size: 0.66rem;
+      font-weight: 800;
+      line-height: 1.3;
+      letter-spacing: -0.04em;
       text-align: center;
-      word-break: keep-all;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .auth-partner__bubble::after {
       content: '';
       position: absolute;
       left: 50%;
-      bottom: -6px;
-      width: 10px;
-      height: 10px;
-      background: #FFE8E3;
-      border-right: 1px solid rgba(255, 209, 220, 0.75);
-      border-bottom: 1px solid rgba(255, 209, 220, 0.75);
+      bottom: -5px;
+      width: 8px;
+      height: 8px;
+      background: #FFE9E3;
+      border-right: 1px solid rgba(255, 209, 220, 0.8);
+      border-bottom: 1px solid rgba(255, 209, 220, 0.8);
       transform: translateX(-50%) rotate(45deg);
     }
     .auth-partner__face {
@@ -630,10 +632,9 @@
       }
       .auth-partner { width: 78px; gap: 0.38rem; }
       .auth-partner__bubble {
-        max-width: 78px;
-        padding: 0.36rem 0.42rem;
-        font-size: 0.62rem;
-        border-radius: 12px;
+        max-width: 86px;
+        padding: 0.28rem 0.45rem;
+        font-size: 0.6rem;
       }
       .auth-partner__face { width: 50px; height: 50px; font-size: 1.35rem; }
       .auth-partner__name { font-size: 0.72rem; }
@@ -1233,22 +1234,22 @@
           </p>
           <div class="auth-partner-row" role="list">
             <article class="auth-partner" role="listitem">
-              <p class="auth-partner__bubble">여행 좋아해요✈️</p>
+              <p class="auth-partner__bubble">#커피사랑 ☕️</p>
               <span class="auth-partner__face" aria-hidden="true">👩🏼</span>
               <span class="auth-partner__name">Elena</span>
             </article>
             <article class="auth-partner" role="listitem">
-              <p class="auth-partner__bubble">부산 살아요🌊</p>
+              <p class="auth-partner__bubble">#부산여행 🌊</p>
               <span class="auth-partner__face" aria-hidden="true">🧑🏻</span>
               <span class="auth-partner__name">Sam</span>
             </article>
             <article class="auth-partner" role="listitem">
-              <p class="auth-partner__bubble">커피에 진심☕️</p>
+              <p class="auth-partner__bubble">#강아지집사 🐶</p>
               <span class="auth-partner__face" aria-hidden="true">👩🏻</span>
               <span class="auth-partner__name">Kate</span>
             </article>
             <article class="auth-partner" role="listitem">
-              <p class="auth-partner__bubble">강아지 2마리🐶</p>
+              <p class="auth-partner__bubble">#캠핑덕후 ⛺️</p>
               <span class="auth-partner__face" aria-hidden="true">👨🏼</span>
               <span class="auth-partner__name">Alex</span>
             </article>
