@@ -1,4 +1,8 @@
-/* DayO 상단 인사말 배너 & 스트릭 카운트 — index.html 전용 (로그인 UI와 분리) */
+/* DayO 상단 인사말 배너 & 스트릭 카운트 — index.html 전용 (로그인 UI와 분리)
+ *
+ * 시간/날짜는 항상 유저 브라우저·디바이스의 현지 시간대를 사용합니다.
+ * (KST 고정 아님, UTC 변환 없음 — Date 로컬 getter만 사용)
+ */
 (function () {
   'use strict';
 
@@ -10,8 +14,20 @@
     return n < 10 ? '0' + n : String(n);
   }
 
-  function dateKey(date) {
-    return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
+  /** 유저 기기 현지 시각의 Date 스냅샷 */
+  function getLocalNow() {
+    return new Date();
+  }
+
+  /** 현지 달력 기준 YYYY-MM-DD (getUTC* 사용 금지) */
+  function localDateKey(date) {
+    var d = date || getLocalNow();
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  }
+
+  /** 현지 시각의 시(0–23). new Date().getHours()와 동일하게 디바이스 타임존 기준 */
+  function localHour(date) {
+    return (date || getLocalNow()).getHours();
   }
 
   function getUserName() {
@@ -46,12 +62,12 @@
     } catch (e) { /* ignore */ }
   }
 
-  /** 로그인 유저의 오늘 첫 접속 기준으로 스트릭 갱신 */
+  /** 로그인 유저의 오늘(현지 기준) 첫 접속으로 스트릭 갱신 */
   function updateStreakIfNeeded() {
-    var today = dateKey(new Date());
-    var yesterdayDate = new Date();
-    yesterdayDate.setDate(yesterdayDate.getDate() - 1);
-    var yesterday = dateKey(yesterdayDate);
+    var now = getLocalNow();
+    var today = localDateKey(now);
+    var yesterdayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    var yesterday = localDateKey(yesterdayDate);
     var last = readLastLogin();
     var streak = readStreak();
 
@@ -74,7 +90,8 @@
       return '🔥 연속 ' + streakCount + '일째! 대단해요, ' + userName + '님!';
     }
 
-    var hour = new Date().getHours();
+    // 디바이스 현지 시간대 기준 시(hour)
+    var hour = localHour();
     if (hour >= 5 && hour < 12) {
       return '좋은 아침이에요, ' + userName + '님! ☕';
     }
@@ -84,6 +101,7 @@
     if (hour >= 18 && hour < 22) {
       return '편안한 저녁이에요, ' + userName + '님! 🌙';
     }
+    // 22:00 ~ 04:59 (현지)
     return '오늘 하루도 고생 많았어요, ' + userName + '님! ✨';
   }
 
