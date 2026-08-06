@@ -1013,7 +1013,12 @@
     'room.selfPipLabel': { KO: '나', EN: 'Me', ZH: '我', JA: '自分', FR: 'Moi', ES: 'Yo' },
     'room.selfPlaceholderLabel': { KO: '내 화면', EN: 'My video', ZH: '我的画面', JA: '自分の画面', FR: 'Mon écran', ES: 'Mi pantalla' },
     'room.toastNoMedia': {
-      KO: '카메라/마이크 권한이 없어도 연습은 가능해요 ☕', EN: 'You can still practice without camera/mic access ☕', ZH: '即使没有摄像头/麦克风权限也能练习 ☕', JA: 'カメラ/マイクの権限がなくても練習は可能です ☕', FR: 'Vous pouvez pratiquer sans accès caméra/micro ☕', ES: 'Puedes practicar sin acceso a cámara/micro ☕'
+      KO: '카메라를 끈 상태로도 대화가 가능해요~ ☕️',
+      EN: 'You can still chat with the camera off~ ☕️',
+      ZH: '即使关闭摄像头也能继续对话哦~ ☕️',
+      JA: 'カメラをオフにしたままでも会話できますよ〜 ☕️',
+      FR: 'Vous pouvez discuter même caméra éteinte~ ☕️',
+      ES: 'Puedes conversar aunque la cámara esté apagada~ ☕️'
     },
     'room.toastShareStop': { KO: '화면 공유가 종료됐어요', EN: 'Screen sharing has ended', ZH: '屏幕共享已结束', JA: '画面共有が終了しました', FR: 'Le partage d\'écran est terminé', ES: 'El compartir pantalla ha terminado' },
     'room.toastShareStart': { KO: '화면 공유를 시작했어요 🖥️', EN: 'Screen sharing started 🖥️', ZH: '已开始屏幕共享 🖥️', JA: '画面共有を開始しました 🖥️', FR: 'Partage d\'écran démarré 🖥️', ES: 'Compartir pantalla iniciado 🖥️' },
