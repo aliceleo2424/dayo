@@ -17,6 +17,7 @@
       price: '9,900원',
       meta: '1장',
       copy: '1초 찍먹 체험가',
+      tickets: 1,
       featured: false
     },
     {
@@ -26,6 +27,7 @@
       price: '16,000원',
       meta: '1장',
       copy: '필요할 때 가볍게 구매하는 기본 티켓',
+      tickets: 1,
       featured: false
     },
     {
@@ -35,6 +37,7 @@
       price: '160,000원',
       meta: '10장 + 1장 증정 (총 11장)',
       copy: '회당 약 14,545원꼴',
+      tickets: 11,
       featured: true
     },
     {
@@ -44,6 +47,7 @@
       price: '400,000원',
       meta: '25장 + 3장 증정 (총 28장)',
       copy: '3장 무료 증정',
+      tickets: 28,
       featured: false
     }
   ];
@@ -127,7 +131,7 @@
         '<p class="tk-card__meta">' + plan.meta + '</p>' +
         '<p class="tk-card__copy">' + plan.copy + '</p>' +
         '<div class="tk-card__cta">' +
-          '<button type="button" class="tk-buy" data-tk-buy="' + plan.id + '">이 이용권 선택</button>' +
+          '<button type="button" class="tk-buy" data-tk-buy="' + plan.id + '">구매하기</button>' +
         '</div>' +
       '</article>';
   }
@@ -196,7 +200,14 @@
         }
       }
       if (!plan) return;
-      showToast(plan.title + ' · ' + plan.price + ' 선택했어요 ☕️ (결제 연동 준비 중)');
+
+      var wallet = window.DayOTicketWallet;
+      var added = plan.tickets || 0;
+      var result = wallet
+        ? wallet.addTickets(added)
+        : { ticketCount: added, added: added };
+
+      showToast('🎉 결제가 완료되었습니다! 이용권 ' + result.added + '장이 충전되었습니다.');
     });
 
     document.addEventListener('keydown', function (e) {
@@ -243,7 +254,11 @@
       e.preventDefault();
       open();
     });
-    window.DayOTickets = { open: open, close: close };
+    window.DayOTickets = {
+      open: open,
+      close: close,
+      plans: PLANS
+    };
     openFromQuery();
   }
 

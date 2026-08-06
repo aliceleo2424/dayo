@@ -120,6 +120,30 @@
       justify-self: end;
     }
 
+    .header-ticket-badge {
+      display: none;
+      align-items: center;
+      gap: 0.2rem;
+      padding: 0.42rem 0.75rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 209, 220, 0.85);
+      background: linear-gradient(180deg, #FFF9F6, #FFEDE6);
+      color: var(--coral);
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+    body.is-logged-in .header-ticket-badge {
+      display: inline-flex;
+    }
+    .header-ticket-badge:hover {
+      border-color: var(--coral);
+      transform: translateY(-1px);
+    }
+
     .header-cta {
       display: inline-flex; align-items: center; gap: 0.35rem;
       padding: 0.7rem 1.2rem;
@@ -1183,6 +1207,9 @@
 
       <div class="header-actions">
         <div data-i18n-lang="icon"></div>
+        <button type="button" class="header-ticket-badge" data-tickets-open aria-label="보유 티켓">
+          <span data-ticket-badge-text>☕️ 보유 티켓: 1장</span>
+        </button>
         <div class="header-mode" data-mode-switch="inline"></div>
         <a href="room.html" class="header-cta" data-ms-guard data-i18n="nav.startChat">🚀 대화 시작하기</a>
         <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
@@ -1208,7 +1235,11 @@
             <p class="auth-streak" id="authStreakText"></p>
           </div>
           <p class="auth-sub">오늘도 다정한 AI 파트너와 가볍게 5분 툭 뱉어볼까요?</p>
-          <div class="auth-ticket-badge">☕️ 보유 티켓: 1장 | 💡 부담 없이 5분 회화</div>
+          <div class="auth-ticket-badge">
+            <span data-ticket-badge-text>☕️ 보유 티켓: 1장</span>
+            <span aria-hidden="true"> | </span>
+            <span>💡 부담 없이 5분 회화</span>
+          </div>
           <a href="room.html" class="auth-cta-btn">🚀 3초 만에 대화 시작하기</a>
         </div>
 
@@ -1823,6 +1854,7 @@
     });
   </script>
   <script src="chat-prefs.js"></script>
+  <script src="ticket-wallet.js"></script>
   <script src="booking-modal.js"></script>
   <script src="tickets-modal.js"></script>
   <script src="mode-switch.js"></script>

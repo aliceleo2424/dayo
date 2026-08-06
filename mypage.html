@@ -510,6 +510,9 @@
       </a>
       <div class="topbar-right">
         <div data-i18n-lang="inline"></div>
+        <button type="button" class="ghost-btn" data-tickets-open style="padding:0.45rem 0.8rem;font-size:0.78rem;">
+          <span data-ticket-badge-text>☕️ 보유 티켓: 1장</span>
+        </button>
         <div data-mode-switch="inline"></div>
         <div class="welcome">
           <span class="welcome-dot" aria-hidden="true"></span>
@@ -574,7 +577,7 @@
         <div class="status-item">
           <div class="status-icon" aria-hidden="true">🎟️</div>
           <p class="status-label" data-i18n="mypage.status.remaining">잔여 대화 세션 이용권</p>
-          <p class="status-value" data-i18n="mypage.status.remainingValue">4회 남음</p>
+          <p class="status-value" data-ticket-remaining-text>4회 남음</p>
           <div class="pass-bar" role="img" data-i18n="mypage.status.passBarAria" data-i18n-attr="aria-label" aria-label="8회 중 4회 사용">
             <span></span>
           </div>
@@ -746,6 +749,7 @@
   <script src="i18n.js"></script>
   <script src="materials.js"></script>
   <script src="mode-switch.js"></script>
+  <script src="ticket-wallet.js"></script>
   <script src="tickets-modal.js"></script>
 </body>
 </html>
