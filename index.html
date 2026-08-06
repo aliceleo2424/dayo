@@ -92,22 +92,28 @@
     .logo-text span { color: var(--coral); font-weight: 600; }
 
     .nav-desktop {
-      display: flex; align-items: center; justify-content: center;
-      gap: 0.15rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: nowrap;
+      gap: 0.1rem;
       list-style: none;
-      flex-wrap: wrap;
+      min-width: 0;
+      white-space: nowrap;
     }
 
     .nav-desktop a {
-      display: block;
-      padding: 0.55rem 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      padding: 0.55rem 0.75rem;
       text-decoration: none;
       color: var(--text-muted);
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 600;
       border-radius: 999px;
       transition: color 0.2s, background 0.2s;
       white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .nav-desktop a:hover {
@@ -118,30 +124,7 @@
     .header-actions {
       display: flex; align-items: center; gap: 0.55rem; flex-shrink: 0;
       justify-self: end;
-    }
-
-    .header-ticket-badge {
-      display: none;
-      align-items: center;
-      gap: 0.2rem;
-      padding: 0.42rem 0.75rem;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 209, 220, 0.85);
-      background: linear-gradient(180deg, #FFF9F6, #FFEDE6);
-      color: var(--coral);
-      font-family: inherit;
-      font-size: 0.78rem;
-      font-weight: 800;
-      cursor: pointer;
       white-space: nowrap;
-      line-height: 1.2;
-    }
-    body.is-logged-in .header-ticket-badge {
-      display: inline-flex;
-    }
-    .header-ticket-badge:hover {
-      border-color: var(--coral);
-      transform: translateY(-1px);
     }
 
     .header-cta {
@@ -1228,9 +1211,6 @@
 
       <div class="header-actions">
         <div data-i18n-lang="icon"></div>
-        <button type="button" class="header-ticket-badge" data-tickets-open aria-label="보유 티켓">
-          <span data-ticket-badge-text>☕️ 보유 티켓: 1장</span>
-        </button>
         <div class="header-mode" data-mode-switch="inline"></div>
         <a href="room.html" class="header-cta" data-ms-guard data-i18n="nav.startChat">🚀 대화 시작하기</a>
         <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
