@@ -90,16 +90,41 @@
     'login.required': {
       KO: '로그인이 필요한 서비스입니다 🔑', EN: 'Please sign in to continue 🔑', ZH: '需要登录 🔑', JA: 'ログインが必要です 🔑', FR: 'Connexion requise 🔑', ES: 'Inicia sesión 🔑'
     },
+    'login.headerBtn': {
+      KO: '로그인 / 회원가입', EN: 'Log in / Sign up', ZH: '登录 / 注册', JA: 'ログイン / 新規登録', FR: 'Connexion / Inscription', ES: 'Iniciar / Registrarse'
+    },
+    'login.greetingFormat': {
+      KO: '{name}님', EN: '{name}', ZH: '{name}', JA: '{name}さん', FR: '{name}', ES: '{name}'
+    },
     'login.title': {
-      KO: '로그인이 필요한 서비스예요', EN: 'Sign in required', ZH: '需要登录', JA: 'ログインが必要です', FR: 'Connexion requise', ES: 'Inicio de sesión requerido'
+      KO: '세계 어디서나, 나를 기다리는 다정한 대화 파트너 ☕️',
+      EN: 'A warm conversation partner waiting for you, anywhere ☕️',
+      ZH: '无论身在何处，都有温柔的对话伙伴在等你 ☕️',
+      JA: '世界のどこでも、あなたを待つあたたかい会話パートナー ☕️',
+      FR: 'Un partenaire chaleureux qui vous attend partout ☕️',
+      ES: 'Un compañero cálido que te espera en cualquier lugar ☕️'
     },
     'login.desc': {
-      KO: '로그인하면 예약한 대화 세션과 나의 학습 리포트를<br>마이페이지에서 한눈에 확인할 수 있어요.',
-      EN: 'Sign in to view your booked sessions and<br>learning reports in one place.',
-      ZH: '登录后可在我的页面查看<br>预约会话和学习报告。',
-      JA: 'ログインすると予約セッションと<br>学習レポートをマイページで確認できます。',
-      FR: 'Connectez-vous pour voir vos sessions<br>et rapports en un seul endroit.',
-      ES: 'Inicia sesión para ver tus sesiones<br>y reportes en un solo lugar.'
+      KO: '틀려도 괜찮아요! DayO와 함께 3초 만에 첫 스피킹을 시작해 볼까요?',
+      EN: "It's okay to make mistakes! Shall we start your first speaking session with DayO in 3 seconds?",
+      ZH: '说错也没关系！要不要和 DayO 一起，3秒开启第一次口语？',
+      JA: '間違えても大丈夫！DayOと一緒に3秒で最初のスピーキングを始めませんか？',
+      FR: "Pas grave de se tromper ! On commence votre premier speaking avec DayO en 3 secondes ?",
+      ES: '¡No pasa nada si te equivocas! ¿Empezamos tu primera conversación con DayO en 3 segundos?'
+    },
+    'login.nicknamePlaceholder': {
+      KO: '닉네임 또는 이메일을 입력해 주세요', EN: 'Enter nickname or email', ZH: '请输入昵称或邮箱', JA: 'ニックネームまたはメールを入力', FR: 'Pseudo ou e-mail', ES: 'Apodo o correo'
+    },
+    'login.startBtn': {
+      KO: 'DayO 시작하기', EN: 'Start with DayO', ZH: '开始使用 DayO', JA: 'DayOをはじめる', FR: 'Commencer avec DayO', ES: 'Empezar con DayO'
+    },
+    'login.welcomeToast': {
+      KO: '{name}님, 환영해요! 오늘도 따뜻한 대화를 시작해 볼까요? 💖',
+      EN: 'Welcome, {name}! Ready for a warm chat today? 💖',
+      ZH: '欢迎，{name}！今天也来一段温暖的对话吧 💖',
+      JA: '{name}さん、ようこそ！今日もあたたかい会話を始めましょう 💖',
+      FR: 'Bienvenue, {name} ! Prêt(e) pour une conversation chaleureuse ? 💖',
+      ES: '¡Bienvenido/a, {name}! ¿Listo/a para una charla cálida? 💖'
     },
     'login.quick': {
       KO: '☕ 3초 만에 로그인하기', EN: '☕ Quick sign in', ZH: '☕ 3秒登录', JA: '☕ 3秒ログイン', FR: '☕ Connexion rapide', ES: '☕ Inicio rápido'

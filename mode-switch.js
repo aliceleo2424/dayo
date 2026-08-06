@@ -1,46 +1,45 @@
-/* DayO 헤더 진입 버튼 & 로그인 안내 — index.html / mypage.html / partner.html 공용 */
+/* DayO 헤더 로그인 버튼 & 인터셉트 모달 — index / mypage / partner / room 공용 */
 (function () {
   'use strict';
 
+  var USER_KEY = 'userName';
   var MEMBER_KEY = 'dayo.memberSession';
 
   var CSS = [
-    'a.ms-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1rem;',
-    'border:1px solid var(--coral-pale,#FFE8E3);border-radius:999px;background:var(--cream,#FFF8F5);',
+    'a.ms-btn,button.ms-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1rem;',
+    'border:1px solid var(--coral-pale,#FFE8E3);border-radius:999px;background:transparent;',
     'color:var(--coral,#FF6B57);font-family:inherit;font-size:.82rem;font-weight:700;line-height:1.2;',
     'text-decoration:none;white-space:nowrap;cursor:pointer;',
     'transition:transform .2s,background .2s,border-color .2s;}',
-    'a.ms-btn:hover{transform:translateY(-1px);border-color:var(--coral,#FF6B57);',
+    'a.ms-btn:hover,button.ms-btn:hover{transform:translateY(-1px);border-color:var(--coral,#FF6B57);',
     'background:var(--coral-pale,#FFE8E3);color:var(--coral,#FF6B57);}',
-    'a.ms-btn .ms-avatar{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;',
-    'background:linear-gradient(135deg,var(--pink,#FFD6DF),var(--peach,#FFE5C4));font-size:.72rem;}',
+    'a.ms-btn .ms-avatar,button.ms-btn .ms-avatar{display:grid;place-items:center;width:22px;height:22px;',
+    'border-radius:50%;background:linear-gradient(135deg,var(--pink,#FFD6DF),var(--peach,#FFE5C4));font-size:.72rem;}',
     '[data-mode-switch="block"]{display:block;margin-top:.5rem;}',
-    '[data-mode-switch="block"] a.ms-btn{display:flex;width:100%;justify-content:center;}',
+    '[data-mode-switch="block"] a.ms-btn,[data-mode-switch="block"] button.ms-btn{display:flex;width:100%;justify-content:center;}',
     '.ms-overlay{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;',
-    'padding:1.25rem;background:rgba(89,72,66,.34);backdrop-filter:blur(6px);opacity:0;visibility:hidden;',
+    'padding:1.25rem;background:rgba(92,74,66,.28);backdrop-filter:blur(8px);opacity:0;visibility:hidden;',
     'transition:opacity .25s;font-family:inherit;}',
     '.ms-overlay.is-open{opacity:1;visibility:visible;}',
-    '.ms-modal{width:min(400px,100%);padding:1.9rem 1.6rem 1.6rem;border-radius:26px;text-align:center;',
-    'border:1px solid rgba(255,214,223,.75);background:#FFFCFA;color:var(--text,#594842);',
-    'box-shadow:0 26px 60px rgba(113,83,72,.24);transform:translateY(18px);transition:transform .28s;}',
+    '.ms-modal{width:min(400px,100%);padding:2rem 1.65rem 1.55rem;border-radius:26px;text-align:center;',
+    'border:1px solid rgba(255,214,223,.75);background:#fdfbf7;color:var(--text,#5C4A42);',
+    'box-shadow:0 26px 60px rgba(113,83,72,.22);transform:translateY(18px);transition:transform .28s;}',
     '.ms-overlay.is-open .ms-modal{transform:translateY(0);}',
     '.ms-key{width:62px;height:62px;display:grid;place-items:center;margin:0 auto 1rem;border-radius:50%;',
     'background:linear-gradient(135deg,var(--pink,#FFD6DF),var(--peach,#FFE5C4));font-size:1.6rem;}',
-    '.ms-modal h2{font-size:1.15rem;font-weight:800;letter-spacing:-.03em;}',
-    '.ms-modal p{margin-top:.6rem;color:var(--muted,#927E77);font-size:.85rem;line-height:1.7;}',
-    '.ms-actions{display:grid;gap:.55rem;margin-top:1.4rem;}',
-    '.ms-login{padding:.9rem 1rem;border:none;border-radius:16px;cursor:pointer;font-family:inherit;',
-    'font-size:.86rem;font-weight:800;color:#fff;background:var(--coral,#FF6B57);',
-    'box-shadow:0 4px 0 var(--coral-dark,#E85B48);}',
-    '.ms-login:active{transform:translateY(2px);box-shadow:0 2px 0 var(--coral-dark,#E85B48);}',
-    '.ms-login--soft{color:var(--text,#594842);background:var(--cream,#FFF8F3);box-shadow:none;',
-    'border:1px solid var(--line,rgba(146,126,119,.14));}',
-    '.ms-login--soft:active{transform:translateY(1px);}',
-    '.ms-foot{margin-top:1.1rem;font-size:.78rem;color:var(--muted,#927E77);}',
-    '.ms-foot a{color:var(--coral,#FF6B57);font-weight:800;text-decoration:none;}',
-    '.ms-foot a:hover{text-decoration:underline;}',
-    '.ms-dismiss{margin-top:.9rem;border:none;background:none;cursor:pointer;font-family:inherit;',
-    'color:var(--muted,#927E77);font-size:.78rem;font-weight:700;}',
+    '.ms-modal h2{font-size:1.12rem;font-weight:800;letter-spacing:-.03em;line-height:1.45;}',
+    '.ms-modal .ms-sub{margin-top:.65rem;color:var(--muted,#9A8580);font-size:.86rem;line-height:1.7;}',
+    '.ms-form{display:grid;gap:.65rem;margin-top:1.35rem;text-align:left;}',
+    '.ms-input{width:100%;padding:.95rem 1.05rem;border:1px solid var(--coral-pale,#FFE8E3);',
+    'border-radius:16px;background:#fff;color:var(--text,#5C4A42);font-family:inherit;font-size:.92rem;',
+    'outline:none;box-sizing:border-box;}',
+    '.ms-input:focus{border-color:var(--coral,#FF6B57);box-shadow:0 0 0 3px rgba(255,107,87,.12);}',
+    '.ms-login{padding:.95rem 1rem;border:none;border-radius:16px;cursor:pointer;font-family:inherit;',
+    'font-size:.9rem;font-weight:800;color:#fff;background:var(--coral,#FF6B57);',
+    'box-shadow:0 4px 0 var(--coral-dark,#E55A45);}',
+    '.ms-login:active{transform:translateY(2px);box-shadow:0 2px 0 var(--coral-dark,#E55A45);}',
+    '.ms-dismiss{margin-top:.95rem;border:none;background:none;cursor:pointer;font-family:inherit;',
+    'color:var(--muted,#9A8580);font-size:.78rem;font-weight:700;}',
     '.ms-toast{position:fixed;left:50%;bottom:1.5rem;z-index:500;width:max-content;',
     'max-width:calc(100vw - 2rem);padding:.9rem 1.2rem;border-radius:16px;font-family:inherit;',
     'border:1px solid var(--coral-pale,#FFE9E4);background:#FFFCFA;color:var(--text,#594842);',
@@ -52,25 +51,33 @@
   var overlay;
   var toastEl;
   var toastTimer;
+  var pendingHref = null;
 
-  function t(key) {
-    return window.DayOI18n ? window.DayOI18n.t(key) : key;
+  function t(key, vars) {
+    if (!window.DayOI18n) return key;
+    if (vars) return window.DayOI18n.tf(key, vars);
+    return window.DayOI18n.t(key);
   }
 
   function applyI18n() {
     if (window.DayOI18n) window.DayOI18n.apply();
   }
 
-  function isMember() {
+  function getUserName() {
     try {
-      return window.localStorage.getItem(MEMBER_KEY) === 'active';
+      return (window.localStorage.getItem(USER_KEY) || '').trim();
     } catch (e) {
-      return false;
+      return '';
     }
   }
 
-  function startMemberSession() {
+  function isMember() {
+    return !!getUserName();
+  }
+
+  function startMemberSession(name) {
     try {
+      window.localStorage.setItem(USER_KEY, name);
       window.localStorage.setItem(MEMBER_KEY, 'active');
     } catch (e) { /* ignore */ }
   }
@@ -84,28 +91,60 @@
     }, 3200);
   }
 
+  function escapeHtml(str) {
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    });
+  }
+
   function buttonFor(role) {
+    var name = getUserName();
+
     if (role === 'partner') {
       return { href: 'mypage.html', icon: '🎓', i18n: 'nav.learnerMypage' };
     }
     if (role === 'member') {
       return { href: 'partner.html', icon: '☕', i18n: 'nav.partnerStudio' };
     }
-    return { href: 'mypage.html', avatar: '👤', i18n: 'nav.mypage', guard: true };
+
+    if (name) {
+      return {
+        href: 'mypage.html',
+        avatar: '👤',
+        label: t('login.greetingFormat', { name: name }),
+        loggedIn: true
+      };
+    }
+
+    return {
+      href: '#',
+      icon: '🔑',
+      i18n: 'login.headerBtn',
+      openLogin: true
+    };
   }
 
   function markup(config) {
     var lead = config.avatar
       ? '<span class="ms-avatar" aria-hidden="true">' + config.avatar + '</span>'
       : '<span aria-hidden="true">' + config.icon + '</span>';
+    var label = config.label
+      ? '<span>' + escapeHtml(config.label) + '</span>'
+      : '<span data-i18n="' + config.i18n + '">' + t(config.i18n) + '</span>';
+
+    if (config.openLogin) {
+      return '<button class="ms-btn" type="button" data-ms-open-login>' + lead + label + '</button>';
+    }
+
     return '<a class="ms-btn" href="' + config.href + '"' +
-      (config.guard ? ' data-ms-guard' : '') + '>' + lead +
-      '<span data-i18n="' + config.i18n + '">' + t(config.i18n) + '</span></a>';
+      (config.loggedIn ? '' : ' data-ms-guard') + '>' + lead + label + '</a>';
   }
 
   function render() {
     var role = document.body.dataset.dayoRole || 'learner';
-    if (role === 'partner' || role === 'member') startMemberSession();
+    if (role === 'partner' || role === 'member') {
+      try { window.localStorage.setItem(MEMBER_KEY, 'active'); } catch (e) { /* ignore */ }
+    }
 
     var html = markup(buttonFor(role));
     var slots = document.querySelectorAll('[data-mode-switch]');
@@ -115,24 +154,37 @@
     applyI18n();
   }
 
-  function openLogin() {
+  function openLogin(href) {
+    pendingHref = href || null;
     overlay.classList.add('is-open');
     document.body.style.overflow = 'hidden';
-    overlay.querySelector('.ms-login').focus();
+    var input = overlay.querySelector('#msNickname');
+    if (input) {
+      input.value = '';
+      setTimeout(function () { input.focus(); }, 50);
+    }
   }
 
   function closeLogin() {
     overlay.classList.remove('is-open');
     document.body.style.overflow = '';
+    pendingHref = null;
   }
 
-  function mockLogin() {
-    startMemberSession();
+  function completeLogin(name) {
+    var trimmed = String(name || '').trim();
+    if (!trimmed) return;
+    var next = pendingHref;
+    startMemberSession(trimmed);
+    pendingHref = null;
     closeLogin();
-    showToast(t('login.success'));
-    setTimeout(function () {
-      window.location.href = 'mypage.html';
-    }, 900);
+    render();
+    showToast(t('login.welcomeToast', { name: trimmed }));
+    if (next) {
+      setTimeout(function () {
+        window.location.href = next;
+      }, 450);
+    }
   }
 
   function mountLogin() {
@@ -140,26 +192,27 @@
     overlay.className = 'ms-overlay';
     overlay.innerHTML = [
       '<div class="ms-modal" role="dialog" aria-modal="true" aria-labelledby="msLoginTitle">',
-      '  <div class="ms-key" aria-hidden="true">🔑</div>',
+      '  <div class="ms-key" aria-hidden="true">☕️</div>',
       '  <h2 id="msLoginTitle" data-i18n="login.title">', t('login.title'), '</h2>',
-      '  <p data-i18n="login.desc" data-i18n-html="true">', t('login.desc'), '</p>',
-      '  <div class="ms-actions">',
-      '    <button class="ms-login" type="button" data-ms-login data-i18n="login.quick">', t('login.quick'), '</button>',
-      '    <button class="ms-login ms-login--soft" type="button" data-ms-login data-i18n="login.email">', t('login.email'), '</button>',
-      '  </div>',
-      '  <p class="ms-foot"><span data-i18n="login.partnerPrompt">', t('login.partnerPrompt'), '</span> ',
-      '  <a href="partner.html" data-i18n="login.partnerLink">', t('login.partnerLink'), '</a></p>',
+      '  <p class="ms-sub" data-i18n="login.desc">', t('login.desc'), '</p>',
+      '  <form class="ms-form" id="msLoginForm">',
+      '    <input class="ms-input" type="text" id="msNickname" name="nickname" autocomplete="nickname"',
+      '      required maxlength="40" data-i18n="login.nicknamePlaceholder" data-i18n-attr="placeholder"',
+      '      placeholder="', t('login.nicknamePlaceholder'), '">',
+      '    <button class="ms-login" type="submit" data-i18n="login.startBtn">', t('login.startBtn'), '</button>',
+      '  </form>',
       '  <button class="ms-dismiss" type="button" data-ms-close data-i18n="login.dismiss">', t('login.dismiss'), '</button>',
       '</div>'
     ].join('');
     document.body.appendChild(overlay);
 
     overlay.addEventListener('click', function (e) {
-      if (e.target === overlay || e.target.closest('[data-ms-close]')) {
-        closeLogin();
-        return;
-      }
-      if (e.target.closest('[data-ms-login]')) mockLogin();
+      if (e.target === overlay || e.target.closest('[data-ms-close]')) closeLogin();
+    });
+
+    overlay.querySelector('#msLoginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      completeLogin(overlay.querySelector('#msNickname').value);
     });
 
     document.addEventListener('keydown', function (e) {
@@ -182,18 +235,42 @@
     render();
 
     document.addEventListener('click', function (e) {
+      if (e.target.closest('[data-ms-open-login]')) {
+        e.preventDefault();
+        openLogin(null);
+        return;
+      }
+
       var guarded = e.target.closest('[data-ms-guard]');
       if (!guarded || isMember()) return;
       e.preventDefault();
       showToast(t('login.required'));
-      openLogin();
+      openLogin(guarded.getAttribute('href'));
     });
 
     document.addEventListener('dayo:langchange', function () {
       render();
+      if (overlay) {
+        var title = overlay.querySelector('#msLoginTitle');
+        var desc = overlay.querySelector('.ms-sub');
+        var input = overlay.querySelector('#msNickname');
+        var submit = overlay.querySelector('.ms-login');
+        var dismiss = overlay.querySelector('[data-ms-close]');
+        if (title) title.textContent = t('login.title');
+        if (desc) desc.textContent = t('login.desc');
+        if (input) input.placeholder = t('login.nicknamePlaceholder');
+        if (submit) submit.textContent = t('login.startBtn');
+        if (dismiss) dismiss.textContent = t('login.dismiss');
+      }
     });
 
-    window.DayOMode = { isMember: isMember, refresh: render, toast: showToast };
+    window.DayOMode = {
+      isMember: isMember,
+      getUserName: getUserName,
+      refresh: render,
+      toast: showToast,
+      openLogin: openLogin
+    };
   }
 
   if (document.readyState === 'loading') {
