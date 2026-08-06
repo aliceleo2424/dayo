@@ -111,18 +111,68 @@
       ES: 'Un compañero cálido que te espera en cualquier lugar ☕️'
     },
     'login.desc': {
-      KO: '틀려도 괜찮아요! DayO와 함께 3초 만에 첫 스피킹을 시작해 볼까요?',
-      EN: "It's okay to make mistakes! Shall we start your first speaking session with DayO in 3 seconds?",
-      ZH: '说错也没关系！要不要和 DayO 一起，3秒开启第一次口语？',
-      JA: '間違えても大丈夫！DayOと一緒に3秒で最初のスピーキングを始めませんか？',
-      FR: "Pas grave de se tromper ! On commence votre premier speaking avec DayO en 3 secondes ?",
-      ES: '¡No pasa nada si te equivocas! ¿Empezamos tu primera conversación con DayO en 3 segundos?'
+      KO: '3초 만에 시작하고 나만의 AI 스피킹 리포트를 받아보세요!',
+      EN: 'Start in 3 seconds and get your own AI speaking report!',
+      ZH: '3秒开启，领取专属 AI 口语报告！',
+      JA: '3秒ではじめて、あなただけのAIスピーキングレポートを受け取りましょう！',
+      FR: 'Commencez en 3 secondes et recevez votre rapport IA !',
+      ES: '¡Empieza en 3 segundos y recibe tu informe de speaking con IA!'
+    },
+    'login.emailPlaceholder': {
+      KO: '이메일 주소 입력', EN: 'Enter email address', ZH: '输入邮箱地址', JA: 'メールアドレスを入力', FR: 'Adresse e-mail', ES: 'Correo electrónico'
+    },
+    'login.passwordPlaceholder': {
+      KO: '비밀번호 입력', EN: 'Enter password', ZH: '输入密码', JA: 'パスワードを入力', FR: 'Mot de passe', ES: 'Contraseña'
     },
     'login.nicknamePlaceholder': {
       KO: '닉네임 또는 이메일을 입력해 주세요', EN: 'Enter nickname or email', ZH: '请输入昵称或邮箱', JA: 'ニックネームまたはメールを入力', FR: 'Pseudo ou e-mail', ES: 'Apodo o correo'
     },
     'login.startBtn': {
-      KO: 'DayO 시작하기', EN: 'Start with DayO', ZH: '开始使用 DayO', JA: 'DayOをはじめる', FR: 'Commencer avec DayO', ES: 'Empezar con DayO'
+      KO: 'DayO 시작하기 🚀', EN: 'Start DayO 🚀', ZH: '开始 DayO 🚀', JA: 'DayOをはじめる 🚀', FR: 'Commencer DayO 🚀', ES: 'Empezar DayO 🚀'
+    },
+    'login.socialDivider': {
+      KO: '또는 소셜 계정으로 1초 만에 시작',
+      EN: 'Or start in 1 second with social',
+      ZH: '或用社交账号 1 秒开始',
+      JA: 'またはソーシャルアカウントで1秒スタート',
+      FR: 'Ou commencez en 1 seconde via un compte social',
+      ES: 'O empieza en 1 segundo con una cuenta social'
+    },
+    'login.social.kakao': {
+      KO: '카카오로 시작하기', EN: 'Continue with Kakao', ZH: '用 Kakao 开始', JA: 'Kakaoで始める', FR: 'Continuer avec Kakao', ES: 'Continuar con Kakao'
+    },
+    'login.social.naver': {
+      KO: '네이버로 시작하기', EN: 'Continue with Naver', ZH: '用 Naver 开始', JA: 'Naverで始める', FR: 'Continuer avec Naver', ES: 'Continuar con Naver'
+    },
+    'login.social.google': {
+      KO: 'Google로 시작하기', EN: 'Continue with Google', ZH: '用 Google 开始', JA: 'Googleで始める', FR: 'Continuer avec Google', ES: 'Continuar con Google'
+    },
+    'login.passwordMismatch': {
+      KO: '비밀번호가 올바르지 않아요. 다시 확인해 주세요 🔑',
+      EN: 'Incorrect password. Please try again 🔑',
+      ZH: '密码不正确，请再试一次 🔑',
+      JA: 'パスワードが正しくありません。もう一度ご確認ください 🔑',
+      FR: 'Mot de passe incorrect. Réessayez 🔑',
+      ES: 'Contraseña incorrecta. Inténtalo de nuevo 🔑'
+    },
+    'login.welcomeTitle': {
+      KO: '🎉 DayO에 오신 걸 환영해요, {name}님!',
+      EN: '🎉 Welcome to DayO, {name}!',
+      ZH: '🎉 欢迎来到 DayO，{name}！',
+      JA: '🎉 DayOへようこそ、{name}さん！',
+      FR: '🎉 Bienvenue sur DayO, {name} !',
+      ES: '🎉 ¡Bienvenido/a a DayO, {name}!'
+    },
+    'login.welcomeBody': {
+      KO: '첫 1회 무료 대화 티켓 ☕이 발급되었습니다. 지금 대화를 시작해 볼까요?',
+      EN: 'Your first free conversation ticket ☕ is ready. Shall we start chatting now?',
+      ZH: '已发放首次免费对话券 ☕。现在就开始对话吧？',
+      JA: '初回無料会話チケット☕が発行されました。今すぐ会話を始めますか？',
+      FR: 'Votre premier ticket de conversation gratuit ☕ est prêt. On commence ?',
+      ES: 'Tu primer ticket de conversación gratis ☕ ya está listo. ¿Empezamos?'
+    },
+    'login.welcomeCta': {
+      KO: '지금 바로 시작하기', EN: 'Start right now', ZH: '马上开始', JA: '今すぐはじめる', FR: 'Commencer maintenant', ES: 'Empezar ahora'
     },
     'login.welcomeToast': {
       KO: '{name}님, 환영해요! 오늘도 따뜻한 대화를 시작해 볼까요? 💖',
