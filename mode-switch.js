@@ -9,7 +9,7 @@
 
   var CSS = [
     'a.ms-btn,button.ms-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.55rem 1rem;',
-    'border:1px solid var(--coral-pale,#FFE8E3);border-radius:999px;background:transparent;',
+    'border:1px solid var(--coral,#FF6B57);border-radius:999px;background:transparent;',
     'color:var(--coral,#FF6B57);font-family:inherit;font-size:.82rem;font-weight:700;line-height:1.2;',
     'text-decoration:none;white-space:nowrap;cursor:pointer;',
     'transition:transform .2s,background .2s,border-color .2s;}',
@@ -17,6 +17,7 @@
     'background:var(--coral-pale,#FFE8E3);color:var(--coral,#FF6B57);}',
     'a.ms-btn .ms-avatar,button.ms-btn .ms-avatar{display:grid;place-items:center;width:22px;height:22px;',
     'border-radius:50%;background:linear-gradient(135deg,var(--pink,#FFD6DF),var(--peach,#FFE5C4));font-size:.72rem;}',
+    'button.ms-btn .ms-caret{font-size:.7rem;opacity:.75;margin-left:.05rem;}',
     '[data-mode-switch="block"]{display:block;margin-top:.5rem;}',
     '[data-mode-switch="block"] a.ms-btn,[data-mode-switch="block"] button.ms-btn{display:flex;width:100%;justify-content:center;}',
     '.ms-profile{position:relative;display:inline-flex;}',
@@ -281,6 +282,7 @@
         '<div class="ms-profile">',
         '  <button class="ms-btn" type="button" data-ms-profile-toggle aria-expanded="false" aria-haspopup="true">',
         lead, label,
+        '  <span class="ms-caret" aria-hidden="true">▾</span>',
         '  </button>',
         '  <div class="ms-menu" role="menu">',
         '    <a href="mypage.html" role="menuitem" data-i18n="nav.mypage">', t('nav.mypage'), '</a>',

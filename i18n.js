@@ -67,8 +67,11 @@
     'nav.faq': {
       KO: '자주 묻는 질문', EN: 'FAQ', ZH: '常见问题', JA: 'よくある質問', FR: 'FAQ', ES: 'Preguntas'
     },
+    'nav.ask': {
+      KO: '💬 질문 있어요', EN: '💬 Ask a question', ZH: '💬 我有问题', JA: '💬 質問があります', FR: '💬 Une question', ES: '💬 Tengo una pregunta'
+    },
     'nav.startChat': {
-      KO: '☕ 대화 시작해요!', EN: '☕ Start Chatting!', ZH: '☕ 开始对话！', JA: '☕ 会話を始める！', FR: '☕ Commencer !', ES: '☕ ¡Empezar!'
+      KO: '🚀 대화 시작하기', EN: '🚀 Start chatting', ZH: '🚀 开始对话', JA: '🚀 会話を始める', FR: '🚀 Commencer', ES: '🚀 Empezar'
     },
     'nav.menuOpen': { KO: '메뉴 열기', EN: 'Open menu', ZH: '打开菜单', JA: 'メニューを開く', FR: 'Ouvrir le menu', ES: 'Abrir menú' },
     'nav.menuClose': { KO: '메뉴 닫기', EN: 'Close menu', ZH: '关闭菜单', JA: 'メニューを閉じる', FR: 'Fermer le menu', ES: 'Cerrar menú' },
@@ -1216,12 +1219,14 @@
 
   var CSS = [
     '.i18n-wrap{position:relative;display:inline-flex;}',
-    '.i18n-btn{display:inline-flex;align-items:center;gap:.35rem;padding:.5rem .75rem;',
+    '.i18n-btn{display:inline-flex;align-items:center;justify-content:center;gap:.35rem;padding:.5rem .75rem;',
     'border:1px solid var(--coral-pale,#FFE8E3);border-radius:999px;background:var(--cream,#FFF8F5);',
     'color:var(--text,#594842);font-family:inherit;font-size:.78rem;font-weight:700;cursor:pointer;',
     'white-space:nowrap;transition:transform .2s,border-color .2s,background .2s;}',
     '.i18n-btn:hover{transform:translateY(-1px);border-color:var(--coral,#FF6B57);}',
     '.i18n-btn .i18n-flag{font-size:1rem;line-height:1;}',
+    '.i18n-btn--icon{width:42px;height:42px;padding:0;border-radius:14px;}',
+    '.i18n-btn--icon .i18n-flag{font-size:1.15rem;}',
     '.i18n-menu{position:absolute;top:calc(100% + .45rem);right:0;min-width:168px;padding:.35rem;',
     'border:1px solid rgba(255,214,223,.75);border-radius:16px;background:#FFFCFA;',
     'box-shadow:0 14px 36px rgba(113,83,72,.16);opacity:0;visibility:hidden;transform:translateY(-6px);',
@@ -1353,6 +1358,10 @@
       if (!meta) return;
       var flag = btn.querySelector('.i18n-flag');
       var label = btn.querySelector('.i18n-label');
+      if (btn.classList.contains('i18n-btn--icon')) {
+        if (flag) flag.textContent = '🌐';
+        return;
+      }
       if (flag) flag.textContent = meta.flag;
       if (label) label.textContent = meta.label;
     });
@@ -1364,18 +1373,24 @@
     });
   }
 
-  function buildSwitcher() {
+  function buildSwitcher(variant) {
+    var isIcon = variant === 'icon';
     var options = SUPPORTED.map(function (code) {
       var meta = LANG_META[code];
       return '<button class="i18n-opt" type="button" role="option" data-lang="' + code + '">' +
         '<span aria-hidden="true">' + meta.flag + '</span>' + meta.label + '</button>';
     }).join('');
 
-    return '<div class="i18n-wrap">' +
-      '<button class="i18n-btn" type="button" aria-haspopup="listbox" aria-label="' + t('lang.select') + '">' +
-      '<span class="i18n-flag" aria-hidden="true">' + LANG_META[currentLang].flag + '</span>' +
-      '<span class="i18n-label">' + LANG_META[currentLang].label + '</span>' +
-      '</button>' +
+    var trigger = isIcon
+      ? '<button class="i18n-btn i18n-btn--icon" type="button" aria-haspopup="listbox" aria-label="' + t('lang.select') + '">' +
+        '<span class="i18n-flag" aria-hidden="true">🌐</span>' +
+        '</button>'
+      : '<button class="i18n-btn" type="button" aria-haspopup="listbox" aria-label="' + t('lang.select') + '">' +
+        '<span class="i18n-flag" aria-hidden="true">' + LANG_META[currentLang].flag + '</span>' +
+        '<span class="i18n-label">' + LANG_META[currentLang].label + '</span>' +
+        '</button>';
+
+    return '<div class="i18n-wrap">' + trigger +
       '<div class="i18n-menu" role="listbox">' + options + '</div>' +
       '</div>';
   }
@@ -1383,7 +1398,7 @@
   function mountSwitchers() {
     var slots = document.querySelectorAll('[data-i18n-lang]');
     Array.prototype.forEach.call(slots, function (slot) {
-      slot.innerHTML = buildSwitcher();
+      slot.innerHTML = buildSwitcher(slot.getAttribute('data-i18n-lang'));
     });
 
     document.addEventListener('click', function (e) {
