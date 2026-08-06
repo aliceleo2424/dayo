@@ -633,6 +633,43 @@
     }
     .site-footer a:hover { text-decoration: underline; }
 
+    .greeting-banner {
+      display: none;
+      margin: 0.85rem auto 0;
+      max-width: 720px;
+      padding: 0 1.25rem;
+    }
+    .greeting-banner.is-visible { display: block; }
+    .greeting-banner__text {
+      display: inline-flex;
+      align-items: center;
+      max-width: 100%;
+      padding: 0.55rem 1rem;
+      border-radius: 999px;
+      background: rgba(255, 252, 250, 0.92);
+      border: 1px solid var(--coral-pale);
+      box-shadow: 0 8px 22px var(--shadow-warm);
+      color: var(--text);
+      font-size: 0.88rem;
+      font-weight: 700;
+      line-height: 1.35;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    @media (max-width: 640px) {
+      .greeting-banner { margin-top: 0.65rem; padding: 0 1rem; }
+      .greeting-banner__text {
+        display: block;
+        width: 100%;
+        text-align: center;
+        font-size: 0.82rem;
+        padding: 0.5rem 0.85rem;
+        white-space: normal;
+      }
+    }
+
     .chat-fab {
       position: fixed; bottom: 1.75rem; right: 1.75rem; z-index: 250;
       width: 56px; height: 56px; border-radius: 50%; border: none;
@@ -804,6 +841,10 @@
   </header>
 
   <div class="page">
+
+    <div class="greeting-banner" id="greetingBanner" hidden aria-live="polite">
+      <p class="greeting-banner__text" id="greetingBannerText"></p>
+    </div>
 
     <!-- Hero -->
     <section class="hero">
@@ -1346,5 +1387,6 @@
   </script>
   <script src="booking-modal.js"></script>
   <script src="mode-switch.js"></script>
+  <script src="greeting-banner.js"></script>
 </body>
 </html>
