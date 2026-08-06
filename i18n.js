@@ -71,7 +71,7 @@
       KO: '💬 질문 있어요', EN: '💬 Ask a question', ZH: '💬 我有问题', JA: '💬 質問があります', FR: '💬 Une question', ES: '💬 Tengo una pregunta'
     },
     'nav.startChat': {
-      KO: '🚀 대화 시작하기', EN: '🚀 Start chatting', ZH: '🚀 开始对话', JA: '🚀 会話を始める', FR: '🚀 Commencer', ES: '🚀 Empezar'
+      KO: '🚀 바로 대화 시작하기', EN: '🚀 Start chatting now', ZH: '🚀 马上开始对话', JA: '🚀 今すぐ会話を始める', FR: '🚀 Commencer maintenant', ES: '🚀 Empezar ya'
     },
     'nav.menuOpen': { KO: '메뉴 열기', EN: 'Open menu', ZH: '打开菜单', JA: 'メニューを開く', FR: 'Ouvrir le menu', ES: 'Abrir menú' },
     'nav.menuClose': { KO: '메뉴 닫기', EN: 'Close menu', ZH: '关闭菜单', JA: 'メニューを閉じる', FR: 'Fermer le menu', ES: 'Cerrar menú' },

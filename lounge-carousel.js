@@ -1,4 +1,6 @@
-/* DayO 라운지 캐러셀 — 메인 홈 CTA 하단 배너 전용 */
+/* DayO 라운지 — 로그인 홈 그리드 카드 (캐러셀 슬롯은 선택)
+ * 그리드 모드(#loungeDots 없음)에서는 초기화만 스킵합니다.
+ */
 (function () {
   'use strict';
 
@@ -9,7 +11,10 @@
     var root = document.getElementById('loungeCarousel');
     var track = document.getElementById('loungeTrack');
     var dotsWrap = document.getElementById('loungeDots');
-    if (!root || !track || !dotsWrap) return;
+    if (!root || !track) return;
+
+    // 그리드 카드 레이아웃이면 자동 슬라이드 불필요
+    if (!dotsWrap || track.classList.contains('lounge-grid')) return;
 
     var slides = track.querySelectorAll('[data-lounge-slide]');
     if (!slides.length) return;

@@ -302,59 +302,89 @@
     .lounge-carousel {
       display: none;
       width: 100%;
-      touch-action: pan-y;
-      user-select: none;
     }
-    .lounge-viewport {
-      position: relative;
-      overflow: hidden;
-      border-radius: 22px;
-      background: linear-gradient(135deg, #FFF6F2 0%, #FFE8E3 48%, #FFF1D8 100%);
-      border: 1px solid rgba(255, 209, 220, 0.7);
-      box-shadow: 0 10px 28px var(--shadow-warm);
-      min-height: 96px;
+    .lounge-head {
+      margin: 0 0 0.85rem;
+      text-align: center;
     }
-    .lounge-track {
-      display: flex;
-      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-      will-change: transform;
+    .lounge-head__title {
+      margin: 0;
+      font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
     }
-    .lounge-slide {
-      flex: 0 0 100%;
-      padding: 1.15rem 1.3rem;
-      text-align: left;
+    .lounge-head__sub {
+      margin: 0.35rem 0 0;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .lounge-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    .lounge-card {
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
+      gap: 0.45rem;
+      min-height: 132px;
+      padding: 1.05rem 1.05rem 1.1rem;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 209, 220, 0.7);
+      background: linear-gradient(160deg, #FFFCF9 0%, #FFF1EC 55%, #FFF8E8 100%);
+      box-shadow: 0 8px 22px rgba(113, 83, 72, 0.07);
+      text-align: left;
       color: var(--text);
       letter-spacing: -0.02em;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
     }
-    .lounge-slide__label {
-      font-size: 0.8rem;
+    .lounge-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(113, 83, 72, 0.1);
+    }
+    .lounge-card:nth-child(2) {
+      background: linear-gradient(160deg, #FFF9F2 0%, #FFE8E3 50%, #FFF3D8 100%);
+    }
+    .lounge-card:nth-child(3) {
+      background: linear-gradient(160deg, #FFFCF8 0%, #FFEFE6 48%, #FFF6E0 100%);
+    }
+    .lounge-card:nth-child(4) {
+      background: linear-gradient(160deg, #FFF8FB 0%, #FFE9F0 52%, #FFF1E4 100%);
+    }
+    .lounge-card:nth-child(5) {
+      background: linear-gradient(160deg, #FFFCF6 0%, #FFF0E4 50%, #FFE8D8 100%);
+      grid-column: span 1;
+    }
+    .lounge-card__label {
+      font-size: 0.78rem;
       font-weight: 800;
       color: var(--coral);
     }
-    .lounge-slide__body {
-      font-size: 0.95rem;
+    .lounge-card__body {
+      font-size: 0.9rem;
       font-weight: 700;
       line-height: 1.5;
     }
-    .lounge-dots {
-      display: flex;
-      justify-content: center;
-      gap: 0.4rem;
-      margin-top: 0.7rem;
-    }
-    .lounge-dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      border: none; padding: 0;
-      background: rgba(154, 133, 128, 0.28);
-      cursor: pointer;
-      transition: transform 0.2s, background 0.2s;
-    }
-    .lounge-dot.is-active {
-      background: var(--coral);
-      transform: scale(1.15);
+
+    @media (max-width: 720px) {
+      .lounge-grid {
+        display: flex;
+        gap: 0.7rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+        padding: 0.1rem 0.15rem 0.45rem;
+        scrollbar-width: thin;
+      }
+      .lounge-card {
+        flex: 0 0 min(78vw, 260px);
+        scroll-snap-align: start;
+        min-height: 124px;
+      }
+      .lounge-card:nth-child(5) { grid-column: auto; }
     }
 
     /* Auth dashboard — hidden for guests */
@@ -364,7 +394,7 @@
       box-sizing: border-box;
     }
     .auth-dashboard__inner {
-      width: min(720px, 100%);
+      width: min(860px, 100%);
       margin: 0 auto;
       display: flex;
       flex-direction: column;
@@ -392,9 +422,13 @@
       font-weight: 700;
       color: var(--coral);
     }
+    .auth-streak--first {
+      color: var(--text-muted);
+      font-weight: 700;
+    }
     .auth-sub {
       margin: 0.15rem 0 0;
-      max-width: 28rem;
+      max-width: 30rem;
       font-size: 0.98rem;
       line-height: 1.65;
       color: var(--text-muted);
@@ -434,31 +468,6 @@
       transform: translateY(-1px);
       border-color: var(--coral);
       box-shadow: 0 4px 12px rgba(255, 107, 87, 0.14);
-    }
-    .auth-cta-btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: min(100%, 420px);
-      margin-top: 0.35rem;
-      padding: 1.35rem 1.6rem;
-      border-radius: 999px;
-      font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
-      font-size: clamp(1.08rem, 2.8vw, 1.28rem);
-      font-weight: 700;
-      color: #fff;
-      text-decoration: none;
-      background: linear-gradient(135deg, #FF7A68 0%, var(--coral) 55%, #FF8A4C 100%);
-      box-shadow: 0 6px 0 var(--coral-dark), 0 14px 34px rgba(255, 107, 87, 0.28);
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-    .auth-cta-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 0 var(--coral-dark), 0 18px 36px rgba(255, 107, 87, 0.32);
-    }
-    .auth-cta-btn:active {
-      transform: translateY(3px);
-      box-shadow: 0 2px 0 var(--coral-dark), 0 6px 16px rgba(255, 107, 87, 0.2);
     }
     .auth-live {
       text-align: center;
@@ -644,9 +653,6 @@
 
     @media (max-width: 640px) {
       .auth-dashboard { padding: 4.85rem 1rem 2rem; }
-      .auth-cta-btn { width: 100%; padding: 1.2rem 1.25rem; }
-      .lounge-slide { padding: 1rem 1.05rem; }
-      .lounge-slide__body { font-size: 0.9rem; }
       .auth-live { padding: 1rem 0.7rem 1.15rem; }
       .auth-live__title {
         font-size: 0.84rem;
@@ -1028,8 +1034,6 @@
     .site-footer a:hover { text-decoration: underline; }
 
     @media (max-width: 640px) {
-      .lounge-slide { font-size: 0.84rem; padding: 0.95rem 1rem; }
-      .lounge-viewport { min-height: 72px; }
       .home-cta-btn { width: 100%; padding: 1.1rem 1.25rem; }
     }
 
@@ -1090,6 +1094,14 @@
     body.is-logged-in #loungeCarousel {
       display: block;
       width: 100%;
+    }
+    body.is-logged-in .lounge-grid {
+      display: grid;
+    }
+    @media (max-width: 720px) {
+      body.is-logged-in .lounge-grid {
+        display: flex;
+      }
     }
     body.is-logged-in .site-footer {
       padding-top: 0.25rem;
@@ -1212,7 +1224,7 @@
       <div class="header-actions">
         <div data-i18n-lang="icon"></div>
         <div class="header-mode" data-mode-switch="inline"></div>
-        <a href="room.html" class="header-cta" data-ms-guard data-i18n="nav.startChat">🚀 대화 시작하기</a>
+        <a href="room.html" class="header-cta" data-ms-guard data-i18n="nav.startChat" data-ticket-gate>🚀 바로 대화 시작하기</a>
         <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
       </div>
     </div>
@@ -1235,14 +1247,13 @@
             <p class="auth-greeting" id="greetingBannerText"></p>
             <p class="auth-streak" id="authStreakText"></p>
           </div>
-          <p class="auth-sub">오늘도 다정한 AI 파트너와 가볍게 5분 툭 뱉어볼까요?</p>
+          <p class="auth-sub">오늘도 다정한 AI 파트너와 함께 즐거운 20분 대화를 나눠볼까요?</p>
           <div class="auth-ticket-badge" data-tickets-open role="button" tabindex="0" aria-label="이용권 구매 / 충전">
             <span data-ticket-badge-text>☕️ 보유 티켓: 1장</span>
             <span aria-hidden="true"> | </span>
-            <span>💡 부담 없이 5분 회화</span>
+            <span>💡 부담 없이 나누는 20분 1:1 대화</span>
             <button type="button" class="auth-ticket-charge" data-tickets-open aria-label="이용권 충전">+ 충전</button>
           </div>
-          <a href="room.html" class="auth-cta-btn" data-ticket-gate>🚀 3초 만에 대화 시작하기</a>
         </div>
 
         <div class="auth-live">
@@ -1289,24 +1300,33 @@
           </div>
         </div>
 
-        <div class="lounge-carousel auth-lounge" id="loungeCarousel" aria-roledescription="carousel" aria-label="DayO 라운지">
-          <div class="lounge-viewport">
-            <div class="lounge-track" id="loungeTrack">
-              <div class="lounge-slide" data-lounge-slide>
-                <span class="lounge-slide__label">☕️ [오늘의 표현]</span>
-                <span class="lounge-slide__body">"I'm down!" (나도 낄게 / 좋아!)</span>
-              </div>
-              <div class="lounge-slide" data-lounge-slide>
-                <span class="lounge-slide__label">📢 [DayO 소식]</span>
-                <span class="lounge-slide__body">신규 글로벌 파트너 Elena 상륙!</span>
-              </div>
-              <div class="lounge-slide" data-lounge-slide>
-                <span class="lounge-slide__label">💡 [오늘의 첫마디]</span>
-                <span class="lounge-slide__body">"주말에 보통 어떤 음악 들으세요?"</span>
-              </div>
-            </div>
+        <div class="lounge-carousel auth-lounge" id="loungeCarousel" aria-label="DayO 라운지">
+          <div class="lounge-head">
+            <h2 class="lounge-head__title">DayO 라운지</h2>
+            <p class="lounge-head__sub">소식 · 이벤트 · 팁을 한눈에</p>
           </div>
-          <div class="lounge-dots" id="loungeDots" role="tablist" aria-label="슬라이드 위치"></div>
+          <div class="lounge-grid" id="loungeTrack">
+            <article class="lounge-card" data-lounge-slide>
+              <span class="lounge-card__label">📢 DayO 소식</span>
+              <span class="lounge-card__body">영국인 레이나와 함께하는 인스타 촬영 현장 비하인드!</span>
+            </article>
+            <article class="lounge-card" data-lounge-slide>
+              <span class="lounge-card__label">🎉 진행 중인 이벤트</span>
+              <span class="lounge-card__body">[8월 한정] 첫 대화 완주 시 스타벅스 커피 쿠폰!</span>
+            </article>
+            <article class="lounge-card" data-lounge-slide>
+              <span class="lounge-card__label">☕️ 오늘의 1분 팁</span>
+              <span class="lounge-card__body">원어민이 매일 쓰는 "I'm down!" (나도 낄게) 표현</span>
+            </article>
+            <article class="lounge-card" data-lounge-slide>
+              <span class="lounge-card__label">🎙️ DayO 라이브 웨비나</span>
+              <span class="lounge-card__body">"외국인 파트너와 어색함 깨부수는 3가지 꿀팁"</span>
+            </article>
+            <article class="lounge-card" data-lounge-slide>
+              <span class="lounge-card__label">💡 스몰토크 질문집</span>
+              <span class="lounge-card__body">첫 인사 때 물꼬 터주는 질문 모음집</span>
+            </article>
+          </div>
         </div>
       </div>
     </section>

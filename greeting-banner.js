@@ -100,8 +100,11 @@
     return '👋 오늘 하루도 고생 많았어요, ' + userName + '님! ✨';
   }
 
-  function buildStreakLine(streakCount) {
+  function buildStreakLine(userName, streakCount) {
     var n = streakCount > 0 ? streakCount : 1;
+    if (n <= 1) {
+      return '☕️ 오늘도 반가워요, ' + userName + '님!';
+    }
     return '🔥 연속 ' + n + '일째 대화 도전 중!';
   }
 
@@ -122,7 +125,11 @@
 
     var streak = updateStreakIfNeeded();
     textEl.textContent = buildGreeting(userName);
-    if (streakEl) streakEl.textContent = buildStreakLine(streak);
+    if (streakEl) {
+      streakEl.textContent = buildStreakLine(userName, streak);
+      // 1일차는 '연속' 없는 환영 문구, 2일 이상만 스트릭 강조
+      streakEl.classList.toggle('auth-streak--first', streak <= 1);
+    }
     banner.hidden = false;
     banner.classList.add('is-visible');
   }
