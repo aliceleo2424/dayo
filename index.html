@@ -820,12 +820,62 @@
     }
     .result-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
+    /* Logged-in dashboard: language + profile only in header; hide landing promo */
+    body.is-logged-in .nav-desktop,
+    body.is-logged-in .header-cta,
+    body.is-logged-in .menu-toggle,
+    body.is-logged-in .nav-mobile,
+    body.is-logged-in .hero-title,
+    body.is-logged-in .hero-subtitle,
+    body.is-logged-in .home-quiz-link,
+    body.is-logged-in .hero-visual,
+    body.is-logged-in [data-landing-only] {
+      display: none !important;
+    }
+    body.is-logged-in .header-mode {
+      display: inline-flex !important;
+    }
+    body.is-logged-in .header-actions [data-i18n-lang="inline"] {
+      display: flex !important;
+    }
+    body.is-logged-in .hero.home-stage {
+      min-height: calc(100dvh - 7.5rem);
+      align-items: center;
+      justify-content: center;
+      padding: 1rem 0 2rem;
+    }
+    body.is-logged-in .greeting-banner.is-visible + .hero.home-stage {
+      min-height: calc(100dvh - 9.5rem);
+      padding-top: 0.5rem;
+    }
+    body.is-logged-in .home-stage-inner,
+    body.is-logged-in .hero-copy,
+    body.is-logged-in .cta-wrap {
+      width: min(520px, 100%);
+      align-items: center;
+    }
+    body.is-logged-in .home-cta-btn {
+      width: min(100%, 460px);
+      padding: 1.35rem 1.75rem;
+      font-size: clamp(1.08rem, 3vw, 1.32rem);
+    }
+    body.is-logged-in .lounge-carousel {
+      width: min(520px, 100%);
+      margin-top: 0.35rem;
+    }
+    body.is-logged-in .site-footer {
+      padding-top: 0.5rem;
+    }
+
     @media (max-width: 900px) {
       .nav-desktop { display: none; }
       .header-actions .header-cta { display: none; }
       .header-mode { display: none; }
       .header-actions [data-i18n-lang="inline"] { display: none; }
       .menu-toggle { display: inline-flex; }
+      body.is-logged-in .header-mode { display: inline-flex !important; }
+      body.is-logged-in .header-actions [data-i18n-lang="inline"] { display: flex !important; }
+      body.is-logged-in .menu-toggle { display: none !important; }
     }
 
     @media (max-width: 860px) {
@@ -1009,7 +1059,7 @@
     </section>
 
     <!-- 3Step Journey -->
-    <section class="journey" id="about">
+    <section class="journey" id="about" data-landing-only>
       <div class="section-inner">
         <p class="section-label reveal" data-i18n="journey.eyebrow">How it works</p>
         <h2 class="section-title reveal" data-i18n="journey.title">3단계로 완성하는 나만의 회화 여정</h2>
@@ -1037,7 +1087,7 @@
     </section>
 
     <!-- Partners teaser -->
-    <section class="journey" id="tutors" style="padding-top: 0;">
+    <section class="journey" id="tutors" style="padding-top: 0;" data-landing-only>
       <div class="section-inner">
         <p class="section-label reveal" data-i18n="partnersTeaser.eyebrow">Partners</p>
         <h2 class="section-title reveal" data-i18n="partnersTeaser.title">다정한 대화 파트너와 눈 맞추며</h2>
@@ -1062,7 +1112,7 @@
     </section>
 
     <!-- Booking CTA -->
-    <section class="journey" id="booking" style="padding-top: 0; padding-bottom: var(--section-gap);">
+    <section class="journey" id="booking" style="padding-top: 0; padding-bottom: var(--section-gap);" data-landing-only>
       <div class="section-inner" style="text-align: center;">
         <p class="section-label reveal" data-i18n="bookingCta.eyebrow">Booking</p>
         <h2 class="section-title reveal" style="margin-bottom: 1.25rem;" data-i18n="bookingCta.title">지금, 화상 회화 스튜디오에서 만나요</h2>
@@ -1075,7 +1125,7 @@
     </section>
 
     <!-- Social Proof -->
-    <section class="reviews">
+    <section class="reviews" data-landing-only>
       <div class="section-inner">
         <p class="section-label reveal" data-i18n="reviews.eyebrow">Real Stories</p>
         <h2 class="section-title reveal" data-i18n="reviews.title">2030, 직접 경험한 후기</h2>
@@ -1507,6 +1557,7 @@
   <script src="booking-modal.js"></script>
   <script src="mode-switch.js"></script>
   <script src="greeting-banner.js"></script>
+  <script src="logged-in-home.js"></script>
   <script src="lounge-carousel.js"></script>
 </body>
 </html>
