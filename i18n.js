@@ -957,6 +957,40 @@
     'book.style.korean': {
       KO: '🇰🇷 한국어를 할 수 있는 파트너', EN: '🇰🇷 A partner who speaks Korean', ZH: '🇰🇷 会说韩语的伙伴', JA: '🇰🇷 韓国語ができるパートナー', FR: '🇰🇷 Un partenaire qui parle coréen', ES: '🇰🇷 Un compañero que habla coreano'
     },
+    'chatPrefs.firstUserTip': {
+      KO: '💡 "첫 대화를 위해 DayO가 가장 다정한 옵션을 미리 맞춰두었어요! (언제든 바꿀 수 있어요)"',
+      EN: '💡 "DayO pre-set the gentlest options for your first chat! (You can change them anytime)"',
+      ZH: '💡 “为了第一次对话，DayO已帮你选好最温柔的选项！（随时可改）”',
+      JA: '💡「初めての会話のために、DayOがやさしい設定を用意しました！（いつでも変更OK）」',
+      FR: '💡 « DayO a préparé les options les plus douces pour votre 1ʳᵉ conversation ! (modifiable) »',
+      ES: '💡 « ¡DayO eligió las opciones más amables para tu primera charla! (puedes cambiarlas) »'
+    },
+    'chatPrefs.safetyToast': {
+      KO: '🤖 AI 실시간 코파일럿 & 스피킹 리포트가 함께합니다.',
+      EN: '🤖 AI live copiloting & speaking report are with you.',
+      ZH: '🤖 AI实时副驾驶与口语报告已就绪。',
+      JA: '🤖 AIリアルタイムコパイロット＆スピーキングレポートが一緒です。',
+      FR: '🤖 Le copilote IA et le rapport de speaking vous accompagnent.',
+      ES: '🤖 El copiloto de IA y el informe de speaking te acompañan.'
+    },
+    'chatPrefs.speedLabel': { KO: '말하기 속도', EN: 'Speaking pace', ZH: '语速', JA: '話すスピード', FR: 'Rythme', ES: 'Ritmo' },
+    'chatPrefs.styleLabel': { KO: '대화 스타일', EN: 'Chat style', ZH: '对话风格', JA: '会話スタイル', FR: 'Style', ES: 'Estilo' },
+    'chatPrefs.requestLabel': { KO: '요청사항', EN: 'Request', ZH: '请求', JA: 'リクエスト', FR: 'Demande', ES: 'Pedido' },
+    'chatPrefs.speed.slow': { KO: '🐢 천천히', EN: '🐢 Slow', ZH: '🐢 慢慢说', JA: '🐢 ゆっくり', FR: '🐢 Lentement', ES: '🐢 Despacio' },
+    'chatPrefs.speed.native': { KO: '🐰 원어민', EN: '🐰 Native pace', ZH: '🐰 母语语速', JA: '🐰 ネイティブ', FR: '🐰 Natif', ES: '🐰 Nativo' },
+    'chatPrefs.style.casual': { KO: '☕️ 편안한 수다', EN: '☕️ Cozy chat', ZH: '☕️ 轻松闲聊', JA: '☕️ リラックス雑談', FR: '☕️ Discussion cosy', ES: '☕️ Charla cómoda' },
+    'chatPrefs.style.correct': { KO: '📝 꼼꼼한 교정', EN: '📝 Careful correction', ZH: '📝 细致纠错', JA: '📝 丁寧な矯正', FR: '📝 Correction soignée', ES: '📝 Corrección cuidadosa' },
+    'chatPrefs.style.interview': { KO: '🎯 실전 인터뷰', EN: '🎯 Real interview', ZH: '🎯 实战面试', JA: '🎯 実践インタビュー', FR: '🎯 Entretien réel', ES: '🎯 Entrevista real' },
+    'chatPrefs.request.praise': { KO: '👏 칭찬 위주로 부탁해요', EN: '👏 Please focus on praise', ZH: '👏 请多夸奖我', JA: '👏 ほめ中心でお願いします', FR: '👏 Plus de compliments SVP', ES: '👏 Más elogios por favor' },
+    'chatPrefs.request.gentle': { KO: '🌿 부드럽게 이끌어 주세요', EN: '🌿 Please guide me gently', ZH: '🌿 请温柔引导', JA: '🌿 やさしく導いてください', FR: '🌿 Guidez-moi en douceur', ES: '🌿 Guíame con suavidad' },
+    'chatPrefs.request.encourage': { KO: '💪 자신감 붙여 주세요', EN: '💪 Please boost my confidence', ZH: '💪 请帮我建立自信', JA: '💪 自信をつけてください', FR: '💪 Donnez-moi confiance', ES: '💪 Dame confianza' },
+    'chatPrefs.requestBadge.praise': { KO: '👏 칭찬 위주', EN: '👏 Praise focus', ZH: '👏 多夸奖', JA: '👏 ほめ中心', FR: '👏 Compliments', ES: '👏 Elogios' },
+    'chatPrefs.requestBadge.gentle': { KO: '🌿 부드럽게', EN: '🌿 Gentle', ZH: '🌿 温柔', JA: '🌿 やさしく', FR: '🌿 Doux', ES: '🌿 Suave' },
+    'chatPrefs.requestBadge.encourage': { KO: '💪 자신감', EN: '💪 Confidence', ZH: '💪 自信', JA: '💪 自信', FR: '💪 Confiance', ES: '💪 Confianza' },
+    'chatPrefs.sheetTitle': { KO: '대화 옵션 바꾸기', EN: 'Change chat options', ZH: '更改对话选项', JA: '会話オプションを変更', FR: 'Modifier les options', ES: 'Cambiar opciones' },
+    'chatPrefs.sheetClose': { KO: '닫기', EN: 'Close', ZH: '关闭', JA: '閉じる', FR: 'Fermer', ES: 'Cerrar' },
+    'book.comfortTitle': { KO: '대화 중 안심 옵션', EN: 'Comfort options for your chat', ZH: '对话安心选项', JA: '会話のあんしんオプション', FR: 'Options de confort', ES: 'Opciones de comodidad' },
+
 
     /* ===== Materials modal chrome (materials.js) ===== */
     'mat.tabArticle': { KO: '📰 예습 자료', EN: '📰 Preview Article', ZH: '📰 预习资料', JA: '📰 予習資料', FR: '📰 Article de préparation', ES: '📰 Material previo' },

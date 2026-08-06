@@ -93,6 +93,12 @@
     '.bk-chip:hover{border-color:var(--coral,#FF6B57);transform:translateY(-1px);}',
     '.bk-chip.is-on{background:var(--coral,#FF6B57);border-color:var(--coral,#FF6B57);color:#fff;font-weight:700;}',
     '.bk-chips--stack .bk-chip{border-radius:var(--radius,18px);line-height:1.5;}',
+    '.bk-first-tip{margin:0 0 1rem;padding:.75rem .9rem;border-radius:16px;border:1px solid rgba(255,209,220,.75);',
+    'background:linear-gradient(135deg,rgba(255,246,242,.95),rgba(255,241,216,.9));font-size:.8rem;font-weight:700;line-height:1.55;color:var(--text,#5C4A42);}',
+    '.bk-first-tip[hidden]{display:none;}',
+    '.bk-comfort{margin-bottom:1.35rem;padding:1rem;border-radius:18px;border:1px dashed rgba(255,209,220,.85);background:rgba(255,252,250,.8);}',
+    '.bk-comfort .bk-group{margin-bottom:1rem;}',
+    '.bk-comfort .bk-group:last-child{margin-bottom:0;}',
     '.bk-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;}',
     '.bk-cal-title{font-family:Quicksand,sans-serif;font-size:.95rem;font-weight:700;}',
     '.bk-cal-nav{width:32px;height:32px;border:1px solid var(--coral-pale,#FFE8E3);border-radius:50%;',
@@ -154,6 +160,9 @@
     language: null,
     purposes: [],
     style: null,
+    chatSpeed: 'slow',
+    chatStyle: 'casual',
+    chatRequest: 'praise',
     date: null,
     time: null,
     partner: null,
@@ -202,6 +211,22 @@
             '</div>' +
           '</section>' +
           '<section class="bk-step" data-step="1">' +
+            '<div class="bk-first-tip" id="bkFirstTip" hidden></div>' +
+            '<div class="bk-comfort" id="bkComfort">' +
+              '<p class="bk-label">' + t('book.comfortTitle') + '</p>' +
+              '<div class="bk-group">' +
+                '<p class="bk-hint">' + t('chatPrefs.speedLabel') + '</p>' +
+                '<div class="bk-chips" id="bkChatSpeeds"></div>' +
+              '</div>' +
+              '<div class="bk-group">' +
+                '<p class="bk-hint">' + t('chatPrefs.styleLabel') + '</p>' +
+                '<div class="bk-chips" id="bkChatStyles"></div>' +
+              '</div>' +
+              '<div class="bk-group">' +
+                '<p class="bk-hint">' + t('chatPrefs.requestLabel') + '</p>' +
+                '<div class="bk-chips bk-chips--stack" id="bkChatRequests"></div>' +
+              '</div>' +
+            '</div>' +
             '<div class="bk-group">' +
               '<p class="bk-label">' + t('book.styleQuestion') + '</p>' +
               '<p class="bk-hint">' + t('book.styleHint') + '</p>' +
@@ -286,12 +311,48 @@
     el.partners = el.overlay.querySelector('#bkPartners');
     el.partnerHint = el.overlay.querySelector('#bkPartnerHint');
     el.summary = el.overlay.querySelector('#bkSummary');
+    el.firstTip = el.overlay.querySelector('#bkFirstTip');
+    el.chatSpeeds = el.overlay.querySelector('#bkChatSpeeds');
+    el.chatStyles = el.overlay.querySelector('#bkChatStyles');
+    el.chatRequests = el.overlay.querySelector('#bkChatRequests');
 
     el.times.innerHTML = TIME_SLOTS.map(function (slot) {
       return '<button type="button" class="bk-chip" data-group="time" data-id="' + slot + '" aria-pressed="false">' + slot + '</button>';
     }).join('');
 
+    renderComfortChips();
     bindDynamicEvents();
+  }
+
+  function prefsApi() {
+    return window.DayOChatPrefs || null;
+  }
+
+  function comfortChipHtml(ids, group, labelFn) {
+    return ids.map(function (id) {
+      return '<button type="button" class="bk-chip" data-group="' + group + '" data-id="' + id + '" aria-pressed="false">' +
+        labelFn(id) + '</button>';
+    }).join('');
+  }
+
+  function renderComfortChips() {
+    var api = prefsApi();
+    if (!el.chatSpeeds || !api) return;
+    el.chatSpeeds.innerHTML = comfortChipHtml(api.SPEED_IDS, 'chatSpeed', api.speedLabel);
+    el.chatStyles.innerHTML = comfortChipHtml(api.STYLE_IDS, 'chatStyle', api.styleLabel);
+    el.chatRequests.innerHTML = comfortChipHtml(api.REQUEST_IDS, 'chatRequest', api.requestLabel);
+    syncChips('chatSpeed');
+    syncChips('chatStyle');
+    syncChips('chatRequest');
+    updateFirstTip();
+  }
+
+  function updateFirstTip() {
+    if (!el.firstTip) return;
+    var api = prefsApi();
+    var show = !!(api && api.isFirstUser());
+    el.firstTip.hidden = !show;
+    if (show) el.firstTip.textContent = api.firstUserTip();
   }
 
   function bindStaticEvents() {
@@ -345,7 +406,7 @@
   function refreshOnLangChange() {
     var wasOpen = el.overlay.classList.contains('is-open');
     renderMarkup();
-    ['language', 'purpose', 'style', 'time'].forEach(syncChips);
+    ['language', 'purpose', 'style', 'time', 'chatSpeed', 'chatStyle', 'chatRequest'].forEach(syncChips);
     el.slots.hidden = !state.date;
     renderCalendar();
     Array.prototype.forEach.call(el.steps, function (section, i) {
@@ -376,12 +437,26 @@
     } else if (group === 'time') {
       state.time = id;
       state.partner = null;
+    } else if (group === 'chatSpeed' || group === 'chatStyle' || group === 'chatRequest') {
+      state[group] = id;
+      persistComfortPrefs(true);
     } else {
       return;
     }
 
     syncChips(group);
     updateFooter();
+  }
+
+  function persistComfortPrefs(clearFirst) {
+    var api = prefsApi();
+    if (!api) return;
+    api.setPrefs({
+      speed: state.chatSpeed,
+      style: state.chatStyle,
+      request: state.chatRequest
+    }, { clearFirstUser: !!clearFirst });
+    updateFirstTip();
   }
 
   function syncChips(group) {
@@ -500,6 +575,7 @@
   }
 
   function renderSummary() {
+    var api = prefsApi();
     var purposeText = state.purposes.map(function (id) {
       return labelOf(PURPOSES, id);
     }).join(', ');
@@ -507,6 +583,9 @@
     el.summary.innerHTML = '' +
       row(t('book.summaryLanguage'), labelOf(LANGUAGES, state.language)) +
       row(t('book.summaryPurpose'), purposeText) +
+      row(t('chatPrefs.speedLabel'), api ? api.speedLabel(state.chatSpeed) : state.chatSpeed) +
+      row(t('chatPrefs.styleLabel'), api ? api.styleLabel(state.chatStyle) : state.chatStyle) +
+      row(t('chatPrefs.requestLabel'), api ? api.requestLabel(state.chatRequest) : state.chatRequest) +
       row(t('book.summaryStyle'), labelOf(STYLES, state.style)) +
       row(t('book.summaryDatetime'), formatDate(state.date) + ' · ' + state.time) +
       row(t('book.summaryPartner'), getPartner(state.partner).name);
@@ -550,8 +629,18 @@
 
   function confirmBooking() {
     if (!isStepReady(3)) return;
+    persistComfortPrefs(true);
     close();
     showToast(t('book.confirmToastFormat', { partner: getPartner(state.partner).name }));
+  }
+
+  function loadComfortIntoState() {
+    var api = prefsApi();
+    if (api) api.applyFirstUserPresetIfNeeded();
+    var prefs = api ? api.getPrefs() : { speed: 'slow', style: 'casual', request: 'praise' };
+    state.chatSpeed = prefs.speed;
+    state.chatStyle = prefs.style;
+    state.chatRequest = prefs.request;
   }
 
   function reset() {
@@ -564,8 +653,10 @@
     state.partner = null;
     state.viewYear = today.getFullYear();
     state.viewMonth = today.getMonth();
+    loadComfortIntoState();
 
-    ['language', 'purpose', 'style', 'time'].forEach(syncChips);
+    ['language', 'purpose', 'style', 'time', 'chatSpeed', 'chatStyle', 'chatRequest'].forEach(syncChips);
+    updateFirstTip();
     el.slots.hidden = true;
     renderCalendar();
     goTo(0);

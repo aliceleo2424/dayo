@@ -176,6 +176,17 @@
     } catch (e) { /* ignore */ }
   }
 
+  function markNewUserChatPreset() {
+    try {
+      if (window.DayOChatPrefs && typeof window.DayOChatPrefs.markFirstUser === 'function') {
+        window.DayOChatPrefs.markFirstUser(true);
+        window.DayOChatPrefs.applyFirstUserPresetIfNeeded();
+        return;
+      }
+      window.localStorage.setItem('dayo.isFirstUser', '1');
+    } catch (e) { /* ignore */ }
+  }
+
   function clearMemberSession() {
     try {
       window.localStorage.removeItem(USER_KEY);
@@ -353,6 +364,7 @@
     notifyAuthChange();
 
     if (options.isNew) {
+      markNewUserChatPreset();
       clearTimeout(welcomeTimer);
       welcomeTimer = setTimeout(function () {
         openWelcome(name);

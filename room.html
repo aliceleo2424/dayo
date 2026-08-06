@@ -43,7 +43,7 @@
       height: 100%;
       height: 100dvh;
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr) auto;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
       background:
         radial-gradient(circle at 12% 18%, rgba(255, 209, 220, 0.55), transparent 42%),
         radial-gradient(circle at 88% 12%, rgba(255, 229, 180, 0.5), transparent 40%),
@@ -116,6 +116,153 @@
       border-radius: 50%;
       background: #6BCB77;
       vertical-align: middle;
+    }
+
+    /* In-chat comfort prefs bar */
+    .prefs-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+      padding: 0.45rem 1rem 0.55rem;
+      background: rgba(255, 252, 250, 0.94);
+      border-bottom: 1px solid rgba(255, 209, 220, 0.35);
+      z-index: 28;
+    }
+    .prefs-bar__tip {
+      flex: 1 1 100%;
+      margin: 0;
+      padding: 0.55rem 0.75rem;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(255, 246, 242, 0.95), rgba(255, 241, 216, 0.9));
+      border: 1px solid rgba(255, 209, 220, 0.7);
+      font-size: 0.74rem;
+      font-weight: 700;
+      line-height: 1.45;
+      color: var(--text);
+    }
+    .prefs-bar__tip[hidden] { display: none; }
+    .speed-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.2rem;
+      border-radius: 999px;
+      background: var(--cream);
+      border: 1px solid var(--coral-pale);
+    }
+    .speed-toggle__btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      padding: 0.4rem 0.75rem;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, transform 0.15s;
+    }
+    .speed-toggle__btn.is-on {
+      background: linear-gradient(135deg, #FF7A68, var(--coral));
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(255, 107, 87, 0.22);
+    }
+    .prefs-badges {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-left: auto;
+    }
+    .prefs-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.38rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 209, 220, 0.85);
+      background: linear-gradient(180deg, #FFF9F6, #FFEDE6);
+      color: var(--coral);
+      font-family: inherit;
+      font-size: 0.76rem;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .prefs-badge:hover {
+      border-color: var(--coral);
+      transform: translateY(-1px);
+    }
+    .prefs-badge__caret { font-size: 0.65rem; opacity: 0.7; }
+
+    .prefs-sheet-overlay {
+      position: fixed; inset: 0; z-index: 220;
+      background: rgba(92, 74, 66, 0.28);
+      backdrop-filter: blur(6px);
+      opacity: 0; visibility: hidden;
+      transition: opacity 0.25s, visibility 0.25s;
+    }
+    .prefs-sheet-overlay.is-open { opacity: 1; visibility: visible; }
+    .prefs-sheet {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      max-height: min(70vh, 520px);
+      padding: 0.75rem 1.15rem 1.35rem;
+      border-radius: 24px 24px 0 0;
+      background: var(--bg-card);
+      border: 1px solid var(--coral-pale);
+      box-shadow: 0 -12px 36px rgba(113, 83, 72, 0.16);
+      transform: translateY(100%);
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      overflow-y: auto;
+    }
+    .prefs-sheet-overlay.is-open .prefs-sheet { transform: translateY(0); }
+    .prefs-sheet__handle {
+      width: 42px; height: 4px; margin: 0.15rem auto 0.85rem;
+      border-radius: 999px; background: rgba(154, 133, 128, 0.35);
+    }
+    .prefs-sheet__head {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 0.75rem; margin-bottom: 0.85rem;
+    }
+    .prefs-sheet__title { font-size: 1rem; font-weight: 800; }
+    .prefs-sheet__close {
+      width: 34px; height: 34px; border: none; border-radius: 50%;
+      background: var(--coral-pale); color: var(--coral); cursor: pointer;
+    }
+    .prefs-sheet__group { margin-bottom: 1rem; }
+    .prefs-sheet__label {
+      margin-bottom: 0.45rem; font-size: 0.78rem; font-weight: 800; color: var(--text-muted);
+    }
+    .prefs-sheet__chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+    .prefs-sheet__chip {
+      padding: 0.55rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid var(--coral-pale);
+      background: var(--cream);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .prefs-sheet__chip.is-on {
+      background: var(--coral);
+      border-color: var(--coral);
+      color: #fff;
+    }
+
+    .toast--safety {
+      top: 6.75rem;
+      bottom: auto;
+      transform: translateX(-50%) translateY(-12px);
+    }
+    .toast--safety.show {
+      transform: translateX(-50%) translateY(0);
     }
 
     .top-btn {
@@ -920,6 +1067,24 @@
       </div>
     </header>
 
+    <div class="prefs-bar" id="prefsBar">
+      <p class="prefs-bar__tip" id="prefsFirstTip" hidden></p>
+      <div class="speed-toggle" role="group" aria-label="말하기 속도">
+        <button type="button" class="speed-toggle__btn" id="speedSlowBtn" data-speed="slow" aria-pressed="false">🐢 천천히</button>
+        <button type="button" class="speed-toggle__btn" id="speedNativeBtn" data-speed="native" aria-pressed="false">🐰 원어민</button>
+      </div>
+      <div class="prefs-badges">
+        <button type="button" class="prefs-badge" id="styleBadgeBtn" data-prefs-sheet="style" aria-haspopup="dialog">
+          <span id="styleBadgeLabel">☕️ 편안한 수다</span>
+          <span class="prefs-badge__caret" aria-hidden="true">▾</span>
+        </button>
+        <button type="button" class="prefs-badge" id="requestBadgeBtn" data-prefs-sheet="request" aria-haspopup="dialog">
+          <span id="requestBadgeLabel">👏 칭찬 위주</span>
+          <span class="prefs-badge__caret" aria-hidden="true">▾</span>
+        </button>
+      </div>
+    </div>
+
     <main class="main-stage chat-collapsed" id="mainStage">
       <div class="video-column" id="videoColumn">
         <div class="share-stage" id="shareStage">
@@ -1046,6 +1211,25 @@
 
   <div class="toast" id="toast"></div>
 
+  <div class="prefs-sheet-overlay" id="prefsSheetOverlay" hidden>
+    <div class="prefs-sheet" role="dialog" aria-modal="true" aria-labelledby="prefsSheetTitle">
+      <div class="prefs-sheet__handle" aria-hidden="true"></div>
+      <div class="prefs-sheet__head">
+        <h2 class="prefs-sheet__title" id="prefsSheetTitle">대화 옵션 바꾸기</h2>
+        <button type="button" class="prefs-sheet__close" id="prefsSheetClose" aria-label="닫기">✕</button>
+      </div>
+      <div class="prefs-sheet__group" id="prefsSheetStyleGroup">
+        <p class="prefs-sheet__label" data-i18n="chatPrefs.styleLabel">대화 스타일</p>
+        <div class="prefs-sheet__chips" id="prefsSheetStyles"></div>
+      </div>
+      <div class="prefs-sheet__group" id="prefsSheetRequestGroup">
+        <p class="prefs-sheet__label" data-i18n="chatPrefs.requestLabel">요청사항</p>
+        <div class="prefs-sheet__chips" id="prefsSheetRequests"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="chat-prefs.js"></script>
   <script>
     /* Timer */
     (function initTimer() {
@@ -1063,16 +1247,137 @@
     })();
 
     const toast = document.getElementById('toast');
-    function showToast(msg) {
+    function showToast(msg, durationMs) {
       toast.textContent = msg;
       toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 2600);
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => toast.classList.remove('show'), durationMs || 2600);
     }
 
     function t(key, vars) {
       if (!window.DayOI18n) return key;
       return vars ? window.DayOI18n.tf(key, vars) : window.DayOI18n.t(key);
     }
+
+    /* In-chat speed toggle + style/request badges */
+    (function initChatPrefsBar() {
+      const api = window.DayOChatPrefs;
+      if (!api) return;
+
+      const tipEl = document.getElementById('prefsFirstTip');
+      const slowBtn = document.getElementById('speedSlowBtn');
+      const nativeBtn = document.getElementById('speedNativeBtn');
+      const styleBadgeLabel = document.getElementById('styleBadgeLabel');
+      const requestBadgeLabel = document.getElementById('requestBadgeLabel');
+      const sheetOverlay = document.getElementById('prefsSheetOverlay');
+      const sheetTitle = document.getElementById('prefsSheetTitle');
+      const sheetClose = document.getElementById('prefsSheetClose');
+      const stylesWrap = document.getElementById('prefsSheetStyles');
+      const requestsWrap = document.getElementById('prefsSheetRequests');
+      const styleGroup = document.getElementById('prefsSheetStyleGroup');
+      const requestGroup = document.getElementById('prefsSheetRequestGroup');
+
+      api.applyFirstUserPresetIfNeeded();
+
+      function renderBar() {
+        const prefs = api.getPrefs();
+        [slowBtn, nativeBtn].forEach((btn) => {
+          if (!btn) return;
+          const on = btn.dataset.speed === prefs.speed;
+          btn.classList.toggle('is-on', on);
+          btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+          btn.textContent = api.speedLabel(btn.dataset.speed);
+        });
+        if (styleBadgeLabel) styleBadgeLabel.textContent = api.styleLabel(prefs.style);
+        if (requestBadgeLabel) requestBadgeLabel.textContent = api.requestBadgeLabel(prefs.request);
+        if (tipEl) {
+          const showTip = api.isFirstUser();
+          tipEl.hidden = !showTip;
+          if (showTip) tipEl.textContent = api.firstUserTip();
+        }
+      }
+
+      function renderSheetChips() {
+        const prefs = api.getPrefs();
+        stylesWrap.innerHTML = api.STYLE_IDS.map((id) =>
+          `<button type="button" class="prefs-sheet__chip${prefs.style === id ? ' is-on' : ''}" data-pref-style="${id}">${api.styleLabel(id)}</button>`
+        ).join('');
+        requestsWrap.innerHTML = api.REQUEST_IDS.map((id) =>
+          `<button type="button" class="prefs-sheet__chip${prefs.request === id ? ' is-on' : ''}" data-pref-request="${id}">${api.requestLabel(id)}</button>`
+        ).join('');
+      }
+
+      function openSheet(focus) {
+        sheetTitle.textContent = t('chatPrefs.sheetTitle');
+        styleGroup.hidden = focus === 'request';
+        requestGroup.hidden = focus === 'style';
+        if (!focus) {
+          styleGroup.hidden = false;
+          requestGroup.hidden = false;
+        }
+        renderSheetChips();
+        sheetOverlay.hidden = false;
+        requestAnimationFrame(() => sheetOverlay.classList.add('is-open'));
+      }
+
+      function closeSheet() {
+        sheetOverlay.classList.remove('is-open');
+        setTimeout(() => { sheetOverlay.hidden = true; }, 280);
+      }
+
+      slowBtn?.addEventListener('click', () => {
+        api.setPrefs({ speed: 'slow' }, { clearFirstUser: true });
+        renderBar();
+        showToast(api.speedLabel('slow'), 1600);
+      });
+      nativeBtn?.addEventListener('click', () => {
+        api.setPrefs({ speed: 'native' }, { clearFirstUser: true });
+        renderBar();
+        showToast(api.speedLabel('native'), 1600);
+      });
+
+      document.getElementById('styleBadgeBtn')?.addEventListener('click', () => openSheet('style'));
+      document.getElementById('requestBadgeBtn')?.addEventListener('click', () => openSheet('request'));
+      sheetClose?.addEventListener('click', closeSheet);
+      sheetOverlay?.addEventListener('click', (e) => {
+        if (e.target === sheetOverlay) closeSheet();
+      });
+
+      stylesWrap?.addEventListener('click', (e) => {
+        const chip = e.target.closest('[data-pref-style]');
+        if (!chip) return;
+        api.setPrefs({ style: chip.dataset.prefStyle }, { clearFirstUser: true });
+        renderBar();
+        renderSheetChips();
+        showToast(api.styleLabel(chip.dataset.prefStyle), 1600);
+        closeSheet();
+      });
+      requestsWrap?.addEventListener('click', (e) => {
+        const chip = e.target.closest('[data-pref-request]');
+        if (!chip) return;
+        api.setPrefs({ request: chip.dataset.prefRequest }, { clearFirstUser: true });
+        renderBar();
+        renderSheetChips();
+        showToast(api.requestBadgeLabel(chip.dataset.prefRequest), 1600);
+        closeSheet();
+      });
+
+      document.addEventListener('dayo:chatprefschange', renderBar);
+      document.addEventListener('dayo:langchange', () => {
+        renderBar();
+        if (sheetOverlay.classList.contains('is-open')) renderSheetChips();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && sheetOverlay.classList.contains('is-open')) closeSheet();
+      });
+
+      renderBar();
+
+      /* AI safety toast — no record switch; 2s soft notice */
+      toast.classList.add('toast--safety');
+      showToast(api.safetyToast(), 2000);
+      setTimeout(() => toast.classList.remove('toast--safety'), 2300);
+    })();
 
     /* Media */
     let localStream = null;
