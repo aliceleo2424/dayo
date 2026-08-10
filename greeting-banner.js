@@ -60,6 +60,12 @@
       window.localStorage.setItem(STREAK_KEY, String(count));
       window.localStorage.setItem(LAST_LOGIN_KEY, date);
     } catch (e) { /* ignore */ }
+    if (window.DayOProfileStore && typeof window.DayOProfileStore.updateProfile === 'function') {
+      window.DayOProfileStore.updateProfile({
+        streak_count: count,
+        last_login_date: date
+      }, { skipEvents: true });
+    }
   }
 
   /** 로그인 유저의 오늘(현지 기준) 첫 접속으로 스트릭 갱신 */

@@ -1,0 +1,9 @@
+node_modules/
+admin/node_modules/
+admin/.next/
+.env
+.env.local
+.env*.local
+.DS_Store
+*.pem
+npm-debug.log*

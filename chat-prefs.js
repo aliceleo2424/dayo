@@ -66,6 +66,16 @@
     };
   }
 
+  function persistPrefs(next) {
+    if (window.DayOProfileStore && typeof window.DayOProfileStore.updateProfile === 'function') {
+      window.DayOProfileStore.updateProfile({
+        speech_speed: next.speed,
+        preferred_style: next.style,
+        preferred_request: next.request
+      }, { skipEvents: true });
+    }
+  }
+
   function setPrefs(partial, options) {
     var next = getPrefs();
     if (partial && partial.speed != null) next.speed = normalize(partial.speed, SPEED_IDS, next.speed);
@@ -76,6 +86,7 @@
     write(REQUEST_KEY, next.request);
     if (options && options.clearFirstUser) markFirstUser(false);
     document.dispatchEvent(new CustomEvent('dayo:chatprefschange', { detail: next }));
+    persistPrefs(next);
     return next;
   }
 

@@ -28,12 +28,19 @@
     return readCount();
   }
 
+  function persistTickets(n) {
+    if (window.DayOProfileStore && typeof window.DayOProfileStore.updateProfile === 'function') {
+      window.DayOProfileStore.updateProfile({ ticket_count: n }, { skipEvents: true });
+    }
+  }
+
   function setCount(n) {
     var next = writeCount(n);
     syncUI(next);
     document.dispatchEvent(new CustomEvent('dayo:ticketchange', {
       detail: { ticketCount: next, added: 0 }
     }));
+    persistTickets(next);
     return next;
   }
 
@@ -44,6 +51,7 @@
     document.dispatchEvent(new CustomEvent('dayo:ticketchange', {
       detail: { ticketCount: next, added: add }
     }));
+    persistTickets(next);
     return { ticketCount: next, added: add };
   }
 

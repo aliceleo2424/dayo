@@ -178,6 +178,14 @@
       window.localStorage.setItem(MEMBER_KEY, 'active');
       if (email) window.localStorage.setItem(EMAIL_KEY, email);
     } catch (e) { /* ignore */ }
+    if (window.DayOProfileStore && typeof window.DayOProfileStore.rebindIdentity === 'function') {
+      window.DayOProfileStore.rebindIdentity(name, email || '');
+    } else if (window.DayOProfileStore && typeof window.DayOProfileStore.updateProfile === 'function') {
+      window.DayOProfileStore.updateProfile({
+        user_name: name,
+        email: email || ''
+      }, { skipEvents: true });
+    }
   }
 
   function markNewUserChatPreset() {
