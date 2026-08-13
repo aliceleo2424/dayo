@@ -38,6 +38,7 @@
     '[data-mode-switch="block"] .ms-menu{left:0;right:0;min-width:0;}',
     '.ms-overlay{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;',
     'padding:1.25rem;background:rgba(92,74,66,.28);backdrop-filter:blur(8px);opacity:0;visibility:hidden;',
+    'width:100%;max-width:100%;overflow-x:hidden;box-sizing:border-box;',
     'transition:opacity .25s;font-family:inherit;}',
     '.ms-overlay.is-open{opacity:1;visibility:visible;}',
     '.ms-modal{width:min(400px,100%);max-height:min(92vh,720px);overflow-y:auto;padding:1.85rem 1.5rem 1.4rem;',
@@ -73,6 +74,7 @@
     'color:var(--muted,#9A8580);font-size:.78rem;font-weight:700;}',
     '.ms-welcome-overlay{position:fixed;inset:0;z-index:450;display:flex;align-items:center;justify-content:center;',
     'padding:1.25rem;background:rgba(92,74,66,.32);backdrop-filter:blur(8px);opacity:0;visibility:hidden;',
+    'width:100%;max-width:100%;overflow-x:hidden;box-sizing:border-box;',
     'transition:opacity .28s;font-family:inherit;}',
     '.ms-welcome-overlay.is-open{opacity:1;visibility:visible;}',
     '.ms-welcome{width:min(380px,100%);padding:2rem 1.55rem 1.5rem;border-radius:26px;text-align:center;',
@@ -85,7 +87,7 @@
     '.ms-welcome p{margin-top:.7rem;color:var(--muted,#9A8580);font-size:.88rem;line-height:1.7;}',
     '.ms-welcome .ms-login{margin-top:1.25rem;width:100%;}',
     '.ms-toast{position:fixed;left:50%;bottom:1.5rem;z-index:500;width:max-content;',
-    'max-width:calc(100vw - 2rem);padding:.9rem 1.2rem;border-radius:16px;font-family:inherit;',
+    'max-width:min(420px,calc(100% - 2rem));padding:.9rem 1.2rem;border-radius:16px;font-family:inherit;',
     'border:1px solid var(--coral-pale,#FFE9E4);background:#FFFCFA;color:var(--text,#594842);',
     'box-shadow:0 12px 34px rgba(113,83,72,.16);font-size:.82rem;font-weight:800;text-align:center;',
     'opacity:0;pointer-events:none;transform:translate(-50%,70px);transition:opacity .3s,transform .38s ease;}',
@@ -351,7 +353,8 @@
   function openLogin(href) {
     pendingHref = href || null;
     overlay.classList.add('is-open');
-    document.body.style.overflow = 'hidden';
+    if (window.DayOScrollLock) window.DayOScrollLock.lock();
+    else document.body.style.overflow = 'hidden';
     var emailInput = overlay.querySelector('#msEmail');
     var passInput = overlay.querySelector('#msPassword');
     if (emailInput) emailInput.value = '';
@@ -360,8 +363,10 @@
   }
 
   function closeLogin() {
+    if (!overlay.classList.contains('is-open')) return;
     overlay.classList.remove('is-open');
-    if (!welcomeOverlay || !welcomeOverlay.classList.contains('is-open')) {
+    if (window.DayOScrollLock) window.DayOScrollLock.unlock();
+    else if (!welcomeOverlay || !welcomeOverlay.classList.contains('is-open')) {
       document.body.style.overflow = '';
     }
   }
@@ -373,13 +378,15 @@
     if (title) title.textContent = t('login.welcomeTitle', { name: name });
     if (body) body.textContent = t('login.welcomeBody');
     welcomeOverlay.classList.add('is-open');
-    document.body.style.overflow = 'hidden';
+    if (window.DayOScrollLock) window.DayOScrollLock.lock();
+    else document.body.style.overflow = 'hidden';
   }
 
   function closeWelcome() {
-    if (!welcomeOverlay) return;
+    if (!welcomeOverlay || !welcomeOverlay.classList.contains('is-open')) return;
     welcomeOverlay.classList.remove('is-open');
-    if (!overlay.classList.contains('is-open')) document.body.style.overflow = '';
+    if (window.DayOScrollLock) window.DayOScrollLock.unlock();
+    else if (!overlay.classList.contains('is-open')) document.body.style.overflow = '';
   }
 
   function finishAuth(name, email, options) {

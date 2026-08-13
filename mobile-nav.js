@@ -9,17 +9,37 @@
     return fallback;
   }
 
+  function lockScroll() {
+    if (window.DayOScrollLock) window.DayOScrollLock.lock();
+  }
+
+  function unlockScroll() {
+    if (window.DayOScrollLock) window.DayOScrollLock.unlock();
+    else {
+      var html = document.documentElement;
+      var body = document.body;
+      ['overflow', 'overflowX', 'overflowY', 'position', 'top', 'left', 'right', 'width', 'paddingRight', 'transform'].forEach(function (prop) {
+        html.style[prop] = '';
+        body.style[prop] = '';
+      });
+      body.classList.remove('dayo-scroll-locked');
+    }
+  }
+
   function init() {
     var toggle = document.getElementById('menuToggle');
     var drawer = document.getElementById('mobileNav');
     var backdrop = document.getElementById('mobileNavBackdrop');
     if (!toggle || !drawer) return;
 
+    var isRoom = document.body.classList.contains('is-room');
+
     function isOpen() {
       return drawer.classList.contains('is-open');
     }
 
     function setOpen(open) {
+      var wasOpen = isOpen();
       drawer.classList.toggle('is-open', open);
       drawer.classList.toggle('open', open);
       if (backdrop) {
@@ -30,6 +50,10 @@
       toggle.setAttribute('aria-label', open ? t('nav.menuClose', '메뉴 닫기') : t('nav.menuOpen', '메뉴 열기'));
       toggle.textContent = open ? '✕' : '☰';
       document.body.classList.toggle('nav-drawer-open', open);
+
+      if (isRoom) return;
+      if (open && !wasOpen) lockScroll();
+      if (!open && wasOpen) unlockScroll();
     }
 
     function close() { setOpen(false); }

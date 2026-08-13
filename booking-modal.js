@@ -60,6 +60,7 @@
   var CSS = [
     '.bk-overlay{position:fixed;inset:0;z-index:900;display:flex;align-items:center;justify-content:center;',
     'padding:1.25rem;background:rgba(92,74,66,.28);backdrop-filter:blur(10px);',
+    'width:100%;max-width:100%;overflow-x:hidden;box-sizing:border-box;',
     'opacity:0;visibility:hidden;transition:opacity .3s ease,visibility .3s ease;}',
     '.bk-overlay.is-open{opacity:1;visibility:visible;}',
     '.bk-modal{position:relative;display:flex;flex-direction:column;width:100%;max-width:520px;',
@@ -142,7 +143,7 @@
     'border:1px solid var(--coral-pale,#FFE8E3);color:var(--text-muted,#9A8580);}',
     '.bk-btn--primary{background:var(--coral,#FF6B57);color:#fff;box-shadow:0 4px 0 var(--coral-dark,#E55A45);}',
     '.bk-btn--primary:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}',
-    '.bk-toast{position:fixed;left:50%;bottom:2rem;z-index:960;max-width:min(420px,calc(100vw - 2rem));',
+    '.bk-toast{position:fixed;left:50%;bottom:2rem;z-index:960;max-width:min(420px,calc(100% - 2rem));',
     'padding:.95rem 1.4rem;border:1px solid var(--coral-pale,#FFE8E3);border-radius:var(--radius,18px);',
     'background:var(--bg-card,#FFFCFA);color:var(--text,#5C4A42);font-family:inherit;font-size:.88rem;',
     'font-weight:600;line-height:1.5;text-align:center;box-shadow:0 12px 32px rgba(255,107,87,.2);',
@@ -668,13 +669,26 @@
     lastFocused = document.activeElement;
     reset();
     el.overlay.classList.add('is-open');
-    document.body.style.overflow = 'hidden';
+    if (window.DayOScrollLock) window.DayOScrollLock.lock();
+    else document.body.style.overflow = 'hidden';
     el.modal.querySelector('.bk-close').focus();
   }
 
   function close() {
+    if (!el.overlay.classList.contains('is-open')) return;
     el.overlay.classList.remove('is-open');
-    document.body.style.overflow = '';
+    if (window.DayOScrollLock) window.DayOScrollLock.unlock();
+    else {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      document.body.style.paddingRight = '';
+      document.body.style.transform = '';
+      document.documentElement.style.overflow = '';
+    }
     if (lastFocused && lastFocused.focus) lastFocused.focus();
   }
 

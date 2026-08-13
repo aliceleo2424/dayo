@@ -84,6 +84,7 @@
   var CSS = [
     '.mt-overlay{position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;',
     'padding:1.25rem;background:rgba(89,72,66,.34);backdrop-filter:blur(6px);opacity:0;visibility:hidden;',
+    'width:100%;max-width:100%;overflow-x:hidden;box-sizing:border-box;',
     'transition:opacity .25s;}',
     '.mt-overlay.is-open{opacity:1;visibility:visible;}',
     '.mt-modal{width:min(560px,100%);max-height:min(86vh,720px);display:flex;flex-direction:column;',
@@ -264,13 +265,16 @@
 
     lastFocused = document.activeElement;
     reportOverlay.classList.add('is-open');
-    document.body.style.overflow = 'hidden';
+    if (window.DayOScrollLock) window.DayOScrollLock.lock();
+    else document.body.style.overflow = 'hidden';
     reportOverlay.querySelector('.mt-close').focus();
   }
 
   function closeReport() {
+    if (!reportOverlay.classList.contains('is-open')) return;
     reportOverlay.classList.remove('is-open');
-    document.body.style.overflow = '';
+    if (window.DayOScrollLock) window.DayOScrollLock.unlock();
+    else document.body.style.overflow = '';
     if (lastFocused && lastFocused.focus) lastFocused.focus();
   }
 
@@ -313,13 +317,16 @@
     renderBody();
     lastFocused = document.activeElement;
     overlay.classList.add('is-open');
-    document.body.style.overflow = 'hidden';
+    if (window.DayOScrollLock) window.DayOScrollLock.lock();
+    else document.body.style.overflow = 'hidden';
     overlay.querySelector('.mt-close').focus();
   }
 
   function close() {
+    if (!overlay.classList.contains('is-open')) return;
     overlay.classList.remove('is-open');
-    document.body.style.overflow = '';
+    if (window.DayOScrollLock) window.DayOScrollLock.unlock();
+    else document.body.style.overflow = '';
     if (lastFocused && lastFocused.focus) lastFocused.focus();
   }
 

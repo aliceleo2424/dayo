@@ -2,12 +2,13 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title data-i18n="page.title.index">DayO 돼요 — AI 회화 코파일럿</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="mobile-nav.css">
+  <script src="scroll-lock.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -882,6 +883,7 @@
       position: fixed; inset: 0; z-index: 300;
       background: rgba(255,248,245,0.75); backdrop-filter: blur(12px);
       display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+      width: 100%; max-width: 100%; overflow-x: hidden; box-sizing: border-box;
       opacity: 0; visibility: hidden; transition: opacity 0.35s ease, visibility 0.35s ease;
     }
     .modal-overlay.active { opacity: 1; visibility: visible; }
@@ -1006,7 +1008,7 @@
 
     .chat-panel {
       position: fixed; bottom: 5.25rem; right: 1.75rem; z-index: 260;
-      width: min(340px, calc(100vw - 2rem)); max-height: min(480px, calc(100vh - 8rem));
+      width: min(340px, calc(100% - 2rem)); max-height: min(480px, calc(100vh - 8rem));
       background: var(--bg-card); border: 1px solid var(--coral-pale);
       border-radius: var(--radius-lg); box-shadow: 0 20px 48px var(--shadow-soft);
       display: flex; flex-direction: column;
@@ -1718,7 +1720,8 @@
       currentStep = 0; isTransitioning = false;
       quizSlides.innerHTML = '';
       quizModal.classList.add('active');
-      document.body.style.overflow = 'hidden';
+      if (window.DayOScrollLock) window.DayOScrollLock.lock();
+      else document.body.style.overflow = 'hidden';
       loadQuizData().then(() => {
         if (!quizModal.classList.contains('active')) return;
         quizSlides.innerHTML = '';
@@ -1727,8 +1730,10 @@
     }
 
     function closeQuizModal() {
+      if (!quizModal.classList.contains('active')) return;
       quizModal.classList.remove('active');
-      document.body.style.overflow = '';
+      if (window.DayOScrollLock) window.DayOScrollLock.unlock();
+      else document.body.style.overflow = '';
       quizSlides.innerHTML = '';
       progressBar.style.width = '20%';
       progressLabel.textContent = '20%';

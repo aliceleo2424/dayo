@@ -2,12 +2,13 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title data-i18n="page.title.room">DayO 돼요 — 화상 회화 스튜디오</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="mobile-nav.css">
+  <script src="scroll-lock.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -271,7 +272,7 @@
       bottom: calc(var(--bottom-h) + 1.15rem);
       right: auto;
       width: max-content;
-      max-width: min(380px, calc(100vw - 2rem));
+      max-width: min(380px, calc(100% - 2rem));
       height: auto;
       min-height: 0;
       max-height: none;
@@ -1519,6 +1520,7 @@
       html, body {
         height: auto;
         min-height: 100%;
+        max-width: 100%;
         overflow: auto;
         overflow-x: hidden;
       }
@@ -1536,6 +1538,8 @@
         gap: 0.5rem;
         position: relative;
         z-index: 260;
+        backdrop-filter: none;
+        overflow: visible;
       }
 
       .top-left {
@@ -1548,29 +1552,39 @@
 
       .top-right {
         position: fixed;
-        top: var(--top-h);
-        right: 0;
+        top: calc(var(--top-h) + 6px);
+        right: 8px;
+        left: auto;
         z-index: 250;
-        width: min(320px, 86vw);
-        height: calc(100dvh - var(--top-h));
+        width: min(252px, calc(100% - 16px));
+        height: auto;
+        max-height: min(68dvh, 400px);
         margin: 0;
-        padding: 1.15rem 1rem 1.5rem;
+        padding: 0.85rem 0.8rem 1rem;
         display: flex;
         flex-direction: column;
         align-items: stretch;
         flex-wrap: nowrap;
         gap: 0.45rem;
+        overflow-x: hidden;
         overflow-y: auto;
         background: #FFFCFA;
-        border-left: 1px solid rgba(255, 209, 220, 0.55);
-        box-shadow: -16px 0 40px rgba(113, 83, 72, 0.16);
-        transform: translateX(100%);
-        transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+        border: 1px solid rgba(255, 209, 220, 0.65);
+        border-radius: 18px;
+        box-shadow: 0 16px 36px rgba(113, 83, 72, 0.16);
+        transform: translateY(-6px);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
       }
 
       .top-right.is-open,
       .top-right.open {
-        transform: translateX(0);
+        transform: none;
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
       }
 
       .room-drawer-head { display: flex; }
@@ -1662,7 +1676,9 @@
         justify-content: space-between;
         gap: 0.35rem;
         padding: 0.65rem 1rem;
+        max-width: 100%;
         overflow-x: auto;
+        overscroll-behavior-x: contain;
       }
 
       .ctrl-btn span.label { display: none; }
@@ -1673,7 +1689,7 @@
     }
   </style>
 </head>
-<body>
+<body class="is-room">
   <script src="i18n.js"></script>
   <div class="studio">
     <header class="top-bar">
@@ -2020,6 +2036,7 @@
       }
 
       function openSheet(focus) {
+        const alreadyOpen = sheetOverlay.classList.contains('is-open');
         sheetTitle.textContent = t('chatPrefs.sheetTitle');
         styleGroup.hidden = focus === 'request';
         requestGroup.hidden = focus === 'style';
@@ -2030,11 +2047,14 @@
         renderSheetChips();
         sheetOverlay.hidden = false;
         requestAnimationFrame(() => sheetOverlay.classList.add('is-open'));
+        if (!alreadyOpen && window.DayOScrollLock) window.DayOScrollLock.lock();
       }
 
       function closeSheet() {
+        if (!sheetOverlay.classList.contains('is-open')) return;
         sheetOverlay.classList.remove('is-open');
         setTimeout(() => { sheetOverlay.hidden = true; }, 280);
+        if (window.DayOScrollLock) window.DayOScrollLock.unlock();
       }
 
       slowBtn?.addEventListener('click', () => {
@@ -2223,13 +2243,16 @@
       const sheet = document.getElementById(name + 'Sheet');
       overlay.classList.add('active');
       sheet.classList.add('open');
+      if (window.DayOScrollLock) window.DayOScrollLock.lock();
     }
 
     function closeSheet(name) {
       const overlay = document.getElementById(name + 'SheetOverlay');
       const sheet = document.getElementById(name + 'Sheet');
+      const wasOpen = overlay.classList.contains('active');
       overlay.classList.remove('active');
       sheet.classList.remove('open');
+      if (wasOpen && window.DayOScrollLock) window.DayOScrollLock.unlock();
     }
 
     document.querySelectorAll('[data-close-sheet]').forEach((btn) => {
@@ -2238,10 +2261,9 @@
 
     document.querySelectorAll('.sheet-overlay').forEach((overlay) => {
       overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) {
-          overlay.classList.remove('active');
-          overlay.querySelector('.bottom-sheet')?.classList.remove('open');
-        }
+        if (e.target !== overlay) return;
+        const name = overlay.id.replace(/SheetOverlay$/, '');
+        closeSheet(name);
       });
     });
 
@@ -2351,6 +2373,7 @@
 
     function openFeedback() {
       feedbackModal.classList.add('active');
+      if (window.DayOScrollLock) window.DayOScrollLock.lock();
     }
 
     function stopAllMedia() {
@@ -2375,6 +2398,7 @@
 
     document.getElementById('feedbackSubmit').addEventListener('click', () => {
       feedbackModal.classList.remove('active');
+      if (window.DayOScrollLock) window.DayOScrollLock.unlock();
       showToast(t('room.toastFeedbackSent'));
       stopAllMedia();
       setTimeout(() => { window.location.href = 'index.html'; }, 1400);
@@ -2383,12 +2407,13 @@
     document.addEventListener('keydown', (e) => {
       if (e.key !== 'Escape') return;
       document.querySelectorAll('.sheet-overlay.active').forEach((o) => {
-        o.classList.remove('active');
-        o.querySelector('.bottom-sheet')?.classList.remove('open');
+        const name = o.id.replace(/SheetOverlay$/, '');
+        closeSheet(name);
       });
       sentenceOverlay.classList.remove('show');
       if (feedbackModal.classList.contains('active')) {
         feedbackModal.classList.remove('active');
+        if (window.DayOScrollLock) window.DayOScrollLock.unlock();
       }
       if (window.DayOReviewQuiz) window.DayOReviewQuiz.close();
     });
@@ -2573,9 +2598,11 @@
         overlay.hidden = false;
         overlay.classList.add('is-open');
         showStep(1);
+        if (window.DayOScrollLock) window.DayOScrollLock.lock();
       }
 
       function close() {
+        var wasOpen = overlay.classList.contains('is-open') || !overlay.hidden;
         if (advanceTimer) {
           clearTimeout(advanceTimer);
           advanceTimer = 0;
@@ -2583,6 +2610,7 @@
         overlay.classList.remove('is-open');
         overlay.hidden = true;
         busy = false;
+        if (wasOpen && window.DayOScrollLock) window.DayOScrollLock.unlock();
       }
 
       function startQuiz() {

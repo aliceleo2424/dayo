@@ -51,5 +51,6 @@
 
 @layer base {
   * { @apply border-border; }
+  html, body { max-width: 100%; overflow-x: hidden; }
   body { @apply bg-background text-foreground; }
 }

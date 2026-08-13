@@ -2,10 +2,11 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="DayO 대화 파트너 프로필 및 스케줄 관리 포털">
   <title data-i18n="page.title.partner">DayO Partner Studio — 대화 파트너 관리</title>
   <link rel="stylesheet" href="mobile-nav.css">
+  <script src="scroll-lock.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -411,6 +412,10 @@
       align-items: center;
       justify-content: center;
       padding: 1.25rem;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      box-sizing: border-box;
       background: rgba(89, 72, 66, 0.34);
       backdrop-filter: blur(6px);
       opacity: 0;
@@ -975,7 +980,7 @@
       bottom: 1.5rem;
       z-index: 100;
       width: max-content;
-      max-width: calc(100vw - 2rem);
+      max-width: calc(100% - 2rem);
       padding: 0.9rem 1.2rem;
       border: 1px solid var(--coral-pale);
       border-radius: 16px;
@@ -1533,14 +1538,17 @@
 
     function openModal(modal) {
       modal.classList.add('is-open');
-      document.body.style.overflow = 'hidden';
+      if (window.DayOScrollLock) window.DayOScrollLock.lock();
+      else document.body.style.overflow = 'hidden';
       const closeBtn = modal.querySelector('[data-close-modal]');
       if (closeBtn) closeBtn.focus();
     }
 
     function closeModal(modal) {
+      if (!modal.classList.contains('is-open')) return;
       modal.classList.remove('is-open');
-      document.body.style.overflow = '';
+      if (window.DayOScrollLock) window.DayOScrollLock.unlock();
+      else document.body.style.overflow = '';
     }
 
     document.getElementById('photoBtn').addEventListener('click', () => openModal(photoModal));

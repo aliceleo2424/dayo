@@ -55,6 +55,7 @@
   var CSS = [
     '.tk-overlay{position:fixed;inset:0;z-index:920;display:flex;align-items:center;justify-content:center;',
     'padding:1.1rem;background:rgba(92,74,66,.28);backdrop-filter:blur(10px);',
+    'width:100%;max-width:100%;overflow-x:hidden;box-sizing:border-box;',
     'opacity:0;visibility:hidden;transition:opacity .28s ease,visibility .28s ease;}',
     '.tk-overlay.is-open{opacity:1;visibility:visible;}',
     '.tk-modal{position:relative;width:100%;max-width:720px;max-height:min(90vh,90dvh);',
@@ -104,7 +105,7 @@
     '.tk-policy__list li{font-size:.8rem;font-weight:600;line-height:1.55;color:#5C4A42;}',
     '.tk-policy__list strong{font-weight:800;color:#FF6B57;}',
     '.tk-toast{position:fixed;left:50%;bottom:1.5rem;z-index:940;transform:translateX(-50%) translateY(12px);',
-    'max-width:min(360px,90vw);padding:.75rem 1.1rem;border-radius:16px;border:1px solid rgba(255,209,220,.75);',
+    'max-width:min(360px,calc(100% - 2rem));padding:.75rem 1.1rem;border-radius:16px;border:1px solid rgba(255,209,220,.75);',
     'background:#FFFCFA;box-shadow:0 12px 28px rgba(113,83,72,.16);font-size:.86rem;font-weight:700;',
     'opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;text-align:center;}',
     '.tk-toast.is-on{opacity:1;transform:translateX(-50%) translateY(0);}',
@@ -172,14 +173,27 @@
   function open() {
     lastFocused = document.activeElement;
     el.overlay.classList.add('is-open');
-    document.body.style.overflow = 'hidden';
+    if (window.DayOScrollLock) window.DayOScrollLock.lock();
+    else document.body.style.overflow = 'hidden';
     var closeBtn = el.overlay.querySelector('[data-tk-close]');
     if (closeBtn) closeBtn.focus();
   }
 
   function close() {
+    if (!el.overlay.classList.contains('is-open')) return;
     el.overlay.classList.remove('is-open');
-    document.body.style.overflow = '';
+    if (window.DayOScrollLock) window.DayOScrollLock.unlock();
+    else {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      document.body.style.paddingRight = '';
+      document.body.style.transform = '';
+      document.documentElement.style.overflow = '';
+    }
     if (lastFocused && lastFocused.focus) lastFocused.focus();
   }
 
