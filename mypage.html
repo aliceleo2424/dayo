@@ -441,6 +441,27 @@
     .library-desc { margin-top: 0.28rem; color: var(--muted); font-size: 0.74rem; line-height: 1.55; }
     .library-arrow { color: var(--muted); font-size: 1.15rem; }
 
+    .vocab-card { margin-top: 1.25rem; padding: 1.5rem; }
+    .vocab-list {
+      display: grid;
+      gap: 0.65rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .vocab-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.18rem;
+      padding: 0.9rem 1rem;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--cream);
+    }
+    .vocab-item__word { font-size: 0.9rem; font-weight: 800; }
+    .vocab-item__meaning { color: var(--muted); font-size: 0.78rem; font-weight: 700; }
+    .vocab-empty { margin: 0; color: var(--muted); font-size: 0.82rem; line-height: 1.55; }
+
     /* 지난 대화 */
     .history-card { margin-top: 1.25rem; padding: 1.5rem; }
     .history-list { display: grid; gap: 0.75rem; }
@@ -611,6 +632,7 @@
           <p class="status-label" data-i18n="mypage.status.remaining">잔여 대화 세션 이용권</p>
           <p class="status-value" data-ticket-remaining-text>4회 남음</p>
           <p class="status-note" data-i18n="mypage.status.remainingNote">모든 이용권은 결제 후 90일 내 소진 필수.</p>
+          <p class="status-note" style="margin-top:0.45rem;">🍓 보유 Jam <strong data-jam-count>0</strong></p>
           <div class="pass-bar" role="img" data-i18n="mypage.status.passBarAria" data-i18n-attr="aria-label" aria-label="8회 중 4회 사용">
             <span></span>
           </div>
@@ -733,6 +755,17 @@
         </div>
       </section>
     </div>
+
+    <section class="card vocab-card" aria-labelledby="vocabTitle">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title" id="vocabTitle">🍓 복습 단어장</h2>
+          <p class="card-subtitle">퀴즈에서 저장한 오늘의 핵심 표현이에요.</p>
+        </div>
+      </div>
+      <ul class="vocab-list" data-review-vocab hidden></ul>
+      <p class="vocab-empty" data-review-vocab-empty>아직 저장한 단어가 없어요. 복습 퀴즈가 끝나면 단어장에 저장해 보세요.</p>
+    </section>
 
     <section class="card history-card" aria-labelledby="historyTitle">
       <div class="card-head">

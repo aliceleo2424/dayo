@@ -12,6 +12,8 @@ var LAST_LOGIN_KEY = 'lastLoginDate';
 var SPEED_KEY = 'dayo.chat.speed';
 var STYLE_KEY = 'dayo.chat.style';
 var REQUEST_KEY = 'dayo.chat.request';
+var JAM_KEY = 'dayo.jamCount';
+var VOCAB_KEY = 'dayo.reviewVocab';
 
 var supabase = null;
 var profileCache = null;
@@ -84,6 +86,48 @@ function getClientKey() {
   return key;
 }
 
+function parseVocab(raw) {
+  if (Array.isArray(raw)) return raw.filter(function (row) { return row && row.word; });
+  if (typeof raw === 'string' && raw) {
+    try {
+      var parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parseVocab(parsed) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+  return [];
+}
+
+function mergeVocabLists(a, b) {
+  var out = [];
+  parseVocab(a).concat(parseVocab(b)).forEach(function (item) {
+    if (!out.some(function (row) { return row.word === item.word; })) {
+      out.push({
+        word: String(item.word),
+        meaning: item.meaning ? String(item.meaning) : '',
+        kind: item.kind ? String(item.kind) : 'word',
+        savedAt: item.savedAt || new Date().toISOString()
+      });
+    }
+  });
+  return out;
+}
+
+function getJamCount() {
+  var remote = profileCache && profileCache.jam_count;
+  var remoteN = Number(remote);
+  var localN = parseInt(lsGet(JAM_KEY, '0'), 10);
+  var local = Number.isFinite(localN) ? localN : 0;
+  if (Number.isFinite(remoteN)) return Math.max(remoteN, local);
+  return local;
+}
+
+function getVocab() {
+  var remote = profileCache && profileCache.review_vocab;
+  return mergeVocabLists(lsGet(VOCAB_KEY, '[]'), remote);
+}
+
 function defaultsFromLocal() {
   var ticket = parseInt(lsGet(TICKET_KEY, '1'), 10);
   var streak = parseInt(lsGet(STREAK_KEY, '1'), 10);
@@ -96,7 +140,9 @@ function defaultsFromLocal() {
     last_login_date: lsGet(LAST_LOGIN_KEY, ''),
     speech_speed: lsGet(SPEED_KEY, 'slow') || 'slow',
     preferred_style: lsGet(STYLE_KEY, 'casual') || 'casual',
-    preferred_request: lsGet(REQUEST_KEY, 'praise') || 'praise'
+    preferred_request: lsGet(REQUEST_KEY, 'praise') || 'praise',
+    jam_count: getJamCount(),
+    review_vocab: getVocab()
   };
 }
 
@@ -110,10 +156,21 @@ function applyProfileToLocal(profile) {
   if (profile.speech_speed) lsSet(SPEED_KEY, profile.speech_speed);
   if (profile.preferred_style) lsSet(STYLE_KEY, profile.preferred_style);
   if (profile.preferred_request) lsSet(REQUEST_KEY, profile.preferred_request);
+  if (profile.jam_count != null) {
+    var jam = Math.max(Number(profile.jam_count) || 0, parseInt(lsGet(JAM_KEY, '0'), 10) || 0);
+    lsSet(JAM_KEY, jam);
+    profile.jam_count = jam;
+  }
+  if (profile.review_vocab != null) {
+    var vocab = mergeVocabLists(lsGet(VOCAB_KEY, '[]'), profile.review_vocab);
+    lsSet(VOCAB_KEY, JSON.stringify(vocab));
+    profile.review_vocab = vocab;
+  }
 
   if (window.DayOTicketWallet && typeof window.DayOTicketWallet.syncUI === 'function') {
     window.DayOTicketWallet.syncUI(Number(profile.ticket_count));
   }
+  syncRewardUI();
   document.dispatchEvent(new CustomEvent('dayo:profilechange', { detail: profile }));
   document.dispatchEvent(new CustomEvent('dayo:ticketchange', {
     detail: { ticketCount: Number(profile.ticket_count) || 0, added: 0 }
@@ -150,9 +207,18 @@ async function fetchOrCreateProfile() {
       return profileCache;
     }
 
-    var insertPayload = Object.assign({}, local, {
+    var insertPayload = {
+      client_key: local.client_key,
+      user_name: local.user_name || '',
+      email: local.email || '',
+      ticket_count: local.ticket_count,
+      streak_count: local.streak_count,
+      last_login_date: local.last_login_date || '',
+      speech_speed: local.speech_speed,
+      preferred_style: local.preferred_style,
+      preferred_request: local.preferred_request,
       updated_at: new Date().toISOString()
-    });
+    };
     var inserted = await client.from('profiles').insert(insertPayload).select('*').single();
     if (inserted.error) throw inserted.error;
     profileCache = inserted.data;
@@ -175,6 +241,8 @@ function mirrorLocalFields(profile) {
   if (profile.speech_speed) lsSet(SPEED_KEY, profile.speech_speed);
   if (profile.preferred_style) lsSet(STYLE_KEY, profile.preferred_style);
   if (profile.preferred_request) lsSet(REQUEST_KEY, profile.preferred_request);
+  if (profile.jam_count != null) lsSet(JAM_KEY, Number(profile.jam_count) || 0);
+  if (profile.review_vocab != null) lsSet(VOCAB_KEY, JSON.stringify(parseVocab(profile.review_vocab)));
 }
 
 async function updateProfile(partial, options) {
@@ -206,15 +274,30 @@ async function updateProfile(partial, options) {
       preferred_request: next.preferred_request || 'praise',
       updated_at: next.updated_at
     };
+    var withRewards = Object.assign({}, payload, {
+      jam_count: Number(next.jam_count) || 0,
+      review_vocab: parseVocab(next.review_vocab)
+    });
 
     var result = await client
       .from('profiles')
-      .upsert(payload, { onConflict: 'client_key' })
+      .upsert(withRewards, { onConflict: 'client_key' })
       .select('*')
       .single();
 
+    if (result.error) {
+      result = await client
+        .from('profiles')
+        .upsert(payload, { onConflict: 'client_key' })
+        .select('*')
+        .single();
+    }
+
     if (result.error) throw result.error;
-    profileCache = result.data;
+    profileCache = Object.assign({}, result.data, {
+      jam_count: withRewards.jam_count,
+      review_vocab: withRewards.review_vocab
+    });
     return profileCache;
   } catch (err) {
     console.warn('[DayO] profiles update failed — localStorage kept', err);
@@ -241,6 +324,64 @@ function getProfile() {
   return profileCache || defaultsFromLocal();
 }
 
+function syncRewardUI() {
+  var jam = getJamCount();
+  Array.prototype.forEach.call(document.querySelectorAll('[data-jam-count]'), function (el) {
+    el.textContent = String(jam);
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-jam-count-text]'), function (el) {
+    el.textContent = jam + ' Jam';
+  });
+
+  var items = getVocab();
+  Array.prototype.forEach.call(document.querySelectorAll('[data-review-vocab]'), function (list) {
+    list.innerHTML = items.map(function (item) {
+      var meaning = item.meaning ? escapeHtml(item.meaning) : '';
+      return '<li class="vocab-item">' +
+        '<span class="vocab-item__word">' + escapeHtml(item.word) + '</span>' +
+        (meaning ? '<span class="vocab-item__meaning">' + meaning + '</span>' : '') +
+        '</li>';
+    }).join('');
+    list.hidden = items.length === 0;
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-review-vocab-empty]'), function (el) {
+    el.hidden = items.length > 0;
+  });
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function addJam(amount) {
+  var add = Math.max(0, Math.floor(Number(amount) || 0));
+  var next = getJamCount() + add;
+  lsSet(JAM_KEY, next);
+  return updateProfile({ jam_count: next }).then(function (profile) {
+    document.dispatchEvent(new CustomEvent('dayo:jamchange', {
+      detail: { jamCount: next, added: add }
+    }));
+    syncRewardUI();
+    return { jamCount: next, added: add, profile: profile };
+  });
+}
+
+function mergeVocab(items) {
+  var next = mergeVocabLists(getVocab(), items || []);
+  lsSet(VOCAB_KEY, JSON.stringify(next));
+  return updateProfile({ review_vocab: next }).then(function (profile) {
+    document.dispatchEvent(new CustomEvent('dayo:vocabchange', {
+      detail: { vocab: next }
+    }));
+    syncRewardUI();
+    return next;
+  });
+}
+
 function ready() {
   if (!readyPromise) readyPromise = fetchOrCreateProfile();
   return readyPromise;
@@ -252,9 +393,17 @@ window.DayOProfileStore = {
   updateProfile: updateProfile,
   fetchOrCreateProfile: fetchOrCreateProfile,
   rebindIdentity: rebindIdentity,
-  getClientKey: getClientKey
+  getClientKey: getClientKey,
+  getJamCount: getJamCount,
+  getVocab: getVocab,
+  addJam: addJam,
+  mergeVocab: mergeVocab,
+  syncRewardUI: syncRewardUI
 };
 
-ready().catch(function (e) {
+ready().then(function () {
+  syncRewardUI();
+}).catch(function (e) {
   console.warn('[DayO] profile bootstrap error', e);
+  syncRewardUI();
 });
