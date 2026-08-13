@@ -56,7 +56,7 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
 
               <TabsContent value="test">
                 <Card>
-                  <CardHeader><CardTitle>10초 스피킹 진단 결과</CardTitle></CardHeader>
+                  <CardHeader><CardTitle>스피킹 진단 결과</CardTitle></CardHeader>
                   <CardContent>
                     {testResult ? (
                       <div className="space-y-4">

@@ -83,6 +83,7 @@
     '@keyframes bkFade{from{opacity:0;transform:translateX(18px);}to{opacity:1;transform:translateX(0);}}',
     '.bk-label{margin-bottom:.6rem;font-size:.86rem;font-weight:700;}',
     '.bk-hint{margin-bottom:.6rem;font-size:.76rem;color:var(--text-muted,#9A8580);}',
+    '.bk-summary+.bk-hint{margin-top:.85rem;margin-bottom:0;line-height:1.55;}',
     '.bk-group{margin-bottom:1.4rem;}',
     '.bk-group:last-child{margin-bottom:0;}',
     '.bk-chips{display:flex;flex-wrap:wrap;gap:.5rem;}',
@@ -260,6 +261,7 @@
             '<div class="bk-group">' +
               '<p class="bk-label">' + t('book.summaryTitle') + '</p>' +
               '<dl class="bk-summary" id="bkSummary"></dl>' +
+              '<p class="bk-hint" id="bkPolicyNote">' + t('book.policyNote') + '</p>' +
             '</div>' +
           '</section>' +
         '</div>' +

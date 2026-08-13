@@ -12,42 +12,42 @@
   var PLANS = [
     {
       id: 'trial',
-      badge: '첫 방문 전용 ☕️',
-      title: '첫 1회 체험권',
+      badge: '첫 가입 전용 ☕️',
+      title: '첫 수업 체험권',
       price: '9,900원',
-      meta: '1장',
-      copy: '1초 찍먹 체험가',
+      meta: '1회',
+      copy: '첫 가입 전용 체험가',
       tickets: 1,
       featured: false
     },
     {
       id: 'single',
       badge: '',
-      title: '1회 단품권',
-      price: '16,000원',
-      meta: '1장',
-      copy: '필요할 때 가볍게 구매하는 기본 티켓',
+      title: '1회 단품 이용권',
+      price: '19,900원',
+      meta: '1회',
+      copy: '필요할 때 한 회씩 가볍게',
       tickets: 1,
       featured: false
     },
     {
       id: 'pack10',
-      badge: '🔥 BEST! 1장 무료',
+      badge: '🔥 BEST! 1회 무료',
       title: '10회 패키지',
-      price: '160,000원',
-      meta: '10장 + 1장 증정 (총 11장)',
-      copy: '회당 약 14,545원꼴',
+      price: '199,000원',
+      meta: '10회 결제 + 1회 서비스 (총 11회)',
+      copy: '10회 가격에 1회(19,900원 상당) 무료 증정!',
       tickets: 11,
       featured: true
     },
     {
-      id: 'month',
-      badge: '🚀 1일 1스피킹 챌린지',
-      title: '한 달 완주 패키지',
-      price: '400,000원',
-      meta: '25장 + 3장 증정 (총 28장)',
-      copy: '3장 무료 증정',
-      tickets: 28,
+      id: 'pack3m',
+      badge: '🚀 실속 패키지',
+      title: '3개월 속성 패키지',
+      price: '597,000원',
+      meta: '30회 결제 + 4회 서비스 (총 34회)',
+      copy: '30회 가격으로 총 34회 이용! 4회(79,600원 상당) 무료 증정 / 90일 내 자유 예약',
+      tickets: 34,
       featured: false
     }
   ];
@@ -143,17 +143,16 @@
         '<div class="tk-head">' +
           '<p class="tk-eyebrow">TICKETS</p>' +
           '<h2 class="tk-title" id="tkTitle">DayO 세션 이용권 ☕️</h2>' +
-          '<p class="tk-sub">1회 20분 1:1 라이브 대화 + AI 코파일럿 &amp; 분석 리포트 포함</p>' +
+          '<p class="tk-sub">기준 세션: 총 30분 (25분 화상 대화 + 5분 미니 퀴즈/리포트)</p>' +
         '</div>' +
         '<div class="tk-body">' +
           '<div class="tk-grid">' + PLANS.map(planCard).join('') + '</div>' +
-          '<aside class="tk-policy" aria-label="이용 및 취소 정책">' +
-            '<p class="tk-policy__title">이용 · 취소 · 노쇼 안내</p>' +
+          '<aside class="tk-policy" aria-label="세션 규정 및 이용 안내">' +
+            '<p class="tk-policy__title">세션 규정 및 이용 안내</p>' +
             '<ul class="tk-policy__list">' +
-              '<li>📌 <strong>유효기간:</strong> 결제일로부터 90일 (넉넉한 사용 기간)</li>' +
-              '<li>🔄 <strong>취소 규정:</strong> 수업 시작 1시간 전까지 100% 무료 취소 (티켓 복구)</li>' +
-              '<li>💌 <strong>노쇼 &amp; 1시간 이내 취소:</strong> 티켓 1회 차감 + <strong>☕️ 복습용 토닥토닥 1분 리포트</strong> 이메일 자동 발송</li>' +
-              '<li>⚠️ <strong>환불 안내:</strong> 구매 후 미사용 티켓은 환불 불가</li>' +
+              '<li>📌 <strong>유효기간:</strong> 모든 이용권은 결제 후 90일 내 소진 필수.</li>' +
+              '<li>🔄 <strong>변경/취소:</strong> 수업 요일 및 시간 변경/취소는 수업 시작 1시간 전까지 가능.</li>' +
+              '<li>💌 <strong>노쇼:</strong> 수업 시작 1시간 이내 취소 및 노쇼 발생 시 티켓이 차감되며 \'토닥토닥 리포트\'가 발송됨.</li>' +
             '</ul>' +
           '</aside>' +
         '</div>' +

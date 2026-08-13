@@ -114,12 +114,12 @@
       ES: 'Un compañero cálido que te espera en cualquier lugar ☕️'
     },
     'login.desc': {
-      KO: '3초 만에 시작하고 나만의 AI 스피킹 리포트를 받아보세요!',
-      EN: 'Start in 3 seconds and get your own AI speaking report!',
-      ZH: '3秒开启，领取专属 AI 口语报告！',
-      JA: '3秒ではじめて、あなただけのAIスピーキングレポートを受け取りましょう！',
-      FR: 'Commencez en 3 secondes et recevez votre rapport IA !',
-      ES: '¡Empieza en 3 segundos y recibe tu informe de speaking con IA!'
+      KO: '로그인하고 나만의 AI 스피킹 리포트를 받아보세요!',
+      EN: 'Sign in and get your own AI speaking report!',
+      ZH: '登录后领取专属 AI 口语报告！',
+      JA: 'ログインして、あなただけのAIスピーキングレポートを受け取りましょう！',
+      FR: 'Connectez-vous et recevez votre rapport IA !',
+      ES: '¡Inicia sesión y recibe tu informe de speaking con IA!'
     },
     'login.emailPlaceholder': {
       KO: '이메일 주소 입력', EN: 'Enter email address', ZH: '输入邮箱地址', JA: 'メールアドレスを入力', FR: 'Adresse e-mail', ES: 'Correo electrónico'
@@ -134,12 +134,12 @@
       KO: 'DayO 시작하기 🚀', EN: 'Start DayO 🚀', ZH: '开始 DayO 🚀', JA: 'DayOをはじめる 🚀', FR: 'Commencer DayO 🚀', ES: 'Empezar DayO 🚀'
     },
     'login.socialDivider': {
-      KO: '또는 소셜 계정으로 1초 만에 시작',
-      EN: 'Or start in 1 second with social',
-      ZH: '或用社交账号 1 秒开始',
-      JA: 'またはソーシャルアカウントで1秒スタート',
-      FR: 'Ou commencez en 1 seconde via un compte social',
-      ES: 'O empieza en 1 segundo con una cuenta social'
+      KO: '또는 소셜 계정으로 시작하기',
+      EN: 'Or continue with a social account',
+      ZH: '或使用社交账号开始',
+      JA: 'またはソーシャルアカウントで始める',
+      FR: 'Ou continuer avec un compte social',
+      ES: 'O continúa con una cuenta social'
     },
     'login.social.kakao': {
       KO: '카카오로 시작하기', EN: 'Continue with Kakao', ZH: '用 Kakao 开始', JA: 'Kakaoで始める', FR: 'Continuer avec Kakao', ES: 'Continuar con Kakao'
@@ -167,12 +167,12 @@
       ES: '🎉 ¡Bienvenido/a a DayO, {name}!'
     },
     'login.welcomeBody': {
-      KO: '첫 1회 무료 대화 티켓 ☕이 발급되었습니다. 지금 대화를 시작해 볼까요?',
-      EN: 'Your first free conversation ticket ☕ is ready. Shall we start chatting now?',
-      ZH: '已发放首次免费对话券 ☕。现在就开始对话吧？',
-      JA: '初回無料会話チケット☕が発行されました。今すぐ会話を始めますか？',
-      FR: 'Votre premier ticket de conversation gratuit ☕ est prêt. On commence ?',
-      ES: 'Tu primer ticket de conversación gratis ☕ ya está listo. ¿Empezamos?'
+      KO: '첫 수업 체험권은 9,900원이에요. 총 30분(25분 화상 대화 + 5분 미니 퀴즈/리포트)으로 시작해 볼까요?',
+      EN: 'Your first-class trial pass is 9,900 KRW. A session is 30 minutes (25 min live chat + 5 min mini quiz/report). Ready to start?',
+      ZH: '首次体验券为9,900韩元。每节课共30分钟（25分钟视频对话 + 5分钟小测验/报告）。要开始吗？',
+      JA: '初回体験チケットは9,900ウォンです。1回30分（25分のビデオ会話 + 5分のミニクイズ/レポート）で始めましょうか？',
+      FR: "Le pass d'essai (1re séance) est à 9 900 KRW. Une session dure 30 min (25 min de conversation + 5 min de mini-quiz/rapport). On commence ?",
+      ES: 'El pase de prueba (1.ª clase) cuesta 9.900 KRW. Cada sesión dura 30 min (25 min de charla + 5 min de mini quiz/informe). ¿Empezamos?'
     },
     'login.welcomeCta': {
       KO: '지금 바로 시작하기', EN: 'Start right now', ZH: '马上开始', JA: '今すぐはじめる', FR: 'Commencer maintenant', ES: 'Empezar ahora'
@@ -186,7 +186,7 @@
       ES: '¡Bienvenido/a, {name}! ¿Listo/a para una charla cálida? 💖'
     },
     'login.quick': {
-      KO: '☕ 3초 만에 로그인하기', EN: '☕ Quick sign in', ZH: '☕ 3秒登录', JA: '☕ 3秒ログイン', FR: '☕ Connexion rapide', ES: '☕ Inicio rápido'
+      KO: '☕ 로그인하기', EN: '☕ Sign in', ZH: '☕ 登录', JA: '☕ ログイン', FR: '☕ Connexion', ES: '☕ Iniciar sesión'
     },
     'login.email': {
       KO: '✉️ 이메일로 로그인', EN: '✉️ Sign in with email', ZH: '✉️ 邮箱登录', JA: '✉️ メールでログイン', FR: '✉️ Connexion par e-mail', ES: '✉️ Iniciar con email'
@@ -280,6 +280,14 @@
     'mypage.status.remainingValue': {
       KO: '4회 남음', EN: '4 left', ZH: '剩余4次', JA: '残り4回', FR: '4 restantes', ES: '4 restantes'
     },
+    'mypage.status.remainingNote': {
+      KO: '모든 이용권은 결제 후 90일 내 소진 필수.',
+      EN: 'All passes must be used within 90 days of payment.',
+      ZH: '所有次数券须在付款后90天内用完。',
+      JA: 'すべての利用券は決済後90日以内に使い切る必要があります。',
+      FR: 'Tous les tickets doivent être utilisés dans les 90 jours après paiement.',
+      ES: 'Todos los pases deben usarse en 90 días tras el pago.'
+    },
     'mypage.status.timeNote': {
       KO: '연속 3주째 대화를 이어가는 중이에요 💖', EN: '3 weeks in a row — keep it up! 💖', ZH: '已连续3周对话 💖', JA: '3週連続で会話中 💖', FR: '3 semaines d\'affilée 💖', ES: '¡3 semanas seguidas! 💖'
     },
@@ -287,12 +295,12 @@
       KO: '📅 내 예약 세션', EN: '📅 Upcoming Sessions', ZH: '📅 我的预约', JA: '📅 予約セッション', FR: '📅 Sessions à venir', ES: '📅 Próximas sesiones'
     },
     'mypage.sessions.sub': {
-      KO: '예약한 대화 파트너와의 일정이에요.',
-      EN: 'Your schedule with conversation partners.',
-      ZH: '与对话伙伴的预约日程。',
-      JA: '予約したパートナーとの日程です。',
-      FR: 'Votre planning avec les partenaires.',
-      ES: 'Tu agenda con los compañeros.'
+      KO: '수업 시작 1시간 전까지 요일·시간 변경/취소가 가능해요.',
+      EN: 'You can change or cancel the day/time until 1 hour before class.',
+      ZH: '开课1小时前可更改或取消星期和时间。',
+      JA: '授業開始1時間前まで曜日・時間の変更/キャンセルが可能です。',
+      FR: 'Changement ou annulation du jour/heure possible jusqu’à 1 h avant le cours.',
+      ES: 'Puedes cambiar o cancelar día/hora hasta 1 hora antes de la clase.'
     },
     'mypage.sessions.enter': {
       KO: '☕ 대화 스튜디오 입장', EN: '☕ Enter Studio', ZH: '☕ 进入对话工作室', JA: '☕ スタジオ入室', FR: '☕ Entrer au Studio', ES: '☕ Entrar al Estudio'
@@ -542,7 +550,7 @@
       ES: 'Desde el OPIc hasta el working holiday, charlas 1:1 en vivo mirándote a los ojos.'
     },
     'hero.badge': {
-      KO: '🍰 10초 만에 끝나는 내 회화 수준 진단', EN: '🍰 A 10-second speaking level check', ZH: '🍰 10秒完成的会话水平诊断', JA: '🍰 10秒で終わる会話レベル診断', FR: '🍰 Diagnostic en 10 secondes', ES: '🍰 Diagnóstico en 10 segundos'
+      KO: '🍰 내 회화 수준 진단', EN: '🍰 Speaking level check', ZH: '🍰 会话水平诊断', JA: '🍰 会話レベル診断', FR: '🍰 Diagnostic de niveau', ES: '🍰 Diagnóstico de nivel'
     },
     'hero.cta': {
       KO: '🍰 내 스피킹 감각 무료로 테스트하기 ›', EN: '🍰 Test my speaking sense for free ›', ZH: '🍰 免费测试我的口语感觉 ›', JA: '🍰 スピーキング感覚を無料でテスト ›', FR: '🍰 Tester gratuitement mon niveau ›', ES: '🍰 Probar gratis mi nivel de habla ›'
@@ -563,15 +571,15 @@
     },
     'journey.step1.tag': { KO: 'STEP 01', EN: 'STEP 01', ZH: 'STEP 01', JA: 'STEP 01', FR: 'ÉTAPE 01', ES: 'PASO 01' },
     'journey.step1.title': {
-      KO: '10초 감각 테스트', EN: '10-second sense test', ZH: '10秒感觉测试', JA: '10秒感覚テスト', FR: 'Test de 10 secondes', ES: 'Prueba de 10 segundos'
+      KO: '스피킹 감각 테스트', EN: 'Speaking sense test', ZH: '口语感觉测试', JA: 'スピーキング感覚テスト', FR: 'Test de speaking', ES: 'Prueba de speaking'
     },
     'journey.step1.desc': {
-      KO: '부담 없이 초단기로 확인하는 내 스피킹 위치',
-      EN: 'A quick, pressure-free check of where your speaking stands.',
-      ZH: '轻松快速确认我的口语水平。',
-      JA: '気軽に短時間で確認できるスピーキングの立ち位置。',
-      FR: 'Un test rapide et sans pression de votre niveau.',
-      ES: 'Una prueba rápida y sin presión de tu nivel de habla.'
+      KO: '부담 없이 확인하는 내 스피킹 위치',
+      EN: 'A pressure-free check of where your speaking stands.',
+      ZH: '轻松确认我的口语水平。',
+      JA: '気軽に確認できるスピーキングの立ち位置。',
+      FR: 'Un test sans pression de votre niveau.',
+      ES: 'Una prueba sin presión de tu nivel de habla.'
     },
     'journey.step2.tag': { KO: 'STEP 02', EN: 'STEP 02', ZH: 'STEP 02', JA: 'STEP 02', FR: 'ÉTAPE 02', ES: 'PASO 02' },
     'journey.step2.title': {
@@ -689,7 +697,7 @@
       KO: '내 스피킹 감각 알아보기', EN: 'Discover your speaking sense', ZH: '了解我的口语感觉', JA: 'スピーキング感覚を知る', FR: 'Découvrez votre niveau', ES: 'Descubre tu nivel de habla'
     },
     'quiz.title': {
-      KO: '10초 스피킹 감각 테스트', EN: '10-second speaking sense test', ZH: '10秒口语感觉测试', JA: '10秒スピーキング感覚テスト', FR: 'Test de 10 secondes', ES: 'Prueba de 10 segundos'
+      KO: '스피킹 감각 테스트', EN: 'Speaking sense test', ZH: '口语感觉测试', JA: 'スピーキング感覚テスト', FR: 'Test de speaking', ES: 'Prueba de speaking'
     },
     'quiz.closeAria': { KO: '닫기', EN: 'Close', ZH: '关闭', JA: '閉じる', FR: 'Fermer', ES: 'Cerrar' },
     'quiz.q1.tag': { KO: '☕ 카페', EN: '☕ Café', ZH: '☕ 咖啡馆', JA: '☕ カフェ', FR: '☕ Café', ES: '☕ Café' },
@@ -820,12 +828,12 @@
       KO: '수업은 어떻게 진행되나요?', EN: 'How do sessions work?', ZH: '课程是如何进行的？', JA: 'レッスンはどのように進みますか？', FR: 'Comment se déroulent les sessions ?', ES: '¿Cómo funcionan las sesiones?'
     },
     'chatbot.a.class': {
-      KO: 'DayO 수업은 1:1 화상 회화로 진행돼요! 원어민 대화 파트너와 눈을 마주치며 실제 상황 대화를 연습하고, AI 코파일럿이 실시간으로 표현을 도와드린답니다.',
-      EN: 'DayO sessions are 1:1 video conversations! You practice real situations while making eye contact with a native conversation partner, and an AI copilot helps with expressions in real time.',
-      ZH: 'DayO课程以1:1视频对话进行！与母语对话伙伴眼神交流练习真实情境对话，AI副驾会实时帮助您表达。',
-      JA: 'DayOのレッスンは1:1のビデオ会話です！ネイティブの会話パートナーと目を合わせながら実践的な会話を練習し、AIコパイロットがリアルタイムで表現をサポートします。',
-      FR: "Les sessions DayO sont des conversations vidéo 1:1 ! Vous pratiquez des situations réelles en regardant votre partenaire natif dans les yeux, avec l'aide en temps réel d'un copilote IA.",
-      ES: '¡Las sesiones de DayO son conversaciones en video 1:1! Practicas situaciones reales mirando a los ojos a tu compañero nativo, con la ayuda en tiempo real de un copiloto IA.'
+      KO: 'DayO 수업은 1회 총 30분이에요! 25분 동안 원어민 대화 파트너와 1:1 화상 대화를 하고, 이어서 5분 미니 퀴즈/리포트로 마무리해요. AI 코파일럿이 실시간으로 표현도 도와드린답니다.',
+      EN: 'Each DayO session is 30 minutes total: 25 minutes of 1:1 video chat with a native partner, plus a 5-minute mini quiz/report. An AI copilot also helps with expressions in real time.',
+      ZH: 'DayO每节课共30分钟：25分钟与母语伙伴1:1视频对话，再加上5分钟小测验/报告。AI副驾也会实时帮助您表达。',
+      JA: 'DayOのレッスンは1回合計30分です。25分の1:1ビデオ会話のあと、5分のミニクイズ/レポートで締めくくります。AIコパイロットがリアルタイムで表現もサポートします。',
+      FR: "Chaque session DayO dure 30 min : 25 min de conversation vidéo 1:1 avec un partenaire natif, puis 5 min de mini-quiz/rapport. Un copilote IA aide aussi en temps réel.",
+      ES: 'Cada sesión de DayO dura 30 min: 25 min de charla en video 1:1 con un compañero nativo, más 5 min de mini quiz/informe. Un copiloto IA también te ayuda en tiempo real.'
     },
     'chatbot.q.teachers': {
       KO: '대화 파트너는 어떤 분들인가요?', EN: 'Who are the conversation partners?', ZH: '对话伙伴是怎样的人？', JA: '会話パートナーはどんな方ですか？', FR: 'Qui sont les partenaires de conversation ?', ES: '¿Quiénes son los compañeros de conversación?'
@@ -850,15 +858,31 @@
       ES: '¡Claro! Está bien aunque seas principiante total. Explicamos primero en coreano y pasamos poco a poco al inglés.'
     },
     'chatbot.q.free': {
-      KO: '10초 스피킹 테스트는 무료인가요?', EN: 'Is the 10-second speaking test free?', ZH: '10秒口语测试是免费的吗？', JA: '10秒スピーキングテストは無料ですか？', FR: 'Le test de 10 secondes est-il gratuit ?', ES: '¿La prueba de 10 segundos es gratis?'
+      KO: '스피킹 테스트는 무료인가요?', EN: 'Is the speaking test free?', ZH: '口语测试是免费的吗？', JA: 'スピーキングテストは無料ですか？', FR: 'Le test de speaking est-il gratuit ?', ES: '¿La prueba de speaking es gratis?'
     },
     'chatbot.a.free': {
-      KO: '네, 10초 스피킹 감각 테스트는 완전 무료예요! 부담 없이 나의 스피킹 감각을 확인해 보세요.',
-      EN: "Yes, the 10-second speaking sense test is completely free! Check your speaking sense with no pressure at all.",
-      ZH: '是的，10秒口语感觉测试完全免费！请轻松确认您的口语感觉。',
-      JA: 'はい、10秒スピーキング感覚テストは完全無料です！気軽にご自身のスピーキング感覚を確認してください。',
-      FR: "Oui, le test de sensibilité de 10 secondes est entièrement gratuit ! Vérifiez votre niveau sans aucune pression.",
-      ES: '¡Sí, la prueba de 10 segundos es completamente gratis! Revisa tu nivel de habla sin presión.'
+      KO: '네, 스피킹 감각 테스트는 완전 무료예요! 부담 없이 나의 스피킹 감각을 확인해 보세요.',
+      EN: "Yes, the speaking sense test is completely free! Check your speaking sense with no pressure at all.",
+      ZH: '是的，口语感觉测试完全免费！请轻松确认您的口语感觉。',
+      JA: 'はい、スピーキング感覚テストは完全無料です！気軽にご自身のスピーキング感覚を確認してください。',
+      FR: "Oui, le test de speaking est entièrement gratuit ! Vérifiez votre niveau sans aucune pression.",
+      ES: '¡Sí, la prueba de speaking es completamente gratis! Revisa tu nivel de habla sin presión.'
+    },
+    'chatbot.q.policy': {
+      KO: '취소·일정 변경 규정은 어떻게 되나요?',
+      EN: 'What are the cancel and reschedule rules?',
+      ZH: '取消和改期规定是怎样的？',
+      JA: 'キャンセル・日程変更のルールは？',
+      FR: 'Quelles sont les règles d’annulation et de report ?',
+      ES: '¿Cuáles son las reglas de cancelación y cambio?'
+    },
+    'chatbot.a.policy': {
+      KO: '모든 이용권은 결제 후 90일 내 소진 필수예요. 수업 요일 및 시간 변경/취소는 수업 시작 1시간 전까지 가능하고, 수업 시작 1시간 이내 취소 및 노쇼 발생 시 티켓이 차감되며 ‘토닥토닥 리포트’가 발송돼요.',
+      EN: 'All passes must be used within 90 days of payment. You can change or cancel the day/time until 1 hour before class. If you cancel within 1 hour of start or no-show, a ticket is deducted and a “Todaktodak Report” is sent.',
+      ZH: '所有次数券须在付款后90天内用完。开课1小时前可更改/取消星期和时间。开课1小时内取消或未到，将扣除次数并发送“托达克托达克报告”。',
+      JA: 'すべての利用券は決済後90日以内に使い切る必要があります。授業の曜日・時間の変更/キャンセルは開始1時間前まで可能です。開始1時間以内のキャンセルやノーショー時はチケットが消化され、「トダクトダクレポート」が送られます。',
+      FR: 'Tous les tickets doivent être utilisés dans les 90 jours après paiement. Changement/annulation du jour et de l’heure possibles jusqu’à 1 h avant le cours. Annulation dans l’heure ou absence : un ticket est débité et un « Todaktodak Report » est envoyé.',
+      ES: 'Todos los pases deben usarse en 90 días tras el pago. Puedes cambiar/cancelar día y hora hasta 1 hora antes. Si cancelas en esa hora o no asistes, se descuenta un ticket y se envía el “Todaktodak Report”.'
     },
 
     /* ===== Booking modal (booking-modal.js) ===== */
@@ -912,6 +936,14 @@
     },
     'book.summaryTitle': {
       KO: '이렇게 예약할게요 🎉', EN: "Here's your booking 🎉", ZH: '将这样为您预约 🎉', JA: 'このように予約します 🎉', FR: 'Voici votre réservation 🎉', ES: 'Así queda tu reserva 🎉'
+    },
+    'book.policyNote': {
+      KO: '수업 요일 및 시간 변경/취소는 수업 시작 1시간 전까지 가능해요. 1시간 이내 취소·노쇼 시 티켓이 차감되며 ‘토닥토닥 리포트’가 발송돼요.',
+      EN: 'You can change or cancel the day/time until 1 hour before class. Cancel within 1 hour or no-show: a ticket is deducted and a “Todaktodak Report” is sent.',
+      ZH: '开课1小时前可更改/取消星期和时间。开课1小时内取消或未到，将扣除次数并发送“托达克托达克报告”。',
+      JA: '授業の曜日・時間の変更/キャンセルは開始1時間前まで可能です。開始1時間以内のキャンセルやノーショー時はチケットが消化され、「トダクトダクレポート」が送られます。',
+      FR: 'Changement/annulation du jour et de l’heure jusqu’à 1 h avant. Annulation dans l’heure ou absence : un ticket est débité et un « Todaktodak Report » est envoyé.',
+      ES: 'Puedes cambiar/cancelar día y hora hasta 1 hora antes. Si cancelas en esa hora o no asistes, se descuenta un ticket y se envía el “Todaktodak Report”.'
     },
     'book.summaryLanguage': { KO: '언어', EN: 'Language', ZH: '语言', JA: '言語', FR: 'Langue', ES: 'Idioma' },
     'book.summaryPurpose': { KO: '목적', EN: 'Purpose', ZH: '目的', JA: '目的', FR: 'Objectif', ES: 'Propósito' },

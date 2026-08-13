@@ -8,7 +8,7 @@ import { UTM_LABELS } from "./types";
 export const dashboardKpis: DashboardKpi[] = [
   { label: "실시간 매출", value: "₩12,840,000", change: 8.4, changeLabel: "전일 대비" },
   { label: "신규 가입자", value: "127", change: 12.1, changeLabel: "전주 대비" },
-  { label: "10초 테스트 완료", value: "342", change: 5.7, changeLabel: "전일 대비" },
+  { label: "스피킹 테스트 완료", value: "342", change: 5.7, changeLabel: "전일 대비" },
   { label: "CVR (전환율)", value: "18.6%", change: -1.2, changeLabel: "전주 대비" },
 ];
 
@@ -30,16 +30,16 @@ export const purposeMetrics: PurposeMetric[] = [
 ];
 
 export const activityFeed: ActivityFeedItem[] = [
-  { id: "a1", type: "payment", userName: "김서연", detail: "프리미엄 3개월 패키지 결제", amount: 297000, timestamp: "2026-07-28T18:42:00" },
+  { id: "a1", type: "payment", userName: "김서연", detail: "3개월 속성 패키지 결제", amount: 597000, timestamp: "2026-07-28T18:42:00" },
   { id: "a2", type: "signup", userName: "이하늘", detail: "Instagram UTM 유입 가입", timestamp: "2026-07-28T18:38:00" },
-  { id: "a3", type: "test", userName: "박지민", detail: "10초 스피킹 테스트 완료 (점수 78)", timestamp: "2026-07-28T18:35:00" },
+  { id: "a3", type: "test", userName: "박지민", detail: "스피킹 테스트 완료 (점수 78)", timestamp: "2026-07-28T18:35:00" },
   { id: "a4", type: "payment", userName: "최유진", detail: "오픽 집중 코스 결제", amount: 149000, timestamp: "2026-07-28T18:30:00" },
   { id: "a5", type: "signup", userName: "정민아", detail: "YouTube 인플루언서 코드 가입", timestamp: "2026-07-28T18:22:00" },
-  { id: "a6", type: "test", userName: "한소희", detail: "10초 스피킹 테스트 완료 (점수 65)", timestamp: "2026-07-28T18:15:00" },
+  { id: "a6", type: "test", userName: "한소희", detail: "스피킹 테스트 완료 (점수 65)", timestamp: "2026-07-28T18:15:00" },
 ];
 
 export const users: User[] = [
-  { id: "u001", name: "김서연", email: "seoyeon.k@email.com", purpose: "opic", language: "english", utmSource: "instagram", utmCampaign: "opic_summer", testScore: 82, testCompleted: true, paymentStatus: "paid", totalSpent: 297000, joinedAt: "2026-07-15", lastActiveAt: "2026-07-28T18:42:00", phone: "010-1234-5678" },
+  { id: "u001", name: "김서연", email: "seoyeon.k@email.com", purpose: "opic", language: "english", utmSource: "instagram", utmCampaign: "opic_summer", testScore: 82, testCompleted: true, paymentStatus: "paid", totalSpent: 597000, joinedAt: "2026-07-15", lastActiveAt: "2026-07-28T18:42:00", phone: "010-1234-5678" },
   { id: "u002", name: "이하늘", email: "haneul.lee@email.com", purpose: "working_holiday", language: "english", utmSource: "youtube", utmCampaign: "wh_2026", testScore: 71, testCompleted: true, paymentStatus: "trial", totalSpent: 0, joinedAt: "2026-07-28", lastActiveAt: "2026-07-28T18:38:00" },
   { id: "u003", name: "박지민", email: "jimin.park@email.com", purpose: "study_abroad", language: "english", utmSource: "google", testScore: 78, testCompleted: true, paymentStatus: "unpaid", totalSpent: 0, joinedAt: "2026-07-27", lastActiveAt: "2026-07-28T18:35:00" },
   { id: "u004", name: "최유진", email: "yujin.choi@email.com", purpose: "opic", language: "english", utmSource: "naver", testScore: 88, testCompleted: true, paymentStatus: "paid", totalSpent: 149000, joinedAt: "2026-07-20", lastActiveAt: "2026-07-28T18:30:00" },
@@ -68,15 +68,15 @@ export const speakingTestResults: SpeakingTestResult[] = users
 
 export const userLifecycleEvents: UserLifecycleEvent[] = [
   { id: "e1", userId: "u001", type: "signup", label: "Instagram UTM 유입 가입", timestamp: "2026-07-15T10:00:00" },
-  { id: "e2", userId: "u001", type: "test_complete", label: "10초 스피킹 테스트 완료 (82점)", timestamp: "2026-07-15T10:05:00" },
+  { id: "e2", userId: "u001", type: "test_complete", label: "스피킹 테스트 완료 (82점)", timestamp: "2026-07-15T10:05:00" },
   { id: "e3", userId: "u001", type: "coupon_received", label: "웰컴 쿠폰 WELCOME20 수령", timestamp: "2026-07-15T10:06:00" },
-  { id: "e4", userId: "u001", type: "payment", label: "프리미엄 3개월 패키지 결제", timestamp: "2026-07-16T14:00:00" },
+  { id: "e4", userId: "u001", type: "payment", label: "3개월 속성 패키지 결제", timestamp: "2026-07-16T14:00:00" },
   { id: "e5", userId: "u001", type: "first_class", label: "Emma 대화 파트너와 첫 1:1 대화 완료", timestamp: "2026-07-17T19:00:00" },
 ];
 
 export const automationRules: AutomationRule[] = [
   { id: "r1", name: "가입 후 24시간 미결제 → 웰컴 쿠폰", trigger: "가입 후 24시간 내 미결제", action: "WELCOME20 쿠폰 자동 발송", channel: "alimtalk", isActive: true, triggeredCount: 342, lastTriggeredAt: "2026-07-28T17:00:00" },
-  { id: "r2", name: "테스트 완료 후 1시간 → 맞춤 코스 추천", trigger: "10초 테스트 완료 후 1시간", action: "맞춤 코스 추천 Push 발송", channel: "push", isActive: true, triggeredCount: 128, lastTriggeredAt: "2026-07-28T16:30:00" },
+  { id: "r2", name: "테스트 완료 후 1시간 → 맞춤 코스 추천", trigger: "스피킹 테스트 완료 후 1시간", action: "맞춤 코스 추천 Push 발송", channel: "push", isActive: true, triggeredCount: 128, lastTriggeredAt: "2026-07-28T16:30:00" },
   { id: "r3", name: "체험 종료 D-1 → 결제 유도", trigger: "체험 기간 종료 1일 전", action: "30% 할인 쿠폰 SMS 발송", channel: "sms", isActive: false, triggeredCount: 56 },
   { id: "r4", name: "7일 미접속 → 재방문 유도", trigger: "7일 이상 미접속", action: "무료 체험 수업 1회 지급", channel: "email", isActive: true, triggeredCount: 89, lastTriggeredAt: "2026-07-27T09:00:00" },
 ];
@@ -103,7 +103,7 @@ export const referralRecords: ReferralRecord[] = [
 export const cmsBanners: CmsBanner[] = [
   { id: "b1", title: "여름 오픽 집중 코스", imageUrl: "/banners/summer-opic.jpg", linkUrl: "/promo/opic", targetAudience: "오픽 목적 미결제자", startDate: "2026-07-01", endDate: "2026-08-31", isActive: true, priority: 1 },
   { id: "b2", title: "워홀 준비생 웰컴 팝업", imageUrl: "/banners/wh-welcome.jpg", linkUrl: "/promo/wh", targetAudience: "워홀 목적 신규", startDate: "2026-07-15", endDate: "2026-09-30", isActive: true, priority: 2 },
-  { id: "b3", title: "10초 테스트 CTA 강조", imageUrl: "/banners/test-cta.jpg", linkUrl: "/test", targetAudience: "테스트 미완료", startDate: "2026-07-01", endDate: "2026-12-31", isActive: false, priority: 3 },
+  { id: "b3", title: "스피킹 테스트 CTA 강조", imageUrl: "/banners/test-cta.jpg", linkUrl: "/test", targetAudience: "테스트 미완료", startDate: "2026-07-01", endDate: "2026-12-31", isActive: false, priority: 3 },
 ];
 
 export const cmsCopies: CmsCopy[] = [
@@ -150,7 +150,7 @@ export function getLifecycleByUserId(userId: string) {
   if (!user) return [];
   return [
     { id: "gen1", userId, type: "signup" as const, label: `${UTM_LABELS[user.utmSource]} 유입 가입`, timestamp: user.joinedAt + "T10:00:00" },
-    ...(user.testCompleted ? [{ id: "gen2", userId, type: "test_complete" as const, label: `10초 테스트 완료 (${user.testScore}점)`, timestamp: user.lastActiveAt }] : []),
+    ...(user.testCompleted ? [{ id: "gen2", userId, type: "test_complete" as const, label: `스피킹 테스트 완료 (${user.testScore}점)`, timestamp: user.lastActiveAt }] : []),
     ...(user.paymentStatus === "paid" ? [{ id: "gen3", userId, type: "payment" as const, label: "결제 완료", timestamp: user.lastActiveAt }] : []),
   ];
 }
