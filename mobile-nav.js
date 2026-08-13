@@ -67,6 +67,7 @@
     if (backdrop) backdrop.addEventListener('click', close);
 
     drawer.addEventListener('click', function (e) {
+      if (e.target.closest('.i18n-wrap')) return;
       var target = e.target.closest('a, button, [data-nav-close], [data-booking-open], [data-chat-open], [data-tickets-open]');
       if (target) close();
     });

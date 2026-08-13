@@ -1301,20 +1301,44 @@
     '.i18n-btn .i18n-flag{font-size:1rem;line-height:1;}',
     '.i18n-btn--icon{width:42px;height:42px;padding:0;border-radius:14px;}',
     '.i18n-btn--icon .i18n-flag{font-size:1.15rem;}',
-    '.i18n-menu{position:absolute;top:calc(100% + .45rem);right:0;min-width:168px;padding:.35rem;',
-    'border:1px solid rgba(255,214,223,.75);border-radius:16px;background:#FFFCFA;',
+    '.i18n-caret{margin-left:auto;font-size:.7rem;opacity:.7;transition:transform .2s;}',
+    '.i18n-wrap.is-open .i18n-caret{transform:rotate(180deg);}',
+    /* Floating dropdown fallback (header / desktop) */
+    '.i18n-menu{position:absolute;top:calc(100% + .45rem);left:0;right:0;z-index:50;width:100%;',
+    'min-width:168px;max-width:min(240px,calc(100vw - 1.5rem));max-height:50vh;overflow-x:hidden;overflow-y:auto;',
+    'padding:.35rem;border:1px solid rgba(255,214,223,.75);border-radius:16px;background:#FFFCFA;',
     'box-shadow:0 14px 36px rgba(113,83,72,.16);opacity:0;visibility:hidden;transform:translateY(-6px);',
-    'transition:opacity .15s,transform .15s,visibility .15s;z-index:120;}',
+    'transition:opacity .15s,transform .15s,visibility .15s;}',
+    '.i18n-btn--icon + .i18n-menu,.header-actions .i18n-menu,.topbar-extras .i18n-menu{left:auto;right:0;width:max-content;}',
+    '@media (min-width:768px){.top-right .i18n-menu{left:auto;right:0;width:max-content;}}',
     '.i18n-wrap.is-open .i18n-menu{opacity:1;visibility:visible;transform:translateY(0);}',
     '.i18n-opt{display:flex;align-items:center;gap:.55rem;width:100%;padding:.55rem .65rem;',
     'border:none;border-radius:12px;background:transparent;color:var(--text,#594842);',
     'font-family:inherit;font-size:.78rem;font-weight:700;text-align:left;cursor:pointer;}',
     '.i18n-opt:hover{background:var(--coral-pale,#FFE9E4);}',
     '.i18n-opt.is-active{color:var(--coral-dark,#E85B48);background:var(--coral-pale,#FFE9E4);}',
-    '[data-i18n-lang="block"] .i18n-wrap{width:100%;}',
-    '[data-i18n-lang="block"] .i18n-btn{width:100%;justify-content:center;}',
+    '[data-i18n-lang="block"] .i18n-wrap,[data-i18n-lang="drawer"] .i18n-wrap{width:100%;}',
+    '[data-i18n-lang="block"] .i18n-btn,[data-i18n-lang="drawer"] .i18n-btn{width:100%;justify-content:flex-start;}',
     '[data-i18n].i18n-flash{animation:i18nFlash .12s ease;}',
-    '@keyframes i18nFlash{0%{opacity:.55}100%{opacity:1}}'
+    '@keyframes i18nFlash{0%{opacity:.55}100%{opacity:1}}',
+    /* Accordion inside hamburger / room session menu — in-flow, not clipped */
+    '.nav-drawer .i18n-wrap,.i18n-wrap--accordion{display:flex;flex-direction:column;width:100%;align-items:stretch;}',
+    '.nav-drawer .i18n-btn,.i18n-wrap--accordion .i18n-btn{width:100%;justify-content:flex-start;border-radius:16px;}',
+    '.nav-drawer .i18n-menu,.i18n-wrap--accordion .i18n-menu{position:static;top:auto;right:auto;left:auto;',
+    'width:100%;min-width:0;max-width:none;max-height:0;overflow:hidden;opacity:1;visibility:visible;',
+    'transform:none;box-shadow:none;border:none;padding:0;background:transparent;z-index:auto;',
+    'transition:max-height .28s ease,padding .2s ease;}',
+    '.nav-drawer .i18n-wrap.is-open .i18n-menu,.i18n-wrap--accordion.is-open .i18n-menu{max-height:50vh;overflow-y:auto;padding:.25rem 0 .1rem;}',
+    '@media (max-width:767px){',
+    '.header-actions>[data-i18n-lang],.topbar-extras [data-i18n-lang]{display:none!important;}',
+    'body.is-room #mobileNav .i18n-wrap{display:flex;flex-direction:column;width:100%;align-items:stretch;}',
+    'body.is-room #mobileNav .i18n-btn{width:100%;justify-content:flex-start;border-radius:16px;}',
+    'body.is-room #mobileNav .i18n-menu{position:static;top:auto;right:auto;left:auto;width:100%;min-width:0;',
+    'max-width:none;max-height:0;overflow:hidden;opacity:1;visibility:visible;transform:none;',
+    'box-shadow:none;border:none;padding:0;background:transparent;z-index:auto;',
+    'transition:max-height .28s ease,padding .2s ease;}',
+    'body.is-room #mobileNav .i18n-wrap.is-open .i18n-menu{max-height:50vh;overflow-y:auto;padding:.25rem 0 .1rem;}',
+    '}'
   ].join('');
 
   function detectLang() {
@@ -1444,10 +1468,18 @@
   function closeAllMenus() {
     Array.prototype.forEach.call(document.querySelectorAll('.i18n-wrap.is-open'), function (wrap) {
       wrap.classList.remove('is-open');
+      var trigger = wrap.querySelector('.i18n-btn');
+      if (trigger) trigger.setAttribute('aria-expanded', 'false');
     });
   }
 
-  function buildSwitcher(variant) {
+  function isAccordionSlot(slot, variant) {
+    if (variant === 'drawer' || variant === 'accordion') return true;
+    if (slot && slot.closest('.nav-drawer')) return true;
+    return false;
+  }
+
+  function buildSwitcher(variant, accordion) {
     var isIcon = variant === 'icon';
     var options = SUPPORTED.map(function (code) {
       var meta = LANG_META[code];
@@ -1455,16 +1487,20 @@
         '<span aria-hidden="true">' + meta.flag + '</span>' + meta.label + '</button>';
     }).join('');
 
+    var caret = isIcon ? '' : '<span class="i18n-caret" aria-hidden="true">▾</span>';
+
     var trigger = isIcon
-      ? '<button class="i18n-btn i18n-btn--icon" type="button" aria-haspopup="listbox" aria-label="' + t('lang.select') + '">' +
+      ? '<button class="i18n-btn i18n-btn--icon" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="' + t('lang.select') + '">' +
         '<span class="i18n-flag" aria-hidden="true">🌐</span>' +
         '</button>'
-      : '<button class="i18n-btn" type="button" aria-haspopup="listbox" aria-label="' + t('lang.select') + '">' +
+      : '<button class="i18n-btn" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="' + t('lang.select') + '">' +
         '<span class="i18n-flag" aria-hidden="true">' + LANG_META[currentLang].flag + '</span>' +
         '<span class="i18n-label">' + LANG_META[currentLang].label + '</span>' +
+        caret +
         '</button>';
 
-    return '<div class="i18n-wrap">' + trigger +
+    var wrapClass = 'i18n-wrap' + (accordion ? ' i18n-wrap--accordion' : '');
+    return '<div class="' + wrapClass + '">' + trigger +
       '<div class="i18n-menu" role="listbox">' + options + '</div>' +
       '</div>';
   }
@@ -1472,21 +1508,29 @@
   function mountSwitchers() {
     var slots = document.querySelectorAll('[data-i18n-lang]');
     Array.prototype.forEach.call(slots, function (slot) {
-      slot.innerHTML = buildSwitcher(slot.getAttribute('data-i18n-lang'));
+      var variant = slot.getAttribute('data-i18n-lang');
+      slot.innerHTML = buildSwitcher(variant, isAccordionSlot(slot, variant));
     });
 
     document.addEventListener('click', function (e) {
       var btn = e.target.closest('.i18n-btn');
       if (btn) {
+        e.preventDefault();
         e.stopPropagation();
         var wrap = btn.closest('.i18n-wrap');
+        if (!wrap) return;
         var open = wrap.classList.contains('is-open');
         closeAllMenus();
-        if (!open) wrap.classList.add('is-open');
+        if (!open) {
+          wrap.classList.add('is-open');
+          btn.setAttribute('aria-expanded', 'true');
+        }
         return;
       }
       var opt = e.target.closest('.i18n-opt');
       if (opt) {
+        e.preventDefault();
+        e.stopPropagation();
         setLang(opt.dataset.lang);
         closeAllMenus();
         return;
