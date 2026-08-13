@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="DayO 대화 파트너 프로필 및 스케줄 관리 포털">
   <title data-i18n="page.title.partner">DayO Partner Studio — 대화 파트너 관리</title>
+  <link rel="stylesheet" href="mobile-nav.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -28,10 +29,12 @@
       --radius: 18px;
     }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; max-width: 100%; overflow-x: hidden; }
 
     body {
       min-height: 100vh;
+      max-width: 100%;
+      overflow-x: hidden;
       font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
       color: var(--text);
       background:
@@ -62,6 +65,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
+      max-width: 100%;
     }
 
     .brand {
@@ -103,6 +107,12 @@
       gap: 0.9rem;
     }
 
+    .topbar-extras {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+    }
+
     .welcome {
       display: flex;
       align-items: center;
@@ -124,6 +134,8 @@
       width: min(1120px, calc(100% - 2rem));
       margin: 0 auto;
       padding: 2rem 0 4rem;
+      max-width: 100%;
+      overflow-x: hidden;
     }
 
     .page-heading {
@@ -990,12 +1002,19 @@
       .studio-link.convert-cta { width: 100%; }
     }
 
-    @media (max-width: 620px) {
-      .topbar-inner, .page { width: min(100% - 1.2rem, 1120px); }
-      .topbar-inner { min-height: 64px; }
+    @media (max-width: 767px) {
+      .topbar-inner, .page {
+        width: 100%;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        box-sizing: border-box;
+      }
+      .page { padding-top: 2rem; padding-bottom: 4rem; }
+      .topbar-inner { min-height: 64px; padding-top: 0; padding-bottom: 0; }
       .brand-copy { font-size: 0.86rem; }
       .brand-copy small { display: none; }
-      .welcome { display: none; }
+      .welcome,
+      .topbar-extras { display: none; }
       .ms-opt { padding: 0.4rem 0.55rem; font-size: 0.7rem; }
       .profile-card { grid-template-columns: 1fr; padding: 1rem; }
       .avatar-panel { min-height: 195px; }
@@ -1020,15 +1039,24 @@
         </span>
       </a>
       <div class="topbar-right">
-        <div data-i18n-lang="inline"></div>
-        <div data-mode-switch="inline"></div>
-        <div class="welcome">
-          <span class="welcome-dot" aria-hidden="true"></span>
-          <span data-i18n="partner.welcome">Camille 님, 반갑습니다! ☕</span>
+        <div class="topbar-extras">
+          <div data-i18n-lang="inline"></div>
+          <div class="welcome">
+            <span class="welcome-dot" aria-hidden="true"></span>
+            <span data-i18n="partner.welcome">Camille 님, 반갑습니다! ☕</span>
+          </div>
         </div>
+        <div data-mode-switch="inline"></div>
+        <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
       </div>
     </div>
   </header>
+  <div class="nav-drawer-backdrop" id="mobileNavBackdrop"></div>
+  <nav class="nav-drawer" id="mobileNav" aria-label="모바일 메뉴">
+    <div class="nav-drawer__head">DayO 메뉴</div>
+    <a href="index.html">홈으로</a>
+    <a href="mypage.html" data-i18n="nav.learnerMypage">🎓 학습자 마이페이지로 이동</a>
+  </nav>
 
   <main class="page">
     <div class="page-heading">
@@ -1551,6 +1579,7 @@
   <script src="materials.js"></script>
   <script src="supabase-env.js"></script>
   <script type="module" src="profile-store.js"></script>
+  <script src="mobile-nav.js"></script>
   <script src="mode-switch.js"></script>
 </body>
 </html>

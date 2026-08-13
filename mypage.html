@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="DayO 학습자 마이페이지 — 내 대화 현황과 예약 세션, 대화 자료를 한 곳에서 관리하세요.">
   <title data-i18n="page.title.mypage">DayO 마이페이지 — 내 대화 라운지</title>
+  <link rel="stylesheet" href="mobile-nav.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -27,10 +28,12 @@
       --radius: 18px;
     }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; max-width: 100%; overflow-x: hidden; }
 
     body {
       min-height: 100vh;
+      max-width: 100%;
+      overflow-x: hidden;
       font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
       color: var(--text);
       background:
@@ -60,6 +63,8 @@
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
+      padding: 0;
+      max-width: 100%;
     }
 
     .brand {
@@ -96,6 +101,7 @@
     }
 
     .topbar-right { display: flex; align-items: center; gap: 0.9rem; }
+    .topbar-extras { display: flex; align-items: center; gap: 0.9rem; }
 
     .welcome {
       display: flex;
@@ -118,6 +124,8 @@
       width: min(1120px, calc(100% - 2rem));
       margin: 0 auto;
       padding: 2rem 0 4rem;
+      max-width: 100%;
+      overflow-x: hidden;
     }
 
     .page-heading { margin-bottom: 1.5rem; }
@@ -482,11 +490,18 @@
       .switch-banner .primary-btn { width: 100%; }
     }
 
-    @media (max-width: 620px) {
-      .topbar-inner, .page { width: min(100% - 1.2rem, 1120px); }
-      .topbar-inner { min-height: 64px; }
+    @media (max-width: 767px) {
+      .topbar-inner, .page {
+        width: 100%;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        box-sizing: border-box;
+      }
+      .page { padding-top: 2rem; padding-bottom: 4rem; }
+      .topbar-inner { min-height: 64px; padding-top: 0; padding-bottom: 0; }
       .brand-copy small { display: none; }
-      .welcome { display: none; }
+      .welcome,
+      .topbar-extras { display: none; }
       .status-grid { grid-template-columns: 1fr; }
       .status-card, .sessions-card, .library-card { padding: 1.1rem; }
       .session { grid-template-columns: 1fr; }
@@ -495,6 +510,10 @@
       .history-card { padding: 1.1rem; }
       .history-item { grid-template-columns: 1fr; }
       .history-item .ghost-btn { width: 100%; }
+    }
+
+    @media (max-width: 620px) {
+      .status-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -509,18 +528,31 @@
         </span>
       </a>
       <div class="topbar-right">
-        <div data-i18n-lang="inline"></div>
-        <button type="button" class="ghost-btn" data-tickets-open style="padding:0.45rem 0.8rem;font-size:0.78rem;">
-          <span data-ticket-badge-text>☕️ 보유 티켓: 1장</span>
-        </button>
-        <div data-mode-switch="inline"></div>
-        <div class="welcome">
-          <span class="welcome-dot" aria-hidden="true"></span>
-          <span data-i18n="mypage.welcome">지민 님, 반갑습니다! 🍰</span>
+        <div class="topbar-extras">
+          <div data-i18n-lang="inline"></div>
+          <button type="button" class="ghost-btn" data-tickets-open style="padding:0.45rem 0.8rem;font-size:0.78rem;">
+            <span data-ticket-badge-text>☕️ 보유 티켓: 1장</span>
+          </button>
+          <div class="welcome">
+            <span class="welcome-dot" aria-hidden="true"></span>
+            <span data-i18n="mypage.welcome">지민 님, 반갑습니다! 🍰</span>
+          </div>
         </div>
+        <div data-mode-switch="inline"></div>
+        <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
       </div>
     </div>
   </header>
+  <div class="nav-drawer-backdrop" id="mobileNavBackdrop"></div>
+  <nav class="nav-drawer" id="mobileNav" aria-label="모바일 메뉴">
+    <div class="nav-drawer__head">DayO 메뉴</div>
+    <a href="index.html" data-i18n="nav.homeAria">홈으로</a>
+    <a href="index.html?booking=open" data-i18n="nav.booking">대화 예약하기</a>
+    <a href="partner.html" data-i18n="nav.partnerStudio">☕ 파트너 스튜디오로 이동</a>
+    <button type="button" class="nav-drawer__link" data-tickets-open>
+      <span data-ticket-badge-text>☕️ 보유 티켓: 1장</span>
+    </button>
+  </nav>
 
   <main class="page">
     <div class="page-heading">
@@ -750,6 +782,7 @@
   <script src="materials.js"></script>
   <script src="supabase-env.js"></script>
   <script type="module" src="profile-store.js"></script>
+  <script src="mobile-nav.js"></script>
   <script src="mode-switch.js"></script>
   <script src="ticket-wallet.js"></script>
   <script src="tickets-modal.js"></script>

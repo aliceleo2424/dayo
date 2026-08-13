@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="mobile-nav.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -30,13 +31,14 @@
       --mouse-y: 50vh;
     }
 
-    html { scroll-behavior: smooth; }
+    html { scroll-behavior: smooth; max-width: 100%; overflow-x: hidden; }
 
     body {
       font-family: 'Gowun Dodum', 'Quicksand', -apple-system, sans-serif;
       background: var(--cream);
       color: var(--text);
       min-height: 100vh;
+      max-width: 100%;
       overflow-x: hidden;
       position: relative;
       -webkit-font-smoothing: antialiased;
@@ -72,11 +74,13 @@
 
     .header-inner {
       max-width: 1180px; margin: 0 auto;
+      width: 100%;
       display: grid;
       grid-template-columns: auto 1fr auto;
       align-items: center;
+      justify-content: space-between;
       gap: 1rem;
-      padding: 0.85rem clamp(1.15rem, 3.5vw, 2.25rem);
+      padding: 0.85rem clamp(1rem, 3.5vw, 2.25rem);
     }
 
     .logo { display: flex; align-items: center; gap: 0.65rem; text-decoration: none; color: var(--text); flex-shrink: 0; }
@@ -151,55 +155,9 @@
       box-shadow: 0 2px 0 var(--coral-dark), 0 4px 12px rgba(255, 107, 87, 0.22);
     }
 
-    .menu-toggle {
-      display: none;
-      width: 42px; height: 42px;
-      border: 1px solid var(--coral-pale);
-      border-radius: 14px;
-      background: var(--bg-card);
-      color: var(--coral);
-      font-size: 1.25rem;
-      cursor: pointer;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s, transform 0.2s;
-    }
-
-    .menu-toggle:hover { background: var(--coral-pale); }
-    .menu-toggle[aria-expanded="true"] { background: var(--coral-pale); }
-
-    .nav-mobile {
-      max-height: 0;
-      overflow: hidden;
-      background: rgba(255, 252, 250, 0.97);
-      border-top: 1px solid transparent;
-      transition: max-height 0.35s ease, padding 0.35s ease, border-color 0.35s ease;
-    }
-
-    .nav-mobile.open {
-      max-height: 360px;
-      padding: 0.75rem 1.25rem 1.25rem;
-      border-top-color: rgba(255, 209, 220, 0.35);
-    }
-
-    .nav-mobile a {
-      display: block;
-      padding: 0.85rem 1rem;
-      text-decoration: none;
-      color: var(--text);
-      font-weight: 600;
-      font-size: 0.95rem;
-      border-radius: 16px;
-      transition: background 0.2s, color 0.2s;
-    }
-
-    .nav-mobile a:hover {
-      background: var(--coral-pale);
-      color: var(--coral);
-    }
+    .page { position: relative; z-index: 2; max-width: 100%; overflow-x: hidden; }
 
     /* Layout */
-    .page { position: relative; z-index: 2; }
 
     .section-inner {
       max-width: 1080px; margin: 0 auto;
@@ -1108,18 +1066,18 @@
       padding-bottom: 1.5rem;
     }
 
-    /* Mobile: collapse center nav into hamburger; keep lang / account / CTA */
-    @media (max-width: 640px) {
+    /* Mobile / tablet (md 미만): hamburger + one-line header */
+    @media (max-width: 767px) {
       .header-inner {
-        grid-template-columns: auto 1fr;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        grid-template-columns: unset;
         gap: 0.65rem;
+        padding: 0.75rem 1rem;
       }
       .nav-desktop { display: none; }
-      .menu-toggle { display: inline-flex; }
-      .header-cta {
-        padding: 0.62rem 0.9rem;
-        font-size: 0.82rem;
-      }
+      .header-actions .header-cta { display: none; }
       .header-actions { gap: 0.4rem; }
     }
 
@@ -1133,8 +1091,9 @@
     }
 
     @media (max-width: 600px) {
-      .header-inner { padding: 0.75rem 1.15rem; }
+      .header-inner { padding: 0.75rem 1rem; }
       .logo-text { font-size: 1.15rem; }
+      .section-inner { padding: 0 1rem; }
       .chat-fab { bottom: 1.25rem; right: 1.25rem; }
       .chat-panel { right: 1rem; }
     }
@@ -1228,14 +1187,17 @@
         <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
       </div>
     </div>
-
-    <nav class="nav-mobile" id="mobileNav" data-i18n="nav.mobileMenuAria" data-i18n-attr="aria-label" aria-label="모바일 메뉴">
-      <a href="#about" data-i18n="nav.about">서비스 소개</a>
-      <a href="#tutors" data-i18n="nav.partners">대화 파트너</a>
-      <a href="#booking" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
-      <a href="#faq" data-chat-open data-i18n="nav.ask">💬 질문 있어요</a>
-    </nav>
   </header>
+  <div class="nav-drawer-backdrop" id="mobileNavBackdrop"></div>
+  <nav class="nav-drawer" id="mobileNav" data-i18n="nav.mobileMenuAria" data-i18n-attr="aria-label" aria-label="모바일 메뉴">
+    <div class="nav-drawer__head">DayO 메뉴</div>
+    <a href="#about" data-i18n="nav.about">서비스 소개</a>
+    <a href="#tutors" data-i18n="nav.partners">대화 파트너</a>
+    <a href="#booking" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
+    <a href="#faq" data-chat-open data-i18n="nav.ask">💬 질문 있어요</a>
+    <a href="mypage.html" data-i18n="nav.mypage">마이페이지</a>
+    <a href="room.html" class="header-cta nav-drawer__cta" data-ms-guard data-i18n="nav.startChat" data-ticket-gate data-nav-close>🚀 바로 대화 시작하기</a>
+  </nav>
 
   <div class="page">
 
@@ -1507,42 +1469,8 @@
 
   <div class="result-toast" id="resultToast"></div>
 
+  <script src="mobile-nav.js"></script>
   <script>
-    /* Mobile nav */
-    (function initMobileNav() {
-      const toggle = document.getElementById('menuToggle');
-      const mobileNav = document.getElementById('mobileNav');
-      if (!toggle || !mobileNav) return;
-
-      function closeMenu() {
-        mobileNav.classList.remove('open');
-        toggle.setAttribute('aria-expanded', 'false');
-        toggle.setAttribute('aria-label', window.DayOI18n ? window.DayOI18n.t('nav.menuOpen') : '메뉴 열기');
-        toggle.textContent = '☰';
-      }
-
-      function openMenu() {
-        mobileNav.classList.add('open');
-        toggle.setAttribute('aria-expanded', 'true');
-        toggle.setAttribute('aria-label', window.DayOI18n ? window.DayOI18n.t('nav.menuClose') : '메뉴 닫기');
-        toggle.textContent = '✕';
-      }
-
-      toggle.addEventListener('click', () => {
-        mobileNav.classList.contains('open') ? closeMenu() : openMenu();
-      });
-
-      mobileNav.querySelectorAll('a').forEach((link) => {
-        link.addEventListener('click', closeMenu);
-      });
-
-      document.addEventListener('dayo:langchange', () => {
-        if (mobileNav.classList.contains('open')) openMenu();
-        else closeMenu();
-      });
-      closeMenu();
-    })();
-
     (function initCursorGlow() {
       const glow = document.getElementById('cursorGlow');
       if (!glow || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
@@ -1830,10 +1758,7 @@
       link.addEventListener('click', (e) => {
         e.preventDefault();
         openChat();
-        const mobileNav = document.getElementById('mobileNav');
-        const menuToggle = document.getElementById('menuToggle');
-        if (mobileNav) mobileNav.classList.remove('open');
-        if (menuToggle) menuToggle.setAttribute('aria-expanded', 'false');
+        if (window.DayOMobileNav) window.DayOMobileNav.close();
       });
     });
 

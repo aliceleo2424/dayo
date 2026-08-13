@@ -19,16 +19,8 @@
     document.body.classList.toggle('is-logged-in', loggedIn);
     document.body.setAttribute('data-auth', loggedIn ? 'logged-in' : 'guest');
 
-    if (loggedIn) {
-      var mobileNav = document.getElementById('mobileNav');
-      var menuToggle = document.getElementById('menuToggle');
-      if (mobileNav) {
-        mobileNav.classList.remove('open');
-        mobileNav.style.display = '';
-      }
-      if (menuToggle) {
-        menuToggle.setAttribute('aria-expanded', 'false');
-      }
+    if (loggedIn && window.DayOMobileNav) {
+      window.DayOMobileNav.close();
     }
   }
 
