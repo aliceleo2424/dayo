@@ -265,10 +265,10 @@
     var name = getUserName();
 
     if (role === 'partner') {
-      return { href: 'mypage.html', icon: '🎓', i18n: 'nav.learnerMypage' };
+      return { href: 'mypage.html', icon: '👤', i18n: 'nav.mypage' };
     }
     if (role === 'member') {
-      return { href: 'partner.html', icon: '☕', i18n: 'nav.partnerStudio' };
+      return { href: 'partner.html', icon: '🤝', i18n: 'nav.partnerSpace' };
     }
 
     if (name) {
@@ -289,9 +289,12 @@
   }
 
   function markup(config) {
-    var lead = config.avatar
-      ? '<span class="ms-avatar" aria-hidden="true">' + config.avatar + '</span>'
-      : '<span aria-hidden="true">' + config.icon + '</span>';
+    var lead = '';
+    if (config.avatar) {
+      lead = '<span class="ms-avatar" aria-hidden="true">' + config.avatar + '</span>';
+    } else if (config.icon) {
+      lead = '<span aria-hidden="true">' + config.icon + '</span>';
+    }
     var label = config.label
       ? '<span>' + escapeHtml(config.label) + '</span>'
       : '<span data-i18n="' + config.i18n + '">' + t(config.i18n) + '</span>';

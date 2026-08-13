@@ -82,10 +82,13 @@
       KO: '파트너 참여', EN: 'Join as Partner', ZH: '成为伙伴', JA: 'パートナー参加', FR: 'Devenir partenaire', ES: 'Ser compañero'
     },
     'nav.partnerStudio': {
-      KO: '☕ 파트너 스튜디오로 이동', EN: '☕ Go to Partner Studio', ZH: '☕ 前往伙伴工作室', JA: '☕ パートナースタジオへ', FR: '☕ Aller au Studio', ES: '☕ Ir al Estudio'
+      KO: '파트너 스튜디오로 이동', EN: 'Go to Partner Studio', ZH: '前往伙伴工作室', JA: 'パートナースタジオへ', FR: 'Aller au Studio', ES: 'Ir al Estudio'
     },
     'nav.learnerMypage': {
-      KO: '🎓 학습자 마이페이지로 이동', EN: '🎓 Go to Learner My Page', ZH: '🎓 前往学习者页面', JA: '🎓 学習者ページへ', FR: '🎓 Aller à Mon espace', ES: '🎓 Ir a Mi página'
+      KO: '학습자 마이페이지로 이동', EN: 'Go to Learner My Page', ZH: '前往学习者页面', JA: '学習者ページへ', FR: 'Aller à Mon espace', ES: 'Ir a Mi página'
+    },
+    'nav.partnerSpace': {
+      KO: '파트너 공간', EN: 'Partner Space', ZH: '伙伴空间', JA: 'パートナー空間', FR: 'Espace partenaire', ES: 'Espacio partner'
     },
     'lang.select': {
       KO: '언어 선택', EN: 'Select language', ZH: '选择语言', JA: '言語を選択', FR: 'Choisir la langue', ES: 'Elegir idioma'
