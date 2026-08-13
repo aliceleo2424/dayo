@@ -365,7 +365,7 @@
     }
 
     .video-column.sharing {
-      grid-template-rows: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      grid-template-rows: minmax(0, 1.15fr) minmax(0, 0.85fr) auto;
     }
 
     .video-stage,
@@ -378,6 +378,43 @@
       background: linear-gradient(160deg, #F7D6DE 0%, #FFE2C8 50%, #FFF1C9 100%);
       box-shadow: 0 8px 28px var(--shadow-warm);
       border: 1px solid rgba(255, 209, 220, 0.5);
+    }
+
+    .daily-host {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      overflow: hidden;
+      border-radius: inherit;
+      background: #1E1A19;
+    }
+
+    .daily-host.is-on { display: block; }
+    .daily-host.is-pending {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .daily-host iframe {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+      max-width: none;
+      border: 0 !important;
+      border-radius: inherit;
+    }
+
+    .video-stage.is-daily {
+      background: #1E1A19;
+    }
+
+    .video-stage.is-daily .tutor-video,
+    .video-stage.is-daily .self-pip {
+      display: none;
     }
 
     .share-stage {
@@ -505,6 +542,130 @@
       font-size: 0.65rem;
       font-weight: 600;
       z-index: 2;
+    }
+
+    /* Live AI copilot hint cards */
+    .copilot-bar {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      padding: 0.7rem 0.8rem 0.75rem;
+      background: var(--bg-card);
+      border: 1px solid var(--coral-pale);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 8px 24px var(--shadow-warm);
+    }
+
+    .copilot-bar__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .copilot-bar__badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.22rem 0.65rem;
+      background: var(--coral-pale);
+      color: var(--coral);
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+
+    .copilot-bar__status {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .copilot-bar__status.is-live::before {
+      content: '';
+      display: inline-block;
+      width: 6px; height: 6px;
+      margin-right: 0.35rem;
+      border-radius: 50%;
+      background: #6BCB77;
+      vertical-align: middle;
+      animation: copilotPulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes copilotPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    .copilot-bar__label {
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: var(--coral);
+    }
+
+    .copilot-phrases {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.45rem;
+    }
+
+    .copilot-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      padding: 0.65rem 0.75rem;
+      border: 1.5px solid var(--coral-pale);
+      border-radius: 14px;
+      background: var(--cream);
+      color: var(--text);
+      font-family: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    }
+
+    .copilot-card:hover {
+      background: var(--coral-pale);
+      border-color: var(--coral);
+      transform: translateY(-1px);
+    }
+
+    .copilot-card__n {
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--coral);
+    }
+
+    .copilot-card__en {
+      font-size: 0.84rem;
+      font-weight: 800;
+      line-height: 1.35;
+      letter-spacing: -0.02em;
+    }
+
+    .copilot-card__ko {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .copilot-grammar {
+      margin: 0;
+      padding: 0.55rem 0.7rem;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(255, 246, 242, 0.95), rgba(255, 241, 216, 0.9));
+      border: 1px solid rgba(255, 209, 220, 0.7);
+      font-size: 0.78rem;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .copilot-grammar strong {
+      color: var(--coral);
+      margin-right: 0.3rem;
     }
 
     /* Chat — grid sibling, never covered */
@@ -1590,7 +1751,6 @@
       .room-drawer-head { display: flex; }
 
       .top-right .top-btn,
-      .top-right [data-i18n-lang],
       .top-right [data-mode-switch] {
         width: 100%;
       }
@@ -1669,6 +1829,14 @@
         bottom: 0.55rem;
       }
 
+      .copilot-phrases {
+        grid-template-columns: 1fr;
+      }
+
+      .copilot-bar {
+        padding: 0.6rem 0.7rem;
+      }
+
       .bottom-bar {
         position: sticky;
         bottom: 0;
@@ -1706,7 +1874,6 @@
       <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
       <div class="top-right" id="mobileNav">
         <div class="nav-drawer__head room-drawer-head">세션 메뉴</div>
-        <div data-i18n-lang="inline"></div>
         <div data-mode-switch="inline"></div>
         <button class="top-btn" type="button" data-booking-open data-i18n="room.booking">📅 대화 예약하기</button>
         <button class="top-btn" id="shareBtn" type="button" data-i18n="room.share">🖥️ 화면 공유</button>
@@ -1740,7 +1907,8 @@
           <video id="shareVideo" playsinline muted></video>
         </div>
 
-        <div class="video-stage">
+        <div class="video-stage" id="videoStage">
+          <div class="daily-host" id="dailyHost"></div>
           <div class="tutor-video" id="tutorVideoBox">
             <video id="tutorVideo" playsinline muted></video>
             <div class="tutor-placeholder">
@@ -1759,6 +1927,19 @@
             </div>
           </div>
         </div>
+
+        <section class="copilot-bar" id="copilotBar" aria-live="polite">
+          <div class="copilot-bar__head">
+            <span class="copilot-bar__badge" data-i18n="room.copilotBadge">✨ AI 코파일럿</span>
+            <span class="copilot-bar__status" id="copilotStatus">듣고 있어요</span>
+          </div>
+          <p class="copilot-bar__label" data-i18n="room.copilotPhrasesLabel">지금 말하기 좋은 추천 영어 표현</p>
+          <div class="copilot-phrases" id="copilotPhrases"></div>
+          <p class="copilot-grammar" id="copilotGrammar">
+            <strong data-i18n="room.copilotGrammarLabel">문법 교정 힌트</strong>
+            <span id="copilotGrammarText"></span>
+          </p>
+        </section>
 
         <div class="sentence-overlay" id="sentenceOverlay">
           <div class="sentence-overlay-label" data-i18n="room.sentenceOverlayLabel">📝 이렇게 말해 보세요</div>
@@ -1955,9 +2136,11 @@
     </div>
   </div>
 
+  <script crossorigin src="https://unpkg.com/@daily-co/daily-js"></script>
   <script src="supabase-env.js"></script>
   <script type="module" src="profile-store.js"></script>
   <script src="chat-prefs.js"></script>
+  <script src="room-live.js"></script>
   <script>
     /* Timer */
     (function initTimer() {
@@ -2111,95 +2294,59 @@
       setTimeout(() => toast.classList.remove('toast--safety'), 2300);
     })();
 
-    /* Media */
-    let localStream = null;
-    let shareStream = null;
-    let micOn = true;
-    let camOn = true;
-
-    const selfVideo = document.getElementById('selfVideo');
-    const selfPip = document.getElementById('selfPip');
+    /* Media — Daily.co live frame, or local camera demo fallback */
     const micBtn = document.getElementById('micBtn');
     const camBtn = document.getElementById('camBtn');
-    const videoColumn = document.getElementById('videoColumn');
-    const shareStage = document.getElementById('shareStage');
-    const shareVideo = document.getElementById('shareVideo');
-
-    async function initMedia() {
-      try {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        selfVideo.srcObject = localStream;
-        selfPip.classList.add('has-stream');
-      } catch (_) {
-        toast.classList.add('toast--notice');
-        showToast(t('room.toastNoMedia'), 3200);
-        setTimeout(() => toast.classList.remove('toast--notice'), 3500);
-      }
-    }
-    initMedia();
+    const live = window.DayOLive;
 
     function renderMicLabel() {
-      micBtn.innerHTML = micOn
+      const on = live ? live.isMicOn() : true;
+      micBtn.classList.toggle('off', !on);
+      micBtn.setAttribute('aria-pressed', String(on));
+      micBtn.innerHTML = on
         ? '🎤 <span class="label">' + t('room.micOn').replace(/^🎤\s*/, '') + '</span>'
         : '🎤 <span class="label">' + t('room.micOff').replace(/^🎤\s*/, '') + '</span>';
     }
     function renderCamLabel() {
-      camBtn.innerHTML = camOn
+      const on = live ? live.isCamOn() : true;
+      camBtn.classList.toggle('off', !on);
+      camBtn.setAttribute('aria-pressed', String(on));
+      camBtn.innerHTML = on
         ? '📹 <span class="label">' + t('room.camOn').replace(/^📹\s*/, '') + '</span>'
         : '📹 <span class="label">' + t('room.camOff').replace(/^📹\s*/, '') + '</span>';
     }
 
     micBtn.addEventListener('click', () => {
-      micOn = !micOn;
-      if (localStream) localStream.getAudioTracks().forEach((track) => { track.enabled = micOn; });
-      micBtn.classList.toggle('off', !micOn);
-      micBtn.setAttribute('aria-pressed', String(micOn));
+      if (live) live.toggleMic();
       renderMicLabel();
     });
 
     camBtn.addEventListener('click', () => {
-      camOn = !camOn;
-      if (localStream) localStream.getVideoTracks().forEach((track) => { track.enabled = camOn; });
-      camBtn.classList.toggle('off', !camOn);
-      camBtn.setAttribute('aria-pressed', String(camOn));
+      if (live) live.toggleCam();
       renderCamLabel();
-      if (!camOn) selfPip.classList.remove('has-stream');
-      else if (localStream) selfPip.classList.add('has-stream');
     });
 
     document.addEventListener('dayo:langchange', () => {
       renderMicLabel();
       renderCamLabel();
     });
-
-    function stopShare() {
-      if (shareStream) {
-        shareStream.getTracks().forEach((t) => t.stop());
-        shareStream = null;
-      }
-      shareVideo.srcObject = null;
-      videoColumn.classList.remove('sharing');
-    }
+    document.addEventListener('dayo:livemedia', () => {
+      renderMicLabel();
+      renderCamLabel();
+    });
 
     document.getElementById('shareBtn').addEventListener('click', async () => {
-      if (shareStream) {
-        stopShare();
-        showToast(t('room.toastShareStop'));
-        return;
-      }
+      if (!live) return;
       try {
-        shareStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        shareVideo.srcObject = shareStream;
-        videoColumn.classList.add('sharing');
-        showToast(t('room.toastShareStart'));
-        shareStream.getVideoTracks()[0].addEventListener('ended', () => {
-          stopShare();
-          showToast(t('room.toastShareStop'));
-        });
+        const sharing = await live.toggleShare();
+        showToast(sharing ? t('room.toastShareStart') : t('room.toastShareStop'));
       } catch (_) {
         showToast(t('room.toastShareCancel'));
       }
     });
+
+    renderMicLabel();
+    renderCamLabel();
 
     /* Chat */
     const mainStage = document.getElementById('mainStage');
@@ -2377,8 +2524,9 @@
     }
 
     function stopAllMedia() {
-      if (localStream) localStream.getTracks().forEach((t) => t.stop());
-      stopShare();
+      if (window.DayOLive && typeof window.DayOLive.hangUp === 'function') {
+        window.DayOLive.hangUp();
+      }
     }
 
     document.getElementById('endBtn').addEventListener('click', openFeedback);

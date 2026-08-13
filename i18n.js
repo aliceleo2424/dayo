@@ -1100,6 +1100,18 @@
     'room.toastFeedbackSent': {
       KO: '피드백이 전달되었습니다! 오늘도 수고하셨어요 💖', EN: 'Feedback sent! Great work today 💖', ZH: '反馈已送达！今天也辛苦了 💖', JA: 'フィードバックが送信されました！今日もお疲れ様でした 💖', FR: 'Feedback envoyé ! Bravo pour aujourd\'hui 💖', ES: '¡Feedback enviado! Buen trabajo hoy 💖'
     },
+    'room.copilotBadge': { KO: '✨ AI 코파일럿', EN: '✨ AI Copilot', ZH: '✨ AI副驾驶', JA: '✨ AIコパイロット', FR: '✨ Copilote IA', ES: '✨ Copiloto IA' },
+    'room.copilotListening': { KO: '듣고 있어요', EN: 'Listening', ZH: '正在听', JA: '聞いています', FR: 'J\'écoute', ES: 'Escuchando' },
+    'room.copilotThinking': { KO: '지금 말하기 좋은 표현을 고르는 중…', EN: 'Picking phrases you can say now…', ZH: '正在挑选适合现在说的表达…', JA: '今言いやすい表現を選んでいます…', FR: 'Je choisis des phrases à dire maintenant…', ES: 'Eligiendo frases para decir ahora…' },
+    'room.copilotDemo': { KO: '데모 모드 · 예시 표현을 보여드려요', EN: 'Demo mode · showing sample phrases', ZH: '演示模式 · 显示示例表达', JA: 'デモモード · サンプル表現を表示', FR: 'Mode démo · phrases d\'exemple', ES: 'Modo demo · frases de ejemplo' },
+    'room.copilotPhrasesLabel': { KO: '지금 말하기 좋은 추천 영어 표현', EN: 'English phrases to say right now', ZH: '现在适合说的英语表达', JA: '今言うとよい英語表現', FR: 'Expressions anglaises à dire maintenant', ES: 'Frases en inglés para decir ahora' },
+    'room.copilotGrammarLabel': { KO: '문법 교정 힌트', EN: 'Grammar hint', ZH: '语法提示', JA: '文法ヒント', FR: 'Indice de grammaire', ES: 'Pista gramatical' },
+    'room.copilotIdleGrammar': { KO: '마이크가 켜지면 대화를 듣고 바로 쓸 수 있는 표현을 추천해 줄게요.', EN: 'Turn on the mic and I\'ll suggest phrases you can use right away.', ZH: '打开麦克风后，我会推荐马上能用的表达。', JA: 'マイクをオンにすると、すぐに使える表現をおすすめします。', FR: 'Activez le micro et je vous proposerai des phrases à utiliser tout de suite.', ES: 'Enciende el micrófono y te sugeriré frases para usar al momento.' },
+    'room.copilotCopied': { KO: '표현을 복사했어요 ✨', EN: 'Phrase copied ✨', ZH: '已复制表达 ✨', JA: '表現をコピーしました ✨', FR: 'Expression copiée ✨', ES: 'Frase copiada ✨' },
+    'room.toastDailyDemo': { KO: '화상 연결이 어려워 데모 화면으로 보여드릴게요 ☕️', EN: 'Video couldn\'t connect, so here\'s the demo view ☕️', ZH: '视频连接失败，先用演示画面 ☕️', JA: '映像接続ができないのでデモ画面でお見せします ☕️', FR: 'La vidéo n\'a pas pu se connecter, voici la démo ☕️', ES: 'No se pudo conectar el video, aquí va la vista demo ☕️' },
+    'room.toastSttOff': { KO: '이 브라우저는 음성 인식을 지원하지 않아요. 데모 힌트를 보여드릴게요.', EN: 'This browser doesn\'t support speech recognition. Showing demo hints.', ZH: '此浏览器不支持语音识别。将显示演示提示。', JA: 'このブラウザは音声認識に対応していません。デモヒントを表示します。', FR: 'Ce navigateur ne prend pas en charge la reconnaissance vocale. Indices démo.', ES: 'Este navegador no admite reconocimiento de voz. Mostrando pistas demo.' },
+    'room.toastDailyLive': { KO: '1:1 화상 대화방에 입장했어요 🎥', EN: 'You\'re in the 1:1 video room 🎥', ZH: '已进入1:1视频对话 🎥', JA: '1:1ビデオ通話に入りました 🎥', FR: 'Vous êtes dans la visio 1:1 🎥', ES: 'Entraste a la videollamada 1:1 🎥' },
+
     'page.title.index': { KO: 'DayO 돼요 — AI 회화 코파일럿', EN: 'DayO — AI Conversation Copilot', ZH: 'DayO — AI对话副驾驶', JA: 'DayO — AI会話コパイロット', FR: 'DayO — Copilote de conversation IA', ES: 'DayO — Copiloto de conversación con IA' },
     'page.title.room': { KO: 'DayO 돼요 — 화상 회화 스튜디오', EN: 'DayO — Video Conversation Studio', ZH: 'DayO — 视频对话工作室', JA: 'DayO — ビデオ会話スタジオ', FR: 'DayO — Studio de conversation vidéo', ES: 'DayO — Estudio de conversación por video' },
     'page.title.mypage': { KO: 'DayO 마이페이지 — 내 대화 라운지', EN: 'DayO My Page — My Conversation Lounge', ZH: 'DayO 我的页面 — 我的对话休息室', JA: 'DayOマイページ — マイ会話ラウンジ', FR: 'DayO Mon Espace — Mon salon de conversation', ES: 'DayO Mi Página — Mi salón de conversación' },
@@ -1310,7 +1322,6 @@
     'box-shadow:0 14px 36px rgba(113,83,72,.16);opacity:0;visibility:hidden;transform:translateY(-6px);',
     'transition:opacity .15s,transform .15s,visibility .15s;}',
     '.i18n-btn--icon + .i18n-menu,.header-actions .i18n-menu,.topbar-extras .i18n-menu{left:auto;right:0;width:max-content;}',
-    '@media (min-width:768px){.top-right .i18n-menu{left:auto;right:0;width:max-content;}}',
     '.i18n-wrap.is-open .i18n-menu{opacity:1;visibility:visible;transform:translateY(0);}',
     '.i18n-opt{display:flex;align-items:center;gap:.55rem;width:100%;padding:.55rem .65rem;',
     'border:none;border-radius:12px;background:transparent;color:var(--text,#594842);',
@@ -1331,13 +1342,6 @@
     '.nav-drawer .i18n-wrap.is-open .i18n-menu,.i18n-wrap--accordion.is-open .i18n-menu{max-height:50vh;overflow-y:auto;padding:.25rem 0 .1rem;}',
     '@media (max-width:767px){',
     '.header-actions>[data-i18n-lang],.topbar-extras [data-i18n-lang]{display:none!important;}',
-    'body.is-room #mobileNav .i18n-wrap{display:flex;flex-direction:column;width:100%;align-items:stretch;}',
-    'body.is-room #mobileNav .i18n-btn{width:100%;justify-content:flex-start;border-radius:16px;}',
-    'body.is-room #mobileNav .i18n-menu{position:static;top:auto;right:auto;left:auto;width:100%;min-width:0;',
-    'max-width:none;max-height:0;overflow:hidden;opacity:1;visibility:visible;transform:none;',
-    'box-shadow:none;border:none;padding:0;background:transparent;z-index:auto;',
-    'transition:max-height .28s ease,padding .2s ease;}',
-    'body.is-room #mobileNav .i18n-wrap.is-open .i18n-menu{max-height:50vh;overflow-y:auto;padding:.25rem 0 .1rem;}',
     '}'
   ].join('');
 
@@ -1507,6 +1511,13 @@
 
   function mountSwitchers() {
     var slots = document.querySelectorAll('[data-i18n-lang]');
+    /* Room studio keeps the session menu focused — no language switcher. */
+    if (document.body && document.body.classList.contains('is-room')) {
+      Array.prototype.forEach.call(slots, function (slot) {
+        slot.parentNode && slot.parentNode.removeChild(slot);
+      });
+      return;
+    }
     Array.prototype.forEach.call(slots, function (slot) {
       var variant = slot.getAttribute('data-i18n-lang');
       slot.innerHTML = buildSwitcher(variant, isAccordionSlot(slot, variant));
