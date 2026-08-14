@@ -789,6 +789,26 @@
     'quiz.lang.zh': { KO: '중국어', EN: 'Chinese', ZH: '中文', JA: '中国語', FR: 'Chinois', ES: 'Chino' },
     'quiz.lang.es': { KO: '스페인어', EN: 'Spanish', ZH: '西班牙语', JA: 'スペイン語', FR: 'Espagnol', ES: 'Español' },
     'quiz.lang.ko': { KO: '한국어', EN: 'Korean', ZH: '韩语', JA: '韓国語', FR: 'Coréen', ES: 'Coreano' },
+    'quiz.themeBadge': {
+      KO: '📍 [상황 {n}/{total}] {label}',
+      EN: '📍 [Scene {n}/{total}] {label}',
+      ZH: '📍 [场景 {n}/{total}] {label}',
+      JA: '📍 [シーン {n}/{total}] {label}',
+      FR: '📍 [Scène {n}/{total}] {label}',
+      ES: '📍 [Escena {n}/{total}] {label}'
+    },
+    'quiz.theme.cafe': {
+      KO: '카페에서 주문할 때', EN: 'Ordering at a cafe', ZH: '在咖啡店点单时', JA: 'カフェで注文するとき', FR: 'Commander au café', ES: 'Pidiendo en un café'
+    },
+    'quiz.theme.restaurant': {
+      KO: '식당에서 자리 잡을 때', EN: 'Getting a table at a restaurant', ZH: '在餐厅找座位时', JA: 'レストランで席を取るとき', FR: 'S’installer au restaurant', ES: 'Pidiendo mesa en un restaurante'
+    },
+    'quiz.theme.street': {
+      KO: '거리에서 길 물을 때', EN: 'Asking for directions on the street', ZH: '在街上问路时', JA: '街で道を聞くとき', FR: 'Demander son chemin', ES: 'Pidiendo indicaciones en la calle'
+    },
+    'quiz.theme.hotel': {
+      KO: '호텔에서 체크인할 때', EN: 'Checking in at a hotel', ZH: '在酒店办理入住时', JA: 'ホテルでチェックインするとき', FR: 'S’enregistrer à l’hôtel', ES: 'Haciendo el check-in en el hotel'
+    },
     'quiz.levelHint': {
       KO: '지금 체감 레벨을 골라 주세요. 그에 맞춰 4문항이 나와요!',
       EN: 'Tap how it feels right now — we’ll give you 4 matching questions.',

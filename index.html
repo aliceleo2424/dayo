@@ -1006,7 +1006,10 @@
     .quiz-illustration.is-fallback .quiz-illustration-fallback { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
 
     .situation-card { background: linear-gradient(135deg, var(--pink), var(--peach)); border-radius: var(--radius); padding: 1.2rem 1.3rem; margin-bottom: 1.15rem; text-align: left; }
-    .situation-tag { font-size: 0.8rem; font-weight: 700; color: var(--coral); margin-bottom: 0.45rem; }
+    .situation-tag {
+      display: inline-block; font-size: 0.78rem; font-weight: 800; color: var(--coral);
+      background: rgba(255,252,250,.72); padding: 0.28rem 0.7rem; border-radius: 999px; margin-bottom: 0.55rem;
+    }
     .situation-text { font-size: 0.95rem; line-height: 1.65; }
     .quiz-options { display: flex; flex-direction: column; gap: 0.65rem; }
     .quiz-option {
@@ -1674,42 +1677,18 @@
       es: { id: 'sofia', name: 'Sofia from Spain', country: '스페인', flag: '🇪🇸', initial: 'S', bio: '밝게 말을 걸어주는 스페인 파트너 Sofia와 여행 스몰토크를 연습해요.' },
       ko: { id: 'jiwoo', name: 'Jiwoo from Seoul', country: '한국', flag: '🇰🇷', initial: 'J', bio: '편안하게 받아주는 서울 파트너 지우와 첫 인사를 연습해요.' }
     };
+    const QUIZ_THEME_IMAGES = {
+      cafe: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80',
+      restaurant: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80',
+      street: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80',
+      hotel: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80'
+    };
     const FALLBACK_QUIZ_BY_LANG = {
       en: [
-        { scenario: '☕ 카페', question: '바리스타가 "Hi! What can I get for you?"라고 물었어요. 가장 자연스러운 나의 답은?', options: ['Coffee me.', 'Can I have a latte, please?', 'Give me now.', 'I am coffee.'], answer: 1, imageUrl: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1400&h=788&q=80' },
-        { scenario: '✈️ 공항', question: '직원이 "May I see your passport?"라고 했어요. 자연스러운 대답은?', options: ['Passport is mine.', 'Wait, why?', 'Here you are.', 'I have it somewhere.'], answer: 2, imageUrl: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1400&h=788&q=80' },
-        { scenario: '🚕 택시', question: '기사님이 "Where would you like to go?"라고 물었어요. 나의 답은?', options: ['To the airport, please.', 'Airport go.', 'I am airport.', 'Drive fast.'], answer: 0, imageUrl: 'https://images.unsplash.com/photo-1515542622106-78bda25190f9?auto=format&fit=crop&w=1400&h=788&q=80' },
-        { scenario: '🏨 호텔', question: '리셉션에서 "Do you have a reservation?"이라고 물었어요. 자연스러운 답은?', options: ['Reservation yes me.', 'Hotel room give.', 'I booked maybe.', 'Yes, under Kim.'], answer: 3, imageUrl: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1400&h=788&q=80' }
-      ],
-      fr: [
-        { scenario: '☕ 카페', question: '카페에서 파트너가 "Bonjour! Un café, s\'il vous plaît."라고 인사했을 때 자연스러운 나의 답은?', options: ['Merci, au revoir!', 'Bonjour!', 'Excusez-moi', 'Je ne sais pas'], answer: 1, imageUrl: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?auto=format&fit=crop&w=1400&h=788&q=80', explanation: '먼저 인사에는 Bonjour!로 받아치면 돼요.' },
-        { scenario: '☕ 카페', question: '바리스타가 "Voici votre café !"라며 커피를 건넸어요. 자연스러운 답은?', options: ['Bonjour', 'Au revoir', 'Merci beaucoup !', 'Excusez-moi'], answer: 2, imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=1400&h=788&q=80' },
-        { scenario: '🍽️ 레스토랑', question: '화장실을 찾고 싶을 때 가장 자연스러운 질문은?', options: ['Où sont les toilettes, s\'il vous plaît ?', 'Je suis toilette.', 'Merci toilette.', 'Café s\'il vous plaît.'], answer: 0, imageUrl: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1400&h=788&q=80' },
-        { scenario: '🚕 택시', question: '기사님이 "Où allez-vous ?"라고 물었어요. 나의 답은?', options: ['Je suis gare.', 'Merci gare.', 'Bonjour taxi.', 'À la gare, s\'il vous plaît.'], answer: 3, imageUrl: 'https://images.unsplash.com/photo-1431274172761-fca41d930114?auto=format&fit=crop&w=1400&h=788&q=80' }
-      ],
-      ja: [
-        { scenario: '🍣 이자카야', question: '점원이 "いらっしゃいませ！ご注文は？"라고 했어요. 자연스러운 나의 답은?', options: ['さようなら。', '生ビールをください。', 'こんにちは、私。', 'すみません、トイレ。'], answer: 1, imageUrl: 'https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&w=1400&h=788&q=80' },
-        { scenario: '👋 인사', question: '파트너가 "こんにちは！"라고 인사했어요. 자연스러운 나의 답은?', options: ['こんにちは！', 'ありがとう。', 'すみません。', 'いただきます。'], answer: 0, imageUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=1400&h=788&q=80' },
-        { scenario: '🏪 편의점', question: '점원이 "袋はいりますか？"라고 물었어요. 자연스러운 답은?', options: ['こんにちは。', 'いただきます。', 'はい、お願いします。', 'さようなら。'], answer: 2, imageUrl: 'https://images.unsplash.com/photo-1604719312566-8912e9227c6a?auto=format&fit=crop&w=1400&h=788&q=80' },
-        { scenario: '🚉 길 묻기', question: '신주쿠역을 찾고 있을 때 가장 자연스러운 질문은?', options: ['新宿は私です。', 'こんにちは、新宿。', 'いただきます。', 'すみません、新宿はどこですか？'], answer: 3, imageUrl: 'https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=1400&h=788&q=80' }
-      ],
-      es: [
-        { scenario: '👋 인사', question: '파트너가 "¡Hola! ¿Cómo estás?"라고 인사했어요. 자연스러운 나의 답은?', options: ['Adiós.', 'Gracias café.', '¡Hola! Bien, ¿y tú?', 'No sé taxi.'], answer: 2, imageUrl: 'https://images.unsplash.com/photo-1539037116277-4db20889f2d4?auto=format&fit=crop&w=1400&h=788&q=80' },
-        { scenario: '☕ 카페', question: '바리스타가 "¿Qué te apetece?"라고 물었어요. 자연스러운 주문은?', options: ['Un café, por favor.', 'Café yo.', 'Hola adiós.', 'No sé.'], answer: 0, imageUrl: 'https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=1400&h=788&q=80' },
-        { scenario: '🍽️ 레스토랑', question: '직원이 "¡Hola! ¿En qué te puedo ayudar?"라고 했어요. 자연스러운 답은?', options: ['Adiós mesa.', 'Una mesa para dos, por favor.', 'Yo dos.', 'Café adiós.'], answer: 1, imageUrl: 'https://images.unsplash.com/photo-1534080564583-6be75777b558?auto=format&fit=crop&w=1400&h=788&q=80' },
-        { scenario: '💃 스몰토크', question: '현지 친구가 "¿De dónde eres?"라고 물었어요. 자연스러운 나의 답은?', options: ['Soy de Corea. ¿Y tú?', 'Corea adiós.', 'Café por favor.', 'No sé baño.'], answer: 0, imageUrl: 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=1400&h=788&q=80' }
-      ],
-      zh: [
-        { scenario: '🧋 카페', question: '점원이 "你好，要喝点什么？"라고 했어요. 자연스러운 주문은?', options: ['我要一杯咖啡。', '咖啡我是。', '再见咖啡。', '你好走。'], answer: 0, imageUrl: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=1400&h=788&q=80' },
-        { scenario: '💰 계산', question: '가격을 묻고 싶을 때 자연스러운 질문은?', options: ['你好吗？', '多少钱？', '再见。', '我是钱。'], answer: 1, imageUrl: 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?auto=format&fit=crop&w=1400&h=788&q=80' },
-        { scenario: '🚻 화장실', question: '화장실을 찾을 때 자연스러운 질문은?', options: ['洗手间在哪里？', '我是洗手间。', '谢谢厕所。', '咖啡在哪里？'], answer: 0, imageUrl: 'https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=1400&h=788&q=80' },
-        { scenario: '👋 인사', question: '파트너가 "你好！"라고 했어요. 나의 답은?', options: ['再见！', '多少钱！', '你好！', '对不起咖啡。'], answer: 2, imageUrl: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=1400&h=788&q=80' }
-      ],
-      ko: [
-        { scenario: '☕ 카페', question: '직원이 "뭐 드릴까요?"라고 물었어요. 자연스러운 주문은?', options: ['커피 나.', '아메리카노 한 잔 주세요.', '빨리 커피.', '나는 커피입니다.'], answer: 1, imageUrl: 'https://images.unsplash.com/photo-1548115184-bc6544d06ba5?auto=format&fit=crop&w=1400&h=788&q=80' },
-        { scenario: '💰 계산', question: '가격을 묻고 싶을 때 자연스러운 질문은?', options: ['이거 얼마예요?', '돈 뭐예요?', '계산 나.', '안녕하세요 가격.'], answer: 0, imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=1400&h=788&q=80' },
-        { scenario: '🍽️ 식사', question: '식사를 시작할 때 자연스러운 인사는?', options: ['잘 가겠습니다', '잘 먹겠습니다', '감사합니다 나가', '화장실 주세요'], answer: 1, imageUrl: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=1400&h=788&q=80' },
-        { scenario: '👋 인사', question: '파트너가 "안녕하세요!"라고 했어요. 나의 답은?', options: ['안녕히 가세요!', '안녕하세요!', '얼마예요!', '주세요 안녕.'], answer: 1, imageUrl: 'https://images.unsplash.com/photo-1517154421773-0529f29ea451?auto=format&fit=crop&w=1400&h=788&q=80' }
+        { theme: 'cafe', themeIndex: 1, question: '카페 카운터에서 직원이 "What can I get for you?"라고 물었을 때 자연스러운 주문 표현은?', options: ['Coffee me.', 'Can I have a latte, please?', 'Give me now.', 'I am coffee.'], answer: 1, imageUrl: QUIZ_THEME_IMAGES.cafe },
+        { theme: 'restaurant', themeIndex: 2, question: '레스토랑에서 "두 명 자리 있나요?"를 영어로 표현한 것은?', options: ['I am two.', 'A table for two, please.', 'Two me table.', 'Check-in two.'], answer: 1, imageUrl: QUIZ_THEME_IMAGES.restaurant },
+        { theme: 'street', themeIndex: 3, question: '길거리에서 "지하철역이 어디인가요?"라고 위치를 물어보는 가장 자연스러운 표현은?', options: ['Subway me where.', 'I am station.', 'Excuse me, where is the subway station?', 'Hotel subway please.'], answer: 2, imageUrl: QUIZ_THEME_IMAGES.street },
+        { theme: 'hotel', themeIndex: 4, question: '호텔 체크인 시 직원이 "Under what name is the reservation?"이라고 물었을 때 의미는?', options: ['예약자 이름이 어떻게 되세요?', '몇 시에 체크아웃하세요?', '커피 드릴까요?', '지하철이 어디예요?'], answer: 0, imageUrl: QUIZ_THEME_IMAGES.hotel }
       ]
     };
 
@@ -1723,8 +1702,11 @@
     }
 
     function normalizeQuizItem(raw) {
-      const imageUrl = raw.imageUrl || raw.image || null;
+      const theme = raw.theme || null;
+      const imageUrl = raw.imageUrl || raw.image || (theme && QUIZ_THEME_IMAGES[theme]) || null;
       return {
+        theme,
+        themeIndex: raw.themeIndex || null,
         scenario: raw.scenario || '',
         question: raw.question || '',
         image: imageUrl,
@@ -1736,6 +1718,8 @@
     }
 
     function extractLevelQuestions(block, lang, level) {
+      if (block && block[level] && Array.isArray(block[level].questions)) return block[level].questions;
+      if (block && Array.isArray(block[level])) return block[level];
       if (block && block.levels && block.levels[level] && Array.isArray(block.levels[level].questions)) {
         return block.levels[level].questions;
       }
@@ -1748,6 +1732,7 @@
     }
 
     function extractLevelCourse(block, level) {
+      if (block && block[level] && block[level].course) return block[level].course;
       if (block && block.levels && block.levels[level] && block.levels[level].course) return block.levels[level].course;
       if (block && block.course) return block.course;
       return { name: '', desc: '' };
@@ -1882,6 +1867,12 @@
       currentStep = 0;
       quizScore = 0;
       quizPhase = 'quiz';
+      quizItems.forEach((item) => {
+        const src = item.imageUrl || item.image;
+        if (!src) return;
+        const pre = new Image();
+        pre.src = src;
+      });
       quizSlides.innerHTML = '';
       quizSlides.appendChild(renderQuestion(0));
     }
@@ -1928,17 +1919,22 @@
       }
     }
 
+    function situationBadge(q, index, total) {
+      const label = t('quiz.theme.' + (q.theme || 'cafe'));
+      return t('quiz.themeBadge', { n: String(index + 1), total: String(total), label });
+    }
+
     function renderQuestion(index) {
       const q = quizItems[index];
       setQuizProgressVisible(true);
       setQuizProgress(index, quizItems.length);
       const slide = document.createElement('div');
       slide.className = 'quiz-slide active';
-      const src = q.imageUrl || q.image;
+      const src = q.imageUrl || q.image || (q.theme && QUIZ_THEME_IMAGES[q.theme]);
       const imageBlock = src
-        ? `<div class="quiz-illustration"><img src="${escapeHtml(src)}" alt="${escapeHtml(q.scenario)}" decoding="async" onerror="this.onerror=null;this.closest('.quiz-illustration').classList.add('is-fallback');"><div class="quiz-illustration-fallback" aria-hidden="true">${scenarioEmoji(q.scenario)}</div></div>`
+        ? `<div class="quiz-illustration"><img src="${escapeHtml(src)}" alt="${escapeHtml(t('quiz.theme.' + (q.theme || 'cafe')))}" decoding="async" onerror="this.onerror=null;this.closest('.quiz-illustration').classList.add('is-fallback');"><div class="quiz-illustration-fallback" aria-hidden="true">${q.theme === 'hotel' ? '🏨' : q.theme === 'street' ? '🗺️' : q.theme === 'restaurant' ? '🍽️' : '☕'}</div></div>`
         : '';
-      slide.innerHTML = `${imageBlock}<div class="situation-card"><div class="situation-tag">${escapeHtml(q.scenario)}</div><p class="situation-text">${escapeHtml(q.question)}</p></div><div class="quiz-options">${q.options.map((o, i) => `<button class="quiz-option" data-index="${i}">${escapeHtml(o)}</button>`).join('')}</div><p class="quiz-feedback" hidden></p><p class="quiz-explanation" hidden></p><button class="quiz-next-btn" type="button" hidden></button>`;
+      slide.innerHTML = `${imageBlock}<div class="situation-card"><div class="situation-tag">${escapeHtml(situationBadge(q, index, quizItems.length))}</div><p class="situation-text">${escapeHtml(q.question)}</p></div><div class="quiz-options">${q.options.map((o, i) => `<button class="quiz-option" data-index="${i}">${escapeHtml(o)}</button>`).join('')}</div><p class="quiz-feedback" hidden></p><p class="quiz-explanation" hidden></p><button class="quiz-next-btn" type="button" hidden></button>`;
       bindQuizIllustration(slide, q, quizItems[index + 1]);
       slide.querySelectorAll('.quiz-option').forEach(btn => btn.addEventListener('click', () => handleAnswer(slide, index, btn)));
       return slide;
