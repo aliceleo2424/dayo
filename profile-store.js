@@ -593,6 +593,59 @@ async function grantWelcomeCoupon(userId, clientKey) {
   fetchCoupons();
 }
 
+function waitMs(ms) {
+  return new Promise(function (resolve) { setTimeout(resolve, ms); });
+}
+
+function localProfileForUser(user, extra) {
+  extra = extra || {};
+  var name = extra.user_name || displayNameFromUser(user);
+  var email = String((user && user.email) || extra.email || '').trim().toLowerCase();
+  return Object.assign({ id: null, _offline: true }, defaultsFromLocal(), extra, {
+    user_id: user && user.id,
+    user_name: name,
+    email: email,
+    ticket_count: extra.ticket_count != null ? extra.ticket_count : 0,
+    has_welcome_coupon: extra.has_welcome_coupon != null ? extra.has_welcome_coupon : true
+  });
+}
+
+async function waitForTriggerProfile(client, userId) {
+  if (!client || !userId) return null;
+  var lastError = null;
+  for (var i = 0; i < 5; i++) {
+    try {
+      var byId = await client.from('profiles').select('*').eq('user_id', userId).maybeSingle();
+      if (byId.error) lastError = byId.error;
+      else if (byId.data) return byId.data;
+    } catch (err) {
+      lastError = err;
+    }
+    if (i < 4) await waitMs(150);
+  }
+  if (lastError) console.warn('[DayO] waitForTriggerProfile', lastError);
+  return null;
+}
+
+async function insertProfileFallback(client, payload) {
+  if (!client || !payload) return { data: null, error: null };
+  try {
+    var inserted = await client.from('profiles').insert(payload).select('*').single();
+    if (inserted && inserted.error) {
+      var retryPayload = Object.assign({}, payload);
+      delete retryPayload.has_welcome_coupon;
+      try {
+        inserted = await client.from('profiles').insert(retryPayload).select('*').single();
+      } catch (retryErr) {
+        return { data: null, error: retryErr };
+      }
+    }
+    return inserted || { data: null, error: null };
+  } catch (err) {
+    return { data: null, error: err };
+  }
+}
+
 async function ensureProfileForUser(user) {
   if (!user) return fetchOrCreateProfile();
 
@@ -611,51 +664,57 @@ async function ensureProfileForUser(user) {
   var client = getClient();
   var local = defaultsFromLocal();
   if (!client) {
-    profileCache = Object.assign({ id: null, user_id: userId, _offline: true }, local, {
+    profileCache = localProfileForUser(user, {
       user_name: name,
       email: email,
       has_welcome_coupon: true
     });
     applyProfileToLocal(profileCache);
-    grantWelcomeCoupon(userId, 'user:' + userId);
+    try { grantWelcomeCoupon(userId, 'user:' + userId); } catch (e) { /* ignore */ }
     return profileCache;
   }
 
   try {
-    var byId = await client.from('profiles').select('*').eq('user_id', userId).maybeSingle();
-    if (byId.error) throw byId.error;
-    if (byId.data) {
-      var nextLogin = Object.assign({}, byId.data, {
-        user_name: byId.data.user_name || name,
-        email: byId.data.email || email,
-        last_login_date: today
+    var existing = await waitForTriggerProfile(client, userId);
+    if (existing) {
+      var nextLogin = Object.assign({}, existing, {
+        user_name: existing.user_name || name,
+        email: existing.email || email,
+        last_login_date: existing.last_login_date || today
       });
       profileCache = nextLogin;
       applyProfileToLocal(profileCache);
-      if (!byId.data.user_name || !byId.data.last_login_date) {
-        await client.from('profiles').update({
-          user_name: nextLogin.user_name,
-          email: nextLogin.email,
-          last_login_date: today,
-          updated_at: new Date().toISOString()
-        }).eq('id', byId.data.id);
-      }
+      try {
+        if (!existing.user_name || !existing.last_login_date) {
+          await client.from('profiles').update({
+            user_name: nextLogin.user_name,
+            email: nextLogin.email,
+            last_login_date: today,
+            updated_at: new Date().toISOString()
+          }).eq('id', existing.id);
+        }
+      } catch (e) { /* login continues even if last_login update fails */ }
+      try { fetchCoupons(); } catch (e) { /* ignore */ }
       return profileCache;
     }
 
     if (email) {
-      var byEmail = await client.from('profiles').select('*').eq('email', email).maybeSingle();
-      if (byEmail.data) {
-        var patched = await client.from('profiles').update({
-          user_id: userId,
-          client_key: 'user:' + userId,
-          user_name: byEmail.data.user_name || name,
-          last_login_date: today,
-          updated_at: new Date().toISOString()
-        }).eq('id', byEmail.data.id).select('*').single();
-        profileCache = patched.data || Object.assign({}, byEmail.data, { user_id: userId });
-        applyProfileToLocal(profileCache);
-        return profileCache;
+      try {
+        var byEmail = await client.from('profiles').select('*').eq('email', email).maybeSingle();
+        if (byEmail.data) {
+          var patched = await client.from('profiles').update({
+            user_id: userId,
+            client_key: 'user:' + userId,
+            user_name: byEmail.data.user_name || name,
+            last_login_date: today,
+            updated_at: new Date().toISOString()
+          }).eq('id', byEmail.data.id).select('*').single();
+          profileCache = patched.data || Object.assign({}, byEmail.data, { user_id: userId });
+          applyProfileToLocal(profileCache);
+          return profileCache;
+        }
+      } catch (e) {
+        console.warn('[DayO] email profile link failed', e);
       }
     }
 
@@ -673,34 +732,35 @@ async function ensureProfileForUser(user) {
       preferred_request: local.preferred_request,
       updated_at: new Date().toISOString()
     };
-    var inserted = await client.from('profiles').insert(insertPayload).select('*').single();
-    if (inserted.error) {
-      var retryPayload = Object.assign({}, insertPayload);
-      delete retryPayload.has_welcome_coupon;
-      inserted = await client.from('profiles').insert(retryPayload).select('*').single();
+    var inserted = await insertProfileFallback(client, insertPayload);
+    if (inserted && inserted.data) {
+      profileCache = inserted.data;
+      applyProfileToLocal(profileCache);
+      try { grantWelcomeCoupon(userId, 'user:' + userId); } catch (e) { /* trigger may already own the coupon */ }
+      return profileCache;
     }
-    if (inserted.error) {
-      var again = await client.from('profiles').select('*').eq('user_id', userId).maybeSingle();
-      if (again.data) {
-        profileCache = again.data;
-        applyProfileToLocal(profileCache);
-        return profileCache;
-      }
-      throw inserted.error;
+
+    var again = await waitForTriggerProfile(client, userId);
+    if (again) {
+      profileCache = again;
+      applyProfileToLocal(profileCache);
+      return profileCache;
     }
-    profileCache = inserted.data;
-    applyProfileToLocal(profileCache);
-    grantWelcomeCoupon(userId, 'user:' + userId);
-    return profileCache;
+
+    if (inserted && inserted.error) {
+      console.warn('[DayO] profiles insert skipped — trigger owns new users', inserted.error);
+    }
   } catch (err) {
     console.warn('[DayO] ensureProfileForUser failed — using local fallback', err);
-    profileCache = Object.assign({ id: null, user_id: userId, _offline: true }, local, {
-      user_name: name,
-      email: email
-    });
-    applyProfileToLocal(profileCache);
-    return profileCache;
   }
+
+  profileCache = localProfileForUser(user, {
+    user_name: name,
+    email: email,
+    has_welcome_coupon: true
+  });
+  applyProfileToLocal(profileCache);
+  return profileCache;
 }
 
 function bindAuthListener(client) {
@@ -796,7 +856,14 @@ async function signInWithEmail(email, password) {
   });
 
   if (!signedIn.error && signedIn.data && signedIn.data.session) {
-    var profile = await ensureProfileForUser(signedIn.data.user);
+    var profile = null;
+    try {
+      profile = await ensureProfileForUser(signedIn.data.user);
+    } catch (profileErr) {
+      console.warn('[DayO] profile sync after sign-in failed — login continues', profileErr);
+      profile = localProfileForUser(signedIn.data.user, { email: cleanedEmail });
+      try { applyProfileToLocal(profile); } catch (e) { /* ignore */ }
+    }
     return {
       isNew: false,
       needsEmail: false,
@@ -811,14 +878,19 @@ async function signInWithEmail(email, password) {
     throw classifyAuthError(signedIn.error);
   }
 
-  var signedUp = await client.auth.signUp({
-    email: cleanedEmail,
-    password: cleanedPass,
-    options: {
-      data: { user_name: nameFromEmail(cleanedEmail) },
-      emailRedirectTo: window.location.origin + (window.location.pathname || '/')
-    }
-  });
+  var signedUp;
+  try {
+    signedUp = await client.auth.signUp({
+      email: cleanedEmail,
+      password: cleanedPass,
+      options: {
+        data: { user_name: nameFromEmail(cleanedEmail) },
+        emailRedirectTo: window.location.origin + (window.location.pathname || '/')
+      }
+    });
+  } catch (signUpErr) {
+    throw classifyAuthError(signUpErr);
+  }
 
   if (signedUp.error) {
     var classified = classifyAuthError(signedUp.error);
@@ -835,7 +907,18 @@ async function signInWithEmail(email, password) {
   }
 
   if (signedUp.data && signedUp.data.session && signupUser) {
-    var created = await ensureProfileForUser(signedUp.data.user);
+    var created = null;
+    try {
+      created = await ensureProfileForUser(signedUp.data.user);
+    } catch (profileErr) {
+      console.warn('[DayO] profile sync after signup failed — login continues', profileErr);
+      created = localProfileForUser(signedUp.data.user, {
+        user_name: nameFromEmail(cleanedEmail),
+        email: cleanedEmail,
+        has_welcome_coupon: true
+      });
+      try { applyProfileToLocal(created); } catch (e) { /* ignore */ }
+    }
     return {
       isNew: true,
       needsEmail: false,

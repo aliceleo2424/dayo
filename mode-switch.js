@@ -511,9 +511,18 @@
         showToast(t('login.confirmEmail'), 4200);
         return;
       }
-      finishAuth(result.name || nameFromEmail(cleanedEmail), result.email || cleanedEmail, {
-        isNew: !!result.isNew
-      });
+      try {
+        finishAuth(result.name || nameFromEmail(cleanedEmail), result.email || cleanedEmail, {
+          isNew: !!result.isNew
+        });
+      } catch (finishErr) {
+        console.warn('[DayO] finishAuth failed', finishErr);
+        startMemberSession(result.name || nameFromEmail(cleanedEmail), result.email || cleanedEmail);
+        closeLogin();
+        render();
+        if (result.isNew) showToast(t('login.signupWelcome'), 4200);
+        else showToast(t('login.welcomeToast', { name: result.name || nameFromEmail(cleanedEmail) }));
+      }
     }).catch(function (err) {
       setLoginBusy(false);
       showToast(authToastMessage(err));
