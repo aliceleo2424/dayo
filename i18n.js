@@ -1084,20 +1084,68 @@
       ES: 'Debes responder a: "{quote}"'
     },
     'quiz.emailTitle': {
-      KO: '내 스피킹 약점 분석표 &<br>맞춤 세션 리포트 받아보기',
-      EN: 'Get my speaking weakness report &<br>a personalized session recommendation',
-      ZH: '获取我的口语弱点分析表 &<br>专属会话报告',
-      JA: 'スピーキング弱点分析表と<br>おすすめセッションレポートを受け取る',
-      FR: 'Recevez mon analyse de faiblesses &<br>un rythme de session personnalisé',
-      ES: 'Recibe mi análisis de debilidades &<br>un informe de sesión personalizado'
+      KO: '🎁 [{level}] 맞춤 회화 치트키 PDF',
+      EN: '🎁 [{level}] conversation cheat-sheet PDF',
+      ZH: '🎁 [{level}] 会话小抄 PDF',
+      JA: '🎁 [{level}] 会話チートシート PDF',
+      FR: '🎁 [{level}] Antisèche de conversation PDF',
+      ES: '🎁 [{level}] Chuleta de conversación PDF'
+    },
+    'quiz.lead.title.ja': {
+      KO: '🎁 [{level}] 현지 식당/카페에서 바로 쓰는 일본어 회화 치트키 PDF',
+      EN: '🎁 [{level}] Japanese café & restaurant cheat-sheet PDF',
+      ZH: '🎁 [{level}] 日本餐厅/咖啡店即用会话小抄 PDF',
+      JA: '🎁 [{level}] 現地の飲食店ですぐ使える日本語チートシート PDF',
+      FR: '🎁 [{level}] Antisèche japonais café & resto PDF',
+      ES: '🎁 [{level}] Chuleta de japonés para café y restaurante PDF'
+    },
+    'quiz.lead.title.fr': {
+      KO: '🎁 [{level}] 파리 여행 필수 서바이벌 회화 표현집 PDF',
+      EN: '🎁 [{level}] Paris travel survival phrases PDF',
+      ZH: '🎁 [{level}] 巴黎旅行必备生存会话 PDF',
+      JA: '🎁 [{level}] パリ旅行サバイバル会話フレーズ PDF',
+      FR: '🎁 [{level}] Phrases survie voyage à Paris PDF',
+      ES: '🎁 [{level}] Frases de supervivencia para París PDF'
+    },
+    'quiz.lead.title.en': {
+      KO: '🎁 [{level}] 원어민 앞 7초 침묵 탈출 만능 표현 20선 PDF',
+      EN: '🎁 [{level}] 20 go-to phrases to beat the 7-second freeze PDF',
+      ZH: '🎁 [{level}] 母语者面前7秒沉默逃生万能表达20句 PDF',
+      JA: '🎁 [{level}] ネイティブの前の7秒沈黙を抜ける万能フレーズ20 PDF',
+      FR: '🎁 [{level}] 20 phrases pour briser les 7 secondes de silence PDF',
+      ES: '🎁 [{level}] 20 frases comodín para salir del silencio de 7 segundos PDF'
+    },
+    'quiz.lead.title.es': {
+      KO: '🎁 [{level}] 바르셀로나 타파스 바 소통 가이드 PDF',
+      EN: '🎁 [{level}] Barcelona tapas-bar conversation guide PDF',
+      ZH: '🎁 [{level}] 巴塞罗那塔帕斯酒吧沟通指南 PDF',
+      JA: '🎁 [{level}] バルセロナのタパスバー会話ガイド PDF',
+      FR: '🎁 [{level}] Guide de conversation tapas à Barcelone PDF',
+      ES: '🎁 [{level}] Guía de conversación en bares de tapas de Barcelona PDF'
+    },
+    'quiz.lead.title.zh': {
+      KO: '🎁 [{level}] 현지 찻집/식당에서 바로 쓰는 중국어 회화 치트키 PDF',
+      EN: '🎁 [{level}] Chinese teahouse & restaurant cheat-sheet PDF',
+      ZH: '🎁 [{level}] 茶馆/餐厅即用中文会话小抄 PDF',
+      JA: '🎁 [{level}] 現地の茶館・食堂ですぐ使える中国語チートシート PDF',
+      FR: '🎁 [{level}] Antisèche chinois salon de thé & resto PDF',
+      ES: '🎁 [{level}] Chuleta de chino para tetería y restaurante PDF'
+    },
+    'quiz.lead.title.ko': {
+      KO: '🎁 [{level}] 카페·식당에서 바로 쓰는 한국어 회화 치트키 PDF',
+      EN: '🎁 [{level}] Korean café & restaurant cheat-sheet PDF',
+      ZH: '🎁 [{level}] 咖啡店/餐厅即用韩语会话小抄 PDF',
+      JA: '🎁 [{level}] カフェ・食堂ですぐ使える韓国語チートシート PDF',
+      FR: '🎁 [{level}] Antisèche coréen café & resto PDF',
+      ES: '🎁 [{level}] Chuleta de coreano para café y restaurante PDF'
     },
     'quiz.emailDesc': {
-      KO: '테스트 결과를 바탕으로 나만의 스피킹 페이스를 추천해 드릴게요',
-      EN: "We'll recommend a speaking pace made just for you, based on your results.",
-      ZH: '根据测试结果为您推荐专属会话节奏。',
-      JA: 'テスト結果に基づいて、あなただけのスピーキングペースをご提案します。',
-      FR: 'Nous vous recommandons un rythme de conversation sur mesure selon vos résultats.',
-      ES: 'Te recomendaremos un ritmo de conversación a tu medida según tus resultados.'
+      KO: '이메일을 남겨주시면 맞춤 회화 자료집과 첫 세션 9,900원 체험 할인쿠폰을 즉시 보내드립니다.',
+      EN: 'Leave your email and we’ll send your tailored conversation pack plus the ₩9,900 first-session coupon right away.',
+      ZH: '留下邮箱，我们会立刻发送专属会话资料集和9,900韩元首次体验优惠券。',
+      JA: 'メールを残していただければ、あなたに合わせた会話資料集と初回セッション9,900ウォン体験クーポンをすぐにお送りします。',
+      FR: 'Laissez votre e-mail : le pack de conversation sur mesure et le coupon 9 900 ₩ partent tout de suite.',
+      ES: 'Deja tu correo y te enviamos al instante la guía de conversación a tu medida y el cupón de 9.900 ₩ para la primera sesión.'
     },
     'quiz.emailPlaceholder': {
       KO: '이메일을 입력해 주세요', EN: 'Enter your email', ZH: '请输入电子邮箱', JA: 'メールアドレスを入力してください', FR: 'Entrez votre e-mail', ES: 'Ingresa tu correo'
@@ -1136,7 +1184,47 @@
       KO: '예: company.com', EN: 'e.g. company.com', ZH: '例如：company.com', JA: '例：company.com', FR: 'ex. company.com', ES: 'ej. company.com'
     },
     'quiz.emailSubmit': {
-      KO: '리포트 받아보기', EN: 'Get my report', ZH: '获取报告', JA: 'レポートを受け取る', FR: 'Recevoir le rapport', ES: 'Recibir el informe'
+      KO: '자료집 & 쿠폰 받기', EN: 'Get the pack & coupon', ZH: '领取资料集和优惠券', JA: '資料集とクーポンを受け取る', FR: 'Recevoir le pack et le coupon', ES: 'Recibir la guía y el cupón'
+    },
+    'quiz.lead.success': {
+      KO: '🎉 입력하신 메일로 자료와 쿠폰 발급 안내가 전송되었습니다!',
+      EN: '🎉 Your pack and coupon details were sent to that email!',
+      ZH: '🎉 资料和优惠券发放说明已发到您填写的邮箱！',
+      JA: '🎉 入力したメールに資料とクーポン案内を送りました！',
+      FR: '🎉 Le pack et le coupon ont été envoyés à cet e-mail !',
+      ES: '🎉 ¡Enviamos la guía y el cupón a ese correo!'
+    },
+    'quiz.lead.errorEmail': {
+      KO: '이메일 주소를 다시 확인해 주세요.',
+      EN: 'Please check the email address.',
+      ZH: '请再确认一下邮箱地址。',
+      JA: 'メールアドレスをもう一度確認してください。',
+      FR: 'Vérifiez l’adresse e-mail.',
+      ES: 'Revisa la dirección de correo.'
+    },
+    'quiz.lead.errorSave': {
+      KO: '저장에 실패했어요. 잠시 후 다시 시도해 주세요.',
+      EN: 'Couldn’t save just now. Please try again in a moment.',
+      ZH: '保存失败。请稍后再试。',
+      JA: '保存に失敗しました。しばらくしてからもう一度どうぞ。',
+      FR: 'Enregistrement impossible. Réessayez dans un instant.',
+      ES: 'No se pudo guardar. Inténtalo de nuevo en un momento.'
+    },
+    'quiz.lead.signupCta': {
+      KO: '회원가입하고 대화 시작하기',
+      EN: 'Sign up and start chatting',
+      ZH: '注册并开始对话',
+      JA: '会員登録して会話を始める',
+      FR: 'Créer un compte et commencer à parler',
+      ES: 'Regístrate y empieza a conversar'
+    },
+    'quiz.lead.bookingCta': {
+      KO: '파트너와 첫 세션 예약하기',
+      EN: 'Book a first session with a partner',
+      ZH: '预约与伙伴的第一次会话',
+      JA: 'パートナーと初セッションを予約する',
+      FR: 'Réserver une première session avec un partenaire',
+      ES: 'Reservar la primera sesión con un partner'
     },
     'quiz.toastFormat': {
       KO: '{email}로 리포트를 보내드릴게요!', EN: "We'll send the report to {email}!", ZH: '将把报告发送到{email}！', JA: '{email}にレポートをお送りします！', FR: 'Nous enverrons le rapport à {email} !', ES: '¡Enviaremos el informe a {email}!'

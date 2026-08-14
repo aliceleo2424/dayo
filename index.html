@@ -1057,6 +1057,56 @@
     }
     .email-submit { padding: 0.95rem; background: var(--coral); color: #fff; border: none; border-radius: var(--radius); font-family: inherit; font-weight: 700; cursor: pointer; box-shadow: 0 4px 0 var(--coral-dark); }
     .email-submit:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--coral-dark); }
+    .email-submit:disabled { opacity: 0.65; cursor: wait; transform: none; }
+
+    .quiz-lead-card {
+      text-align: left;
+      margin: 0.35rem 0 0.85rem;
+      padding: 1.15rem 1.15rem 1.2rem;
+      border: 1px solid rgba(255, 107, 87, 0.2);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, #FFF7FB, #FFE9D8 68%, #FFF6C7);
+    }
+    .quiz-lead-title {
+      font-size: 1.02rem;
+      font-weight: 800;
+      line-height: 1.5;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.45rem;
+    }
+    .quiz-lead-desc {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 0.95rem;
+    }
+    .quiz-lead-error {
+      margin: 0.15rem 0 0.55rem;
+      color: var(--coral);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .quiz-lead-error:empty { display: none; }
+    .quiz-lead-done { display: none; text-align: center; }
+    .quiz-lead-card.is-done .email-form { display: none; }
+    .quiz-lead-card.is-done .quiz-lead-done { display: block; }
+    .quiz-lead-success {
+      font-size: 0.92rem;
+      font-weight: 800;
+      line-height: 1.55;
+      margin-bottom: 0.85rem;
+    }
+    .quiz-lead-cta {
+      display: block; width: 100%; margin-top: 0.45rem; padding: 0.88rem 1.05rem;
+      background: var(--coral); color: #fff; border: none; border-radius: var(--radius);
+      font-family: inherit; font-size: 0.9rem; font-weight: 700; cursor: pointer; text-align: center;
+      text-decoration: none; box-sizing: border-box;
+    }
+    .quiz-lead-cta:hover { background: #ff5741; }
+    .quiz-lead-cta--ghost {
+      background: transparent; color: var(--coral); border: 1.5px solid var(--coral-pale);
+    }
+    .quiz-lead-cta--ghost:hover { background: var(--coral-pale); }
 
     .site-footer {
       text-align: center;
@@ -1983,6 +2033,8 @@
       const host = pack.host || QUIZ_HOSTS[quizLang];
       const pace = derivePace(quizLevel, quizScore);
       const course = (currentLevelBlock() && currentLevelBlock().course) || { name: '', desc: '' };
+      const levelLabel = t('quiz.level.' + quizLevel + '.name');
+      const leadTitle = t('quiz.lead.title.' + quizLang, { level: levelLabel });
       const slide = document.createElement('div');
       slide.className = 'quiz-slide active';
       slide.innerHTML = `<div class="quiz-result">
@@ -2009,15 +2061,124 @@
             </div>
           </div>
         </div>
-        <p class="quiz-result-coupon">${escapeHtml(t('quiz.resultCouponHint'))}</p>
-        <button class="quiz-result-cta" type="button" data-tickets-open>${escapeHtml(t('quiz.resultCta'))}</button>
+        <div class="quiz-lead-card" id="quizLeadCard">
+          <p class="quiz-lead-title">${escapeHtml(leadTitle)}</p>
+          <p class="quiz-lead-desc">${escapeHtml(t('quiz.emailDesc'))}</p>
+          <form class="email-form" id="quizLeadForm" novalidate>
+            <div class="email-compose">
+              <input class="email-input" id="quizEmailLocal" type="text" autocomplete="username" inputmode="email" placeholder="${escapeHtml(t('quiz.emailLocalPlaceholder'))}" aria-label="${escapeHtml(t('quiz.emailLocalPlaceholder'))}">
+              <span class="email-at" aria-hidden="true">@</span>
+              <select class="email-domain-select" id="quizEmailDomain" aria-label="${escapeHtml(t('quiz.emailDomainAria'))}">
+                <option value="naver.com">${escapeHtml(t('quiz.emailDomain.naver'))}</option>
+                <option value="gmail.com">${escapeHtml(t('quiz.emailDomain.gmail'))}</option>
+                <option value="daum.net">${escapeHtml(t('quiz.emailDomain.daum'))}</option>
+                <option value="icloud.com">${escapeHtml(t('quiz.emailDomain.icloud'))}</option>
+                <option value="outlook.com">${escapeHtml(t('quiz.emailDomain.outlook'))}</option>
+                <option value="yahoo.com">${escapeHtml(t('quiz.emailDomain.yahoo'))}</option>
+                <option value="hanmail.net">${escapeHtml(t('quiz.emailDomain.hanmail'))}</option>
+                <option value="custom">${escapeHtml(t('quiz.emailDomain.custom'))}</option>
+              </select>
+              <input class="email-domain-custom" id="quizEmailDomainCustom" type="text" hidden placeholder="${escapeHtml(t('quiz.emailDomainCustomPlaceholder'))}" aria-label="${escapeHtml(t('quiz.emailDomainCustomPlaceholder'))}">
+            </div>
+            <p class="quiz-lead-error" id="quizLeadError" role="alert"></p>
+            <button class="email-submit" type="submit">${escapeHtml(t('quiz.emailSubmit'))}</button>
+          </form>
+          <div class="quiz-lead-done">
+            <p class="quiz-lead-success">${escapeHtml(t('quiz.lead.success'))}</p>
+            <button class="quiz-lead-cta" type="button" data-quiz-signup>${escapeHtml(t('quiz.lead.signupCta'))}</button>
+            <button class="quiz-lead-cta quiz-lead-cta--ghost" type="button" data-booking-open>${escapeHtml(t('quiz.lead.bookingCta'))}</button>
+          </div>
+        </div>
         <button class="quiz-result-retry" type="button">${escapeHtml(t('quiz.resultRetry'))}</button>
       </div>`;
-      slide.querySelector('[data-tickets-open]').addEventListener('click', () => {
-        setTimeout(closeQuizModal, 0);
-      });
+      bindQuizLeadForm(slide);
       slide.querySelector('.quiz-result-retry').addEventListener('click', goToLevelSelect);
       return slide;
+    }
+
+    function composeQuizEmail(slide) {
+      const local = String((slide.querySelector('#quizEmailLocal') || {}).value || '').trim();
+      const domainSel = String((slide.querySelector('#quizEmailDomain') || {}).value || '');
+      const custom = String((slide.querySelector('#quizEmailDomainCustom') || {}).value || '').trim().replace(/^@/, '');
+      const domain = domainSel === 'custom' ? custom : domainSel;
+      if (!local || !domain) return '';
+      return (local + '@' + domain).toLowerCase();
+    }
+
+    function isValidEmail(value) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || ''));
+    }
+
+    function bindQuizLeadForm(slide) {
+      const card = slide.querySelector('#quizLeadCard');
+      const form = slide.querySelector('#quizLeadForm');
+      const domainSel = slide.querySelector('#quizEmailDomain');
+      const custom = slide.querySelector('#quizEmailDomainCustom');
+      const errorEl = slide.querySelector('#quizLeadError');
+      if (!form || !card) return;
+
+      if (domainSel && custom) {
+        domainSel.addEventListener('change', () => {
+          const isCustom = domainSel.value === 'custom';
+          custom.hidden = !isCustom;
+          if (isCustom) custom.focus();
+        });
+      }
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const email = composeQuizEmail(slide);
+        if (!isValidEmail(email)) {
+          if (errorEl) errorEl.textContent = t('quiz.lead.errorEmail');
+          return;
+        }
+        if (errorEl) errorEl.textContent = '';
+        const submitBtn = form.querySelector('.email-submit');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = t('quiz.emailSubmit');
+        }
+        const store = window.DayOProfileStore;
+        const save = function () {
+          if (!store || typeof store.saveQuizLead !== 'function') return Promise.resolve({ ok: false });
+          return store.saveQuizLead({
+            email: email,
+            language: quizLang,
+            level: quizLevel,
+            score: quizScore
+          });
+        };
+        const pending = (store && typeof store.ready === 'function') ? store.ready().then(save) : save();
+        Promise.resolve(pending).then((result) => {
+          if (!result || !result.ok) {
+            if (errorEl) errorEl.textContent = t('quiz.lead.errorSave');
+            if (submitBtn) submitBtn.disabled = false;
+            return;
+          }
+          card.classList.add('is-done');
+          showToast(t('quiz.lead.success'));
+        }).catch(() => {
+          if (errorEl) errorEl.textContent = t('quiz.lead.errorSave');
+          if (submitBtn) submitBtn.disabled = false;
+        });
+      });
+
+      const signupBtn = slide.querySelector('[data-quiz-signup]');
+      if (signupBtn) {
+        signupBtn.addEventListener('click', () => {
+          closeQuizModal();
+          if (window.DayOMode && typeof window.DayOMode.openLogin === 'function') {
+            window.DayOMode.openLogin();
+          }
+        });
+      }
+      const bookingBtn = slide.querySelector('[data-booking-open]');
+      if (bookingBtn) {
+        bookingBtn.addEventListener('click', () => {
+          setTimeout(closeQuizModal, 0);
+        });
+      }
+    }
     }
 
     function handleAnswer(slide, index, btn) {

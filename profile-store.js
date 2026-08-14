@@ -1165,6 +1165,7 @@ async function fetchPartnerSessionLogs() {
       var all = result.data || [];
       rows = all.filter(function (row) {
         if (!sessionEndedAt(row)) return false;
+        if (row.room_name === 'quiz-lead') return false;
         if (uid) return row.partner_id === uid || row.user_id === uid;
         if (email && row.email && String(row.email).toLowerCase() === email) return true;
         if (clientKey && row.client_key === clientKey) return true;
@@ -1237,6 +1238,80 @@ async function bootstrap() {
   return fetchOrCreateProfile();
 }
 
+async function saveQuizLead(lead) {
+  lead = lead || {};
+  var email = String(lead.email || '').trim().toLowerCase();
+  var payload = {
+    email: email,
+    language: String(lead.language || ''),
+    level: String(lead.level || ''),
+    score: typeof lead.score === 'number' ? lead.score : parseInt(lead.score, 10) || 0,
+    created_at: new Date().toISOString()
+  };
+  if (!email || email.indexOf('@') < 1) {
+    return { ok: false, error: 'invalid-email' };
+  }
+
+  try {
+    var stored = [];
+    try { stored = JSON.parse(lsGet('dayo.quizLeads', '[]') || '[]'); } catch (e) { stored = []; }
+    if (!Array.isArray(stored)) stored = [];
+    stored.push(payload);
+    lsSet('dayo.quizLeads', JSON.stringify(stored.slice(-30)));
+    if (!lsGet(EMAIL_KEY, '')) lsSet(EMAIL_KEY, email);
+  } catch (e) {}
+
+  var client = getClient();
+  if (!client) return { ok: false, local: true };
+
+  try {
+    var leadRes = await client.from('leads').insert({
+      email: payload.email,
+      language: payload.language,
+      level: payload.level,
+      score: payload.score,
+      created_at: payload.created_at
+    });
+    if (!leadRes.error) return { ok: true, table: 'leads', local: true, payload: payload };
+  } catch (err) {
+    console.warn('[DayO] leads insert failed', err);
+  }
+
+  try {
+    var logRes = await client.from('session_logs').insert({
+      client_key: getClientKey(),
+      email: payload.email,
+      user_name: lsGet(USER_KEY, '') || 'quiz-lead',
+      room_name: 'quiz-lead',
+      transcript: [{
+        type: 'quiz-lead',
+        language: payload.language,
+        level: payload.level,
+        score: payload.score,
+        timestamp: payload.created_at
+      }],
+      started_at: payload.created_at,
+      ended_at: payload.created_at
+    });
+    if (!logRes.error) return { ok: true, table: 'session_logs', local: true, payload: payload };
+  } catch (err) {
+    console.warn('[DayO] quiz-lead session_logs backup failed', err);
+  }
+
+  try {
+    var key = getClientKey();
+    var upd = await client.from('profiles').update({
+      email: payload.email,
+      updated_at: payload.created_at
+    }).eq('client_key', key).select('id');
+    if (!upd.error && upd.data && upd.data.length) return { ok: true, table: 'profiles', local: true, payload: payload };
+  } catch (err) {
+    console.warn('[DayO] quiz-lead profiles backup failed', err);
+  }
+
+  return { ok: false, local: true, payload: payload };
+}
+
 function ready() {
   if (!readyPromise) readyPromise = bootstrap();
   return readyPromise;
@@ -1265,6 +1340,7 @@ window.DayOProfileStore = {
   getLastTranscript: getLastTranscript,
   fetchPartnerSessionLogs: fetchPartnerSessionLogs,
   summarizePartnerEarnings: summarizePartnerEarnings,
+  saveQuizLead: saveQuizLead,
   syncRewardUI: syncRewardUI,
   fetchCoupons: fetchCoupons,
   markCouponUsed: markCouponUsed,
