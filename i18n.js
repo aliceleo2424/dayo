@@ -582,6 +582,9 @@
     'room.wordHelp': {
       KO: '💡 단어도움', EN: '💡 Word Help', ZH: '💡 单词帮助', JA: '💡 単語ヘルプ', FR: '💡 Mots', ES: '💡 Palabras'
     },
+    'room.wordHelpLoading': {
+      KO: 'AI 추천 단어 찾는 중...', EN: 'Finding AI word tips...', ZH: '正在寻找AI推荐单词…', JA: 'AIおすすめ単語を探しています…', FR: 'Recherche de mots IA…', ES: 'Buscando palabras con IA…'
+    },
     'room.sentenceHelp': {
       KO: '📝 문장도움', EN: '📝 Sentence Help', ZH: '📝 句子帮助', JA: '📝 文ヘルプ', FR: '📝 Phrases', ES: '📝 Frases'
     },
@@ -1138,12 +1141,17 @@
     'room.sentenceOverlayClose': { KO: '닫기', EN: 'Close', ZH: '关闭', JA: '閉じる', FR: 'Fermer', ES: 'Cerrar' },
     'room.wordSheetBadge': { KO: '💡 단어도움', EN: '💡 Word Help', ZH: '💡 单词帮助', JA: '💡 単語ヘルプ', FR: '💡 Mots', ES: '💡 Palabras' },
     'room.wordSheetTitle': {
-      KO: '막히는 한국어 단어나 상황을 입력해 보세요', EN: 'Type the Korean word or situation you\'re stuck on', ZH: '请输入卡壳的韩语单词或情境', JA: '困っている韓国語の単語や状況を入力してください', FR: 'Saisissez le mot ou la situation en coréen qui vous bloque', ES: 'Escribe la palabra o situación en coreano que te cuesta'
+      KO: '지금 쓰면 좋은 핵심 단어', EN: 'Words to use right now', ZH: '现在就能用的关键词', JA: '今使えるキーワード', FR: 'Mots à utiliser maintenant', ES: 'Palabras para usar ahora'
     },
     'room.wordSheetCloseAria': { KO: '닫기', EN: 'Close', ZH: '关闭', JA: '閉じる', FR: 'Fermer', ES: 'Cerrar' },
-    'room.wordSheetDesc': { KO: '예: 따뜻한 아메리카노', EN: 'e.g. hot americano', ZH: '例：热美式咖啡', JA: '例：温かいアメリカーノ', FR: 'ex. americano chaud', ES: 'ej. americano caliente' },
-    'room.wordSheetPlaceholder': { KO: '한국어로 편하게 적어 주세요', EN: 'Feel free to write in Korean', ZH: '请用韩语轻松输入', JA: '韓国語で気軽に書いてください', FR: 'Écrivez librement en coréen', ES: 'Escribe libremente en coreano' },
-    'room.wordSheetSubmit': { KO: '추천받기', EN: 'Get suggestions', ZH: '获取推荐', JA: '提案を受け取る', FR: 'Obtenir des suggestions', ES: 'Obtener sugerencias' },
+    'room.wordSheetDesc': {
+      KO: '지금 대화에 바로 쓸 수 있는 단어예요. 카드를 누르면 복사돼요.',
+      EN: 'Words you can use in this chat. Tap a card to copy.',
+      ZH: '可立刻用在当前对话里的词。点卡片即可复制。',
+      JA: '今の会話ですぐ使える単語です。カードをタップするとコピーされます。',
+      FR: 'Des mots à utiliser tout de suite. Touchez une carte pour copier.',
+      ES: 'Palabras para usar ahora. Toca una tarjeta para copiar.'
+    },
     'room.sentenceSheetBadge': { KO: '📝 문장도움', EN: '📝 Sentence Help', ZH: '📝 句子帮助', JA: '📝 文ヘルプ', FR: '📝 Phrases', ES: '📝 Frases' },
     'room.sentenceSheetTitle': {
       KO: '하고 싶은 말을 모국어로 편하게 써보세요', EN: 'Write what you want to say in your own language', ZH: '请用母语轻松写下想说的话', JA: '言いたいことを母国語で気軽に書いてください', FR: 'Écrivez ce que vous voulez dire dans votre langue', ES: 'Escribe lo que quieres decir en tu idioma'

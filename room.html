@@ -1088,9 +1088,44 @@
     }
 
     .word-card-text {
-      font-size: 0.95rem;
-      font-weight: 700;
+      font-size: 1.02rem;
+      font-weight: 800;
       line-height: 1.35;
+      letter-spacing: -0.02em;
+    }
+
+    .word-card-meaning {
+      margin-top: 0.2rem;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .word-card-hint {
+      margin-top: 0.35rem;
+      color: var(--coral);
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+
+    .word-loading {
+      display: none;
+      margin: 0.2rem 0 0.85rem;
+      padding: 0.85rem 1rem;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #FFF6F2, #FFE8E3);
+      color: var(--coral);
+      font-size: 0.88rem;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .word-loading.is-on { display: block; }
+
+    .ctrl-btn.is-busy {
+      pointer-events: none;
+      opacity: 0.78;
     }
 
     /* Feedback Modal (center, compact) */
@@ -1900,7 +1935,6 @@
       <div class="top-right" id="mobileNav">
         <div class="nav-drawer__head room-drawer-head">세션 메뉴</div>
         <div data-mode-switch="inline"></div>
-        <button class="top-btn" type="button" data-booking-open data-i18n="room.booking">📅 대화 예약하기</button>
         <button class="top-btn" id="shareBtn" type="button" data-i18n="room.share">🖥️ 화면 공유</button>
         <button class="top-btn top-btn--end" id="endBtn" type="button" data-i18n="room.end">🚪 세션 종료</button>
       </div>
@@ -2012,15 +2046,14 @@
       <div class="sheet-header">
         <div>
           <div class="sheet-badge" data-i18n="room.wordSheetBadge">💡 단어도움</div>
-          <h2 class="sheet-title" id="wordSheetTitle" data-i18n="room.wordSheetTitle">막히는 한국어 단어나 상황을 입력해 보세요</h2>
+          <h2 class="sheet-title" id="wordSheetTitle" data-i18n="room.wordSheetTitle">지금 쓰면 좋은 핵심 단어</h2>
         </div>
         <button class="sheet-close" data-close-sheet="word" data-i18n="room.wordSheetCloseAria" data-i18n-attr="aria-label" aria-label="닫기">✕</button>
       </div>
       <div class="sheet-body">
-        <p class="sheet-desc" data-i18n="room.wordSheetDesc">예: 따뜻한 아메리카노</p>
-        <textarea class="sheet-input" id="wordInput" placeholder="한국어로 편하게 적어 주세요" data-i18n="room.wordSheetPlaceholder"></textarea>
-        <button class="sheet-submit" id="wordSubmit" type="button" data-i18n="room.wordSheetSubmit">추천받기</button>
-        <div class="word-cards" id="wordCards" hidden></div>
+        <p class="sheet-desc" data-i18n="room.wordSheetDesc">지금 대화에 바로 쓸 수 있는 단어예요. 카드를 누르면 복사돼요.</p>
+        <p class="word-loading" id="wordLoading" data-i18n="room.wordHelpLoading">AI 추천 단어 찾는 중...</p>
+        <div class="word-cards" id="wordCards"></div>
       </div>
     </div>
   </div>
@@ -2459,59 +2492,89 @@
       });
     });
 
-    /* Word Help — noun phrases only */
+    /* Word Help — Gemini copilot from recent transcript */
     const wordHelpBtn = document.getElementById('wordHelpBtn');
-    const wordInput = document.getElementById('wordInput');
-    const wordSubmit = document.getElementById('wordSubmit');
     const wordCards = document.getElementById('wordCards');
+    const wordLoading = document.getElementById('wordLoading');
+    let wordHelpBusy = false;
 
-    const wordPresets = {
-      default: ['hot americano', 'warm americano', 'hot drip coffee'],
-      아메리카노: ['hot americano', 'warm americano', 'hot drip coffee'],
-      날씨: ['nice weather', 'sunny day', 'fresh air'],
-      감사: ['thank you', 'many thanks', 'appreciation'],
-      소개: ['nice to meet you', 'introduction', 'first meeting'],
-      예약: ['reservation', 'booking', 'table for two']
-    };
-
-    function getWordSuggestions(input) {
-      const text = input.toLowerCase();
-      for (const key of Object.keys(wordPresets)) {
-        if (key !== 'default' && text.includes(key)) return wordPresets[key];
-      }
-      if (text.includes('주문') || text.includes('커피') || text.includes('따뜻한')) {
-        return wordPresets.아메리카노;
-      }
-      return wordPresets.default;
+    function escapeWord(str) {
+      return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
     }
 
-    wordHelpBtn.addEventListener('click', () => {
-      wordCards.hidden = true;
-      wordCards.innerHTML = '';
-      wordInput.value = '';
-      openSheet('word');
-      setTimeout(() => wordInput.focus(), 280);
-    });
+    function setWordHelpBusy(on) {
+      if (!wordHelpBtn) return;
+      wordHelpBusy = !!on;
+      wordHelpBtn.classList.toggle('is-busy', wordHelpBusy);
+      wordHelpBtn.disabled = wordHelpBusy;
+      wordHelpBtn.setAttribute('aria-busy', String(wordHelpBusy));
+      if (wordHelpBusy) {
+        wordHelpBtn.textContent = t('room.wordHelpLoading');
+      } else {
+        wordHelpBtn.textContent = t('room.wordHelp');
+      }
+      if (wordLoading) wordLoading.classList.toggle('is-on', wordHelpBusy);
+    }
 
-    wordSubmit.addEventListener('click', () => {
-      const value = wordInput.value.trim();
-      if (!value) { wordInput.focus(); return; }
-      const suggestions = getWordSuggestions(value);
-      wordCards.innerHTML = suggestions.map((s, i) => `
-        <button class="word-card" type="button" data-phrase="${s}">
-          <div class="word-card-num">${i + 1}</div>
-          <div class="word-card-text">${s}</div>
-        </button>
-      `).join('');
-      wordCards.hidden = false;
-      wordCards.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-      wordCards.querySelectorAll('.word-card').forEach((card) => {
-        card.addEventListener('click', () => {
-          navigator.clipboard?.writeText(card.dataset.phrase).catch(() => {});
-          showToast(t('room.wordCopiedFormat', { phrase: card.dataset.phrase }));
+    function renderWordCards(words) {
+      const list = Array.isArray(words) ? words.slice(0, 3) : [];
+      wordCards.innerHTML = list.map(function (item, i) {
+        const word = escapeWord(item.word || item.en || '');
+        const meaning = escapeWord(item.meaning || item.ko || '');
+        return '' +
+          '<button class="word-card" type="button" data-word="' + word + '">' +
+            '<div class="word-card-num">' + (i + 1) + '</div>' +
+            '<div class="word-card-text">' + word + '</div>' +
+            (meaning ? '<div class="word-card-meaning">' + meaning + '</div>' : '') +
+            '<div class="word-card-hint">탭하면 복사돼요</div>' +
+          '</button>';
+      }).join('');
+      wordCards.hidden = list.length === 0;
+      wordCards.querySelectorAll('.word-card').forEach(function (card) {
+        card.addEventListener('click', function () {
+          const phrase = card.getAttribute('data-word') || '';
+          if (!phrase) return;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(phrase).catch(function () {});
+          }
+          showToast(t('room.wordCopiedFormat', { phrase: phrase }));
           closeSheet('word');
         });
+      });
+    }
+
+    function fallbackWordHelp() {
+      return [
+        { word: 'hello', meaning: '안녕하세요' },
+        { word: 'thanks', meaning: '고마워요' },
+        { word: 'sorry', meaning: '미안해요' }
+      ];
+    }
+
+    wordHelpBtn.addEventListener('click', function () {
+      if (wordHelpBusy) return;
+      setWordHelpBusy(true);
+      wordCards.innerHTML = '';
+      openSheet('word');
+
+      var api = window.DayOLive;
+      var request = (api && typeof api.suggestWords === 'function')
+        ? api.suggestWords()
+        : Promise.resolve({ words: fallbackWordHelp(), fallback: true });
+
+      Promise.resolve(request).then(function (result) {
+        var words = result && Array.isArray(result.words) && result.words.length
+          ? result.words
+          : fallbackWordHelp();
+        renderWordCards(words);
+      }).catch(function () {
+        renderWordCards(fallbackWordHelp());
+      }).then(function () {
+        setWordHelpBusy(false);
       });
     });
 
@@ -3219,6 +3282,5 @@
   </script>
   <script src="mobile-nav.js"></script>
   <script src="mode-switch.js"></script>
-  <script src="booking-modal.js"></script>
 </body>
 </html>

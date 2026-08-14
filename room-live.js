@@ -324,7 +324,94 @@
     return chain;
   }
 
-  function scheduleCopilot(line) {
+  var FALLBACK_WORDS = [
+    { word: 'hello', meaning: '안녕하세요' },
+    { word: 'thanks', meaning: '고마워요' },
+    { word: 'sorry', meaning: '미안해요' }
+  ];
+
+  function recentTranscriptContext(limit) {
+    var rows = serializeTranscript(sessionTranscript);
+    var slice = rows.slice(-(limit || 5));
+    return slice.map(function (row) {
+      var who = row.speaker === 'partner' ? 'Partner' : 'User';
+      return who + ': ' + row.text;
+    }).join('\n').trim();
+  }
+
+  function parseWordHelpJson(raw) {
+    var text = String(raw || '').trim();
+    var fenced = text.match(/\[[\s\S]*\]/);
+    if (fenced) text = fenced[0];
+    var data = JSON.parse(text);
+    if (data && !Array.isArray(data) && Array.isArray(data.words)) data = data.words;
+    if (!Array.isArray(data)) return [];
+    return data.map(function (item) {
+      if (typeof item === 'string') return { word: item, meaning: '' };
+      return {
+        word: String((item && (item.word || item.en || item.phrase)) || '').trim(),
+        meaning: String((item && (item.meaning || item.ko)) || '').trim()
+      };
+    }).filter(function (item) { return item.word; }).slice(0, 3);
+  }
+
+  function askGeminiWords(context) {
+    var key = geminiKey();
+    var blob = String(context || '').trim();
+    if (!key || !blob) return Promise.resolve(null);
+
+    var prompt = [
+      "현재 유저의 대화 맥락에 맞춰 지금 사용하면 좋을 영어 핵심 단어 3개와 한국어 뜻을 JSON 배열 형태 [{word: '단어', meaning: '뜻'}] 로만 응답해 줘.",
+      'Conversation context:',
+      blob.slice(-900)
+    ].join('\n');
+
+    function post(model) {
+      return fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(key),
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.4, maxOutputTokens: 220 }
+          })
+        }
+      ).then(function (res) {
+        if (!res.ok) throw new Error('gemini ' + res.status);
+        return res.json();
+      }).then(function (json) {
+        var text = '';
+        try {
+          text = json.candidates[0].content.parts.map(function (p) { return p.text || ''; }).join('');
+        } catch (e) {
+          throw new Error('empty gemini');
+        }
+        var words = parseWordHelpJson(text);
+        if (!words.length) throw new Error('no words');
+        return words;
+      });
+    }
+
+    var chain = Promise.reject(new Error('start'));
+    GEMINI_MODELS.forEach(function (model) {
+      chain = chain.catch(function () { return post(model); });
+    });
+    return withTimeout(chain, 8000);
+  }
+
+  function suggestWords() {
+    var context = recentTranscriptContext(5);
+    if (!geminiKey() || !context) {
+      return Promise.resolve({ words: FALLBACK_WORDS.slice(), fallback: true });
+    }
+    return askGeminiWords(context).then(function (words) {
+      if (words && words.length) return { words: words.slice(0, 3), fallback: false };
+      return { words: FALLBACK_WORDS.slice(), fallback: true };
+    }).catch(function () {
+      return { words: FALLBACK_WORDS.slice(), fallback: true };
+    });
+  }
     var cleaned = String(line || '').trim();
     if (cleaned) {
       recentLines.push(cleaned);
@@ -781,6 +868,7 @@
     toggleShare: toggleShare,
     hangUp: hangUp,
     getTranscript: function () { return serializeTranscript(sessionTranscript); },
+    suggestWords: suggestWords,
     saveTranscript: saveTranscript
   };
 
