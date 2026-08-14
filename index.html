@@ -110,10 +110,10 @@
     .nav-desktop a {
       display: inline-flex;
       align-items: center;
-      padding: 0.55rem 0.75rem;
+      padding: 0.5rem 0.62rem;
       text-decoration: none;
       color: var(--text-muted);
-      font-size: 0.88rem;
+      font-size: 0.84rem;
       font-weight: 600;
       border-radius: 999px;
       transition: color 0.2s, background 0.2s;
@@ -349,7 +349,7 @@
     /* Auth dashboard — hidden for guests */
     .auth-dashboard {
       display: none;
-      padding: 5.5rem 1.25rem 2.5rem;
+      padding: 5.5rem 1.25rem 1.35rem;
       box-sizing: border-box;
     }
     .auth-dashboard__inner {
@@ -366,6 +366,11 @@
       flex-direction: column;
       align-items: center;
       gap: 0.75rem;
+      padding: 1.35rem 1.25rem 1.4rem;
+      border-radius: 28px;
+      background: linear-gradient(145deg, #FFF7FB, #FFE9D8 62%, #FFF6C7);
+      border: 1px solid rgba(255, 107, 87, 0.16);
+      box-shadow: 0 12px 32px var(--shadow-warm);
     }
     .auth-greeting {
       margin: 0;
@@ -427,6 +432,32 @@
       transform: translateY(-1px);
       border-color: var(--coral);
       box-shadow: 0 4px 12px rgba(255, 107, 87, 0.14);
+    }
+    .auth-coupon-note {
+      margin: 0;
+      max-width: 28rem;
+      padding: 0.55rem 0.85rem;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px dashed rgba(255, 107, 87, 0.35);
+      color: var(--text);
+      font-size: 0.86rem;
+      font-weight: 800;
+      line-height: 1.55;
+    }
+    .auth-coupon-note code {
+      font-family: inherit;
+      color: var(--coral);
+      letter-spacing: 0.04em;
+    }
+    .auth-dash-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.15rem;
+      padding: 0.85rem 1.25rem;
+      border-radius: 18px;
+      text-decoration: none;
     }
     .auth-live {
       text-align: center;
@@ -611,7 +642,7 @@
     }
 
     @media (max-width: 640px) {
-      .auth-dashboard { padding: 4.85rem 1rem 2rem; }
+      .auth-dashboard { padding: 4.85rem 1rem 1.15rem; }
       .auth-live { padding: 1rem 0.7rem 1.15rem; }
       .auth-live__title {
         font-size: 0.84rem;
@@ -1171,11 +1202,7 @@
     }
     .result-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-    /* Logged-in: show auth dashboard; GNB stays visible; hide guest landing only */
-    body.is-logged-in [data-landing-hero],
-    body.is-logged-in [data-landing-only] {
-      display: none !important;
-    }
+    /* Logged-in: dashboard card on top; landing sections stay visible for GNB scroll */
     body.is-logged-in #authDashboard.auth-dashboard {
       display: block;
     }
@@ -1192,11 +1219,16 @@
         display: flex;
       }
     }
-    body.is-logged-in .site-footer {
-      padding-top: 0.25rem;
-      padding-bottom: 1.5rem;
+    body.is-logged-in .hero {
+      min-height: 0;
+      padding-top: 2.25rem;
     }
-    #about, #tutors, #booking, #reviews, #authDashboard, .auth-live, #loungeCarousel {
+    body.is-logged-in .nav-auth-only {
+      display: inline-flex;
+    }
+    .nav-auth-only { display: none; }
+    #service-intro, #partners, #pricing, #about, #tutors, #booking, #reviews,
+    #authDashboard, .auth-live, #loungeCarousel {
       scroll-margin-top: 5.75rem;
     }
 
@@ -1314,10 +1346,13 @@
       </a>
 
       <nav class="nav-desktop" data-i18n="nav.mainMenuAria" data-i18n-attr="aria-label" aria-label="주요 메뉴">
-        <a href="#about" data-i18n="nav.about">서비스 소개</a>
-        <a href="#tutors" data-i18n="nav.partners">대화 파트너</a>
+        <a href="#service-intro" data-i18n="nav.about">서비스 소개</a>
+        <a href="#partners" data-i18n="nav.partners">대화 파트너</a>
+        <a href="#reviews" data-i18n="nav.reviews">후기</a>
+        <a href="#pricing" data-i18n="nav.pricing">가격</a>
         <a href="#booking" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
         <a href="#faq" data-chat-open data-i18n="nav.ask">💬 질문 있어요</a>
+        <a href="mypage.html" class="nav-auth-only" data-i18n="nav.profile">내 프로필</a>
       </nav>
 
       <div class="header-actions">
@@ -1332,8 +1367,10 @@
   <nav class="nav-drawer" id="mobileNav" data-i18n="nav.mobileMenuAria" data-i18n-attr="aria-label" aria-label="모바일 메뉴">
     <div class="nav-drawer__head">DayO 메뉴</div>
     <div data-i18n-lang="drawer"></div>
-    <a href="#about" data-i18n="nav.about">서비스 소개</a>
-    <a href="#tutors" data-i18n="nav.partners">대화 파트너</a>
+    <a href="#service-intro" data-i18n="nav.about">서비스 소개</a>
+    <a href="#partners" data-i18n="nav.partners">대화 파트너</a>
+    <a href="#reviews" data-i18n="nav.reviews">후기</a>
+    <a href="#pricing" data-i18n="nav.pricing">가격</a>
     <a href="#booking" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
     <a href="#faq" data-chat-open data-i18n="nav.ask">💬 질문 있어요</a>
     <a href="mypage.html" data-i18n="nav.mypage">마이페이지</a>
@@ -1350,12 +1387,14 @@
             <p class="auth-greeting" id="greetingBannerText"></p>
           </div>
           <p class="auth-sub">다정한 글로벌 파트너, 꼼꼼한 AI 매니저가 늘 대기중이에요!</p>
+          <p class="auth-coupon-note">🎟️ 첫 세션 9,900원 체험권 <code>WELCOME_9900</code> 보유 중이에요</p>
           <div class="auth-ticket-badge" data-tickets-open role="button" tabindex="0" aria-label="이용권 구매 / 충전">
             <span data-ticket-badge-text>☕️ 보유 티켓: 1장</span>
             <span aria-hidden="true"> | </span>
             <span>💡 총 30분 · 25분 화상 대화 + 5분 미니 퀴즈/리포트</span>
             <button type="button" class="auth-ticket-charge" data-tickets-open aria-label="이용권 충전">+ 충전</button>
           </div>
+          <a href="room.html" class="header-cta auth-dash-cta" data-ms-guard data-ticket-gate>🚀 대화방 입장하기</a>
         </div>
 
         <div class="auth-live">
@@ -1478,7 +1517,7 @@
     </section>
 
     <!-- 3Step Journey -->
-    <section class="journey" id="about" data-landing-only>
+    <section class="journey" id="service-intro" data-landing-only>
       <div class="section-inner">
         <p class="section-label reveal" data-i18n="journey.eyebrow">How it works</p>
         <h2 class="section-title reveal" data-i18n="journey.title">3단계로 완성하는 나만의 회화 여정</h2>
@@ -1506,7 +1545,7 @@
     </section>
 
     <!-- Partners teaser -->
-    <section class="journey" id="tutors" style="padding-top: 0;" data-landing-only>
+    <section class="journey" id="partners" style="padding-top: 0;" data-landing-only>
       <div class="section-inner">
         <p class="section-label reveal" data-i18n="partnersTeaser.eyebrow">Partners</p>
         <h2 class="section-title reveal" data-i18n="partnersTeaser.title">다정한 대화 파트너와 눈 맞추며</h2>
@@ -1531,7 +1570,7 @@
     </section>
 
     <!-- Booking CTA -->
-    <section class="journey" id="booking" style="padding-top: 0; padding-bottom: var(--section-gap);" data-landing-only>
+    <section class="journey" id="pricing" style="padding-top: 0; padding-bottom: var(--section-gap);" data-landing-only>
       <div class="section-inner" style="text-align: center;">
         <p class="section-label reveal" data-i18n="bookingCta.eyebrow">Booking</p>
         <h2 class="section-title reveal" style="margin-bottom: 1.25rem;" data-i18n="bookingCta.title">지금, 화상 회화 스튜디오에서 만나요</h2>

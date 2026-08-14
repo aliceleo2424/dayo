@@ -1,5 +1,5 @@
-/* DayO 로그인 유저 메인 대시보드 레이아웃 토글 — index.html 전용
- * 로그인/로그아웃 시 dayo:authchange 이벤트로 즉시 랜딩 ↔ 대시보드 스왑
+/* DayO 로그인 유저 메인 — 상단 대시보드 카드 + 랜딩 섹션 유지
+ * 로그인/로그아웃 시 dayo:authchange 로 is-logged-in 클래스를 토글한다.
  */
 (function () {
   'use strict';

@@ -61,6 +61,15 @@
     'nav.partners': {
       KO: '대화 파트너', EN: 'Partners', ZH: '对话伙伴', JA: '会話パートナー', FR: 'Partenaires', ES: 'Compañeros'
     },
+    'nav.reviews': {
+      KO: '후기', EN: 'Stories', ZH: '评价', JA: '体験談', FR: 'Avis', ES: 'Opiniones'
+    },
+    'nav.pricing': {
+      KO: '가격', EN: 'Pricing', ZH: '价格', JA: '料金', FR: 'Tarifs', ES: 'Precios'
+    },
+    'nav.profile': {
+      KO: '내 프로필', EN: 'My profile', ZH: '我的资料', JA: 'マイプロフィール', FR: 'Mon profil', ES: 'Mi perfil'
+    },
     'nav.booking': {
       KO: '대화 예약하기', EN: 'Book a Chat', ZH: '预约对话', JA: '会話予約', FR: 'Réserver', ES: 'Reservar'
     },

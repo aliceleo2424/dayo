@@ -3,9 +3,9 @@
   'use strict';
 
   var HASH_ALIASES = {
-    'service-intro': 'about',
-    'partners': 'tutors',
-    'pricing': 'booking'
+    about: 'service-intro',
+    tutors: 'partners',
+    booking: 'pricing'
   };
 
   function t(key, fallback) {
@@ -34,13 +34,6 @@
     }
   }
 
-  function isShown(el) {
-    if (!el) return false;
-    var style = window.getComputedStyle(el);
-    if (style.display === 'none' || style.visibility === 'hidden') return false;
-    return el.getClientRects().length > 0;
-  }
-
   function navHashId(link) {
     var raw = (link.getAttribute('href') || '').trim();
     if (!raw || raw === '#') return '';
@@ -57,22 +50,7 @@
 
   function resolveNavTarget(id) {
     var mapped = HASH_ALIASES[id] || id;
-    var el = document.getElementById(mapped) || document.getElementById(id);
-    if (isShown(el)) return el;
-    if (!document.body.classList.contains('is-logged-in')) return el;
-    if (mapped === 'about' || id === 'service-intro') {
-      return document.getElementById('authDashboard') || el;
-    }
-    if (mapped === 'tutors' || id === 'partners') {
-      return document.querySelector('.auth-live') || document.getElementById('loungeCarousel') || el;
-    }
-    if (mapped === 'reviews') {
-      return document.getElementById('loungeCarousel') || el;
-    }
-    if (mapped === 'booking' || id === 'pricing') {
-      return document.getElementById('authDashboard') || el;
-    }
-    return el;
+    return document.getElementById(mapped) || document.getElementById(id);
   }
 
   function init() {
@@ -160,6 +138,15 @@
       });
 
       close();
+    }
+
+    if (window.location.hash) {
+      var initial = resolveNavTarget(String(window.location.hash).replace(/^#/, ''));
+      if (initial && typeof initial.scrollIntoView === 'function') {
+        window.setTimeout(function () {
+          initial.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
+      }
     }
 
     window.DayOMobileNav = {
