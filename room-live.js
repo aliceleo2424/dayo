@@ -325,14 +325,15 @@
   }
 
   var FALLBACK_WORDS = [
-    { word: 'hello', meaning: '안녕하세요' },
-    { word: 'thanks', meaning: '고마워요' },
-    { word: 'sorry', meaning: '미안해요' }
+    { word: 'actually', meaning: '사실은' },
+    { word: 'maybe', meaning: '아마도' },
+    { word: 'really', meaning: '정말' }
   ];
 
   function recentTranscriptContext(limit) {
     var rows = serializeTranscript(sessionTranscript);
-    var slice = rows.slice(-(limit || 5));
+    var take = Math.min(Math.max(limit || 5, 3), 5);
+    var slice = rows.slice(-take);
     return slice.map(function (row) {
       var who = row.speaker === 'partner' ? 'Partner' : 'User';
       return who + ': ' + row.text;
@@ -361,8 +362,8 @@
     if (!key || !blob) return Promise.resolve(null);
 
     var prompt = [
-      "현재 유저의 대화 맥락에 맞춰 지금 사용하면 좋을 영어 핵심 단어 3개와 한국어 뜻을 JSON 배열 형태 [{word: '단어', meaning: '뜻'}] 로만 응답해 줘.",
-      'Conversation context:',
+      "현재 유저와 파트너가 나눈 최근 대화 맥락을 파악하여, 유저가 지금 이어 말할 때 사용하기 가장 적절한 핵심 영단어 3개와 한국어 뜻을 JSON 배열 형태 [{word: '단어', meaning: '뜻'}] 로 응답해 줘.",
+      'Recent conversation (3-5 lines):',
       blob.slice(-900)
     ].join('\n');
 
@@ -374,7 +375,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.4, maxOutputTokens: 220 }
+            generationConfig: { temperature: 0.3, maxOutputTokens: 160 }
           })
         }
       ).then(function (res) {
@@ -397,7 +398,7 @@
     GEMINI_MODELS.forEach(function (model) {
       chain = chain.catch(function () { return post(model); });
     });
-    return withTimeout(chain, 8000);
+    return withTimeout(chain, 4000);
   }
 
   function suggestWords() {
@@ -412,6 +413,8 @@
       return { words: FALLBACK_WORDS.slice(), fallback: true };
     });
   }
+
+  function scheduleCopilot(line) {
     var cleaned = String(line || '').trim();
     if (cleaned) {
       recentLines.push(cleaned);

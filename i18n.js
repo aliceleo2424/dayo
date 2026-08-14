@@ -583,7 +583,7 @@
       KO: '💡 단어도움', EN: '💡 Word Help', ZH: '💡 单词帮助', JA: '💡 単語ヘルプ', FR: '💡 Mots', ES: '💡 Palabras'
     },
     'room.wordHelpLoading': {
-      KO: 'AI 추천 단어 찾는 중...', EN: 'Finding AI word tips...', ZH: '正在寻找AI推荐单词…', JA: 'AIおすすめ単語を探しています…', FR: 'Recherche de mots IA…', ES: 'Buscando palabras con IA…'
+      KO: 'AI가 추천 단어 찾는 중...', EN: 'AI is finding word tips...', ZH: 'AI正在寻找推荐单词…', JA: 'AIがおすすめ単語を探しています…', FR: 'L’IA cherche des mots…', ES: 'La IA busca palabras…'
     },
     'room.sentenceHelp': {
       KO: '📝 문장도움', EN: '📝 Sentence Help', ZH: '📝 句子帮助', JA: '📝 文ヘルプ', FR: '📝 Phrases', ES: '📝 Frases'
