@@ -512,17 +512,59 @@ function bindAuthListener(client) {
   });
 }
 
+function authError(code, message) {
+  var err = new Error(message || code);
+  err.code = code;
+  err.userMessage = message || '';
+  return err;
+}
+
+function isMissingUserError(error) {
+  var msg = String((error && (error.message || error.error_description || error.msg)) || '').toLowerCase();
+  var status = Number(error && (error.status || error.statusCode)) || 0;
+  if (/invalid login credentials|invalid credentials|user not found|email not found|unable to find user|no user found/i.test(msg)) {
+    return true;
+  }
+  return status === 400 && /invalid login/i.test(msg);
+}
+
+function classifyAuthError(error) {
+  var msg = String((error && (error.message || error.error_description || error.msg)) || '').trim();
+  var lower = msg.toLowerCase();
+  if (/at least 6|minimum 6|6 characters|password.*short|weak password/i.test(lower)) {
+    return authError('password_length', msg);
+  }
+  if (/already registered|already exists|user already/i.test(lower)) {
+    return authError('password', msg);
+  }
+  if (/invalid login credentials|invalid credentials|wrong password|incorrect password/i.test(lower)) {
+    return authError('password', msg);
+  }
+  if (/email not confirmed|not confirmed/i.test(lower)) {
+    return authError('confirm_email', msg);
+  }
+  if (/invalid.*email|email.*invalid|valid email/i.test(lower)) {
+    return authError('invalid_email', msg);
+  }
+  if (/rate limit|too many requests|only request this after/i.test(lower)) {
+    return authError('rate_limit', msg);
+  }
+  return authError('auth', msg);
+}
+
 async function signInWithEmail(email, password) {
   var client = getClient();
   var cleanedEmail = String(email || '').trim().toLowerCase();
   var cleanedPass = String(password || '');
-  if (!client) throw new Error('supabase unavailable');
-  if (!cleanedEmail || !cleanedPass) throw new Error('missing credentials');
+  if (!client) throw authError('auth', 'supabase unavailable');
+  if (!cleanedEmail || !cleanedPass) throw authError('missing', '');
+  if (cleanedPass.length < 6) throw authError('password_length', '');
 
   var signedIn = await client.auth.signInWithPassword({
     email: cleanedEmail,
     password: cleanedPass
   });
+
   if (!signedIn.error && signedIn.data && signedIn.data.session) {
     var profile = await ensureProfileForUser(signedIn.data.user);
     return {
@@ -535,6 +577,10 @@ async function signInWithEmail(email, password) {
     };
   }
 
+  if (signedIn.error && !isMissingUserError(signedIn.error)) {
+    throw classifyAuthError(signedIn.error);
+  }
+
   var signedUp = await client.auth.signUp({
     email: cleanedEmail,
     password: cleanedPass,
@@ -543,17 +589,22 @@ async function signInWithEmail(email, password) {
       emailRedirectTo: window.location.origin + (window.location.pathname || '/')
     }
   });
+
   if (signedUp.error) {
-    var msg = String(signedUp.error.message || signedIn.error && signedIn.error.message || '');
-    var err = new Error(msg);
-    err.code = /already|registered|exists/i.test(msg) ? 'password' : 'auth';
-    if (signedIn.error && /invalid login/i.test(String(signedIn.error.message || '')) && /already|registered|exists/i.test(msg)) {
-      err.code = 'password';
+    var classified = classifyAuthError(signedUp.error);
+    if (classified.code === 'password' || /already registered|already exists/i.test(String(signedUp.error.message || ''))) {
+      throw authError('password', signedUp.error.message);
     }
-    throw err;
+    throw classified;
   }
 
-  if (signedUp.data && signedUp.data.session && signedUp.data.user) {
+  var signupUser = signedUp.data && signedUp.data.user;
+  var identities = signupUser && signupUser.identities;
+  if (signupUser && !signedUp.data.session && Array.isArray(identities) && identities.length === 0) {
+    throw authError('password', '');
+  }
+
+  if (signedUp.data && signedUp.data.session && signupUser) {
     var created = await ensureProfileForUser(signedUp.data.user);
     return {
       isNew: true,

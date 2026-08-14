@@ -154,12 +154,28 @@
       KO: 'Google로 시작하기', EN: 'Continue with Google', ZH: '用 Google 开始', JA: 'Googleで始める', FR: 'Continuer avec Google', ES: 'Continuar con Google'
     },
     'login.passwordMismatch': {
-      KO: '비밀번호가 올바르지 않아요. 다시 확인해 주세요 🔑',
-      EN: 'Incorrect password. Please try again 🔑',
-      ZH: '密码不正确，请再试一次 🔑',
-      JA: 'パスワードが正しくありません。もう一度ご確認ください 🔑',
-      FR: 'Mot de passe incorrect. Réessayez 🔑',
-      ES: 'Contraseña incorrecta. Inténtalo de nuevo 🔑'
+      KO: '비밀번호가 올바르지 않습니다.',
+      EN: 'The password is incorrect.',
+      ZH: '密码不正确。',
+      JA: 'パスワードが正しくありません。',
+      FR: 'Le mot de passe est incorrect.',
+      ES: 'La contraseña no es correcta.'
+    },
+    'login.passwordTooShort': {
+      KO: '비밀번호는 최소 6자리 이상이어야 합니다.',
+      EN: 'Password must be at least 6 characters.',
+      ZH: '密码至少需要 6 位。',
+      JA: 'パスワードは6文字以上にしてください。',
+      FR: 'Le mot de passe doit contenir au moins 6 caractères.',
+      ES: 'La contraseña debe tener al menos 6 caracteres.'
+    },
+    'login.signupWelcome': {
+      KO: 'DayO 회원이 되신 것을 환영합니다! (티켓 1회 지급 완료)',
+      EN: 'Welcome to DayO! (1 session ticket added)',
+      ZH: '欢迎成为 DayO 会员！（已发放 1 次体验券）',
+      JA: 'DayO会員になってくれてありがとう！（チケット1回分を付与しました）',
+      FR: 'Bienvenue chez DayO ! (1 ticket offert)',
+      ES: '¡Bienvenido a DayO! (1 ticket añadido)'
     },
     'login.confirmEmail': {
       KO: '가입 메일을 보냈어요. 메일함에서 확인하면 바로 시작할 수 있어요 ✉️',

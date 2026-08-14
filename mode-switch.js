@@ -304,13 +304,25 @@
     });
   }
 
-  function showToast(message) {
+  function showToast(message, ms) {
     toastEl.textContent = message;
     toastEl.classList.add('is-show');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () {
       toastEl.classList.remove('is-show');
-    }, 3200);
+    }, ms || 3200);
+  }
+
+  function authToastMessage(err) {
+    var code = err && err.code;
+    if (code === 'password_length') return t('login.passwordTooShort');
+    if (code === 'password') return t('login.passwordMismatch');
+    if (code === 'confirm_email') return t('login.confirmEmail');
+    var raw = String((err && (err.userMessage || err.message)) || '').trim();
+    if (raw && raw !== 'unavailable' && raw !== 'supabase unavailable' && raw !== 'missing credentials' && raw !== 'missing') {
+      return raw;
+    }
+    return t('login.authError');
   }
 
   function escapeHtml(str) {
@@ -457,6 +469,7 @@
 
     if (options.isNew) {
       markNewUserChatPreset();
+      showToast(t('login.signupWelcome'), 4200);
       clearTimeout(welcomeTimer);
       welcomeTimer = setTimeout(function () {
         openWelcome(name);
@@ -476,6 +489,10 @@
     var cleanedEmail = String(email || '').trim().toLowerCase();
     var cleanedPass = String(password || '');
     if (!cleanedEmail || !cleanedPass) return;
+    if (cleanedPass.length < 6) {
+      showToast(t('login.passwordTooShort'));
+      return;
+    }
 
     setLoginBusy(true);
     waitForStore().then(function (store) {
@@ -499,13 +516,7 @@
       });
     }).catch(function (err) {
       setLoginBusy(false);
-      var code = err && err.code;
-      var msg = String((err && err.message) || '');
-      if (code === 'password' || /invalid login|invalid credentials|wrong password/i.test(msg)) {
-        showToast(t('login.passwordMismatch'));
-        return;
-      }
-      showToast(t('login.authError'));
+      showToast(authToastMessage(err));
     });
   }
 
@@ -522,9 +533,9 @@
       return store.signInWithGoogle();
     }).then(function () {
       /* Google OAuth redirects away; keep busy until navigation */
-    }).catch(function () {
+    }).catch(function (err) {
       setLoginBusy(false);
-      showToast(t('login.authError'));
+      showToast(authToastMessage(err));
     });
   }
 
