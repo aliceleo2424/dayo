@@ -2529,7 +2529,39 @@
       }
     }
 
-    document.getElementById('endBtn').addEventListener('click', openFeedback);
+    function persistTranscript() {
+      if (window.DayOLive && typeof window.DayOLive.saveTranscript === 'function') {
+        return window.DayOLive.saveTranscript().catch(function () {
+          return { ok: false, local: true, transcript: window.DayOLive.getTranscript() };
+        });
+      }
+      try {
+        var fallback = (window.DayOLastTranscript && Array.isArray(window.DayOLastTranscript))
+          ? window.DayOLastTranscript
+          : [];
+        window.localStorage.setItem('last_session_transcript', JSON.stringify(fallback));
+        return Promise.resolve({ ok: false, local: true, transcript: fallback });
+      } catch (e) {
+        return Promise.resolve({ ok: false, local: false, transcript: [] });
+      }
+    }
+
+    function openReviewFromTranscript(result) {
+      var transcript = (result && result.transcript)
+        || (window.DayOLive && window.DayOLive.getTranscript && window.DayOLive.getTranscript())
+        || window.DayOLastTranscript
+        || [];
+      if (window.DayOReviewQuiz && typeof window.DayOReviewQuiz.open === 'function') {
+        window.DayOReviewQuiz.open({ transcript: transcript });
+        return;
+      }
+      setTimeout(function () { window.location.href = 'index.html'; }, 1400);
+    }
+
+    document.getElementById('endBtn').addEventListener('click', () => {
+      persistTranscript();
+      openFeedback();
+    });
 
     starButtons.forEach((btn) => {
       btn.addEventListener('click', () => {
@@ -2549,7 +2581,9 @@
       if (window.DayOScrollLock) window.DayOScrollLock.unlock();
       showToast(t('room.toastFeedbackSent'));
       stopAllMedia();
-      setTimeout(() => { window.location.href = 'index.html'; }, 1400);
+      persistTranscript().then(openReviewFromTranscript).catch(function () {
+        openReviewFromTranscript(null);
+      });
     });
 
     document.addEventListener('keydown', (e) => {
@@ -2643,6 +2677,8 @@
         { word: 'Is this seat taken?', meaning: '이 자리 비었나요?', kind: 'expr' },
         { word: "I'd like to reserve a table for two.", meaning: '두 명 테이블을 예약하고 싶어요', kind: 'expr' }
       ];
+
+      var sessionTranscript = [];
 
       var els = {
         start: document.getElementById('rqStart'),
@@ -2741,8 +2777,78 @@
         clearFeedback();
       }
 
-      function open() {
+      function escapeRq(str) {
+        return String(str == null ? '' : str).replace(/[&<>"']/g, function (ch) {
+          return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
+        });
+      }
+
+      function normalizeTranscript(raw) {
+        if (!Array.isArray(raw)) return [];
+        return raw.map(function (row, i) {
+          return {
+            id: (row && row.id) || ('t-' + i),
+            speaker: (row && row.speaker) || 'user',
+            text: String((row && row.text) || '').trim(),
+            timestamp: (row && row.timestamp) || null
+          };
+        }).filter(function (row) { return row.text; });
+      }
+
+      function readStoredTranscript() {
+        if (window.DayOLive && typeof window.DayOLive.getTranscript === 'function') {
+          var live = normalizeTranscript(window.DayOLive.getTranscript());
+          if (live.length) return live;
+        }
+        if (window.DayOLastTranscript) {
+          var last = normalizeTranscript(window.DayOLastTranscript);
+          if (last.length) return last;
+        }
+        if (window.DayOProfileStore && typeof window.DayOProfileStore.getLastTranscript === 'function') {
+          var stored = normalizeTranscript(window.DayOProfileStore.getLastTranscript());
+          if (stored.length) return stored;
+        }
+        try {
+          return normalizeTranscript(JSON.parse(localStorage.getItem('last_session_transcript') || '[]'));
+        } catch (err) {
+          return [];
+        }
+      }
+
+      function transcriptBlob() {
+        return sessionTranscript.map(function (row) { return row.text; }).join(' ');
+      }
+
+      function applyTranscriptIntro() {
+        var summary = document.getElementById('rqSummary');
+        if (!summary) return;
+        if (!sessionTranscript.length) return;
+        var count = sessionTranscript.length;
+        var preview = sessionTranscript[sessionTranscript.length - 1].text;
+        summary.innerHTML =
+          '오늘 세션에서 <strong>' + count + '개의 발화</strong>를 남겼어요. ' +
+          '마지막에 이렇게 말해 보셨네요: <strong>' + escapeRq(preview) + '</strong> ☕';
+      }
+
+      function transcriptReportPhrases() {
+        var seen = {};
+        return sessionTranscript.map(function (row) {
+          return { word: row.text, meaning: '오늘 직접 말한 표현', kind: 'expr' };
+        }).filter(function (item) {
+          var key = item.word.toLowerCase();
+          if (seen[key]) return false;
+          seen[key] = true;
+          return true;
+        }).slice(-7);
+      }
+
+      function open(options) {
+        options = options || {};
+        sessionTranscript = normalizeTranscript(options.transcript);
+        if (!sessionTranscript.length) sessionTranscript = readStoredTranscript();
+        window.DayOLastTranscript = sessionTranscript;
         resetQuiz();
+        applyTranscriptIntro();
         overlay.hidden = false;
         overlay.classList.add('is-open');
         showStep(1);
@@ -2949,14 +3055,22 @@
         busy = false;
         if (els.fill) els.fill.style.width = '100%';
         if (els.reportTitle) els.reportTitle.textContent = '🏆 오늘 세션 복습 완료!';
+        var spoken = transcriptBlob();
         if (els.reportList) {
           els.reportList.innerHTML =
             '<li>🎯 복습 퀴즈 7문항 중 <strong>' + correctCount + '문항</strong>을 맞혔어요.</li>' +
-            '<li>💬 오늘 습득한 핵심 표현을 아래에 모아 두었어요.</li>';
+            (sessionTranscript.length
+              ? '<li>🎙️ 오늘 남긴 발화 <strong>' + sessionTranscript.length + '개</strong>를 바탕으로 피드백을 정리했어요.</li>'
+              : '<li>💬 오늘 습득한 핵심 표현을 아래에 모아 두었어요.</li>') +
+            (spoken
+              ? '<li>📝 대화 스크립트: “' + escapeRq(spoken.slice(0, 140)) + (spoken.length > 140 ? '…' : '') + '”</li>'
+              : '');
         }
+        var reportPhrases = transcriptReportPhrases();
+        if (!reportPhrases.length) reportPhrases = KEY_PHRASES;
         if (els.phrases) {
-          els.phrases.innerHTML = KEY_PHRASES.map(function (item) {
-            return '<p class="rq-phrase"><strong>' + item.word + '</strong><span>' + item.meaning + '</span></p>';
+          els.phrases.innerHTML = reportPhrases.map(function (item) {
+            return '<p class="rq-phrase"><strong>' + escapeRq(item.word) + '</strong><span>' + escapeRq(item.meaning) + '</span></p>';
           }).join('');
         }
         showStep(3);
@@ -3053,7 +3167,8 @@
         open: open,
         close: close,
         showStep: showStep,
-        start: startQuiz
+        start: startQuiz,
+        getTranscript: function () { return sessionTranscript.slice(); }
       };
     })();
   </script>

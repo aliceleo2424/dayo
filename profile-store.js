@@ -382,6 +382,77 @@ function mergeVocab(items) {
   });
 }
 
+var LAST_TRANSCRIPT_KEY = 'last_session_transcript';
+
+function serializeTranscript(rows) {
+  if (!Array.isArray(rows)) return [];
+  return rows.map(function (row, i) {
+    var ts = row && row.timestamp;
+    if (ts instanceof Date) ts = ts.toISOString();
+    else if (ts == null) ts = new Date().toISOString();
+    return {
+      id: (row && row.id) || ('t-' + i),
+      speaker: (row && row.speaker) || 'user',
+      text: String((row && row.text) || '').trim(),
+      timestamp: ts
+    };
+  }).filter(function (row) { return row.text; });
+}
+
+function backupTranscriptLocal(rows) {
+  var serialized = serializeTranscript(rows);
+  try {
+    window.localStorage.setItem(LAST_TRANSCRIPT_KEY, JSON.stringify(serialized));
+  } catch (e) { /* quota / private mode */ }
+  return serialized;
+}
+
+function getLastTranscript() {
+  try {
+    var parsed = JSON.parse(lsGet(LAST_TRANSCRIPT_KEY, '[]'));
+    return Array.isArray(parsed) ? serializeTranscript(parsed) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+async function saveSessionLog(transcript, extra) {
+  extra = extra || {};
+  var serialized = backupTranscriptLocal(transcript);
+  var payload = {
+    client_key: getClientKey(),
+    user_name: lsGet(USER_KEY, ''),
+    email: lsGet(EMAIL_KEY, ''),
+    room_name: extra.roomName || '',
+    transcript: serialized,
+    started_at: extra.startedAt || (serialized[0] && serialized[0].timestamp) || new Date().toISOString(),
+    ended_at: extra.endedAt || new Date().toISOString()
+  };
+
+  var client = getClient();
+  if (!client) {
+    return { ok: false, local: true, transcript: serialized, payload: payload };
+  }
+
+  try {
+    var result = await client.from('session_logs').insert(payload).select('id').single();
+    if (result.error) {
+      result = await client.from('transcripts').insert(payload).select('id').single();
+    }
+    if (result.error) throw result.error;
+    return {
+      ok: true,
+      local: true,
+      id: result.data && result.data.id,
+      transcript: serialized,
+      payload: payload
+    };
+  } catch (err) {
+    console.warn('[DayO] session_logs insert failed — localStorage kept', err);
+    return { ok: false, local: true, transcript: serialized, payload: payload, error: err };
+  }
+}
+
 function ready() {
   if (!readyPromise) readyPromise = fetchOrCreateProfile();
   return readyPromise;
@@ -398,6 +469,8 @@ window.DayOProfileStore = {
   getVocab: getVocab,
   addJam: addJam,
   mergeVocab: mergeVocab,
+  saveSessionLog: saveSessionLog,
+  getLastTranscript: getLastTranscript,
   syncRewardUI: syncRewardUI
 };
 

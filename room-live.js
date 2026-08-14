@@ -31,6 +31,9 @@
   var geminiTimer = 0;
   var recentLines = [];
   var lastHintsKey = '';
+  var sessionTranscript = [];
+  var sessionStartedAt = new Date().toISOString();
+  var utteranceSeq = 0;
 
   function env(key) {
     var bag = window.__DAYO_ENV__ || {};
@@ -71,8 +74,78 @@
     });
   }
 
-  function notifyMedia() {
-    document.dispatchEvent(new CustomEvent('dayo:livemedia'));
+  function uuid() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+      return window.crypto.randomUUID();
+    }
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      var r = (Math.random() * 16) | 0;
+      var v = c === 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
+
+  function serializeTranscript(rows) {
+    return (Array.isArray(rows) ? rows : []).map(function (row, i) {
+      var ts = row && row.timestamp;
+      if (ts instanceof Date) ts = ts.toISOString();
+      else if (!ts) ts = new Date().toISOString();
+      return {
+        id: (row && row.id) || ('t-' + i),
+        speaker: (row && row.speaker) || 'user',
+        text: String((row && row.text) || '').trim(),
+        timestamp: ts
+      };
+    }).filter(function (row) { return row.text; });
+  }
+
+  function backupTranscriptLocal() {
+    var serialized = serializeTranscript(sessionTranscript);
+    try {
+      window.localStorage.setItem('last_session_transcript', JSON.stringify(serialized));
+    } catch (e) { /* quota / private mode */ }
+    window.DayOLastTranscript = serialized;
+    return serialized;
+  }
+
+  function pushTranscript(text, speaker) {
+    var cleaned = String(text || '').trim();
+    if (!cleaned) return null;
+    var role = speaker || 'user';
+    var last = sessionTranscript[sessionTranscript.length - 1];
+    if (last && last.speaker === role && last.text === cleaned) return last;
+    utteranceSeq += 1;
+    var entry = {
+      id: uuid(),
+      speaker: role,
+      text: cleaned,
+      timestamp: new Date()
+    };
+    sessionTranscript.push(entry);
+    backupTranscriptLocal();
+    document.dispatchEvent(new CustomEvent('dayo:transcript', { detail: entry }));
+    return entry;
+  }
+
+  function saveTranscript() {
+    var serialized = backupTranscriptLocal();
+    var extra = {
+      roomName: roomName(),
+      startedAt: sessionStartedAt,
+      endedAt: new Date().toISOString()
+    };
+    var store = window.DayOProfileStore;
+    var done = function (result) {
+      var payload = result || { ok: false, local: true, transcript: serialized };
+      document.dispatchEvent(new CustomEvent('dayo:transcriptsaved', { detail: payload }));
+      return payload;
+    };
+    if (store && typeof store.saveSessionLog === 'function') {
+      return store.saveSessionLog(sessionTranscript, extra).then(done).catch(function (err) {
+        return done({ ok: false, local: true, transcript: serialized, error: err });
+      });
+    }
+    return Promise.resolve(done({ ok: false, local: true, transcript: serialized }));
   }
 
   function dailyDomain() {
@@ -443,7 +516,10 @@
           if (event.results[i].isFinal && chunk) finalText += chunk + ' ';
         }
         finalText = finalText.trim();
-        if (finalText) scheduleCopilot(finalText);
+        if (finalText) {
+          pushTranscript(finalText, 'user');
+          scheduleCopilot(finalText);
+        }
       };
 
       recognition.onerror = function (event) {
@@ -590,6 +666,10 @@
 
   function start() {
     try {
+      sessionStartedAt = new Date().toISOString();
+      sessionTranscript = [];
+      utteranceSeq = 0;
+      backupTranscriptLocal();
       renderHints(demoHints(''));
       setStatus(t('room.copilotDemo'), false);
       bindCopilotClicks();
@@ -627,7 +707,9 @@
     toggleMic: toggleMic,
     toggleCam: toggleCam,
     toggleShare: toggleShare,
-    hangUp: hangUp
+    hangUp: hangUp,
+    getTranscript: function () { return serializeTranscript(sessionTranscript); },
+    saveTranscript: saveTranscript
   };
 
   document.addEventListener('dayo:langchange', function () {
