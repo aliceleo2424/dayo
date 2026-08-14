@@ -927,7 +927,32 @@
 
     .quiz-start { text-align: center; padding: 0.4rem 0 0.2rem; }
     .quiz-start-emoji { font-size: 2.4rem; line-height: 1; margin-bottom: 0.75rem; }
-    .quiz-start-desc { font-size: 0.92rem; color: var(--text-muted); line-height: 1.65; margin-bottom: 1.2rem; }
+    .quiz-start-desc { font-size: 0.92rem; color: var(--text-muted); line-height: 1.65; margin-bottom: 1rem; }
+    .quiz-level-grid { display: flex; flex-direction: column; gap: 0.55rem; }
+    .quiz-level-card {
+      display: flex; align-items: flex-start; gap: 0.75rem; width: 100%;
+      text-align: left; padding: 0.9rem 1rem;
+      border: 1.5px solid var(--coral-pale); border-radius: var(--radius);
+      background: var(--cream); font-family: inherit; color: inherit; cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s, background 0.2s;
+    }
+    .quiz-level-card:hover { transform: translateY(-1px); border-color: var(--coral); background: var(--coral-pale); }
+    .quiz-level-emoji { font-size: 1.55rem; line-height: 1; flex: 0 0 auto; margin-top: 0.1rem; }
+    .quiz-level-name { display: block; font-size: 0.98rem; font-weight: 800; margin-bottom: 0.18rem; }
+    .quiz-level-desc { display: block; font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+    .quiz-feedback {
+      margin-top: 0.75rem; padding: 0.7rem 0.9rem; border-radius: var(--radius);
+      font-size: 0.88rem; font-weight: 700; line-height: 1.5; text-align: center;
+      animation: quizPop 0.35s ease;
+    }
+    .quiz-feedback[hidden] { display: none; }
+    .quiz-feedback.is-correct { background: #E7F5EB; color: #2E6B45; }
+    .quiz-feedback.is-wrong { background: var(--coral-pale); color: var(--coral); }
+    @keyframes quizPop {
+      from { opacity: 0; transform: translateY(6px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .quiz-result-coupon { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; margin: 0.35rem 0 0.15rem; }
 
     .quiz-result { text-align: center; padding: 0.15rem 0; }
     .quiz-result-score { font-size: 1.05rem; font-weight: 700; color: var(--coral); margin-bottom: 0.35rem; }
@@ -1159,7 +1184,10 @@
       .quiz-header { margin-bottom: 0.55rem; padding-right: 1.75rem; }
       .quiz-badge { font-size: 0.68rem; padding: 0.18rem 0.6rem; margin-bottom: 0.3rem; }
       .quiz-lang-tabs { gap: 0.3rem; margin-bottom: 0.55rem; }
-      .quiz-lang-tab { font-size: 0.7rem; padding: 0.32rem 0.55rem; }
+      .quiz-lang-tab { font-size: 0.68rem; padding: 0.3rem 0.48rem; }
+      .quiz-level-card { padding: 0.75rem 0.8rem; }
+      .quiz-level-name { font-size: 0.9rem; }
+      .quiz-level-desc { font-size: 0.76rem; }
       .quiz-title { font-size: 1.05rem; margin-bottom: 0.4rem; }
       .progress-wrap { height: 6px; margin-bottom: 0.2rem; }
       .progress-label { font-size: 0.68rem; }
@@ -1495,7 +1523,9 @@
           <button type="button" class="quiz-lang-tab is-on" role="tab" aria-selected="true" data-quiz-lang="en"><span class="quiz-lang-flag" aria-hidden="true">🇺🇸</span><span data-i18n="quiz.lang.en">영어</span></button>
           <button type="button" class="quiz-lang-tab" role="tab" aria-selected="false" data-quiz-lang="fr"><span class="quiz-lang-flag" aria-hidden="true">🇫🇷</span><span data-i18n="quiz.lang.fr">프랑스어</span></button>
           <button type="button" class="quiz-lang-tab" role="tab" aria-selected="false" data-quiz-lang="ja"><span class="quiz-lang-flag" aria-hidden="true">🇯🇵</span><span data-i18n="quiz.lang.ja">일본어</span></button>
+          <button type="button" class="quiz-lang-tab" role="tab" aria-selected="false" data-quiz-lang="zh"><span class="quiz-lang-flag" aria-hidden="true">🇨🇳</span><span data-i18n="quiz.lang.zh">중국어</span></button>
           <button type="button" class="quiz-lang-tab" role="tab" aria-selected="false" data-quiz-lang="es"><span class="quiz-lang-flag" aria-hidden="true">🇪🇸</span><span data-i18n="quiz.lang.es">스페인어</span></button>
+          <button type="button" class="quiz-lang-tab" role="tab" aria-selected="false" data-quiz-lang="ko"><span class="quiz-lang-flag" aria-hidden="true">🇰🇷</span><span data-i18n="quiz.lang.ko">한국어</span></button>
         </div>
         <h2 class="quiz-title" id="quizTitle">외국인 앞 7초 침묵 탈출, 돼요! ☕</h2>
         <div class="progress-wrap" id="quizProgressWrap" hidden><div class="progress-bar" id="progressBar"></div></div>
@@ -1615,24 +1645,29 @@
       }, 550);
     }, 2000);
 
-    /* Quiz — 10-second level test, language-specific funnels */
+    /* Quiz — 6-language & level-adaptive diagnostic funnel */
+    const QUIZ_LANGS = ['en', 'fr', 'ja', 'zh', 'es', 'ko'];
+    const QUIZ_LEVELS = ['intro', 'basic', 'challenge'];
+    const QUIZ_LEVEL_META = [
+      { id: 'intro', emoji: '🌱' },
+      { id: 'basic', emoji: '☕' },
+      { id: 'challenge', emoji: '💬' }
+    ];
     const QUIZ_HEADLINES = {
       en: '외국인 앞 7초 침묵 탈출, 돼요! ☕',
       fr: '일주일 안에 프랑스어로 자기소개, 돼요! 🥐',
       ja: '현지 이자카야에서 막힘없이 주문, 돼요! 🍣',
-      es: '여행지에서 현지 친구 사귀기, 돼요! 💃'
+      zh: '현지 카페에서 유창하게 주문, 돼요! 🧋',
+      es: '여행지에서 현지 친구 사귀기, 돼요! 💃',
+      ko: '처음 보는 사람과도 자연스럽게 대화, 돼요! 🍵'
     };
     const QUIZ_HOSTS = {
       en: { id: 'layna', name: 'Layna from UK', country: '영국', flag: '🇬🇧', initial: 'L', bio: '첫 인사부터 따뜻하게 받아주는 영국 파트너예요.' },
       fr: { id: 'emma', name: 'Emma from Belgium', country: '벨기에', flag: '🇧🇪', initial: 'E', bio: '벨기에 출신 Emma와 함께 인사부터 자기소개까지 차근차근 연습해요.' },
       ja: { id: 'yui', name: 'Yui from Japan', country: '일본', flag: '🇯🇵', initial: 'Y', bio: '천천히, 정확하게 받아주는 일본 파트너 Yui예요.' },
-      es: { id: 'elena', name: 'Elena from Spain', country: '스페인', flag: '🇪🇸', initial: 'E', bio: '밝게 말을 걸어주는 스페인 파트너 Elena와 여행 스몰토크를 연습해요.' }
-    };
-    const QUIZ_COURSES = {
-      en: { name: '7초 침묵 탈출 코스', desc: '외국인 앞에서 얼어붙지 않고, 첫 인사를 자연스럽게 여는 입문 세션' },
-      fr: { name: '일주일 자기소개 코스', desc: 'Bonjour부터 이름·출신 소개까지, 일주일 만에 입을 여는 프랑스어 입문' },
-      ja: { name: '이자카야 주문 코스', desc: '인사부터 생맥주 한 잔까지, 현지 술집에서 막히지 않는 입문 세션' },
-      es: { name: '여행지 친구 사귀기 코스', desc: 'Hola부터 출신 소개까지, 현지에서 말을 거는 입문 세션' }
+      zh: { id: 'mei', name: 'Mei from China', country: '중국', flag: '🇨🇳', initial: 'M', bio: '천천히 받아주는 중국 파트너 Mei와 인사부터 주문까지 연습해요.' },
+      es: { id: 'sofia', name: 'Sofia from Spain', country: '스페인', flag: '🇪🇸', initial: 'S', bio: '밝게 말을 걸어주는 스페인 파트너 Sofia와 여행 스몰토크를 연습해요.' },
+      ko: { id: 'jiwoo', name: 'Jiwoo from Seoul', country: '한국', flag: '🇰🇷', initial: 'J', bio: '편안하게 받아주는 서울 파트너 지우와 첫 인사를 연습해요.' }
     };
     const FALLBACK_QUIZ_BY_LANG = {
       en: [
@@ -1658,6 +1693,18 @@
         { scenario: '☕ 카페', question: '바리스타가 "¿Qué te apetece?"라고 물었어요. 자연스러운 주문은?', options: ['Un café, por favor.', 'Café yo.', 'Hola adiós.', 'No sé.'], answer: 0, image: '/images/cafe.png' },
         { scenario: '🍽️ 레스토랑', question: '직원이 "¡Hola! ¿En qué te puedo ayudar?"라고 했어요. 자연스러운 답은?', options: ['Adiós mesa.', 'Una mesa para dos, por favor.', 'Yo dos.', 'Café adiós.'], answer: 1, image: '/images/restaurant.png' },
         { scenario: '💃 스몰토크', question: '현지 친구가 "¿De dónde eres?"라고 물었어요. 자연스러운 나의 답은?', options: ['Soy de Corea. ¿Y tú?', 'Corea adiós.', 'Café por favor.', 'No sé baño.'], answer: 0, image: '/images/shopping.png' }
+      ],
+      zh: [
+        { scenario: '🧋 카페', question: '점원이 "你好，要喝点什么？"라고 했어요. 자연스러운 주문은?', options: ['我要一杯咖啡。', '咖啡我是。', '再见咖啡。', '你好走。'], answer: 0, image: '/images/cafe.png' },
+        { scenario: '💰 계산', question: '가격을 묻고 싶을 때 자연스러운 질문은?', options: ['你好吗？', '多少钱？', '再见。', '我是钱。'], answer: 1, image: '/images/shopping.png' },
+        { scenario: '🚻 화장실', question: '화장실을 찾을 때 자연스러운 질문은?', options: ['洗手间在哪里？', '我是洗手间。', '谢谢厕所。', '咖啡在哪里？'], answer: 0, image: '/images/restaurant.png' },
+        { scenario: '👋 인사', question: '파트너가 "你好！"라고 했어요. 나의 답은?', options: ['再见！', '多少钱！', '你好！', '对不起咖啡。'], answer: 2, image: '/images/cafe.png' }
+      ],
+      ko: [
+        { scenario: '☕ 카페', question: '직원이 "뭐 드릴까요?"라고 물었어요. 자연스러운 주문은?', options: ['커피 나.', '아메리카노 한 잔 주세요.', '빨리 커피.', '나는 커피입니다.'], answer: 1, image: '/images/cafe.png' },
+        { scenario: '💰 계산', question: '가격을 묻고 싶을 때 자연스러운 질문은?', options: ['이거 얼마예요?', '돈 뭐예요?', '계산 나.', '안녕하세요 가격.'], answer: 0, image: '/images/shopping.png' },
+        { scenario: '🍽️ 식사', question: '식사를 시작할 때 자연스러운 인사는?', options: ['잘 가겠습니다', '잘 먹겠습니다', '감사합니다 나가', '화장실 주세요'], answer: 1, image: '/images/restaurant.png' },
+        { scenario: '👋 인사', question: '파트너가 "안녕하세요!"라고 했어요. 나의 답은?', options: ['안녕히 가세요!', '안녕하세요!', '얼마예요!', '주세요 안녕.'], answer: 1, image: '/images/cafe.png' }
       ]
     };
 
@@ -1681,18 +1728,39 @@
       };
     }
 
+    function extractLevelQuestions(block, lang, level) {
+      if (block && block.levels && block.levels[level] && Array.isArray(block.levels[level].questions)) {
+        return block.levels[level].questions;
+      }
+      if (block && block.questions && !Array.isArray(block.questions) && Array.isArray(block.questions[level])) {
+        return block.questions[level];
+      }
+      if (Array.isArray(block)) return block.slice(0, 4);
+      if (block && Array.isArray(block.questions)) return block.questions.slice(0, 4);
+      return (FALLBACK_QUIZ_BY_LANG[lang] || FALLBACK_QUIZ_BY_LANG.en).slice(0, 4);
+    }
+
+    function extractLevelCourse(block, level) {
+      if (block && block.levels && block.levels[level] && block.levels[level].course) return block.levels[level].course;
+      if (block && block.course) return block.course;
+      return { name: '', desc: '' };
+    }
+
     function packFromLangMap(map) {
       const out = {};
-      ['en', 'fr', 'ja', 'es'].forEach((lang) => {
+      QUIZ_LANGS.forEach((lang) => {
         const block = map && map[lang];
-        const questions = Array.isArray(block)
-          ? block
-          : (block && Array.isArray(block.questions) ? block.questions : FALLBACK_QUIZ_BY_LANG[lang]);
+        const levels = {};
+        QUIZ_LEVELS.forEach((level) => {
+          levels[level] = {
+            course: extractLevelCourse(block, level),
+            questions: extractLevelQuestions(block, lang, level).slice(0, 4).map(normalizeQuizItem)
+          };
+        });
         out[lang] = {
           headline: (block && block.headline) || QUIZ_HEADLINES[lang],
           host: (block && block.host) || QUIZ_HOSTS[lang],
-          course: (block && block.course) || QUIZ_COURSES[lang],
-          questions: questions.map(normalizeQuizItem)
+          levels
         };
       });
       return out;
@@ -1708,20 +1776,37 @@
     const modalClose = document.getElementById('modalClose');
     const toast = document.getElementById('resultToast');
     let currentStep = 0, isTransitioning = false;
-    let quizPhase = 'start';
+    let quizPhase = 'level';
     let quizLang = 'en';
+    let quizLevel = 'basic';
     let quizScore = 0;
-    let quizPack = packFromLangMap({ en: FALLBACK_QUIZ_BY_LANG.en, fr: FALLBACK_QUIZ_BY_LANG.fr, ja: FALLBACK_QUIZ_BY_LANG.ja, es: FALLBACK_QUIZ_BY_LANG.es });
-    let quizItems = quizPack.en.questions;
+    let quizPack = packFromLangMap(FALLBACK_QUIZ_BY_LANG);
+    let quizItems = quizPack.en.levels.basic.questions;
     let quizLoadPromise = null;
 
     function currentPack() {
       return quizPack[quizLang] || quizPack.en;
     }
 
+    function currentLevelBlock() {
+      const pack = currentPack();
+      return (pack.levels && pack.levels[quizLevel]) || pack.levels.basic;
+    }
+
+    function refreshQuizItems() {
+      const block = currentLevelBlock();
+      quizItems = (block && block.questions) || [];
+    }
+
     function setQuizProgressVisible(visible) {
       quizProgressWrap.hidden = !visible;
       progressLabel.hidden = !visible;
+    }
+
+    function setQuizProgress(filled, total) {
+      const pct = total ? (filled / total) * 100 : 0;
+      progressBar.style.width = pct + '%';
+      progressLabel.textContent = t('quiz.progressFormat', { current: String(Math.min(filled, total)), total: String(total) });
     }
 
     function applyQuizHeadline() {
@@ -1736,21 +1821,35 @@
       });
     }
 
+    function derivePace(selfLevel, score) {
+      if (selfLevel === 'intro') return score >= 3 ? 'basic' : 'intro';
+      if (selfLevel === 'basic') {
+        if (score <= 1) return 'intro';
+        if (score >= 4) return 'challenge';
+        return 'basic';
+      }
+      return score <= 1 ? 'basic' : 'challenge';
+    }
+
+    function goToLevelSelect() {
+      currentStep = 0;
+      quizScore = 0;
+      isTransitioning = false;
+      quizPhase = 'level';
+      quizSlides.innerHTML = '';
+      quizSlides.appendChild(renderLevelStep());
+    }
+
     function applyQuizLang(lang, opts) {
       const restart = !opts || opts.restart !== false;
       if (!quizPack[lang]) lang = 'en';
       const changed = lang !== quizLang;
       quizLang = lang;
-      quizItems = currentPack().questions;
+      refreshQuizItems();
       applyQuizHeadline();
       syncQuizLangTabs();
       if (!restart || !changed || !quizModal.classList.contains('active')) return;
-      currentStep = 0;
-      quizScore = 0;
-      isTransitioning = false;
-      quizPhase = 'start';
-      quizSlides.innerHTML = '';
-      quizSlides.appendChild(renderStartStep());
+      goToLevelSelect();
     }
 
     function loadQuizData() {
@@ -1758,71 +1857,87 @@
       quizLoadPromise = fetch('quizData.json')
         .then((res) => { if (!res.ok) throw new Error('quiz fetch failed: ' + res.status); return res.json(); })
         .then((data) => {
-          if (Array.isArray(data)) {
-            quizPack = packFromLangMap({ en: data, fr: FALLBACK_QUIZ_BY_LANG.fr, ja: FALLBACK_QUIZ_BY_LANG.ja, es: FALLBACK_QUIZ_BY_LANG.es });
-          } else {
-            quizPack = packFromLangMap(data);
-          }
-          quizItems = currentPack().questions;
+          quizPack = packFromLangMap(Array.isArray(data) ? { en: data } : data);
+          refreshQuizItems();
           applyQuizHeadline();
         })
         .catch(() => {
           quizPack = packFromLangMap(FALLBACK_QUIZ_BY_LANG);
-          quizItems = currentPack().questions;
+          refreshQuizItems();
           applyQuizHeadline();
         });
       return quizLoadPromise;
     }
 
-    function renderStartStep() {
+    function startQuizAtLevel(level) {
+      quizLevel = QUIZ_LEVELS.indexOf(level) >= 0 ? level : 'basic';
+      refreshQuizItems();
+      currentStep = 0;
+      quizScore = 0;
+      quizPhase = 'quiz';
+      quizSlides.innerHTML = '';
+      quizSlides.appendChild(renderQuestion(0));
+    }
+
+    function renderLevelStep() {
       setQuizProgressVisible(false);
       const slide = document.createElement('div');
       slide.className = 'quiz-slide active';
-      slide.innerHTML = `<div class="quiz-start"><div class="quiz-start-emoji" aria-hidden="true">🍰</div><p class="quiz-start-desc">${escapeHtml(t('quiz.startHint'))}</p><button class="quiz-next-btn quiz-start-btn" type="button">${escapeHtml(t('quiz.startBtn'))}</button></div>`;
-      slide.querySelector('.quiz-start-btn').addEventListener('click', () => {
-        if (isTransitioning) return;
-        isTransitioning = true;
-        slide.classList.add('exit-left');
-        setTimeout(() => {
-          slide.remove();
-          currentStep = 0;
-          quizScore = 0;
-          quizPhase = 'quiz';
-          quizSlides.appendChild(renderQuestion(0));
-          isTransitioning = false;
-        }, 350);
+      const cards = QUIZ_LEVEL_META.map((meta) => (
+        `<button type="button" class="quiz-level-card" data-quiz-level="${meta.id}">` +
+          `<span class="quiz-level-emoji" aria-hidden="true">${meta.emoji}</span>` +
+          `<span><span class="quiz-level-name">${escapeHtml(t('quiz.level.' + meta.id + '.name'))}</span>` +
+          `<span class="quiz-level-desc">${escapeHtml(t('quiz.level.' + meta.id + '.desc'))}</span></span>` +
+        `</button>`
+      )).join('');
+      slide.innerHTML = `<div class="quiz-start"><p class="quiz-start-desc">${escapeHtml(t('quiz.levelHint'))}</p><div class="quiz-level-grid">${cards}</div></div>`;
+      slide.querySelectorAll('[data-quiz-level]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (isTransitioning) return;
+          isTransitioning = true;
+          slide.classList.add('exit-left');
+          const level = btn.getAttribute('data-quiz-level');
+          setTimeout(() => {
+            slide.remove();
+            startQuizAtLevel(level);
+            isTransitioning = false;
+          }, 350);
+        });
       });
       return slide;
     }
 
     function renderQuestion(index) {
       const q = quizItems[index];
-      const pct = ((index + 1) / quizItems.length) * 100;
       setQuizProgressVisible(true);
-      progressBar.style.width = pct + '%';
-      progressLabel.textContent = Math.round(pct) + '%';
+      setQuizProgress(index, quizItems.length);
       const slide = document.createElement('div');
       slide.className = 'quiz-slide active';
       const imageBlock = q.image
         ? `<div class="quiz-illustration"><img src="${escapeHtml(q.image)}" alt="${escapeHtml(q.scenario)}" loading="lazy" onerror="this.onerror=null;this.closest('.quiz-illustration').classList.add('is-fallback');this.remove();"><div class="quiz-illustration-fallback" aria-hidden="true">${scenarioEmoji(q.scenario)}</div></div>`
         : '';
-      slide.innerHTML = `${imageBlock}<div class="situation-card"><div class="situation-tag">${escapeHtml(q.scenario)}</div><p class="situation-text">${escapeHtml(q.question)}</p></div><div class="quiz-options">${q.options.map((o, i) => `<button class="quiz-option" data-index="${i}">${escapeHtml(o)}</button>`).join('')}</div><p class="quiz-explanation" hidden></p><button class="quiz-next-btn" type="button" hidden></button>`;
+      slide.innerHTML = `${imageBlock}<div class="situation-card"><div class="situation-tag">${escapeHtml(q.scenario)}</div><p class="situation-text">${escapeHtml(q.question)}</p></div><div class="quiz-options">${q.options.map((o, i) => `<button class="quiz-option" data-index="${i}">${escapeHtml(o)}</button>`).join('')}</div><p class="quiz-feedback" hidden></p><p class="quiz-explanation" hidden></p><button class="quiz-next-btn" type="button" hidden></button>`;
       slide.querySelectorAll('.quiz-option').forEach(btn => btn.addEventListener('click', () => handleAnswer(slide, index, btn)));
       return slide;
     }
 
     function renderResultStep() {
       setQuizProgressVisible(true);
-      progressBar.style.width = '100%';
-      progressLabel.textContent = '100%';
+      setQuizProgress(quizItems.length, quizItems.length);
       const pack = currentPack();
       const host = pack.host || QUIZ_HOSTS[quizLang];
-      const course = pack.course || QUIZ_COURSES[quizLang];
+      const pace = derivePace(quizLevel, quizScore);
+      const course = (currentLevelBlock() && currentLevelBlock().course) || { name: '', desc: '' };
       const slide = document.createElement('div');
       slide.className = 'quiz-slide active';
       slide.innerHTML = `<div class="quiz-result">
         <p class="quiz-result-score">${escapeHtml(t('quiz.resultScore', { score: String(quizScore), total: String(quizItems.length) }))}</p>
         <h3 class="quiz-result-lead">${escapeHtml(t('quiz.resultLead'))}</h3>
+        <div class="quiz-result-block">
+          <p class="quiz-result-label">${escapeHtml(t('quiz.paceLabel'))}</p>
+          <p class="quiz-result-course-name">${escapeHtml(t('quiz.pace.' + pace + '.name'))}</p>
+          <p class="quiz-result-course-desc">${escapeHtml(t('quiz.pace.' + pace + '.desc'))}</p>
+        </div>
         <div class="quiz-result-block">
           <p class="quiz-result-label">${escapeHtml(t('quiz.resultCourseLabel'))}</p>
           <p class="quiz-result-course-name">${escapeHtml(course.name)}</p>
@@ -1839,16 +1954,14 @@
             </div>
           </div>
         </div>
-        <a class="quiz-result-cta" href="room.html" data-ms-guard>${escapeHtml(t('quiz.resultCta'))}</a>
+        <p class="quiz-result-coupon">${escapeHtml(t('quiz.resultCouponHint'))}</p>
+        <button class="quiz-result-cta" type="button" data-tickets-open>${escapeHtml(t('quiz.resultCta'))}</button>
         <button class="quiz-result-retry" type="button">${escapeHtml(t('quiz.resultRetry'))}</button>
       </div>`;
-      slide.querySelector('.quiz-result-retry').addEventListener('click', () => {
-        currentStep = 0;
-        quizScore = 0;
-        quizPhase = 'start';
-        quizSlides.innerHTML = '';
-        quizSlides.appendChild(renderStartStep());
+      slide.querySelector('[data-tickets-open]').addEventListener('click', () => {
+        setTimeout(closeQuizModal, 0);
       });
+      slide.querySelector('.quiz-result-retry').addEventListener('click', goToLevelSelect);
       return slide;
     }
 
@@ -1858,19 +1971,28 @@
       const clickedIndex = parseInt(btn.dataset.index, 10);
       slide.querySelectorAll('.quiz-option').forEach((b) => { b.disabled = true; });
 
+      let isCorrect = true;
       if (typeof q.answerIndex === 'number') {
-        const isCorrect = clickedIndex === q.answerIndex;
+        isCorrect = clickedIndex === q.answerIndex;
         if (isCorrect) quizScore += 1;
         btn.classList.add(isCorrect ? 'is-correct' : 'is-wrong');
         if (!isCorrect) {
           const correctBtn = slide.querySelector(`.quiz-option[data-index="${q.answerIndex}"]`);
           if (correctBtn) correctBtn.classList.add('is-correct');
         }
-        if (q.explanation) {
-          const exp = slide.querySelector('.quiz-explanation');
-          exp.textContent = '💡 ' + q.explanation;
-          exp.hidden = false;
-        }
+      }
+
+      setQuizProgress(index + 1, quizItems.length);
+
+      const feedback = slide.querySelector('.quiz-feedback');
+      feedback.textContent = t(isCorrect ? 'quiz.feedback.correct' : 'quiz.feedback.wrong');
+      feedback.classList.add(isCorrect ? 'is-correct' : 'is-wrong');
+      feedback.hidden = false;
+
+      if (q.explanation) {
+        const exp = slide.querySelector('.quiz-explanation');
+        exp.textContent = '💡 ' + q.explanation;
+        exp.hidden = false;
       }
 
       const isLast = index + 1 >= quizItems.length;
@@ -1901,10 +2023,11 @@
 
     function rerenderCurrentQuizSlide() {
       if (!quizModal.classList.contains('active')) return;
+      refreshQuizItems();
       applyQuizHeadline();
       syncQuizLangTabs();
       quizSlides.innerHTML = '';
-      if (quizPhase === 'start') quizSlides.appendChild(renderStartStep());
+      if (quizPhase === 'level' || quizPhase === 'start') quizSlides.appendChild(renderLevelStep());
       else if (quizPhase === 'result') quizSlides.appendChild(renderResultStep());
       else if (quizItems.length) quizSlides.appendChild(renderQuestion(currentStep));
     }
@@ -1920,16 +2043,16 @@
       currentStep = 0;
       quizScore = 0;
       isTransitioning = false;
-      quizPhase = 'start';
+      quizPhase = 'level';
       quizSlides.innerHTML = '';
       quizModal.classList.add('active');
       applyQuizHeadline();
       syncQuizLangTabs();
-      quizSlides.appendChild(renderStartStep());
+      quizSlides.appendChild(renderLevelStep());
       if (window.DayOScrollLock) window.DayOScrollLock.lock();
       else document.body.style.overflow = 'hidden';
       loadQuizData().then(() => {
-        if (!quizModal.classList.contains('active') || quizPhase !== 'start') return;
+        if (!quizModal.classList.contains('active') || quizPhase !== 'level') return;
         applyQuizHeadline();
       });
     }
@@ -1940,9 +2063,9 @@
       if (window.DayOScrollLock) window.DayOScrollLock.unlock();
       else document.body.style.overflow = '';
       quizSlides.innerHTML = '';
-      quizPhase = 'start';
-      progressBar.style.width = '20%';
-      progressLabel.textContent = '20%';
+      quizPhase = 'level';
+      progressBar.style.width = '0%';
+      progressLabel.textContent = t('quiz.progressFormat', { current: '0', total: '4' });
       setQuizProgressVisible(false);
     }
 

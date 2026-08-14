@@ -9,92 +9,212 @@
       "initial": "L",
       "bio": "첫 인사부터 따뜻하게 받아주는 영국 파트너예요."
     },
-    "course": {
-      "name": "7초 침묵 탈출 코스",
-      "desc": "외국인 앞에서 얼어붙지 않고, 첫 인사를 자연스럽게 여는 입문 세션"
-    },
-    "questions": [
-      {
-        "id": "en-1",
-        "difficulty": "easy",
-        "category": "cafe",
-        "image": "/images/cafe.png",
-        "scenario": "☕ 카페",
-        "question": "바리스타가 \"Hi! What can I get for you?\"라고 물었어요. 가장 자연스러운 나의 답은?",
-        "options": [
-          "Coffee me.",
-          "Can I have a latte, please?",
-          "Give me now.",
-          "I am coffee."
-        ],
-        "answer": 1,
-        "explanation": "부탁할 때는 Can I have ~, please?가 가장 자연스러워요."
+    "levels": {
+      "intro": {
+        "course": {
+          "name": "알파벳·인사 새싹 코스",
+          "desc": "Hi / Please / Thank you만으로도 입을 여는 초슬로우 세션"
+        },
+        "questions": [
+          {
+            "id": "en-i1",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "👋 인사",
+            "question": "외국인 파트너가 먼저 손을 흔들었어요. “안녕”에 해당하는 영어는?",
+            "options": [
+              "Bye",
+              "Hi",
+              "Stop",
+              "Wait"
+            ],
+            "answer": 1,
+            "explanation": "가장 쉬운 인사는 Hi!예요."
+          },
+          {
+            "id": "en-i2",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "☕ 부탁",
+            "question": "커피를 부탁할 때 붙이면 공손해지는 한 단어는?",
+            "options": [
+              "Now",
+              "Please",
+              "Fast",
+              "Me"
+            ],
+            "answer": 1,
+            "explanation": "Please 하나만 붙여도 훨씬 부드러워요."
+          },
+          {
+            "id": "en-i3",
+            "difficulty": "easy",
+            "image": "/images/shopping.png",
+            "scenario": "🙏 감사",
+            "question": "물건을 받았을 때 하는 인사는?",
+            "options": [
+              "Sorry",
+              "Hello",
+              "Thank you",
+              "Excuse me"
+            ],
+            "answer": 2,
+            "explanation": "받을 때는 Thank you가 정답이에요."
+          },
+          {
+            "id": "en-i4",
+            "difficulty": "easy",
+            "image": "/images/airport.png",
+            "scenario": "👋 작별",
+            "question": "헤어질 때 자연스러운 말은?",
+            "options": [
+              "Hi",
+              "Please",
+              "Coffee",
+              "Bye"
+            ],
+            "answer": 3,
+            "explanation": "작별은 Bye로 가볍게 끝내면 돼요."
+          }
+        ]
       },
-      {
-        "id": "en-2",
-        "difficulty": "easy",
-        "category": "airport",
-        "image": "/images/airport.png",
-        "scenario": "✈️ 공항",
-        "question": "직원이 \"May I see your passport?\"라고 했어요. 자연스러운 대답은?",
-        "options": [
-          "Passport is mine.",
-          "Wait, why?",
-          "Here you are.",
-          "I have it somewhere."
-        ],
-        "answer": 2,
-        "explanation": "서류를 건넬 때는 Here you are.가 가장 짧고 자연스러워요."
+      "basic": {
+        "course": {
+          "name": "7초 침묵 탈출 코스",
+          "desc": "카페·공항에서 단어가 아닌 짧은 문장으로 받아치는 입문 세션"
+        },
+        "questions": [
+          {
+            "id": "en-b1",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "☕ 카페",
+            "question": "바리스타가 \"Hi! What can I get for you?\"라고 물었어요. 가장 자연스러운 나의 답은?",
+            "options": [
+              "Coffee me.",
+              "Can I have a latte, please?",
+              "Give me now.",
+              "I am coffee."
+            ],
+            "answer": 1,
+            "explanation": "부탁할 때는 Can I have ~, please?가 가장 자연스러워요."
+          },
+          {
+            "id": "en-b2",
+            "difficulty": "easy",
+            "image": "/images/airport.png",
+            "scenario": "✈️ 공항",
+            "question": "직원이 \"May I see your passport?\"라고 했어요. 자연스러운 대답은?",
+            "options": [
+              "Passport is mine.",
+              "Wait, why?",
+              "Here you are.",
+              "I have it somewhere."
+            ],
+            "answer": 2,
+            "explanation": "서류를 건넬 때는 Here you are.가 가장 짧고 자연스러워요."
+          },
+          {
+            "id": "en-b3",
+            "difficulty": "easy",
+            "image": "/images/taxi.png",
+            "scenario": "🚕 택시",
+            "question": "기사님이 \"Where would you like to go?\"라고 물었어요. 나의 답은?",
+            "options": [
+              "To the airport, please.",
+              "Airport go.",
+              "I am airport.",
+              "Drive fast."
+            ],
+            "answer": 0,
+            "explanation": "목적지는 To the ~, please.로 말하면 돼요."
+          },
+          {
+            "id": "en-b4",
+            "difficulty": "easy",
+            "image": "/images/hotel.png",
+            "scenario": "🏨 호텔",
+            "question": "리셉션에서 \"Do you have a reservation?\"이라고 물었어요. 자연스러운 답은?",
+            "options": [
+              "Reservation yes me.",
+              "Hotel room give.",
+              "I booked maybe.",
+              "Yes, under Kim."
+            ],
+            "answer": 3,
+            "explanation": "예약 확인할 때는 Yes, under (이름).이면 충분해요."
+          }
+        ]
       },
-      {
-        "id": "en-3",
-        "difficulty": "easy",
-        "category": "taxi",
-        "image": "/images/taxi.png",
-        "scenario": "🚕 택시",
-        "question": "기사님이 \"Where would you like to go?\"라고 물었어요. 나의 답은?",
-        "options": [
-          "To the airport, please.",
-          "Airport go.",
-          "I am airport.",
-          "Drive fast."
-        ],
-        "answer": 0,
-        "explanation": "목적지는 To the ~, please.로 말하면 돼요."
-      },
-      {
-        "id": "en-4",
-        "difficulty": "easy",
-        "category": "hotel",
-        "image": "/images/hotel.png",
-        "scenario": "🏨 호텔",
-        "question": "리셉션에서 \"Do you have a reservation?\"이라고 물었어요. 자연스러운 답은?",
-        "options": [
-          "Reservation yes me.",
-          "Hotel room give.",
-          "I booked maybe.",
-          "Yes, under Kim."
-        ],
-        "answer": 3,
-        "explanation": "예약 확인할 때는 Yes, under (이름).이면 충분해요."
-      },
-      {
-        "id": "en-5",
-        "difficulty": "easy",
-        "category": "restaurant",
-        "image": "/images/restaurant.png",
-        "scenario": "🍽️ 레스토랑",
-        "question": "직원이 \"Would you like a table for two?\"라고 했어요. 나의 답은?",
-        "options": [
-          "Two table yes.",
-          "Yes, please. A table for two.",
-          "We are hungry.",
-          "Table now."
-        ],
-        "answer": 1,
-        "explanation": "Yes, please. 뒤에 인원을 한 번 더 확인하면 더 자연스러워요."
+      "challenge": {
+        "course": {
+          "name": "울렁증 브레이커 코스",
+          "desc": "문장은 나오는데 입이 굳을 때, 한 박자 이어가는 도전 세션"
+        },
+        "questions": [
+          {
+            "id": "en-c1",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "☕ 스몰토크",
+            "question": "파트너가 \"How are you today?\"라고 물었는데 7초가 멈췄어요. 가장 자연스러운 이어가기는?",
+            "options": [
+              "I am fine, thanks. How about you?",
+              "Yes.",
+              "Coffee please now.",
+              "I don't know English forever."
+            ],
+            "answer": 0,
+            "explanation": "짧은 안부 + How about you?면 침묵이 풀려요."
+          },
+          {
+            "id": "en-c2",
+            "difficulty": "easy",
+            "image": "/images/restaurant.png",
+            "scenario": "🍽️ 레스토랑",
+            "question": "직원이 \"Are you ready to order?\"라고 했어요. 아직 고르는 중일 때 자연스러운 답은?",
+            "options": [
+              "Give me food.",
+              "Could I have a minute, please?",
+              "I am menu.",
+              "Table two."
+            ],
+            "answer": 1,
+            "explanation": "Could I have a minute, please?면 여유 있게 고를 수 있어요."
+          },
+          {
+            "id": "en-c3",
+            "difficulty": "easy",
+            "image": "/images/shopping.png",
+            "scenario": "🛍️ 가게",
+            "question": "점원이 \"Can I help you?\"라고 했는데 그냥 구경 중이에요. 자연스러운 답은?",
+            "options": [
+              "Go away.",
+              "I'm just looking, thanks.",
+              "Give discount.",
+              "You help now."
+            ],
+            "answer": 1,
+            "explanation": "I'm just looking, thanks.가 가장 부드러운 거절이에요."
+          },
+          {
+            "id": "en-c4",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "💬 막힘",
+            "question": "하고 싶은 말이 생각이 안 날 때 시간을 버는 자연스러운 한 줄은?",
+            "options": [
+              "Stop talking.",
+              "Um, let me think for a second.",
+              "I am stupid.",
+              "Repeat forever."
+            ],
+            "answer": 1,
+            "explanation": "Let me think for a second.면 울렁증이 와도 대화가 끊기지 않아요."
+          }
+        ]
       }
-    ]
+    }
   },
   "fr": {
     "headline": "일주일 안에 프랑스어로 자기소개, 돼요! 🥐",
@@ -106,92 +226,212 @@
       "initial": "E",
       "bio": "벨기에 출신 Emma와 함께 인사부터 자기소개까지 차근차근 연습해요."
     },
-    "course": {
-      "name": "일주일 자기소개 코스",
-      "desc": "Bonjour부터 이름·출신 소개까지, 일주일 만에 입을 여는 프랑스어 입문"
-    },
-    "questions": [
-      {
-        "id": "fr-1",
-        "difficulty": "easy",
-        "category": "cafe",
-        "image": "/images/cafe.png",
-        "scenario": "☕ 카페",
-        "question": "카페에서 파트너가 \"Bonjour! Un café, s'il vous plaît.\"라고 인사했을 때 자연스러운 나의 답은?",
-        "options": [
-          "Merci, au revoir!",
-          "Bonjour!",
-          "Excusez-moi",
-          "Je ne sais pas"
-        ],
-        "answer": 1,
-        "explanation": "먼저 인사에는 Bonjour!로 받아치면 돼요. 바로 작별 인사(au revoir)는 어색해요."
+    "levels": {
+      "intro": {
+        "course": {
+          "name": "Bonjour 새싹 코스",
+          "desc": "인사·감사 단어만으로 입을 여는 프랑스어 첫걸음"
+        },
+        "questions": [
+          {
+            "id": "fr-i1",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "👋 인사",
+            "question": "아침에 파트너를 만났을 때 하는 인사는?",
+            "options": [
+              "Au revoir",
+              "Bonjour",
+              "Merci",
+              "Pardon"
+            ],
+            "answer": 1,
+            "explanation": "낮 인사의 기본은 Bonjour예요."
+          },
+          {
+            "id": "fr-i2",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "🙏 감사",
+            "question": "커피를 받았을 때 하는 말은?",
+            "options": [
+              "Bonjour",
+              "Merci",
+              "Salut taxi",
+              "Non"
+            ],
+            "answer": 1,
+            "explanation": "감사는 Merci 한 단어면 충분해요."
+          },
+          {
+            "id": "fr-i3",
+            "difficulty": "easy",
+            "image": "/images/shopping.png",
+            "scenario": "👋 작별",
+            "question": "헤어질 때 쓰는 말은?",
+            "options": [
+              "Bonjour",
+              "S'il vous plaît",
+              "Au revoir",
+              "Café"
+            ],
+            "answer": 2,
+            "explanation": "작별은 Au revoir예요."
+          },
+          {
+            "id": "fr-i4",
+            "difficulty": "easy",
+            "image": "/images/restaurant.png",
+            "scenario": "🙏 부탁",
+            "question": "부탁할 때 붙이는 공손한 표현은?",
+            "options": [
+              "Voilà",
+              "S'il vous plaît",
+              "Moi",
+              "Vite"
+            ],
+            "answer": 1,
+            "explanation": "S'il vous plaît를 붙이면 바로 공손해져요."
+          }
+        ]
       },
-      {
-        "id": "fr-2",
-        "difficulty": "easy",
-        "category": "cafe",
-        "image": "/images/cafe.png",
-        "scenario": "☕ 카페",
-        "question": "바리스타가 \"Voici votre café !\"라며 커피를 건넸어요. 자연스러운 답은?",
-        "options": [
-          "Bonjour",
-          "Au revoir",
-          "Merci beaucoup !",
-          "Excusez-moi"
-        ],
-        "answer": 2,
-        "explanation": "받을 때는 Merci beaucoup!가 가장 자연스러워요."
+      "basic": {
+        "course": {
+          "name": "일주일 자기소개 코스",
+          "desc": "카페 인사부터 목적지까지, 짧은 문장으로 받아치는 입문"
+        },
+        "questions": [
+          {
+            "id": "fr-b1",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "☕ 카페",
+            "question": "카페에서 파트너가 \"Bonjour! Un café, s'il vous plaît.\"라고 인사했을 때 자연스러운 나의 답은?",
+            "options": [
+              "Merci, au revoir!",
+              "Bonjour!",
+              "Excusez-moi",
+              "Je ne sais pas"
+            ],
+            "answer": 1,
+            "explanation": "먼저 인사에는 Bonjour!로 받아치면 돼요."
+          },
+          {
+            "id": "fr-b2",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "☕ 카페",
+            "question": "바리스타가 \"Voici votre café !\"라며 커피를 건넸어요. 자연스러운 답은?",
+            "options": [
+              "Bonjour",
+              "Au revoir",
+              "Merci beaucoup !",
+              "Excusez-moi"
+            ],
+            "answer": 2,
+            "explanation": "받을 때는 Merci beaucoup!가 가장 자연스러워요."
+          },
+          {
+            "id": "fr-b3",
+            "difficulty": "easy",
+            "image": "/images/restaurant.png",
+            "scenario": "🍽️ 레스토랑",
+            "question": "화장실을 찾고 싶을 때 가장 자연스러운 질문은?",
+            "options": [
+              "Où sont les toilettes, s'il vous plaît ?",
+              "Je suis toilette.",
+              "Merci toilette.",
+              "Café s'il vous plaît."
+            ],
+            "answer": 0,
+            "explanation": "장소를 물을 때는 Où sont ~, s'il vous plaît ?를 쓰면 돼요."
+          },
+          {
+            "id": "fr-b4",
+            "difficulty": "easy",
+            "image": "/images/taxi.png",
+            "scenario": "🚕 택시",
+            "question": "기사님이 \"Où allez-vous ?\"라고 물었어요. 나의 답은?",
+            "options": [
+              "Je suis gare.",
+              "Merci gare.",
+              "Bonjour taxi.",
+              "À la gare, s'il vous plaît."
+            ],
+            "answer": 3,
+            "explanation": "목적지는 À la ~, s'il vous plaît.로 말하면 돼요."
+          }
+        ]
       },
-      {
-        "id": "fr-3",
-        "difficulty": "easy",
-        "category": "restaurant",
-        "image": "/images/restaurant.png",
-        "scenario": "🍽️ 레스토랑",
-        "question": "화장실을 찾고 싶을 때 가장 자연스러운 질문은?",
-        "options": [
-          "Où sont les toilettes, s'il vous plaît ?",
-          "Je suis toilette.",
-          "Merci toilette.",
-          "Café s'il vous plaît."
-        ],
-        "answer": 0,
-        "explanation": "장소를 물을 때는 Où sont ~, s'il vous plaît ?를 쓰면 돼요."
-      },
-      {
-        "id": "fr-4",
-        "difficulty": "easy",
-        "category": "taxi",
-        "image": "/images/taxi.png",
-        "scenario": "🚕 택시",
-        "question": "기사님이 \"Où allez-vous ?\"라고 물었어요. 나의 답은?",
-        "options": [
-          "Je suis gare.",
-          "Merci gare.",
-          "Bonjour taxi.",
-          "À la gare, s'il vous plaît."
-        ],
-        "answer": 3,
-        "explanation": "목적지는 À la ~, s'il vous plaît.로 말하면 돼요."
-      },
-      {
-        "id": "fr-5",
-        "difficulty": "easy",
-        "category": "restaurant",
-        "image": "/images/restaurant.png",
-        "scenario": "🍽️ 레스토랑",
-        "question": "직원이 \"Vous désirez ?\"라고 물었어요. 자연스러운 주문은?",
-        "options": [
-          "Salade moi.",
-          "Je voudrais une salade, s'il vous plaît.",
-          "Merci, au revoir.",
-          "Je ne sais pas café."
-        ],
-        "answer": 1,
-        "explanation": "주문은 Je voudrais ~, s'il vous plaît.가 입문 필수 문장이에요."
+      "challenge": {
+        "course": {
+          "name": "자기소개 도전 코스",
+          "desc": "문장은 되는데 입이 굳을 때, 한 줄로 이어가는 프랑스어"
+        },
+        "questions": [
+          {
+            "id": "fr-c1",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "💬 자기소개",
+            "question": "파트너가 \"Comment tu t'appelles ?\"라고 물었어요. 자연스러운 답은?",
+            "options": [
+              "Je m'appelle Min.",
+              "Bonjour café.",
+              "Au revoir nom.",
+              "Je suis merci."
+            ],
+            "answer": 0,
+            "explanation": "이름은 Je m'appelle ~.로 소개하면 돼요."
+          },
+          {
+            "id": "fr-c2",
+            "difficulty": "easy",
+            "image": "/images/shopping.png",
+            "scenario": "💬 출신",
+            "question": "\"Tu viens d'où ?\"라는 질문에 자연스러운 답은?",
+            "options": [
+              "Je viens de Corée.",
+              "Corée merci.",
+              "Je suis toilette.",
+              "Café s'il vous plaît."
+            ],
+            "answer": 0,
+            "explanation": "출신은 Je viens de ~.예요."
+          },
+          {
+            "id": "fr-c3",
+            "difficulty": "easy",
+            "image": "/images/restaurant.png",
+            "scenario": "🍽️ 주문",
+            "question": "아직 메뉴를 고르는 중일 때 자연스러운 한 줄은?",
+            "options": [
+              "Donnez-moi tout.",
+              "Un instant, s'il vous plaît.",
+              "Je suis menu.",
+              "Au revoir."
+            ],
+            "answer": 1,
+            "explanation": "Un instant, s'il vous plaît.면 시간을 벌 수 있어요."
+          },
+          {
+            "id": "fr-c4",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "💬 막힘",
+            "question": "말이 막혔을 때 가장 자연스러운 시간은?",
+            "options": [
+              "Arrêtez.",
+              "Euh… laissez-moi réfléchir.",
+              "Je suis stupide.",
+              "Parlez plus."
+            ],
+            "answer": 1,
+            "explanation": "Laissez-moi réfléchir.면 울렁증이 와도 대화가 이어져요."
+          }
+        ]
       }
-    ]
+    }
   },
   "ja": {
     "headline": "현지 이자카야에서 막힘없이 주문, 돼요! 🍣",
@@ -203,188 +443,862 @@
       "initial": "Y",
       "bio": "천천히, 정확하게 받아주는 일본 파트너 Yui예요."
     },
-    "course": {
-      "name": "이자카야 주문 코스",
-      "desc": "인사부터 생맥주 한 잔까지, 현지 술집에서 막히지 않는 입문 세션"
-    },
-    "questions": [
-      {
-        "id": "ja-1",
-        "difficulty": "easy",
-        "category": "restaurant",
-        "image": "/images/restaurant.png",
-        "scenario": "🍣 이자카야",
-        "question": "점원이 \"いらっしゃいませ！ご注文は？\"라고 했어요. 자연스러운 나의 답은?",
-        "options": [
-          "さようなら。",
-          "生ビールをください。",
-          "こんにちは、私。",
-          "すみません、トイレ。"
-        ],
-        "answer": 1,
-        "explanation": "주문은 ~をください.가 가장 짧고 확실해요."
+    "levels": {
+      "intro": {
+        "course": {
+          "name": "こんにちは 새싹 코스",
+          "desc": "인사·감사 한 단어로 입을 여는 일본어 첫걸음"
+        },
+        "questions": [
+          {
+            "id": "ja-i1",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "👋 인사",
+            "question": "낮에 파트너를 만났을 때 하는 인사는?",
+            "options": [
+              "ありがとう",
+              "こんにちは",
+              "すみません",
+              "さようなら"
+            ],
+            "answer": 1,
+            "explanation": "낮 인사는 こんにちは예요."
+          },
+          {
+            "id": "ja-i2",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "🙏 감사",
+            "question": "받은 뒤에 하는 말은?",
+            "options": [
+              "こんにちは",
+              "ありがとう",
+              "どうぞ",
+              "いいえ"
+            ],
+            "answer": 1,
+            "explanation": "감사는 ありがとう예요."
+          },
+          {
+            "id": "ja-i3",
+            "difficulty": "easy",
+            "image": "/images/shopping.png",
+            "scenario": "🙏 미안",
+            "question": "길을 막을 때 가볍게 하는 말은?",
+            "options": [
+              "いただきます",
+              "すみません",
+              "おはよう",
+              "乾杯"
+            ],
+            "answer": 1,
+            "explanation": "실례할 때는 すみません이 만능이에요."
+          },
+          {
+            "id": "ja-i4",
+            "difficulty": "easy",
+            "image": "/images/restaurant.png",
+            "scenario": "👋 작별",
+            "question": "헤어질 때 쓰는 말은?",
+            "options": [
+              "こんにちは",
+              "ください",
+              "さようなら",
+              "ビール"
+            ],
+            "answer": 2,
+            "explanation": "작별은 さようなら예요."
+          }
+        ]
       },
-      {
-        "id": "ja-2",
-        "difficulty": "easy",
-        "category": "cafe",
-        "image": "/images/cafe.png",
-        "scenario": "👋 인사",
-        "question": "파트너가 \"こんにちは！\"라고 인사했어요. 자연스러운 나의 답은?",
-        "options": [
-          "こんにちは！",
-          "ありがとう。",
-          "すみません。",
-          "いただきます。"
-        ],
-        "answer": 0,
-        "explanation": "인사에는 같은 인사로 받아치면 돼요."
+      "basic": {
+        "course": {
+          "name": "이자카야 주문 코스",
+          "desc": "인사부터 생맥주 한 잔까지, 현지 술집에서 막히지 않는 입문"
+        },
+        "questions": [
+          {
+            "id": "ja-b1",
+            "difficulty": "easy",
+            "image": "/images/restaurant.png",
+            "scenario": "🍣 이자카야",
+            "question": "점원이 \"いらっしゃいませ！ご注文は？\"라고 했어요. 자연스러운 나의 답은?",
+            "options": [
+              "さようなら。",
+              "生ビールをください。",
+              "こんにちは、私。",
+              "すみません、トイレ。"
+            ],
+            "answer": 1,
+            "explanation": "주문은 ~をください.가 가장 짧고 확실해요."
+          },
+          {
+            "id": "ja-b2",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "👋 인사",
+            "question": "파트너가 \"こんにちは！\"라고 인사했어요. 자연스러운 나의 답은?",
+            "options": [
+              "こんにちは！",
+              "ありがとう。",
+              "すみません。",
+              "いただきます。"
+            ],
+            "answer": 0,
+            "explanation": "인사에는 같은 인사로 받아치면 돼요."
+          },
+          {
+            "id": "ja-b3",
+            "difficulty": "easy",
+            "image": "/images/shopping.png",
+            "scenario": "🏪 편의점",
+            "question": "점원이 \"袋はいりますか？\"라고 물었어요. 자연스러운 답은?",
+            "options": [
+              "こんにちは。",
+              "いただきます。",
+              "はい、お願いします。",
+              "さようなら。"
+            ],
+            "answer": 2,
+            "explanation": "부탁·수락은 はい、お願いします.면 충분해요."
+          },
+          {
+            "id": "ja-b4",
+            "difficulty": "easy",
+            "image": "/images/airport.png",
+            "scenario": "🚉 길 묻기",
+            "question": "신주쿠역을 찾고 있을 때 가장 자연스러운 질문은?",
+            "options": [
+              "新宿は私です。",
+              "こんにちは、新宿。",
+              "いただきます。",
+              "すみません、新宿はどこですか？"
+            ],
+            "answer": 3,
+            "explanation": "길을 물을 때는 すみません、~はどこですか？를 쓰면 돼요."
+          }
+        ]
       },
-      {
-        "id": "ja-3",
-        "difficulty": "easy",
-        "category": "shopping",
-        "image": "/images/shopping.png",
-        "scenario": "🏪 편의점",
-        "question": "점원이 \"袋はいりますか？\"라고 물었어요. 자연스러운 답은?",
-        "options": [
-          "こんにちは。",
-          "いただきます。",
-          "はい、お願いします。",
-          "さようなら。"
-        ],
-        "answer": 2,
-        "explanation": "부탁·수락은 はい、お願いします.면 충분해요."
-      },
-      {
-        "id": "ja-4",
-        "difficulty": "easy",
-        "category": "airport",
-        "image": "/images/airport.png",
-        "scenario": "🚉 길 묻기",
-        "question": "신주쿠역을 찾고 있을 때 가장 자연스러운 질문은?",
-        "options": [
-          "新宿は私です。",
-          "こんにちは、新宿。",
-          "いただきます。",
-          "すみません、新宿はどこですか？"
-        ],
-        "answer": 3,
-        "explanation": "길을 물을 때는 すみません、~はどこですか？를 쓰면 돼요."
-      },
-      {
-        "id": "ja-5",
-        "difficulty": "easy",
-        "category": "restaurant",
-        "image": "/images/restaurant.png",
-        "scenario": "🍽️ 식사 후",
-        "question": "식사를 마친 뒤 파트너가 \"ごちそうさまでした\"라고 했어요. 나의 답은?",
-        "options": [
-          "こんにちは。",
-          "ごちそうさまでした！",
-          "すみません、ビール。",
-          "いくらですか。"
-        ],
-        "answer": 1,
-        "explanation": "식사 후의 인사는 ごちそうさまでした.로 맞춰 주면 자연스러워요."
+      "challenge": {
+        "course": {
+          "name": "이자카야 도전 코스",
+          "desc": "문장은 되는데 주문이 막힐 때, 한 줄로 이어가는 일본어"
+        },
+        "questions": [
+          {
+            "id": "ja-c1",
+            "difficulty": "easy",
+            "image": "/images/restaurant.png",
+            "scenario": "🍣 추가 주문",
+            "question": "한 잔 더 시키고 싶을 때 자연스러운 말은?",
+            "options": [
+              "同じものでお願いします。",
+              "さようならビール。",
+              "私はビールです。",
+              "こんにちは追加。"
+            ],
+            "answer": 0,
+            "explanation": "같은 걸로 한 잔 더 = 同じものでお願いします."
+          },
+          {
+            "id": "ja-c2",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "💬 자기소개",
+            "question": "\"お名前は？\"라고 물었어요. 자연스러운 답은?",
+            "options": [
+              "ありがとう名前。",
+              "ミンです。よろしくお願いします。",
+              "すみませんビール。",
+              "いただきます。"
+            ],
+            "answer": 1,
+            "explanation": "이름 + よろしくお願いします.가 기본 자기소개예요."
+          },
+          {
+            "id": "ja-c3",
+            "difficulty": "easy",
+            "image": "/images/restaurant.png",
+            "scenario": "🍽️ 계산",
+            "question": "계산하고 싶을 때 자연스러운 한 줄은?",
+            "options": [
+              "メニューください。",
+              "お会計をお願いします。",
+              "乾杯します。",
+              "席をください。"
+            ],
+            "answer": 1,
+            "explanation": "계산은 お会計をお願いします."
+          },
+          {
+            "id": "ja-c4",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "💬 막힘",
+            "question": "말이 막혔을 때 시간을 버는 자연스러운 말은?",
+            "options": [
+              "黙って。",
+              "ちょっと待ってください。",
+              "日本語だめ。",
+              "もっと早く。"
+            ],
+            "answer": 1,
+            "explanation": "ちょっと待ってください.면 한 박자 쉴 수 있어요."
+          }
+        ]
       }
-    ]
+    }
+  },
+  "zh": {
+    "headline": "현지 카페에서 유창하게 주문, 돼요! 🧋",
+    "host": {
+      "id": "mei",
+      "name": "Mei from China",
+      "country": "중국",
+      "flag": "🇨🇳",
+      "initial": "M",
+      "bio": "천천히 받아주는 중국 파트너 Mei와 인사부터 주문까지 연습해요."
+    },
+    "levels": {
+      "intro": {
+        "course": {
+          "name": "你好 새싹 코스",
+          "desc": "인사·감사 한 글자로 입을 여는 중국어 첫걸음"
+        },
+        "questions": [
+          {
+            "id": "zh-i1",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "👋 인사",
+            "question": "낮에 파트너를 만났을 때 하는 인사는?",
+            "options": [
+              "谢谢",
+              "你好",
+              "再见",
+              "对不起"
+            ],
+            "answer": 1,
+            "explanation": "기본 인사는 你好예요."
+          },
+          {
+            "id": "zh-i2",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "🙏 감사",
+            "question": "음료를 받았을 때 하는 말은?",
+            "options": [
+              "你好",
+              "谢谢",
+              "请",
+              "走"
+            ],
+            "answer": 1,
+            "explanation": "감사는 谢谢예요."
+          },
+          {
+            "id": "zh-i3",
+            "difficulty": "easy",
+            "image": "/images/shopping.png",
+            "scenario": "👋 작별",
+            "question": "헤어질 때 쓰는 말은?",
+            "options": [
+              "你好",
+              "咖啡",
+              "再见",
+              "多少"
+            ],
+            "answer": 2,
+            "explanation": "작별은 再见이에요."
+          },
+          {
+            "id": "zh-i4",
+            "difficulty": "easy",
+            "image": "/images/restaurant.png",
+            "scenario": "🙏 미안",
+            "question": "실수했을 때 가볍게 하는 말은?",
+            "options": [
+              "对不起",
+              "你好",
+              "请坐",
+              "干杯"
+            ],
+            "answer": 0,
+            "explanation": "미안함은 对不起로 충분해요."
+          }
+        ]
+      },
+      "basic": {
+        "course": {
+          "name": "카페 주문 코스",
+          "desc": "你好부터 커피 한 잔까지, 현지 카페에서 막히지 않는 입문"
+        },
+        "questions": [
+          {
+            "id": "zh-b1",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "🧋 카페",
+            "question": "점원이 \"你好，要喝点什么？\"라고 했어요. 자연스러운 주문은?",
+            "options": [
+              "我要一杯咖啡。",
+              "咖啡我是。",
+              "再见咖啡。",
+              "你好走。"
+            ],
+            "answer": 0,
+            "explanation": "주문은 我要一杯~.가 가장 쉬워요."
+          },
+          {
+            "id": "zh-b2",
+            "difficulty": "easy",
+            "image": "/images/shopping.png",
+            "scenario": "💰 계산",
+            "question": "가격을 묻고 싶을 때 자연스러운 질문은?",
+            "options": [
+              "你好吗？",
+              "多少钱？",
+              "再见。",
+              "我是钱。"
+            ],
+            "answer": 1,
+            "explanation": "가격은 多少钱？로 물으면 돼요."
+          },
+          {
+            "id": "zh-b3",
+            "difficulty": "easy",
+            "image": "/images/restaurant.png",
+            "scenario": "🚻 화장실",
+            "question": "화장실을 찾을 때 자연스러운 질문은?",
+            "options": [
+              "洗手间在哪里？",
+              "我是洗手间。",
+              "谢谢厕所。",
+              "咖啡在哪里？"
+            ],
+            "answer": 0,
+            "explanation": "洗手间在哪里？가 여행 필수 문장이에요."
+          },
+          {
+            "id": "zh-b4",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "👋 인사",
+            "question": "파트너가 \"你好！\"라고 했어요. 나의 답은?",
+            "options": [
+              "再见！",
+              "多少钱！",
+              "你好！",
+              "对不起咖啡。"
+            ],
+            "answer": 2,
+            "explanation": "인사에는 你好!로 받아치면 돼요."
+          }
+        ]
+      },
+      "challenge": {
+        "course": {
+          "name": "현지 소통 도전 코스",
+          "desc": "문장은 되는데 말이 막힐 때, 한 줄로 이어가는 중국어"
+        },
+        "questions": [
+          {
+            "id": "zh-c1",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "💬 자기소개",
+            "question": "\"你叫什么名字？\"라고 물었어요. 자연스러운 답은?",
+            "options": [
+              "我叫민。",
+              "名字谢谢。",
+              "再见我。",
+              "咖啡我叫。"
+            ],
+            "answer": 0,
+            "explanation": "이름은 我叫 ~.예요."
+          },
+          {
+            "id": "zh-c2",
+            "difficulty": "easy",
+            "image": "/images/shopping.png",
+            "scenario": "💬 출신",
+            "question": "\"你是哪国人？\"라는 질문에 자연스러운 답은?",
+            "options": [
+              "我是韩国人。",
+              "韩国再见。",
+              "我是洗手间。",
+              "多少钱韩国。"
+            ],
+            "answer": 0,
+            "explanation": "국적은 我是韩国人。예요."
+          },
+          {
+            "id": "zh-c3",
+            "difficulty": "easy",
+            "image": "/images/restaurant.png",
+            "scenario": "🍽️ 계산",
+            "question": "계산하고 싶을 때 자연스러운 한 줄은?",
+            "options": [
+              "买单，谢谢。",
+              "菜单我是。",
+              "你好走。",
+              "干杯厕所。"
+            ],
+            "answer": 0,
+            "explanation": "계산은 买单이 가장 짧아요."
+          },
+          {
+            "id": "zh-c4",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "💬 막힘",
+            "question": "말이 막혔을 때 시간을 버는 자연스러운 말은?",
+            "options": [
+              "你闭嘴。",
+              "让我想一想。",
+              "我很笨。",
+              "再说十遍。"
+            ],
+            "answer": 1,
+            "explanation": "让我想一想。면 한 박자 쉴 수 있어요."
+          }
+        ]
+      }
+    }
   },
   "es": {
     "headline": "여행지에서 현지 친구 사귀기, 돼요! 💃",
     "host": {
-      "id": "elena",
-      "name": "Elena from Spain",
+      "id": "sofia",
+      "name": "Sofia from Spain",
       "country": "스페인",
       "flag": "🇪🇸",
-      "initial": "E",
-      "bio": "밝게 말을 걸어주는 스페인 파트너 Elena와 여행 스몰토크를 연습해요."
+      "initial": "S",
+      "bio": "밝게 말을 걸어주는 스페인 파트너 Sofia와 여행 스몰토크를 연습해요."
     },
-    "course": {
-      "name": "여행지 친구 사귀기 코스",
-      "desc": "Hola부터 출신 소개까지, 현지에서 말을 거는 입문 세션"
-    },
-    "questions": [
-      {
-        "id": "es-1",
-        "difficulty": "easy",
-        "category": "cafe",
-        "image": "/images/cafe.png",
-        "scenario": "👋 인사",
-        "question": "파트너가 \"¡Hola! ¿Cómo estás?\"라고 인사했어요. 자연스러운 나의 답은?",
-        "options": [
-          "Adiós.",
-          "Gracias café.",
-          "¡Hola! Bien, ¿y tú?",
-          "No sé taxi."
-        ],
-        "answer": 2,
-        "explanation": "인사에는 ¡Hola!와 안부(Bien, ¿y tú?)를 같이 돌려주면 돼요."
+    "levels": {
+      "intro": {
+        "course": {
+          "name": "Hola 새싹 코스",
+          "desc": "인사·감사 한 단어로 입을 여는 스페인어 첫걸음"
+        },
+        "questions": [
+          {
+            "id": "es-i1",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "👋 인사",
+            "question": "파트너를 만났을 때 하는 인사는?",
+            "options": [
+              "Adiós",
+              "Hola",
+              "Gracias",
+              "Por favor"
+            ],
+            "answer": 1,
+            "explanation": "인사의 기본은 Hola예요."
+          },
+          {
+            "id": "es-i2",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "🙏 감사",
+            "question": "음료를 받았을 때 하는 말은?",
+            "options": [
+              "Hola",
+              "Gracias",
+              "Taxi",
+              "Ahora"
+            ],
+            "answer": 1,
+            "explanation": "감사는 Gracias예요."
+          },
+          {
+            "id": "es-i3",
+            "difficulty": "easy",
+            "image": "/images/shopping.png",
+            "scenario": "👋 작별",
+            "question": "헤어질 때 쓰는 말은?",
+            "options": [
+              "Hola",
+              "Café",
+              "Adiós",
+              "Mesa"
+            ],
+            "answer": 2,
+            "explanation": "작별은 Adiós예요."
+          },
+          {
+            "id": "es-i4",
+            "difficulty": "easy",
+            "image": "/images/restaurant.png",
+            "scenario": "🙏 부탁",
+            "question": "부탁할 때 붙이는 공손한 표현은?",
+            "options": [
+              "Yo",
+              "Por favor",
+              "Más",
+              "Ya"
+            ],
+            "answer": 1,
+            "explanation": "Por favor를 붙이면 바로 공손해져요."
+          }
+        ]
       },
-      {
-        "id": "es-2",
-        "difficulty": "easy",
-        "category": "cafe",
-        "image": "/images/cafe.png",
-        "scenario": "☕ 카페",
-        "question": "바리스타가 \"¿Qué te apetece?\"라고 물었어요. 자연스러운 주문은?",
-        "options": [
-          "Un café, por favor.",
-          "Café yo.",
-          "Hola adiós.",
-          "No sé."
-        ],
-        "answer": 0,
-        "explanation": "주문은 Un ~, por favor.가 입문 필수예요."
+      "basic": {
+        "course": {
+          "name": "여행지 친구 사귀기 코스",
+          "desc": "Hola부터 출신 소개까지, 현지에서 말을 거는 입문 세션"
+        },
+        "questions": [
+          {
+            "id": "es-b1",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "👋 인사",
+            "question": "파트너가 \"¡Hola! ¿Cómo estás?\"라고 인사했어요. 자연스러운 나의 답은?",
+            "options": [
+              "Adiós.",
+              "Gracias café.",
+              "¡Hola! Bien, ¿y tú?",
+              "No sé taxi."
+            ],
+            "answer": 2,
+            "explanation": "인사에는 ¡Hola!와 안부(Bien, ¿y tú?)를 같이 돌려주면 돼요."
+          },
+          {
+            "id": "es-b2",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "☕ 카페",
+            "question": "바리스타가 \"¿Qué te apetece?\"라고 물었어요. 자연스러운 주문은?",
+            "options": [
+              "Un café, por favor.",
+              "Café yo.",
+              "Hola adiós.",
+              "No sé."
+            ],
+            "answer": 0,
+            "explanation": "주문은 Un ~, por favor.가 입문 필수예요."
+          },
+          {
+            "id": "es-b3",
+            "difficulty": "easy",
+            "image": "/images/restaurant.png",
+            "scenario": "🍽️ 레스토랑",
+            "question": "직원이 \"¡Hola! ¿En qué te puedo ayudar?\"라고 했어요. 자연스러운 답은?",
+            "options": [
+              "Adiós mesa.",
+              "Una mesa para dos, por favor.",
+              "Yo dos.",
+              "Café adiós."
+            ],
+            "answer": 1,
+            "explanation": "테이블은 Una mesa para ~, por favor.로 요청하면 돼요."
+          },
+          {
+            "id": "es-b4",
+            "difficulty": "easy",
+            "image": "/images/shopping.png",
+            "scenario": "💃 스몰토크",
+            "question": "현지 친구가 \"¿De dónde eres?\"라고 물었어요. 자연스러운 나의 답은?",
+            "options": [
+              "Soy de Corea. ¿Y tú?",
+              "Corea adiós.",
+              "Café por favor.",
+              "No sé baño."
+            ],
+            "answer": 0,
+            "explanation": "출신을 물을 때는 Soy de ~. ¿Y tú?로 대화를 이어가면 돼요."
+          }
+        ]
       },
-      {
-        "id": "es-3",
-        "difficulty": "easy",
-        "category": "restaurant",
-        "image": "/images/restaurant.png",
-        "scenario": "🍽️ 레스토랑",
-        "question": "직원이 \"¡Hola! ¿En qué te puedo ayudar?\"라고 했어요. 자연스러운 답은?",
-        "options": [
-          "Adiós mesa.",
-          "Una mesa para dos, por favor.",
-          "Yo dos.",
-          "Café adiós."
-        ],
-        "answer": 1,
-        "explanation": "테이블은 Una mesa para ~, por favor.로 요청하면 돼요."
-      },
-      {
-        "id": "es-4",
-        "difficulty": "easy",
-        "category": "restaurant",
-        "image": "/images/restaurant.png",
-        "scenario": "🍽️ 식사 중",
-        "question": "직원이 \"¿Está todo bien?\"이라고 물었어요. 자연스러운 답은?",
-        "options": [
-          "Baño yo.",
-          "Adiós.",
-          "No.",
-          "Sí, está delicioso. Gracias."
-        ],
-        "answer": 3,
-        "explanation": "잘 먹고 있을 때는 Sí, está delicioso. Gracias.가 따뜻해요."
-      },
-      {
-        "id": "es-5",
-        "difficulty": "easy",
-        "category": "shopping",
-        "image": "/images/shopping.png",
-        "scenario": "💃 스몰토크",
-        "question": "현지 친구가 \"¿De dónde eres?\"라고 물었어요. 자연스러운 나의 답은?",
-        "options": [
-          "Soy de Corea. ¿Y tú?",
-          "Corea adiós.",
-          "Café por favor.",
-          "No sé baño."
-        ],
-        "answer": 0,
-        "explanation": "출신을 물을 때는 Soy de ~. ¿Y tú?로 대화를 이어가면 돼요."
+      "challenge": {
+        "course": {
+          "name": "현지 친구 도전 코스",
+          "desc": "문장은 되는데 울렁증이 올 때, 한 줄로 이어가는 스페인어"
+        },
+        "questions": [
+          {
+            "id": "es-c1",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "💬 자기소개",
+            "question": "\"¿Cómo te llamas?\"라고 물었어요. 자연스러운 답은?",
+            "options": [
+              "Me llamo Min. Encantada.",
+              "Hola nombre.",
+              "Adiós me.",
+              "Café llamo."
+            ],
+            "answer": 0,
+            "explanation": "Me llamo ~. Encantada.가 기본 소개예요."
+          },
+          {
+            "id": "es-c2",
+            "difficulty": "easy",
+            "image": "/images/restaurant.png",
+            "scenario": "🍽️ 주문",
+            "question": "아직 고르는 중일 때 자연스러운 한 줄은?",
+            "options": [
+              "Dame todo.",
+              "Un momento, por favor.",
+              "Soy menú.",
+              "Adiós mesa."
+            ],
+            "answer": 1,
+            "explanation": "Un momento, por favor.면 여유를 벌 수 있어요."
+          },
+          {
+            "id": "es-c3",
+            "difficulty": "easy",
+            "image": "/images/shopping.png",
+            "scenario": "💃 약속",
+            "question": "다음에 또 보고 싶을 때 자연스러운 말은?",
+            "options": [
+              "No hables.",
+              "¿Tomamos un café mañana?",
+              "Yo taxi ahora.",
+              "Adiós para siempre."
+            ],
+            "answer": 1,
+            "explanation": "¿Tomamos un café mañana?면 친구로 이어져요."
+          },
+          {
+            "id": "es-c4",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "💬 막힘",
+            "question": "말이 막혔을 때 시간을 버는 자연스러운 말은?",
+            "options": [
+              "Cállate.",
+              "Déjame pensar un segundo.",
+              "Soy tonta.",
+              "Habla más rápido."
+            ],
+            "answer": 1,
+            "explanation": "Déjame pensar un segundo.면 울렁증이 와도 대화가 끊기지 않아요."
+          }
+        ]
       }
-    ]
+    }
+  },
+  "ko": {
+    "headline": "처음 보는 사람과도 자연스럽게 대화, 돼요! 🍵",
+    "host": {
+      "id": "jiwoo",
+      "name": "Jiwoo from Seoul",
+      "country": "한국",
+      "flag": "🇰🇷",
+      "initial": "J",
+      "bio": "편안하게 받아주는 서울 파트너 지우와 첫 인사를 연습해요."
+    },
+    "levels": {
+      "intro": {
+        "course": {
+          "name": "안녕하세요 새싹 코스",
+          "desc": "인사·감사 한 마디로 입을 여는 한국어 첫걸음"
+        },
+        "questions": [
+          {
+            "id": "ko-i1",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "👋 인사",
+            "question": "처음 만난 파트너에게 하는 인사는?",
+            "options": [
+              "안녕",
+              "안녕하세요",
+              "잘 가",
+              "네"
+            ],
+            "answer": 1,
+            "explanation": "처음 만났을 때는 안녕하세요가 더 공손해요."
+          },
+          {
+            "id": "ko-i2",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "🙏 감사",
+            "question": "음료를 받았을 때 하는 말은?",
+            "options": [
+              "안녕하세요",
+              "감사합니다",
+              "잠시만요",
+              "아니요"
+            ],
+            "answer": 1,
+            "explanation": "받을 때는 감사합니다예요."
+          },
+          {
+            "id": "ko-i3",
+            "difficulty": "easy",
+            "image": "/images/shopping.png",
+            "scenario": "👋 작별",
+            "question": "헤어질 때 공손한 말은?",
+            "options": [
+              "안녕",
+              "들어가세요",
+              "안녕히 가세요",
+              "네네"
+            ],
+            "answer": 2,
+            "explanation": "작별은 안녕히 가세요예요."
+          },
+          {
+            "id": "ko-i4",
+            "difficulty": "easy",
+            "image": "/images/restaurant.png",
+            "scenario": "🙏 부탁",
+            "question": "부탁할 때 문장 끝에 붙이면 공손해지는 말은?",
+            "options": [
+              "빨리",
+              "주세요",
+              "나",
+              "이거"
+            ],
+            "answer": 1,
+            "explanation": "~ 주세요가 가장 쉬운 부탁이에요."
+          }
+        ]
+      },
+      "basic": {
+        "course": {
+          "name": "카페 첫 대화 코스",
+          "desc": "인사부터 주문까지, 어색하지 않게 받아치는 입문 세션"
+        },
+        "questions": [
+          {
+            "id": "ko-b1",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "☕ 카페",
+            "question": "직원이 \"뭐 드릴까요?\"라고 물었어요. 자연스러운 주문은?",
+            "options": [
+              "커피 나.",
+              "아메리카노 한 잔 주세요.",
+              "빨리 커피.",
+              "나는 커피입니다."
+            ],
+            "answer": 1,
+            "explanation": "메뉴 + 주세요가 가장 자연스러워요."
+          },
+          {
+            "id": "ko-b2",
+            "difficulty": "easy",
+            "image": "/images/shopping.png",
+            "scenario": "💰 계산",
+            "question": "가격을 묻고 싶을 때 자연스러운 질문은?",
+            "options": [
+              "이거 얼마예요?",
+              "돈 뭐예요?",
+              "계산 나.",
+              "안녕하세요 가격."
+            ],
+            "answer": 0,
+            "explanation": "얼마예요?면 충분해요."
+          },
+          {
+            "id": "ko-b3",
+            "difficulty": "easy",
+            "image": "/images/restaurant.png",
+            "scenario": "🍽️ 식사",
+            "question": "식사를 시작할 때 자연스러운 인사는?",
+            "options": [
+              "잘 가겠습니다",
+              "잘 먹겠습니다",
+              "감사합니다 나가",
+              "화장실 주세요"
+            ],
+            "answer": 1,
+            "explanation": "먹기 전에는 잘 먹겠습니다예요."
+          },
+          {
+            "id": "ko-b4",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "👋 인사",
+            "question": "파트너가 \"안녕하세요!\"라고 했어요. 나의 답은?",
+            "options": [
+              "안녕히 가세요!",
+              "안녕하세요!",
+              "얼마예요!",
+              "주세요 안녕."
+            ],
+            "answer": 1,
+            "explanation": "인사에는 같은 인사로 받아치면 돼요."
+          }
+        ]
+      },
+      "challenge": {
+        "course": {
+          "name": "어색함 탈출 도전 코스",
+          "desc": "말은 되는데 울렁증이 올 때, 한 줄로 이어가는 한국어"
+        },
+        "questions": [
+          {
+            "id": "ko-c1",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "💬 자기소개",
+            "question": "\"이름이 어떻게 되세요?\"라고 물었어요. 자연스러운 답은?",
+            "options": [
+              "민이라고 해요. 반가워요.",
+              "이름 커피.",
+              "저 사람입니다.",
+              "안녕히 가세요 민."
+            ],
+            "answer": 0,
+            "explanation": "이름 + 반가워요가 기본 소개예요."
+          },
+          {
+            "id": "ko-c2",
+            "difficulty": "easy",
+            "image": "/images/shopping.png",
+            "scenario": "💬 스몰토크",
+            "question": "\"오늘 하루 어땠어요?\"라는 질문에 자연스러운 답은?",
+            "options": [
+              "네.",
+              "조금 바빴는데 괜찮았어요. 너는요?",
+              "돈 주세요.",
+              "안녕 하루."
+            ],
+            "answer": 1,
+            "explanation": "짧은 감상 + 너는요?면 대화가 이어져요."
+          },
+          {
+            "id": "ko-c3",
+            "difficulty": "easy",
+            "image": "/images/restaurant.png",
+            "scenario": "🍽️ 약속",
+            "question": "다음에 또 보고 싶을 때 자연스러운 말은?",
+            "options": [
+              "다시 보지 말자.",
+              "다음에 커피 한잔 할까요?",
+              "지금 나가세요.",
+              "계산 싫어요."
+            ],
+            "answer": 1,
+            "explanation": "다음에 ~ 할까요?가 부담 없는 제안이에요."
+          },
+          {
+            "id": "ko-c4",
+            "difficulty": "easy",
+            "image": "/images/cafe.png",
+            "scenario": "💬 막힘",
+            "question": "말이 막혔을 때 시간을 버는 자연스러운 말은?",
+            "options": [
+              "말하지 마세요.",
+              "잠시만요, 생각 좀 할게요.",
+              "저 바보예요.",
+              "더 빨리 말해요."
+            ],
+            "answer": 1,
+            "explanation": "생각 좀 할게요.면 울렁증이 와도 대화가 끊기지 않아요."
+          }
+        ]
+      }
+    }
   }
 }

@@ -786,14 +786,60 @@
     'quiz.lang.en': { KO: '영어', EN: 'English', ZH: '英语', JA: '英語', FR: 'Anglais', ES: 'Inglés' },
     'quiz.lang.fr': { KO: '프랑스어', EN: 'French', ZH: '法语', JA: 'フランス語', FR: 'Français', ES: 'Francés' },
     'quiz.lang.ja': { KO: '일본어', EN: 'Japanese', ZH: '日语', JA: '日本語', FR: 'Japonais', ES: 'Japonés' },
+    'quiz.lang.zh': { KO: '중국어', EN: 'Chinese', ZH: '中文', JA: '中国語', FR: 'Chinois', ES: 'Chino' },
     'quiz.lang.es': { KO: '스페인어', EN: 'Spanish', ZH: '西班牙语', JA: 'スペイン語', FR: 'Espagnol', ES: 'Español' },
+    'quiz.lang.ko': { KO: '한국어', EN: 'Korean', ZH: '韩语', JA: '韓国語', FR: 'Coréen', ES: 'Coreano' },
+    'quiz.levelHint': {
+      KO: '지금 체감 레벨을 골라 주세요. 그에 맞춰 4문항이 나와요!',
+      EN: 'Tap how it feels right now — we’ll give you 4 matching questions.',
+      ZH: '点选现在的体感级别，会出4道对应题目。',
+      JA: '今の体感レベルをタップしてください。合わせて4問出ます！',
+      FR: 'Choisissez votre niveau ressenti — 4 questions adaptées suivent.',
+      ES: 'Elige cómo te sientes ahora: te daremos 4 preguntas a medida.'
+    },
+    'quiz.level.intro.name': { KO: '입문', EN: 'Starter', ZH: '入门', JA: '入門', FR: 'Début', ES: 'Inicio' },
+    'quiz.level.intro.desc': {
+      KO: '기초 단어와 알파벳만 알아요',
+      EN: 'I only know basic words and the alphabet',
+      ZH: '只认识基础单词和字母',
+      JA: '基礎単語とアルファベットだけわかります',
+      FR: 'Je ne connais que des mots de base et l’alphabet',
+      ES: 'Solo conozco palabras básicas y el alfabeto'
+    },
+    'quiz.level.basic.name': { KO: '기초', EN: 'Everyday', ZH: '基础', JA: '基礎', FR: 'Base', ES: 'Base' },
+    'quiz.level.basic.desc': {
+      KO: '카페 주문/인사는 단어로 더듬더듬 가능해요',
+      EN: 'I can stumble through cafe orders and greetings with words',
+      ZH: '咖啡点单/打招呼能用单词磕磕绊绊地说',
+      JA: 'カフェ注文や挨拶は単語でたどたどしくできます',
+      FR: 'Je peux commander/saluer avec des mots, en hésitant',
+      ES: 'Puedo pedir en un café o saludar con palabras, a trompicones'
+    },
+    'quiz.level.challenge.name': { KO: '도전', EN: 'Brave', ZH: '挑战', JA: 'チャレンジ', FR: 'Défi', ES: 'Reto' },
+    'quiz.level.challenge.desc': {
+      KO: '문장은 만들지만 말이 막히고 울렁증이 있어요',
+      EN: 'I can make sentences, but I freeze and get nervous',
+      ZH: '能组句子，但会卡壳、心里发慌',
+      JA: '文は作れるけど、言葉に詰まって緊張します',
+      FR: 'Je forme des phrases, mais je bloque et j’ai le trac',
+      ES: 'Puedo hacer frases, pero me trabo y me pongo nervioso/a'
+    },
+    'quiz.feedback.correct': {
+      KO: '정답이에요! 🍰', EN: 'Yes! 🍰', ZH: '答对了！🍰', JA: '正解！🍰', FR: 'Bravo ! 🍰', ES: '¡Correcto! 🍰'
+    },
+    'quiz.feedback.wrong': {
+      KO: '아쉬워요! 정답은 여기예요 💫', EN: 'Almost! The answer is highlighted 💫', ZH: '差一点！答案在这里 💫', JA: 'おしい！正解はこちら 💫', FR: 'Presque ! La bonne réponse est ici 💫', ES: '¡Casi! La respuesta está aquí 💫'
+    },
+    'quiz.progressFormat': {
+      KO: '{current} / {total}', EN: '{current} / {total}', ZH: '{current} / {total}', JA: '{current} / {total}', FR: '{current} / {total}', ES: '{current} / {total}'
+    },
     'quiz.startHint': {
-      KO: '선택한 언어로 입문 상황 퀴즈 4~5문항이 나와요. 약 10초면 끝!',
-      EN: 'You’ll get 4–5 beginner situation questions in the language you pick. About 10 seconds!',
-      ZH: '将按所选语言出4–5道入门情景题。大约10秒！',
-      JA: '選んだ言語で入門シチュエーションクイズが4〜5問出ます。約10秒！',
-      FR: '4 à 5 questions de situations débutant dans la langue choisie. Environ 10 secondes !',
-      ES: '4–5 preguntas de situaciones de inicio en el idioma que elijas. ¡Unos 10 segundos!'
+      KO: '언어를 고른 뒤, 체감 레벨을 탭하면 맞춤 4문항이 시작돼요.',
+      EN: 'Pick a language, then tap your level to start 4 tailored questions.',
+      ZH: '选好语言后点选体感级别，就会开始4道定制题。',
+      JA: '言語を選んで体感レベルをタップすると、4問が始まります。',
+      FR: 'Choisissez la langue, puis le niveau — 4 questions sur mesure.',
+      ES: 'Elige idioma y nivel: empiezan 4 preguntas a tu medida.'
     },
     'quiz.startBtn': {
       KO: '테스트 시작하기', EN: 'Start the test', ZH: '开始测试', JA: 'テストを始める', FR: 'Commencer le test', ES: 'Empezar el test'
@@ -807,12 +853,12 @@
       ES: 'Acertaste {score} / {total}'
     },
     'quiz.resultLead': {
-      KO: '입문 레벨, 바로 대화 시작해도 돼요!',
-      EN: 'Beginner level — you’re ready to start chatting!',
-      ZH: '入门水平，可以直接开始对话！',
-      JA: '入門レベル、すぐに会話を始めて大丈夫！',
-      FR: 'Niveau débutant — vous pouvez commencer à parler !',
-      ES: 'Nivel inicial — ¡ya puedes empezar a hablar!'
+      KO: '예상 회화 페이스가 나왔어요. 이 속도로 첫 세션을 열어 볼까요?',
+      EN: 'Here’s your expected speaking pace. Ready to open your first session?',
+      ZH: '已得出预估会话节奏。要用这个速度开启第一次会话吗？',
+      JA: '予想会話ペースが出ました。この速さで初セッション、始めますか？',
+      FR: 'Voici votre rythme de conversation estimé. On ouvre la première session ?',
+      ES: 'Este es tu ritmo de conversación estimado. ¿Abrimos la primera sesión?'
     },
     'quiz.resultCourseLabel': {
       KO: '추천 코스', EN: 'Recommended course', ZH: '推荐课程', JA: 'おすすめコース', FR: 'Cours recommandé', ES: 'Curso recomendado'
@@ -820,11 +866,54 @@
     'quiz.resultHostLabel': {
       KO: '추천 파트너', EN: 'Recommended partner', ZH: '推荐伙伴', JA: 'おすすめパートナー', FR: 'Partenaire recommandé', ES: 'Compañero recomendado'
     },
+    'quiz.paceLabel': {
+      KO: 'DayO 레벨', EN: 'DayO level', ZH: 'DayO等级', JA: 'DayOレベル', FR: 'Niveau DayO', ES: 'Nivel DayO'
+    },
+    'quiz.pace.intro.name': { KO: '🌱 새싹 페이스', EN: '🌱 Seed pace', ZH: '🌱 萌芽节奏', JA: '🌱 新芽ペース', FR: '🌱 Rythme pousse', ES: '🌱 Ritmo brote' },
+    'quiz.pace.intro.desc': {
+      KO: '천천히, 단어부터. 파트너가 속도를 맞춰 줄게요.',
+      EN: 'Slow and word-by-word. Your partner will match your pace.',
+      ZH: '慢慢来，从单词开始。伙伴会跟上你的速度。',
+      JA: 'ゆっくり、単語から。パートナーがペースを合わせてくれます。',
+      FR: 'Doucement, mot à mot. Le partenaire s’adapte à vous.',
+      ES: 'Despacio, palabra a palabra. Tu compañero/a irá a tu ritmo.'
+    },
+    'quiz.pace.basic.name': { KO: '☕ 카페 페이스', EN: '☕ Cafe pace', ZH: '☕ 咖啡节奏', JA: '☕ カフェペース', FR: '☕ Rythme café', ES: '☕ Ritmo café' },
+    'quiz.pace.basic.desc': {
+      KO: '짧은 문장으로 주문·인사. 막혀도 한 박자면 다시 열려요.',
+      EN: 'Short sentences for orders and hellos. A pause is enough to restart.',
+      ZH: '用短句点单、打招呼。卡住也只要一拍就能接上。',
+      JA: '短い文で注文・挨拶。詰まっても一息で再開できます。',
+      FR: 'Phrases courtes pour commander et saluer. Une pause suffit pour repartir.',
+      ES: 'Frases cortas para pedir y saludar. Con una pausa, sigues.'
+    },
+    'quiz.pace.challenge.name': { KO: '💬 도전 페이스', EN: '💬 Brave pace', ZH: '💬 挑战节奏', JA: '💬 チャレンジペース', FR: '💬 Rythme défi', ES: '💬 Ritmo reto' },
+    'quiz.pace.challenge.desc': {
+      KO: '문장은 나와요. 울렁증만 풀면 대화가 길게 이어져요.',
+      EN: 'The sentences are there. Once the nerves ease, the chat flows.',
+      ZH: '句子已经会了。只要缓解紧张，对话就能拉长。',
+      JA: '文は出せます。緊張がほどければ会話が続きます。',
+      FR: 'Les phrases sont là. Une fois le trac parti, la conversation file.',
+      ES: 'Las frases ya salen. Si se va el nervio, la charla se alarga.'
+    },
     'quiz.resultCta': {
-      KO: '이 파트너와 대화 시작하기', EN: 'Start chatting with this partner', ZH: '和这位伙伴开始对话', JA: 'このパートナーと会話を始める', FR: 'Parler avec ce partenaire', ES: 'Empezar a hablar con este compañero'
+      KO: '🎉 첫 세션 9,900원 할인권으로 시작하기',
+      EN: '🎉 Start with the ₩9,900 first-session coupon',
+      ZH: '🎉 用9,900韩元首次体验券开始',
+      JA: '🎉 初回9,900ウォンクーポンで始める',
+      FR: '🎉 Commencer avec le coupon 9 900 ₩',
+      ES: '🎉 Empezar con el cupón de 9.900 ₩'
+    },
+    'quiz.resultCouponHint': {
+      KO: '추천 파트너와 첫 세션에 체험 할인권이 자동 적용돼요.',
+      EN: 'The trial coupon applies automatically to your first session with this partner.',
+      ZH: '与推荐伙伴的首次会话将自动套用体验优惠券。',
+      JA: 'おすすめパートナーとの初回セッションに体験クーポンが自動適用されます。',
+      FR: 'Le coupon d’essai s’applique automatiquement à la première session.',
+      ES: 'El cupón de prueba se aplica solo a la primera sesión con este compañero/a.'
     },
     'quiz.resultRetry': {
-      KO: '다른 언어로 다시 테스트', EN: 'Try another language', ZH: '用其他语言再测一次', JA: '別の言語でもう一度', FR: 'Tester une autre langue', ES: 'Probar otro idioma'
+      KO: '레벨 다시 고르기', EN: 'Pick another level', ZH: '重新选择级别', JA: 'レベルを選び直す', FR: 'Choisir un autre niveau', ES: 'Elegir otro nivel'
     },
     'quiz.closeAria': { KO: '닫기', EN: 'Close', ZH: '关闭', JA: '閉じる', FR: 'Fermer', ES: 'Cerrar' },
     'quiz.q1.tag': { KO: '☕ 카페', EN: '☕ Café', ZH: '☕ 咖啡馆', JA: '☕ カフェ', FR: '☕ Café', ES: '☕ Café' },
