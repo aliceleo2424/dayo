@@ -11,7 +11,7 @@
     },
     "intro": {
       "course": {
-        "name": "새싹 페이스 코스",
+        "name": "새싹 페이스",
         "desc": "카페·식당·길찾기·호텔, 단어부터 천천히 여는 입문 세션"
       },
       "questions": [
@@ -21,7 +21,7 @@
           "themeIndex": 1,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=600&q=80",
-          "question": "카페 카운터에서 커피를 주문할 때, 붙이면 공손해지는 한 단어는?",
+          "question": "브런치 카페 카운터에서 주문할 때, 붙이면 바로 부드러워지는 한 단어는?",
           "options": [
             "Now",
             "Please",
@@ -29,7 +29,7 @@
             "Hotel"
           ],
           "answer": 1,
-          "explanation": "카페 주문에는 Please를 붙이면 바로 부드러워져요."
+          "explanation": "카페 주문엔 Please 한 마디면 바로 공손해져요."
         },
         {
           "id": "en-i-restaurant",
@@ -37,7 +37,7 @@
           "themeIndex": 2,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80",
-          "question": "식당에서 자리를 가리킬 때 쓰는 단어는?",
+          "question": "식당에서 자리를 잡을 때 직원이 제일 먼저 듣는 단어는?",
           "options": [
             "Menu",
             "Street",
@@ -45,7 +45,7 @@
             "Key"
           ],
           "answer": 2,
-          "explanation": "식당 사진은 테이블 장면이에요. Table이 자리예요."
+          "explanation": "자리 장면의 핵심 단어는 Table이에요."
         },
         {
           "id": "en-i-street",
@@ -53,7 +53,7 @@
           "themeIndex": 3,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=600&q=80",
-          "question": "거리에서 길을 물을 때 제일 먼저 하는 말은?",
+          "question": "길에서 모르는 사람에게 길을 물을 때 제일 먼저 꺼내는 말은?",
           "options": [
             "Check-in",
             "Excuse me",
@@ -61,7 +61,7 @@
             "Bill"
           ],
           "answer": 1,
-          "explanation": "처음 말을 걸 때는 Excuse me가 정중해요."
+          "explanation": "처음 말을 걸 때는 Excuse me가 제일 자연스러워요."
         },
         {
           "id": "en-i-hotel",
@@ -69,7 +69,7 @@
           "themeIndex": 4,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80",
-          "question": "호텔 숙박 예약을 뜻하는 단어는?",
+          "question": "호텔 프론트에서 숙박을 미리 잡아 둔 걸 가리키는 말은?",
           "options": [
             "Reservation",
             "Croissant",
@@ -77,14 +77,14 @@
             "Menu"
           ],
           "answer": 0,
-          "explanation": "호텔 리셉션에서 쓰는 핵심 단어는 Reservation이에요."
+          "explanation": "리셉션에서 쓰는 핵심 단어는 Reservation이에요."
         }
       ]
     },
     "basic": {
       "course": {
-        "name": "카페 페이스 코스",
-        "desc": "같은 네 상황에서 짧은 문장으로 받아치는 기초 세션"
+        "name": "카페 페이스",
+        "desc": "같은 네 장면에서 짧은 한 줄로 받아치는 기초 세션"
       },
       "questions": [
         {
@@ -93,15 +93,15 @@
           "themeIndex": 1,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=600&q=80",
-          "question": "카페 카운터에서 직원이 \"What can I get for you?\"라고 물었을 때 자연스러운 주문 표현은?",
+          "question": "브런치 카페에서 직원이 \"What can I get for you?\"라고 물었어요. 가장 자연스러운 주문은?",
           "options": [
             "Coffee me.",
-            "Can I have a latte, please?",
+            "Can I get a latte, please?",
             "Give me now.",
             "I am coffee."
           ],
           "answer": 1,
-          "explanation": "주문은 Can I have ~, please?가 가장 자연스러워요."
+          "explanation": "카페에선 Can I get ~, please?가 지금 제일 많이 들려요."
         },
         {
           "id": "en-b-restaurant",
@@ -109,15 +109,15 @@
           "themeIndex": 2,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80",
-          "question": "레스토랑에서 \"두 명 자리 있나요?\"를 영어로 표현한 것은?",
+          "question": "식당 입구에서 \"두 명 자리 있나요?\"를 영어로 자연스럽게 말하면?",
           "options": [
             "I am two.",
-            "A table for two, please.",
+            "Hi — a table for two, please.",
             "Two me table.",
             "Check-in two."
           ],
           "answer": 1,
-          "explanation": "자리는 A table for two, please.로 물어보면 돼요."
+          "explanation": "자리는 A table for two, please.면 바로 통해요."
         },
         {
           "id": "en-b-street",
@@ -125,15 +125,15 @@
           "themeIndex": 3,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=600&q=80",
-          "question": "길거리에서 \"지하철역이 어디인가요?\"라고 위치를 물어보는 가장 자연스러운 표현은?",
+          "question": "길에서 \"지하철역이 어디예요?\"를 물을 때 제일 자연스러운 한 줄은?",
           "options": [
             "Subway me where.",
             "I am station.",
-            "Excuse me, where is the subway station?",
+            "Excuse me, where's the subway station?",
             "Hotel subway please."
           ],
           "answer": 2,
-          "explanation": "위치는 Excuse me, where is ~?가 가장 자연스러워요."
+          "explanation": "where's ~?가 교과서 where is보다 입에 붙어요."
         },
         {
           "id": "en-b-hotel",
@@ -141,9 +141,9 @@
           "themeIndex": 4,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80",
-          "question": "호텔 체크인 시 직원이 \"Under what name is the reservation?\"이라고 물었을 때 의미는?",
+          "question": "호텔 직원이 \"Under what name is the reservation?\"이라고 했어요. 뜻은?",
           "options": [
-            "예약자 이름이 어떻게 되세요?",
+            "예약하신 성함이 어떻게 되세요?",
             "몇 시에 체크아웃하세요?",
             "커피 드릴까요?",
             "지하철이 어디예요?"
@@ -155,8 +155,8 @@
     },
     "challenge": {
       "course": {
-        "name": "도전 페이스 코스",
-        "desc": "같은 네 상황에서 막히지 않고 한 줄 더 이어가는 도전 세션"
+        "name": "도전 페이스",
+        "desc": "같은 네 장면에서 막히지 않고 한 줄 더 이어가는 도전 세션"
       },
       "questions": [
         {
@@ -165,15 +165,15 @@
           "themeIndex": 1,
           "difficulty": "hard",
           "imageUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=600&q=80",
-          "question": "카페에서 아직 메뉴를 고르는 중일 때 자연스러운 한 줄은?",
+          "question": "메뉴를 보고 있는데 바리스타가 기다려요. 자연스러운 한 줄은?",
           "options": [
             "Give me all.",
-            "Could I have a minute, please?",
+            "I'll need a minute, thanks.",
             "I am menu.",
             "Where is the hotel?"
           ],
           "answer": 1,
-          "explanation": "Could I have a minute, please?면 카페에서 여유를 벌 수 있어요."
+          "explanation": "I'll need a minute, thanks.면 고를 시간을 부드럽게 벌 수 있어요."
         },
         {
           "id": "en-c-restaurant",
@@ -181,7 +181,7 @@
           "themeIndex": 2,
           "difficulty": "hard",
           "imageUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80",
-          "question": "식당 테이블에 앉은 뒤 메뉴판을 부탁하는 자연스러운 표현은?",
+          "question": "자리에 앉자마자 메뉴판을 부탁할 때 자연스러운 말은?",
           "options": [
             "Food now.",
             "Could we see the menu, please?",
@@ -197,7 +197,7 @@
           "themeIndex": 3,
           "difficulty": "hard",
           "imageUrl": "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=600&q=80",
-          "question": "거리에서 역까지 가는 길을 정중하게 물을 때 알맞은 것은?",
+          "question": "역까지 가는 길을 정중하게 물을 때 알맞은 것은?",
           "options": [
             "Go station.",
             "Sorry to bother you — how do I get to the station?",
@@ -205,7 +205,7 @@
             "Check-in please."
           ],
           "answer": 1,
-          "explanation": "How do I get to ~?가 길찾기 핵심 문장이에요."
+          "explanation": "How do I get to ~?가 길찾기 핵심 한 줄이에요."
         },
         {
           "id": "en-c-hotel",
@@ -213,15 +213,15 @@
           "themeIndex": 4,
           "difficulty": "hard",
           "imageUrl": "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80",
-          "question": "호텔 리셉션에서 체크인할 때 내가 먼저 하면 자연스러운 말은?",
+          "question": "호텔 프론트에 도착해서 내가 먼저 꺼내면 자연스러운 말은?",
           "options": [
             "Give room.",
-            "Hi, I have a reservation under Kim.",
+            "Hi, I've got a reservation under Kim.",
             "Coffee please now.",
             "Where is the bakery?"
           ],
           "answer": 1,
-          "explanation": "I have a reservation under (이름).이면 체크인이 열려요."
+          "explanation": "I've got a reservation under (이름).이면 체크인이 바로 열려요."
         }
       ]
     }
@@ -238,7 +238,7 @@
     },
     "intro": {
       "course": {
-        "name": "새싹 페이스 코스",
+        "name": "새싹 페이스",
         "desc": "카페·식당·길찾기·호텔, 단어부터 천천히 여는 입문 세션"
       },
       "questions": [
@@ -248,7 +248,7 @@
           "themeIndex": 1,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80",
-          "question": "파리 카페에서 직원에게 먼저 하는 인사는?",
+          "question": "파리 카페에 들어서면 직원에게 먼저 하는 인사는?",
           "options": [
             "Au revoir",
             "Bonjour",
@@ -256,7 +256,7 @@
             "Métro"
           ],
           "answer": 1,
-          "explanation": "카페에 들어서면 먼저 Bonjour예요."
+          "explanation": "카페 문을 열면 먼저 Bonjour예요. 안 하면 어색해져요."
         },
         {
           "id": "fr-i-restaurant",
@@ -264,7 +264,7 @@
           "themeIndex": 2,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=600&q=80",
-          "question": "식당에서 부탁할 때 붙이는 공손한 말은?",
+          "question": "비스트로에서 부탁할 때 문장 끝에 붙이는 공손한 말은?",
           "options": [
             "Voilà",
             "S'il vous plaît",
@@ -272,7 +272,7 @@
             "Clé"
           ],
           "answer": 1,
-          "explanation": "식당에서도 S'il vous plaît를 붙이면 공손해져요."
+          "explanation": "식당에서도 S'il vous plaît를 붙이면 바로 부드러워져요."
         },
         {
           "id": "fr-i-street",
@@ -280,7 +280,7 @@
           "themeIndex": 3,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80",
-          "question": "에펠탑 근처 거리에서 길을 물을 때 첫마디는?",
+          "question": "에펠탑 근처 거리에서 행인에게 길을 물을 때 첫마디는?",
           "options": [
             "Check-in",
             "Excusez-moi",
@@ -288,7 +288,7 @@
             "L'addition"
           ],
           "answer": 1,
-          "explanation": "행인에게 말을 걸 때는 Excusez-moi가 첫마디예요."
+          "explanation": "처음 말을 걸 때는 Excusez-moi가 첫마디예요."
         },
         {
           "id": "fr-i-hotel",
@@ -296,7 +296,7 @@
           "themeIndex": 4,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
-          "question": "호텔 예약을 뜻하는 프랑스어는?",
+          "question": "호텔 프론트에서 숙박을 미리 잡아 둔 걸 뜻하는 말은?",
           "options": [
             "Croissant",
             "Réservation",
@@ -310,8 +310,8 @@
     },
     "basic": {
       "course": {
-        "name": "카페 페이스 코스",
-        "desc": "같은 네 상황에서 짧은 문장으로 받아치는 기초 세션"
+        "name": "카페 페이스",
+        "desc": "같은 네 장면에서 짧은 한 줄로 받아치는 기초 세션"
       },
       "questions": [
         {
@@ -320,15 +320,15 @@
           "themeIndex": 1,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80",
-          "question": "사진 속 파리 카페 직원이 \"Bonjour ! Qu'est-ce que je vous sers ?\"라고 물었을 때 자연스러운 주문은?",
+          "question": "빵 냄새가 나는 카페에서 직원이 « Qu'est-ce que je vous sers ? »라고 물었어요. 자연스러운 주문은?",
           "options": [
             "Merci, au revoir !",
-            "Un café, s'il vous plaît.",
+            "Je vais prendre un café, s'il vous plaît.",
             "Je suis café.",
             "Où est l'hôtel ?"
           ],
           "answer": 1,
-          "explanation": "카페 주문은 Un café, s'il vous plaît.면 충분해요."
+          "explanation": "카페에선 Je vais prendre ~, s'il vous plaît.가 입에 제일 붙어요."
         },
         {
           "id": "fr-b-restaurant",
@@ -336,7 +336,7 @@
           "themeIndex": 2,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=600&q=80",
-          "question": "파리 비스트로에서 \"메뉴판 좀 보여주시겠어요?\"를 프랑스어로 말할 때 알맞은 것은?",
+          "question": "파리 비스트로에서 메뉴판을 부탁할 때 알맞은 한 줄은?",
           "options": [
             "Je suis menu.",
             "La carte, s'il vous plaît.",
@@ -344,7 +344,7 @@
             "Un café taxi."
           ],
           "answer": 1,
-          "explanation": "메뉴판은 La carte, s'il vous plaît.예요."
+          "explanation": "프랑스 식당 메뉴판은 menu가 아니라 La carte예요."
         },
         {
           "id": "fr-b-street",
@@ -352,15 +352,15 @@
           "themeIndex": 3,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80",
-          "question": "에펠탑 근처 거리에서 지나가는 행인에게 정중하게 길을 물어볼 때 첫마디는?",
+          "question": "에펠탑 근처에서 지하철역 가는 길을 물을 때 자연스러운 첫 줄은?",
           "options": [
             "Bonjour taxi.",
-            "Excusez-moi, s'il vous plaît.",
+            "Excusez-moi, c'est par où, la station de métro ?",
             "Merci hôtel.",
             "Je suis rue."
           ],
           "answer": 1,
-          "explanation": "길찾기의 첫마디는 Excusez-moi, s'il vous plaît.예요."
+          "explanation": "C'est par où, ~ ?가 길에서 제일 자주 들려요."
         },
         {
           "id": "fr-b-hotel",
@@ -368,22 +368,22 @@
           "themeIndex": 4,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80",
-          "question": "호텔 카운터에서 \"체크인 부탁드립니다\"라고 말할 때 알맞은 표현은?",
+          "question": "호텔 카운터에서 체크인하러 왔다고 말할 때 자연스러운 표현은?",
           "options": [
-            "Je voudrais m'enregistrer, s'il vous plaît.",
+            "Bonjour, je viens m'enregistrer.",
             "Un croissant, s'il vous plaît.",
             "Où est le métro ?",
             "L'addition, s'il vous plaît."
           ],
           "answer": 0,
-          "explanation": "체크인은 Je voudrais m'enregistrer, s'il vous plaît.로 말하면 돼요."
+          "explanation": "Je viens m'enregistrer.가 교과서 je voudrais보다 프론트에서 자연스러워요."
         }
       ]
     },
     "challenge": {
       "course": {
-        "name": "도전 페이스 코스",
-        "desc": "같은 네 상황에서 막히지 않고 한 줄 더 이어가는 도전 세션"
+        "name": "도전 페이스",
+        "desc": "같은 네 장면에서 막히지 않고 한 줄 더 이어가는 도전 세션"
       },
       "questions": [
         {
@@ -395,12 +395,12 @@
           "question": "카페에서 아직 고르는 중일 때 자연스러운 한 줄은?",
           "options": [
             "Donnez-moi tout.",
-            "Un instant, s'il vous plaît.",
+            "Je n'ai pas encore choisi.",
             "Je suis menu.",
             "Où est la rue ?"
           ],
           "answer": 1,
-          "explanation": "Un instant, s'il vous plaît.면 카페에서 시간을 벌 수 있어요."
+          "explanation": "Je n'ai pas encore choisi.면 고를 시간을 부드럽게 벌 수 있어요."
         },
         {
           "id": "fr-c-restaurant",
@@ -416,7 +416,7 @@
             "Check-in s'il vous plaît."
           ],
           "answer": 1,
-          "explanation": "On n'a pas encore choisi.가 식당에서 자연스러워요."
+          "explanation": "On n'a pas encore choisi.가 식당에서 자주 쓰는 한 줄이에요."
         },
         {
           "id": "fr-c-street",
@@ -424,7 +424,7 @@
           "themeIndex": 3,
           "difficulty": "hard",
           "imageUrl": "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80",
-          "question": "거리에서 지하철역 가는 길을 물을 때 알맞은 문장은?",
+          "question": "거리에서 지하철역까지 가는 길을 물을 때 알맞은 문장은?",
           "options": [
             "Métro moi.",
             "Excusez-moi, pour aller à la station de métro ?",
@@ -443,7 +443,7 @@
           "question": "호텔 리셉션에서 예약을 확인할 때 자연스러운 말은?",
           "options": [
             "Donnez chambre.",
-            "J'ai une réservation au nom de Kim.",
+            "Bonjour, j'ai une réservation au nom de Kim.",
             "Un café maintenant.",
             "Où est la boulangerie ?"
           ],
@@ -465,7 +465,7 @@
     },
     "intro": {
       "course": {
-        "name": "새싹 페이스 코스",
+        "name": "새싹 페이스",
         "desc": "카페·식당·길찾기·호텔, 단어부터 천천히 여는 입문 세션"
       },
       "questions": [
@@ -475,7 +475,7 @@
           "themeIndex": 1,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1582293041079-7814c2f12063?auto=format&fit=crop&w=600&q=80",
-          "question": "카페에서 주문할 때 문장 끝에 붙이는 말은?",
+          "question": "킷사텐에서 말차 디저트를 주문할 때, 문장 끝에 붙이는 말은?",
           "options": [
             "さようなら",
             "ください",
@@ -491,7 +491,7 @@
           "themeIndex": 2,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80",
-          "question": "식당에서 자리를 뜻하는 단어는?",
+          "question": "라멘 가게에서 앉는 곳을 뜻하는 단어는?",
           "options": [
             "コーヒー",
             "席",
@@ -507,7 +507,7 @@
           "themeIndex": 3,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80",
-          "question": "거리에서 길을 물을 때 먼저 하는 말은?",
+          "question": "교토 거리에서 길을 물을 때 먼저 하는 말은?",
           "options": [
             "いただきます",
             "すみません",
@@ -523,7 +523,7 @@
           "themeIndex": 4,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=600&q=80",
-          "question": "호텔 숙박 예약을 뜻하는 말은?",
+          "question": "료칸에서 숙박을 미리 잡아 둔 것을 뜻하는 말은?",
           "options": [
             "パン",
             "予約",
@@ -531,14 +531,14 @@
             "交差点"
           ],
           "answer": 1,
-          "explanation": "호텔 카운터의 핵심 단어는 予約예요."
+          "explanation": "프론트의 핵심 단어는 予約예요."
         }
       ]
     },
     "basic": {
       "course": {
-        "name": "카페 페이스 코스",
-        "desc": "같은 네 상황에서 짧은 문장으로 받아치는 기초 세션"
+        "name": "카페 페이스",
+        "desc": "같은 네 장면에서 짧은 한 줄로 받아치는 기초 세션"
       },
       "questions": [
         {
@@ -547,15 +547,15 @@
           "themeIndex": 1,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1582293041079-7814c2f12063?auto=format&fit=crop&w=600&q=80",
-          "question": "카페 카운터에서 \"ご注文は？\"라고 물었을 때 자연스러운 주문은?",
+          "question": "말차와 모찌가 보이는 카운터에서 「ご注文は？」라고 물었어요. 자연스러운 주문은?",
           "options": [
             "さようなら。",
-            "コーヒーをください。",
+            "抹茶ラテをください。",
             "私はコーヒーです。",
             "駅はどこですか。"
           ],
           "answer": 1,
-          "explanation": "카페에서는 ~をください.가 가장 짧고 확실해요."
+          "explanation": "사진 속 장면엔 抹茶ラテをください。가 딱 맞아요."
         },
         {
           "id": "ja-b-restaurant",
@@ -563,15 +563,15 @@
           "themeIndex": 2,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80",
-          "question": "식당에서 \"두 명 자리 있나요?\"에 가까운 일본어는?",
+          "question": "라멘 가게에서 \"두 명인데, 자리 있나요?\"에 가까운 일본어는?",
           "options": [
             "私は二人です。",
-            "二人です。席はありますか？",
+            "2名なんですけど、空いてますか？",
             "メニューはコーヒー。",
             "チェックインお願いします。"
           ],
           "answer": 1,
-          "explanation": "자리는 二人です。席はありますか？로 물으면 돼요."
+          "explanation": "자리는 2名なんですけど、空いてますか？가 현장에서 잘 통해요."
         },
         {
           "id": "ja-b-street",
@@ -579,15 +579,15 @@
           "themeIndex": 3,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80",
-          "question": "거리에서 \"역이 어디인가요?\"를 물을 때 가장 자연스러운 표현은?",
+          "question": "교토 거리에서 \"역이 어느 쪽이에요?\"를 물을 때 자연스러운 표현은?",
           "options": [
             "駅は私です。",
-            "すみません、駅はどこですか？",
+            "すみません、駅はどっちですか？",
             "コーヒーをください。",
             "予約お願いします。"
           ],
           "answer": 1,
-          "explanation": "길찾기는 すみません、~はどこですか？예요."
+          "explanation": "どっちですか？가 どこですか？보다 길에서 더 자주 들려요."
         },
         {
           "id": "ja-b-hotel",
@@ -595,7 +595,7 @@
           "themeIndex": 4,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=600&q=80",
-          "question": "호텔 카운터에서 \"체크인 부탁드립니다\"에 알맞은 표현은?",
+          "question": "료칸 프론트에서 체크인하러 왔다고 말할 때 알맞은 표현은?",
           "options": [
             "コーヒーをください。",
             "チェックインをお願いします。",
@@ -603,14 +603,14 @@
             "メニューをください。"
           ],
           "answer": 1,
-          "explanation": "체크인은 チェックインをお願いします。예요."
+          "explanation": "チェックインをお願いします。면 프론트가 바로 열려요."
         }
       ]
     },
     "challenge": {
       "course": {
-        "name": "도전 페이스 코스",
-        "desc": "같은 네 상황에서 막히지 않고 한 줄 더 이어가는 도전 세션"
+        "name": "도전 페이스",
+        "desc": "같은 네 장면에서 막히지 않고 한 줄 더 이어가는 도전 세션"
       },
       "questions": [
         {
@@ -619,15 +619,15 @@
           "themeIndex": 1,
           "difficulty": "hard",
           "imageUrl": "https://images.unsplash.com/photo-1582293041079-7814c2f12063?auto=format&fit=crop&w=600&q=80",
-          "question": "카페에서 아직 고르는 중일 때 자연스러운 한 줄은?",
+          "question": "킷사텐에서 아직 고르는 중일 때 자연스러운 한 줄은?",
           "options": [
             "全部ください。",
-            "ちょっと待ってください。",
+            "まだ決めてないんですけど…",
             "私はメニューです。",
             "ホテルはどこですか。"
           ],
           "answer": 1,
-          "explanation": "ちょっと待ってください.면 카페에서 한 박자 쉴 수 있어요."
+          "explanation": "まだ決めてないんですけど…면 고를 시간을 부드럽게 벌 수 있어요."
         },
         {
           "id": "ja-c-restaurant",
@@ -635,15 +635,15 @@
           "themeIndex": 2,
           "difficulty": "hard",
           "imageUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80",
-          "question": "식당 테이블에서 메뉴판을 부탁하는 자연스러운 말은?",
+          "question": "라멘 가게 테이블에서 메뉴판을 부탁하는 자연스러운 말은?",
           "options": [
             "食べ物今。",
-            "メニューをください。",
+            "メニューをお願いします。",
             "席は私です。",
             "地下鉄ください。"
           ],
           "answer": 1,
-          "explanation": "메뉴판은 メニューをください。예요."
+          "explanation": "メニューをお願いします。가 ください보다 한결 다정해요."
         },
         {
           "id": "ja-c-street",
@@ -654,12 +654,12 @@
           "question": "거리에서 역까지 가는 길을 물을 때 알맞은 것은?",
           "options": [
             "駅行く。",
-            "すみません、駅までの行き方を教えてください。",
+            "すみません、駅までの行き方教えてもらえますか？",
             "パンをください。",
             "部屋をお願いします。"
           ],
           "answer": 1,
-          "explanation": "行き方を教えてください.가 길찾기 도전 문장이에요."
+          "explanation": "行き方教えてもらえますか？가 길찾기 도전 문장이에요."
         },
         {
           "id": "ja-c-hotel",
@@ -667,15 +667,15 @@
           "themeIndex": 4,
           "difficulty": "hard",
           "imageUrl": "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=600&q=80",
-          "question": "호텔 리셉션에서 예약을 확인할 때 자연스러운 말은?",
+          "question": "료칸 프론트에서 예약을 확인할 때 자연스러운 말은?",
           "options": [
             "部屋ください。",
-            "キムで予約しています。",
+            "キムで予約してます。",
             "コーヒー今ください。",
             "パン屋はどこですか。"
           ],
           "answer": 1,
-          "explanation": "~で予約しています。이면 체크인이 열려요."
+          "explanation": "~で予約してます。이면 체크인이 열려요."
         }
       ]
     }
@@ -692,7 +692,7 @@
     },
     "intro": {
       "course": {
-        "name": "새싹 페이스 코스",
+        "name": "새싹 페이스",
         "desc": "카페·식당·길찾기·호텔, 단어부터 천천히 여는 입문 세션"
       },
       "questions": [
@@ -702,7 +702,7 @@
           "themeIndex": 1,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=600&q=80",
-          "question": "카페에서 부탁할 때 자주 쓰는 한 글자는?",
+          "question": "전통 찻집에서 부탁할 때 자주 쓰는 한 글자는?",
           "options": [
             "走",
             "请",
@@ -710,7 +710,7 @@
             "站"
           ],
           "answer": 1,
-          "explanation": "카페 주문에는 请을 붙이면 공손해져요."
+          "explanation": "찻집 주문에는 请을 붙이면 공손해져요."
         },
         {
           "id": "zh-i-restaurant",
@@ -718,7 +718,7 @@
           "themeIndex": 2,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=600&q=80",
-          "question": "식당에서 자리를 뜻하는 말은?",
+          "question": "식당에서 앉는 자리를 뜻하는 말은?",
           "options": [
             "咖啡",
             "位子",
@@ -734,7 +734,7 @@
           "themeIndex": 3,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=600&q=80",
-          "question": "거리에서 길을 물을 때 먼저 하는 말은?",
+          "question": "밤거리에서 길을 물을 때 먼저 하는 말은?",
           "options": [
             "买单",
             "请问",
@@ -750,7 +750,7 @@
           "themeIndex": 4,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80",
-          "question": "호텔 예약을 뜻하는 말은?",
+          "question": "호텔에서 숙박을 미리 잡아 둔 것을 뜻하는 말은?",
           "options": [
             "点心",
             "预订",
@@ -758,14 +758,14 @@
             "路口"
           ],
           "answer": 1,
-          "explanation": "호텔 카운터의 핵심 단어는 预订예요."
+          "explanation": "프론트의 핵심 단어는 预订예요."
         }
       ]
     },
     "basic": {
       "course": {
-        "name": "카페 페이스 코스",
-        "desc": "같은 네 상황에서 짧은 문장으로 받아치는 기초 세션"
+        "name": "카페 페이스",
+        "desc": "같은 네 장면에서 짧은 한 줄로 받아치는 기초 세션"
       },
       "questions": [
         {
@@ -774,15 +774,15 @@
           "themeIndex": 1,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=600&q=80",
-          "question": "카페에서 \"要喝点什么？\"라고 물었을 때 자연스러운 주문은?",
+          "question": "찻집에서 \"要喝点什么？\"라고 물었어요. 사진 장면에 맞는 자연스러운 주문은?",
           "options": [
             "再见咖啡。",
-            "我要一杯咖啡。",
+            "来一杯茶，谢谢。",
             "我是咖啡。",
             "地铁在哪里？"
           ],
           "answer": 1,
-          "explanation": "카페 주문은 我要一杯~.예요."
+          "explanation": "다도 장면엔 来一杯茶，谢谢。가 커피보다 잘 맞아요."
         },
         {
           "id": "zh-b-restaurant",
@@ -790,7 +790,7 @@
           "themeIndex": 2,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=600&q=80",
-          "question": "식당에서 \"두 명 자리 있나요?\"에 가까운 중국어는?",
+          "question": "딤섬 식당에서 \"두 명 자리 있나요?\"에 가까운 중국어는?",
           "options": [
             "我是两个。",
             "有两位的位子吗？",
@@ -806,7 +806,7 @@
           "themeIndex": 3,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=600&q=80",
-          "question": "거리에서 \"지하철역이 어디인가요?\"를 물을 때 가장 자연스러운 표현은?",
+          "question": "거리에서 \"지하철역이 어디예요?\"를 물을 때 가장 자연스러운 표현은?",
           "options": [
             "地铁是我。",
             "请问，地铁站在哪里？",
@@ -822,7 +822,7 @@
           "themeIndex": 4,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80",
-          "question": "호텔 카운터에서 \"체크인 부탁드립니다\"에 알맞은 표현은?",
+          "question": "호텔 카운터에서 체크인하러 왔다고 말할 때 알맞은 표현은?",
           "options": [
             "我要一杯咖啡。",
             "你好，我要办理入住。",
@@ -830,14 +830,14 @@
             "请给我菜单。"
           ],
           "answer": 1,
-          "explanation": "체크인은 我要办理入住。예요."
+          "explanation": "你好，我要办理入住。면 프론트가 바로 열려요."
         }
       ]
     },
     "challenge": {
       "course": {
-        "name": "도전 페이스 코스",
-        "desc": "같은 네 상황에서 막히지 않고 한 줄 더 이어가는 도전 세션"
+        "name": "도전 페이스",
+        "desc": "같은 네 장면에서 막히지 않고 한 줄 더 이어가는 도전 세션"
       },
       "questions": [
         {
@@ -846,7 +846,7 @@
           "themeIndex": 1,
           "difficulty": "hard",
           "imageUrl": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=600&q=80",
-          "question": "카페에서 아직 고르는 중일 때 자연스러운 한 줄은?",
+          "question": "찻집에서 아직 고르는 중일 때 자연스러운 한 줄은?",
           "options": [
             "全部给我。",
             "请稍等，我看一下。",
@@ -854,7 +854,7 @@
             "酒店在哪里？"
           ],
           "answer": 1,
-          "explanation": "请稍等，我看一下。면 카페에서 시간을 벌 수 있어요."
+          "explanation": "请稍等，我看一下。면 고를 시간을 벌 수 있어요."
         },
         {
           "id": "zh-c-restaurant",
@@ -897,12 +897,12 @@
           "question": "호텔 리셉션에서 예약을 확인할 때 자연스러운 말은?",
           "options": [
             "给我房间。",
-            "预订在金的名字下。",
+            "你好，我姓金，有预订。",
             "现在要咖啡。",
             "面包店在哪里？"
           ],
           "answer": 1,
-          "explanation": "预订在~的名字下。이면 체크인이 열려요."
+          "explanation": "我姓金，有预订。이 영어식 '~의 이름 아래'보다 현지에서 자연스러워요."
         }
       ]
     }
@@ -919,7 +919,7 @@
     },
     "intro": {
       "course": {
-        "name": "새싹 페이스 코스",
+        "name": "새싹 페이스",
         "desc": "카페·식당·길찾기·호텔, 단어부터 천천히 여는 입문 세션"
       },
       "questions": [
@@ -929,7 +929,7 @@
           "themeIndex": 1,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80",
-          "question": "카페에서 부탁할 때 붙이는 공손한 말은?",
+          "question": "야외 테라스 카페에서 부탁할 때 붙이는 공손한 말은?",
           "options": [
             "Adiós",
             "Por favor",
@@ -945,7 +945,7 @@
           "themeIndex": 2,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1515443961218-a51367888e4b?auto=format&fit=crop&w=600&q=80",
-          "question": "식당에서 자리를 뜻하는 단어는?",
+          "question": "타파스 식당에서 자리를 뜻하는 단어는?",
           "options": [
             "Café",
             "Mesa",
@@ -961,15 +961,15 @@
           "themeIndex": 3,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=600&q=80",
-          "question": "거리에서 길을 물을 때 먼저 하는 말은?",
+          "question": "고딕 지구 거리에서 길을 물을 때 먼저 하는 말은?",
           "options": [
             "La cuenta",
-            "Perdón",
+            "Perdona",
             "Check-in",
             "Pan"
           ],
           "answer": 1,
-          "explanation": "처음 말을 걸 때는 Perdón이 정중해요."
+          "explanation": "스페인에선 Perdona가 행인에게 말 걸 때 제일 자주 들려요."
         },
         {
           "id": "es-i-hotel",
@@ -977,7 +977,7 @@
           "themeIndex": 4,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=600&q=80",
-          "question": "호텔 예약을 뜻하는 단어는?",
+          "question": "리조트 프론트에서 숙박을 미리 잡아 둔 것을 뜻하는 단어는?",
           "options": [
             "Croissant",
             "Reserva",
@@ -991,8 +991,8 @@
     },
     "basic": {
       "course": {
-        "name": "카페 페이스 코스",
-        "desc": "같은 네 상황에서 짧은 문장으로 받아치는 기초 세션"
+        "name": "카페 페이스",
+        "desc": "같은 네 장면에서 짧은 한 줄로 받아치는 기초 세션"
       },
       "questions": [
         {
@@ -1001,15 +1001,15 @@
           "themeIndex": 1,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80",
-          "question": "카페 카운터에서 \"¿Qué te apetece?\"라고 물었을 때 자연스러운 주문은?",
+          "question": "테라스 카페에서 \"¿Qué te apetece?\"라고 물었어요. 자연스러운 주문은?",
           "options": [
             "Café yo.",
-            "Un café, por favor.",
+            "Un café con leche, por favor.",
             "Soy café.",
             "¿Dónde está el hotel?"
           ],
           "answer": 1,
-          "explanation": "카페 주문은 Un café, por favor.예요."
+          "explanation": "테라스에선 Un café con leche, por favor.가 입에 제일 붙어요."
         },
         {
           "id": "es-b-restaurant",
@@ -1017,15 +1017,15 @@
           "themeIndex": 2,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1515443961218-a51367888e4b?auto=format&fit=crop&w=600&q=80",
-          "question": "식당에서 \"두 명 자리 있나요?\"를 스페인어로 표현한 것은?",
+          "question": "타파스 바에서 \"두 명 자리 있나요?\"를 스페인어로 자연스럽게 말하면?",
           "options": [
             "Soy dos.",
-            "¿Hay una mesa para dos?",
+            "¿Hay mesa para dos?",
             "El menú es café.",
             "Quiero check-in."
           ],
           "answer": 1,
-          "explanation": "자리는 ¿Hay una mesa para dos?로 물으면 돼요."
+          "explanation": "자리는 ¿Hay mesa para dos?로 물으면 돼요."
         },
         {
           "id": "es-b-street",
@@ -1033,15 +1033,15 @@
           "themeIndex": 3,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=600&q=80",
-          "question": "길거리에서 \"지하철역이 어디인가요?\"를 묻는 가장 자연스러운 표현은?",
+          "question": "길에서 \"지하철이 어디예요?\"를 묻는 가장 자연스러운 표현은?",
           "options": [
             "Metro yo dónde.",
-            "Perdón, ¿dónde está la estación de metro?",
+            "Perdona, ¿dónde está el metro?",
             "Un café, por favor.",
             "Quiero reservar."
           ],
           "answer": 1,
-          "explanation": "길찾기는 Perdón, ¿dónde está ~?예요."
+          "explanation": "Perdona, ¿dónde está el metro?가 길에서 짧고 자연스러워요."
         },
         {
           "id": "es-b-hotel",
@@ -1049,22 +1049,22 @@
           "themeIndex": 4,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=600&q=80",
-          "question": "호텔 카운터에서 \"체크인 부탁드립니다\"에 알맞은 표현은?",
+          "question": "리조트 카운터에서 체크인하러 왔다고 말할 때 알맞은 표현은?",
           "options": [
             "Un café, por favor.",
-            "Quiero hacer el check-in, por favor.",
+            "Hola, vengo a hacer el check-in.",
             "¿Dónde está el metro?",
             "La carta, por favor."
           ],
           "answer": 1,
-          "explanation": "체크인은 Quiero hacer el check-in, por favor.예요."
+          "explanation": "Vengo a hacer el check-in.이 quiero보다 프론트에서 자연스러워요."
         }
       ]
     },
     "challenge": {
       "course": {
-        "name": "도전 페이스 코스",
-        "desc": "같은 네 상황에서 막히지 않고 한 줄 더 이어가는 도전 세션"
+        "name": "도전 페이스",
+        "desc": "같은 네 장면에서 막히지 않고 한 줄 더 이어가는 도전 세션"
       },
       "questions": [
         {
@@ -1073,15 +1073,15 @@
           "themeIndex": 1,
           "difficulty": "hard",
           "imageUrl": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80",
-          "question": "카페에서 아직 고르는 중일 때 자연스러운 한 줄은?",
+          "question": "테라스에서 아직 고르는 중일 때 자연스러운 한 줄은?",
           "options": [
             "Dame todo.",
-            "Un momento, por favor.",
+            "Un segundo, que aún miro.",
             "Soy el menú.",
             "¿Dónde está la calle?"
           ],
           "answer": 1,
-          "explanation": "Un momento, por favor.면 카페에서 여유를 벌 수 있어요."
+          "explanation": "Un segundo, que aún miro.면 고를 시간을 벌 수 있어요."
         },
         {
           "id": "es-c-restaurant",
@@ -1089,7 +1089,7 @@
           "themeIndex": 2,
           "difficulty": "hard",
           "imageUrl": "https://images.unsplash.com/photo-1515443961218-a51367888e4b?auto=format&fit=crop&w=600&q=80",
-          "question": "식당 테이블에서 메뉴판을 부탁하는 자연스러운 말은?",
+          "question": "타파스 테이블에서 메뉴판을 부탁하는 자연스러운 말은?",
           "options": [
             "Comida ahora.",
             "La carta, por favor.",
@@ -1097,7 +1097,7 @@
             "Metro por favor."
           ],
           "answer": 1,
-          "explanation": "메뉴판은 La carta, por favor.예요."
+          "explanation": "스페인 식당 메뉴판은 menú보다 La carta를 더 많이 써요."
         },
         {
           "id": "es-c-street",
@@ -1108,7 +1108,7 @@
           "question": "거리에서 역까지 가는 길을 물을 때 알맞은 것은?",
           "options": [
             "Metro ir.",
-            "Perdón, ¿cómo se va a la estación?",
+            "Perdona, ¿cómo se va a la estación?",
             "Pan por favor.",
             "La habitación, por favor."
           ],
@@ -1121,10 +1121,10 @@
           "themeIndex": 4,
           "difficulty": "hard",
           "imageUrl": "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=600&q=80",
-          "question": "호텔 리셉션에서 예약을 확인할 때 자연스러운 말은?",
+          "question": "리조트 리셉션에서 예약을 확인할 때 자연스러운 말은?",
           "options": [
             "Dame habitación.",
-            "Tengo una reserva a nombre de Kim.",
+            "Hola, tengo una reserva a nombre de Kim.",
             "Café ahora.",
             "¿Dónde está la panadería?"
           ],
@@ -1146,7 +1146,7 @@
     },
     "intro": {
       "course": {
-        "name": "새싹 페이스 코스",
+        "name": "새싹 페이스",
         "desc": "카페·식당·길찾기·호텔, 단어부터 천천히 여는 입문 세션"
       },
       "questions": [
@@ -1156,7 +1156,7 @@
           "themeIndex": 1,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=600&q=80",
-          "question": "카페에서 주문할 때 문장 끝에 붙이면 공손해지는 말은?",
+          "question": "아늑한 카페 테이블에서 주문할 때, 문장 끝에 붙이면 공손해지는 말은?",
           "options": [
             "빨리",
             "주세요",
@@ -1172,7 +1172,7 @@
           "themeIndex": 2,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=600&q=80",
-          "question": "식당에서 앉는 곳을 가리키는 말은?",
+          "question": "고깃집에서 앉는 곳을 가리키는 말은?",
           "options": [
             "커피",
             "자리",
@@ -1188,7 +1188,7 @@
           "themeIndex": 3,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1517154421773-0529f29ea451?auto=format&fit=crop&w=600&q=80",
-          "question": "거리에서 길을 물을 때 먼저 하는 말은?",
+          "question": "한옥마을 골목에서 길을 물을 때 먼저 하는 말은?",
           "options": [
             "계산이요",
             "실례합니다",
@@ -1204,7 +1204,7 @@
           "themeIndex": 4,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=600&q=80",
-          "question": "호텔 숙박을 미리 잡아 둔 것을 뜻하는 말은?",
+          "question": "한옥 스테이에서 숙박을 미리 잡아 둔 것을 뜻하는 말은?",
           "options": [
             "크루아상",
             "예약",
@@ -1212,14 +1212,14 @@
             "교차로"
           ],
           "answer": 1,
-          "explanation": "호텔 카운터의 핵심 단어는 예약이에요."
+          "explanation": "프론트의 핵심 단어는 예약이에요."
         }
       ]
     },
     "basic": {
       "course": {
-        "name": "카페 페이스 코스",
-        "desc": "같은 네 상황에서 짧은 문장으로 받아치는 기초 세션"
+        "name": "카페 페이스",
+        "desc": "같은 네 장면에서 짧은 한 줄로 받아치는 기초 세션"
       },
       "questions": [
         {
@@ -1228,7 +1228,7 @@
           "themeIndex": 1,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=600&q=80",
-          "question": "카페 직원이 \"뭐 드릴까요?\"라고 물었을 때 자연스러운 주문은?",
+          "question": "커피와 디저트가 놓인 카페에서 직원이 \"뭐 드릴까요?\"라고 물었어요. 자연스러운 주문은?",
           "options": [
             "커피 나.",
             "아메리카노 한 잔 주세요.",
@@ -1244,15 +1244,15 @@
           "themeIndex": 2,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=600&q=80",
-          "question": "식당에서 \"두 명 자리 있나요?\"를 자연스럽게 말한 것은?",
+          "question": "고깃집 입구에서 \"두 명 자리 있나요?\"를 자연스럽게 말한 것은?",
           "options": [
             "저 두 명입니다.",
-            "두 명요. 자리 있나요?",
+            "두 명이요. 자리 있나요?",
             "메뉴가 커피예요.",
             "체크인하러 왔어요."
           ],
           "answer": 1,
-          "explanation": "자리는 두 명요. 자리 있나요?로 물으면 돼요."
+          "explanation": "자리는 두 명이요. 자리 있나요?로 물으면 돼요."
         },
         {
           "id": "ko-b-street",
@@ -1260,15 +1260,15 @@
           "themeIndex": 3,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1517154421773-0529f29ea451?auto=format&fit=crop&w=600&q=80",
-          "question": "길거리에서 \"지하철역이 어디인가요?\"를 묻는 가장 자연스러운 표현은?",
+          "question": "북촌 골목에서 \"지하철역이 어느 쪽이에요?\"를 묻는 가장 자연스러운 표현은?",
           "options": [
             "지하철 나 어디.",
-            "실례합니다, 지하철역이 어디예요?",
+            "실례합니다, 지하철역이 어느 쪽이에요?",
             "아메리카노 주세요.",
             "예약했어요."
           ],
           "answer": 1,
-          "explanation": "길찾기는 실례합니다, ~ 어디예요?예요."
+          "explanation": "어느 쪽이에요?가 어디예요?보다 골목에서 더 잘 통해요."
         },
         {
           "id": "ko-b-hotel",
@@ -1276,22 +1276,22 @@
           "themeIndex": 4,
           "difficulty": "medium",
           "imageUrl": "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=600&q=80",
-          "question": "호텔 카운터에서 \"체크인 부탁드립니다\"에 알맞은 표현은?",
+          "question": "한옥 스테이 프론트에서 체크인하러 왔다고 말할 때 알맞은 표현은?",
           "options": [
             "커피 주세요.",
-            "체크인하러 왔어요.",
+            "한옥으로 예약했는데요.",
             "지하철역이 어디예요?",
             "메뉴판 주세요."
           ],
           "answer": 1,
-          "explanation": "체크인하러 왔어요.면 리셉션에서 바로 통해요."
+          "explanation": "한옥으로 예약했는데요.면 스테이 프론트에서 바로 통해요."
         }
       ]
     },
     "challenge": {
       "course": {
-        "name": "도전 페이스 코스",
-        "desc": "같은 네 상황에서 막히지 않고 한 줄 더 이어가는 도전 세션"
+        "name": "도전 페이스",
+        "desc": "같은 네 장면에서 막히지 않고 한 줄 더 이어가는 도전 세션"
       },
       "questions": [
         {
@@ -1316,7 +1316,7 @@
           "themeIndex": 2,
           "difficulty": "hard",
           "imageUrl": "https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=600&q=80",
-          "question": "식당 테이블에서 메뉴판을 부탁하는 자연스러운 말은?",
+          "question": "고깃집 테이블에서 메뉴판을 부탁하는 자연스러운 말은?",
           "options": [
             "밥 지금요.",
             "메뉴판 좀 주시겠어요?",
@@ -1332,7 +1332,7 @@
           "themeIndex": 3,
           "difficulty": "hard",
           "imageUrl": "https://images.unsplash.com/photo-1517154421773-0529f29ea451?auto=format&fit=crop&w=600&q=80",
-          "question": "거리에서 역까지 가는 길을 물을 때 알맞은 것은?",
+          "question": "한옥마을에서 역까지 가는 길을 물을 때 알맞은 것은?",
           "options": [
             "역 가요.",
             "실례합니다, 역까지 어떻게 가요?",
@@ -1348,15 +1348,15 @@
           "themeIndex": 4,
           "difficulty": "hard",
           "imageUrl": "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=600&q=80",
-          "question": "호텔 리셉션에서 예약을 확인할 때 자연스러운 말은?",
+          "question": "한옥 스테이 프론트에서 예약을 확인할 때 자연스러운 말은?",
           "options": [
             "방 주세요.",
-            "김으로 예약했어요.",
+            "김으로 예약했는데요.",
             "지금 커피요.",
             "빵집이 어디예요?"
           ],
           "answer": 1,
-          "explanation": "~으로 예약했어요.이면 체크인이 열려요."
+          "explanation": "~으로 예약했는데요.이면 체크인이 열려요."
         }
       ]
     }

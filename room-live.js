@@ -9,9 +9,9 @@
   ];
 
   var DEFAULT_PHRASES = [
-    { en: "That sounds great — tell me more!", ko: '멋지네요, 좀 더 이야기해 주세요!' },
-    { en: "I feel the same way.", ko: '저도 같은 마음이에요.' },
-    { en: "Could you say that another way?", ko: '다른 말로 해주실 수 있나요?' }
+    { en: "That sounds great — tell me more!", ko: '그거 좋네요, 좀 더 들려주세요!' },
+    { en: "Same here.", ko: '저도요.' },
+    { en: "Wait, can you say that another way?", ko: '잠깐, 다른 말로 해 줄 수 있어요?' }
   ];
 
   var micOn = true;
@@ -199,11 +199,11 @@
     if (/coffee|cafe|latte|americano|아메리카노|커피|카페/.test(text)) {
       return {
         phrases: [
-          { en: "I'd like a hot Americano, please.", ko: '따뜻한 아메리카노 주세요.' },
-          { en: "What do you usually order here?", ko: '여기서 보통 뭐 시키세요?' },
+          { en: "Can I get a hot Americano, please?", ko: '따뜻한 아메리카노 주세요.' },
+          { en: "What do you usually get here?", ko: '여기서 보통 뭐 시키세요?' },
           { en: "This café has such a cozy vibe.", ko: '이 카페 분위기 정말 아늑하네요.' }
         ],
-        grammar: '주문할 땐 I\'d like ~, please. 가 가장 자연스러워요.'
+        grammar: '카페 주문은 Can I get ~, please? 가 I\'d like 보다 지금 더 자주 들려요.'
       };
     }
     if (/weather|sunny|rain|날씨|기분/.test(text)) {
@@ -329,8 +329,8 @@
 
   var FALLBACK_WORDS = [
     { word: 'actually', meaning: '사실은' },
-    { word: 'maybe', meaning: '아마도' },
-    { word: 'really', meaning: '정말' }
+    { word: 'anyway', meaning: '아무튼, 그건 그렇고' },
+    { word: 'wait', meaning: '잠깐만요' }
   ];
 
   function recentTranscriptContext(limit) {
@@ -419,16 +419,16 @@
 
   var FALLBACK_SENTENCES = [
     {
-      sentence: 'That sounds really interesting! Tell me more about it.',
-      translation: '정말 흥미롭네요! 더 자세히 알려주세요.'
+      sentence: "Oh nice — tell me more!",
+      translation: '오, 좋다 — 더 얘기해 줘요!'
     },
     {
-      sentence: 'I see what you mean. In my opinion...',
-      translation: '무슨 말씀이신지 알겠어요. 제 생각에는...'
+      sentence: "Yeah, I get you. For me...",
+      translation: '응, 무슨 말인지 알겠어요. 저는...'
     },
     {
-      sentence: 'Could you explain that again in a simpler way?',
-      translation: '그 부분을 조금 더 쉽게 다시 설명해주실 수 있나요?'
+      sentence: "Wait, can you say that a bit simpler?",
+      translation: '잠깐, 조금만 쉽게 다시 말해 줄래요?'
     }
   ];
 

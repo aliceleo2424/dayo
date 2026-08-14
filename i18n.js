@@ -220,10 +220,10 @@
     'login.welcomeBody': {
       KO: '첫 세션 체험 할인권은 9,900원이에요. 총 30분(25분 화상 대화 + 5분 미니 퀴즈/리포트)으로 시작해 볼까요?',
       EN: 'Your first-session trial coupon is 9,900 KRW. A session is 30 minutes (25 min live chat + 5 min mini quiz/report). Ready to start?',
-      ZH: '首次体验券为9,900韩元。每节课共30分钟（25分钟视频对话 + 5分钟小测验/报告）。要开始吗？',
-      JA: '初回体験チケットは9,900ウォンです。1回30分（25分のビデオ会話 + 5分のミニクイズ/レポート）で始めましょうか？',
-      FR: "Le pass d'essai (1re séance) est à 9 900 KRW. Une session dure 30 min (25 min de conversation + 5 min de mini-quiz/rapport). On commence ?",
-      ES: 'El pase de prueba (1.ª clase) cuesta 9.900 KRW. Cada sesión dura 30 min (25 min de charla + 5 min de mini quiz/informe). ¿Empezamos?'
+      ZH: '首次体验券为9,900韩元。每次会话共30分钟（25分钟视频对话 + 5分钟小测验/报告）。要开始吗？',
+      JA: '初回体験チケットは9,900ウォンです。1回のセッションは30分（25分のビデオ会話 + 5分のミニクイズ/レポート）で始めましょうか？',
+      FR: "Le pass d'essai (1re session) est à 9 900 KRW. Une session dure 30 min (25 min de conversation + 5 min de mini-quiz/rapport). On commence ?",
+      ES: 'El pase de prueba (1.ª sesión) cuesta 9.900 KRW. Cada sesión dura 30 min (25 min de charla + 5 min de mini quiz/informe). ¿Empezamos?'
     },
     'login.welcomeCta': {
       KO: '지금 바로 시작하기', EN: 'Start right now', ZH: '马上开始', JA: '今すぐはじめる', FR: 'Commencer maintenant', ES: 'Empezar ahora'
@@ -374,11 +374,11 @@
     },
     'mypage.sessions.sub': {
       KO: '세션 시작 1시간 전까지 요일·시간 변경/취소가 가능해요.',
-      EN: 'You can change or cancel the day/time until 1 hour before class.',
-      ZH: '开课1小时前可更改或取消星期和时间。',
+      EN: 'You can change or cancel the day/time until 1 hour before the session.',
+      ZH: '会话开始1小时前可更改或取消星期和时间。',
       JA: 'セッション開始1時間前まで曜日・時間の変更/キャンセルが可能です。',
-      FR: 'Changement ou annulation du jour/heure possible jusqu’à 1 h avant le cours.',
-      ES: 'Puedes cambiar o cancelar día/hora hasta 1 hora antes de la clase.'
+      FR: 'Changement ou annulation du jour/heure possible jusqu’à 1 h avant la session.',
+      ES: 'Puedes cambiar o cancelar día/hora hasta 1 hora antes de la sesión.'
     },
     'mypage.sessions.enter': {
       KO: '☕ 대화 스튜디오 입장', EN: '☕ Enter Studio', ZH: '☕ 进入对话工作室', JA: '☕ スタジオ入室', FR: '☕ Entrer au Studio', ES: '☕ Entrar al Estudio'
@@ -387,7 +387,7 @@
       KO: '📚 대화 자료 보기', EN: '📚 View Materials', ZH: '📚 查看资料', JA: '📚 資料を見る', FR: '📚 Voir les supports', ES: '📚 Ver materiales'
     },
     'mypage.library.title': {
-      KO: '📚 세션 대화 자료함', EN: '📚 Chat Materials', ZH: '📚 对话资料库', JA: '📚 会話資料', FR: '📚 Supports de cours', ES: '📚 Materiales'
+      KO: '📚 세션 대화 자료함', EN: '📚 Chat Materials', ZH: '📚 对话资料库', JA: '📚 会話資料', FR: '📚 Supports de conversation', ES: '📚 Materiales'
     },
     'mypage.library.sub': {
       KO: '대화 전 예습하고, 끝난 뒤 복습해 보세요.',
@@ -983,7 +983,7 @@
       ES: 'Este es tu ritmo de conversación estimado. ¿Abrimos la primera sesión?'
     },
     'quiz.resultCourseLabel': {
-      KO: '추천 코스', EN: 'Recommended course', ZH: '推荐课程', JA: 'おすすめコース', FR: 'Cours recommandé', ES: 'Curso recomendado'
+      KO: '추천 페이스', EN: 'Recommended pace', ZH: '推荐节奏', JA: 'おすすめペース', FR: 'Rythme recommandé', ES: 'Ritmo recomendado'
     },
     'quiz.resultHostLabel': {
       KO: '추천 파트너', EN: 'Recommended partner', ZH: '推荐伙伴', JA: 'おすすめパートナー', FR: 'Partenaire recommandé', ES: 'Compañero recomendado'
@@ -1084,20 +1084,20 @@
       ES: 'Debes responder a: "{quote}"'
     },
     'quiz.emailTitle': {
-      KO: '내 스피킹 약점 분석표 &<br>맞춤 코스 리포트 받아보기',
-      EN: 'Get my speaking weakness report &<br>a personalized course recommendation',
-      ZH: '获取我的口语弱点分析表 &<br>专属课程报告',
-      JA: 'スピーキング弱点分析表と<br>おすすめコースレポートを受け取る',
-      FR: 'Recevez mon analyse de faiblesses &<br>un programme personnalisé',
-      ES: 'Recibe mi análisis de debilidades &<br>un curso personalizado'
+      KO: '내 스피킹 약점 분석표 &<br>맞춤 세션 리포트 받아보기',
+      EN: 'Get my speaking weakness report &<br>a personalized session recommendation',
+      ZH: '获取我的口语弱点分析表 &<br>专属会话报告',
+      JA: 'スピーキング弱点分析表と<br>おすすめセッションレポートを受け取る',
+      FR: 'Recevez mon analyse de faiblesses &<br>un rythme de session personnalisé',
+      ES: 'Recibe mi análisis de debilidades &<br>un informe de sesión personalizado'
     },
     'quiz.emailDesc': {
-      KO: '테스트 결과를 바탕으로 나만의 스피킹 코스를 추천해 드릴게요',
-      EN: "We'll recommend a speaking course made just for you, based on your results.",
-      ZH: '根据测试结果为您推荐专属口语课程。',
-      JA: 'テスト結果に基づいて、あなただけのスピーキングコースをご提案します。',
-      FR: 'Nous vous recommandons un programme sur mesure selon vos résultats.',
-      ES: 'Te recomendaremos un curso a tu medida según tus resultados.'
+      KO: '테스트 결과를 바탕으로 나만의 스피킹 페이스를 추천해 드릴게요',
+      EN: "We'll recommend a speaking pace made just for you, based on your results.",
+      ZH: '根据测试结果为您推荐专属会话节奏。',
+      JA: 'テスト結果に基づいて、あなただけのスピーキングペースをご提案します。',
+      FR: 'Nous vous recommandons un rythme de conversation sur mesure selon vos résultats.',
+      ES: 'Te recomendaremos un ritmo de conversación a tu medida según tus resultados.'
     },
     'quiz.emailPlaceholder': {
       KO: '이메일을 입력해 주세요', EN: 'Enter your email', ZH: '请输入电子邮箱', JA: 'メールアドレスを入力してください', FR: 'Entrez votre e-mail', ES: 'Ingresa tu correo'
@@ -1163,13 +1163,13 @@
     'chatbot.faqLabel': { KO: '자주 묻는 질문', EN: 'Frequently Asked', ZH: '常见问题', JA: 'よくある質問', FR: 'Questions fréquentes', ES: 'Preguntas frecuentes' },
     'chatbot.typing': { KO: '입력 중...', EN: 'Typing...', ZH: '输入中...', JA: '入力中...', FR: 'En train d\'écrire...', ES: 'Escribiendo...' },
     'chatbot.q.class': {
-      KO: '세션은 어떻게 진행되나요?', EN: 'How do sessions work?', ZH: '课程是如何进行的？', JA: 'レッスンはどのように進みますか？', FR: 'Comment se déroulent les sessions ?', ES: '¿Cómo funcionan las sesiones?'
+      KO: '세션은 어떻게 진행되나요?', EN: 'How do sessions work?', ZH: '会话是如何进行的？', JA: 'セッションはどのように進みますか？', FR: 'Comment se déroulent les sessions ?', ES: '¿Cómo funcionan las sesiones?'
     },
     'chatbot.a.class': {
       KO: 'DayO 세션은 1회 총 30분이에요! 25분 동안 원어민 대화 파트너와 1:1 화상 대화를 하고, 이어서 5분 미니 퀴즈/리포트로 마무리해요. AI 코파일럿이 실시간으로 표현도 도와드린답니다.',
       EN: 'Each DayO session is 30 minutes total: 25 minutes of 1:1 video chat with a native partner, plus a 5-minute mini quiz/report. An AI copilot also helps with expressions in real time.',
-      ZH: 'DayO每节课共30分钟：25分钟与母语伙伴1:1视频对话，再加上5分钟小测验/报告。AI副驾也会实时帮助您表达。',
-      JA: 'DayOのレッスンは1回合計30分です。25分の1:1ビデオ会話のあと、5分のミニクイズ/レポートで締めくくります。AIコパイロットがリアルタイムで表現もサポートします。',
+      ZH: 'DayO每次会话共30分钟：25分钟与母语伙伴1:1视频对话，再加上5分钟小测验/报告。AI副驾也会实时帮助您表达。',
+      JA: 'DayOのセッションは1回合計30分です。25分の1:1ビデオ会話のあと、5分のミニクイズ/レポートで締めくくります。AIコパイロットがリアルタイムで表現もサポートします。',
       FR: "Chaque session DayO dure 30 min : 25 min de conversation vidéo 1:1 avec un partenaire natif, puis 5 min de mini-quiz/rapport. Un copilote IA aide aussi en temps réel.",
       ES: 'Cada sesión de DayO dura 30 min: 25 min de charla en video 1:1 con un compañero nativo, más 5 min de mini quiz/informe. Un copiloto IA también te ayuda en tiempo real.'
     },
@@ -1190,8 +1190,8 @@
     'chatbot.a.beginner': {
       KO: '물론이죠! 영어를 처음 시작하셔도 괜찮아요. 한국어로 먼저 설명해 드리고, 천천히 영어로 전환하는 맞춤형 세션을 제공해요.',
       EN: "Of course! It's fine even if you're a total beginner. We explain in Korean first and gradually shift to English at your pace.",
-      ZH: '当然可以！即使是英语初学者也没问题。我们会先用韩语说明，再逐步切换到英语进行定制授课。',
-      JA: 'もちろんです！英語が初めてでも大丈夫です。まず韓国語で説明し、ゆっくり英語に切り替えるカスタムレッスンをご提供します。',
+      ZH: '当然可以！即使是英语初学者也没问题。我们会先用韩语说明，再逐步切换到英语进行定制会话。',
+      JA: 'もちろんです！英語が初めてでも大丈夫です。まず韓国語で説明し、ゆっくり英語に切り替えるカスタムセッションをご提供します。',
       FR: "Bien sûr ! Même en débutant complet, c'est parfait. Nous expliquons d'abord en coréen puis passons en douceur à l'anglais.",
       ES: '¡Claro! Está bien aunque seas principiante total. Explicamos primero en coreano y pasamos poco a poco al inglés.'
     },
@@ -1216,10 +1216,10 @@
     },
     'chatbot.a.policy': {
       KO: '모든 이용권은 결제 후 90일 내 소진 필수예요. 세션 요일 및 시간 변경/취소는 세션 시작 1시간 전까지 가능하고, 세션 시작 1시간 이내 취소 및 노쇼 발생 시 티켓이 차감되며 ‘토닥토닥 리포트’가 발송돼요.',
-      EN: 'All passes must be used within 90 days of payment. You can change or cancel the day/time until 1 hour before class. If you cancel within 1 hour of start or no-show, a ticket is deducted and a “Todaktodak Report” is sent.',
-      ZH: '所有次数券须在付款后90天内用完。开课1小时前可更改/取消星期和时间。开课1小时内取消或未到，将扣除次数并发送“托达克托达克报告”。',
+      EN: 'All passes must be used within 90 days of payment. You can change or cancel the day/time until 1 hour before the session. If you cancel within 1 hour of start or no-show, a ticket is deducted and a “Todaktodak Report” is sent.',
+      ZH: '所有次数券须在付款后90天内用完。会话开始1小时前可更改/取消星期和时间。会话开始1小时内取消或未到，将扣除次数并发送“托达克托达克报告”。',
       JA: 'すべての利用券は決済後90日以内に使い切る必要があります。セッションの曜日・時間の変更/キャンセルは開始1時間前まで可能です。開始1時間以内のキャンセルやノーショー時はチケットが消化され、「トダクトダクレポート」が送られます。',
-      FR: 'Tous les tickets doivent être utilisés dans les 90 jours après paiement. Changement/annulation du jour et de l’heure possibles jusqu’à 1 h avant le cours. Annulation dans l’heure ou absence : un ticket est débité et un « Todaktodak Report » est envoyé.',
+      FR: 'Tous les tickets doivent être utilisés dans les 90 jours après paiement. Changement/annulation du jour et de l’heure possibles jusqu’à 1 h avant la session. Annulation dans l’heure ou absence : un ticket est débité et un « Todaktodak Report » est envoyé.',
       ES: 'Todos los pases deben usarse en 90 días tras el pago. Puedes cambiar/cancelar día y hora hasta 1 hora antes. Si cancelas en esa hora o no asistes, se descuenta un ticket y se envía el “Todaktodak Report”.'
     },
 
@@ -1277,8 +1277,8 @@
     },
     'book.policyNote': {
       KO: '세션 요일 및 시간 변경/취소는 세션 시작 1시간 전까지 가능해요. 1시간 이내 취소·노쇼 시 티켓이 차감되며 ‘토닥토닥 리포트’가 발송돼요.',
-      EN: 'You can change or cancel the day/time until 1 hour before class. Cancel within 1 hour or no-show: a ticket is deducted and a “Todaktodak Report” is sent.',
-      ZH: '开课1小时前可更改/取消星期和时间。开课1小时内取消或未到，将扣除次数并发送“托达克托达克报告”。',
+      EN: 'You can change or cancel the day/time until 1 hour before the session. Cancel within 1 hour or no-show: a ticket is deducted and a “Todaktodak Report” is sent.',
+      ZH: '会话开始1小时前可更改/取消星期和时间。会话开始1小时内取消或未到，将扣除次数并发送“托达克托达克报告”。',
       JA: 'セッションの曜日・時間の変更/キャンセルは開始1時間前まで可能です。開始1時間以内のキャンセルやノーショー時はチケットが消化され、「トダクトダクレポート」が送られます。',
       FR: 'Changement/annulation du jour et de l’heure jusqu’à 1 h avant. Annulation dans l’heure ou absence : un ticket est débité et un « Todaktodak Report » est envoyé.',
       ES: 'Puedes cambiar/cancelar día y hora hasta 1 hora antes. Si cancelas en esa hora o no asistes, se descuenta un ticket y se envía el “Todaktodak Report”.'
@@ -1422,13 +1422,13 @@
       FR: 'Des phrases à dire tout de suite. Touchez une carte pour copier.',
       ES: 'Frases para decir ahora. Toca una tarjeta para copiar.'
     },
-    'room.feedbackTitle': { KO: '오늘 세션은 어떠하셨나요? 🍰', EN: 'How was today\'s session? 🍰', ZH: '今天的课程怎么样？🍰', JA: '今日のレッスンはどうでしたか？🍰', FR: 'Comment était la session d\'aujourd\'hui ? 🍰', ES: '¿Cómo estuvo la sesión de hoy? 🍰' },
+    'room.feedbackTitle': { KO: '오늘 세션은 어떠하셨나요? 🍰', EN: 'How was today\'s session? 🍰', ZH: '今天的会话怎么样？🍰', JA: '今日のセッションはどうでしたか？🍰', FR: 'Comment était la session d\'aujourd\'hui ? 🍰', ES: '¿Cómo estuvo la sesión de hoy? 🍰' },
     'room.starAria': { KO: '별점', EN: 'Star rating', ZH: '星级评分', JA: '評価', FR: 'Note', ES: 'Calificación' },
     'room.feedbackSectionLabel': {
       KO: '다음 세션엔 대화 파트너가 이렇게 해주면 좋겠어요<br>(다중 선택 가능)',
       EN: 'I\'d love it if my partner did this next time<br>(multiple choices allowed)',
-      ZH: '希望下次课程对话伙伴能这样做<br>(可多选)',
-      JA: '次のレッスンでは会話パートナーにこうしてほしいです<br>（複数選択可）',
+      ZH: '希望下次会话对话伙伴能这样做<br>(可多选)',
+      JA: '次のセッションでは会話パートナーにこうしてほしいです<br>（複数選択可）',
       FR: 'J\'aimerais que mon partenaire fasse ceci la prochaine fois<br>(choix multiples)',
       ES: 'Me gustaría que mi compañero hiciera esto la próxima vez<br>(elige varios)'
     },
@@ -1558,7 +1558,7 @@
     'mypage.library.item2.title': { KO: '추천 표현 리뷰 · 카페와 주문', EN: 'Recommended expressions review · Café & Ordering', ZH: '推荐表达复习 · 咖啡厅与点单', JA: 'おすすめ表現レビュー · カフェと注文', FR: 'Révision des expressions · Café et commande', ES: 'Repaso de expresiones · Café y pedidos' },
     'mypage.library.item2.desc': { KO: '지난 대화에서 자주 막혔던 표현을 모았어요.', EN: 'Expressions you often got stuck on in past chats.', ZH: '收集了以往对话中常卡壳的表达。', JA: '過去の会話でよく詰まった表現を集めました。', FR: 'Les expressions qui vous ont souvent bloqué.', ES: 'Expresiones con las que a menudo te trababas.' },
     'mypage.library.item3.title': { KO: '오픽 빈출 주제 · 재택근무 이야기', EN: 'Frequent OPIc topic · Working from home', ZH: 'OPIc常见主题 · 居家办公', JA: 'OPIc頻出テーマ · リモートワーク', FR: 'Sujet fréquent OPIc : télétravail', ES: 'Tema frecuente de OPIc: trabajo remoto' },
-    'mypage.library.item3.desc': { KO: 'Kate 파트너와의 세션 전 예습 자료예요.', EN: 'Preview material before your session with partner Kate.', ZH: '与Kate伙伴课程前的预习资料。', JA: 'Kateパートナーとのセッション前の予習資料です。', FR: 'Matériel de préparation avant la session avec Kate.', ES: 'Material de preparación antes de la sesión con Kate.' },
+    'mypage.library.item3.desc': { KO: 'Kate 파트너와의 세션 전 예습 자료예요.', EN: 'Preview material before your session with partner Kate.', ZH: '与Kate伙伴会话前的预习资料。', JA: 'Kateパートナーとのセッション前の予習資料です。', FR: 'Matériel de préparation avant la session avec Kate.', ES: 'Material de preparación antes de la sesión con Kate.' },
     'mypage.library.item4.title': { KO: '지난 대화 복습 노트', EN: 'Past conversation review notes', ZH: '过往对话复习笔记', JA: '過去の会話の復習ノート', FR: 'Notes de révision des conversations passées', ES: 'Notas de repaso de conversaciones pasadas' },
     'mypage.library.item4.desc': { KO: '파트너가 남긴 피드백 표현을 다시 확인해 보세요.', EN: 'Review the feedback expressions your partner left.', ZH: '重新查看伙伴留下的反馈表达。', JA: 'パートナーが残したフィードバック表現を再確認してみましょう。', FR: 'Revoyez les expressions de retour laissées par votre partenaire.', ES: 'Revisa las expresiones de comentarios que dejó tu compañero.' },
     'mypage.history1.meta': { KO: '2026.08.02 (일) 20:00 · 30분 · 주제 ☕ 여행 회화', EN: '2026.08.02 (Sun) 20:00 · 30 min · Topic ☕ Travel Conversation', ZH: '2026.08.02（周日）20:00 · 30分钟 · 主题 ☕ 旅行会话', JA: '2026.08.02（日）20:00 · 30分 · テーマ ☕ 旅行会話', FR: '02.08.2026 (dim) 20:00 · 30 min · Sujet ☕ Conversation voyage', ES: '02.08.2026 (dom) 20:00 · 30 min · Tema ☕ Conversación de viaje' },
