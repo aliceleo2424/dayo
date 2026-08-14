@@ -1110,9 +1110,9 @@
 
     /* ===== Room studio extras (room.html) ===== */
     'room.micOn': { KO: '🎤 마이크 켜짐', EN: '🎤 Mic On', ZH: '🎤 麦克风开启', JA: '🎤 マイクオン', FR: '🎤 Micro activé', ES: '🎤 Micrófono activado' },
-    'room.micOff': { KO: '🎤 마이크 꺼짐', EN: '🎤 Mic Off', ZH: '🎤 麦克风关闭', JA: '🎤 マイクオフ', FR: '🎤 Micro désactivé', ES: '🎤 Micrófono apagado' },
+    'room.micOff': { KO: '🔇 마이크 꺼짐', EN: '🔇 Mic Off', ZH: '🔇 麦克风关闭', JA: '🔇 マイクオフ', FR: '🔇 Micro désactivé', ES: '🔇 Micrófono apagado' },
     'room.camOn': { KO: '📹 카메라 켜짐', EN: '📹 Camera On', ZH: '📹 摄像头开启', JA: '📹 カメラオン', FR: '📹 Caméra activée', ES: '📹 Cámara activada' },
-    'room.camOff': { KO: '📹 카메라 꺼짐', EN: '📹 Camera Off', ZH: '📹 摄像头关闭', JA: '📹 カメラオフ', FR: '📹 Caméra désactivée', ES: '📹 Cámara apagada' },
+    'room.camOff': { KO: '🚫 카메라 꺼짐', EN: '🚫 Camera Off', ZH: '🚫 摄像头关闭', JA: '🚫 カメラオフ', FR: '🚫 Caméra désactivée', ES: '🚫 Cámara apagada' },
     'room.chatLabel': { KO: '채팅', EN: 'Chat', ZH: '聊天', JA: 'チャット', FR: 'Chat', ES: 'Chat' },
     'room.chatHeaderTitle': { KO: '💬 라이브 채팅', EN: '💬 Live Chat', ZH: '💬 实时聊天', JA: '💬 ライブチャット', FR: '💬 Chat en direct', ES: '💬 Chat en vivo' },
     'room.chatCloseAria': { KO: '채팅 닫기', EN: 'Close chat', ZH: '关闭聊天', JA: 'チャットを閉じる', FR: 'Fermer le chat', ES: 'Cerrar chat' },

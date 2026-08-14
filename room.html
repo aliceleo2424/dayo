@@ -811,7 +811,32 @@
     }
 
     .ctrl-btn:hover { transform: translateY(-2px); background: var(--coral-pale); }
-    .ctrl-btn.off { opacity: 0.55; background: #F3EDEB; }
+    .ctrl-btn.off {
+      opacity: 0.92;
+      background: #F3EDEB;
+      color: #9A8580;
+      box-shadow: none;
+    }
+    .ctrl-btn .ctrl-icon {
+      position: relative;
+      display: inline-flex;
+      width: 1.2em;
+      justify-content: center;
+      line-height: 1;
+    }
+    .ctrl-btn.off .ctrl-icon::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 8%;
+      width: 2.5px;
+      height: 84%;
+      background: #FF6B57;
+      border-radius: 2px;
+      transform: translateX(-50%) rotate(-38deg);
+      pointer-events: none;
+      box-shadow: 0 0 0 1px rgba(255, 252, 250, 0.75);
+    }
 
     .ctrl-btn--ai {
       background: var(--coral);
@@ -1965,8 +1990,14 @@
     </main>
 
     <footer class="bottom-bar">
-      <button class="ctrl-btn" id="micBtn" type="button" aria-pressed="true">🎤 <span class="label" data-i18n="room.micOn">마이크 켜짐</span></button>
-      <button class="ctrl-btn" id="camBtn" type="button" aria-pressed="true">📹 <span class="label" data-i18n="room.camOn">카메라 켜짐</span></button>
+      <button class="ctrl-btn" id="micBtn" type="button" aria-pressed="true" aria-label="마이크 켜짐">
+        <span class="ctrl-icon" aria-hidden="true">🎤</span>
+        <span class="label" data-i18n="room.micOn">마이크 켜짐</span>
+      </button>
+      <button class="ctrl-btn" id="camBtn" type="button" aria-pressed="true" aria-label="카메라 켜짐">
+        <span class="ctrl-icon" aria-hidden="true">📹</span>
+        <span class="label" data-i18n="room.camOn">카메라 켜짐</span>
+      </button>
       <button class="ctrl-btn" id="chatToggle" type="button">💬 <span class="label" data-i18n="room.chatLabel">채팅</span></button>
       <div class="ctrl-divider" aria-hidden="true"></div>
       <button class="ctrl-btn ctrl-btn--ai" id="wordHelpBtn" type="button" data-i18n="room.wordHelp">💡 단어도움</button>
@@ -2297,33 +2328,47 @@
     /* Media — Daily.co live frame, or local camera demo fallback */
     const micBtn = document.getElementById('micBtn');
     const camBtn = document.getElementById('camBtn');
-    const live = window.DayOLive;
+
+    function liveApi() {
+      return window.DayOLive || null;
+    }
 
     function renderMicLabel() {
-      const on = live ? live.isMicOn() : true;
+      const api = liveApi();
+      const on = api ? !!api.isMicOn() : true;
+      const label = on
+        ? t('room.micOn').replace(/^[^\s]+\s*/, '')
+        : t('room.micOff').replace(/^[^\s]+\s*/, '');
       micBtn.classList.toggle('off', !on);
       micBtn.setAttribute('aria-pressed', String(on));
-      micBtn.innerHTML = on
-        ? '🎤 <span class="label">' + t('room.micOn').replace(/^🎤\s*/, '') + '</span>'
-        : '🎤 <span class="label">' + t('room.micOff').replace(/^🎤\s*/, '') + '</span>';
+      micBtn.setAttribute('aria-label', on ? t('room.micOn') : t('room.micOff'));
+      micBtn.innerHTML = '<span class="ctrl-icon" aria-hidden="true">' + (on ? '🎤' : '🔇') + '</span>' +
+        ' <span class="label">' + label + '</span>';
     }
+
     function renderCamLabel() {
-      const on = live ? live.isCamOn() : true;
+      const api = liveApi();
+      const on = api ? !!api.isCamOn() : true;
+      const label = on
+        ? t('room.camOn').replace(/^[^\s]+\s*/, '')
+        : t('room.camOff').replace(/^[^\s]+\s*/, '');
       camBtn.classList.toggle('off', !on);
       camBtn.setAttribute('aria-pressed', String(on));
-      camBtn.innerHTML = on
-        ? '📹 <span class="label">' + t('room.camOn').replace(/^📹\s*/, '') + '</span>'
-        : '📹 <span class="label">' + t('room.camOff').replace(/^📹\s*/, '') + '</span>';
+      camBtn.setAttribute('aria-label', on ? t('room.camOn') : t('room.camOff'));
+      camBtn.innerHTML = '<span class="ctrl-icon" aria-hidden="true">' + (on ? '📹' : '🚫') + '</span>' +
+        ' <span class="label">' + label + '</span>';
     }
 
     micBtn.addEventListener('click', () => {
-      if (live) live.toggleMic();
-      renderMicLabel();
+      const api = liveApi();
+      if (!api || typeof api.toggleMic !== 'function') return;
+      Promise.resolve(api.toggleMic()).finally(renderMicLabel);
     });
 
     camBtn.addEventListener('click', () => {
-      if (live) live.toggleCam();
-      renderCamLabel();
+      const api = liveApi();
+      if (!api || typeof api.toggleCam !== 'function') return;
+      Promise.resolve(api.toggleCam()).finally(renderCamLabel);
     });
 
     document.addEventListener('dayo:langchange', () => {

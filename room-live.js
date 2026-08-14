@@ -378,10 +378,43 @@
     else pip.classList.remove('has-stream');
   }
 
-  function applyDailyMedia() {
+  function notifyMedia() {
+    document.dispatchEvent(new CustomEvent('dayo:livemedia', {
+      detail: { micOn: !!micOn, camOn: !!camOn }
+    }));
+  }
+
+  function dailyLocalAudio() {
+    if (!callFrame || typeof callFrame.localAudio !== 'function') return micOn;
+    try {
+      var value = callFrame.localAudio();
+      if (typeof value === 'boolean') return value;
+    } catch (e) { /* ignore */ }
+    try {
+      var local = callFrame.participants && callFrame.participants().local;
+      if (local && typeof local.audio === 'boolean') return local.audio;
+    } catch (e) { /* ignore */ }
+    return micOn;
+  }
+
+  function dailyLocalVideo() {
+    if (!callFrame || typeof callFrame.localVideo !== 'function') return camOn;
+    try {
+      var value = callFrame.localVideo();
+      if (typeof value === 'boolean') return value;
+    } catch (e) { /* ignore */ }
+    try {
+      var local = callFrame.participants && callFrame.participants().local;
+      if (local && typeof local.video === 'boolean') return local.video;
+    } catch (e) { /* ignore */ }
+    return camOn;
+  }
+
+  function syncMediaFromDaily() {
     if (!callFrame) return;
-    try { callFrame.setLocalAudio(micOn); } catch (e) { /* ignore */ }
-    try { callFrame.setLocalVideo(camOn); } catch (e) { /* ignore */ }
+    micOn = dailyLocalAudio();
+    camOn = dailyLocalVideo();
+    notifyMedia();
   }
 
   function stopShareDemo() {
@@ -477,8 +510,16 @@
       demoMode = false;
       host.classList.remove('is-pending');
       if (stage) stage.classList.add('is-daily');
-      applyDailyMedia();
+      syncMediaFromDaily();
       showToast(t('room.toastDailyLive'), 2200);
+    });
+
+    callFrame.on('participant-updated', function (ev) {
+      var participant = ev && ev.participant;
+      if (!participant || !participant.local) return;
+      if (typeof participant.audio === 'boolean') micOn = participant.audio;
+      if (typeof participant.video === 'boolean') camOn = participant.video;
+      notifyMedia();
     });
 
     callFrame.on('error', function () {
@@ -574,9 +615,24 @@
   }
 
   function toggleMic() {
+    if (callFrame && typeof callFrame.setLocalAudio === 'function') {
+      var next = !dailyLocalAudio();
+      return Promise.resolve(callFrame.setLocalAudio(next)).then(function () {
+        micOn = dailyLocalAudio();
+        if (micOn) resumeSpeech();
+        else pauseSpeech();
+        notifyMedia();
+        return micOn;
+      }).catch(function (err) {
+        console.warn('[DayO] setLocalAudio failed', err);
+        micOn = dailyLocalAudio();
+        notifyMedia();
+        return micOn;
+      });
+    }
+
     micOn = !micOn;
-    if (callFrame) applyDailyMedia();
-    else applyLocalTracks();
+    applyLocalTracks();
     if (micOn) resumeSpeech();
     else pauseSpeech();
     notifyMedia();
@@ -584,9 +640,22 @@
   }
 
   function toggleCam() {
+    if (callFrame && typeof callFrame.setLocalVideo === 'function') {
+      var next = !dailyLocalVideo();
+      return Promise.resolve(callFrame.setLocalVideo(next)).then(function () {
+        camOn = dailyLocalVideo();
+        notifyMedia();
+        return camOn;
+      }).catch(function (err) {
+        console.warn('[DayO] setLocalVideo failed', err);
+        camOn = dailyLocalVideo();
+        notifyMedia();
+        return camOn;
+      });
+    }
+
     camOn = !camOn;
-    if (callFrame) applyDailyMedia();
-    else applyLocalTracks();
+    applyLocalTracks();
     notifyMedia();
     return camOn;
   }
