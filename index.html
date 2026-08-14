@@ -1678,17 +1678,53 @@
       ko: { id: 'jiwoo', name: 'Jiwoo from Seoul', country: '한국', flag: '🇰🇷', initial: 'J', bio: '편안하게 받아주는 서울 파트너 지우와 첫 인사를 연습해요.' }
     };
     const QUIZ_THEME_IMAGES = {
-      cafe: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80',
-      restaurant: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80',
-      street: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80',
-      hotel: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80'
+      fr: {
+        cafe: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80',
+        restaurant: 'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=600&q=80',
+        street: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80',
+        hotel: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80'
+      },
+      en: {
+        cafe: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=600&q=80',
+        restaurant: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80',
+        street: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=600&q=80',
+        hotel: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80'
+      },
+      ja: {
+        cafe: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=600&q=80',
+        restaurant: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80',
+        street: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80',
+        hotel: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=600&q=80'
+      },
+      ko: {
+        cafe: 'https://images.unsplash.com/photo-1538485399081-7191377e8241?auto=format&fit=crop&w=600&q=80',
+        restaurant: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=600&q=80',
+        street: 'https://images.unsplash.com/photo-1517154421773-0529f29ea451?auto=format&fit=crop&w=600&q=80',
+        hotel: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80'
+      },
+      es: {
+        cafe: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=600&q=80',
+        restaurant: 'https://images.unsplash.com/photo-1515443961218-a51367888e4b?auto=format&fit=crop&w=600&q=80',
+        street: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=600&q=80',
+        hotel: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=600&q=80'
+      },
+      zh: {
+        cafe: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=600&q=80',
+        restaurant: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=600&q=80',
+        street: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=600&q=80',
+        hotel: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80'
+      }
     };
+    function quizThemeImage(lang, theme) {
+      const pack = QUIZ_THEME_IMAGES[lang] || QUIZ_THEME_IMAGES.en;
+      return (theme && pack[theme]) || pack.cafe;
+    }
     const FALLBACK_QUIZ_BY_LANG = {
       en: [
-        { theme: 'cafe', themeIndex: 1, question: '카페 카운터에서 직원이 "What can I get for you?"라고 물었을 때 자연스러운 주문 표현은?', options: ['Coffee me.', 'Can I have a latte, please?', 'Give me now.', 'I am coffee.'], answer: 1, imageUrl: QUIZ_THEME_IMAGES.cafe },
-        { theme: 'restaurant', themeIndex: 2, question: '레스토랑에서 "두 명 자리 있나요?"를 영어로 표현한 것은?', options: ['I am two.', 'A table for two, please.', 'Two me table.', 'Check-in two.'], answer: 1, imageUrl: QUIZ_THEME_IMAGES.restaurant },
-        { theme: 'street', themeIndex: 3, question: '길거리에서 "지하철역이 어디인가요?"라고 위치를 물어보는 가장 자연스러운 표현은?', options: ['Subway me where.', 'I am station.', 'Excuse me, where is the subway station?', 'Hotel subway please.'], answer: 2, imageUrl: QUIZ_THEME_IMAGES.street },
-        { theme: 'hotel', themeIndex: 4, question: '호텔 체크인 시 직원이 "Under what name is the reservation?"이라고 물었을 때 의미는?', options: ['예약자 이름이 어떻게 되세요?', '몇 시에 체크아웃하세요?', '커피 드릴까요?', '지하철이 어디예요?'], answer: 0, imageUrl: QUIZ_THEME_IMAGES.hotel }
+        { theme: 'cafe', themeIndex: 1, question: '카페 카운터에서 직원이 "What can I get for you?"라고 물었을 때 자연스러운 주문 표현은?', options: ['Coffee me.', 'Can I have a latte, please?', 'Give me now.', 'I am coffee.'], answer: 1, imageUrl: quizThemeImage('en', 'cafe') },
+        { theme: 'restaurant', themeIndex: 2, question: '레스토랑에서 "두 명 자리 있나요?"를 영어로 표현한 것은?', options: ['I am two.', 'A table for two, please.', 'Two me table.', 'Check-in two.'], answer: 1, imageUrl: quizThemeImage('en', 'restaurant') },
+        { theme: 'street', themeIndex: 3, question: '길거리에서 "지하철역이 어디인가요?"라고 위치를 물어보는 가장 자연스러운 표현은?', options: ['Subway me where.', 'I am station.', 'Excuse me, where is the subway station?', 'Hotel subway please.'], answer: 2, imageUrl: quizThemeImage('en', 'street') },
+        { theme: 'hotel', themeIndex: 4, question: '호텔 체크인 시 직원이 "Under what name is the reservation?"이라고 물었을 때 의미는?', options: ['예약자 이름이 어떻게 되세요?', '몇 시에 체크아웃하세요?', '커피 드릴까요?', '지하철이 어디예요?'], answer: 0, imageUrl: quizThemeImage('en', 'hotel') }
       ]
     };
 
@@ -1703,7 +1739,7 @@
 
     function normalizeQuizItem(raw) {
       const theme = raw.theme || null;
-      const imageUrl = raw.imageUrl || raw.image || (theme && QUIZ_THEME_IMAGES[theme]) || null;
+      const imageUrl = raw.imageUrl || raw.image || (theme && quizThemeImage(quizLang, theme)) || null;
       return {
         theme,
         themeIndex: raw.themeIndex || null,
@@ -1930,7 +1966,7 @@
       setQuizProgress(index, quizItems.length);
       const slide = document.createElement('div');
       slide.className = 'quiz-slide active';
-      const src = q.imageUrl || q.image || (q.theme && QUIZ_THEME_IMAGES[q.theme]);
+      const src = q.imageUrl || q.image || quizThemeImage(quizLang, q.theme);
       const imageBlock = src
         ? `<div class="quiz-illustration"><img src="${escapeHtml(src)}" alt="${escapeHtml(t('quiz.theme.' + (q.theme || 'cafe')))}" decoding="async" onerror="this.onerror=null;this.closest('.quiz-illustration').classList.add('is-fallback');"><div class="quiz-illustration-fallback" aria-hidden="true">${q.theme === 'hotel' ? '🏨' : q.theme === 'street' ? '🗺️' : q.theme === 'restaurant' ? '🍽️' : '☕'}</div></div>`
         : '';
