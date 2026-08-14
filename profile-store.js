@@ -18,6 +18,8 @@ var JAM_KEY = 'dayo.jamCount';
 var VOCAB_KEY = 'dayo.reviewVocab';
 var WELCOME_COUPON_KEY = 'dayo.hasWelcomeCoupon';
 var WELCOME_COUPON_CODE = 'WELCOME_9900';
+var COUPONS_KEY = 'dayo.coupons';
+var WELCOME_TITLE = '첫 수업 9,900원 체험 할인권';
 var STREAK_KEY = 'streakCount';
 var LAST_LOGIN_KEY = 'lastLoginDate';
 var SPEED_KEY = 'dayo.chat.speed';
@@ -384,9 +386,191 @@ async function updateProfile(partial, options) {
   }
 }
 
+function welcomeCouponShape(extra) {
+  return Object.assign({
+    id: 'local-welcome',
+    code: WELCOME_COUPON_CODE,
+    title: WELCOME_TITLE,
+    discount_price: 9900,
+    original_price: 19900,
+    is_used: false
+  }, extra || {});
+}
+
+function readLocalCoupons() {
+  try {
+    var parsed = JSON.parse(lsGet(COUPONS_KEY, '[]'));
+    if (Array.isArray(parsed) && parsed.length) return parsed;
+  } catch (e) { /* ignore */ }
+  if (lsGet(WELCOME_COUPON_KEY, '') === '1' || (profileCache && profileCache.has_welcome_coupon)) {
+    return [welcomeCouponShape()];
+  }
+  return [];
+}
+
+function writeLocalCoupons(rows) {
+  try {
+    window.localStorage.setItem(COUPONS_KEY, JSON.stringify(rows || []));
+  } catch (e) { /* ignore */ }
+}
+
+function upsertLocalCoupon(coupon) {
+  if (!coupon) return readLocalCoupons();
+  var list = readLocalCoupons();
+  var matched = false;
+  list = list.map(function (row) {
+    if ((coupon.id && row.id === coupon.id) || row.code === coupon.code) {
+      matched = true;
+      if (row.is_used && !coupon.is_used) return row;
+      return Object.assign({}, row, coupon);
+    }
+    return row;
+  });
+  if (!matched) list.push(coupon);
+  writeLocalCoupons(list);
+  return list;
+}
+
+function unusedCoupons(rows) {
+  return (rows || readLocalCoupons()).filter(function (row) {
+    return row && row.is_used !== true;
+  });
+}
+
+function getUnusedWelcomeCoupon(rows) {
+  var list = unusedCoupons(rows);
+  for (var i = 0; i < list.length; i++) {
+    if (list[i].code === WELCOME_COUPON_CODE) return list[i];
+  }
+  return null;
+}
+
+function couponDisplayTitle(coupon) {
+  if (!coupon) return '';
+  if (coupon.code === WELCOME_COUPON_CODE) {
+    return '🎉 첫 수업 9,900원 체험 할인권 (19,900원 ➔ 9,900원)';
+  }
+  return coupon.title || coupon.code;
+}
+
+function dispatchCouponChange(rows) {
+  document.dispatchEvent(new CustomEvent('dayo:couponchange', {
+    detail: { coupons: rows || readLocalCoupons() }
+  }));
+}
+
+async function fetchCoupons() {
+  var local = readLocalCoupons();
+  var client = getClient();
+  var userId = getAuthUserId();
+  var clientKey = getClientKey();
+  if (!client) {
+    syncCouponUI(local);
+    return local;
+  }
+
+  try {
+    var query = client.from('coupons').select('*').order('created_at', { ascending: false });
+    if (userId) query = query.eq('user_id', userId);
+    else query = query.eq('client_key', clientKey);
+    var res = await query;
+    if (res.error) throw res.error;
+    var rows = Array.isArray(res.data) ? res.data : [];
+    if (!rows.length && (lsGet(WELCOME_COUPON_KEY, '') === '1' || (profileCache && profileCache.has_welcome_coupon))) {
+      var localWelcome = local.filter(function (row) { return row.code === WELCOME_COUPON_CODE; })[0];
+      if (localWelcome && localWelcome.is_used) {
+        rows = local;
+      } else {
+        var synthetic = welcomeCouponShape({
+          user_id: userId || null,
+          client_key: clientKey
+        });
+        try {
+          var inserted = await client.from('coupons').insert({
+            user_id: userId || null,
+            client_key: clientKey,
+            code: WELCOME_COUPON_CODE,
+            title: WELCOME_TITLE,
+            discount_price: 9900,
+            original_price: 19900,
+            is_used: false
+          }).select('*').single();
+          if (!inserted.error && inserted.data) synthetic = inserted.data;
+        } catch (e) { /* table may not exist yet */ }
+        rows = [synthetic];
+      }
+    }
+    writeLocalCoupons(rows);
+    syncCouponUI(rows);
+    dispatchCouponChange(rows);
+    return rows;
+  } catch (err) {
+    console.warn('[DayO] coupons fetch failed — localStorage kept', err);
+    syncCouponUI(local);
+    return local;
+  }
+}
+
+async function markCouponUsed(coupon) {
+  if (!coupon) return null;
+  var used = Object.assign({}, coupon, {
+    is_used: true,
+    used_at: new Date().toISOString()
+  });
+  var list = upsertLocalCoupon(used);
+  var client = getClient();
+  if (client) {
+    try {
+      var patch = { is_used: true, used_at: used.used_at };
+      if (coupon.id && String(coupon.id).indexOf('local-') !== 0) {
+        await client.from('coupons').update(patch).eq('id', coupon.id);
+      } else {
+        var userId = getAuthUserId();
+        var q = client.from('coupons').update(patch).eq('code', coupon.code).eq('is_used', false);
+        if (userId) q = q.eq('user_id', userId);
+        else q = q.eq('client_key', getClientKey());
+        await q;
+      }
+    } catch (e) {
+      console.warn('[DayO] coupon mark used failed — localStorage kept', e);
+    }
+  }
+  syncCouponUI(list);
+  dispatchCouponChange(list);
+  return used;
+}
+
+function syncCouponUI(rows) {
+  var unused = unusedCoupons(rows || readLocalCoupons());
+  Array.prototype.forEach.call(document.querySelectorAll('[data-coupon-wallet]'), function (list) {
+    list.innerHTML = unused.map(function (coupon) {
+      var title = escapeHtml(couponDisplayTitle(coupon));
+      var orig = Number(coupon.original_price) || 19900;
+      var due = Number(coupon.discount_price) || 9900;
+      return '' +
+        '<article class="coupon-item" data-coupon-code="' + escapeHtml(coupon.code || '') + '">' +
+          '<p class="coupon-item__eyebrow">UNUSED COUPON</p>' +
+          '<p class="coupon-item__title">' + title + '</p>' +
+          '<p class="coupon-item__price"><span>' + orig.toLocaleString('ko-KR') + '원</span> ➔ <strong>' + due.toLocaleString('ko-KR') + '원</strong></p>' +
+          '<button type="button" class="primary-btn" data-tickets-open>지금 적용하기</button>' +
+        '</article>';
+    }).join('');
+    list.hidden = unused.length === 0;
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-coupon-wallet-empty]'), function (el) {
+    el.hidden = unused.length > 0;
+  });
+}
+
 async function grantWelcomeCoupon(userId, clientKey) {
   lsSet(WELCOME_COUPON_KEY, '1');
   if (profileCache) profileCache.has_welcome_coupon = true;
+  upsertLocalCoupon(welcomeCouponShape({
+    user_id: userId || null,
+    client_key: clientKey || ('user:' + userId)
+  }));
+  syncCouponUI();
+  dispatchCouponChange();
   var client = getClient();
   if (!client || !userId) return;
   try {
@@ -400,12 +584,13 @@ async function grantWelcomeCoupon(userId, clientKey) {
       user_id: userId,
       client_key: clientKey || ('user:' + userId),
       code: WELCOME_COUPON_CODE,
-      title: '첫 수업 9,900원 체험 할인권',
+      title: WELCOME_TITLE,
       discount_price: 9900,
       original_price: 19900,
       is_used: false
     });
   } catch (e) { /* duplicate welcome coupon is fine */ }
+  fetchCoupons();
 }
 
 async function ensureProfileForUser(user) {
@@ -739,6 +924,7 @@ function syncRewardUI() {
   Array.prototype.forEach.call(document.querySelectorAll('[data-review-vocab-empty]'), function (el) {
     el.hidden = items.length > 0;
   });
+  syncCouponUI();
 }
 
 function escapeHtml(str) {
@@ -905,11 +1091,18 @@ window.DayOProfileStore = {
   mergeVocab: mergeVocab,
   saveSessionLog: saveSessionLog,
   getLastTranscript: getLastTranscript,
-  syncRewardUI: syncRewardUI
+  syncRewardUI: syncRewardUI,
+  fetchCoupons: fetchCoupons,
+  markCouponUsed: markCouponUsed,
+  getUnusedWelcomeCoupon: getUnusedWelcomeCoupon,
+  unusedCoupons: unusedCoupons,
+  couponDisplayTitle: couponDisplayTitle,
+  syncCouponUI: syncCouponUI
 };
 
 ready().then(function () {
   syncRewardUI();
+  return fetchCoupons();
 }).catch(function (e) {
   console.warn('[DayO] profile bootstrap error', e);
   syncRewardUI();

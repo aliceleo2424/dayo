@@ -1,5 +1,6 @@
 /* DayO 세션 이용권 구매 모달 — mypage / index 공용 (결제 연동 전 UI)
  * 트리거: [data-tickets-open] 또는 ?tickets=open
+ * 미사용 WELCOME_9900 쿠폰이 있으면 1회 이용권(19,900원)에 자동 적용 → 9,900원
  */
 (function () {
   'use strict';
@@ -15,6 +16,7 @@
       badge: '첫 가입 전용 ☕️',
       title: '첫 수업 체험권',
       price: '9,900원',
+      priceValue: 9900,
       meta: '1회',
       copy: '첫 가입 전용 체험가',
       tickets: 1,
@@ -25,6 +27,7 @@
       badge: '',
       title: '1회 단품 이용권',
       price: '19,900원',
+      priceValue: 19900,
       meta: '1회',
       copy: '필요할 때 한 회씩 가볍게',
       tickets: 1,
@@ -35,6 +38,7 @@
       badge: '🔥 BEST! 1회 무료',
       title: '10회 패키지',
       price: '199,000원',
+      priceValue: 199000,
       meta: '10회 결제 + 1회 서비스 (총 11회)',
       copy: '10회 가격에 1회(19,900원 상당) 무료 증정!',
       tickets: 11,
@@ -45,6 +49,7 @@
       badge: '🚀 실속 패키지',
       title: '3개월 속성 패키지',
       price: '597,000원',
+      priceValue: 597000,
       meta: '30회 결제 + 4회 서비스 (총 34회)',
       copy: '30회 가격으로 총 34회 이용! 4회(79,600원 상당) 무료 증정 / 90일 내 자유 예약',
       tickets: 34,
@@ -75,20 +80,36 @@
     'font-weight:800;letter-spacing:-.03em;line-height:1.35;}',
     '.tk-sub{margin:.55rem auto 0;max-width:28rem;font-size:.88rem;line-height:1.6;color:#9A8580;font-weight:600;}',
     '.tk-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.2rem 1.25rem 1.4rem;}',
+    '.tk-duebar{display:none;margin:0 0 1rem;padding:1.05rem 1.1rem 1.15rem;border-radius:22px;text-align:center;',
+    'border:1px solid rgba(255,107,87,.28);background:linear-gradient(165deg,#FFF6F2,#FFE8E3 50%,#FFF9F4);',
+    'box-shadow:0 10px 24px rgba(255,107,87,.12);}',
+    '.tk-duebar.is-on{display:block;}',
+    '.tk-duebar__label{font-size:.78rem;font-weight:800;color:#FF6B57;letter-spacing:.02em;}',
+    '.tk-duebar__was{margin-top:.35rem;font-size:.95rem;font-weight:700;color:#9A8580;text-decoration:line-through;}',
+    '.tk-duebar__now{margin-top:.1rem;font-size:clamp(1.85rem,5vw,2.35rem);font-weight:900;color:#FF6B57;',
+    'letter-spacing:-.04em;line-height:1.15;}',
+    '.tk-duebar__hint{margin-top:.35rem;font-size:.78rem;font-weight:700;color:#5C4A42;}',
     '.tk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.85rem;}',
     '.tk-card{position:relative;display:flex;flex-direction:column;gap:.45rem;padding:1.1rem 1rem 1.05rem;',
     'border-radius:22px;border:1px solid rgba(255,209,220,.7);background:linear-gradient(180deg,#FFFCFA,#FFF8F5);',
     'box-shadow:0 8px 22px rgba(113,83,72,.06);text-align:left;}',
     '.tk-card--best{border-color:rgba(255,107,87,.55);background:linear-gradient(165deg,#FFF6F2 0%,#FFE8E3 48%,#FFF9F4 100%);',
     'box-shadow:0 12px 28px rgba(255,107,87,.14),0 0 0 1px rgba(255,107,87,.08);}',
+    '.tk-card--coupon{border-color:rgba(255,107,87,.45);background:linear-gradient(165deg,#FFF9F6,#FFEDE8);}',
     '.tk-badge{display:inline-flex;align-self:flex-start;padding:.28rem .65rem;border-radius:999px;',
     'background:rgba(255,249,196,.85);border:1px solid rgba(255,209,220,.7);',
     'color:#5C4A42;font-size:.72rem;font-weight:800;line-height:1.2;}',
-    '.tk-card--best .tk-badge{background:linear-gradient(135deg,#FF7A68,#FF6B57);color:#fff;border-color:transparent;}',
+    '.tk-card--best .tk-badge,.tk-card--coupon .tk-badge{background:linear-gradient(135deg,#FF7A68,#FF6B57);color:#fff;border-color:transparent;}',
     '.tk-card__title{font-family:Quicksand,Gowun Dodum,sans-serif;font-size:1.02rem;font-weight:800;letter-spacing:-.02em;}',
+    '.tk-card__was{margin:0;font-size:.88rem;font-weight:700;color:#9A8580;text-decoration:line-through;}',
     '.tk-card__price{font-size:1.35rem;font-weight:800;color:#FF6B57;letter-spacing:-.03em;line-height:1.2;}',
+    '.tk-card__price--due{font-size:1.85rem;font-weight:900;}',
     '.tk-card__meta{font-size:.78rem;font-weight:700;color:#9A8580;}',
     '.tk-card__copy{margin-top:.15rem;font-size:.8rem;font-weight:600;line-height:1.45;color:#5C4A42;}',
+    '.tk-coupon{display:flex;align-items:flex-start;gap:.5rem;margin-top:.2rem;padding:.65rem .7rem;',
+    'border-radius:16px;border:1px solid rgba(255,107,87,.22);background:rgba(255,255,255,.72);cursor:pointer;}',
+    '.tk-coupon input{margin-top:.15rem;accent-color:#FF6B57;width:1rem;height:1rem;flex:0 0 auto;}',
+    '.tk-coupon span{font-size:.78rem;font-weight:800;line-height:1.45;color:#5C4A42;}',
     '.tk-card__cta{margin-top:auto;padding-top:.65rem;}',
     '.tk-buy{width:100%;padding:.7rem .9rem;border:none;border-radius:999px;cursor:pointer;',
     'font-family:inherit;font-size:.86rem;font-weight:800;color:#fff;',
@@ -119,22 +140,84 @@
   var el = {};
   var lastFocused = null;
   var toastTimer = null;
+  var buying = false;
+  var couponState = {
+    unusedWelcome: null,
+    applyWelcome: true
+  };
+
+  function formatWon(n) {
+    return Number(n).toLocaleString('ko-KR') + '원';
+  }
+
+  function welcomeDue() {
+    var coupon = couponState.unusedWelcome;
+    return {
+      original: Number(coupon && coupon.original_price) || 19900,
+      due: Number(coupon && coupon.discount_price) || 9900
+    };
+  }
+
+  function isCouponApplied() {
+    return !!(couponState.applyWelcome && couponState.unusedWelcome);
+  }
+
+  function visiblePlans() {
+    return PLANS.filter(function (plan) {
+      if (plan.id === 'trial' && couponState.unusedWelcome) return false;
+      return true;
+    });
+  }
 
   function planCard(plan) {
+    var applied = plan.id === 'single' && isCouponApplied();
+    var prices = welcomeDue();
     var badge = plan.badge
       ? '<span class="tk-badge">' + plan.badge + '</span>'
-      : '';
+      : (applied ? '<span class="tk-badge">체험 할인권 적용</span>' : '');
+    var priceHtml = applied
+      ? '<p class="tk-card__was">' + formatWon(prices.original) + '</p>' +
+        '<p class="tk-card__price tk-card__price--due">' + formatWon(prices.due) + '</p>'
+      : '<p class="tk-card__price">' + plan.price + '</p>';
+    var couponHtml = '';
+    if (plan.id === 'single' && couponState.unusedWelcome) {
+      couponHtml =
+        '<label class="tk-coupon">' +
+          '<input type="checkbox" data-tk-coupon' + (couponState.applyWelcome ? ' checked' : '') + '>' +
+          '<span>🎉 첫 수업 9,900원 체험 할인권 (19,900원 ➔ 9,900원)</span>' +
+        '</label>';
+    }
+    var cls = 'tk-card';
+    if (plan.featured) cls += ' tk-card--best';
+    if (applied) cls += ' tk-card--coupon';
     return '' +
-      '<article class="tk-card' + (plan.featured ? ' tk-card--best' : '') + '" data-plan="' + plan.id + '">' +
+      '<article class="' + cls + '" data-plan="' + plan.id + '">' +
         badge +
         '<h3 class="tk-card__title">' + plan.title + '</h3>' +
-        '<p class="tk-card__price">' + plan.price + '</p>' +
+        priceHtml +
         '<p class="tk-card__meta">' + plan.meta + '</p>' +
-        '<p class="tk-card__copy">' + plan.copy + '</p>' +
+        '<p class="tk-card__copy">' + (applied ? '첫 수업 체험가로 결제돼요' : plan.copy) + '</p>' +
+        couponHtml +
         '<div class="tk-card__cta">' +
-          '<button type="button" class="tk-buy" data-tk-buy="' + plan.id + '">구매하기</button>' +
+          '<button type="button" class="tk-buy" data-tk-buy="' + plan.id + '">' +
+            (applied ? formatWon(prices.due) + ' 결제하기' : '구매하기') +
+          '</button>' +
         '</div>' +
       '</article>';
+  }
+
+  function renderPlans() {
+    if (!el.grid) return;
+    el.grid.innerHTML = visiblePlans().map(planCard).join('');
+    if (el.duebar) {
+      var on = isCouponApplied();
+      el.duebar.classList.toggle('is-on', on);
+      if (on) {
+        var prices = welcomeDue();
+        el.duebar.querySelector('[data-tk-due-was]').textContent = formatWon(prices.original);
+        el.duebar.querySelector('[data-tk-due-now]').textContent = formatWon(prices.due);
+      }
+    }
   }
 
   function buildMarkup() {
@@ -147,7 +230,13 @@
           '<p class="tk-sub">기준 세션: 총 30분 (25분 화상 대화 + 5분 미니 퀴즈/리포트)</p>' +
         '</div>' +
         '<div class="tk-body">' +
-          '<div class="tk-grid">' + PLANS.map(planCard).join('') + '</div>' +
+          '<div class="tk-duebar" data-tk-duebar>' +
+            '<p class="tk-duebar__label">🎉 첫 수업 체험 할인권 자동 적용</p>' +
+            '<p class="tk-duebar__was" data-tk-due-was>19,900원</p>' +
+            '<p class="tk-duebar__now" data-tk-due-now>9,900원</p>' +
+            '<p class="tk-duebar__hint">1회 이용권 결제 예정 금액</p>' +
+          '</div>' +
+          '<div class="tk-grid" data-tk-grid></div>' +
           '<aside class="tk-policy" aria-label="세션 규정 및 이용 안내">' +
             '<p class="tk-policy__title">세션 규정 및 이용 안내</p>' +
             '<ul class="tk-policy__list">' +
@@ -170,6 +259,32 @@
     }, 2800);
   }
 
+  function findPlan(id) {
+    for (var i = 0; i < PLANS.length; i++) {
+      if (PLANS[i].id === id) return PLANS[i];
+    }
+    return null;
+  }
+
+  async function loadCoupons() {
+    var store = window.DayOProfileStore;
+    var rows = [];
+    if (store && typeof store.fetchCoupons === 'function') {
+      try {
+        rows = await store.fetchCoupons();
+      } catch (e) {
+        rows = [];
+      }
+    }
+    var welcome = store && typeof store.getUnusedWelcomeCoupon === 'function'
+      ? store.getUnusedWelcomeCoupon(rows)
+      : null;
+    couponState.unusedWelcome = welcome || null;
+    couponState.applyWelcome = !!couponState.unusedWelcome;
+    renderPlans();
+    return couponState.unusedWelcome;
+  }
+
   function open() {
     lastFocused = document.activeElement;
     el.overlay.classList.add('is-open');
@@ -177,6 +292,7 @@
     else document.body.style.overflow = 'hidden';
     var closeBtn = el.overlay.querySelector('[data-tk-close]');
     if (closeBtn) closeBtn.focus();
+    loadCoupons();
   }
 
   function close() {
@@ -197,34 +313,57 @@
     if (lastFocused && lastFocused.focus) lastFocused.focus();
   }
 
-  function bindEvents() {
-    el.overlay.addEventListener('click', function (e) {
-      if (e.target === el.overlay || e.target.closest('[data-tk-close]')) close();
-    });
-
-    el.overlay.addEventListener('click', function (e) {
-      var buy = e.target.closest('[data-tk-buy]');
-      if (!buy) return;
-      var plan = null;
-      for (var i = 0; i < PLANS.length; i++) {
-        if (PLANS[i].id === buy.getAttribute('data-tk-buy')) {
-          plan = PLANS[i];
-          break;
-        }
+  async function completePurchase(plan) {
+    if (buying || !plan) return;
+    buying = true;
+    var applyCoupon = plan.id === 'single' && isCouponApplied();
+    var coupon = couponState.unusedWelcome;
+    try {
+      if (applyCoupon && window.DayOProfileStore && typeof window.DayOProfileStore.markCouponUsed === 'function') {
+        await window.DayOProfileStore.markCouponUsed(coupon);
+        couponState.unusedWelcome = null;
+        couponState.applyWelcome = false;
       }
-      if (!plan) return;
-
       var wallet = window.DayOTicketWallet;
       var added = plan.tickets || 0;
       var result = wallet
         ? wallet.addTickets(added)
         : { ticketCount: added, added: added };
+      renderPlans();
+      if (applyCoupon) {
+        showToast('🎉 9,900원 결제가 완료되었습니다! 체험 할인권이 사용되고 이용권 1장이 충전되었습니다.');
+      } else {
+        showToast('🎉 결제가 완료되었습니다! 이용권 ' + result.added + '장이 충전되었습니다.');
+      }
+    } finally {
+      buying = false;
+    }
+  }
 
-      showToast('🎉 결제가 완료되었습니다! 이용권 ' + result.added + '장이 충전되었습니다.');
+  function bindEvents() {
+    el.overlay.addEventListener('click', function (e) {
+      if (e.target === el.overlay || e.target.closest('[data-tk-close]')) close();
+    });
+
+    el.overlay.addEventListener('change', function (e) {
+      var box = e.target.closest('[data-tk-coupon]');
+      if (!box) return;
+      couponState.applyWelcome = !!box.checked;
+      renderPlans();
+    });
+
+    el.overlay.addEventListener('click', function (e) {
+      var buy = e.target.closest('[data-tk-buy]');
+      if (!buy) return;
+      completePurchase(findPlan(buy.getAttribute('data-tk-buy')));
     });
 
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && el.overlay.classList.contains('is-open')) close();
+    });
+
+    document.addEventListener('dayo:couponchange', function () {
+      if (el.overlay && el.overlay.classList.contains('is-open')) loadCoupons();
     });
   }
 
@@ -256,7 +395,10 @@
 
     el.overlay = overlay;
     el.toast = toast;
+    el.grid = overlay.querySelector('[data-tk-grid]');
+    el.duebar = overlay.querySelector('[data-tk-duebar]');
     bindEvents();
+    renderPlans();
   }
 
   function promptPurchase(message) {
@@ -287,6 +429,7 @@
       promptPurchase: promptPurchase
     };
     openFromQuery();
+    loadCoupons();
   }
 
   if (document.readyState === 'loading') {

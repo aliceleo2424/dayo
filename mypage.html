@@ -463,6 +463,43 @@
     .vocab-item__meaning { color: var(--muted); font-size: 0.78rem; font-weight: 700; }
     .vocab-empty { margin: 0; color: var(--muted); font-size: 0.82rem; line-height: 1.55; }
 
+    .coupon-card { margin-top: 1.25rem; padding: 1.5rem; }
+    .coupon-list { display: grid; gap: 0.75rem; }
+    .coupon-item {
+      display: grid;
+      gap: 0.35rem;
+      padding: 1.15rem 1.2rem 1.2rem;
+      border: 1px solid rgba(255, 107, 87, 0.22);
+      border-radius: 22px;
+      background: linear-gradient(145deg, #FFF6F2, #FFE9E4 55%, #FFF9F0);
+      box-shadow: 0 10px 24px rgba(255, 107, 87, 0.08);
+    }
+    .coupon-item__eyebrow {
+      color: var(--coral);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+    .coupon-item__title {
+      font-size: 1.02rem;
+      font-weight: 800;
+      line-height: 1.45;
+      letter-spacing: -0.02em;
+    }
+    .coupon-item__price {
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+    .coupon-item__price span { text-decoration: line-through; }
+    .coupon-item__price strong { color: var(--coral); font-size: 1.05rem; }
+    .coupon-item .primary-btn {
+      margin-top: 0.55rem;
+      width: fit-content;
+      padding: 0.7rem 1.1rem;
+    }
+    .coupon-empty { margin: 0; color: var(--muted); font-size: 0.82rem; line-height: 1.55; }
+
     /* 지난 대화 */
     .history-card { margin-top: 1.25rem; padding: 1.5rem; }
     .history-list { display: grid; gap: 0.75rem; }
@@ -525,7 +562,8 @@
       .welcome,
       .topbar-extras { display: none; }
       .status-grid { grid-template-columns: 1fr; }
-      .status-card, .sessions-card, .library-card { padding: 1.1rem; }
+      .status-card, .sessions-card, .library-card, .coupon-card { padding: 1.1rem; }
+      .coupon-item .primary-btn { width: 100%; }
       .session { grid-template-columns: 1fr; }
       .session-actions .primary-btn,
       .session-actions .ghost-btn { flex: 1; }
@@ -647,6 +685,17 @@
           <p class="status-note" data-i18n="mypage.status.timeNote">연속 3주째 대화를 이어가는 중이에요 💖</p>
         </div>
       </div>
+    </section>
+
+    <section class="card coupon-card" aria-labelledby="couponTitle">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title" id="couponTitle" data-i18n="mypage.coupon.title">🎟️ 쿠폰함</h2>
+          <p class="card-subtitle" data-i18n="mypage.coupon.sub">보유 중인 미사용 쿠폰이에요. 1회 이용권 결제 시 자동으로 적용돼요.</p>
+        </div>
+      </div>
+      <div class="coupon-list" data-coupon-wallet></div>
+      <p class="coupon-empty" data-coupon-wallet-empty data-i18n="mypage.coupon.empty">아직 사용 가능한 쿠폰이 없어요.</p>
     </section>
 
     <div class="dashboard-grid">

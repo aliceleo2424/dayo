@@ -342,6 +342,33 @@
     'mypage.status.timeNote': {
       KO: '연속 3주째 대화를 이어가는 중이에요 💖', EN: '3 weeks in a row — keep it up! 💖', ZH: '已连续3周对话 💖', JA: '3週連続で会話中 💖', FR: '3 semaines d\'affilée 💖', ES: '¡3 semanas seguidas! 💖'
     },
+    'mypage.coupon.title': {
+      KO: '🎟️ 쿠폰함', EN: '🎟️ Coupons', ZH: '🎟️ 优惠券', JA: '🎟️ クーポン', FR: '🎟️ Coupons', ES: '🎟️ Cupones'
+    },
+    'mypage.coupon.sub': {
+      KO: '보유 중인 미사용 쿠폰이에요. 1회 이용권 결제 시 자동으로 적용돼요.',
+      EN: 'Unused coupons. Auto-applied when you buy a single session.',
+      ZH: '未使用优惠券，购买单次课时自动适用。',
+      JA: '未使用クーポンです。1回利用券の支払いで自動適用されます。',
+      FR: 'Coupons inutilisés, appliqués automatiquement à l’achat d’une session.',
+      ES: 'Cupones sin usar. Se aplican al comprar una sesión.'
+    },
+    'mypage.coupon.empty': {
+      KO: '아직 사용 가능한 쿠폰이 없어요.',
+      EN: 'No unused coupons yet.',
+      ZH: '暂无可用优惠券。',
+      JA: '使えるクーポンはまだありません。',
+      FR: 'Aucun coupon disponible.',
+      ES: 'Aún no hay cupones.'
+    },
+    'mypage.coupon.welcome': {
+      KO: '🎉 첫 수업 9,900원 체험 할인권 (19,900원 ➔ 9,900원)',
+      EN: '🎉 First-class 9,900 KRW trial coupon (19,900 → 9,900)',
+      ZH: '🎉 首课 9,900韩元体验券（19,900 ➔ 9,900）',
+      JA: '🎉 初回授業9,900ウォン体験クーポン（19,900 ➔ 9,900）',
+      FR: '🎉 Coupon d’essai 9 900 KRW (19 900 ➔ 9 900)',
+      ES: '🎉 Cupón de prueba 9.900 KRW (19.900 ➔ 9.900)'
+    },
     'mypage.sessions.title': {
       KO: '📅 내 예약 세션', EN: '📅 Upcoming Sessions', ZH: '📅 我的预约', JA: '📅 予約セッション', FR: '📅 Sessions à venir', ES: '📅 Próximas sesiones'
     },
