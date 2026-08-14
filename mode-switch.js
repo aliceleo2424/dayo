@@ -36,11 +36,11 @@
     '[data-mode-switch="block"] .ms-profile{display:block;width:100%;}',
     '[data-mode-switch="block"] .ms-profile > .ms-btn{width:100%;justify-content:center;}',
     '[data-mode-switch="block"] .ms-menu{left:0;right:0;min-width:0;}',
-    '.ms-overlay{position:fixed;inset:0;z-index:400;display:flex;align-items:center;justify-content:center;',
+    '.ms-overlay{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;',
     'padding:1.25rem;background:rgba(92,74,66,.28);backdrop-filter:blur(8px);opacity:0;visibility:hidden;',
-    'width:100%;max-width:100%;overflow-x:hidden;box-sizing:border-box;',
+    'pointer-events:none;width:100%;max-width:100%;overflow-x:hidden;box-sizing:border-box;',
     'transition:opacity .25s;font-family:inherit;}',
-    '.ms-overlay.is-open{opacity:1;visibility:visible;}',
+    '.ms-overlay.is-open{display:flex;opacity:1;visibility:visible;pointer-events:auto;}',
     '.ms-modal{width:min(400px,100%);max-height:min(92vh,720px);overflow-y:auto;padding:1.85rem 1.5rem 1.4rem;',
     'border-radius:26px;text-align:center;border:1px solid rgba(255,214,223,.75);background:#fdfbf7;',
     'color:var(--text,#5C4A42);box-shadow:0 26px 60px rgba(113,83,72,.22);transform:translateY(18px);',
@@ -74,11 +74,11 @@
     '.ms-social-btn--google{background:#fff;color:#5C4A42;border:1px solid rgba(154,133,128,.28);}',
     '.ms-dismiss{margin-top:.9rem;border:none;background:none;cursor:pointer;font-family:inherit;',
     'color:var(--muted,#9A8580);font-size:.78rem;font-weight:700;}',
-    '.ms-welcome-overlay{position:fixed;inset:0;z-index:450;display:flex;align-items:center;justify-content:center;',
+    '.ms-welcome-overlay{position:fixed;inset:0;z-index:450;display:none;align-items:center;justify-content:center;',
     'padding:1.25rem;background:rgba(92,74,66,.32);backdrop-filter:blur(8px);opacity:0;visibility:hidden;',
-    'width:100%;max-width:100%;overflow-x:hidden;box-sizing:border-box;',
+    'pointer-events:none;width:100%;max-width:100%;overflow-x:hidden;box-sizing:border-box;',
     'transition:opacity .28s;font-family:inherit;}',
-    '.ms-welcome-overlay.is-open{opacity:1;visibility:visible;}',
+    '.ms-welcome-overlay.is-open{display:flex;opacity:1;visibility:visible;pointer-events:auto;}',
     '.ms-welcome{width:min(380px,100%);padding:2rem 1.55rem 1.5rem;border-radius:26px;text-align:center;',
     'border:1px solid rgba(255,214,223,.8);background:linear-gradient(180deg,#FFFCFA,#fdfbf7);',
     'color:var(--text,#5C4A42);box-shadow:0 26px 60px rgba(113,83,72,.24);transform:translateY(16px) scale(.97);',
@@ -419,9 +419,68 @@
     }
   }
 
+  function hideAuthLayer(el) {
+    if (!el) return;
+    el.classList.remove('is-open');
+    el.style.display = 'none';
+    el.style.pointerEvents = 'none';
+    el.setAttribute('aria-hidden', 'true');
+  }
+
+  function showAuthLayer(el) {
+    if (!el) return;
+    el.style.display = 'flex';
+    el.style.pointerEvents = 'auto';
+    el.removeAttribute('aria-hidden');
+    el.classList.add('is-open');
+  }
+
+  function restorePageInteraction() {
+    if (window.DayOScrollLock && typeof window.DayOScrollLock.unlockAll === 'function') {
+      window.DayOScrollLock.unlockAll();
+    } else if (window.DayOScrollLock && typeof window.DayOScrollLock.unlock === 'function') {
+      window.DayOScrollLock.unlock();
+    }
+    var html = document.documentElement;
+    var body = document.body;
+    if (html) {
+      html.style.overflow = '';
+      html.style.overflowX = '';
+      html.style.overflowY = '';
+      html.style.pointerEvents = '';
+    }
+    if (body) {
+      body.style.overflow = 'auto';
+      body.style.overflowX = '';
+      body.style.overflowY = '';
+      body.style.pointerEvents = 'auto';
+      body.style.position = '';
+      body.style.top = '';
+      body.style.left = '';
+      body.style.right = '';
+      body.style.bottom = '';
+      body.style.width = '';
+      body.style.height = '';
+      body.style.paddingRight = '';
+      body.style.transform = '';
+      body.style.touchAction = '';
+      body.classList.remove('dayo-scroll-locked');
+      body.removeAttribute('data-dayo-scroll-lock');
+    }
+  }
+
+  function closeAuthModal() {
+    hideAuthLayer(overlay);
+    hideAuthLayer(welcomeOverlay);
+    if (window.DayOMobileNav && typeof window.DayOMobileNav.close === 'function') {
+      window.DayOMobileNav.close();
+    }
+    restorePageInteraction();
+  }
+
   function openLogin(href) {
     pendingHref = href || null;
-    overlay.classList.add('is-open');
+    showAuthLayer(overlay);
     if (window.DayOScrollLock) window.DayOScrollLock.lock();
     else document.body.style.overflow = 'hidden';
     var emailInput = overlay.querySelector('#msEmail');
@@ -432,12 +491,7 @@
   }
 
   function closeLogin() {
-    if (!overlay.classList.contains('is-open')) return;
-    overlay.classList.remove('is-open');
-    if (window.DayOScrollLock) window.DayOScrollLock.unlock();
-    else if (!welcomeOverlay || !welcomeOverlay.classList.contains('is-open')) {
-      document.body.style.overflow = '';
-    }
+    closeAuthModal();
   }
 
   function openWelcome(name) {
@@ -446,16 +500,14 @@
     var body = welcomeOverlay.querySelector('#msWelcomeBody');
     if (title) title.textContent = t('login.welcomeTitle', { name: name });
     if (body) body.textContent = t('login.welcomeBody');
-    welcomeOverlay.classList.add('is-open');
+    showAuthLayer(welcomeOverlay);
     if (window.DayOScrollLock) window.DayOScrollLock.lock();
     else document.body.style.overflow = 'hidden';
   }
 
   function closeWelcome() {
-    if (!welcomeOverlay || !welcomeOverlay.classList.contains('is-open')) return;
-    welcomeOverlay.classList.remove('is-open');
-    if (window.DayOScrollLock) window.DayOScrollLock.unlock();
-    else if (!overlay.classList.contains('is-open')) document.body.style.overflow = '';
+    hideAuthLayer(welcomeOverlay);
+    if (!overlay || !overlay.classList.contains('is-open')) restorePageInteraction();
   }
 
   function finishAuth(name, email, options) {
@@ -463,7 +515,7 @@
     var next = pendingHref;
     pendingHref = null;
     startMemberSession(name, email);
-    closeLogin();
+    closeAuthModal();
     render();
     notifyAuthChange();
 
@@ -518,7 +570,7 @@
       } catch (finishErr) {
         console.warn('[DayO] finishAuth failed', finishErr);
         startMemberSession(result.name || nameFromEmail(cleanedEmail), result.email || cleanedEmail);
-        closeLogin();
+        closeAuthModal();
         render();
         if (result.isNew) showToast(t('login.signupWelcome'), 4200);
         else showToast(t('login.welcomeToast', { name: result.name || nameFromEmail(cleanedEmail) }));
@@ -599,6 +651,7 @@
       '</div>'
     ].join('');
     document.body.appendChild(overlay);
+    hideAuthLayer(overlay);
 
     welcomeOverlay = document.createElement('div');
     welcomeOverlay.className = 'ms-welcome-overlay';
@@ -611,6 +664,7 @@
       '</div>'
     ].join('');
     document.body.appendChild(welcomeOverlay);
+    hideAuthLayer(welcomeOverlay);
 
     overlay.addEventListener('click', function (e) {
       if (e.target === overlay || e.target.closest('[data-ms-close]')) {
@@ -735,6 +789,8 @@
       refresh: render,
       toast: showToast,
       openLogin: openLogin,
+      closeLogin: closeLogin,
+      closeAuthModal: closeAuthModal,
       notifyAuthChange: notifyAuthChange
     };
   }

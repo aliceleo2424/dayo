@@ -884,9 +884,10 @@
       background: rgba(255,248,245,0.75); backdrop-filter: blur(12px);
       display: flex; align-items: center; justify-content: center; padding: 1.5rem;
       width: 100%; max-width: 100%; overflow-x: hidden; box-sizing: border-box;
-      opacity: 0; visibility: hidden; transition: opacity 0.35s ease, visibility 0.35s ease;
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
     }
-    .modal-overlay.active { opacity: 1; visibility: visible; }
+    .modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
 
     .modal {
       position: relative; background: var(--bg-card);
@@ -1194,6 +1195,9 @@
     body.is-logged-in .site-footer {
       padding-top: 0.25rem;
       padding-bottom: 1.5rem;
+    }
+    #about, #tutors, #booking, #reviews, #authDashboard, .auth-live, #loungeCarousel {
+      scroll-margin-top: 5.75rem;
     }
 
     /* Mobile / tablet (md 미만): hamburger + one-line header */
@@ -1540,7 +1544,7 @@
     </section>
 
     <!-- Social Proof -->
-    <section class="reviews" data-landing-only>
+    <section class="reviews" id="reviews" data-landing-only>
       <div class="section-inner">
         <p class="section-label reveal" data-i18n="reviews.eyebrow">Real Stories</p>
         <h2 class="section-title reveal" data-i18n="reviews.title">2030, 직접 경험한 후기</h2>

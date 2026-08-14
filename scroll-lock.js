@@ -5,7 +5,7 @@
   var STYLE_PROPS = [
     'overflow', 'overflowX', 'overflowY',
     'position', 'top', 'left', 'right', 'bottom', 'width', 'height',
-    'paddingRight', 'touchAction', 'overscrollBehavior', 'transform'
+    'paddingRight', 'touchAction', 'overscrollBehavior', 'transform', 'pointerEvents'
   ];
 
   var count = 0;

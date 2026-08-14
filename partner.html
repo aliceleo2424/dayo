@@ -432,10 +432,11 @@
       backdrop-filter: blur(6px);
       opacity: 0;
       visibility: hidden;
+      pointer-events: none;
       transition: opacity 0.25s;
     }
 
-    .modal-overlay.is-open { opacity: 1; visibility: visible; }
+    .modal-overlay.is-open { opacity: 1; visibility: visible; pointer-events: auto; }
 
     .modal {
       width: min(460px, 100%);
