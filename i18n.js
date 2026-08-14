@@ -161,6 +161,38 @@
       FR: 'Mot de passe incorrect. Réessayez 🔑',
       ES: 'Contraseña incorrecta. Inténtalo de nuevo 🔑'
     },
+    'login.confirmEmail': {
+      KO: '가입 메일을 보냈어요. 메일함에서 확인하면 바로 시작할 수 있어요 ✉️',
+      EN: 'We sent a confirmation email. Check your inbox to start ✉️',
+      ZH: '已发送确认邮件，验证后即可开始 ✉️',
+      JA: '確認メールを送りました。受信箱を確認してください ✉️',
+      FR: 'Un e-mail de confirmation a été envoyé ✉️',
+      ES: 'Te enviamos un correo de confirmación ✉️'
+    },
+    'login.authError': {
+      KO: '로그인에 실패했어요. 잠시 후 다시 시도해 주세요',
+      EN: 'Sign-in failed. Please try again in a moment',
+      ZH: '登录失败，请稍后再试',
+      JA: 'ログインに失敗しました。しばらくしてから再度お試しください',
+      FR: 'La connexion a échoué. Réessayez dans un instant',
+      ES: 'No se pudo iniciar sesión. Inténtalo de nuevo'
+    },
+    'login.socialSoon': {
+      KO: '지금은 이메일 또는 Google 로그인을 지원해요 ☕️',
+      EN: 'Email or Google sign-in is available right now ☕️',
+      ZH: '目前支持邮箱或 Google 登录 ☕️',
+      JA: 'いまはメールまたはGoogleログインに対応しています ☕️',
+      FR: 'Connexion e-mail ou Google pour le moment ☕️',
+      ES: 'Ahora mismo puedes entrar con email o Google ☕️'
+    },
+    'login.busy': {
+      KO: '잠시만 기다려 주세요…',
+      EN: 'Just a moment…',
+      ZH: '请稍候…',
+      JA: '少々お待ちください…',
+      FR: 'Un instant…',
+      ES: 'Un momento…'
+    },
     'login.welcomeTitle': {
       KO: '🎉 DayO에 오신 걸 환영해요, {name}님!',
       EN: '🎉 Welcome to DayO, {name}!',

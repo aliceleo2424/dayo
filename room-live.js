@@ -132,7 +132,10 @@
     var extra = {
       roomName: roomName(),
       startedAt: sessionStartedAt,
-      endedAt: new Date().toISOString()
+      endedAt: new Date().toISOString(),
+      userId: (window.DayOProfileStore && window.DayOProfileStore.getUserId && window.DayOProfileStore.getUserId())
+        || (window.DayOMode && window.DayOMode.getUserId && window.DayOMode.getUserId())
+        || ''
     };
     var store = window.DayOProfileStore;
     var done = function (result) {

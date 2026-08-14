@@ -59,6 +59,7 @@
     'font-size:.9rem;font-weight:800;color:#fff;background:var(--coral,#FF6B57);',
     'box-shadow:0 4px 0 var(--coral-dark,#E55A45);}',
     '.ms-login:active{transform:translateY(2px);box-shadow:0 2px 0 var(--coral-dark,#E55A45);}',
+    '.ms-login:disabled{opacity:.62;pointer-events:none;transform:none;box-shadow:none;}',
     '.ms-divider{display:flex;align-items:center;gap:.55rem;margin:1.15rem 0 .85rem;color:var(--muted,#9A8580);',
     'font-size:.72rem;font-weight:700;letter-spacing:-.01em;}',
     '.ms-divider::before,.ms-divider::after{content:"";flex:1;height:1px;background:rgba(154,133,128,.28);}',
@@ -67,6 +68,7 @@
     'padding:.85rem 1rem;border-radius:14px;border:none;cursor:pointer;font-family:inherit;',
     'font-size:.84rem;font-weight:800;transition:transform .15s,opacity .15s;}',
     '.ms-social-btn:hover{transform:translateY(-1px);opacity:.96;}',
+    '.ms-social-btn:disabled{opacity:.6;pointer-events:none;transform:none;}',
     '.ms-social-btn--kakao{background:#FEE500;color:#191919;}',
     '.ms-social-btn--naver{background:#03C75A;color:#fff;}',
     '.ms-social-btn--google{background:#fff;color:#5C4A42;border:1px solid rgba(154,133,128,.28);}',
@@ -119,6 +121,14 @@
 
   function getUserName() {
     try {
+      if (window.DayOProfileStore && typeof window.DayOProfileStore.getUser === 'function') {
+        var user = window.DayOProfileStore.getUser();
+        if (user) {
+          var meta = user.user_metadata || {};
+          return String(meta.user_name || meta.full_name || meta.name || '').trim()
+            || (window.localStorage.getItem(USER_KEY) || '').trim();
+        }
+      }
       return (window.localStorage.getItem(USER_KEY) || '').trim();
     } catch (e) {
       return '';
@@ -126,7 +136,47 @@
   }
 
   function isMember() {
+    if (window.DayOProfileStore && typeof window.DayOProfileStore.isSignedIn === 'function') {
+      if (window.DayOProfileStore.isSignedIn()) return true;
+    }
     return !!getUserName();
+  }
+
+  function waitForStore() {
+    if (window.DayOProfileStore && typeof window.DayOProfileStore.signInWithEmail === 'function') {
+      return Promise.resolve(window.DayOProfileStore);
+    }
+    return new Promise(function (resolve) {
+      var n = 0;
+      var timer = setInterval(function () {
+        n += 1;
+        if (window.DayOProfileStore && typeof window.DayOProfileStore.signInWithEmail === 'function') {
+          clearInterval(timer);
+          resolve(window.DayOProfileStore);
+        } else if (n > 50) {
+          clearInterval(timer);
+          resolve(null);
+        }
+      }, 50);
+    });
+  }
+
+  function setLoginBusy(busy) {
+    if (!overlay) return;
+    var submit = overlay.querySelector('.ms-login');
+    var google = overlay.querySelector('[data-ms-social="google"]');
+    var form = overlay.querySelector('#msLoginForm');
+    if (submit) {
+      submit.disabled = !!busy;
+      submit.textContent = busy ? t('login.busy') : t('login.startBtn');
+    }
+    if (google) google.disabled = !!busy;
+    if (form) {
+      var inputs = form.querySelectorAll('input');
+      Array.prototype.forEach.call(inputs, function (input) {
+        input.disabled = !!busy;
+      });
+    }
   }
 
   function readUsers() {
@@ -231,21 +281,27 @@
     closeAllMenus();
     clearTimeout(welcomeTimer);
     closeWelcome();
-    clearMemberSession();
-    render();
-    notifyAuthChange();
-    showToast(t('login.logoutToast'));
-
-    var leaf = (window.location.pathname || '').split('/').pop() || '';
-    if (leaf && leaf !== 'index.html' && leaf !== 'index.htm') {
-      window.location.href = 'index.html';
-      return;
-    }
-    try {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (e) {
-      window.scrollTo(0, 0);
-    }
+    waitForStore().then(function (store) {
+      if (store && typeof store.signOut === 'function') return store.signOut();
+      clearMemberSession();
+      notifyAuthChange();
+    }).catch(function () {
+      clearMemberSession();
+      notifyAuthChange();
+    }).then(function () {
+      render();
+      showToast(t('login.logoutToast'));
+      var leaf = (window.location.pathname || '').split('/').pop() || '';
+      if (leaf && leaf !== 'index.html' && leaf !== 'index.htm') {
+        window.location.href = 'index.html';
+        return;
+      }
+      try {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (e) {
+        window.scrollTo(0, 0);
+      }
+    });
   }
 
   function showToast(message) {
@@ -274,9 +330,10 @@
     }
 
     if (name) {
+      var initial = name.charAt(0).toUpperCase();
       return {
         href: 'mypage.html',
-        avatar: '👤',
+        avatar: initial || '👤',
         label: t('login.greetingFormat', { name: name }),
         loggedIn: true
       };
@@ -420,30 +477,55 @@
     var cleanedPass = String(password || '');
     if (!cleanedEmail || !cleanedPass) return;
 
-    var existing = findUserByEmail(cleanedEmail);
-    if (existing) {
-      if (existing.password && existing.password !== cleanedPass) {
+    setLoginBusy(true);
+    waitForStore().then(function (store) {
+      if (!store || typeof store.signInWithEmail !== 'function') {
+        throw new Error('unavailable');
+      }
+      return store.signInWithEmail(cleanedEmail, cleanedPass);
+    }).then(function (result) {
+      setLoginBusy(false);
+      if (!result) {
+        showToast(t('login.authError'));
+        return;
+      }
+      if (result.needsEmail) {
+        closeLogin();
+        showToast(t('login.confirmEmail'), 4200);
+        return;
+      }
+      finishAuth(result.name || nameFromEmail(cleanedEmail), result.email || cleanedEmail, {
+        isNew: !!result.isNew
+      });
+    }).catch(function (err) {
+      setLoginBusy(false);
+      var code = err && err.code;
+      var msg = String((err && err.message) || '');
+      if (code === 'password' || /invalid login|invalid credentials|wrong password/i.test(msg)) {
         showToast(t('login.passwordMismatch'));
         return;
       }
-      finishAuth(existing.name || nameFromEmail(cleanedEmail), cleanedEmail, { isNew: false });
-      return;
-    }
-
-    var name = nameFromEmail(cleanedEmail);
-    upsertUser({ email: cleanedEmail, password: cleanedPass, name: name, provider: 'email' });
-    finishAuth(name, cleanedEmail, { isNew: true });
+      showToast(t('login.authError'));
+    });
   }
 
   function handleSocialAuth(provider) {
-    var data = SOCIAL[provider];
-    if (!data) return;
-    var existing = findUserByEmail(data.email);
-    var isNew = !existing;
-    if (isNew) {
-      upsertUser({ email: data.email, password: '', name: data.name, provider: provider });
+    if (provider !== 'google') {
+      showToast(t('login.socialSoon'));
+      return;
     }
-    finishAuth(data.name, data.email, { isNew: isNew });
+    setLoginBusy(true);
+    waitForStore().then(function (store) {
+      if (!store || typeof store.signInWithGoogle !== 'function') {
+        throw new Error('unavailable');
+      }
+      return store.signInWithGoogle();
+    }).then(function () {
+      /* Google OAuth redirects away; keep busy until navigation */
+    }).catch(function () {
+      setLoginBusy(false);
+      showToast(t('login.authError'));
+    });
   }
 
   function syncLoginI18n() {
@@ -483,7 +565,7 @@
       '      data-i18n="login.emailPlaceholder" data-i18n-attr="placeholder"',
       '      placeholder="', t('login.emailPlaceholder'), '">',
       '    <input class="ms-input" type="password" id="msPassword" name="password" autocomplete="current-password" required',
-      '      minlength="4" data-i18n="login.passwordPlaceholder" data-i18n-attr="placeholder"',
+      '      minlength="6" data-i18n="login.passwordPlaceholder" data-i18n-attr="placeholder"',
       '      placeholder="', t('login.passwordPlaceholder'), '">',
       '    <button class="ms-login" type="submit" data-i18n="login.startBtn">', t('login.startBtn'), '</button>',
       '  </form>',
@@ -613,9 +695,23 @@
       }
     });
 
+    document.addEventListener('dayo:authchange', function () {
+      render();
+    });
+
+    waitForStore().then(function () {
+      render();
+    });
+
     window.DayOMode = {
       isMember: isMember,
       getUserName: getUserName,
+      getUserId: function () {
+        if (window.DayOProfileStore && typeof window.DayOProfileStore.getUserId === 'function') {
+          return window.DayOProfileStore.getUserId();
+        }
+        return '';
+      },
       refresh: render,
       toast: showToast,
       openLogin: openLogin,

@@ -6,6 +6,8 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 var PROFILE_KEY = 'dayo.profileKey';
 var USER_KEY = 'userName';
 var EMAIL_KEY = 'dayo_userEmail';
+var AUTH_ID_KEY = 'dayo.authUserId';
+var MEMBER_KEY = 'dayo.memberSession';
 var TICKET_KEY = 'ticketCount';
 var STREAK_KEY = 'streakCount';
 var LAST_LOGIN_KEY = 'lastLoginDate';
@@ -18,6 +20,8 @@ var VOCAB_KEY = 'dayo.reviewVocab';
 var supabase = null;
 var profileCache = null;
 var readyPromise = null;
+var authUser = null;
+var authBound = false;
 
 function env(name) {
   try {
@@ -53,7 +57,12 @@ function getClient() {
   if (!url || !key) return null;
   try {
     supabase = createClient(url, key, {
-      auth: { persistSession: false, autoRefreshToken: false }
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storage: window.localStorage
+      }
     });
   } catch (e) {
     console.warn('[DayO] Supabase client init failed', e);
@@ -73,7 +82,17 @@ function uuid() {
   });
 }
 
+function getAuthUserId() {
+  if (authUser && authUser.id) return authUser.id;
+  return lsGet(AUTH_ID_KEY, '');
+}
+
 function getClientKey() {
+  var uid = getAuthUserId();
+  if (uid) {
+    lsSet(PROFILE_KEY, 'user:' + uid);
+    return 'user:' + uid;
+  }
   var email = lsGet(EMAIL_KEY, '').trim().toLowerCase();
   if (email) {
     lsSet(PROFILE_KEY, 'email:' + email);
@@ -84,6 +103,41 @@ function getClientKey() {
   var key = 'anon:' + uuid();
   lsSet(PROFILE_KEY, key);
   return key;
+}
+
+function nameFromEmail(email) {
+  var local = String(email || '').split('@')[0] || 'DayO';
+  return local.replace(/[._-]+/g, ' ').trim() || 'DayO';
+}
+
+function displayNameFromUser(user) {
+  if (!user) return 'DayO';
+  var meta = user.user_metadata || {};
+  return String(
+    meta.user_name || meta.full_name || meta.name || nameFromEmail(user.email)
+  ).trim() || 'DayO';
+}
+
+function dispatchAuthChange(loggedIn, extra) {
+  extra = extra || {};
+  document.dispatchEvent(new CustomEvent('dayo:authchange', {
+    detail: Object.assign({
+      loggedIn: !!loggedIn,
+      userName: extra.userName || lsGet(USER_KEY, ''),
+      userId: extra.userId || getAuthUserId() || '',
+      email: extra.email || lsGet(EMAIL_KEY, '')
+    }, extra)
+  }));
+}
+
+function clearAuthLocal() {
+  authUser = null;
+  try {
+    window.localStorage.removeItem(USER_KEY);
+    window.localStorage.removeItem(EMAIL_KEY);
+    window.localStorage.removeItem(MEMBER_KEY);
+    window.localStorage.removeItem(AUTH_ID_KEY);
+  } catch (e) { /* ignore */ }
 }
 
 function parseVocab(raw) {
@@ -209,9 +263,10 @@ async function fetchOrCreateProfile() {
 
     var insertPayload = {
       client_key: local.client_key,
+      user_id: getAuthUserId() || null,
       user_name: local.user_name || '',
       email: local.email || '',
-      ticket_count: local.ticket_count,
+      ticket_count: local.ticket_count || 1,
       streak_count: local.streak_count,
       last_login_date: local.last_login_date || '',
       speech_speed: local.speech_speed,
@@ -264,6 +319,7 @@ async function updateProfile(partial, options) {
   try {
     var payload = {
       client_key: next.client_key,
+      user_id: next.user_id || getAuthUserId() || null,
       user_name: next.user_name || '',
       email: next.email || '',
       ticket_count: Number(next.ticket_count) || 0,
@@ -292,6 +348,15 @@ async function updateProfile(partial, options) {
         .select('*')
         .single();
     }
+    if (result.error) {
+      var noUserCol = Object.assign({}, payload);
+      delete noUserCol.user_id;
+      result = await client
+        .from('profiles')
+        .upsert(noUserCol, { onConflict: 'client_key' })
+        .select('*')
+        .single();
+    }
 
     if (result.error) throw result.error;
     profileCache = Object.assign({}, result.data, {
@@ -305,16 +370,247 @@ async function updateProfile(partial, options) {
   }
 }
 
-/** After login: rebind client_key to email and load/create that profile row */
+async function ensureProfileForUser(user) {
+  if (!user) return fetchOrCreateProfile();
+
+  authUser = user;
+  var userId = user.id;
+  var email = String(user.email || '').trim().toLowerCase();
+  var name = displayNameFromUser(user);
+  var today = new Date().toISOString().slice(0, 10);
+
+  lsSet(AUTH_ID_KEY, userId);
+  lsSet(USER_KEY, name);
+  lsSet(EMAIL_KEY, email);
+  lsSet(MEMBER_KEY, 'active');
+  lsSet(PROFILE_KEY, 'user:' + userId);
+
+  var client = getClient();
+  var local = defaultsFromLocal();
+  if (!client) {
+    profileCache = Object.assign({ id: null, user_id: userId, _offline: true }, local, {
+      user_name: name,
+      email: email,
+      ticket_count: 1
+    });
+    applyProfileToLocal(profileCache);
+    return profileCache;
+  }
+
+  try {
+    var byId = await client.from('profiles').select('*').eq('user_id', userId).maybeSingle();
+    if (byId.error) throw byId.error;
+    if (byId.data) {
+      var nextLogin = Object.assign({}, byId.data, {
+        user_name: byId.data.user_name || name,
+        email: byId.data.email || email,
+        last_login_date: today
+      });
+      profileCache = nextLogin;
+      applyProfileToLocal(profileCache);
+      if (!byId.data.user_name || !byId.data.last_login_date) {
+        await client.from('profiles').update({
+          user_name: nextLogin.user_name,
+          email: nextLogin.email,
+          last_login_date: today,
+          updated_at: new Date().toISOString()
+        }).eq('id', byId.data.id);
+      }
+      return profileCache;
+    }
+
+    if (email) {
+      var byEmail = await client.from('profiles').select('*').eq('email', email).maybeSingle();
+      if (byEmail.data) {
+        var patched = await client.from('profiles').update({
+          user_id: userId,
+          client_key: 'user:' + userId,
+          user_name: byEmail.data.user_name || name,
+          last_login_date: today,
+          updated_at: new Date().toISOString()
+        }).eq('id', byEmail.data.id).select('*').single();
+        profileCache = patched.data || Object.assign({}, byEmail.data, { user_id: userId });
+        applyProfileToLocal(profileCache);
+        return profileCache;
+      }
+    }
+
+    var insertPayload = {
+      user_id: userId,
+      client_key: 'user:' + userId,
+      user_name: name,
+      email: email,
+      ticket_count: 1,
+      streak_count: 1,
+      last_login_date: today,
+      speech_speed: local.speech_speed,
+      preferred_style: local.preferred_style,
+      preferred_request: local.preferred_request,
+      updated_at: new Date().toISOString()
+    };
+    var inserted = await client.from('profiles').insert(insertPayload).select('*').single();
+    if (inserted.error) {
+      var again = await client.from('profiles').select('*').eq('user_id', userId).maybeSingle();
+      if (again.data) {
+        profileCache = again.data;
+        applyProfileToLocal(profileCache);
+        return profileCache;
+      }
+      throw inserted.error;
+    }
+    profileCache = inserted.data;
+    applyProfileToLocal(profileCache);
+    return profileCache;
+  } catch (err) {
+    console.warn('[DayO] ensureProfileForUser failed — using local fallback', err);
+    profileCache = Object.assign({ id: null, user_id: userId, _offline: true }, local, {
+      user_name: name,
+      email: email,
+      ticket_count: Number(local.ticket_count) > 0 ? local.ticket_count : 1
+    });
+    applyProfileToLocal(profileCache);
+    return profileCache;
+  }
+}
+
+function bindAuthListener(client) {
+  if (authBound || !client || !client.auth) return;
+  authBound = true;
+  client.auth.onAuthStateChange(function (event, session) {
+    var user = session && session.user ? session.user : null;
+    if (user) {
+      authUser = user;
+      lsSet(AUTH_ID_KEY, user.id);
+      if (event === 'TOKEN_REFRESHED') return;
+      ensureProfileForUser(user).then(function (profile) {
+        dispatchAuthChange(true, {
+          userName: (profile && profile.user_name) || displayNameFromUser(user),
+          userId: user.id,
+          email: user.email || '',
+          event: event
+        });
+      }).catch(function () {
+        dispatchAuthChange(true, {
+          userName: displayNameFromUser(user),
+          userId: user.id,
+          email: user.email || '',
+          event: event
+        });
+      });
+      return;
+    }
+    if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+      clearAuthLocal();
+      profileCache = null;
+      dispatchAuthChange(false, { userName: '', userId: '', email: '', event: event });
+      return;
+    }
+    if (event === 'INITIAL_SESSION' && !authUser) {
+      clearAuthLocal();
+      dispatchAuthChange(false, { userName: '', userId: '', email: '', event: event });
+    }
+  });
+}
+
+async function signInWithEmail(email, password) {
+  var client = getClient();
+  var cleanedEmail = String(email || '').trim().toLowerCase();
+  var cleanedPass = String(password || '');
+  if (!client) throw new Error('supabase unavailable');
+  if (!cleanedEmail || !cleanedPass) throw new Error('missing credentials');
+
+  var signedIn = await client.auth.signInWithPassword({
+    email: cleanedEmail,
+    password: cleanedPass
+  });
+  if (!signedIn.error && signedIn.data && signedIn.data.session) {
+    var profile = await ensureProfileForUser(signedIn.data.user);
+    return {
+      isNew: false,
+      needsEmail: false,
+      user: signedIn.data.user,
+      profile: profile,
+      name: (profile && profile.user_name) || displayNameFromUser(signedIn.data.user),
+      email: cleanedEmail
+    };
+  }
+
+  var signedUp = await client.auth.signUp({
+    email: cleanedEmail,
+    password: cleanedPass,
+    options: {
+      data: { user_name: nameFromEmail(cleanedEmail) },
+      emailRedirectTo: window.location.origin + (window.location.pathname || '/')
+    }
+  });
+  if (signedUp.error) {
+    var msg = String(signedUp.error.message || signedIn.error && signedIn.error.message || '');
+    var err = new Error(msg);
+    err.code = /already|registered|exists/i.test(msg) ? 'password' : 'auth';
+    if (signedIn.error && /invalid login/i.test(String(signedIn.error.message || '')) && /already|registered|exists/i.test(msg)) {
+      err.code = 'password';
+    }
+    throw err;
+  }
+
+  if (signedUp.data && signedUp.data.session && signedUp.data.user) {
+    var created = await ensureProfileForUser(signedUp.data.user);
+    return {
+      isNew: true,
+      needsEmail: false,
+      user: signedUp.data.user,
+      profile: created,
+      name: (created && created.user_name) || nameFromEmail(cleanedEmail),
+      email: cleanedEmail
+    };
+  }
+
+  return {
+    isNew: true,
+    needsEmail: true,
+    user: signedUp.data && signedUp.data.user,
+    profile: null,
+    name: nameFromEmail(cleanedEmail),
+    email: cleanedEmail
+  };
+}
+
+async function signInWithGoogle() {
+  var client = getClient();
+  if (!client) throw new Error('supabase unavailable');
+  var redirectTo = window.location.href.split('#')[0];
+  var result = await client.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: redirectTo }
+  });
+  if (result.error) throw result.error;
+  return result.data;
+}
+
+async function signOutAuth() {
+  var client = getClient();
+  try {
+    if (client && client.auth) await client.auth.signOut();
+  } catch (e) {
+    console.warn('[DayO] signOut failed', e);
+  }
+  clearAuthLocal();
+  profileCache = null;
+  dispatchAuthChange(false, { userName: '', userId: '', email: '' });
+}
+
+/** After login: rebind client_key to auth user / email and load/create that profile row */
 async function rebindIdentity(name, email) {
   if (name) lsSet(USER_KEY, name);
   if (email) lsSet(EMAIL_KEY, email);
+  if (authUser) return ensureProfileForUser(authUser);
   var key = getClientKey();
   readyPromise = null;
   profileCache = null;
   var profile = await fetchOrCreateProfile();
   return updateProfile({
     client_key: key,
+    user_id: getAuthUserId() || profile.user_id || null,
     user_name: name || profile.user_name || '',
     email: email || profile.email || ''
   }, { skipEvents: false });
@@ -421,6 +717,7 @@ async function saveSessionLog(transcript, extra) {
   var serialized = backupTranscriptLocal(transcript);
   var payload = {
     client_key: getClientKey(),
+    user_id: extra.userId || getAuthUserId() || null,
     user_name: lsGet(USER_KEY, ''),
     email: lsGet(EMAIL_KEY, ''),
     room_name: extra.roomName || '',
@@ -436,6 +733,11 @@ async function saveSessionLog(transcript, extra) {
 
   try {
     var result = await client.from('session_logs').insert(payload).select('id').single();
+    if (result.error) {
+      var withoutUser = Object.assign({}, payload);
+      delete withoutUser.user_id;
+      result = await client.from('session_logs').insert(withoutUser).select('id').single();
+    }
     if (result.error) {
       result = await client.from('transcripts').insert(payload).select('id').single();
     }
@@ -453,8 +755,36 @@ async function saveSessionLog(transcript, extra) {
   }
 }
 
+function getUser() {
+  return authUser;
+}
+
+function getUserId() {
+  return getAuthUserId() || '';
+}
+
+function isSignedIn() {
+  return !!getAuthUserId();
+}
+
+async function bootstrap() {
+  var client = getClient();
+  bindAuthListener(client);
+  if (!client) return fetchOrCreateProfile();
+  try {
+    var sessionRes = await client.auth.getSession();
+    var session = sessionRes && sessionRes.data && sessionRes.data.session;
+    if (session && session.user) {
+      return ensureProfileForUser(session.user);
+    }
+  } catch (e) {
+    console.warn('[DayO] getSession failed', e);
+  }
+  return fetchOrCreateProfile();
+}
+
 function ready() {
-  if (!readyPromise) readyPromise = fetchOrCreateProfile();
+  if (!readyPromise) readyPromise = bootstrap();
   return readyPromise;
 }
 
@@ -463,8 +793,16 @@ window.DayOProfileStore = {
   getProfile: getProfile,
   updateProfile: updateProfile,
   fetchOrCreateProfile: fetchOrCreateProfile,
+  ensureProfileForUser: ensureProfileForUser,
   rebindIdentity: rebindIdentity,
+  getClient: getClient,
   getClientKey: getClientKey,
+  getUser: getUser,
+  getUserId: getUserId,
+  isSignedIn: isSignedIn,
+  signInWithEmail: signInWithEmail,
+  signInWithGoogle: signInWithGoogle,
+  signOut: signOutAuth,
   getJamCount: getJamCount,
   getVocab: getVocab,
   addJam: addJam,
