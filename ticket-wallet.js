@@ -3,7 +3,7 @@
   'use strict';
 
   var TICKET_KEY = 'ticketCount';
-  var DEFAULT_COUNT = 1;
+  var DEFAULT_COUNT = 0;
 
   function readCount() {
     try {

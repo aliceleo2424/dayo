@@ -170,12 +170,12 @@
       ES: 'La contraseña debe tener al menos 6 caracteres.'
     },
     'login.signupWelcome': {
-      KO: 'DayO 회원이 되신 것을 환영합니다! (티켓 1회 지급 완료)',
-      EN: 'Welcome to DayO! (1 session ticket added)',
-      ZH: '欢迎成为 DayO 会员！（已发放 1 次体验券）',
-      JA: 'DayO会員になってくれてありがとう！（チケット1回分を付与しました）',
-      FR: 'Bienvenue chez DayO ! (1 ticket offert)',
-      ES: '¡Bienvenido a DayO! (1 ticket añadido)'
+      KO: '🎉 DayO 회원이 되신 것을 환영합니다! 첫 수업 9,900원 체험 할인권이 발급되었습니다.',
+      EN: '🎉 Welcome to DayO! Your 9,900 KRW first-class trial coupon has been issued.',
+      ZH: '🎉 欢迎成为 DayO 会员！已发放 9,900韩元 首课体验优惠券。',
+      JA: '🎉 DayO会員になってくれてありがとう！初回授業9,900ウォン体験クーポンを発行しました。',
+      FR: '🎉 Bienvenue chez DayO ! Votre coupon d\'essai à 9 900 KRW a été émis.',
+      ES: '🎉 ¡Bienvenido a DayO! Se emitió tu cupón de prueba de 9.900 KRW.'
     },
     'login.confirmEmail': {
       KO: '가입 메일을 보냈어요. 메일함에서 확인하면 바로 시작할 수 있어요 ✉️',

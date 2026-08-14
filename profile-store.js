@@ -16,6 +16,15 @@ var STYLE_KEY = 'dayo.chat.style';
 var REQUEST_KEY = 'dayo.chat.request';
 var JAM_KEY = 'dayo.jamCount';
 var VOCAB_KEY = 'dayo.reviewVocab';
+var WELCOME_COUPON_KEY = 'dayo.hasWelcomeCoupon';
+var WELCOME_COUPON_CODE = 'WELCOME_9900';
+var STREAK_KEY = 'streakCount';
+var LAST_LOGIN_KEY = 'lastLoginDate';
+var SPEED_KEY = 'dayo.chat.speed';
+var STYLE_KEY = 'dayo.chat.style';
+var REQUEST_KEY = 'dayo.chat.request';
+var JAM_KEY = 'dayo.jamCount';
+var VOCAB_KEY = 'dayo.reviewVocab';
 
 var supabase = null;
 var profileCache = null;
@@ -183,20 +192,21 @@ function getVocab() {
 }
 
 function defaultsFromLocal() {
-  var ticket = parseInt(lsGet(TICKET_KEY, '1'), 10);
+  var ticket = parseInt(lsGet(TICKET_KEY, '0'), 10);
   var streak = parseInt(lsGet(STREAK_KEY, '1'), 10);
   return {
     client_key: getClientKey(),
     user_name: lsGet(USER_KEY, ''),
     email: lsGet(EMAIL_KEY, ''),
-    ticket_count: Number.isFinite(ticket) && ticket >= 0 ? ticket : 1,
+    ticket_count: Number.isFinite(ticket) && ticket >= 0 ? ticket : 0,
     streak_count: Number.isFinite(streak) && streak > 0 ? streak : 1,
     last_login_date: lsGet(LAST_LOGIN_KEY, ''),
     speech_speed: lsGet(SPEED_KEY, 'slow') || 'slow',
     preferred_style: lsGet(STYLE_KEY, 'casual') || 'casual',
     preferred_request: lsGet(REQUEST_KEY, 'praise') || 'praise',
     jam_count: getJamCount(),
-    review_vocab: getVocab()
+    review_vocab: getVocab(),
+    has_welcome_coupon: lsGet(WELCOME_COUPON_KEY, '') === '1'
   };
 }
 
@@ -205,6 +215,7 @@ function applyProfileToLocal(profile) {
   if (profile.user_name) lsSet(USER_KEY, profile.user_name);
   if (profile.email) lsSet(EMAIL_KEY, profile.email);
   if (profile.ticket_count != null) lsSet(TICKET_KEY, profile.ticket_count);
+  if (profile.has_welcome_coupon != null) lsSet(WELCOME_COUPON_KEY, profile.has_welcome_coupon ? '1' : '0');
   if (profile.streak_count != null) lsSet(STREAK_KEY, profile.streak_count);
   if (profile.last_login_date != null) lsSet(LAST_LOGIN_KEY, profile.last_login_date || '');
   if (profile.speech_speed) lsSet(SPEED_KEY, profile.speech_speed);
@@ -266,7 +277,8 @@ async function fetchOrCreateProfile() {
       user_id: getAuthUserId() || null,
       user_name: local.user_name || '',
       email: local.email || '',
-      ticket_count: local.ticket_count || 1,
+      ticket_count: Number.isFinite(Number(local.ticket_count)) ? Number(local.ticket_count) : 0,
+      has_welcome_coupon: !!local.has_welcome_coupon,
       streak_count: local.streak_count,
       last_login_date: local.last_login_date || '',
       speech_speed: local.speech_speed,
@@ -291,6 +303,7 @@ function mirrorLocalFields(profile) {
   if (profile.user_name != null) lsSet(USER_KEY, profile.user_name);
   if (profile.email != null) lsSet(EMAIL_KEY, profile.email);
   if (profile.ticket_count != null) lsSet(TICKET_KEY, profile.ticket_count);
+  if (profile.has_welcome_coupon != null) lsSet(WELCOME_COUPON_KEY, profile.has_welcome_coupon ? '1' : '0');
   if (profile.streak_count != null) lsSet(STREAK_KEY, profile.streak_count);
   if (profile.last_login_date != null) lsSet(LAST_LOGIN_KEY, profile.last_login_date || '');
   if (profile.speech_speed) lsSet(SPEED_KEY, profile.speech_speed);
@@ -323,6 +336,7 @@ async function updateProfile(partial, options) {
       user_name: next.user_name || '',
       email: next.email || '',
       ticket_count: Number(next.ticket_count) || 0,
+      has_welcome_coupon: !!next.has_welcome_coupon,
       streak_count: Number(next.streak_count) || 1,
       last_login_date: next.last_login_date || '',
       speech_speed: next.speech_speed || 'slow',
@@ -370,6 +384,30 @@ async function updateProfile(partial, options) {
   }
 }
 
+async function grantWelcomeCoupon(userId, clientKey) {
+  lsSet(WELCOME_COUPON_KEY, '1');
+  if (profileCache) profileCache.has_welcome_coupon = true;
+  var client = getClient();
+  if (!client || !userId) return;
+  try {
+    await client.from('profiles').update({
+      has_welcome_coupon: true,
+      updated_at: new Date().toISOString()
+    }).eq('user_id', userId);
+  } catch (e) { /* column may not exist yet */ }
+  try {
+    await client.from('coupons').insert({
+      user_id: userId,
+      client_key: clientKey || ('user:' + userId),
+      code: WELCOME_COUPON_CODE,
+      title: '첫 수업 9,900원 체험 할인권',
+      discount_price: 9900,
+      original_price: 19900,
+      is_used: false
+    });
+  } catch (e) { /* duplicate welcome coupon is fine */ }
+}
+
 async function ensureProfileForUser(user) {
   if (!user) return fetchOrCreateProfile();
 
@@ -391,9 +429,10 @@ async function ensureProfileForUser(user) {
     profileCache = Object.assign({ id: null, user_id: userId, _offline: true }, local, {
       user_name: name,
       email: email,
-      ticket_count: 1
+      has_welcome_coupon: true
     });
     applyProfileToLocal(profileCache);
+    grantWelcomeCoupon(userId, 'user:' + userId);
     return profileCache;
   }
 
@@ -440,7 +479,8 @@ async function ensureProfileForUser(user) {
       client_key: 'user:' + userId,
       user_name: name,
       email: email,
-      ticket_count: 1,
+      ticket_count: 0,
+      has_welcome_coupon: true,
       streak_count: 1,
       last_login_date: today,
       speech_speed: local.speech_speed,
@@ -449,6 +489,11 @@ async function ensureProfileForUser(user) {
       updated_at: new Date().toISOString()
     };
     var inserted = await client.from('profiles').insert(insertPayload).select('*').single();
+    if (inserted.error) {
+      var retryPayload = Object.assign({}, insertPayload);
+      delete retryPayload.has_welcome_coupon;
+      inserted = await client.from('profiles').insert(retryPayload).select('*').single();
+    }
     if (inserted.error) {
       var again = await client.from('profiles').select('*').eq('user_id', userId).maybeSingle();
       if (again.data) {
@@ -460,13 +505,13 @@ async function ensureProfileForUser(user) {
     }
     profileCache = inserted.data;
     applyProfileToLocal(profileCache);
+    grantWelcomeCoupon(userId, 'user:' + userId);
     return profileCache;
   } catch (err) {
     console.warn('[DayO] ensureProfileForUser failed — using local fallback', err);
     profileCache = Object.assign({ id: null, user_id: userId, _offline: true }, local, {
       user_name: name,
-      email: email,
-      ticket_count: Number(local.ticket_count) > 0 ? local.ticket_count : 1
+      email: email
     });
     applyProfileToLocal(profileCache);
     return profileCache;
