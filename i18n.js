@@ -778,10 +778,53 @@
 
     /* ===== Quiz modal (index.html) ===== */
     'quiz.badge': {
-      KO: '내 스피킹 감각 알아보기', EN: 'Discover your speaking sense', ZH: '了解我的口语感觉', JA: 'スピーキング感覚を知る', FR: 'Découvrez votre niveau', ES: 'Descubre tu nivel de habla'
+      KO: '10초 레벨테스트', EN: '10-second level test', ZH: '10秒水平测试', JA: '10秒レベルテスト', FR: 'Test de niveau 10 s', ES: 'Test de nivel de 10 s'
     },
     'quiz.title': {
-      KO: '스피킹 감각 테스트', EN: 'Speaking sense test', ZH: '口语感觉测试', JA: 'スピーキング感覚テスト', FR: 'Test de speaking', ES: 'Prueba de speaking'
+      KO: '외국인 앞 7초 침묵 탈출, 돼요! ☕', EN: 'Break the 7-second freeze, you can! ☕', ZH: '7秒沉默逃脱，真的可以！☕', JA: '外国人の前の7秒沈黙から脱出、できる！☕', FR: 'Fini le silence de 7 secondes, ça marche ! ☕', ES: 'Sal del silencio de 7 segundos, ¡se puede! ☕'
+    },
+    'quiz.lang.en': { KO: '영어', EN: 'English', ZH: '英语', JA: '英語', FR: 'Anglais', ES: 'Inglés' },
+    'quiz.lang.fr': { KO: '프랑스어', EN: 'French', ZH: '法语', JA: 'フランス語', FR: 'Français', ES: 'Francés' },
+    'quiz.lang.ja': { KO: '일본어', EN: 'Japanese', ZH: '日语', JA: '日本語', FR: 'Japonais', ES: 'Japonés' },
+    'quiz.lang.es': { KO: '스페인어', EN: 'Spanish', ZH: '西班牙语', JA: 'スペイン語', FR: 'Espagnol', ES: 'Español' },
+    'quiz.startHint': {
+      KO: '선택한 언어로 입문 상황 퀴즈 4~5문항이 나와요. 약 10초면 끝!',
+      EN: 'You’ll get 4–5 beginner situation questions in the language you pick. About 10 seconds!',
+      ZH: '将按所选语言出4–5道入门情景题。大约10秒！',
+      JA: '選んだ言語で入門シチュエーションクイズが4〜5問出ます。約10秒！',
+      FR: '4 à 5 questions de situations débutant dans la langue choisie. Environ 10 secondes !',
+      ES: '4–5 preguntas de situaciones de inicio en el idioma que elijas. ¡Unos 10 segundos!'
+    },
+    'quiz.startBtn': {
+      KO: '테스트 시작하기', EN: 'Start the test', ZH: '开始测试', JA: 'テストを始める', FR: 'Commencer le test', ES: 'Empezar el test'
+    },
+    'quiz.resultScore': {
+      KO: '{score} / {total} 맞혔어요',
+      EN: 'You got {score} / {total} right',
+      ZH: '答对 {score} / {total}',
+      JA: '{score} / {total} 正解',
+      FR: '{score} / {total} bonnes réponses',
+      ES: 'Acertaste {score} / {total}'
+    },
+    'quiz.resultLead': {
+      KO: '입문 레벨, 바로 대화 시작해도 돼요!',
+      EN: 'Beginner level — you’re ready to start chatting!',
+      ZH: '入门水平，可以直接开始对话！',
+      JA: '入門レベル、すぐに会話を始めて大丈夫！',
+      FR: 'Niveau débutant — vous pouvez commencer à parler !',
+      ES: 'Nivel inicial — ¡ya puedes empezar a hablar!'
+    },
+    'quiz.resultCourseLabel': {
+      KO: '추천 코스', EN: 'Recommended course', ZH: '推荐课程', JA: 'おすすめコース', FR: 'Cours recommandé', ES: 'Curso recomendado'
+    },
+    'quiz.resultHostLabel': {
+      KO: '추천 파트너', EN: 'Recommended partner', ZH: '推荐伙伴', JA: 'おすすめパートナー', FR: 'Partenaire recommandé', ES: 'Compañero recomendado'
+    },
+    'quiz.resultCta': {
+      KO: '이 파트너와 대화 시작하기', EN: 'Start chatting with this partner', ZH: '和这位伙伴开始对话', JA: 'このパートナーと会話を始める', FR: 'Parler avec ce partenaire', ES: 'Empezar a hablar con este compañero'
+    },
+    'quiz.resultRetry': {
+      KO: '다른 언어로 다시 테스트', EN: 'Try another language', ZH: '用其他语言再测一次', JA: '別の言語でもう一度', FR: 'Tester une autre langue', ES: 'Probar otro idioma'
     },
     'quiz.closeAria': { KO: '닫기', EN: 'Close', ZH: '关闭', JA: '閉じる', FR: 'Fermer', ES: 'Cerrar' },
     'quiz.q1.tag': { KO: '☕ 카페', EN: '☕ Café', ZH: '☕ 咖啡馆', JA: '☕ カフェ', FR: '☕ Café', ES: '☕ Café' },

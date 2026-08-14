@@ -29,11 +29,13 @@
   var PARTNER_SLOTS_A = ['10:00', '19:30', '22:00'];
   var PARTNER_SLOTS_B = ['14:00', '19:30', '21:00'];
   var AVAILABLE_PARTNERS = [
-    { id: 'kate', language: 'en', name: 'Kate from USA', initial: 'K', rating: '4.9', korean: true, styles: ['fast', 'correct'], slots: PARTNER_SLOTS_A },
+    { id: 'layna', language: 'en', name: 'Layna from UK', initial: 'L', rating: '5.0', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
+    { id: 'kate', language: 'en', name: 'Kate from USA', initial: 'K', rating: '4.9', korean: true, styles: ['fast', 'correct'], slots: PARTNER_SLOTS_B },
     { id: 'olivia', language: 'en', name: 'Olivia from UK', initial: 'O', rating: '4.8', korean: true, styles: ['slow', 'casual'], slots: PARTNER_SLOTS_B },
     { id: 'elena', language: 'es', name: 'Elena from Spain', initial: 'E', rating: '4.9', korean: true, styles: ['fast', 'slow'], slots: PARTNER_SLOTS_A },
     { id: 'lucia', language: 'es', name: 'Lucía from Mexico', initial: 'L', rating: '4.8', korean: true, styles: ['correct', 'slow'], slots: PARTNER_SLOTS_B },
-    { id: 'camille', language: 'fr', name: 'Camille from France', initial: 'C', rating: '4.9', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
+    { id: 'emma', language: 'fr', name: 'Emma from Belgium', initial: 'E', rating: '5.0', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
+    { id: 'camille', language: 'fr', name: 'Camille from France', initial: 'C', rating: '4.9', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_B },
     { id: 'chloe', language: 'fr', name: 'Chloé from Canada', initial: 'C', rating: '4.8', korean: true, styles: ['fast', 'slow'], slots: PARTNER_SLOTS_B },
     { id: 'yui', language: 'ja', name: 'Yui from Japan', initial: 'Y', rating: '5.0', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
     { id: 'aoi', language: 'ja', name: 'Aoi from Japan', initial: 'A', rating: '4.9', korean: true, styles: ['fast', 'correct'], slots: PARTNER_SLOTS_B },
