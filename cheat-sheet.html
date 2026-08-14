@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>DayO 맞춤 회화 치트키</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="mobile-nav.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --pink: #FFD1DC;
+      --peach: #FFE5B4;
+      --yellow: #FFF9C4;
+      --cream: #FFF8F5;
+      --coral: #FF6B57;
+      --coral-dark: #E55A45;
+      --coral-pale: #FFE8E3;
+      --card: #FFFCFA;
+      --text: #5C4A42;
+      --muted: #9A8580;
+      --radius: 22px;
+      --radius-lg: 28px;
+    }
+    html { max-width: 100%; overflow-x: hidden; }
+    body {
+      min-height: 100vh;
+      font-family: 'Gowun Dodum', 'Quicksand', -apple-system, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 8% 4%, rgba(255, 209, 220, 0.7), transparent 28rem),
+        radial-gradient(circle at 94% 12%, rgba(255, 229, 180, 0.7), transparent 26rem),
+        radial-gradient(circle at 70% 92%, rgba(255, 249, 196, 0.55), transparent 28rem),
+        var(--cream);
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; }
+    .wrap {
+      width: min(720px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 1.25rem 0 7.5rem;
+    }
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+      margin-bottom: 1.25rem;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      text-decoration: none;
+      font-family: Quicksand, sans-serif;
+      font-weight: 700;
+    }
+    .brand-mark {
+      width: 40px; height: 40px;
+      display: grid; place-items: center;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--pink), var(--peach));
+      color: var(--coral);
+      font-size: 1.15rem;
+    }
+    .brand small { display: block; color: var(--muted); font-size: 0.68rem; letter-spacing: 0.08em; }
+    .home-link {
+      padding: 0.45rem 0.8rem;
+      border: 1px solid var(--coral-pale);
+      border-radius: 999px;
+      background: var(--card);
+      color: var(--coral);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .hero {
+      padding: 1.25rem 1.2rem 1.3rem;
+      border: 1px solid rgba(255, 107, 87, 0.16);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(145deg, #FFF7FB, #FFE9D8 62%, #FFF6C7);
+      margin-bottom: 1.1rem;
+    }
+    .kicker {
+      color: var(--coral-dark);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.4rem;
+    }
+    h1 { font-size: 1.28rem; line-height: 1.45; letter-spacing: -0.03em; }
+    .hero p { margin-top: 0.5rem; color: var(--muted); font-size: 0.88rem; line-height: 1.65; }
+    .chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.85rem; }
+    .chip {
+      padding: 0.28rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.75);
+      font-size: 0.76rem;
+      font-weight: 800;
+    }
+    .list { display: grid; gap: 0.7rem; }
+    .card {
+      border: 1px solid rgba(255, 214, 223, 0.8);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: 0 10px 28px rgba(92, 74, 66, 0.06);
+      overflow: hidden;
+    }
+    .card-main {
+      width: 100%;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 1rem 1.05rem;
+      border: none;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+    .n {
+      flex: 0 0 32px;
+      width: 32px; height: 32px;
+      display: grid; place-items: center;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--pink), var(--yellow));
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--coral-dark);
+    }
+    .phrase { font-size: 1.02rem; font-weight: 800; line-height: 1.45; letter-spacing: -0.02em; }
+    .scene { margin-top: 0.22rem; color: var(--muted); font-size: 0.72rem; font-weight: 700; }
+    .caret { margin-left: auto; color: var(--coral); font-size: 0.85rem; transition: transform 0.18s; }
+    .card.is-open .caret { transform: rotate(180deg); }
+    .detail {
+      display: none;
+      padding: 0 1.05rem 1.05rem 3.55rem;
+    }
+    .card.is-open .detail { display: block; }
+    .meaning { font-size: 0.9rem; font-weight: 800; line-height: 1.5; margin-bottom: 0.35rem; }
+    .tip { color: var(--muted); font-size: 0.82rem; line-height: 1.6; }
+    .copy-btn {
+      margin-top: 0.7rem;
+      padding: 0.5rem 0.85rem;
+      border: 1px solid var(--coral-pale);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--coral-dark);
+      font: inherit;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .copy-btn:hover { background: var(--coral-pale); }
+    .coupon {
+      margin-top: 1.1rem;
+      padding: 1rem 1.1rem;
+      border-radius: var(--radius);
+      background: var(--card);
+      border: 1px dashed rgba(255, 107, 87, 0.35);
+      text-align: center;
+    }
+    .coupon strong { display: block; margin-top: 0.25rem; font-size: 1.2rem; letter-spacing: 0.04em; }
+    .cta {
+      position: fixed;
+      left: 50%;
+      bottom: calc(0.9rem + env(safe-area-inset-bottom));
+      z-index: 40;
+      width: min(720px, calc(100% - 2rem));
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.95rem 1.1rem;
+      border: none;
+      border-radius: 18px;
+      background: var(--coral);
+      color: #fff;
+      font: inherit;
+      font-size: 0.92rem;
+      font-weight: 800;
+      text-decoration: none;
+      text-align: center;
+      box-shadow: 0 10px 28px rgba(255, 107, 87, 0.28);
+    }
+    .cta:hover { background: #ff5741; }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 5.6rem;
+      z-index: 50;
+      transform: translateX(-50%) translateY(12px);
+      padding: 0.7rem 1rem;
+      border-radius: 14px;
+      background: var(--card);
+      border: 1px solid var(--coral-pale);
+      font-size: 0.82rem;
+      font-weight: 800;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    @media (max-width: 640px) {
+      .wrap { width: calc(100% - 1.5rem); padding-bottom: 8rem; }
+      h1 { font-size: 1.12rem; }
+      .detail { padding-left: 1.05rem; }
+      .cta { font-size: 0.84rem; padding: 0.9rem 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">D</span>
+        <span>DayO <small>CHEAT SHEET</small></span>
+      </a>
+      <a class="home-link" href="index.html">홈으로</a>
+    </div>
+    <section class="hero">
+      <p class="kicker" id="sheetKicker">SPEAKING CHEAT SHEET</p>
+      <h1 id="sheetTitle">맞춤 회화 치트키</h1>
+      <p id="sheetDesc">카드를 누르면 발음 팁과 한국어 해석이 열려요. 마음에 드는 한 줄은 복사해서 세션에서 바로 써 보세요.</p>
+      <div class="chips" id="sheetChips"></div>
+    </section>
+    <div class="list" id="sheetList"></div>
+    <div class="coupon">
+      첫 세션 체험 쿠폰 코드
+      <strong id="sheetCoupon">WELCOME_9900</strong>
+    </div>
+  </div>
+  <a class="cta" id="sheetCta" href="index.html?booking=open">🎟️ 첫 세션 9,900원 체험권 적용하고 대화 시작하기</a>
+  <div class="toast" id="sheetToast" role="status"></div>
+
+  <script src="cheat-sheet-data.js"></script>
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var api = window.DayOCheatSheets;
+      if (!api) return;
+      var lang = api.normalizeLang(params.get('lang') || params.get('language') || 'en');
+      var level = api.normalizeLevel(params.get('level') || 'basic');
+      var info = api.meta(lang, level);
+      var phrases = api.getPhrases(lang, level);
+      var scenes = { cafe: '☕ 카페', restaurant: '🍽️ 식당', street: '🗺️ 길찾기', hotel: '🏨 호텔' };
+
+      document.title = 'DayO · ' + info.flag + ' ' + info.title;
+      document.getElementById('sheetTitle').textContent = '🎁 [' + info.levelName + '] ' + info.title;
+      document.getElementById('sheetKicker').textContent = info.flag + ' ' + info.label + ' · ' + info.levelName + ' 페이스';
+      document.getElementById('sheetCoupon').textContent = info.coupon;
+      document.getElementById('sheetChips').innerHTML =
+        '<span class="chip">' + info.flag + ' ' + info.name + '</span>' +
+        '<span class="chip">' + info.levelName + '</span>' +
+        '<span class="chip">' + phrases.length + '선</span>';
+      document.getElementById('sheetCta').href = 'index.html?booking=open';
+
+      var list = document.getElementById('sheetList');
+      list.innerHTML = phrases.map(function (item, i) {
+        return (
+          '<article class="card" data-card>' +
+            '<button class="card-main" type="button">' +
+              '<span class="n">' + (i + 1) + '</span>' +
+              '<span><span class="phrase"></span><span class="scene"></span></span>' +
+              '<span class="caret" aria-hidden="true">▾</span>' +
+            '</button>' +
+            '<div class="detail">' +
+              '<p class="meaning"></p>' +
+              '<p class="tip"></p>' +
+              '<button class="copy-btn" type="button" data-copy>복사하기</button>' +
+            '</div>' +
+          '</article>'
+        );
+      }).join('');
+
+      Array.prototype.forEach.call(list.querySelectorAll('[data-card]'), function (card, i) {
+        var item = phrases[i];
+        card.querySelector('.phrase').textContent = item.phrase;
+        card.querySelector('.scene').textContent = scenes[item.scene] || '대화';
+        card.querySelector('.meaning').textContent = item.meaning;
+        card.querySelector('.tip').textContent = '발음 팁 · ' + item.tip;
+        card.querySelector('.card-main').addEventListener('click', function () {
+          card.classList.toggle('is-open');
+        });
+        card.querySelector('[data-copy]').addEventListener('click', function (e) {
+          e.stopPropagation();
+          var text = item.phrase;
+          var done = function () { showToast('표현을 복사했어요 ✨'); };
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(done).catch(function () { fallbackCopy(text); done(); });
+          } else {
+            fallbackCopy(text);
+            done();
+          }
+        });
+      });
+
+      function fallbackCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+
+      var toast = document.getElementById('sheetToast');
+      var toastTimer;
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 2200);
+      }
+    })();
+  </script>
+</body>
+</html>

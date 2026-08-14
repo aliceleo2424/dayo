@@ -2085,7 +2085,8 @@
           </form>
           <div class="quiz-lead-done">
             <p class="quiz-lead-success">${escapeHtml(t('quiz.lead.success'))}</p>
-            <button class="quiz-lead-cta" type="button" data-quiz-signup>${escapeHtml(t('quiz.lead.signupCta'))}</button>
+            <a class="quiz-lead-cta" href="cheat-sheet.html?lang=${encodeURIComponent(quizLang)}&amp;level=${encodeURIComponent(quizLevel)}">${escapeHtml(t('quiz.lead.cheatCta'))}</a>
+            <button class="quiz-lead-cta quiz-lead-cta--ghost" type="button" data-quiz-signup>${escapeHtml(t('quiz.lead.signupCta'))}</button>
             <button class="quiz-lead-cta quiz-lead-cta--ghost" type="button" data-booking-open>${escapeHtml(t('quiz.lead.bookingCta'))}</button>
           </div>
         </div>
@@ -2148,6 +2149,17 @@
             score: quizScore
           });
         };
+        fetch('/api/send-lead-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email,
+            language: quizLang,
+            level: quizLevel,
+            score: quizScore,
+            origin: window.location.origin
+          })
+        }).catch(function () {});
         const pending = (store && typeof store.ready === 'function') ? store.ready().then(save) : save();
         Promise.resolve(pending).then((result) => {
           if (!result || !result.ok) {
@@ -2178,7 +2190,6 @@
           setTimeout(closeQuizModal, 0);
         });
       }
-    }
     }
 
     function handleAnswer(slide, index, btn) {

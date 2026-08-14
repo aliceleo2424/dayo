@@ -1226,6 +1226,14 @@
       FR: 'Réserver une première session avec un partenaire',
       ES: 'Reservar la primera sesión con un partner'
     },
+    'quiz.lead.cheatCta': {
+      KO: '🎁 맞춤 회화 치트키 확인하기',
+      EN: '🎁 Open your conversation cheat sheet',
+      ZH: '🎁 查看专属会话速查表',
+      JA: '🎁 会話チートシートを確認する',
+      FR: '🎁 Voir la fiche d’expressions',
+      ES: '🎁 Ver la guía de expresiones'
+    },
     'quiz.toastFormat': {
       KO: '{email}로 리포트를 보내드릴게요!', EN: "We'll send the report to {email}!", ZH: '将把报告发送到{email}！', JA: '{email}にレポートをお送りします！', FR: 'Nous enverrons le rapport à {email} !', ES: '¡Enviaremos el informe a {email}!'
     },
