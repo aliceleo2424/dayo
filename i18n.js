@@ -588,6 +588,9 @@
     'room.sentenceHelp': {
       KO: '📝 문장도움', EN: '📝 Sentence Help', ZH: '📝 句子帮助', JA: '📝 文ヘルプ', FR: '📝 Phrases', ES: '📝 Frases'
     },
+    'room.sentenceHelpLoading': {
+      KO: 'AI가 추천 문장 생각 중...', EN: 'AI is thinking of sentences...', ZH: 'AI正在想推荐句子…', JA: 'AIがおすすめ文を考えています…', FR: 'L’IA prépare des phrases…', ES: 'La IA piensa frases…'
+    },
     'report.title': {
       KO: '📊 지난 대화 상세 리포트', EN: '📊 Chat Detail Report', ZH: '📊 详细对话报告', JA: '📊 詳細レポート', FR: '📊 Rapport détaillé', ES: '📊 Informe detallado'
     },
@@ -1154,14 +1157,17 @@
     },
     'room.sentenceSheetBadge': { KO: '📝 문장도움', EN: '📝 Sentence Help', ZH: '📝 句子帮助', JA: '📝 文ヘルプ', FR: '📝 Phrases', ES: '📝 Frases' },
     'room.sentenceSheetTitle': {
-      KO: '하고 싶은 말을 모국어로 편하게 써보세요', EN: 'Write what you want to say in your own language', ZH: '请用母语轻松写下想说的话', JA: '言いたいことを母国語で気軽に書いてください', FR: 'Écrivez ce que vous voulez dire dans votre langue', ES: 'Escribe lo que quieres decir en tu idioma'
+      KO: '지금 이어 말하면 좋은 문장', EN: 'Sentences to say next', ZH: '接下来可以说的句子', JA: '今つなげるといい文', FR: 'Phrases à dire maintenant', ES: 'Frases para seguir'
     },
     'room.sentenceSheetCloseAria': { KO: '닫기', EN: 'Close', ZH: '关闭', JA: '閉じる', FR: 'Fermer', ES: 'Cerrar' },
     'room.sentenceSheetDesc': {
-      KO: 'AI가 대화 파트너에게 바로 말할 수 있는 자연스러운 문장으로 바꿔 줄게요.', EN: 'AI will turn it into a natural sentence you can say right to your partner.', ZH: 'AI会将其转换成可以直接对伙伴说的自然句子。', JA: 'AIがパートナーにそのまま話せる自然な文章に変換します。', FR: "L'IA le transformera en phrase naturelle à dire à votre partenaire.", ES: 'La IA lo convertirá en una frase natural para decirle a tu compañero.'
+      KO: '지금 파트너에게 바로 말할 수 있는 문장이에요. 카드를 누르면 복사돼요.',
+      EN: 'Sentences you can say to your partner now. Tap a card to copy.',
+      ZH: '现在就能对伙伴说的句子。点卡片即可复制。',
+      JA: '今パートナーにすぐ言える文です。カードをタップするとコピーされます。',
+      FR: 'Des phrases à dire tout de suite. Touchez une carte pour copier.',
+      ES: 'Frases para decir ahora. Toca una tarjeta para copiar.'
     },
-    'room.sentenceSheetPlaceholder': { KO: '예: 오늘 날씨가 좋아서 기분이 좋아요', EN: 'e.g. The weather is nice today so I feel great', ZH: '例：今天天气好，心情也不错', JA: '例：今日は天気が良くて気分がいいです', FR: 'ex. Il fait beau aujourd\'hui, je suis de bonne humeur', ES: 'ej. Hoy hace buen tiempo y estoy de buen humor' },
-    'room.sentenceSheetSubmit': { KO: '문장 변환', EN: 'Convert', ZH: '转换句子', JA: '文章変換', FR: 'Convertir', ES: 'Convertir' },
     'room.feedbackTitle': { KO: '오늘 세션은 어떠하셨나요? 🍰', EN: 'How was today\'s session? 🍰', ZH: '今天的课程怎么样？🍰', JA: '今日のレッスンはどうでしたか？🍰', FR: 'Comment était la session d\'aujourd\'hui ? 🍰', ES: '¿Cómo estuvo la sesión de hoy? 🍰' },
     'room.starAria': { KO: '별점', EN: 'Star rating', ZH: '星级评分', JA: '評価', FR: 'Note', ES: 'Calificación' },
     'room.feedbackSectionLabel': {

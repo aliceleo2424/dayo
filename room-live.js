@@ -414,6 +414,95 @@
     });
   }
 
+  var FALLBACK_SENTENCES = [
+    {
+      sentence: 'That sounds really interesting! Tell me more about it.',
+      translation: '정말 흥미롭네요! 더 자세히 알려주세요.'
+    },
+    {
+      sentence: 'I see what you mean. In my opinion...',
+      translation: '무슨 말씀이신지 알겠어요. 제 생각에는...'
+    },
+    {
+      sentence: 'Could you explain that again in a simpler way?',
+      translation: '그 부분을 조금 더 쉽게 다시 설명해주실 수 있나요?'
+    }
+  ];
+
+  function parseSentenceHelpJson(raw) {
+    var text = String(raw || '').trim();
+    var fenced = text.match(/\[[\s\S]*\]/);
+    if (fenced) text = fenced[0];
+    var data = JSON.parse(text);
+    if (data && !Array.isArray(data) && Array.isArray(data.sentences)) data = data.sentences;
+    if (!Array.isArray(data)) return [];
+    return data.map(function (item) {
+      if (typeof item === 'string') return { sentence: item, translation: '' };
+      return {
+        sentence: String((item && (item.sentence || item.en || item.phrase || item.text)) || '').trim(),
+        translation: String((item && (item.translation || item.meaning || item.ko)) || '').trim()
+      };
+    }).filter(function (item) { return item.sentence; }).slice(0, 3);
+  }
+
+  function askGeminiSentences(context) {
+    var key = geminiKey();
+    var blob = String(context || '').trim();
+    if (!key || !blob) return Promise.resolve(null);
+
+    var prompt = [
+      "현재 유저와 파트너가 나눈 최근 대화 맥락을 파악하여, 유저가 지금 파트너에게 이어 말하기에 가장 자연스럽고 세련된 영어 답변 문장 3개와 한국어 뜻을 JSON 배열 형태 [{sentence: '영어 문장', translation: '한국어 뜻'}] 로 응답해 줘.",
+      'Recent conversation (3-5 lines):',
+      blob.slice(-900)
+    ].join('\n');
+
+    function post(model) {
+      return fetch(
+        'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(key),
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: prompt }] }],
+            generationConfig: { temperature: 0.4, maxOutputTokens: 280 }
+          })
+        }
+      ).then(function (res) {
+        if (!res.ok) throw new Error('gemini ' + res.status);
+        return res.json();
+      }).then(function (json) {
+        var text = '';
+        try {
+          text = json.candidates[0].content.parts.map(function (p) { return p.text || ''; }).join('');
+        } catch (e) {
+          throw new Error('empty gemini');
+        }
+        var sentences = parseSentenceHelpJson(text);
+        if (!sentences.length) throw new Error('no sentences');
+        return sentences;
+      });
+    }
+
+    var chain = Promise.reject(new Error('start'));
+    GEMINI_MODELS.forEach(function (model) {
+      chain = chain.catch(function () { return post(model); });
+    });
+    return withTimeout(chain, 4000);
+  }
+
+  function suggestSentences() {
+    var context = recentTranscriptContext(5);
+    if (!geminiKey() || !context) {
+      return Promise.resolve({ sentences: FALLBACK_SENTENCES.slice(), fallback: true });
+    }
+    return askGeminiSentences(context).then(function (sentences) {
+      if (sentences && sentences.length) return { sentences: sentences.slice(0, 3), fallback: false };
+      return { sentences: FALLBACK_SENTENCES.slice(), fallback: true };
+    }).catch(function () {
+      return { sentences: FALLBACK_SENTENCES.slice(), fallback: true };
+    });
+  }
+
   function scheduleCopilot(line) {
     var cleaned = String(line || '').trim();
     if (cleaned) {
@@ -872,6 +961,7 @@
     hangUp: hangUp,
     getTranscript: function () { return serializeTranscript(sessionTranscript); },
     suggestWords: suggestWords,
+    suggestSentences: suggestSentences,
     saveTranscript: saveTranscript
   };
 

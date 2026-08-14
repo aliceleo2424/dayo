@@ -1094,6 +1094,12 @@
       letter-spacing: -0.02em;
     }
 
+    .word-card-text--sentence {
+      font-size: 0.92rem;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
     .word-card-meaning {
       margin-top: 0.2rem;
       color: var(--text-muted);
@@ -1999,12 +2005,6 @@
             <span id="copilotGrammarText"></span>
           </p>
         </section>
-
-        <div class="sentence-overlay" id="sentenceOverlay">
-          <div class="sentence-overlay-label" data-i18n="room.sentenceOverlayLabel">📝 이렇게 말해 보세요</div>
-          <div class="sentence-overlay-text" id="sentenceOverlayText"></div>
-          <button class="sentence-overlay-close" id="sentenceOverlayClose" type="button" data-i18n="room.sentenceOverlayClose">닫기</button>
-        </div>
       </div>
 
       <aside class="chat-panel" id="chatPanel" data-i18n="room.chatPanelAria" data-i18n-attr="aria-label" aria-label="라이브 채팅">
@@ -2065,14 +2065,14 @@
       <div class="sheet-header">
         <div>
           <div class="sheet-badge" data-i18n="room.sentenceSheetBadge">📝 문장도움</div>
-          <h2 class="sheet-title" id="sentenceSheetTitle" data-i18n="room.sentenceSheetTitle">하고 싶은 말을 모국어로 편하게 써보세요</h2>
+          <h2 class="sheet-title" id="sentenceSheetTitle" data-i18n="room.sentenceSheetTitle">지금 이어 말하면 좋은 문장</h2>
         </div>
         <button class="sheet-close" data-close-sheet="sentence" data-i18n="room.sentenceSheetCloseAria" data-i18n-attr="aria-label" aria-label="닫기">✕</button>
       </div>
       <div class="sheet-body">
-        <p class="sheet-desc" data-i18n="room.sentenceSheetDesc">AI가 대화 파트너에게 바로 말할 수 있는 자연스러운 문장으로 바꿔 줄게요.</p>
-        <textarea class="sheet-input" id="sentenceInput" placeholder="예: 오늘 날씨가 좋아서 기분이 좋아요" data-i18n="room.sentenceSheetPlaceholder"></textarea>
-        <button class="sheet-submit" id="sentenceSubmit" type="button" data-i18n="room.sentenceSheetSubmit">문장 변환</button>
+        <p class="sheet-desc" data-i18n="room.sentenceSheetDesc">지금 파트너에게 바로 말할 수 있는 문장이에요. 카드를 누르면 복사돼요.</p>
+        <p class="word-loading" id="sentenceLoading" data-i18n="room.sentenceHelpLoading">AI가 추천 문장 생각 중...</p>
+        <div class="word-cards" id="sentenceCards"></div>
       </div>
     </div>
   </div>
@@ -2578,46 +2578,87 @@
       });
     });
 
-    /* Sentence Help */
+    /* Sentence Help — Gemini copilot from recent transcript */
     const sentenceHelpBtn = document.getElementById('sentenceHelpBtn');
-    const sentenceInput = document.getElementById('sentenceInput');
-    const sentenceSubmit = document.getElementById('sentenceSubmit');
-    const sentenceOverlay = document.getElementById('sentenceOverlay');
-    const sentenceOverlayText = document.getElementById('sentenceOverlayText');
+    const sentenceCards = document.getElementById('sentenceCards');
+    const sentenceLoading = document.getElementById('sentenceLoading');
+    let sentenceHelpBusy = false;
 
-    const sentenceMap = [
-      { keys: ['날씨', '기분'], en: "The weather is so nice today that I'm in a great mood." },
-      { keys: ['아메리카노', '따뜻한'], en: "I'd like a hot Americano, please." },
-      { keys: ['만나서', '반가'], en: "It's so nice to meet you!" },
-      { keys: ['천천히', '말해'], en: 'Could you please speak a little more slowly?' },
-      { keys: ['다시', '한 번'], en: 'Could you say that one more time, please?' },
-      { keys: ['이해', '못'], en: "Sorry, I didn't quite catch that." },
-      { keys: ['도와'], en: 'Could you help me with this, please?' }
-    ];
-
-    function convertSentence(input) {
-      for (const item of sentenceMap) {
-        if (item.keys.some((k) => input.includes(k))) return item.en;
-      }
-      return "I'd love to share that with you — could we talk about it together?";
+    function fallbackSentenceHelp() {
+      return [
+        {
+          sentence: 'That sounds really interesting! Tell me more about it.',
+          translation: '정말 흥미롭네요! 더 자세히 알려주세요.'
+        },
+        {
+          sentence: 'I see what you mean. In my opinion...',
+          translation: '무슨 말씀이신지 알겠어요. 제 생각에는...'
+        },
+        {
+          sentence: 'Could you explain that again in a simpler way?',
+          translation: '그 부분을 조금 더 쉽게 다시 설명해주실 수 있나요?'
+        }
+      ];
     }
 
-    sentenceHelpBtn.addEventListener('click', () => {
-      sentenceInput.value = '';
+    function setSentenceHelpBusy(on) {
+      if (!sentenceHelpBtn) return;
+      sentenceHelpBusy = !!on;
+      sentenceHelpBtn.classList.toggle('is-busy', sentenceHelpBusy);
+      sentenceHelpBtn.disabled = sentenceHelpBusy;
+      sentenceHelpBtn.setAttribute('aria-busy', String(sentenceHelpBusy));
+      sentenceHelpBtn.textContent = sentenceHelpBusy ? t('room.sentenceHelpLoading') : t('room.sentenceHelp');
+      if (sentenceLoading) sentenceLoading.classList.toggle('is-on', sentenceHelpBusy);
+    }
+
+    function renderSentenceCards(sentences) {
+      const list = Array.isArray(sentences) ? sentences.slice(0, 3) : [];
+      sentenceCards.innerHTML = list.map(function (item, i) {
+        const sentence = escapeWord(item.sentence || item.en || '');
+        const translation = escapeWord(item.translation || item.meaning || item.ko || '');
+        return '' +
+          '<button class="word-card" type="button" data-sentence="' + sentence + '">' +
+            '<div class="word-card-num">' + (i + 1) + '</div>' +
+            '<div class="word-card-text word-card-text--sentence">' + sentence + '</div>' +
+            (translation ? '<div class="word-card-meaning">' + translation + '</div>' : '') +
+            '<div class="word-card-hint">탭하면 문장이 복사돼요</div>' +
+          '</button>';
+      }).join('');
+      sentenceCards.hidden = list.length === 0;
+      sentenceCards.querySelectorAll('.word-card').forEach(function (card) {
+        card.addEventListener('click', function () {
+          const phrase = card.getAttribute('data-sentence') || '';
+          if (!phrase) return;
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(phrase).catch(function () {});
+          }
+          showToast(t('room.wordCopiedFormat', { phrase: phrase }));
+          closeSheet('sentence');
+        });
+      });
+    }
+
+    sentenceHelpBtn.addEventListener('click', function () {
+      if (sentenceHelpBusy) return;
+      setSentenceHelpBusy(true);
+      sentenceCards.innerHTML = '';
       openSheet('sentence');
-      setTimeout(() => sentenceInput.focus(), 280);
-    });
 
-    sentenceSubmit.addEventListener('click', () => {
-      const value = sentenceInput.value.trim();
-      if (!value) { sentenceInput.focus(); return; }
-      sentenceOverlayText.textContent = convertSentence(value);
-      closeSheet('sentence');
-      sentenceOverlay.classList.add('show');
-    });
+      var api = window.DayOLive;
+      var request = (api && typeof api.suggestSentences === 'function')
+        ? api.suggestSentences()
+        : Promise.resolve({ sentences: fallbackSentenceHelp(), fallback: true });
 
-    document.getElementById('sentenceOverlayClose').addEventListener('click', () => {
-      sentenceOverlay.classList.remove('show');
+      Promise.resolve(request).then(function (result) {
+        var sentences = result && Array.isArray(result.sentences) && result.sentences.length
+          ? result.sentences
+          : fallbackSentenceHelp();
+        renderSentenceCards(sentences);
+      }).catch(function () {
+        renderSentenceCards(fallbackSentenceHelp());
+      }).then(function () {
+        setSentenceHelpBusy(false);
+      });
     });
 
     /* Feedback modal on end */
@@ -2700,7 +2741,6 @@
         const name = o.id.replace(/SheetOverlay$/, '');
         closeSheet(name);
       });
-      sentenceOverlay.classList.remove('show');
       if (feedbackModal.classList.contains('active')) {
         feedbackModal.classList.remove('active');
         if (window.DayOScrollLock) window.DayOScrollLock.unlock();
