@@ -26,7 +26,7 @@ export default function TutorsPage() {
     { key: "languages", header: "언어", render: (r) => (r.languages as string[]).map((l) => LANGUAGE_LABELS[l as keyof typeof LANGUAGE_LABELS]).join(", ") },
     { key: "status", header: "상태", render: (r) => <Badge variant={r.status === "active" ? "success" : "default"}>{statusLabels[r.status as keyof typeof statusLabels]}</Badge> },
     { key: "rating", header: "평점", sortable: true, render: (r) => `⭐ ${r.rating}` },
-    { key: "totalClasses", header: "수업", sortable: true },
+    { key: "totalClasses", header: "세션", sortable: true },
     { key: "noShowRate", header: "노쇼율", sortable: true, render: (r) => `${r.noShowRate}%` },
   ];
 
@@ -55,7 +55,7 @@ export default function TutorsPage() {
         <Tabs defaultValue="tutors">
           <TabsList>
             <TabsTrigger value="tutors">대화 파트너 프로필</TabsTrigger>
-            <TabsTrigger value="reports">수업 리포트</TabsTrigger>
+            <TabsTrigger value="reports">세션 리포트</TabsTrigger>
           </TabsList>
 
           <TabsContent value="tutors" className="mt-6">

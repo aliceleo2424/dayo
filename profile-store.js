@@ -19,7 +19,7 @@ var VOCAB_KEY = 'dayo.reviewVocab';
 var WELCOME_COUPON_KEY = 'dayo.hasWelcomeCoupon';
 var WELCOME_COUPON_CODE = 'WELCOME_9900';
 var COUPONS_KEY = 'dayo.coupons';
-var WELCOME_TITLE = '첫 수업 9,900원 체험 할인권';
+var WELCOME_TITLE = '첫 세션 9,900원 체험 할인권';
 var STREAK_KEY = 'streakCount';
 var LAST_LOGIN_KEY = 'lastLoginDate';
 var SPEED_KEY = 'dayo.chat.speed';
@@ -448,7 +448,7 @@ function getUnusedWelcomeCoupon(rows) {
 function couponDisplayTitle(coupon) {
   if (!coupon) return '';
   if (coupon.code === WELCOME_COUPON_CODE) {
-    return '🎉 첫 수업 9,900원 체험 할인권 (19,900원 ➔ 9,900원)';
+    return '🎉 첫 세션 9,900원 체험 할인권 (19,900원 ➔ 9,900원)';
   }
   return coupon.title || coupon.code;
 }

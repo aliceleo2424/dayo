@@ -85,7 +85,7 @@
       KO: '파트너 스튜디오로 이동', EN: 'Go to Partner Studio', ZH: '前往伙伴工作室', JA: 'パートナースタジオへ', FR: 'Aller au Studio', ES: 'Ir al Estudio'
     },
     'nav.learnerMypage': {
-      KO: '학습자 마이페이지로 이동', EN: 'Go to Learner My Page', ZH: '前往学习者页面', JA: '学習者ページへ', FR: 'Aller à Mon espace', ES: 'Ir a Mi página'
+      KO: '마이페이지로 이동', EN: 'Go to My Page', ZH: '前往我的页面', JA: 'マイページへ', FR: 'Aller à Mon espace', ES: 'Ir a Mi página'
     },
     'nav.partnerSpace': {
       KO: '파트너 공간', EN: 'Partner Space', ZH: '伙伴空间', JA: 'パートナー空間', FR: 'Espace partenaire', ES: 'Espacio partner'
@@ -170,12 +170,12 @@
       ES: 'La contraseña debe tener al menos 6 caracteres.'
     },
     'login.signupWelcome': {
-      KO: '🎉 DayO 회원이 되신 것을 환영합니다! 첫 수업 9,900원 체험 할인권이 발급되었습니다.',
-      EN: '🎉 Welcome to DayO! Your 9,900 KRW first-class trial coupon has been issued.',
-      ZH: '🎉 欢迎成为 DayO 会员！已发放 9,900韩元 首课体验优惠券。',
-      JA: '🎉 DayO会員になってくれてありがとう！初回授業9,900ウォン体験クーポンを発行しました。',
-      FR: '🎉 Bienvenue chez DayO ! Votre coupon d\'essai à 9 900 KRW a été émis.',
-      ES: '🎉 ¡Bienvenido a DayO! Se emitió tu cupón de prueba de 9.900 KRW.'
+      KO: '🎉 DayO에 오신 것을 환영합니다! 첫 세션 할인쿠폰으로 가볍게 대화하고, 원하는 만큼 추가 구매하실 수 있어요!',
+      EN: '🎉 Welcome to DayO! Use your first-session discount coupon for a light chat, then add more sessions whenever you like!',
+      ZH: '🎉 欢迎来到 DayO！用首场会话优惠券轻松聊起来，之后可按需加购！',
+      JA: '🎉 DayOへようこそ！初回セッション割引クーポンで気軽に会話して、あとは必要な分だけ追加できます！',
+      FR: '🎉 Bienvenue chez DayO ! Discutez léger avec le coupon de première session, puis achetez autant de sessions que vous voulez !',
+      ES: '🎉 ¡Bienvenido a DayO! Conversá con el cupón de primera sesión y comprá más cuando quieras!'
     },
     'login.confirmEmail': {
       KO: '가입 메일을 보냈어요. 메일함에서 확인하면 바로 시작할 수 있어요 ✉️',
@@ -218,8 +218,8 @@
       ES: '🎉 ¡Bienvenido/a a DayO, {name}!'
     },
     'login.welcomeBody': {
-      KO: '첫 수업 체험권은 9,900원이에요. 총 30분(25분 화상 대화 + 5분 미니 퀴즈/리포트)으로 시작해 볼까요?',
-      EN: 'Your first-class trial pass is 9,900 KRW. A session is 30 minutes (25 min live chat + 5 min mini quiz/report). Ready to start?',
+      KO: '첫 세션 체험 할인권은 9,900원이에요. 총 30분(25분 화상 대화 + 5분 미니 퀴즈/리포트)으로 시작해 볼까요?',
+      EN: 'Your first-session trial coupon is 9,900 KRW. A session is 30 minutes (25 min live chat + 5 min mini quiz/report). Ready to start?',
       ZH: '首次体验券为9,900韩元。每节课共30分钟（25分钟视频对话 + 5分钟小测验/报告）。要开始吗？',
       JA: '初回体験チケットは9,900ウォンです。1回30分（25分のビデオ会話 + 5分のミニクイズ/レポート）で始めましょうか？',
       FR: "Le pass d'essai (1re séance) est à 9 900 KRW. Une session dure 30 min (25 min de conversation + 5 min de mini-quiz/rapport). On commence ?",
@@ -362,10 +362,10 @@
       ES: 'Aún no hay cupones.'
     },
     'mypage.coupon.welcome': {
-      KO: '🎉 첫 수업 9,900원 체험 할인권 (19,900원 ➔ 9,900원)',
-      EN: '🎉 First-class 9,900 KRW trial coupon (19,900 → 9,900)',
+      KO: '🎉 첫 세션 9,900원 체험 할인권 (19,900원 ➔ 9,900원)',
+      EN: '🎉 First-session 9,900 KRW trial coupon (19,900 → 9,900)',
       ZH: '🎉 首课 9,900韩元体验券（19,900 ➔ 9,900）',
-      JA: '🎉 初回授業9,900ウォン体験クーポン（19,900 ➔ 9,900）',
+      JA: '🎉 初回セッション9,900ウォン体験クーポン（19,900 ➔ 9,900）',
       FR: '🎉 Coupon d’essai 9 900 KRW (19 900 ➔ 9 900)',
       ES: '🎉 Cupón de prueba 9.900 KRW (19.900 ➔ 9.900)'
     },
@@ -373,10 +373,10 @@
       KO: '📅 내 예약 세션', EN: '📅 Upcoming Sessions', ZH: '📅 我的预约', JA: '📅 予約セッション', FR: '📅 Sessions à venir', ES: '📅 Próximas sesiones'
     },
     'mypage.sessions.sub': {
-      KO: '수업 시작 1시간 전까지 요일·시간 변경/취소가 가능해요.',
+      KO: '세션 시작 1시간 전까지 요일·시간 변경/취소가 가능해요.',
       EN: 'You can change or cancel the day/time until 1 hour before class.',
       ZH: '开课1小时前可更改或取消星期和时间。',
-      JA: '授業開始1時間前まで曜日・時間の変更/キャンセルが可能です。',
+      JA: 'セッション開始1時間前まで曜日・時間の変更/キャンセルが可能です。',
       FR: 'Changement ou annulation du jour/heure possible jusqu’à 1 h avant le cours.',
       ES: 'Puedes cambiar o cancelar día/hora hasta 1 hora antes de la clase.'
     },
@@ -387,7 +387,7 @@
       KO: '📚 대화 자료 보기', EN: '📚 View Materials', ZH: '📚 查看资料', JA: '📚 資料を見る', FR: '📚 Voir les supports', ES: '📚 Ver materiales'
     },
     'mypage.library.title': {
-      KO: '📚 수업 대화 자료함', EN: '📚 Chat Materials', ZH: '📚 对话资料库', JA: '📚 会話資料', FR: '📚 Supports de cours', ES: '📚 Materiales'
+      KO: '📚 세션 대화 자료함', EN: '📚 Chat Materials', ZH: '📚 对话资料库', JA: '📚 会話資料', FR: '📚 Supports de cours', ES: '📚 Materiales'
     },
     'mypage.library.sub': {
       KO: '대화 전 예습하고, 끝난 뒤 복습해 보세요.',
@@ -537,7 +537,7 @@
       KO: '이번 달 완료한 대화', EN: 'Chats completed', ZH: '本月完成对话', JA: '今月完了した会話', FR: 'Sessions terminées', ES: 'Charlas completadas'
     },
     'partner.report.satisfaction': {
-      KO: '평균 수업 만족도', EN: 'Avg. satisfaction', ZH: '平均满意度', JA: '平均満足度', FR: 'Satisfaction moyenne', ES: 'Satisfacción media'
+      KO: '평균 세션 만족도', EN: 'Avg. satisfaction', ZH: '平均满意度', JA: '平均満足度', FR: 'Satisfaction moyenne', ES: 'Satisfacción media'
     },
     'partner.report.points': {
       KO: '정산 예정 포인트', EN: 'Points to settle', ZH: '待结算积分', JA: '精算予定ポイント', FR: 'Points à régler', ES: 'Puntos pendientes'
@@ -554,10 +554,10 @@
       ES: '¡Usa tus puntos para coreano también! 💖'
     },
     'partner.convert.sub': {
-      KO: '학습자 모드로 전환하면 적립 포인트로 바로 대화를 예약할 수 있어요.',
-      EN: 'Switch to learner mode to book chats with your points.',
-      ZH: '切换到学习者模式即可用积分预约。',
-      JA: '学習者モードでポイント予約ができます。',
+      KO: '대화 모드로 전환하면 적립 포인트로 바로 대화를 예약할 수 있어요.',
+      EN: 'Switch to chat mode to book sessions with your points.',
+      ZH: '切换到会话模式即可用积分预约。',
+      JA: '会話モードでポイント予約ができます。',
       FR: 'Passez en mode apprenant pour réserver.',
       ES: 'Cambia a modo aprendiz para reservar.'
     },
@@ -571,7 +571,7 @@
       KO: '🖥️ 화면 공유', EN: '🖥️ Share Screen', ZH: '🖥️ 共享屏幕', JA: '🖥️ 画面共有', FR: '🖥️ Partager l\'écran', ES: '🖥️ Compartir pantalla'
     },
     'room.end': {
-      KO: '🚪 수업 종료', EN: '🚪 End Session', ZH: '🚪 结束课程', JA: '🚪 セッション終了', FR: '🚪 Terminer', ES: '🚪 Terminar'
+      KO: '🚪 세션 종료', EN: '🚪 End Session', ZH: '🚪 结束会话', JA: '🚪 セッション終了', FR: '🚪 Terminer', ES: '🚪 Terminar'
     },
     'room.partnerStatus': {
       KO: 'Live · 프랑스어 대화 파트너', EN: 'Live · French Partner', ZH: 'Live · 法语伙伴', JA: 'Live · フランス語パートナー', FR: 'Live · Partenaire français', ES: 'Live · Compañero francés'
@@ -595,7 +595,7 @@
       KO: '대화 주제', EN: 'Topic', ZH: '对话主题', JA: '会話テーマ', FR: 'Sujet', ES: 'Tema'
     },
     'report.aiTitle': {
-      KO: '✨ 수업 중 AI 코파일럿 활동 이력', EN: '✨ AI Copilot Activity', ZH: '✨ AI副驾活动记录', JA: '✨ AIコパイロット履歴', FR: '✨ Activité AI Copilot', ES: '✨ Actividad AI Copilot'
+      KO: '✨ 세션 중 AI 코파일럿 활동 이력', EN: '✨ AI Copilot Activity', ZH: '✨ AI副驾活动记录', JA: '✨ AIコパイロット履歴', FR: '✨ Activité AI Copilot', ES: '✨ Actividad AI Copilot'
     },
     'report.aiDesc': {
       KO: '대화 중 도움받은 기록이에요. 복습하면 다음 대화가 훨씬 편해져요!',
@@ -606,10 +606,10 @@
       ES: 'Ayuda recibida en la charla. ¡Repasa para la próxima!'
     },
     'report.words': {
-      KO: '💡 수업 중 찾은 단어', EN: '💡 Words found', ZH: '💡 找到的词', JA: '💡 見つけた単語', FR: '💡 Mots trouvés', ES: '💡 Palabras encontradas'
+      KO: '💡 세션 중 찾은 단어', EN: '💡 Words found', ZH: '💡 找到的词', JA: '💡 見つけた単語', FR: '💡 Mots trouvés', ES: '💡 Palabras encontradas'
     },
     'report.sentences': {
-      KO: '📝 수업 중 도움받은 문장', EN: '📝 Sentences helped', ZH: '📝 帮助的句子', JA: '📝 ヘルプした文', FR: '📝 Phrases aidées', ES: '📝 Frases ayudadas'
+      KO: '📝 세션 중 도움받은 문장', EN: '📝 Sentences helped', ZH: '📝 帮助的句子', JA: '📝 ヘルプした文', FR: '📝 Phrases aidées', ES: '📝 Frases ayudadas'
     },
 
     /* ===== Hero (index.html) ===== */
@@ -903,10 +903,10 @@
     'chatbot.faqLabel': { KO: '자주 묻는 질문', EN: 'Frequently Asked', ZH: '常见问题', JA: 'よくある質問', FR: 'Questions fréquentes', ES: 'Preguntas frecuentes' },
     'chatbot.typing': { KO: '입력 중...', EN: 'Typing...', ZH: '输入中...', JA: '入力中...', FR: 'En train d\'écrire...', ES: 'Escribiendo...' },
     'chatbot.q.class': {
-      KO: '수업은 어떻게 진행되나요?', EN: 'How do sessions work?', ZH: '课程是如何进行的？', JA: 'レッスンはどのように進みますか？', FR: 'Comment se déroulent les sessions ?', ES: '¿Cómo funcionan las sesiones?'
+      KO: '세션은 어떻게 진행되나요?', EN: 'How do sessions work?', ZH: '课程是如何进行的？', JA: 'レッスンはどのように進みますか？', FR: 'Comment se déroulent les sessions ?', ES: '¿Cómo funcionan las sesiones?'
     },
     'chatbot.a.class': {
-      KO: 'DayO 수업은 1회 총 30분이에요! 25분 동안 원어민 대화 파트너와 1:1 화상 대화를 하고, 이어서 5분 미니 퀴즈/리포트로 마무리해요. AI 코파일럿이 실시간으로 표현도 도와드린답니다.',
+      KO: 'DayO 세션은 1회 총 30분이에요! 25분 동안 원어민 대화 파트너와 1:1 화상 대화를 하고, 이어서 5분 미니 퀴즈/리포트로 마무리해요. AI 코파일럿이 실시간으로 표현도 도와드린답니다.',
       EN: 'Each DayO session is 30 minutes total: 25 minutes of 1:1 video chat with a native partner, plus a 5-minute mini quiz/report. An AI copilot also helps with expressions in real time.',
       ZH: 'DayO每节课共30分钟：25分钟与母语伙伴1:1视频对话，再加上5分钟小测验/报告。AI副驾也会实时帮助您表达。',
       JA: 'DayOのレッスンは1回合計30分です。25分の1:1ビデオ会話のあと、5分のミニクイズ/レポートで締めくくります。AIコパイロットがリアルタイムで表現もサポートします。',
@@ -928,7 +928,7 @@
       KO: '영어를 아예 못해도 참여할 수 있나요?', EN: 'Can I join with zero English?', ZH: '完全不会英语也能参加吗？', JA: '英語が全く話せなくても参加できますか？', FR: 'Puis-je participer sans parler anglais ?', ES: '¿Puedo participar sin saber inglés?'
     },
     'chatbot.a.beginner': {
-      KO: '물론이죠! 영어를 처음 시작하셔도 괜찮아요. 한국어로 먼저 설명해 드리고, 천천히 영어로 전환하는 맞춤형 수업을 제공해요.',
+      KO: '물론이죠! 영어를 처음 시작하셔도 괜찮아요. 한국어로 먼저 설명해 드리고, 천천히 영어로 전환하는 맞춤형 세션을 제공해요.',
       EN: "Of course! It's fine even if you're a total beginner. We explain in Korean first and gradually shift to English at your pace.",
       ZH: '当然可以！即使是英语初学者也没问题。我们会先用韩语说明，再逐步切换到英语进行定制授课。',
       JA: 'もちろんです！英語が初めてでも大丈夫です。まず韓国語で説明し、ゆっくり英語に切り替えるカスタムレッスンをご提供します。',
@@ -955,10 +955,10 @@
       ES: '¿Cuáles son las reglas de cancelación y cambio?'
     },
     'chatbot.a.policy': {
-      KO: '모든 이용권은 결제 후 90일 내 소진 필수예요. 수업 요일 및 시간 변경/취소는 수업 시작 1시간 전까지 가능하고, 수업 시작 1시간 이내 취소 및 노쇼 발생 시 티켓이 차감되며 ‘토닥토닥 리포트’가 발송돼요.',
+      KO: '모든 이용권은 결제 후 90일 내 소진 필수예요. 세션 요일 및 시간 변경/취소는 세션 시작 1시간 전까지 가능하고, 세션 시작 1시간 이내 취소 및 노쇼 발생 시 티켓이 차감되며 ‘토닥토닥 리포트’가 발송돼요.',
       EN: 'All passes must be used within 90 days of payment. You can change or cancel the day/time until 1 hour before class. If you cancel within 1 hour of start or no-show, a ticket is deducted and a “Todaktodak Report” is sent.',
       ZH: '所有次数券须在付款后90天内用完。开课1小时前可更改/取消星期和时间。开课1小时内取消或未到，将扣除次数并发送“托达克托达克报告”。',
-      JA: 'すべての利用券は決済後90日以内に使い切る必要があります。授業の曜日・時間の変更/キャンセルは開始1時間前まで可能です。開始1時間以内のキャンセルやノーショー時はチケットが消化され、「トダクトダクレポート」が送られます。',
+      JA: 'すべての利用券は決済後90日以内に使い切る必要があります。セッションの曜日・時間の変更/キャンセルは開始1時間前まで可能です。開始1時間以内のキャンセルやノーショー時はチケットが消化され、「トダクトダクレポート」が送られます。',
       FR: 'Tous les tickets doivent être utilisés dans les 90 jours après paiement. Changement/annulation du jour et de l’heure possibles jusqu’à 1 h avant le cours. Annulation dans l’heure ou absence : un ticket est débité et un « Todaktodak Report » est envoyé.',
       ES: 'Todos los pases deben usarse en 90 días tras el pago. Puedes cambiar/cancelar día y hora hasta 1 hora antes. Si cancelas en esa hora o no asistes, se descuenta un ticket y se envía el “Todaktodak Report”.'
     },
@@ -1016,10 +1016,10 @@
       KO: '이렇게 예약할게요 🎉', EN: "Here's your booking 🎉", ZH: '将这样为您预约 🎉', JA: 'このように予約します 🎉', FR: 'Voici votre réservation 🎉', ES: 'Así queda tu reserva 🎉'
     },
     'book.policyNote': {
-      KO: '수업 요일 및 시간 변경/취소는 수업 시작 1시간 전까지 가능해요. 1시간 이내 취소·노쇼 시 티켓이 차감되며 ‘토닥토닥 리포트’가 발송돼요.',
+      KO: '세션 요일 및 시간 변경/취소는 세션 시작 1시간 전까지 가능해요. 1시간 이내 취소·노쇼 시 티켓이 차감되며 ‘토닥토닥 리포트’가 발송돼요.',
       EN: 'You can change or cancel the day/time until 1 hour before class. Cancel within 1 hour or no-show: a ticket is deducted and a “Todaktodak Report” is sent.',
       ZH: '开课1小时前可更改/取消星期和时间。开课1小时内取消或未到，将扣除次数并发送“托达克托达克报告”。',
-      JA: '授業の曜日・時間の変更/キャンセルは開始1時間前まで可能です。開始1時間以内のキャンセルやノーショー時はチケットが消化され、「トダクトダクレポート」が送られます。',
+      JA: 'セッションの曜日・時間の変更/キャンセルは開始1時間前まで可能です。開始1時間以内のキャンセルやノーショー時はチケットが消化され、「トダクトダクレポート」が送られます。',
       FR: 'Changement/annulation du jour et de l’heure jusqu’à 1 h avant. Annulation dans l’heure ou absence : un ticket est débité et un « Todaktodak Report » est envoyé.',
       ES: 'Puedes cambiar/cancelar día y hora hasta 1 hora antes. Si cancelas en esa hora o no asistes, se descuenta un ticket y se envía el “Todaktodak Report”.'
     },
@@ -1154,10 +1154,10 @@
     },
     'room.sentenceSheetPlaceholder': { KO: '예: 오늘 날씨가 좋아서 기분이 좋아요', EN: 'e.g. The weather is nice today so I feel great', ZH: '例：今天天气好，心情也不错', JA: '例：今日は天気が良くて気分がいいです', FR: 'ex. Il fait beau aujourd\'hui, je suis de bonne humeur', ES: 'ej. Hoy hace buen tiempo y estoy de buen humor' },
     'room.sentenceSheetSubmit': { KO: '문장 변환', EN: 'Convert', ZH: '转换句子', JA: '文章変換', FR: 'Convertir', ES: 'Convertir' },
-    'room.feedbackTitle': { KO: '오늘 수업은 어떠하셨나요? 🍰', EN: 'How was today\'s session? 🍰', ZH: '今天的课程怎么样？🍰', JA: '今日のレッスンはどうでしたか？🍰', FR: 'Comment était la session d\'aujourd\'hui ? 🍰', ES: '¿Cómo estuvo la sesión de hoy? 🍰' },
+    'room.feedbackTitle': { KO: '오늘 세션은 어떠하셨나요? 🍰', EN: 'How was today\'s session? 🍰', ZH: '今天的课程怎么样？🍰', JA: '今日のレッスンはどうでしたか？🍰', FR: 'Comment était la session d\'aujourd\'hui ? 🍰', ES: '¿Cómo estuvo la sesión de hoy? 🍰' },
     'room.starAria': { KO: '별점', EN: 'Star rating', ZH: '星级评分', JA: '評価', FR: 'Note', ES: 'Calificación' },
     'room.feedbackSectionLabel': {
-      KO: '다음 수업엔 대화 파트너가 이렇게 해주면 좋겠어요<br>(다중 선택 가능)',
+      KO: '다음 세션엔 대화 파트너가 이렇게 해주면 좋겠어요<br>(다중 선택 가능)',
       EN: 'I\'d love it if my partner did this next time<br>(multiple choices allowed)',
       ZH: '希望下次课程对话伙伴能这样做<br>(可多选)',
       JA: '次のレッスンでは会話パートナーにこうしてほしいです<br>（複数選択可）',
@@ -1171,7 +1171,7 @@
     'room.feedbackChip.levelUp': { KO: '📈 레벨을 조금 올려주세요', EN: '📈 Please raise the level a bit', ZH: '📈 请稍微提高难度', JA: '📈 レベルを少し上げてください', FR: '📈 Augmentez un peu le niveau', ES: '📈 Sube un poco el nivel' },
     'room.feedbackChip.levelDown': { KO: '📉 레벨을 조금 내려주세요', EN: '📉 Please lower the level a bit', ZH: '📉 请稍微降低难度', JA: '📉 レベルを少し下げてください', FR: '📉 Baissez un peu le niveau', ES: '📉 Baja un poco el nivel' },
     'room.feedbackChip.correction': { KO: '📝 문장 교정을 더 많이 해주세요', EN: '📝 Please correct my sentences more', ZH: '📝 请多纠正句子', JA: '📝 文章の添削をもっとしてください', FR: '📝 Corrigez plus mes phrases', ES: '📝 Corrige más mis frases' },
-    'room.feedbackSubmit': { KO: '소중한 피드백 보내고 수업 종료하기', EN: 'Send feedback & end session', ZH: '发送宝贵反馈并结束课程', JA: '大切なフィードバックを送って終了する', FR: 'Envoyer le feedback et terminer', ES: 'Enviar feedback y terminar' },
+    'room.feedbackSubmit': { KO: '소중한 피드백 보내고 세션 종료하기', EN: 'Send feedback & end session', ZH: '发送宝贵反馈并结束会话', JA: '大切なフィードバックを送って終了する', FR: 'Envoyer le feedback et terminer', ES: 'Enviar feedback y terminar' },
     'room.toastFeedbackSent': {
       KO: '피드백이 전달되었습니다! 오늘도 수고하셨어요 💖', EN: 'Feedback sent! Great work today 💖', ZH: '反馈已送达！今天也辛苦了 💖', JA: 'フィードバックが送信されました！今日もお疲れ様でした 💖', FR: 'Feedback envoyé ! Bravo pour aujourd\'hui 💖', ES: '¡Feedback enviado! Buen trabajo hoy 💖'
     },
@@ -1337,7 +1337,7 @@
     'mat.item.enopic.source': { KO: 'DayO 큐레이션 · 4분 예습', EN: 'Curated by DayO · 4-min preview', ZH: 'DayO精选 · 4分钟预习', JA: 'DayOキュレーション · 4分予習', FR: 'Sélection DayO · Aperçu de 4 min', ES: 'Curaduría de DayO · Vista previa de 4 min' },
     'mat.item.enopic.summary': { KO: '오픽에서 자주 나오는 "일과 일상" 주제예요. 내 경험과 연결해서 두세 문장으로 말해보는 연습을 해보세요.', EN: 'A common OPIc "work and daily life" topic. Practice connecting it to your own experience in two or three sentences.', ZH: '这是OPIc中常见的"工作与日常"主题。请练习结合自身经历用两三句话来表达。', JA: 'OPICでよく出る「仕事と日常」テーマです。自分の経験に結びつけて2〜3文で話す練習をしてみましょう。', FR: 'Un sujet fréquent à l\'OPIc : « travail et vie quotidienne ». Entraînez-vous à le relier à votre expérience en deux ou trois phrases.', ES: 'Un tema frecuente de OPIc: "trabajo y vida diaria". Practica conectarlo con tu propia experiencia en dos o tres oraciones.' },
     'mat.item.enopic.points': {
-      KO: ['많은 회사가 주 2~3일만 출근하는 하이브리드 방식을 유지하고 있습니다.', '집중 업무 공간보다 협업과 회의를 위한 라운지형 공간이 늘어나는 추세입니다.', '통근 시간이 줄면서 아침 시간을 학습이나 운동에 쓰는 사람이 많아졌습니다.'],
+      KO: ['많은 회사가 주 2~3일만 출근하는 하이브리드 방식을 유지하고 있습니다.', '집중 업무 공간보다 협업과 회의를 위한 라운지형 공간이 늘어나는 추세입니다.', '통근 시간이 줄면서 아침 시간을 연습이나 운동에 쓰는 사람이 많아졌습니다.'],
       EN: ['Many companies now keep a hybrid model with only 2-3 office days a week.', 'Lounge-style spaces for collaboration and meetings are replacing focused work areas.', 'With shorter commutes, more people spend mornings on learning or exercise.'],
       ZH: ['许多公司现在只需每周到岗2-3天，实行混合办公模式。', '用于协作和会议的休闲式空间正逐渐取代专注办公区。', '通勤时间减少后，越来越多人把早晨用于学习或运动。'],
       JA: ['多くの企業が週2〜3日だけ出社するハイブリッド方式を維持しています。', '集中作業スペースよりも、協業や会議のためのラウンジ型スペースが増える傾向にあります。', '通勤時間が減り、朝の時間を学習や運動に使う人が増えました。'],

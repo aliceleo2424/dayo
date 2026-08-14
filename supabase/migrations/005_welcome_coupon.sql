@@ -95,7 +95,7 @@ begin
     new.id,
     'user:' || new.id::text,
     'WELCOME_9900',
-    '첫 수업 9,900원 체험 할인권',
+    '첫 세션 9,900원 체험 할인권',
     9900,
     19900,
     false

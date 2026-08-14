@@ -14,7 +14,7 @@
     {
       id: 'trial',
       badge: '첫 가입 전용 ☕️',
-      title: '첫 수업 체험권',
+      title: '첫 세션 체험 할인권',
       price: '9,900원',
       priceValue: 9900,
       meta: '1회',
@@ -184,7 +184,7 @@
       couponHtml =
         '<label class="tk-coupon">' +
           '<input type="checkbox" data-tk-coupon' + (couponState.applyWelcome ? ' checked' : '') + '>' +
-          '<span>🎉 첫 수업 9,900원 체험 할인권 (19,900원 ➔ 9,900원)</span>' +
+          '<span>🎉 첫 세션 9,900원 체험 할인권 (19,900원 ➔ 9,900원)</span>' +
         '</label>';
     }
     var cls = 'tk-card';
@@ -196,7 +196,7 @@
         '<h3 class="tk-card__title">' + plan.title + '</h3>' +
         priceHtml +
         '<p class="tk-card__meta">' + plan.meta + '</p>' +
-        '<p class="tk-card__copy">' + (applied ? '첫 수업 체험가로 결제돼요' : plan.copy) + '</p>' +
+        '<p class="tk-card__copy">' + (applied ? '첫 세션 체험가로 결제돼요' : plan.copy) + '</p>' +
         couponHtml +
         '<div class="tk-card__cta">' +
           '<button type="button" class="tk-buy" data-tk-buy="' + plan.id + '">' +
@@ -231,7 +231,7 @@
         '</div>' +
         '<div class="tk-body">' +
           '<div class="tk-duebar" data-tk-duebar>' +
-            '<p class="tk-duebar__label">🎉 첫 수업 체험 할인권 자동 적용</p>' +
+            '<p class="tk-duebar__label">🎉 첫 세션 체험 할인권 자동 적용</p>' +
             '<p class="tk-duebar__was" data-tk-due-was>19,900원</p>' +
             '<p class="tk-duebar__now" data-tk-due-now>9,900원</p>' +
             '<p class="tk-duebar__hint">1회 이용권 결제 예정 금액</p>' +
@@ -241,8 +241,8 @@
             '<p class="tk-policy__title">세션 규정 및 이용 안내</p>' +
             '<ul class="tk-policy__list">' +
               '<li>📌 <strong>유효기간:</strong> 모든 이용권은 결제 후 90일 내 소진 필수.</li>' +
-              '<li>🔄 <strong>변경/취소:</strong> 수업 요일 및 시간 변경/취소는 수업 시작 1시간 전까지 가능.</li>' +
-              '<li>💌 <strong>노쇼:</strong> 수업 시작 1시간 이내 취소 및 노쇼 발생 시 티켓이 차감되며 \'토닥토닥 리포트\'가 발송됨.</li>' +
+              '<li>🔄 <strong>변경/취소:</strong> 세션 요일 및 시간 변경/취소는 세션 시작 1시간 전까지 가능.</li>' +
+              '<li>💌 <strong>노쇼:</strong> 세션 시작 1시간 이내 취소 및 노쇼 발생 시 티켓이 차감되며 \'토닥토닥 리포트\'가 발송됨.</li>' +
             '</ul>' +
           '</aside>' +
         '</div>' +

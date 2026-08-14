@@ -78,7 +78,7 @@ export const automationRules: AutomationRule[] = [
   { id: "r1", name: "가입 후 24시간 미결제 → 웰컴 쿠폰", trigger: "가입 후 24시간 내 미결제", action: "WELCOME20 쿠폰 자동 발송", channel: "alimtalk", isActive: true, triggeredCount: 342, lastTriggeredAt: "2026-07-28T17:00:00" },
   { id: "r2", name: "테스트 완료 후 1시간 → 맞춤 코스 추천", trigger: "스피킹 테스트 완료 후 1시간", action: "맞춤 코스 추천 Push 발송", channel: "push", isActive: true, triggeredCount: 128, lastTriggeredAt: "2026-07-28T16:30:00" },
   { id: "r3", name: "체험 종료 D-1 → 결제 유도", trigger: "체험 기간 종료 1일 전", action: "30% 할인 쿠폰 SMS 발송", channel: "sms", isActive: false, triggeredCount: 56 },
-  { id: "r4", name: "7일 미접속 → 재방문 유도", trigger: "7일 이상 미접속", action: "무료 체험 수업 1회 지급", channel: "email", isActive: true, triggeredCount: 89, lastTriggeredAt: "2026-07-27T09:00:00" },
+  { id: "r4", name: "7일 미접속 → 재방문 유도", trigger: "7일 이상 미접속", action: "무료 체험 세션 1회 지급", channel: "email", isActive: true, triggeredCount: 89, lastTriggeredAt: "2026-07-27T09:00:00" },
 ];
 
 export const coupons: Coupon[] = [
