@@ -137,6 +137,9 @@
         || (window.DayOMode && window.DayOMode.getUserId && window.DayOMode.getUserId())
         || ''
     };
+    if (document.body && document.body.getAttribute('data-dayo-role') === 'partner') {
+      extra.partnerId = extra.userId;
+    }
     var store = window.DayOProfileStore;
     var done = function (result) {
       var payload = result || { ok: false, local: true, transcript: serialized };

@@ -431,27 +431,27 @@
       ES: 'Gestiona perfil, horarios y sesiones.'
     },
     'partner.brand': {
-      KO: 'DayO Partner Studio', EN: 'DayO Partner Studio', ZH: 'DayO Partner Studio', JA: 'DayO Partner Studio', FR: 'DayO Partner Studio', ES: 'DayO Partner Studio'
+      KO: 'DayO Partner Lounge', EN: 'DayO Partner Lounge', ZH: 'DayO Partner Lounge', JA: 'DayO Partner Lounge', FR: 'DayO Partner Lounge', ES: 'DayO Partner Lounge'
     },
     'partner.brandSub': {
-      KO: 'CONVERSATION PARTNER PORTAL', EN: 'CONVERSATION PARTNER PORTAL', ZH: 'CONVERSATION PARTNER PORTAL', JA: 'CONVERSATION PARTNER PORTAL', FR: 'CONVERSATION PARTNER PORTAL', ES: 'CONVERSATION PARTNER PORTAL'
+      KO: 'PARTNER LOUNGE', EN: 'PARTNER LOUNGE', ZH: 'PARTNER LOUNGE', JA: 'PARTNER LOUNGE', FR: 'PARTNER LOUNGE', ES: 'PARTNER LOUNGE'
     },
     'partner.welcome': {
       KO: 'Camille 님, 반갑습니다! ☕', EN: 'Welcome, Camille! ☕', ZH: '欢迎，Camille！☕', JA: 'Camilleさん、こんにちは！☕', FR: 'Bonjour Camille ! ☕', ES: '¡Hola Camille! ☕'
     },
     'partner.eyebrow': {
-      KO: 'MY PARTNER STUDIO', EN: 'MY PARTNER STUDIO', ZH: 'MY PARTNER STUDIO', JA: 'MY PARTNER STUDIO', FR: 'MY PARTNER STUDIO', ES: 'MY PARTNER STUDIO'
+      KO: 'PARTNER LOUNGE', EN: 'PARTNER LOUNGE', ZH: 'PARTNER LOUNGE', JA: 'PARTNER LOUNGE', FR: 'PARTNER LOUNGE', ES: 'PARTNER LOUNGE'
     },
     'partner.heading': {
       KO: '오늘도 다정한 대화를 준비해 볼까요? 🍰', EN: 'Ready for warm conversations today? 🍰', ZH: '今天也准备好温暖的对话吧？🍰', JA: '今日も温かい会話の準備を 🍰', FR: 'Prêt(e) pour des échanges chaleureux ? 🍰', ES: '¿Listo para conversaciones cálidas? 🍰'
     },
     'partner.headingDesc': {
-      KO: '프로필과 가능한 시간을 관리하고, 예정된 대화 세션을 확인할 수 있어요.',
-      EN: 'Manage your profile, availability, and upcoming sessions.',
-      ZH: '管理资料、可用时间和预定会话。',
-      JA: 'プロフィール、空き時間、予定セッションを管理できます。',
-      FR: 'Gérez profil, disponibilités et sessions.',
-      ES: 'Gestiona perfil, horarios y sesiones.'
+      KO: '이번 달 활동비와 세션 현황을 확인하고, 프로필·가능 시간을 관리해 보세요.',
+      EN: 'Check this month’s activity pay and sessions, then manage your profile and availability.',
+      ZH: '查看本月活动费和会话情况，并管理资料与可用时间。',
+      JA: '今月の活動費とセッションを確認し、プロフィールと空き時間を管理しましょう。',
+      FR: 'Consultez l’activité du mois, puis gérez profil et disponibilités.',
+      ES: 'Revisa la actividad del mes y gestiona tu perfil y horarios.'
     },
     'partner.profile.title': {
       KO: '대화 파트너 프로필', EN: 'Partner Profile', ZH: '对话伙伴资料', JA: 'パートナープロフィール', FR: 'Profil partenaire', ES: 'Perfil de compañero'
@@ -534,13 +534,115 @@
       KO: '이번 달의 따뜻한 성과예요.', EN: 'Your warm achievements this month.', ZH: '本月温暖成果。', JA: '今月の成果です。', FR: 'Vos résultats ce mois.', ES: 'Tus logros este mes.'
     },
     'partner.report.completed': {
-      KO: '이번 달 완료한 대화', EN: 'Chats completed', ZH: '本月完成对话', JA: '今月完了した会話', FR: 'Sessions terminées', ES: 'Charlas completadas'
+      KO: '이번 달 완료한 대화', EN: 'Chats completed this month', ZH: '本月完成对话', JA: '今月完了した会話', FR: 'Sessions terminées ce mois', ES: 'Charlas completadas este mes'
     },
     'partner.report.satisfaction': {
       KO: '평균 세션 만족도', EN: 'Avg. satisfaction', ZH: '平均满意度', JA: '平均満足度', FR: 'Satisfaction moyenne', ES: 'Satisfacción media'
     },
     'partner.report.points': {
-      KO: '정산 예정 포인트', EN: 'Points to settle', ZH: '待结算积分', JA: '精算予定ポイント', FR: 'Points à régler', ES: 'Puntos pendientes'
+      KO: '정산 예정 활동비', EN: 'Activity pay pending', ZH: '待结算活动费', JA: '精算予定の活動費', FR: 'Activité à régler', ES: 'Actividad pendiente'
+    },
+    'partner.stats.monthCount': {
+      KO: '이번 달 완료한 대화', EN: 'Conversations completed this month', ZH: '本月完成的对话', JA: '今月完了した会話', FR: 'Conversations terminées ce mois', ES: 'Conversaciones de este mes'
+    },
+    'partner.stats.pending': {
+      KO: '정산 예정 활동비', EN: 'Activity pay pending', ZH: '待结算活动费', JA: '精算予定の活動費', FR: 'Activité à régler', ES: 'Actividad pendiente'
+    },
+    'partner.stats.pendingHint': {
+      KO: '대화 1회 × 6,000원', EN: '6,000 KRW per conversation', ZH: '每次对话 × 6,000韩元', JA: '会話1回 × 6,000ウォン', FR: '6 000 KRW par conversation', ES: '6.000 KRW por conversación'
+    },
+    'partner.stats.settled': {
+      KO: '누적 정산 완료 금액', EN: 'Settled activity pay', ZH: '累计已结算金额', JA: '累計精算済み金額', FR: 'Montant déjà réglé', ES: 'Importe ya liquidado'
+    },
+    'partner.stats.settledHint': {
+      KO: '지난달까지 완료된 세션', EN: 'Completed sessions from previous months', ZH: '截至上月已完成的会话', JA: '先月から完了したセッション', FR: 'Sessions des mois précédents', ES: 'Sesiones de meses anteriores'
+    },
+    'partner.stats.loading': {
+      KO: '불러오는 중…', EN: 'Loading…', ZH: '加载中…', JA: '読み込み中…', FR: 'Chargement…', ES: 'Cargando…'
+    },
+    'partner.stats.countFormat': {
+      KO: '{n}회', EN: '{n}', ZH: '{n}次', JA: '{n}回', FR: '{n}', ES: '{n}'
+    },
+    'partner.stats.wonFormat': {
+      KO: '{amount}원', EN: '₩{amount}', ZH: '₩{amount}', JA: '₩{amount}', FR: '{amount} ₩', ES: '₩{amount}'
+    },
+    'partner.promo.eyebrow': {
+      KO: 'EVENT & PROMOTION', EN: 'EVENT & PROMOTION', ZH: 'EVENT & PROMOTION', JA: 'EVENT & PROMOTION', FR: 'EVENT & PROMOTION', ES: 'EVENT & PROMOTION'
+    },
+    'partner.promo.referral': {
+      KO: '🎉 [친구 추천 보너스] 이번 달 유학생 친구 5명 소개 시 +50,000원 추가 정산!',
+      EN: '🎉 [Referral bonus] Introduce 5 international student friends this month for +₩50,000 extra settlement!',
+      ZH: '🎉 [好友推荐奖金] 本月介绍5位留学生朋友即可额外结算 +50,000韩元！',
+      JA: '🎉 [友達紹介ボーナス] 今月留学生の友達を5人紹介すると +50,000ウォン追加精算！',
+      FR: '🎉 [Bonus parrainage] Présentez 5 ami(e)s étudiants internationaux ce mois-ci : +50 000 ₩ !',
+      ES: '🎉 [Bono de referidos] ¡Presenta a 5 amigos estudiantes internacionales este mes y suma +₩50.000!'
+    },
+    'partner.promo.best': {
+      KO: '⭐ [베스트 파트너 리워드] 월간 세션 만족도 우수 파트너 특별 인센티브 지급',
+      EN: '⭐ [Best Partner Reward] Special incentive for partners with outstanding monthly session satisfaction',
+      ZH: '⭐ [最佳伙伴奖励] 向月度会话满意度优秀的伙伴发放特别激励',
+      JA: '⭐ [ベストパートナーリワード] 月間セッション満足度が優秀なパートナーに特別インセンティブ',
+      FR: '⭐ [Récompense Best Partner] Prime spéciale pour les partenaires à la meilleure satisfaction du mois',
+      ES: '⭐ [Recompensa Best Partner] Incentivo especial para partners con excelente satisfacción mensual'
+    },
+    'partner.tips.title': {
+      KO: '💡 실전 대화 팁 & 가이드북', EN: '💡 Conversation Tips & Playbook', ZH: '💡 实战对话技巧与指南', JA: '💡 実践会話ヒント＆プレイブック', FR: '💡 Astuces & playbook de conversation', ES: '💡 Consejos y playbook de conversación'
+    },
+    'partner.tips.sub': {
+      KO: '세션 전에 가볍게 훑어보면 대화가 한결 편해져요.',
+      EN: 'A light read before the session makes conversation easier.',
+      ZH: '会话前快速浏览，对话会轻松许多。',
+      JA: 'セッション前にさっと読むと会話がぐっと楽になります。',
+      FR: 'Un coup d’œil avant la session rend l’échange plus fluide.',
+      ES: 'Una lectura rápida antes de la sesión hace la conversación más fácil.'
+    },
+    'partner.tips.1.title': {
+      KO: '꿀팁 1: 대화 중 7초 침묵이 흐를 때 쓸 수 있는 만능 질문 5가지',
+      EN: 'Tip 1: Five all-purpose questions for a 7-second silence',
+      ZH: '小贴士1：对话中出现7秒沉默时可使用的5个万能问题',
+      JA: 'ヒント1：会話で7秒の沈黙が流れたときに使える万能質問5つ',
+      FR: 'Astuce 1 : 5 questions passe-partout quand le silence dure 7 secondes',
+      ES: 'Consejo 1: 5 preguntas comodín cuando hay 7 segundos de silencio'
+    },
+    'partner.tips.1.body': {
+      KO: '<ol><li>오늘 하루 중에서 제일 작게라도 웃게 만든 일이 있었나요?</li><li>이번 주에 시간이 조금 난다면, 어디에 가보고 싶어요?</li><li>매일 먹어도 질리지 않는 음식이 있나요?</li><li>요즘 머릿속에 자꾸 맴도는 노래가 있나요?</li><li>이번 주를 조금 더 따뜻하게 만들어 준 작은 일이 있었나요?</li></ol><p>질문은 짧게, 그리고 상대의 답을 한 박자 기다려 주세요. 침묵을 채우기보다 “듣고 있다”는 눈빛을 먼저 보여 주면 대화가 다시 흘러가요.</p>',
+      EN: '<ol><li>What made you smile even a little today?</li><li>If you had a free afternoon this week, where would you go?</li><li>Is there a food you could eat every day?</li><li>What song has been stuck in your head lately?</li><li>What small thing made this week feel a bit warmer?</li></ol><p>Keep the question short, then wait one beat. Showing that you are listening often restarts the conversation more gently than filling the silence.</p>',
+      ZH: '<ol><li>今天哪怕很小，有没有让你笑一下的事？</li><li>这周如果有空闲的下午，你想去哪里？</li><li>有没有每天吃都不会腻的食物？</li><li>最近脑子里一直循环的歌是什么？</li><li>有没有一件小事让这周更温暖一点？</li></ol><p>问题要短，然后停一拍。先用眼神告诉对方“我在听”，对话往往会自己重新流动。</p>',
+      JA: '<ol><li>今日、小さくても笑顔になったことはありますか？</li><li>今週ちょっと時間があったら、どこに行ってみたいですか？</li><li>毎日食べても飽きない食べ物はありますか？</li><li>最近頭の中でループしている曲はありますか？</li><li>今週を少し温かくしてくれた小さな出来事はありましたか？</li></ol><p>質問は短く、答えは一拍待ってください。沈黙を埋めるより「聞いています」という視線が会話を再開させます。</p>',
+      FR: '<ol><li>Qu’est-ce qui vous a fait sourire, même un peu, aujourd’hui ?</li><li>Si vous aviez un après-midi libre cette semaine, où iriez-vous ?</li><li>Y a-t-il un plat que vous pourriez manger tous les jours ?</li><li>Quelle chanson tourne dans votre tête en ce moment ?</li><li>Quel petit moment a rendu cette semaine un peu plus douce ?</li></ol><p>Posez la question brièvement, puis attendez un temps. Montrer que vous écoutez relance souvent mieux que de combler le silence.</p>',
+      ES: '<ol><li>¿Qué te hizo sonreír, aunque fuera un poco, hoy?</li><li>Si tuvieras una tarde libre esta semana, ¿adónde irías?</li><li>¿Hay alguna comida que podrías comer todos los días?</li><li>¿Qué canción se te ha quedado en la cabeza últimamente?</li><li>¿Qué detalle pequeño hizo esta semana un poco más cálida?</li></ol><p>Haz la pregunta corta y espera un segundo. Mostrar que estás escuchando suele reiniciar la conversación mejor que llenar el silencio.</p>'
+    },
+    'partner.tips.2.title': {
+      KO: '꿀팁 2: 유저의 첫 세션 긴장을 풀어주는 3분 아이스브레이킹 대화법',
+      EN: 'Tip 2: A 3-minute icebreaker for first-session nerves',
+      ZH: '小贴士2：缓解用户首次会话紧张的3分钟破冰对话法',
+      JA: 'ヒント2：初回セッションの緊張をほぐす3分アイスブレイク',
+      FR: 'Astuce 2 : Icebreaker de 3 minutes pour détendre une première session',
+      ES: 'Consejo 2: Icebreaker de 3 minutos para soltar los nervios de la primera sesión'
+    },
+    'partner.tips.2.body': {
+      KO: '<p><strong>0–1분:</strong> 이름과 오늘 기분을 가볍게 묻고, “틀려도 전혀 괜찮아요. 오늘은 편하게 이야기만 하면 돼요”라고 한 문장으로 안심시켜 주세요.</p><p><strong>1–2분:</strong> 날씨, 커피, 주말 계획처럼 정답이 없는 주제로 짧게 주고받아요. 파트너가 먼저 한 문장 예시(“저는 오늘 카페에서 왔어요”)를 주면 유저가 따라오기 쉬워요.</p><p><strong>2–3분:</strong> “오늘 제일 이야기하고 싶은 장면이 있나요?”처럼 세션 목적을 부드러운 선택지로 열어 주세요. 유저가 고르면 그 장면부터 대화를 시작하면 긴장이 훨씬 빨리 풀려요.</p>',
+      EN: '<p><strong>0–1 min:</strong> Ask their name and how they feel today, then reassure them in one line: “Mistakes are totally okay. Today we just talk comfortably.”</p><p><strong>1–2 min:</strong> Swap a few no-right-answer topics like weather, coffee, or weekend plans. Offer one example sentence first so they can follow.</p><p><strong>2–3 min:</strong> Open the session goal gently: “Is there a scene you’d most like to talk about today?” Start from their choice and first-session nerves usually ease quickly.</p>',
+      ZH: '<p><strong>0–1分钟：</strong>轻松问名字和今天心情，再用一句话安抚：“说错完全没关系。今天只要轻松聊天就好。”</p><p><strong>1–2分钟：</strong>用天气、咖啡、周末计划这类没有标准答案的话题短短交换。伙伴先给一句示例，用户更容易跟上。</p><p><strong>2–3分钟：</strong>温柔打开会话目的：“今天最想聊的场景是什么？”从对方选择开始，紧张通常会很快松开。</p>',
+      JA: '<p><strong>0–1分：</strong>名前と今日の気分を軽く聞いて、「間違えても大丈夫。今日は気楽に話せばいいですよ」と一文で安心させてください。</p><p><strong>1–2分：</strong>天気、コーヒー、週末の予定など正解のない話題を短くやり取り。パートナーが先に一文例を出すと続きやすくなります。</p><p><strong>2–3分：</strong>「今日いちばん話したい場面はありますか？」とセッションの目的をやさしく開いてください。相手の選択から始めると緊張が早くほどけます。</p>',
+      FR: '<p><strong>0–1 min :</strong> Demandez le prénom et l’humeur du jour, puis rassurez en une phrase : « Se tromper, ce n’est pas grave. Aujourd’hui, on parle simplement. »</p><p><strong>1–2 min :</strong> Échangez sur la météo, un café ou le week-end. Donnez d’abord une phrase exemple pour qu’il/elle puisse suivre.</p><p><strong>2–3 min :</strong> Ouvrez l’objectif en douceur : « Y a-t-il une scène dont vous aimeriez surtout parler ? » Partez de son choix, et le stress baisse vite.</p>',
+      ES: '<p><strong>0–1 min:</strong> Pregunta el nombre y cómo se siente hoy, y tranquiliza con una frase: “Equivocarse está bien. Hoy solo charlamos con calma.”</p><p><strong>1–2 min:</strong> Intercambia temas sin respuesta correcta: el clima, un café, el fin de semana. Da primero una frase de ejemplo para que sea más fácil seguir.</p><p><strong>2–3 min:</strong> Abre el objetivo con suavidad: “¿Hay alguna escena de la que más te gustaría hablar hoy?” Empieza por su elección y los nervios suelen soltarse rápido.</p>'
+    },
+    'partner.tips.3.title': {
+      KO: '꿀팁 3: 유저가 단어/문장도움 AI 버튼을 눌렀을 때 다정하게 리액션해 주는 법',
+      EN: 'Tip 3: Warm reactions when the user taps word/sentence-help AI',
+      ZH: '小贴士3：用户按下单词/句子帮助AI按钮时，如何温柔回应',
+      JA: 'ヒント3：ユーザーが単語・文のヘルプAIを押したときのやさしいリアクション',
+      FR: 'Astuce 3 : Réagir avec chaleur quand l’utilisateur ouvre l’aide IA mot/phrase',
+      ES: 'Consejo 3: Cómo reaccionar con calidez cuando el usuario toca la ayuda de IA de palabras/frases'
+    },
+    'partner.tips.3.body': {
+      KO: '<p>도움 버튼을 누르는 건 대화를 멈추는 신호가 아니라, “이 장면을 같이 만들고 싶다”는 손짓이에요. 파트너는 기다려 주고, 나온 표현을 한 번 더 다정하게 받아 주세요.</p><ul><li>“좋아요, 그 표현 아주 자연스러워요. 천천히 말해 볼까요?”</li><li>“그 단어 골랐네요! 오늘 장면에 딱 맞아요.”</li><li>유저가 따라 말하면 의미를 한 줄로 다시 비춰 주고, 같은 표현을 한 번 더 대화에 넣어 주세요.</li><li>틀린 부분을 바로잡지 말고, 올바른 문장을 부드럽게 이어서 보여 주세요.</li></ul><p>도움 AI는 파트너를 대신하는 게 아니라, 두 사람이 같은 문장을 나눠 갖는 다리예요. 버튼을 눌러도 세션의 온기는 파트너에게 남아 있으면 충분해요.</p>',
+      EN: '<p>Tapping help is not a stop sign — it is a request to build the scene together. Wait, then warmly catch the phrase that appears.</p><ul><li>“Nice — that sounds very natural. Want to try it slowly?”</li><li>“You picked that word! It fits today’s scene perfectly.”</li><li>When they repeat it, mirror the meaning in one line and weave the same phrase back into the conversation.</li><li>Do not jump to correct. Gently continue with the natural sentence instead.</li></ul><p>Help AI does not replace the partner — it is a bridge so both of you can share the same sentence. The warmth of the session can stay with you.</p>',
+      ZH: '<p>按下帮助按钮不是叫停，而是“想一起把这个场景说出来”的手势。请先等待，再用温柔的语气接住出现的表达。</p><ul><li>“很好，这个说法很自然。我们慢慢再说一次好吗？”</li><li>“你选了这个词！和今天的场景刚刚好。”</li><li>对方跟读后，用一句话映出意思，再把同一表达放回对话里。</li><li>不要立刻纠错，用正确、自然的句子轻轻接下去。</li></ul><p>帮助AI不是取代伙伴，而是让两个人共用同一句话的桥。按钮按下去，会话的温度仍可以留在伙伴这边。</p>',
+      JA: '<p>ヘルプボタンは会話を止める合図ではなく、「この場面を一緒に作りたい」という合図です。待ってから、出てきた表現をやさしく受け止めてください。</p><ul><li>「いいですね。とても自然です。ゆっくり言ってみましょうか？」</li><li>「その単語を選びましたね！今日の場面にぴったりです。」</li><li>繰り返したら意味を一文で映して、同じ表現をもう一度会話に戻してください。</li><li>すぐに直さず、自然な文をやさしくつないで見せましょう。</li></ul><p>ヘルプAIはパートナーの代わりではなく、同じ文を分け合う橋です。ボタンを押しても、セッションの温かさはパートナーに残っていれば十分です。</p>',
+      FR: '<p>Appuyer sur l’aide n’arrête pas la conversation : c’est une invitation à construire la scène ensemble. Attendez, puis accueillez la phrase avec chaleur.</p><ul><li>« Super, c’est très naturel. On essaie doucement ? »</li><li>« Vous avez choisi ce mot ! Il va parfaitement avec la scène d’aujourd’hui. »</li><li>Quand la personne répète, renvoyez le sens en une ligne et réinsérez la même expression dans l’échange.</li><li>Ne corrigez pas tout de suite : enchaînez simplement avec la phrase naturelle.</li></ul><p>L’IA d’aide ne remplace pas le partenaire : c’est un pont pour partager la même phrase. La chaleur de la session peut rester de votre côté.</p>',
+      ES: '<p>Tocar la ayuda no frena la conversación: es un gesto de “quiero construir esta escena contigo”. Espera y recibe con calidez la frase que aparece.</p><ul><li>“Qué bien, suena muy natural. ¿La decimos despacio?”</li><li>“¡Elegiste esa palabra! Encaja perfecto con la escena de hoy.”</li><li>Cuando la repita, refleja el significado en una línea y vuelve a meter la misma expresión en la conversación.</li><li>No corrijas de inmediato: continúa con la frase natural, con suavidad.</li></ul><p>La IA de ayuda no sustituye al partner: es un puente para compartir la misma frase. Aunque se pulse el botón, el calor de la sesión puede quedarse contigo.</p>'
     },
     'partner.convert.eyebrow': {
       KO: 'LEARN KOREAN WITH DAYO', EN: 'LEARN KOREAN WITH DAYO', ZH: 'LEARN KOREAN WITH DAYO', JA: 'LEARN KOREAN WITH DAYO', FR: 'LEARN KOREAN WITH DAYO', ES: 'LEARN KOREAN WITH DAYO'
@@ -1356,7 +1458,7 @@
     'page.title.index': { KO: 'DayO 돼요 — AI 회화 코파일럿', EN: 'DayO — AI Conversation Copilot', ZH: 'DayO — AI对话副驾驶', JA: 'DayO — AI会話コパイロット', FR: 'DayO — Copilote de conversation IA', ES: 'DayO — Copiloto de conversación con IA' },
     'page.title.room': { KO: 'DayO 돼요 — 화상 회화 스튜디오', EN: 'DayO — Video Conversation Studio', ZH: 'DayO — 视频对话工作室', JA: 'DayO — ビデオ会話スタジオ', FR: 'DayO — Studio de conversation vidéo', ES: 'DayO — Estudio de conversación por video' },
     'page.title.mypage': { KO: 'DayO 마이페이지 — 내 대화 라운지', EN: 'DayO My Page — My Conversation Lounge', ZH: 'DayO 我的页面 — 我的对话休息室', JA: 'DayOマイページ — マイ会話ラウンジ', FR: 'DayO Mon Espace — Mon salon de conversation', ES: 'DayO Mi Página — Mi salón de conversación' },
-    'page.title.partner': { KO: 'DayO Partner Studio — 대화 파트너 관리', EN: 'DayO Partner Studio — Conversation Partner Management', ZH: 'DayO Partner Studio — 对话伙伴管理', JA: 'DayO Partner Studio — 会話パートナー管理', FR: 'DayO Partner Studio — Gestion des partenaires de conversation', ES: 'DayO Partner Studio — Gestión de compañeros de conversación' },
+    'page.title.partner': { KO: 'DayO Partner Lounge — 대화 파트너 라운지', EN: 'DayO Partner Lounge — Conversation Partner Dashboard', ZH: 'DayO Partner Lounge — 对话伙伴休息室', JA: 'DayO Partner Lounge — 会話パートナーラウンジ', FR: 'DayO Partner Lounge — Espace partenaire', ES: 'DayO Partner Lounge — Sala de partners' },
     'nav.mainMenuAria': { KO: '주요 메뉴', EN: 'Main menu', ZH: '主菜单', JA: 'メインメニュー', FR: 'Menu principal', ES: 'Menú principal' },
     'nav.mobileMenuAria': { KO: '모바일 메뉴', EN: 'Mobile menu', ZH: '移动菜单', JA: 'モバイルメニュー', FR: 'Menu mobile', ES: 'Menú móvil' },
     'chatbot.panelAria': { KO: 'FAQ 챗봇', EN: 'FAQ chatbot', ZH: 'FAQ聊天机器人', JA: 'FAQチャットボット', FR: 'Chatbot FAQ', ES: 'Chatbot de preguntas frecuentes' },

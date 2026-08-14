@@ -1088,8 +1088,12 @@ async function saveSessionLog(transcript, extra) {
     room_name: extra.roomName || '',
     transcript: serialized,
     started_at: extra.startedAt || (serialized[0] && serialized[0].timestamp) || new Date().toISOString(),
-    ended_at: extra.endedAt || new Date().toISOString()
+    ended_at: extra.endedAt || new Date().toISOString(),
+    partner_id: extra.partnerId || extra.partner_id || null
   };
+  if (!payload.partner_id && typeof document !== 'undefined' && document.body && document.body.getAttribute('data-dayo-role') === 'partner') {
+    payload.partner_id = payload.user_id || null;
+  }
 
   var client = getClient();
   if (!client) {
@@ -1099,8 +1103,14 @@ async function saveSessionLog(transcript, extra) {
   try {
     var result = await client.from('session_logs').insert(payload).select('id').single();
     if (result.error) {
+      var withoutPartner = Object.assign({}, payload);
+      delete withoutPartner.partner_id;
+      result = await client.from('session_logs').insert(withoutPartner).select('id').single();
+    }
+    if (result.error) {
       var withoutUser = Object.assign({}, payload);
       delete withoutUser.user_id;
+      delete withoutUser.partner_id;
       result = await client.from('session_logs').insert(withoutUser).select('id').single();
     }
     if (result.error) {
@@ -1118,6 +1128,85 @@ async function saveSessionLog(transcript, extra) {
     console.warn('[DayO] session_logs insert failed — localStorage kept', err);
     return { ok: false, local: true, transcript: serialized, payload: payload, error: err };
   }
+}
+
+function sessionEndedAt(row) {
+  var raw = row && (row.ended_at || row.endedAt);
+  var date = raw ? new Date(raw) : null;
+  return date && !isNaN(date.getTime()) ? date : null;
+}
+
+function isSameMonth(date, now) {
+  return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+}
+
+async function fetchPartnerSessionLogs() {
+  var client = getClient();
+  var uid = getAuthUserId();
+  var email = String(lsGet(EMAIL_KEY, '') || '').trim().toLowerCase();
+  var clientKey = getClientKey();
+  var rows = [];
+
+  if (client) {
+    try {
+      var result = await client
+        .from('session_logs')
+        .select('id, ended_at, started_at, created_at, room_name, user_id, partner_id, email, client_key')
+        .order('ended_at', { ascending: false })
+        .limit(500);
+      if (result.error) {
+        result = await client
+          .from('session_logs')
+          .select('id, ended_at, started_at, created_at, room_name, user_id, email, client_key')
+          .order('ended_at', { ascending: false })
+          .limit(500);
+      }
+      if (result.error) throw result.error;
+      var all = result.data || [];
+      rows = all.filter(function (row) {
+        if (!sessionEndedAt(row)) return false;
+        if (uid) return row.partner_id === uid || row.user_id === uid;
+        if (email && row.email && String(row.email).toLowerCase() === email) return true;
+        if (clientKey && row.client_key === clientKey) return true;
+        return false;
+      });
+    } catch (err) {
+      console.warn('[DayO] partner session_logs fetch failed', err);
+    }
+  }
+
+  if (!rows.length && !uid) {
+    var local = getLastTranscript();
+    if (local && local.length) {
+      rows.push({
+        id: 'local-last',
+        ended_at: new Date().toISOString(),
+        started_at: null,
+        room_name: 'local'
+      });
+    }
+  }
+
+  return rows;
+}
+
+function summarizePartnerEarnings(rows, rate) {
+  rate = typeof rate === 'number' ? rate : 6000;
+  var now = new Date();
+  var monthCount = 0;
+  var settledCount = 0;
+  (rows || []).forEach(function (row) {
+    var ended = sessionEndedAt(row);
+    if (!ended) return;
+    if (isSameMonth(ended, now)) monthCount += 1;
+    else settledCount += 1;
+  });
+  return {
+    monthCount: monthCount,
+    pendingWon: monthCount * rate,
+    settledWon: settledCount * rate,
+    rate: rate
+  };
 }
 
 function getUser() {
@@ -1174,6 +1263,8 @@ window.DayOProfileStore = {
   mergeVocab: mergeVocab,
   saveSessionLog: saveSessionLog,
   getLastTranscript: getLastTranscript,
+  fetchPartnerSessionLogs: fetchPartnerSessionLogs,
+  summarizePartnerEarnings: summarizePartnerEarnings,
   syncRewardUI: syncRewardUI,
   fetchCoupons: fetchCoupons,
   markCouponUsed: markCouponUsed,
