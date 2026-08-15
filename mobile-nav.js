@@ -5,7 +5,7 @@
   var HASH_ALIASES = {
     about: 'service-intro',
     tutors: 'partners',
-    booking: 'pricing'
+    pricing: 'booking'
   };
 
   function t(key, fallback) {

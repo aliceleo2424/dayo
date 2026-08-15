@@ -1260,8 +1260,20 @@
       min-height: 0;
       padding-top: 2.25rem;
     }
-    body.is-logged-in a.nav-guest-only {
+    .nav-auth-only { display: none; }
+    .header-actions > a.nav-auth-only,
+    .nav-drawer a.nav-auth-only {
       display: none;
+    }
+    body.is-logged-in .header-actions > a.nav-auth-only {
+      display: inline-flex;
+    }
+    body.is-logged-in .nav-drawer a.nav-auth-only {
+      display: flex;
+    }
+    body.is-logged-in .nav-drawer a.nav-auth-only.header-cta,
+    body.is-logged-in .nav-drawer a.nav-auth-only.nav-drawer__cta {
+      display: inline-flex;
     }
     #service-intro, #partners, #pricing, #about, #tutors, #booking, #reviews,
     #authDashboard, .auth-live, #loungeCarousel {
@@ -1397,14 +1409,14 @@
       <nav class="nav-desktop" data-i18n="nav.mainMenuAria" data-i18n-attr="aria-label" aria-label="주요 메뉴">
         <a href="#service-intro" data-i18n="nav.about">서비스 소개</a>
         <a href="#partners" data-i18n="nav.partners">대화 파트너</a>
-        <a href="#reviews" class="nav-guest-only" data-i18n="nav.reviews">후기</a>
-        <a href="#booking" class="nav-guest-only" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
+        <a href="#reviews" data-i18n="nav.reviews">후기</a>
+        <a href="#booking" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
       </nav>
 
       <div class="header-actions">
         <div data-i18n-lang="icon"></div>
         <div class="header-mode" data-mode-switch="inline"></div>
-        <a href="room.html" class="header-cta" data-ms-guard data-i18n="nav.startChat" data-ticket-gate>🚀 바로 대화 시작하기</a>
+        <a href="room.html" class="header-cta nav-auth-only" data-ms-guard data-i18n="nav.startChat" data-ticket-gate>🚀 바로 대화 시작하기</a>
         <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
       </div>
     </div>
@@ -1415,10 +1427,10 @@
     <div data-i18n-lang="drawer"></div>
     <a href="#service-intro" data-i18n="nav.about">서비스 소개</a>
     <a href="#partners" data-i18n="nav.partners">대화 파트너</a>
-    <a href="#reviews" class="nav-guest-only" data-i18n="nav.reviews">후기</a>
-    <a href="#booking" class="nav-guest-only" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
-    <a href="mypage.html" data-i18n="nav.mypage">마이페이지</a>
-    <a href="room.html" class="header-cta nav-drawer__cta" data-ms-guard data-i18n="nav.startChat" data-ticket-gate data-nav-close>🚀 바로 대화 시작하기</a>
+    <a href="#reviews" data-i18n="nav.reviews">후기</a>
+    <a href="#booking" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
+    <a href="mypage.html" class="nav-auth-only" data-i18n="nav.mypage">마이페이지</a>
+    <a href="room.html" class="header-cta nav-drawer__cta nav-auth-only" data-ms-guard data-i18n="nav.startChat" data-ticket-gate data-nav-close>🚀 바로 대화 시작하기</a>
   </nav>
 
   <div class="page">
@@ -1614,7 +1626,7 @@
     </section>
 
     <!-- Booking CTA -->
-    <section class="journey" id="pricing" style="padding-top: 0; padding-bottom: var(--section-gap);" data-landing-only>
+    <section class="journey" id="booking" style="padding-top: 0; padding-bottom: var(--section-gap);" data-landing-only>
       <div class="section-inner" style="text-align: center;">
         <p class="section-label reveal" data-i18n="bookingCta.eyebrow">Booking</p>
         <h2 class="section-title reveal" style="margin-bottom: 1.25rem;" data-i18n="bookingCta.title">지금, 화상 회화 스튜디오에서 만나요</h2>
