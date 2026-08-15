@@ -2246,9 +2246,8 @@
           </form>
           <div class="quiz-lead-done">
             <p class="quiz-lead-success">${escapeHtml(t('quiz.lead.success'))}</p>
-            <a class="quiz-lead-cta" href="cheat-sheet.html?lang=${encodeURIComponent(quizLang)}&amp;level=${encodeURIComponent(quizLevel)}">${escapeHtml(t('quiz.lead.cheatCta'))}</a>
-            <button class="quiz-lead-cta quiz-lead-cta--ghost" type="button" data-quiz-signup>${escapeHtml(t('quiz.lead.signupCta'))}</button>
-            <button class="quiz-lead-cta quiz-lead-cta--ghost" type="button" data-booking-open>${escapeHtml(t('quiz.lead.bookingCta'))}</button>
+            <a class="quiz-lead-cta" href="room.html" data-ms-guard data-ticket-gate data-quiz-start-cta>${escapeHtml(t('quiz.lead.startCta'))}</a>
+            <a class="quiz-lead-cta quiz-lead-cta--ghost" href="cheat-sheet.html?lang=${encodeURIComponent(quizLang)}&amp;level=${encodeURIComponent(quizLevel)}">${escapeHtml(t('quiz.lead.cheatCta'))}</a>
           </div>
         </div>
         <button class="quiz-result-retry" type="button">${escapeHtml(t('quiz.resultRetry'))}</button>
@@ -2300,54 +2299,54 @@
           submitBtn.disabled = true;
           submitBtn.textContent = t('quiz.emailSubmit');
         }
+        try {
+          window.localStorage.setItem('lead_email', email);
+        } catch (e) { /* ignore */ }
+
         const store = window.DayOProfileStore;
-        const save = function () {
-          if (!store || typeof store.saveQuizLead !== 'function') return Promise.resolve({ ok: false });
-          return store.saveQuizLead({
-            email: email,
-            language: quizLang,
-            level: quizLevel,
-            score: quizScore
-          });
+        const finishSuccess = function () {
+          card.classList.add('is-done');
+          showToast(t('quiz.lead.success'));
         };
+
         fetch('/api/send-lead-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email: email,
-            language: quizLang,
-            level: quizLevel,
+            language: quizLang || 'en',
+            level: quizLevel || 'starter',
             score: quizScore,
             origin: window.location.origin
           })
         }).catch(function () {});
-        const pending = (store && typeof store.ready === 'function') ? store.ready().then(save) : save();
-        Promise.resolve(pending).then((result) => {
-          if (!result || !result.ok) {
-            if (errorEl) errorEl.textContent = t('quiz.lead.errorSave');
-            if (submitBtn) submitBtn.disabled = false;
-            return;
+
+        const saveLead = function () {
+          if (!store || typeof store.saveQuizLead !== 'function') {
+            return Promise.resolve({ ok: true, local: true });
           }
-          card.classList.add('is-done');
-          showToast(t('quiz.lead.success'));
-        }).catch(() => {
-          if (errorEl) errorEl.textContent = t('quiz.lead.errorSave');
-          if (submitBtn) submitBtn.disabled = false;
+          return store.saveQuizLead({
+            email: email,
+            language: quizLang || 'en',
+            level: quizLevel || 'starter',
+            score: quizScore
+          });
+        };
+
+        const pending = (store && typeof store.ready === 'function')
+          ? store.ready().then(saveLead).catch(saveLead)
+          : saveLead();
+
+        Promise.resolve(pending).then(function () {
+          finishSuccess();
+        }).catch(function () {
+          finishSuccess();
         });
       });
 
-      const signupBtn = slide.querySelector('[data-quiz-signup]');
-      if (signupBtn) {
-        signupBtn.addEventListener('click', () => {
-          closeQuizModal();
-          if (window.DayOMode && typeof window.DayOMode.openLogin === 'function') {
-            window.DayOMode.openLogin();
-          }
-        });
-      }
-      const bookingBtn = slide.querySelector('[data-booking-open]');
-      if (bookingBtn) {
-        bookingBtn.addEventListener('click', () => {
+      const startCta = slide.querySelector('[data-quiz-start-cta]');
+      if (startCta) {
+        startCta.addEventListener('click', () => {
           setTimeout(closeQuizModal, 0);
         });
       }

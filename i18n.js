@@ -1212,12 +1212,12 @@
       KO: '자료집 & 쿠폰 받기', EN: 'Get the pack & coupon', ZH: '领取资料集和优惠券', JA: '資料集とクーポンを受け取る', FR: 'Recevoir le pack et le coupon', ES: 'Recibir la guía y el cupón'
     },
     'quiz.lead.success': {
-      KO: '🎉 입력하신 메일로 자료와 쿠폰 발급 안내가 전송되었습니다!',
-      EN: '🎉 Your pack and coupon details were sent to that email!',
-      ZH: '🎉 资料和优惠券发放说明已发到您填写的邮箱！',
-      JA: '🎉 入力したメールに資料とクーポン案内を送りました！',
-      FR: '🎉 Le pack et le coupon ont été envoyés à cet e-mail !',
-      ES: '🎉 ¡Enviamos la guía y el cupón a ese correo!'
+      KO: '🎉 입력하신 메일로 회화 치트키 자료와 9,900원 체험 할인쿠폰 발급 안내가 전송되었습니다!',
+      EN: '🎉 Your conversation cheat sheet and ₩9,900 trial coupon details were sent to that email!',
+      ZH: '🎉 会话速查资料和 9,900 韩元体验优惠券发放说明已发到您填写的邮箱！',
+      JA: '🎉 入力したメールに会話チートシートと9,900ウォン体験クーポンのご案内を送りました！',
+      FR: '🎉 La fiche d’expressions et le coupon d’essai 9 900 ₩ ont été envoyés à cet e-mail !',
+      ES: '🎉 ¡Enviamos la guía de conversación y el cupón de prueba de ₩9,900 a ese correo!'
     },
     'quiz.lead.errorEmail': {
       KO: '이메일 주소를 다시 확인해 주세요.',
@@ -1234,6 +1234,14 @@
       JA: '保存に失敗しました。しばらくしてからもう一度どうぞ。',
       FR: 'Enregistrement impossible. Réessayez dans un instant.',
       ES: 'No se pudo guardar. Inténtalo de nuevo en un momento.'
+    },
+    'quiz.lead.startCta': {
+      KO: '🎟️ 첫 세션 9,900원에 바로 대화 시작하기',
+      EN: '🎟️ Start chatting now for ₩9,900',
+      ZH: '🎟️ 9,900韩元立即开始对话',
+      JA: '🎟️ 初回9,900ウォンですぐ会話を始める',
+      FR: '🎟️ Commencer maintenant pour 9 900 ₩',
+      ES: '🎟️ Empieza ya por ₩9,900'
     },
     'quiz.lead.signupCta': {
       KO: '회원가입하고 대화 시작하기',

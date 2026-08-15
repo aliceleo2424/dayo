@@ -1241,75 +1241,89 @@ async function bootstrap() {
 async function saveQuizLead(lead) {
   lead = lead || {};
   var email = String(lead.email || '').trim().toLowerCase();
-  var payload = {
-    email: email,
-    language: String(lead.language || ''),
-    level: String(lead.level || ''),
-    score: typeof lead.score === 'number' ? lead.score : parseInt(lead.score, 10) || 0,
-    created_at: new Date().toISOString()
-  };
   if (!email || email.indexOf('@') < 1) {
     return { ok: false, error: 'invalid-email' };
   }
 
+  var payload = {
+    email: email,
+    language: String(lead.language || 'en').trim() || 'en',
+    level: String(lead.level || 'starter').trim() || 'starter',
+    score: typeof lead.score === 'number' ? lead.score : parseInt(lead.score, 10) || 0,
+    created_at: new Date().toISOString()
+  };
+
+  persistQuizLeadLocal(payload);
+
+  var client = getClient();
+  if (client) {
+    try {
+      var remote = await insertLeadRemote(client, payload);
+      if (remote && remote.ok) return { ok: true, table: 'leads', local: true, payload: payload };
+    } catch (err) {
+      console.warn('[DayO] leads insert failed', err);
+    }
+  }
+
+  return { ok: true, local: true, payload: payload };
+}
+
+function persistQuizLeadLocal(payload) {
+  try {
+    window.localStorage.setItem('lead_email', payload.email);
+  } catch (e) { /* ignore */ }
   try {
     var stored = [];
     try { stored = JSON.parse(lsGet('dayo.quizLeads', '[]') || '[]'); } catch (e) { stored = []; }
     if (!Array.isArray(stored)) stored = [];
     stored.push(payload);
     lsSet('dayo.quizLeads', JSON.stringify(stored.slice(-30)));
-    if (!lsGet(EMAIL_KEY, '')) lsSet(EMAIL_KEY, email);
-  } catch (e) {}
+    if (!lsGet(EMAIL_KEY, '')) lsSet(EMAIL_KEY, payload.email);
+  } catch (e) { /* ignore */ }
+}
 
-  var client = getClient();
-  if (!client) return { ok: false, local: true };
+function withTimeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise(function (resolve) {
+      setTimeout(function () {
+        resolve({ error: { message: 'timeout' } });
+      }, ms);
+    })
+  ]);
+}
 
-  try {
-    var leadRes = await client.from('leads').insert({
+async function insertLeadRemote(client, payload) {
+  var rows = [
+    {
       email: payload.email,
-      language: payload.language,
-      level: payload.level,
-      score: payload.score,
+      language: payload.language || 'en',
+      level: payload.level || 'starter',
       created_at: payload.created_at
-    });
-    if (!leadRes.error) return { ok: true, table: 'leads', local: true, payload: payload };
-  } catch (err) {
-    console.warn('[DayO] leads insert failed', err);
-  }
-
-  try {
-    var logRes = await client.from('session_logs').insert({
-      client_key: getClientKey(),
+    },
+    {
       email: payload.email,
-      user_name: lsGet(USER_KEY, '') || 'quiz-lead',
-      room_name: 'quiz-lead',
-      transcript: [{
-        type: 'quiz-lead',
-        language: payload.language,
-        level: payload.level,
-        score: payload.score,
-        timestamp: payload.created_at
-      }],
-      started_at: payload.created_at,
-      ended_at: payload.created_at
-    });
-    if (!logRes.error) return { ok: true, table: 'session_logs', local: true, payload: payload };
-  } catch (err) {
-    console.warn('[DayO] quiz-lead session_logs backup failed', err);
-  }
-
-  try {
-    var key = getClientKey();
-    var upd = await client.from('profiles').update({
+      language: payload.language || 'en',
+      level: payload.level || 'starter'
+    },
+    {
       email: payload.email,
-      updated_at: payload.created_at
-    }).eq('client_key', key).select('id');
-    if (!upd.error && upd.data && upd.data.length) return { ok: true, table: 'profiles', local: true, payload: payload };
-  } catch (err) {
-    console.warn('[DayO] quiz-lead profiles backup failed', err);
+      language: payload.language || 'en',
+      level: payload.level || 'starter',
+      score: payload.score || 0,
+      created_at: payload.created_at
+    }
+  ];
+  for (var i = 0; i < rows.length; i += 1) {
+    try {
+      var leadRes = await withTimeout(client.from('leads').insert([rows[i]]), 8000);
+      if (leadRes && !leadRes.error) return { ok: true };
+      console.warn('[DayO] leads insert attempt failed', leadRes && leadRes.error);
+    } catch (err) {
+      console.warn('[DayO] leads insert attempt threw', err);
+    }
   }
-
-  return { ok: false, local: true, payload: payload };
+  return { ok: false };
 }
 
 function ready() {
