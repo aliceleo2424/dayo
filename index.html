@@ -866,35 +866,41 @@
       font-size: 0.9rem; color: var(--text-muted); line-height: 1.7;
     }
 
-    .service-intro-video {
+    .dayo-video-wrapper {
       max-width: 800px;
       width: 100%;
       margin: 2.5rem auto 0 auto;
     }
-    .service-intro-video__label {
-      margin: 0 0 0.85rem;
+    .dayo-video-wrapper__label {
+      margin: 0 0 1rem;
       text-align: center;
-      font-size: 0.95rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: var(--text);
     }
-    .service-intro-video__frame {
+    .dayo-video-wrapper__badge {
+      display: inline-block;
+      background: #FFF0F0;
+      color: #FF6B6B;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+    }
+    .dayo-video-wrapper__frame {
       position: relative;
       width: 100%;
       aspect-ratio: 16 / 9;
-      border-radius: 16px;
+      border-radius: 18px;
       overflow: hidden;
-      box-shadow: 0 12px 32px var(--shadow-soft);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.05);
       background: #1a1412;
     }
-    .service-intro-video__frame iframe {
+    .dayo-video-wrapper__frame iframe {
       position: absolute;
       inset: 0;
       display: block;
       width: 100%;
       height: 100%;
-      border: 0;
+      border: none;
     }
 
     /* Reviews */
@@ -1628,10 +1634,23 @@
             <p class="journey-desc" data-i18n="journey.step3.desc">울렁증 없이 친구처럼 다정하게 트이는 실전 회화</p>
           </article>
         </div>
-        <div class="service-intro-video reveal">
-          <p class="service-intro-video__label" data-i18n="journey.videoLabel">🎬 DayO 1:1 대화 미리보기</p>
-          <div class="service-intro-video__frame">
-            <iframe id="service-intro-video" width="100%" height="100%" src="https://www.youtube.com/embed/YOUR_VIDEO_ID" title="DayO 서비스 소개 영상" data-i18n="journey.videoTitle" data-i18n-attr="title" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <div class="dayo-video-wrapper reveal">
+          <div class="dayo-video-wrapper__label">
+            <span class="dayo-video-wrapper__badge" data-i18n="journey.videoLabel">🎬 DayO 돼요 글로벌 화상회화 서비스 소개</span>
+          </div>
+          <div class="dayo-video-wrapper__frame">
+            <iframe
+              id="service-intro-video"
+              width="100%"
+              height="100%"
+              src="https://www.youtube.com/embed/0OzKMDUEc4o"
+              title="DayO 돼요 서비스 소개 영상"
+              data-i18n="journey.videoTitle"
+              data-i18n-attr="title"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
           </div>
         </div>
       </div>

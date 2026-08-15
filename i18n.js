@@ -765,15 +765,15 @@
       KO: '3단계로 완성하는 나만의 회화 여정', EN: 'Your speaking journey in 3 simple steps', ZH: '3步完成属于我的会话之旅', JA: '3ステップで完成する会話の旅', FR: 'Votre parcours en 3 étapes', ES: 'Tu camino de conversación en 3 pasos'
     },
     'journey.videoLabel': {
-      KO: '🎬 DayO 1:1 대화 미리보기',
-      EN: '🎬 DayO 1:1 conversation preview',
-      ZH: '🎬 DayO 1:1 对话预览',
-      JA: '🎬 DayO 1:1会話プレビュー',
-      FR: '🎬 Aperçu d’une conversation DayO 1:1',
-      ES: '🎬 Vista previa de conversación 1:1 de DayO'
+      KO: '🎬 DayO 돼요 글로벌 화상회화 서비스 소개',
+      EN: '🎬 DayO global video chat intro',
+      ZH: '🎬 DayO 全球视频会话服务介绍',
+      JA: '🎬 DayOグローバルビデオ会話サービスの紹介',
+      FR: '🎬 Présentation DayO conversation vidéo',
+      ES: '🎬 Presentación de DayO videollamada global'
     },
     'journey.videoTitle': {
-      KO: 'DayO 서비스 소개 영상',
+      KO: 'DayO 돼요 서비스 소개 영상',
       EN: 'DayO service intro video',
       ZH: 'DayO 服务介绍视频',
       JA: 'DayOサービス紹介動画',
