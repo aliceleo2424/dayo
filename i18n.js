@@ -1255,7 +1255,8 @@
 
     /* ===== Chatbot FAQ (index.html) ===== */
     'chatbot.title': { KO: 'DayO 도우미', EN: 'DayO Helper', ZH: 'DayO 助手', JA: 'DayOヘルパー', FR: 'Assistant DayO', ES: 'Asistente DayO' },
-    'chatbot.fabAria': { KO: 'FAQ 챗봇 열기', EN: 'Open FAQ chatbot', ZH: '打开常见问题聊天机器人', JA: 'FAQチャットボットを開く', FR: 'Ouvrir le chatbot FAQ', ES: 'Abrir chatbot de preguntas' },
+    'chatbot.fabAria': { KO: '도움이 필요하신가요? 질문하기', EN: 'Need help? Ask a question', ZH: '需要帮助吗？提问', JA: 'お困りですか？質問する', FR: 'Besoin d’aide ? Posez une question', ES: '¿Necesitas ayuda? Pregunta' },
+    'chatbot.fabTooltip': { KO: '도움이 필요하신가요? 질문하기', EN: 'Need help? Ask a question', ZH: '需要帮助吗？提问', JA: 'お困りですか？質問する', FR: 'Besoin d’aide ? Posez une question', ES: '¿Necesitas ayuda? Pregunta' },
     'chatbot.closeAria': { KO: '닫기', EN: 'Close', ZH: '关闭', JA: '閉じる', FR: 'Fermer', ES: 'Cerrar' },
     'chatbot.greeting': {
       KO: '안녕하세요! DayO 도우미예요. 궁금한 점을 골라주시면 알려드릴게요.',
@@ -1881,7 +1882,10 @@
       if (!text) return;
       var attr = node.getAttribute('data-i18n-attr');
       if (attr) {
-        node.setAttribute(attr, text);
+        attr.split(',').forEach(function (name) {
+          var trimmed = name.trim();
+          if (trimmed) node.setAttribute(trimmed, text);
+        });
       } else if (node.getAttribute('data-i18n-html') === 'true') {
         node.innerHTML = text;
       } else if (node.tagName === 'INPUT' || node.tagName === 'TEXTAREA') {

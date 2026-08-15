@@ -1159,12 +1159,49 @@
 
     .chat-fab {
       position: fixed; bottom: 1.75rem; right: 1.75rem; z-index: 250;
+      display: grid; place-items: center;
       width: 56px; height: 56px; border-radius: 50%; border: none;
-      background: var(--coral); color: #fff; font-size: 1.4rem;
+      background: var(--coral); color: #fff;
       cursor: pointer; box-shadow: 0 6px 24px var(--shadow-soft);
       transition: transform 0.2s;
     }
-    .chat-fab:hover { transform: scale(1.06); }
+    .chat-fab:hover, .chat-fab:focus-visible { transform: scale(1.06); }
+    .chat-fab-icon { display: block; width: 26px; height: 26px; }
+    .chat-fab::after {
+      content: attr(aria-label);
+      position: absolute;
+      right: calc(100% + 0.7rem);
+      top: 50%;
+      transform: translateY(-50%) translateX(8px);
+      padding: 0.5rem 0.75rem;
+      border-radius: 12px;
+      background: var(--text);
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      line-height: 1.35;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      box-shadow: 0 8px 20px var(--shadow-soft);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+    }
+    .chat-fab:hover::after,
+    .chat-fab:focus-visible::after {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(-50%) translateX(0);
+    }
+    @media (hover: none) {
+      .chat-fab:hover::after,
+      .chat-fab:focus-visible::after {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
 
     .chat-panel {
       position: fixed; bottom: 5.25rem; right: 1.75rem; z-index: 260;
@@ -1223,10 +1260,9 @@
       min-height: 0;
       padding-top: 2.25rem;
     }
-    body.is-logged-in .nav-auth-only {
-      display: inline-flex;
+    body.is-logged-in a.nav-guest-only {
+      display: none;
     }
-    .nav-auth-only { display: none; }
     #service-intro, #partners, #pricing, #about, #tutors, #booking, #reviews,
     #authDashboard, .auth-live, #loungeCarousel {
       scroll-margin-top: 5.75rem;
@@ -1261,6 +1297,19 @@
       .logo-text { font-size: 1.15rem; }
       .section-inner { padding: 0 1rem; }
       .chat-fab { bottom: 1.25rem; right: 1.25rem; }
+      .chat-fab::after {
+        right: 50%;
+        top: auto;
+        bottom: calc(100% + 0.55rem);
+        transform: translateX(50%) translateY(6px);
+        white-space: normal;
+        max-width: 11.5rem;
+        text-align: center;
+      }
+      .chat-fab:hover::after,
+      .chat-fab:focus-visible::after {
+        transform: translateX(50%) translateY(0);
+      }
       .chat-panel { right: 1rem; }
     }
 
@@ -1348,11 +1397,8 @@
       <nav class="nav-desktop" data-i18n="nav.mainMenuAria" data-i18n-attr="aria-label" aria-label="주요 메뉴">
         <a href="#service-intro" data-i18n="nav.about">서비스 소개</a>
         <a href="#partners" data-i18n="nav.partners">대화 파트너</a>
-        <a href="#reviews" data-i18n="nav.reviews">후기</a>
-        <a href="#pricing" data-i18n="nav.pricing">가격</a>
-        <a href="#booking" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
-        <a href="#faq" data-chat-open data-i18n="nav.ask">💬 질문 있어요</a>
-        <a href="mypage.html" class="nav-auth-only" data-i18n="nav.profile">내 프로필</a>
+        <a href="#reviews" class="nav-guest-only" data-i18n="nav.reviews">후기</a>
+        <a href="#booking" class="nav-guest-only" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
       </nav>
 
       <div class="header-actions">
@@ -1369,10 +1415,8 @@
     <div data-i18n-lang="drawer"></div>
     <a href="#service-intro" data-i18n="nav.about">서비스 소개</a>
     <a href="#partners" data-i18n="nav.partners">대화 파트너</a>
-    <a href="#reviews" data-i18n="nav.reviews">후기</a>
-    <a href="#pricing" data-i18n="nav.pricing">가격</a>
-    <a href="#booking" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
-    <a href="#faq" data-chat-open data-i18n="nav.ask">💬 질문 있어요</a>
+    <a href="#reviews" class="nav-guest-only" data-i18n="nav.reviews">후기</a>
+    <a href="#booking" class="nav-guest-only" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
     <a href="mypage.html" data-i18n="nav.mypage">마이페이지</a>
     <a href="room.html" class="header-cta nav-drawer__cta" data-ms-guard data-i18n="nav.startChat" data-ticket-gate data-nav-close>🚀 바로 대화 시작하기</a>
   </nav>
@@ -1637,7 +1681,13 @@
   </div>
 
   <!-- Chatbot -->
-  <button class="chat-fab" id="chatFab" data-i18n="chatbot.fabAria" data-i18n-attr="aria-label" aria-label="FAQ 챗봇 열기">💬</button>
+  <button class="chat-fab" id="chatFab" type="button" data-i18n="chatbot.fabTooltip" data-i18n-attr="aria-label,title" aria-label="도움이 필요하신가요? 질문하기" title="도움이 필요하신가요? 질문하기">
+    <svg class="chat-fab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.15" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"></circle>
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+    </svg>
+  </button>
   <div class="chat-panel" id="chatPanel" role="dialog" data-i18n="chatbot.panelAria" data-i18n-attr="aria-label" aria-label="FAQ 챗봇">
     <div class="chat-panel-header">
       <span class="chat-panel-title" data-i18n="chatbot.title">DayO 도우미</span>
@@ -2359,6 +2409,14 @@
     function closeChat() { chatPanel.classList.remove('open'); }
     chatFab.addEventListener('click', () => chatPanel.classList.contains('open') ? closeChat() : openChat());
     chatClose.addEventListener('click', closeChat);
+
+    function syncChatFabTitle() {
+      var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+      if (finePointer) chatFab.removeAttribute('title');
+      else chatFab.setAttribute('title', chatFab.getAttribute('aria-label') || '도움이 필요하신가요? 질문하기');
+    }
+    syncChatFabTitle();
+    document.addEventListener('dayo:langchange', syncChatFabTitle);
 
     document.querySelectorAll('[data-chat-open], a[href="#faq"]').forEach((link) => {
       link.addEventListener('click', (e) => {
