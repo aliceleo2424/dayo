@@ -764,6 +764,22 @@
     'journey.title': {
       KO: '3단계로 완성하는 나만의 회화 여정', EN: 'Your speaking journey in 3 simple steps', ZH: '3步完成属于我的会话之旅', JA: '3ステップで完成する会話の旅', FR: 'Votre parcours en 3 étapes', ES: 'Tu camino de conversación en 3 pasos'
     },
+    'journey.videoLabel': {
+      KO: '🎬 DayO 1:1 대화 미리보기',
+      EN: '🎬 DayO 1:1 conversation preview',
+      ZH: '🎬 DayO 1:1 对话预览',
+      JA: '🎬 DayO 1:1会話プレビュー',
+      FR: '🎬 Aperçu d’une conversation DayO 1:1',
+      ES: '🎬 Vista previa de conversación 1:1 de DayO'
+    },
+    'journey.videoTitle': {
+      KO: 'DayO 서비스 소개 영상',
+      EN: 'DayO service intro video',
+      ZH: 'DayO 服务介绍视频',
+      JA: 'DayOサービス紹介動画',
+      FR: 'Vidéo de présentation DayO',
+      ES: 'Vídeo de presentación de DayO'
+    },
     'journey.step1.tag': { KO: 'STEP 01', EN: 'STEP 01', ZH: 'STEP 01', JA: 'STEP 01', FR: 'ÉTAPE 01', ES: 'PASO 01' },
     'journey.step1.title': {
       KO: '스피킹 감각 테스트', EN: 'Speaking sense test', ZH: '口语感觉测试', JA: 'スピーキング感覚テスト', FR: 'Test de speaking', ES: 'Prueba de speaking'

@@ -866,6 +866,37 @@
       font-size: 0.9rem; color: var(--text-muted); line-height: 1.7;
     }
 
+    .service-intro-video {
+      max-width: 800px;
+      width: 100%;
+      margin: 2.5rem auto 0 auto;
+    }
+    .service-intro-video__label {
+      margin: 0 0 0.85rem;
+      text-align: center;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .service-intro-video__frame {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 12px 32px var(--shadow-soft);
+      background: #1a1412;
+    }
+    .service-intro-video__frame iframe {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+    }
+
     /* Reviews */
     .reviews { padding: 0 0 var(--section-gap); }
 
@@ -1596,6 +1627,12 @@
             <h3 class="journey-title" data-i18n="journey.step3.title">1:1 원어민 눈맞춤 대화</h3>
             <p class="journey-desc" data-i18n="journey.step3.desc">울렁증 없이 친구처럼 다정하게 트이는 실전 회화</p>
           </article>
+        </div>
+        <div class="service-intro-video reveal">
+          <p class="service-intro-video__label" data-i18n="journey.videoLabel">🎬 DayO 1:1 대화 미리보기</p>
+          <div class="service-intro-video__frame">
+            <iframe id="service-intro-video" width="100%" height="100%" src="https://www.youtube.com/embed/YOUR_VIDEO_ID" title="DayO 서비스 소개 영상" data-i18n="journey.videoTitle" data-i18n-attr="title" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
         </div>
       </div>
     </section>
