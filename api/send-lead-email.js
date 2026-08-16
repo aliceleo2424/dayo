@@ -1,14 +1,15 @@
 /* Vercel serverless: POST /api/send-lead-email
- * Env: RESEND_API_KEY (required), RESEND_FROM, DAYO_SITE_URL,
+ * Env: GMAIL_USER, GMAIL_APP_PASS (required),
  *      NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY or SUPABASE_SERVICE_ROLE_KEY
  */
-var { Resend } = require('resend');
+var nodemailer = require('nodemailer');
 var { createClient } = require('@supabase/supabase-js');
 var sheets = require('../cheat-sheet-data.js');
 
 var DEFAULT_SITE = 'https://dayo-black.vercel.app';
 var DEFAULT_SUPABASE_URL = 'https://mmhapsimcngmtefqfrcg.supabase.co';
 var COUPON_CODE = 'WELCOME9900';
+var FROM_ADDRESS = 'DayO <dayo.speak@gmail.com>';
 
 function json(res, status, body) {
   res.statusCode = status;
@@ -56,7 +57,6 @@ function escapeHtml(value) {
 
 function emailHtml(opts) {
   var cheatUrl = DEFAULT_SITE + '/cheat-sheet.html?lang=' + encodeURIComponent(opts.lang);
-  if (opts.level) cheatUrl += '&level=' + encodeURIComponent(opts.level);
   var bookingUrl = opts.base + '/index.html#booking';
   var langName = escapeHtml(opts.langName);
   return (
@@ -137,6 +137,18 @@ async function insertLead(payload) {
   return { ok: false, reason: 'insert-failed' };
 }
 
+function getTransporter() {
+  var user = String(process.env.GMAIL_USER || '').trim();
+  var pass = String(process.env.GMAIL_APP_PASS || '').trim();
+  if (!user || !pass) return null;
+  return nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
+    auth: { user: user, pass: pass }
+  });
+}
+
 module.exports = async function handler(req, res) {
   cors(res);
   if (req.method === 'OPTIONS') {
@@ -157,9 +169,9 @@ module.exports = async function handler(req, res) {
   var level = sheets.normalizeLevel(body.level);
   var info = sheets.meta(lang, level);
   var base = siteUrl();
-  var key = process.env.RESEND_API_KEY;
-  if (!key) {
-    return json(res, 503, { ok: false, error: 'missing-resend-key' });
+  var transporter = getTransporter();
+  if (!transporter) {
+    return json(res, 503, { ok: false, error: 'missing-gmail-credentials' });
   }
 
   var leadPayload = {
@@ -170,37 +182,29 @@ module.exports = async function handler(req, res) {
   };
   var lead = await insertLead(leadPayload);
 
-  var from = process.env.RESEND_FROM || 'DayO <onboarding@resend.dev>';
   var subject = '[DayO] 🎁 신청하신 ' + info.name + ' 실전 회화 치트키와 9,900원 체험권이 도착했습니다!';
-  var cheatSheet = DEFAULT_SITE + '/cheat-sheet.html?lang=' + encodeURIComponent(lang) + '&level=' + encodeURIComponent(level);
+  var cheatSheet = DEFAULT_SITE + '/cheat-sheet.html?lang=' + encodeURIComponent(lang);
 
   try {
-    var resend = new Resend(key);
-    var sent = await resend.emails.send({
-      from: from,
+    var sent = await transporter.sendMail({
+      from: FROM_ADDRESS,
       to: email,
       subject: subject,
       html: emailHtml({ base: base, lang: lang, level: level, langName: info.name })
     });
-    if (sent && sent.error) {
-      return json(res, 502, {
-        ok: false,
-        error: 'resend-failed',
-        detail: sent.error,
-        leadSaved: !!(lead && lead.ok)
-      });
-    }
-    var data = (sent && sent.data) || sent || {};
     return json(res, 200, {
       ok: true,
-      id: data.id || null,
+      id: (sent && (sent.messageId || sent.response)) || null,
       lang: lang,
       level: level,
-      coupon: COUPON_CODE,
       cheatSheet: cheatSheet,
       leadSaved: !!(lead && lead.ok)
     });
   } catch (err) {
-    return json(res, 500, { ok: false, error: 'send-failed', leadSaved: !!(lead && lead.ok) });
+    return json(res, 502, {
+      ok: false,
+      error: 'send-failed',
+      leadSaved: !!(lead && lead.ok)
+    });
   }
 };

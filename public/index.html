@@ -1156,6 +1156,16 @@
     .email-submit { padding: 0.95rem; background: var(--coral); color: #fff; border: none; border-radius: var(--radius); font-family: inherit; font-weight: 700; cursor: pointer; box-shadow: 0 4px 0 var(--coral-dark); }
     .email-submit:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--coral-dark); }
     .email-submit:disabled { opacity: 0.65; cursor: wait; transform: none; }
+    .email-submit.is-loading { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; }
+    .email-submit.is-loading::before {
+      content: '';
+      width: 0.9em; height: 0.9em;
+      border: 2px solid rgba(255,255,255,0.35);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: quiz-spin 0.7s linear infinite;
+    }
+    @keyframes quiz-spin { to { transform: rotate(360deg); } }
 
     .quiz-lead-card {
       text-align: left;
@@ -2296,9 +2306,8 @@
             <button class="email-submit" type="submit">${escapeHtml(t('quiz.emailSubmit'))}</button>
           </form>
           <div class="quiz-lead-done">
-            <p class="quiz-lead-success">${escapeHtml(t('quiz.lead.success'))}</p>
+            <p class="quiz-lead-success" id="quizLeadSuccess"></p>
             <a class="quiz-lead-cta" href="room.html" data-ms-guard data-ticket-gate data-quiz-start-cta>${escapeHtml(t('quiz.lead.startCta'))}</a>
-            <a class="quiz-lead-cta quiz-lead-cta--ghost" href="cheat-sheet.html?lang=${encodeURIComponent(quizLang)}&amp;level=${encodeURIComponent(quizLevel)}">${escapeHtml(t('quiz.lead.cheatCta'))}</a>
           </div>
         </div>
         <button class="quiz-result-retry" type="button">${escapeHtml(t('quiz.resultRetry'))}</button>
@@ -2348,23 +2357,24 @@
         const submitBtn = form.querySelector('.email-submit');
         if (submitBtn) {
           submitBtn.disabled = true;
+          submitBtn.classList.add('is-loading');
           submitBtn.textContent = t('quiz.emailSending');
         }
-        try {
-          window.localStorage.setItem('lead_email', email);
-        } catch (e) { /* ignore */ }
 
         const store = window.DayOProfileStore;
+        const successEl = slide.querySelector('#quizLeadSuccess');
         const finishSuccess = function () {
+          if (successEl) successEl.textContent = t('quiz.lead.success', { email: email });
           card.classList.add('is-done');
-          showToast(t('quiz.lead.success'));
+          showToast(t('quiz.lead.success', { email: email }));
         };
         const finishError = function () {
           if (submitBtn) {
             submitBtn.disabled = false;
+            submitBtn.classList.remove('is-loading');
             submitBtn.textContent = t('quiz.emailSubmit');
           }
-          if (errorEl) errorEl.textContent = t('quiz.lead.errorSave');
+          if (errorEl) errorEl.textContent = t('quiz.lead.errorSend');
         };
 
         const saveLead = function () {
@@ -2394,16 +2404,15 @@
             return { resp: resp, data: data };
           });
         }).then(function (result) {
+          if (!(result && result.resp && result.resp.ok && result.data && result.data.ok)) {
+            finishError();
+            return;
+          }
+          try { window.localStorage.setItem('lead_email', email); } catch (e) { /* ignore */ }
           const pending = (store && typeof store.ready === 'function')
             ? store.ready().then(saveLead).catch(saveLead)
             : saveLead();
-          return Promise.resolve(pending).then(function () { return result; }, function () { return result; });
-        }).then(function (result) {
-          if (result && result.resp && result.resp.ok && result.data && result.data.ok) {
-            finishSuccess();
-            return;
-          }
-          finishError();
+          return Promise.resolve(pending).then(finishSuccess, finishSuccess);
         }).catch(function () {
           finishError();
         });

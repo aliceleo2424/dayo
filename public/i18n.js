@@ -1228,15 +1228,15 @@
       KO: '자료집 & 쿠폰 받기', EN: 'Get the pack & coupon', ZH: '领取资料集和优惠券', JA: '資料集とクーポンを受け取る', FR: 'Recevoir le pack et le coupon', ES: 'Recibir la guía y el cupón'
     },
     'quiz.emailSending': {
-      KO: '보내는 중…', EN: 'Sending…', ZH: '发送中…', JA: '送信中…', FR: 'Envoi…', ES: 'Enviando…'
+      KO: '전송 중...', EN: 'Sending…', ZH: '发送中…', JA: '送信中…', FR: 'Envoi…', ES: 'Enviando…'
     },
     'quiz.lead.success': {
-      KO: '🎉 입력하신 메일함으로 치트키 자료와 9,900원 쿠폰이 발송되었습니다!',
-      EN: '🎉 Your conversation cheat sheet and ₩9,900 coupon were sent to that inbox!',
-      ZH: '🎉 会话速查资料和 9,900 韩元优惠券已发到您填写的邮箱！',
-      JA: '🎉 入力したメールにチートシートと9,900ウォンクーポンを送りました！',
-      FR: '🎉 La fiche d’expressions et le coupon 9 900 ₩ ont été envoyés à cette boîte mail !',
-      ES: '🎉 ¡Enviamos la guía de conversación y el cupón de ₩9,900 a ese correo!'
+      KO: '🎉 입력하신 메일함({email})으로 자료가 발송되었습니다! 메일함을 확인해 주세요.',
+      EN: '🎉 The pack was sent to {email}. Please check your inbox!',
+      ZH: '🎉 资料已发到 {email}！请查看邮箱。',
+      JA: '🎉 {email} に資料を送りました。メールをご確認ください。',
+      FR: '🎉 Le pack a été envoyé à {email}. Vérifiez votre boîte mail !',
+      ES: '🎉 Enviamos el material a {email}. ¡Revisa tu bandeja de entrada!'
     },
     'quiz.lead.errorEmail': {
       KO: '이메일 주소를 다시 확인해 주세요.',
@@ -1253,6 +1253,14 @@
       JA: '保存に失敗しました。しばらくしてからもう一度どうぞ。',
       FR: 'Enregistrement impossible. Réessayez dans un instant.',
       ES: 'No se pudo guardar. Inténtalo de nuevo en un momento.'
+    },
+    'quiz.lead.errorSend': {
+      KO: '메일 전송에 실패했습니다. 이메일 주소를 다시 확인해 주세요.',
+      EN: 'We couldn’t send the email. Please check the address and try again.',
+      ZH: '邮件发送失败。请再确认邮箱地址。',
+      JA: 'メール送信に失敗しました。アドレスを確認してください。',
+      FR: 'L’envoi a échoué. Vérifiez l’adresse e-mail.',
+      ES: 'No se pudo enviar el correo. Revisa la dirección e inténtalo de nuevo.'
     },
     'quiz.lead.startCta': {
       KO: '🎟️ 첫 세션 9,900원에 바로 대화 시작하기',
