@@ -2297,7 +2297,7 @@
         const submitBtn = form.querySelector('.email-submit');
         if (submitBtn) {
           submitBtn.disabled = true;
-          submitBtn.textContent = t('quiz.emailSubmit');
+          submitBtn.textContent = t('quiz.emailSending');
         }
         try {
           window.localStorage.setItem('lead_email', email);
@@ -2308,18 +2308,13 @@
           card.classList.add('is-done');
           showToast(t('quiz.lead.success'));
         };
-
-        fetch('/api/send-lead-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: email,
-            language: quizLang || 'en',
-            level: quizLevel || 'starter',
-            score: quizScore,
-            origin: window.location.origin
-          })
-        }).catch(function () {});
+        const finishError = function () {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = t('quiz.emailSubmit');
+          }
+          if (errorEl) errorEl.textContent = t('quiz.lead.errorSave');
+        };
 
         const saveLead = function () {
           if (!store || typeof store.saveQuizLead !== 'function') {
@@ -2333,14 +2328,33 @@
           });
         };
 
-        const pending = (store && typeof store.ready === 'function')
-          ? store.ready().then(saveLead).catch(saveLead)
-          : saveLead();
-
-        Promise.resolve(pending).then(function () {
-          finishSuccess();
+        fetch('/api/send-lead-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email,
+            language: quizLang || 'en',
+            level: quizLevel || 'starter',
+            score: quizScore,
+            origin: window.location.origin
+          })
+        }).then(function (resp) {
+          return resp.json().catch(function () { return {}; }).then(function (data) {
+            return { resp: resp, data: data };
+          });
+        }).then(function (result) {
+          const pending = (store && typeof store.ready === 'function')
+            ? store.ready().then(saveLead).catch(saveLead)
+            : saveLead();
+          return Promise.resolve(pending).then(function () { return result; }, function () { return result; });
+        }).then(function (result) {
+          if (result && result.resp && result.resp.ok && result.data && result.data.ok) {
+            finishSuccess();
+            return;
+          }
+          finishError();
         }).catch(function () {
-          finishSuccess();
+          finishError();
         });
       });
 

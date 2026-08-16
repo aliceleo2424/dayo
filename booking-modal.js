@@ -696,9 +696,11 @@
   }
 
   function openFromQuery() {
-    if (!/[?&]booking=open(&|$)/.test(window.location.search)) return;
+    var fromQuery = /[?&]booking=open(&|$)/.test(window.location.search);
+    var fromHash = window.location.hash === '#booking';
+    if (!fromQuery && !fromHash) return;
     open();
-    if (window.history && window.history.replaceState) {
+    if (fromQuery && window.history && window.history.replaceState) {
       var clean = window.location.search.replace(/([?&])booking=open(&|$)/, '$1').replace(/[?&]$/, '');
       window.history.replaceState({}, '', window.location.pathname + clean + window.location.hash);
     }

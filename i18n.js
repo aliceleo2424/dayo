@@ -1211,13 +1211,16 @@
     'quiz.emailSubmit': {
       KO: '자료집 & 쿠폰 받기', EN: 'Get the pack & coupon', ZH: '领取资料集和优惠券', JA: '資料集とクーポンを受け取る', FR: 'Recevoir le pack et le coupon', ES: 'Recibir la guía y el cupón'
     },
+    'quiz.emailSending': {
+      KO: '보내는 중…', EN: 'Sending…', ZH: '发送中…', JA: '送信中…', FR: 'Envoi…', ES: 'Enviando…'
+    },
     'quiz.lead.success': {
-      KO: '🎉 입력하신 메일로 회화 치트키 자료와 9,900원 체험 할인쿠폰 발급 안내가 전송되었습니다!',
-      EN: '🎉 Your conversation cheat sheet and ₩9,900 trial coupon details were sent to that email!',
-      ZH: '🎉 会话速查资料和 9,900 韩元体验优惠券发放说明已发到您填写的邮箱！',
-      JA: '🎉 入力したメールに会話チートシートと9,900ウォン体験クーポンのご案内を送りました！',
-      FR: '🎉 La fiche d’expressions et le coupon d’essai 9 900 ₩ ont été envoyés à cet e-mail !',
-      ES: '🎉 ¡Enviamos la guía de conversación y el cupón de prueba de ₩9,900 a ese correo!'
+      KO: '🎉 입력하신 메일함으로 치트키 자료와 9,900원 쿠폰이 발송되었습니다!',
+      EN: '🎉 Your conversation cheat sheet and ₩9,900 coupon were sent to that inbox!',
+      ZH: '🎉 会话速查资料和 9,900 韩元优惠券已发到您填写的邮箱！',
+      JA: '🎉 入力したメールにチートシートと9,900ウォンクーポンを送りました！',
+      FR: '🎉 La fiche d’expressions et le coupon 9 900 ₩ ont été envoyés à cette boîte mail !',
+      ES: '🎉 ¡Enviamos la guía de conversación y el cupón de ₩9,900 a ese correo!'
     },
     'quiz.lead.errorEmail': {
       KO: '이메일 주소를 다시 확인해 주세요.',

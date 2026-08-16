@@ -18,6 +18,7 @@ var JAM_KEY = 'dayo.jamCount';
 var VOCAB_KEY = 'dayo.reviewVocab';
 var WELCOME_COUPON_KEY = 'dayo.hasWelcomeCoupon';
 var WELCOME_COUPON_CODE = 'WELCOME_9900';
+var WELCOME_COUPON_CODES = { WELCOME_9900: true, WELCOME9900: true };
 var COUPONS_KEY = 'dayo.coupons';
 var WELCOME_TITLE = '첫 세션 9,900원 체험 할인권';
 var STREAK_KEY = 'streakCount';
@@ -440,14 +441,14 @@ function unusedCoupons(rows) {
 function getUnusedWelcomeCoupon(rows) {
   var list = unusedCoupons(rows);
   for (var i = 0; i < list.length; i++) {
-    if (list[i].code === WELCOME_COUPON_CODE) return list[i];
+    if (WELCOME_COUPON_CODES[list[i].code]) return list[i];
   }
   return null;
 }
 
 function couponDisplayTitle(coupon) {
   if (!coupon) return '';
-  if (coupon.code === WELCOME_COUPON_CODE) {
+  if (WELCOME_COUPON_CODES[coupon.code]) {
     return '🎉 첫 세션 9,900원 체험 할인권 (19,900원 ➔ 9,900원)';
   }
   return coupon.title || coupon.code;

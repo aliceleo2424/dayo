@@ -299,7 +299,7 @@
       label: LANGS[L].label,
       levelName: LEVELS[V].name,
       title: TITLES[L] || TITLES.en,
-      coupon: 'WELCOME_9900'
+      coupon: 'WELCOME9900'
     };
   }
 
@@ -308,7 +308,7 @@
     LEVELS: LEVELS,
     TITLES: TITLES,
     DATA: DATA,
-    COUPON: 'WELCOME_9900',
+    COUPON: 'WELCOME9900',
     normalizeLang: normalizeLang,
     normalizeLevel: normalizeLevel,
     getPhrases: getPhrases,
