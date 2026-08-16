@@ -55,10 +55,43 @@ function escapeHtml(value) {
     .replace(/"/g, '&quot;');
 }
 
+function defaultTemplate(langName) {
+  return {
+    subject: '[DayO] 🎁 신청하신 ' + langName + ' 실전 회화 치트키와 9,900원 체험권이 도착했습니다!',
+    intro_text: '신청하신 ' + langName + ' 회화 치트키 자료입니다.',
+    coupon_code: COUPON_CODE,
+    extra_notice: '이 메일은 레벨테스트 자료 요청으로 보내드렸어요. DayO 돼요'
+  };
+}
+
+async function fetchEmailTemplate(language) {
+  var client = getSupabase();
+  if (!client) return null;
+  var wanted = String(language || 'ja').trim() || 'ja';
+  var langs = wanted === 'ja' ? ['ja'] : [wanted, 'ja'];
+  for (var i = 0; i < langs.length; i += 1) {
+    try {
+      var result = await client
+        .from('email_templates')
+        .select('*')
+        .eq('language', langs[i])
+        .single();
+      if (result && result.data && !result.error) return result.data;
+    } catch (err) { /* try fallback language */ }
+  }
+  return null;
+}
+
 function emailHtml(opts) {
-  var cheatUrl = DEFAULT_SITE + '/cheat-sheet.html?lang=' + encodeURIComponent(opts.lang);
+  var cheatUrl = DEFAULT_SITE + '/cheat-sheet.html?lang=' + encodeURIComponent(opts.lang) +
+    '&level=' + encodeURIComponent(opts.level || '');
   var bookingUrl = opts.base + '/index.html#booking';
-  var langName = escapeHtml(opts.langName);
+  var intro = escapeHtml(opts.introText);
+  var coupon = escapeHtml(opts.couponCode || COUPON_CODE);
+  var notice = escapeHtml(opts.extraNotice || '');
+  var noticeBlock = notice
+    ? ('<tr><td style="padding:8px 28px 28px;font-size:12px;line-height:1.6;color:#9A8580;">' + notice + '</td></tr>')
+    : '<tr><td style="padding:0 0 20px;"></td></tr>';
   return (
     '<div style="margin:0;padding:0;background:#FFF8F5;font-family:Apple SD Gothic Neo,Pretendard,sans-serif;color:#5C4A42;">' +
       '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFF8F5;padding:24px 12px;">' +
@@ -69,22 +102,20 @@ function emailHtml(opts) {
               '<h1 style="margin:0;font-size:22px;line-height:1.4;letter-spacing:-0.03em;">신청하신 자료가 도착했어요 🎁</h1>' +
             '</td></tr>' +
             '<tr><td style="padding:22px 28px 8px;font-size:15px;line-height:1.7;">' +
-              '<p style="margin:0 0 18px;">신청하신 <strong>' + langName + '</strong> 회화 치트키 자료입니다.</p>' +
+              '<p style="margin:0 0 18px;">' + intro + '</p>' +
               '<p style="margin:0 0 22px;text-align:center;">' +
                 '<a href="' + cheatUrl + '" style="display:inline-block;background:#FF6B57;color:#fff;text-decoration:none;font-weight:800;padding:14px 22px;border-radius:18px;">🎁 맞춤 치트키 열람하기</a>' +
               '</p>' +
               '<div style="background:#FFF8F5;border:1px solid #FFE8E3;border-radius:18px;padding:16px 18px;margin:0 0 18px;">' +
                 '<p style="margin:0 0 6px;font-size:12px;font-weight:800;color:#E55A45;letter-spacing:0.04em;">첫 세션 9,900원 할인 쿠폰</p>' +
-                '<p style="margin:0 0 8px;font-size:22px;font-weight:800;letter-spacing:0.04em;">' + COUPON_CODE + '</p>' +
+                '<p style="margin:0 0 8px;font-size:22px;font-weight:800;letter-spacing:0.04em;">' + coupon + '</p>' +
                 '<p style="margin:0;font-size:14px;line-height:1.6;color:#9A8580;">예약 화면에서 이 코드를 적용하면 첫 세션이 <strong style="color:#5C4A42;">9,900원</strong>으로 열려요.</p>' +
               '</div>' +
               '<p style="margin:0 0 8px;text-align:center;">' +
                 '<a href="' + bookingUrl + '" style="display:inline-block;color:#FF6B57;font-weight:800;text-decoration:none;">🎟️ 쿠폰 적용하고 대화 시작하기 →</a>' +
               '</p>' +
             '</td></tr>' +
-            '<tr><td style="padding:8px 28px 28px;font-size:12px;line-height:1.6;color:#9A8580;">' +
-              '이 메일은 레벨테스트 자료 요청으로 보내드렸어요. DayO 돼요' +
-            '</td></tr>' +
+            noticeBlock +
           '</table>' +
         '</td></tr>' +
       '</table>' +
@@ -217,15 +248,29 @@ module.exports = async function handler(req, res) {
   };
   var lead = await insertLead(leadPayload);
 
-  var subject = '[DayO] 🎁 신청하신 ' + info.name + ' 실전 회화 치트키와 9,900원 체험권이 도착했습니다!';
-  var cheatSheet = DEFAULT_SITE + '/cheat-sheet.html?lang=' + encodeURIComponent(lang);
+  var dbTemplate = await fetchEmailTemplate(lang);
+  var fallback = defaultTemplate(info.name);
+  var template = dbTemplate || fallback;
+  var subject = String(template.subject || fallback.subject);
+  var introText = String(template.intro_text || fallback.intro_text);
+  var couponCode = String(template.coupon_code || fallback.coupon_code || COUPON_CODE);
+  var extraNotice = String(template.extra_notice != null ? template.extra_notice : fallback.extra_notice);
+  var cheatSheet = DEFAULT_SITE + '/cheat-sheet.html?lang=' + encodeURIComponent(lang) +
+    '&level=' + encodeURIComponent(body.level || level);
 
   try {
     var sent = await transporter.sendMail({
       from: FROM_ADDRESS,
       to: email,
       subject: subject,
-      html: emailHtml({ base: base, lang: lang, level: level, langName: info.name })
+      html: emailHtml({
+        base: base,
+        lang: lang,
+        level: body.level || level,
+        introText: introText,
+        couponCode: couponCode,
+        extraNotice: extraNotice
+      })
     });
     return json(res, 200, {
       ok: true,
