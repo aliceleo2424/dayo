@@ -149,6 +149,33 @@ function getTransporter() {
   });
 }
 
+function smtpFailure(err) {
+  var code = String((err && (err.code || err.responseCode)) || '');
+  var raw = String((err && (err.response || err.message)) || '');
+  if (code === 'EAUTH' || /535|534|authentication/i.test(raw + code)) {
+    return {
+      error: 'smtp-auth-failed',
+      message: 'SMTP 인증에 실패했습니다. Gmail 앱 비밀번호를 확인해 주세요.'
+    };
+  }
+  if (code === 'EENVELOPE' || /550|551|553|recipient|mailbox unavailable/i.test(raw)) {
+    return {
+      error: 'invalid-recipient',
+      message: '수신 이메일 주소가 올바르지 않습니다. 주소를 다시 확인해 주세요.'
+    };
+  }
+  if (code === 'ECONNECTION' || code === 'ETIMEDOUT' || code === 'ESOCKET' || /connect|timeout/i.test(raw + code)) {
+    return {
+      error: 'smtp-connection-failed',
+      message: '메일 서버 연결에 실패했습니다. 잠시 후 다시 시도해 주세요.'
+    };
+  }
+  return {
+    error: 'send-failed',
+    message: raw ? ('메일 전송에 실패했습니다: ' + raw) : '메일 전송에 실패했습니다.'
+  };
+}
+
 module.exports = async function handler(req, res) {
   cors(res);
   if (req.method === 'OPTIONS') {
@@ -162,7 +189,11 @@ module.exports = async function handler(req, res) {
   var body = await readBody(req);
   var email = String((body && body.email) || '').trim().toLowerCase();
   if (!isValidEmail(email)) {
-    return json(res, 400, { ok: false, error: 'invalid-email' });
+    return json(res, 400, {
+      ok: false,
+      error: 'invalid-email',
+      message: '올바른 이메일 주소 형식이 아닙니다: ' + (email || '(empty)')
+    });
   }
 
   var lang = sheets.normalizeLang(body.language || body.lang);
@@ -171,7 +202,11 @@ module.exports = async function handler(req, res) {
   var base = siteUrl();
   var transporter = getTransporter();
   if (!transporter) {
-    return json(res, 503, { ok: false, error: 'missing-gmail-credentials' });
+    return json(res, 503, {
+      ok: false,
+      error: 'missing-gmail-credentials',
+      message: '메일 서버 설정이 없습니다. GMAIL_USER / GMAIL_APP_PASS를 확인해 주세요.'
+    });
   }
 
   var leadPayload = {
@@ -201,9 +236,11 @@ module.exports = async function handler(req, res) {
       leadSaved: !!(lead && lead.ok)
     });
   } catch (err) {
+    var detail = smtpFailure(err);
     return json(res, 502, {
       ok: false,
-      error: 'send-failed',
+      error: detail.error,
+      message: detail.message,
       leadSaved: !!(lead && lead.ok)
     });
   }

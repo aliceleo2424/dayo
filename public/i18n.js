@@ -1239,12 +1239,12 @@
       ES: '🎉 Enviamos el material a {email}. ¡Revisa tu bandeja de entrada!'
     },
     'quiz.lead.errorEmail': {
-      KO: '이메일 주소를 다시 확인해 주세요.',
-      EN: 'Please check the email address.',
-      ZH: '请再确认一下邮箱地址。',
-      JA: 'メールアドレスをもう一度確認してください。',
-      FR: 'Vérifiez l’adresse e-mail.',
-      ES: 'Revisa la dirección de correo.'
+      KO: '올바른 이메일 주소 형식을 입력해 주세요.',
+      EN: 'Please enter a valid email address.',
+      ZH: '请输入正确的邮箱格式。',
+      JA: '正しいメールアドレス形式を入力してください。',
+      FR: 'Saisissez une adresse e-mail valide.',
+      ES: 'Introduce un correo con un formato válido.'
     },
     'quiz.lead.errorSave': {
       KO: '저장에 실패했어요. 잠시 후 다시 시도해 주세요.',

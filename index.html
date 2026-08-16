@@ -2288,9 +2288,9 @@
           <p class="quiz-lead-desc">${escapeHtml(t('quiz.emailDesc'))}</p>
           <form class="email-form" id="quizLeadForm" novalidate>
             <div class="email-compose">
-              <input class="email-input" id="quizEmailLocal" type="text" autocomplete="username" inputmode="email" placeholder="${escapeHtml(t('quiz.emailLocalPlaceholder'))}" aria-label="${escapeHtml(t('quiz.emailLocalPlaceholder'))}">
+              <input class="email-input" id="lead-email-id" type="text" autocomplete="username" inputmode="email" placeholder="${escapeHtml(t('quiz.emailLocalPlaceholder'))}" aria-label="${escapeHtml(t('quiz.emailLocalPlaceholder'))}">
               <span class="email-at" aria-hidden="true">@</span>
-              <select class="email-domain-select" id="quizEmailDomain" aria-label="${escapeHtml(t('quiz.emailDomainAria'))}">
+              <select class="email-domain-select" id="lead-email-domain" aria-label="${escapeHtml(t('quiz.emailDomainAria'))}">
                 <option value="naver.com">${escapeHtml(t('quiz.emailDomain.naver'))}</option>
                 <option value="gmail.com">${escapeHtml(t('quiz.emailDomain.gmail'))}</option>
                 <option value="daum.net">${escapeHtml(t('quiz.emailDomain.daum'))}</option>
@@ -2300,7 +2300,7 @@
                 <option value="hanmail.net">${escapeHtml(t('quiz.emailDomain.hanmail'))}</option>
                 <option value="custom">${escapeHtml(t('quiz.emailDomain.custom'))}</option>
               </select>
-              <input class="email-domain-custom" id="quizEmailDomainCustom" type="text" hidden placeholder="${escapeHtml(t('quiz.emailDomainCustomPlaceholder'))}" aria-label="${escapeHtml(t('quiz.emailDomainCustomPlaceholder'))}">
+              <input class="email-domain-custom" id="lead-email-domain-custom" type="text" hidden placeholder="${escapeHtml(t('quiz.emailDomainCustomPlaceholder'))}" aria-label="${escapeHtml(t('quiz.emailDomainCustomPlaceholder'))}">
             </div>
             <p class="quiz-lead-error" id="quizLeadError" role="alert"></p>
             <button class="email-submit" type="submit">${escapeHtml(t('quiz.emailSubmit'))}</button>
@@ -2317,13 +2317,27 @@
       return slide;
     }
 
+    function getCombinedEmail(root) {
+      const scope = root || document;
+      const idEl = scope.querySelector('#lead-email-id') || document.querySelector('#lead-email-id');
+      const domainEl = scope.querySelector('#lead-email-domain') || document.querySelector('#lead-email-domain');
+      const customEl = scope.querySelector('#lead-email-domain-custom') || document.querySelector('#lead-email-domain-custom');
+      const idInput = String((idEl && idEl.value) || '').trim();
+      const domainSelect = String((domainEl && domainEl.value) || '').trim();
+      const directDomainInput = String((customEl && customEl.value) || '').trim();
+
+      if (idInput.includes('@')) {
+        return idInput.replace(/\s+/g, '').toLowerCase();
+      }
+
+      let finalDomain = domainSelect === 'custom' ? directDomainInput : domainSelect;
+      if (!idInput || !finalDomain) return '';
+      finalDomain = finalDomain.replace(/^@/, '').replace(/\s+/g, '');
+      return (idInput + '@' + finalDomain).toLowerCase();
+    }
+
     function composeQuizEmail(slide) {
-      const local = String((slide.querySelector('#quizEmailLocal') || {}).value || '').trim();
-      const domainSel = String((slide.querySelector('#quizEmailDomain') || {}).value || '');
-      const custom = String((slide.querySelector('#quizEmailDomainCustom') || {}).value || '').trim().replace(/^@/, '');
-      const domain = domainSel === 'custom' ? custom : domainSel;
-      if (!local || !domain) return '';
-      return (local + '@' + domain).toLowerCase();
+      return getCombinedEmail(slide);
     }
 
     function isValidEmail(value) {
@@ -2333,8 +2347,8 @@
     function bindQuizLeadForm(slide) {
       const card = slide.querySelector('#quizLeadCard');
       const form = slide.querySelector('#quizLeadForm');
-      const domainSel = slide.querySelector('#quizEmailDomain');
-      const custom = slide.querySelector('#quizEmailDomainCustom');
+      const domainSel = slide.querySelector('#lead-email-domain');
+      const custom = slide.querySelector('#lead-email-domain-custom');
       const errorEl = slide.querySelector('#quizLeadError');
       if (!form || !card) return;
 
@@ -2348,8 +2362,9 @@
 
       form.addEventListener('submit', (event) => {
         event.preventDefault();
-        const email = composeQuizEmail(slide);
-        if (!isValidEmail(email)) {
+        const fullEmail = getCombinedEmail(slide);
+        console.log('Sending to email:', fullEmail);
+        if (!isValidEmail(fullEmail)) {
           if (errorEl) errorEl.textContent = t('quiz.lead.errorEmail');
           return;
         }
@@ -2364,17 +2379,17 @@
         const store = window.DayOProfileStore;
         const successEl = slide.querySelector('#quizLeadSuccess');
         const finishSuccess = function () {
-          if (successEl) successEl.textContent = t('quiz.lead.success', { email: email });
+          if (successEl) successEl.textContent = t('quiz.lead.success', { email: fullEmail });
           card.classList.add('is-done');
-          showToast(t('quiz.lead.success', { email: email }));
+          showToast(t('quiz.lead.success', { email: fullEmail }));
         };
-        const finishError = function () {
+        const finishError = function (message) {
           if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.classList.remove('is-loading');
             submitBtn.textContent = t('quiz.emailSubmit');
           }
-          if (errorEl) errorEl.textContent = t('quiz.lead.errorSend');
+          if (errorEl) errorEl.textContent = message || t('quiz.lead.errorSend');
         };
 
         const saveLead = function () {
@@ -2382,7 +2397,7 @@
             return Promise.resolve({ ok: true, local: true });
           }
           return store.saveQuizLead({
-            email: email,
+            email: fullEmail,
             language: quizLang || 'en',
             level: quizLevel || 'starter',
             score: quizScore
@@ -2393,7 +2408,7 @@
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            email: email,
+            email: fullEmail,
             language: quizLang || 'en',
             level: quizLevel || 'starter',
             score: quizScore,
@@ -2405,10 +2420,10 @@
           });
         }).then(function (result) {
           if (!(result && result.resp && result.resp.ok && result.data && result.data.ok)) {
-            finishError();
+            finishError((result && result.data && (result.data.message || result.data.error)) || t('quiz.lead.errorSend'));
             return;
           }
-          try { window.localStorage.setItem('lead_email', email); } catch (e) { /* ignore */ }
+          try { window.localStorage.setItem('lead_email', fullEmail); } catch (e) { /* ignore */ }
           const pending = (store && typeof store.ready === 'function')
             ? store.ready().then(saveLead).catch(saveLead)
             : saveLead();
