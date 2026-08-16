@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/mobile-nav.css">
+  <link rel="stylesheet" href="mobile-nav.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -231,13 +231,13 @@
 <body>
   <div class="wrap">
     <div class="top">
-      <a class="brand" href="/index.html">
+      <a class="brand" href="index.html">
         <span class="brand-mark">D</span>
         <span>DayO <small>CHEAT SHEET</small></span>
       </a>
       <div class="top-actions">
         <button class="print-btn" type="button" id="sheetPrint">🖨️ PDF로 저장/인쇄</button>
-        <a class="home-link" href="/index.html">홈으로</a>
+        <a class="home-link" href="index.html">홈으로</a>
       </div>
     </div>
     <section class="hero">
@@ -252,10 +252,10 @@
       <strong id="sheetCoupon">WELCOME9900</strong>
     </div>
   </div>
-  <a class="cta" id="sheetCta" href="/index.html#booking">🎟️ 첫 세션 9,900원 쿠폰 적용하고 대화 시작하기</a>
+  <a class="cta" id="sheetCta" href="index.html#booking">🎟️ 첫 세션 9,900원 쿠폰 적용하고 대화 시작하기</a>
   <div class="toast" id="sheetToast" role="status"></div>
 
-  <script src="/cheat-sheet-data.js"></script>
+  <script src="cheat-sheet-data.js"></script>
   <script>
     (function () {
       var params = new URLSearchParams(window.location.search);
@@ -275,7 +275,7 @@
         '<span class="chip">' + info.flag + ' ' + info.name + '</span>' +
         '<span class="chip">' + info.levelName + '</span>' +
         '<span class="chip">' + phrases.length + '선</span>';
-      document.getElementById('sheetCta').href = '/index.html#booking';
+      document.getElementById('sheetCta').href = 'index.html#booking';
       document.getElementById('sheetPrint').addEventListener('click', function () {
         window.print();
       });

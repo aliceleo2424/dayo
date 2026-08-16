@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="DayO 마이페이지 — 내 대화 현황과 예약 세션, 대화 자료를 한 곳에서 관리하세요.">
+  <title data-i18n="page.title.mypage">DayO 마이페이지 — 내 대화 라운지</title>
+  <link rel="stylesheet" href="mobile-nav.css">
+  <script src="scroll-lock.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #FFF8F3;
+      --card: #FFFCFA;
+      --pink: #FFD6DF;
+      --pink-soft: #FFF0F3;
+      --peach: #FFE5C4;
+      --yellow: #FFF6C7;
+      --mint: #DDEFE4;
+      --coral: #FF6B57;
+      --coral-dark: #E85B48;
+      --coral-pale: #FFE9E4;
+      --text: #594842;
+      --muted: #927E77;
+      --line: rgba(146, 126, 119, 0.14);
+      --shadow: 0 14px 42px rgba(113, 83, 72, 0.09);
+      --radius-lg: 28px;
+      --radius: 18px;
+    }
+
+    html { scroll-behavior: smooth; max-width: 100%; overflow-x: hidden; }
+
+    body {
+      min-height: 100vh;
+      max-width: 100%;
+      overflow-x: hidden;
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 3%, rgba(255, 214, 223, 0.66), transparent 28rem),
+        radial-gradient(circle at 92% 12%, rgba(255, 246, 199, 0.7), transparent 27rem),
+        radial-gradient(circle at 70% 94%, rgba(221, 239, 228, 0.6), transparent 30rem),
+        var(--cream);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button { font: inherit; color: inherit; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      border-bottom: 1px solid rgba(255, 214, 223, 0.6);
+      background: rgba(255, 248, 243, 0.86);
+      backdrop-filter: blur(18px);
+    }
+
+    .topbar-inner {
+      width: min(1120px, calc(100% - 2rem));
+      min-height: 72px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0;
+      max-width: 100%;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.7rem;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border: 3px solid rgba(255, 255, 255, 0.9);
+      border-radius: 50%;
+      color: var(--coral);
+      background: linear-gradient(135deg, var(--pink), var(--peach));
+      box-shadow: 0 6px 16px rgba(255, 107, 87, 0.15);
+      font-family: Georgia, serif;
+      font-size: 1.25rem;
+    }
+
+    .brand-copy small {
+      display: block;
+      margin-top: 0.1rem;
+      color: var(--muted);
+      font-size: 0.67rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+    }
+
+    .topbar-right { display: flex; align-items: center; gap: 0.9rem; }
+    .topbar-extras { display: flex; align-items: center; gap: 0.9rem; }
+
+    .welcome {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .welcome-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #75B987;
+      box-shadow: 0 0 0 5px rgba(117, 185, 135, 0.13);
+    }
+
+    .page {
+      width: min(1120px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 2rem 0 4rem;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+
+    .page-heading { margin-bottom: 1.5rem; }
+
+    .eyebrow {
+      margin-bottom: 0.45rem;
+      color: var(--coral);
+      font-size: 0.76rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    h1 {
+      font-size: clamp(1.65rem, 4vw, 2.35rem);
+      line-height: 1.3;
+      letter-spacing: -0.04em;
+    }
+
+    .heading-desc {
+      margin-top: 0.55rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.65;
+    }
+
+    .card {
+      border: 1px solid rgba(255, 214, 223, 0.65);
+      border-radius: var(--radius-lg);
+      background: rgba(255, 252, 250, 0.94);
+      box-shadow: var(--shadow);
+    }
+
+    .card-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-title { font-size: 1.08rem; letter-spacing: -0.025em; }
+
+    .card-subtitle {
+      margin-top: 0.3rem;
+      color: var(--muted);
+      font-size: 0.8rem;
+      line-height: 1.55;
+    }
+
+    /* 언어별 발화 리포트 */
+    .speaking-card {
+      margin-bottom: 1.25rem;
+      padding: 1.6rem;
+      background: linear-gradient(135deg, var(--pink-soft), #FFFCF4 55%, var(--yellow));
+    }
+
+    .speaking-eyebrow {
+      margin-bottom: 0.5rem;
+      color: var(--coral-dark);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+    }
+
+    .speaking-title {
+      font-size: clamp(1.05rem, 2.6vw, 1.3rem);
+      font-weight: 800;
+      line-height: 1.6;
+      letter-spacing: -0.025em;
+      word-break: keep-all;
+    }
+
+    .speaking-title em {
+      font-style: normal;
+      padding: 0.1rem 0.45rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.82);
+      color: var(--coral-dark);
+    }
+
+    .speaking-desc {
+      margin-top: 0.65rem;
+      color: var(--muted);
+      font-size: 0.84rem;
+      line-height: 1.7;
+    }
+
+    .gauge-list {
+      display: grid;
+      gap: 0.9rem;
+      margin-top: 1.3rem;
+    }
+
+    .gauge-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+      margin-bottom: 0.45rem;
+    }
+
+    .gauge-name { font-size: 0.85rem; font-weight: 800; }
+    .gauge-value { color: var(--muted); font-size: 0.76rem; font-weight: 800; }
+
+    .gauge-track {
+      height: 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.82);
+      overflow: hidden;
+    }
+
+    .gauge-fill {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+      animation: gaugeGrow 1.1s ease-out both;
+    }
+
+    .gauge-fill--en { background: linear-gradient(90deg, #FFB4A2, var(--coral)); }
+    .gauge-fill--fr { background: linear-gradient(90deg, #C9DFF0, #8FB8DA); }
+
+    @keyframes gaugeGrow {
+      from { transform: scaleX(0); transform-origin: left; }
+      to { transform: scaleX(1); transform-origin: left; }
+    }
+
+    /* 대화 현황 */
+    .status-card { padding: 1.5rem; }
+
+    .status-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.9rem;
+    }
+
+    .status-item {
+      padding: 1.1rem;
+      border-radius: 20px;
+      background: linear-gradient(145deg, #FFF9F3, var(--pink-soft));
+    }
+
+    .status-item:nth-child(2) { background: linear-gradient(145deg, #FFFCF2, var(--yellow)); }
+    .status-item:nth-child(3) { background: linear-gradient(145deg, #FAFDFB, var(--mint)); }
+
+    .status-icon {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 0.75rem;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.86);
+      font-size: 1.05rem;
+    }
+
+    .status-label { color: var(--muted); font-size: 0.76rem; font-weight: 700; }
+    .status-value { margin-top: 0.28rem; font-size: 1.35rem; font-weight: 900; letter-spacing: -0.03em; }
+    .status-note { margin-top: 0.3rem; color: var(--muted); font-size: 0.72rem; }
+
+    .pass-bar {
+      height: 8px;
+      margin-top: 0.7rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.8);
+      overflow: hidden;
+    }
+
+    .pass-bar span {
+      display: block;
+      height: 100%;
+      width: 50%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--coral), #FFA88F);
+    }
+
+    .primary-btn,
+    .ghost-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      border-radius: 16px;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.18s, box-shadow 0.18s, background 0.18s, border-color 0.18s;
+    }
+
+    .primary-btn {
+      padding: 0.8rem 1.2rem;
+      border: none;
+      color: #fff;
+      background: var(--coral);
+      box-shadow: 0 4px 0 var(--coral-dark);
+      font-size: 0.82rem;
+    }
+
+    .primary-btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--coral-dark); }
+
+    .ghost-btn {
+      padding: 0.78rem 1.1rem;
+      border: 1px solid var(--line);
+      color: var(--text);
+      background: var(--cream);
+      font-size: 0.8rem;
+    }
+
+    .ghost-btn:hover { transform: translateY(-1px); border-color: var(--coral); color: var(--coral-dark); }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.85fr);
+      gap: 1.25rem;
+      margin-top: 1.25rem;
+      align-items: start;
+    }
+
+    /* 예약 세션 */
+    .sessions-card { padding: 1.5rem; }
+    .session-list { display: grid; gap: 0.9rem; }
+
+    .session {
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr);
+      gap: 1rem;
+      padding: 1.15rem;
+      border: 1px solid rgba(255, 229, 196, 0.85);
+      border-radius: 20px;
+      background: linear-gradient(145deg, #FFF9F3, var(--pink-soft));
+    }
+
+    .partner-badge {
+      width: 54px;
+      height: 54px;
+      display: grid;
+      place-items: center;
+      border: 3px solid rgba(255, 255, 255, 0.95);
+      border-radius: 50%;
+      background: linear-gradient(140deg, var(--pink), var(--peach));
+      box-shadow: 0 6px 14px rgba(113, 83, 72, 0.12);
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: var(--coral-dark);
+    }
+
+    .session-top {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .session-name { font-size: 0.96rem; font-weight: 800; }
+
+    .tag {
+      padding: 0.26rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.86);
+      color: var(--coral-dark);
+      font-size: 0.68rem;
+      font-weight: 800;
+    }
+
+    .tag--soon { background: var(--coral-pale); }
+
+    .session-meta { margin-top: 0.45rem; color: var(--muted); font-size: 0.78rem; line-height: 1.6; }
+    .session-time { margin-top: 0.5rem; font-size: 0.85rem; font-weight: 800; }
+
+    .session-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.9rem;
+    }
+
+    /* 자료함 */
+    .library-card { padding: 1.5rem; }
+    .library-list { display: grid; gap: 0.75rem; }
+
+    .library-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      padding: 0.95rem 1rem;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--cream);
+      text-align: left;
+      cursor: pointer;
+      transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
+    }
+
+    .library-item:hover {
+      transform: translateY(-1px);
+      border-color: var(--coral);
+      box-shadow: 0 10px 22px rgba(255, 107, 87, 0.12);
+    }
+
+    .library-icon {
+      flex: 0 0 42px;
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      background: linear-gradient(135deg, var(--pink), var(--yellow));
+      font-size: 1.05rem;
+    }
+
+    .library-copy { flex: 1; min-width: 0; }
+    .library-title { font-size: 0.86rem; font-weight: 800; }
+    .library-desc { margin-top: 0.28rem; color: var(--muted); font-size: 0.74rem; line-height: 1.55; }
+    .library-arrow { color: var(--muted); font-size: 1.15rem; }
+
+    .vocab-card { margin-top: 1.25rem; padding: 1.5rem; }
+    .vocab-list {
+      display: grid;
+      gap: 0.65rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .vocab-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.18rem;
+      padding: 0.9rem 1rem;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--cream);
+    }
+    .vocab-item__word { font-size: 0.9rem; font-weight: 800; }
+    .vocab-item__meaning { color: var(--muted); font-size: 0.78rem; font-weight: 700; }
+    .vocab-empty { margin: 0; color: var(--muted); font-size: 0.82rem; line-height: 1.55; }
+
+    .coupon-card { margin-top: 1.25rem; padding: 1.5rem; }
+    .coupon-list { display: grid; gap: 0.75rem; }
+    .coupon-item {
+      display: grid;
+      gap: 0.35rem;
+      padding: 1.15rem 1.2rem 1.2rem;
+      border: 1px solid rgba(255, 107, 87, 0.22);
+      border-radius: 22px;
+      background: linear-gradient(145deg, #FFF6F2, #FFE9E4 55%, #FFF9F0);
+      box-shadow: 0 10px 24px rgba(255, 107, 87, 0.08);
+    }
+    .coupon-item__eyebrow {
+      color: var(--coral);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+    .coupon-item__title {
+      font-size: 1.02rem;
+      font-weight: 800;
+      line-height: 1.45;
+      letter-spacing: -0.02em;
+    }
+    .coupon-item__price {
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 700;
+    }
+    .coupon-item__price span { text-decoration: line-through; }
+    .coupon-item__price strong { color: var(--coral); font-size: 1.05rem; }
+    .coupon-item .primary-btn {
+      margin-top: 0.55rem;
+      width: fit-content;
+      padding: 0.7rem 1.1rem;
+    }
+    .coupon-empty { margin: 0; color: var(--muted); font-size: 0.82rem; line-height: 1.55; }
+
+    /* 지난 대화 */
+    .history-card { margin-top: 1.25rem; padding: 1.5rem; }
+    .history-list { display: grid; gap: 0.75rem; }
+
+    .history-item {
+      display: grid;
+      grid-template-columns: 54px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.15rem;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: var(--cream);
+    }
+
+    .history-copy { min-width: 0; }
+
+    /* 파트너 전환 배너 */
+    .switch-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.25rem;
+      margin-top: 1.25rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255, 214, 223, 0.75);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, var(--pink-soft), var(--peach) 62%, var(--yellow));
+      box-shadow: var(--shadow);
+    }
+
+    .switch-eyebrow {
+      margin-bottom: 0.4rem;
+      color: var(--coral-dark);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+    }
+
+    .switch-copy { font-size: 1.02rem; font-weight: 800; line-height: 1.5; letter-spacing: -0.02em; }
+    .switch-sub { margin-top: 0.4rem; color: var(--muted); font-size: 0.82rem; line-height: 1.6; }
+    .switch-banner .primary-btn { flex: 0 0 auto; padding: 0.9rem 1.35rem; font-size: 0.86rem; }
+
+    @media (max-width: 880px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .switch-banner { flex-direction: column; align-items: flex-start; }
+      .switch-banner .primary-btn { width: 100%; }
+    }
+
+    @media (max-width: 767px) {
+      .topbar-inner, .page {
+        width: 100%;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        box-sizing: border-box;
+      }
+      .page { padding-top: 2rem; padding-bottom: 4rem; }
+      .topbar-inner { min-height: 64px; padding-top: 0; padding-bottom: 0; }
+      .brand-copy small { display: none; }
+      .welcome,
+      .topbar-extras { display: none; }
+      .status-grid { grid-template-columns: 1fr; }
+      .status-card, .sessions-card, .library-card, .coupon-card { padding: 1.1rem; }
+      .coupon-item .primary-btn { width: 100%; }
+      .session { grid-template-columns: 1fr; }
+      .session-actions .primary-btn,
+      .session-actions .ghost-btn { flex: 1; }
+      .history-card { padding: 1.1rem; }
+      .history-item { grid-template-columns: 1fr; }
+      .history-item .ghost-btn { width: 100%; }
+    }
+
+    @media (max-width: 620px) {
+      .status-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body data-dayo-role="member">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="index.html" data-i18n="nav.homeAria" data-i18n-attr="aria-label" aria-label="DayO 메인으로 이동">
+        <span class="brand-mark">D</span>
+        <span class="brand-copy">
+          <span data-i18n="mypage.brand">DayO 마이페이지</span>
+          <small data-i18n="mypage.brandSub">MY CONVERSATION LOUNGE</small>
+        </span>
+      </a>
+      <div class="topbar-right">
+        <div class="topbar-extras">
+          <div data-i18n-lang="inline"></div>
+          <button type="button" class="ghost-btn" data-tickets-open style="padding:0.45rem 0.8rem;font-size:0.78rem;">
+            <span data-ticket-badge-text>☕️ 보유 티켓: 1장</span>
+          </button>
+          <div class="welcome">
+            <span class="welcome-dot" aria-hidden="true"></span>
+            <span data-i18n="mypage.welcome">지민 님, 반갑습니다! 🍰</span>
+          </div>
+        </div>
+        <div data-mode-switch="inline"></div>
+        <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
+      </div>
+    </div>
+  </header>
+  <div class="nav-drawer-backdrop" id="mobileNavBackdrop"></div>
+  <nav class="nav-drawer" id="mobileNav" aria-label="모바일 메뉴">
+    <div class="nav-drawer__head">DayO 메뉴</div>
+    <div data-i18n-lang="drawer"></div>
+    <a href="index.html" data-i18n="nav.homeAria">홈으로</a>
+    <a href="index.html?booking=open" data-i18n="nav.booking">대화 예약하기</a>
+    <a href="partner.html"><span aria-hidden="true">🤝</span> <span data-i18n="nav.partnerStudio">파트너 스튜디오로 이동</span></a>
+    <button type="button" class="nav-drawer__link" data-tickets-open>
+      <span data-ticket-badge-text>☕️ 보유 티켓: 1장</span>
+    </button>
+  </nav>
+
+  <main class="page">
+    <div class="page-heading">
+      <p class="eyebrow" data-i18n="mypage.eyebrow">MY CONVERSATION LOUNGE</p>
+      <h1 data-i18n="mypage.heading">오늘도 한 잔의 대화, 준비되셨나요? ☕</h1>
+      <p class="heading-desc" data-i18n="mypage.headingDesc">내 대화 현황과 예약한 세션, 예습 자료를 한 곳에서 확인할 수 있어요.</p>
+    </div>
+
+    <section class="card speaking-card" aria-labelledby="speakingTitle">
+      <p class="speaking-eyebrow" data-i18n="mypage.speaking.eyebrow">MONTHLY SPEAKING REPORT</p>
+      <h2 class="speaking-title" id="speakingTitle" data-i18n="mypage.speaking.title" data-i18n-html="true">
+        🎉 이번 달 나는 <em>영어 🇺🇸 1시간 20분</em>, <em>프랑스어 🇫🇷 40분</em> 대화했어요!
+      </h2>
+      <p class="speaking-desc" data-i18n="mypage.speaking.desc">총 2시간, 지난달보다 45분 더 이야기했어요. 이 속도라면 다음 달엔 3시간도 문제없어요 💪</p>
+
+      <div class="gauge-list">
+        <div class="gauge">
+          <div class="gauge-top">
+            <span class="gauge-name" data-i18n="mypage.speaking.en">🇺🇸 영어</span>
+            <span class="gauge-value">80분 · 66%</span>
+          </div>
+          <div class="gauge-track">
+            <span class="gauge-fill gauge-fill--en" style="width: 66%"></span>
+          </div>
+        </div>
+        <div class="gauge">
+          <div class="gauge-top">
+            <span class="gauge-name" data-i18n="mypage.speaking.fr">🇫🇷 프랑스어</span>
+            <span class="gauge-value">40분 · 34%</span>
+          </div>
+          <div class="gauge-track">
+            <span class="gauge-fill gauge-fill--fr" style="width: 34%"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card status-card" aria-labelledby="statusTitle">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title" id="statusTitle" data-i18n="mypage.status.title">🎓 내 대화 현황</h2>
+          <p class="card-subtitle" data-i18n="mypage.status.sub">이번 달 나의 대화 기록과 남은 이용권이에요.</p>
+        </div>
+        <a class="primary-btn" href="index.html?booking=open" data-i18n="mypage.status.newBooking">📅 새 대화 예약하기</a>
+      </div>
+
+      <div class="status-grid">
+        <div class="status-item">
+          <div class="status-icon" aria-hidden="true">☕</div>
+          <p class="status-label" data-i18n="mypage.status.monthly">이번 달 참여 대화</p>
+          <p class="status-value">8회</p>
+          <p class="status-note" data-i18n="mypage.status.monthlyNote">지난달보다 3회 더 이야기했어요!</p>
+        </div>
+        <div class="status-item">
+          <div class="status-icon" aria-hidden="true">🎟️</div>
+          <p class="status-label" data-i18n="mypage.status.remaining">잔여 대화 세션 이용권</p>
+          <p class="status-value" data-ticket-remaining-text>4회 남음</p>
+          <p class="status-note" data-i18n="mypage.status.remainingNote">모든 이용권은 결제 후 90일 내 소진 필수.</p>
+          <p class="status-note" style="margin-top:0.45rem;">🍓 보유 Jam <strong data-jam-count>0</strong></p>
+          <div class="pass-bar" role="img" data-i18n="mypage.status.passBarAria" data-i18n-attr="aria-label" aria-label="8회 중 4회 사용">
+            <span></span>
+          </div>
+          <button class="ghost-btn" type="button" data-tickets-open style="margin-top:0.75rem;width:100%;">☕️ 이용권 구매하기</button>
+        </div>
+        <div class="status-item">
+          <div class="status-icon" aria-hidden="true">⏱️</div>
+          <p class="status-label" data-i18n="mypage.status.time">이번 달 대화 시간</p>
+          <p class="status-value">240분</p>
+          <p class="status-note" data-i18n="mypage.status.timeNote">연속 3주째 대화를 이어가는 중이에요 💖</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card coupon-card" aria-labelledby="couponTitle">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title" id="couponTitle" data-i18n="mypage.coupon.title">🎟️ 쿠폰함</h2>
+          <p class="card-subtitle" data-i18n="mypage.coupon.sub">보유 중인 미사용 쿠폰이에요. 1회 이용권 결제 시 자동으로 적용돼요.</p>
+        </div>
+      </div>
+      <div class="coupon-list" data-coupon-wallet></div>
+      <p class="coupon-empty" data-coupon-wallet-empty data-i18n="mypage.coupon.empty">아직 사용 가능한 쿠폰이 없어요.</p>
+    </section>
+
+    <div class="dashboard-grid">
+      <section class="card sessions-card" aria-labelledby="sessionsTitle">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title" id="sessionsTitle" data-i18n="mypage.sessions.title">📅 내 예약 세션</h2>
+            <p class="card-subtitle" data-i18n="mypage.sessions.sub">세션 시작 1시간 전까지 요일·시간 변경/취소가 가능해요.</p>
+          </div>
+        </div>
+
+        <div class="session-list">
+          <article class="session">
+            <span class="partner-badge" aria-hidden="true">C</span>
+            <div>
+              <div class="session-top">
+                <p class="session-name">Camille from France</p>
+                <span class="tag">🇫🇷 <span data-i18n="book.lang.fr">프랑스어</span></span>
+                <span class="tag tag--soon" data-i18n="partner.session1.status">● 30분 후 시작</span>
+              </div>
+              <p class="session-meta" data-i18n="mypage.session1.meta">목적: ✈️ 여행/일상 · 스타일: 🐢 천천히 들어주는 파트너</p>
+              <p class="session-time" data-i18n="mypage.session1.time">오늘 20:00 · 30분</p>
+              <div class="session-actions">
+                <a class="primary-btn" href="room.html" data-i18n="mypage.sessions.enter">☕ 대화 스튜디오 입장</a>
+                <button class="ghost-btn" type="button" data-material="fr-travel" data-i18n="mypage.sessions.materials">📚 대화 자료 보기</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="session">
+            <span class="partner-badge" aria-hidden="true">K</span>
+            <div>
+              <div class="session-top">
+                <p class="session-name">Kate from USA</p>
+                <span class="tag">🇺🇸 <span data-i18n="book.lang.en">영어</span></span>
+              </div>
+              <p class="session-meta" data-i18n="mypage.session2.meta">목적: 🎯 오픽/토스 · 스타일: 📝 교정을 꼼꼼히 해주는 파트너</p>
+              <p class="session-time" data-i18n="mypage.session2.time">8월 6일 (목) 21:00 · 30분</p>
+              <div class="session-actions">
+                <a class="primary-btn" href="room.html" data-i18n="mypage.sessions.enter">☕ 대화 스튜디오 입장</a>
+                <button class="ghost-btn" type="button" data-material="en-opic" data-i18n="mypage.sessions.materials">📚 대화 자료 보기</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="session">
+            <span class="partner-badge" aria-hidden="true">Y</span>
+            <div>
+              <div class="session-top">
+                <p class="session-name">Yui from Japan</p>
+                <span class="tag">🇯🇵 <span data-i18n="book.lang.ja">일본어</span></span>
+              </div>
+              <p class="session-meta" data-i18n="mypage.session3.meta">목적: ☕ 자유 수다 · 스타일: ⚡ 자연스러운 실전 티키타카</p>
+              <p class="session-time" data-i18n="mypage.session3.time">8월 9일 (일) 11:00 · 30분</p>
+              <div class="session-actions">
+                <a class="primary-btn" href="room.html" data-i18n="mypage.sessions.enter">☕ 대화 스튜디오 입장</a>
+                <button class="ghost-btn" type="button" data-material="fr-travel" data-i18n="mypage.sessions.materials">📚 대화 자료 보기</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="card library-card" aria-labelledby="libraryTitle">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title" id="libraryTitle" data-i18n="mypage.library.title">📚 세션 대화 자료함</h2>
+            <p class="card-subtitle" data-i18n="mypage.library.sub">대화 전 예습하고, 끝난 뒤 복습해 보세요.</p>
+          </div>
+        </div>
+
+        <div class="library-list">
+          <button class="library-item" type="button" data-material="fr-travel" data-material-view="article">
+            <span class="library-icon" aria-hidden="true">📰</span>
+            <span class="library-copy">
+              <span class="library-title" data-i18n="mypage.library.item1.title">이번 주 예습 기사 · 니스 여름 축제</span>
+              <span class="library-desc" data-i18n="mypage.library.item1.desc">Camille 파트너와의 여행 회화 전에 3분만 읽어보세요.</span>
+            </span>
+            <span class="library-arrow" aria-hidden="true">›</span>
+          </button>
+
+          <button class="library-item" type="button" data-material="fr-travel" data-material-view="expressions">
+            <span class="library-icon" aria-hidden="true">💬</span>
+            <span class="library-copy">
+              <span class="library-title" data-i18n="mypage.library.item2.title">추천 표현 리뷰 · 카페와 주문</span>
+              <span class="library-desc" data-i18n="mypage.library.item2.desc">지난 대화에서 자주 막혔던 표현을 모았어요.</span>
+            </span>
+            <span class="library-arrow" aria-hidden="true">›</span>
+          </button>
+
+          <button class="library-item" type="button" data-material="en-opic" data-material-view="article">
+            <span class="library-icon" aria-hidden="true">🎧</span>
+            <span class="library-copy">
+              <span class="library-title" data-i18n="mypage.library.item3.title">오픽 빈출 주제 · 재택근무 이야기</span>
+              <span class="library-desc" data-i18n="mypage.library.item3.desc">Kate 파트너와의 세션 전 예습 자료예요.</span>
+            </span>
+            <span class="library-arrow" aria-hidden="true">›</span>
+          </button>
+
+          <button class="library-item" type="button" data-material="ko-daily" data-material-view="expressions">
+            <span class="library-icon" aria-hidden="true">🍰</span>
+            <span class="library-copy">
+              <span class="library-title" data-i18n="mypage.library.item4.title">지난 대화 복습 노트</span>
+              <span class="library-desc" data-i18n="mypage.library.item4.desc">파트너가 남긴 피드백 표현을 다시 확인해 보세요.</span>
+            </span>
+            <span class="library-arrow" aria-hidden="true">›</span>
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <section class="card vocab-card" aria-labelledby="vocabTitle">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title" id="vocabTitle">🍓 복습 단어장</h2>
+          <p class="card-subtitle">퀴즈에서 저장한 오늘의 핵심 표현이에요.</p>
+        </div>
+      </div>
+      <ul class="vocab-list" data-review-vocab hidden></ul>
+      <p class="vocab-empty" data-review-vocab-empty>아직 저장한 단어가 없어요. 복습 퀴즈가 끝나면 단어장에 저장해 보세요.</p>
+    </section>
+
+    <section class="card history-card" aria-labelledby="historyTitle">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title" id="historyTitle" data-i18n="mypage.history.title">🕘 지난 대화</h2>
+          <p class="card-subtitle" data-i18n="mypage.history.sub">대화가 끝난 뒤 리포트를 열어 복습해 보세요.</p>
+        </div>
+      </div>
+
+      <div class="history-list">
+        <article class="history-item">
+          <span class="partner-badge" aria-hidden="true">C</span>
+          <div class="history-copy">
+            <div class="session-top">
+              <p class="session-name">Camille from France</p>
+              <span class="tag">🇫🇷 <span data-i18n="book.lang.fr">프랑스어</span></span>
+            </div>
+            <p class="session-meta" data-i18n="mypage.history1.meta">2026.08.02 (일) 20:00 · 30분 · 주제 ☕ 여행 회화</p>
+          </div>
+          <button class="ghost-btn" type="button" data-report="r-0802" data-i18n="mypage.history.report">📊 상세 리포트 보기</button>
+        </article>
+
+        <article class="history-item">
+          <span class="partner-badge" aria-hidden="true">K</span>
+          <div class="history-copy">
+            <div class="session-top">
+              <p class="session-name">Kate from USA</p>
+              <span class="tag">🇺🇸 <span data-i18n="book.lang.en">영어</span></span>
+            </div>
+            <p class="session-meta" data-i18n="mypage.history2.meta">2026.07.29 (수) 21:00 · 30분 · 주제 🎯 오픽/토스 준비</p>
+          </div>
+          <button class="ghost-btn" type="button" data-report="r-0729" data-i18n="mypage.history.report">📊 상세 리포트 보기</button>
+        </article>
+      </div>
+    </section>
+
+    <section class="switch-banner" aria-labelledby="switchTitle">
+      <div>
+        <p class="switch-eyebrow" data-i18n="mypage.switch.eyebrow">FOR CONVERSATION PARTNERS</p>
+        <p class="switch-copy" id="switchTitle" data-i18n="mypage.switch.title">DayO의 대화 파트너이신가요? 파트너 전용 공간으로 이동합니다 ☕</p>
+        <p class="switch-sub" data-i18n="mypage.switch.sub">프로필과 대화 가능 시간을 관리하고, 예정된 세션을 확인할 수 있어요.</p>
+      </div>
+      <a class="primary-btn" href="partner.html"><span aria-hidden="true">🤝</span> <span data-i18n="nav.partnerStudio">파트너 스튜디오로 이동</span></a>
+    </section>
+  </main>
+
+  <script src="i18n.js"></script>
+  <script src="materials.js"></script>
+  <script src="supabase-env.js"></script>
+  <script type="module" src="profile-store.js"></script>
+  <script src="mobile-nav.js"></script>
+  <script src="mode-switch.js"></script>
+  <script src="ticket-wallet.js"></script>
+  <script src="tickets-modal.js"></script>
+</body>
+</html>

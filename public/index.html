@@ -1,0 +1,2559 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title data-i18n="page.title.index">DayO 돼요 — AI 회화 코파일럿</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="mobile-nav.css">
+  <script src="scroll-lock.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink: #FFD1DC;
+      --peach: #FFE5B4;
+      --yellow: #FFF9C4;
+      --cream: #FFF8F5;
+      --coral: #FF6B57;
+      --coral-dark: #E55A45;
+      --coral-pale: #FFE8E3;
+      --bg-card: #FFFCFA;
+      --text: #5C4A42;
+      --text-muted: #9A8580;
+      --shadow-soft: rgba(255, 107, 87, 0.14);
+      --shadow-warm: rgba(92, 74, 66, 0.06);
+      --radius: 22px;
+      --radius-lg: 28px;
+      --section-gap: clamp(5rem, 12vw, 7rem);
+      --mouse-x: 50vw;
+      --mouse-y: 50vh;
+    }
+
+    html { scroll-behavior: smooth; max-width: 100%; overflow-x: hidden; }
+
+    body {
+      font-family: 'Gowun Dodum', 'Quicksand', -apple-system, sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      min-height: 100vh;
+      max-width: 100%;
+      overflow-x: hidden;
+      position: relative;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .mesh-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .mesh-bg__layer { position: absolute; inset: -50%; width: 200%; height: 200%; opacity: 0.65; }
+    .mesh-bg__layer--1 { background: radial-gradient(circle at 30% 40%, var(--pink) 0%, transparent 42%); animation: meshDrift1 14s ease-in-out infinite alternate; }
+    .mesh-bg__layer--2 { background: radial-gradient(circle at 70% 25%, var(--peach) 0%, transparent 40%); animation: meshDrift2 16s ease-in-out infinite alternate; }
+    .mesh-bg__layer--3 { background: radial-gradient(circle at 55% 75%, var(--yellow) 0%, transparent 45%); animation: meshDrift3 18s ease-in-out infinite alternate; }
+
+    @keyframes meshDrift1 { 0% { transform: translate(0,0); } 100% { transform: translate(5%,8%); } }
+    @keyframes meshDrift2 { 0% { transform: translate(0,0); } 100% { transform: translate(-6%,5%); } }
+    @keyframes meshDrift3 { 0% { transform: translate(0,0); } 100% { transform: translate(4%,-6%); } }
+
+    .cursor-glow {
+      position: fixed; left: var(--mouse-x); top: var(--mouse-y);
+      width: 300px; height: 300px; border-radius: 50%; pointer-events: none; z-index: 1;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(255,198,185,0.3) 0%, rgba(255,229,180,0.15) 45%, transparent 70%);
+      filter: blur(40px); opacity: 0;
+      transition: opacity 0.4s ease, left 0.12s ease-out, top 0.12s ease-out;
+    }
+    .cursor-glow.active { opacity: 1; }
+    @media (hover: none), (pointer: coarse) { .cursor-glow { display: none; } }
+
+    /* Header */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(255,248,245,0.85); backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(255,209,220,0.3);
+    }
+
+    .header-inner {
+      max-width: 1180px; margin: 0 auto;
+      width: 100%;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.85rem clamp(1rem, 3.5vw, 2.25rem);
+    }
+
+    .logo { display: flex; align-items: center; gap: 0.65rem; text-decoration: none; color: var(--text); flex-shrink: 0; }
+    .logo-icon {
+      width: 42px; height: 42px;
+      background: linear-gradient(145deg, #FF9A8B, var(--coral));
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Quicksand', sans-serif; font-size: 1.3rem; font-weight: 700; color: #fff;
+      box-shadow: 0 4px 16px var(--shadow-soft);
+    }
+    .logo-text { font-family: 'Quicksand', 'Gowun Dodum', sans-serif; font-size: 1.35rem; font-weight: 700; }
+    .logo-text span { color: var(--coral); font-weight: 600; }
+
+    .nav-desktop {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: nowrap;
+      gap: 0.1rem;
+      list-style: none;
+      min-width: 0;
+      white-space: nowrap;
+    }
+
+    .nav-desktop a {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.5rem 0.62rem;
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      font-weight: 600;
+      border-radius: 999px;
+      transition: color 0.2s, background 0.2s;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .nav-desktop a:hover {
+      color: var(--coral);
+      background: var(--coral-pale);
+    }
+
+    .header-actions {
+      display: flex; align-items: center; gap: 0.55rem; flex-shrink: 0;
+      justify-self: end;
+      white-space: nowrap;
+    }
+
+    .header-cta {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.7rem 1.2rem;
+      background: linear-gradient(135deg, #FF7A68 0%, var(--coral) 55%, #FF8A4C 100%);
+      color: #fff;
+      text-decoration: none;
+      font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: 999px;
+      box-shadow: 0 4px 0 var(--coral-dark), 0 8px 20px rgba(255, 107, 87, 0.26);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .header-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0 var(--coral-dark), 0 12px 24px rgba(255, 107, 87, 0.3);
+    }
+
+    .header-cta:active {
+      transform: translateY(1px);
+      box-shadow: 0 2px 0 var(--coral-dark), 0 4px 12px rgba(255, 107, 87, 0.22);
+    }
+
+    .page { position: relative; z-index: 2; max-width: 100%; overflow-x: hidden; }
+
+    /* Layout */
+
+    .section-inner {
+      max-width: 1080px; margin: 0 auto;
+      padding: 0 clamp(1.5rem, 5vw, 2.5rem);
+    }
+
+    .section-label {
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--coral); margin-bottom: 0.75rem;
+    }
+
+    .section-title {
+      font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
+      font-size: clamp(1.5rem, 3.5vw, 1.85rem); font-weight: 700;
+      line-height: 1.35; margin-bottom: 2.5rem;
+    }
+
+    /* Hero — guest landing (original 2-column). Logged-in overrides below. */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center;
+      padding: 6.5rem 0 4rem;
+    }
+
+    .home-stage-inner {
+      width: 100%;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: clamp(2.5rem, 6vw, 4.5rem);
+      align-items: center;
+    }
+
+    .hero-copy { text-align: left; }
+
+    .hero-title {
+      font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
+      font-size: clamp(2rem, 4.8vw, 3.2rem);
+      font-weight: 700; line-height: 1.22; margin-bottom: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .title-rotator { transition: opacity 0.55s ease; }
+    .title-rotator.fade-out { opacity: 0; }
+    .hero-title em { font-style: normal; color: var(--coral); }
+
+    .hero-subtitle {
+      font-size: clamp(0.98rem, 2vw, 1.1rem);
+      color: var(--text-muted); line-height: 1.8;
+      margin-bottom: 2rem; max-width: 420px;
+    }
+
+    .cta-wrap {
+      display: flex; flex-direction: column; align-items: flex-start; gap: 0.75rem;
+    }
+
+    .cta-badge { display: none; }
+
+    .home-cta-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem;
+      padding: 1.15rem 2rem;
+      font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
+      font-size: clamp(0.98rem, 2.4vw, 1.12rem);
+      font-weight: 700;
+      color: #fff;
+      text-decoration: none;
+      background: linear-gradient(135deg, #FF7A68 0%, var(--coral) 55%, #FF8A4C 100%);
+      border: none;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+      box-shadow: 0 5px 0 var(--coral-dark), 0 10px 28px rgba(255, 107, 87, 0.26);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .home-cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 0 var(--coral-dark), 0 14px 32px rgba(255, 107, 87, 0.3);
+    }
+    .home-cta-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 var(--coral-dark), 0 6px 16px rgba(255, 107, 87, 0.2);
+    }
+
+    .cta-btn, .home-quiz-link {
+      display: inline-flex; align-items: center; gap: 0.35rem;
+      padding: 0.35rem 0.15rem;
+      font-family: inherit; font-size: 0.9rem; font-weight: 700;
+      color: var(--coral); background: transparent; border: none;
+      cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
+      box-shadow: none;
+    }
+    .cta-btn:hover, .home-quiz-link:hover {
+      transform: none; box-shadow: none; color: var(--coral-dark);
+    }
+    .cta-btn:active, .home-quiz-link:active { transform: none; box-shadow: none; }
+
+    /* Guest: lounge lives only inside auth dashboard */
+    .lounge-carousel {
+      display: none;
+      width: 100%;
+    }
+    .lounge-head {
+      margin: 0 0 0.85rem;
+      text-align: center;
+    }
+    .lounge-head__title {
+      margin: 0;
+      font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .lounge-head__sub {
+      margin: 0.35rem 0 0;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .lounge-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    .lounge-card {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      min-height: 132px;
+      padding: 1.05rem 1.05rem 1.1rem;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 209, 220, 0.7);
+      background: linear-gradient(160deg, #FFFCF9 0%, #FFF1EC 55%, #FFF8E8 100%);
+      box-shadow: 0 8px 22px rgba(113, 83, 72, 0.07);
+      text-align: left;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .lounge-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(113, 83, 72, 0.1);
+    }
+    .lounge-card:nth-child(2) {
+      background: linear-gradient(160deg, #FFF9F2 0%, #FFE8E3 50%, #FFF3D8 100%);
+    }
+    .lounge-card:nth-child(3) {
+      background: linear-gradient(160deg, #FFFCF8 0%, #FFEFE6 48%, #FFF6E0 100%);
+    }
+    .lounge-card:nth-child(4) {
+      background: linear-gradient(160deg, #FFF8FB 0%, #FFE9F0 52%, #FFF1E4 100%);
+    }
+    .lounge-card:nth-child(5) {
+      background: linear-gradient(160deg, #FFFCF6 0%, #FFF0E4 50%, #FFE8D8 100%);
+      grid-column: span 1;
+    }
+    .lounge-card__label {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--coral);
+    }
+    .lounge-card__body {
+      font-size: 0.9rem;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 720px) {
+      .lounge-grid {
+        display: flex;
+        gap: 0.7rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: x proximity;
+        padding: 0.1rem 0.15rem 0.45rem;
+        scrollbar-width: thin;
+      }
+      .lounge-card {
+        flex: 0 0 min(78vw, 260px);
+        scroll-snap-align: start;
+        min-height: 124px;
+      }
+      .lounge-card:nth-child(5) { grid-column: auto; }
+    }
+
+    /* Auth dashboard — hidden for guests */
+    .auth-dashboard {
+      display: none;
+      padding: 5.5rem 1.25rem 1.35rem;
+      box-sizing: border-box;
+    }
+    .auth-dashboard__inner {
+      width: min(860px, 100%);
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1.5rem;
+    }
+    .auth-hero {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1.35rem 1.25rem 1.4rem;
+      border-radius: 28px;
+      background: linear-gradient(145deg, #FFF7FB, #FFE9D8 62%, #FFF6C7);
+      border: 1px solid rgba(255, 107, 87, 0.16);
+      box-shadow: 0 12px 32px var(--shadow-warm);
+    }
+    .auth-greeting {
+      margin: 0;
+      font-size: clamp(1.25rem, 3.4vw, 1.7rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.35;
+      color: var(--text);
+    }
+    .auth-streak {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--coral);
+    }
+    .auth-streak--first {
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+    .auth-sub {
+      margin: 0.15rem 0 0;
+      max-width: 30rem;
+      font-size: 0.98rem;
+      line-height: 1.65;
+      color: var(--text-muted);
+    }
+    .auth-ticket-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.35rem 0.45rem;
+      margin-top: 0.15rem;
+      padding: 0.42rem 0.45rem 0.42rem 0.95rem;
+      border-radius: 999px;
+      background: rgba(255, 249, 196, 0.8);
+      border: 1px solid rgba(255, 209, 220, 0.7);
+      color: var(--text);
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+    .auth-ticket-charge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.32rem 0.7rem;
+      border: 1px solid rgba(255, 209, 220, 0.95);
+      border-radius: 999px;
+      background: linear-gradient(180deg, #FFFCF9, #FFE8E3);
+      color: var(--coral);
+      font-family: inherit;
+      font-size: 0.76rem;
+      font-weight: 800;
+      cursor: pointer;
+      line-height: 1.2;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .auth-ticket-charge:hover {
+      transform: translateY(-1px);
+      border-color: var(--coral);
+      box-shadow: 0 4px 12px rgba(255, 107, 87, 0.14);
+    }
+    .auth-coupon-note {
+      margin: 0;
+      max-width: 28rem;
+      padding: 0.55rem 0.85rem;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px dashed rgba(255, 107, 87, 0.35);
+      color: var(--text);
+      font-size: 0.86rem;
+      font-weight: 800;
+      line-height: 1.55;
+    }
+    .auth-coupon-note code {
+      font-family: inherit;
+      color: var(--coral);
+      letter-spacing: 0.04em;
+    }
+    .auth-dash-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.15rem;
+      padding: 0.85rem 1.25rem;
+      border-radius: 18px;
+      text-decoration: none;
+    }
+    .auth-live {
+      text-align: center;
+      padding: 1.2rem 1rem 1.35rem;
+      border-radius: 24px;
+      background: rgba(255, 252, 250, 0.88);
+      border: 1px solid rgba(255, 209, 220, 0.65);
+      box-shadow: 0 10px 28px var(--shadow-warm);
+    }
+    .auth-live__title {
+      margin: 0 0 1.05rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem 0.4rem;
+      font-size: 0.92rem;
+      font-weight: 800;
+      line-height: 1.45;
+      color: var(--text);
+    }
+    .auth-live__online {
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .auth-lang-chip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+    }
+    .auth-lang-chip__btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      padding: 0.28rem 0.65rem 0.28rem 0.7rem;
+      border: 1px solid rgba(255, 209, 220, 0.85);
+      border-radius: 999px;
+      background: linear-gradient(180deg, #FFF9F6 0%, #FFEDE6 100%);
+      color: var(--coral);
+      font-family: inherit;
+      font-size: 0.84rem;
+      font-weight: 800;
+      line-height: 1.2;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(255, 107, 87, 0.1);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+    .auth-lang-chip__btn:hover,
+    .auth-lang-chip.is-open .auth-lang-chip__btn {
+      transform: translateY(-1px);
+      border-color: var(--coral);
+      box-shadow: 0 4px 12px rgba(255, 107, 87, 0.16);
+    }
+    .auth-lang-chip__caret {
+      font-size: 0.68rem;
+      opacity: 0.75;
+    }
+    .auth-lang-chip__menu {
+      position: absolute;
+      top: calc(100% + 0.4rem);
+      left: 50%;
+      z-index: 20;
+      min-width: 7.5rem;
+      padding: 0.35rem;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 209, 220, 0.8);
+      background: #FFFCFA;
+      box-shadow: 0 12px 28px rgba(113, 83, 72, 0.14);
+      transform: translateX(-50%);
+      display: none;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+    .auth-lang-chip.is-open .auth-lang-chip__menu {
+      display: flex;
+    }
+    .auth-lang-chip__opt {
+      padding: 0.55rem 0.7rem;
+      border: none;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-align: left;
+      cursor: pointer;
+    }
+    .auth-lang-chip__opt:hover,
+    .auth-lang-chip__opt.is-active {
+      background: var(--coral-pale);
+      color: var(--coral);
+    }
+    .auth-partner-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 0.85rem 1.15rem;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x proximity;
+      padding: 0.15rem 0.2rem 0.35rem;
+      margin: 0 auto;
+      max-width: 100%;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 107, 87, 0.35) transparent;
+    }
+    .auth-partner-row::-webkit-scrollbar { height: 5px; }
+    .auth-partner-row::-webkit-scrollbar-thumb {
+      background: rgba(255, 107, 87, 0.3);
+      border-radius: 999px;
+    }
+    .auth-partner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.45rem;
+      flex: 0 0 auto;
+      width: 88px;
+      scroll-snap-align: center;
+    }
+    .auth-partner__bubble {
+      position: relative;
+      max-width: 96px;
+      padding: 0.32rem 0.55rem;
+      border-radius: 999px;
+      background: linear-gradient(160deg, #FFF7F3 0%, #FFE9E3 55%, #FFF2DC 100%);
+      border: 1px solid rgba(255, 209, 220, 0.8);
+      box-shadow: 0 3px 10px rgba(113, 83, 72, 0.08);
+      color: var(--coral);
+      font-size: 0.66rem;
+      font-weight: 800;
+      line-height: 1.3;
+      letter-spacing: -0.04em;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .auth-partner__bubble::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      bottom: -5px;
+      width: 8px;
+      height: 8px;
+      background: #FFE9E3;
+      border-right: 1px solid rgba(255, 209, 220, 0.8);
+      border-bottom: 1px solid rgba(255, 209, 220, 0.8);
+      transform: translateX(-50%) rotate(45deg);
+    }
+    .auth-partner__face {
+      display: grid;
+      place-items: center;
+      width: 56px;
+      height: 56px;
+      margin-top: 0.15rem;
+      border-radius: 50%;
+      background: linear-gradient(145deg, var(--pink), var(--peach));
+      border: 2px solid #fff;
+      box-shadow: 0 6px 16px rgba(113, 83, 72, 0.12);
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+    .auth-partner__name {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .auth-hero .greeting-banner {
+      display: none;
+      margin: 0;
+      width: 100%;
+      text-align: center;
+    }
+    .auth-hero .greeting-banner.is-visible {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    @media (max-width: 640px) {
+      .auth-dashboard { padding: 4.85rem 1rem 1.15rem; }
+      .auth-live { padding: 1rem 0.7rem 1.15rem; }
+      .auth-live__title {
+        font-size: 0.84rem;
+        gap: 0.28rem 0.32rem;
+      }
+      .auth-lang-chip__btn { font-size: 0.78rem; padding: 0.24rem 0.55rem; }
+      .auth-partner-row {
+        justify-content: flex-start;
+        gap: 0.65rem;
+        padding: 0.1rem 0.35rem 0.4rem;
+      }
+      .auth-partner { width: 78px; gap: 0.38rem; }
+      .auth-partner__bubble {
+        max-width: 86px;
+        padding: 0.28rem 0.45rem;
+        font-size: 0.6rem;
+      }
+      .auth-partner__face { width: 50px; height: 50px; font-size: 1.35rem; }
+      .auth-partner__name { font-size: 0.72rem; }
+    }
+
+    .visual-card {
+      position: relative;
+      width: min(280px, 85vw);
+      padding: 1.75rem 1.5rem 2rem;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,209,220,0.5);
+      border-radius: 32px;
+      box-shadow: 0 20px 48px var(--shadow-soft), 0 8px 20px var(--shadow-warm);
+    }
+
+    .live-badge {
+      position: absolute; top: -0.75rem; left: 50%; transform: translateX(-50%);
+      white-space: nowrap;
+      padding: 0.35rem 0.9rem;
+      background: linear-gradient(135deg, var(--pink), var(--peach));
+      border-radius: 999px;
+      font-size: 0.72rem; font-weight: 600; color: var(--text);
+      box-shadow: 0 4px 14px var(--shadow-warm);
+    }
+
+    .live-badge::before {
+      content: ''; display: inline-block;
+      width: 6px; height: 6px; background: var(--coral);
+      border-radius: 50%; margin-right: 0.4rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .phone-frame {
+      background: linear-gradient(160deg, var(--pink) 0%, var(--peach) 100%);
+      border-radius: 24px;
+      padding: 1.5rem 1.25rem;
+      min-height: 260px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 1.25rem;
+    }
+
+    .partner-profile {
+      text-align: center;
+      transition: opacity 0.5s ease;
+    }
+
+    .partner-avatar {
+      --avatar-bg: #FFD1DC;
+      --avatar-skin: #F2C7A5;
+      --avatar-hair: #38251F;
+      position: relative;
+      width: 82px; height: 82px;
+      border-radius: 50%;
+      background: var(--avatar-bg);
+      border: 3px solid var(--coral-pale);
+      outline: 2px solid rgba(255,255,255,0.95);
+      outline-offset: -6px;
+      margin: 0 auto 0.55rem;
+      overflow: hidden;
+      box-shadow: 0 7px 18px var(--shadow-warm);
+    }
+
+    .avatar-body {
+      position: absolute; left: 18px; bottom: -12px;
+      width: 46px; height: 33px;
+      border-radius: 50% 50% 12px 12px;
+      background: rgba(255,255,255,0.88);
+    }
+
+    .avatar-neck {
+      position: absolute; left: 35px; bottom: 18px;
+      width: 12px; height: 15px;
+      border-radius: 0 0 8px 8px;
+      background: var(--avatar-skin);
+    }
+
+    .avatar-face {
+      position: absolute; left: 20px; top: 15px;
+      width: 42px; height: 48px;
+      border-radius: 48% 48% 46% 46%;
+      background: var(--avatar-skin);
+      z-index: 2;
+    }
+
+    .avatar-hair {
+      position: absolute; left: 15px; top: 8px;
+      width: 52px; height: 48px;
+      border-radius: 52% 52% 42% 42%;
+      background: var(--avatar-hair);
+      z-index: 1;
+    }
+
+    .partner-avatar[data-hair="bob"] .avatar-hair { height: 55px; border-radius: 50% 50% 36% 36%; }
+    .partner-avatar[data-hair="wave"] .avatar-hair { left: 12px; width: 58px; height: 57px; border-radius: 48% 52% 40% 44%; }
+    .partner-avatar[data-hair="bun"] .avatar-hair::before {
+      content: ""; position: absolute; left: 17px; top: -9px;
+      width: 22px; height: 18px; border-radius: 50%;
+      background: var(--avatar-hair);
+    }
+    .partner-avatar[data-hair="short"] .avatar-hair { left: 18px; width: 47px; height: 29px; border-radius: 55% 55% 30% 30%; }
+
+    .avatar-fringe {
+      position: absolute; left: 18px; top: 11px;
+      width: 45px; height: 20px;
+      border-radius: 55% 55% 45% 20%;
+      background: var(--avatar-hair);
+      z-index: 3;
+      transform: rotate(-4deg);
+    }
+
+    .partner-avatar[data-hair="short"] .avatar-fringe { left: 20px; width: 42px; height: 17px; }
+
+    .avatar-eye {
+      position: absolute; top: 21px;
+      width: 7px; height: 4px;
+      border-bottom: 2px solid #5C4038;
+      border-radius: 0 0 9px 9px;
+    }
+    .avatar-eye--left { left: 9px; }
+    .avatar-eye--right { right: 9px; }
+
+    .avatar-smile {
+      position: absolute; left: 13px; top: 31px;
+      width: 16px; height: 9px;
+      border-bottom: 3px solid #C85D5D;
+      border-radius: 0 0 16px 16px;
+    }
+
+    .avatar-blush {
+      position: absolute; top: 29px;
+      width: 7px; height: 4px;
+      border-radius: 50%;
+      background: rgba(255,123,123,0.28);
+    }
+    .avatar-blush--left { left: 4px; }
+    .avatar-blush--right { right: 4px; }
+
+    .partner-name { font-size: 0.85rem; font-weight: 600; color: var(--text); }
+
+    .speech-bubble {
+      background: var(--bg-card);
+      padding: 0.85rem 1.1rem;
+      border-radius: 20px 20px 20px 6px;
+      font-size: 0.88rem; line-height: 1.55; color: var(--text);
+      box-shadow: 0 4px 14px var(--shadow-warm);
+      animation: bubbleFloat 3.5s ease-in-out infinite;
+      max-width: 210px;
+      min-height: 3.4rem;
+      display: flex; align-items: center; justify-content: center;
+      text-align: center;
+      transition: opacity 0.5s ease;
+    }
+
+    .partner-profile.fade-out,
+    .speech-bubble.fade-out { opacity: 0; }
+
+    @keyframes bubbleFloat {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    /* Journey section */
+    .journey { padding: var(--section-gap) 0; }
+
+    .journey-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .journey-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,209,220,0.45);
+      border-radius: var(--radius-lg);
+      padding: 2rem 1.75rem;
+      box-shadow: 0 8px 28px var(--shadow-warm);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .journey-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 36px var(--shadow-soft);
+    }
+
+    .journey-step {
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.72rem; font-weight: 700;
+      color: var(--coral); letter-spacing: 0.06em;
+      margin-bottom: 0.85rem;
+    }
+
+    .journey-icon { font-size: 1.5rem; margin-bottom: 0.85rem; display: block; }
+
+    .journey-title {
+      font-size: 1.05rem; font-weight: 700;
+      line-height: 1.45; margin-bottom: 0.65rem;
+    }
+
+    .journey-desc {
+      font-size: 0.9rem; color: var(--text-muted); line-height: 1.7;
+    }
+
+    .dayo-video-wrapper {
+      max-width: 800px;
+      width: 100%;
+      margin: 2.5rem auto 0 auto;
+    }
+    .dayo-video-wrapper__label {
+      margin: 0 0 1rem;
+      text-align: center;
+    }
+    .dayo-video-wrapper__badge {
+      display: inline-block;
+      background: #FFF0F0;
+      color: #FF6B6B;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+    }
+    .dayo-video-wrapper__frame {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      background: #1a1412;
+    }
+    .dayo-video-wrapper__frame iframe {
+      position: absolute;
+      inset: 0;
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* Reviews */
+    .reviews { padding: 0 0 var(--section-gap); }
+
+    .reviews-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .review-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(255,209,220,0.4);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem 1.5rem;
+      box-shadow: 0 6px 24px var(--shadow-warm);
+      transform: rotate(-0.5deg);
+    }
+
+    .review-card:nth-child(2) { transform: rotate(0.5deg); }
+    .review-card:nth-child(3) { transform: rotate(-0.3deg); }
+
+    .review-emoji { font-size: 1.25rem; margin-bottom: 0.85rem; }
+
+    .review-text {
+      font-size: 0.92rem; line-height: 1.75;
+      margin-bottom: 1.25rem; color: var(--text);
+    }
+
+    .review-author {
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.78rem; font-weight: 600; color: var(--text-muted);
+    }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0; transform: translateY(28px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    /* Modal, Quiz, Chat — preserved styles */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 300;
+      background: rgba(255,248,245,0.75); backdrop-filter: blur(12px);
+      display: flex; align-items: center; justify-content: center; padding: 1.5rem;
+      width: 100%; max-width: 100%; overflow-x: hidden; box-sizing: border-box;
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+    .modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
+
+    .modal {
+      position: relative; background: var(--bg-card);
+      border: 1px solid var(--coral-pale); border-radius: var(--radius-lg);
+      padding: 2rem 1.75rem; max-width: 520px; width: 100%;
+      max-height: 90vh; overflow-y: auto;
+      transform: scale(0.92) translateY(16px);
+      transition: transform 0.4s cubic-bezier(0.34,1.4,0.64,1);
+      box-shadow: 0 24px 64px var(--shadow-soft);
+    }
+    .modal-overlay.active .modal { transform: scale(1) translateY(0); }
+
+    .modal-close {
+      position: absolute; top: 1.1rem; right: 1.1rem;
+      width: 36px; height: 36px; background: var(--coral-pale);
+      border: none; border-radius: 50%; color: var(--coral);
+      font-size: 1rem; cursor: pointer; z-index: 2;
+    }
+    .modal-close:hover { background: var(--coral); color: #fff; }
+
+    .quiz-header { margin-bottom: 1.25rem; padding-right: 2rem; }
+    .quiz-badge { display: inline-block; font-size: 0.78rem; font-weight: 700; color: var(--coral); background: var(--coral-pale); padding: 0.3rem 0.85rem; border-radius: 999px; margin-bottom: 0.75rem; }
+    .quiz-lang-tabs { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0 0 0.85rem; }
+    .quiz-lang-tab {
+      display: inline-flex; align-items: center; gap: 0.28rem;
+      padding: 0.4rem 0.72rem; border: 1.5px solid var(--coral-pale); border-radius: 999px;
+      background: var(--cream); font-family: inherit; font-size: 0.78rem; font-weight: 700;
+      color: var(--text); cursor: pointer; transition: transform 0.2s, background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .quiz-lang-tab:hover { transform: translateY(-1px); border-color: var(--coral); }
+    .quiz-lang-tab.is-on { background: var(--coral); border-color: var(--coral); color: #fff; }
+    .quiz-lang-tab .quiz-lang-flag { font-size: 1.05rem; line-height: 1; }
+    .quiz-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 1rem; line-height: 1.45; }
+    .progress-wrap { height: 8px; background: var(--coral-pale); border-radius: 999px; overflow: hidden; margin-bottom: 0.35rem; }
+    .progress-wrap[hidden], .progress-label[hidden] { display: none; }
+    .progress-bar { height: 100%; width: 20%; background: var(--coral); border-radius: 999px; transition: width 0.45s ease; }
+    .progress-label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-align: right; }
+
+    .quiz-start { text-align: center; padding: 0.4rem 0 0.2rem; }
+    .quiz-start-emoji { font-size: 2.4rem; line-height: 1; margin-bottom: 0.75rem; }
+    .quiz-start-desc { font-size: 0.92rem; color: var(--text-muted); line-height: 1.65; margin-bottom: 1rem; }
+    .quiz-level-grid { display: flex; flex-direction: column; gap: 0.55rem; }
+    .quiz-level-card {
+      display: flex; align-items: flex-start; gap: 0.75rem; width: 100%;
+      text-align: left; padding: 0.9rem 1rem;
+      border: 1.5px solid var(--coral-pale); border-radius: var(--radius);
+      background: var(--cream); font-family: inherit; color: inherit; cursor: pointer;
+      transition: transform 0.2s, border-color 0.2s, background 0.2s;
+    }
+    .quiz-level-card:hover { transform: translateY(-1px); border-color: var(--coral); background: var(--coral-pale); }
+    .quiz-level-emoji { font-size: 1.55rem; line-height: 1; flex: 0 0 auto; margin-top: 0.1rem; }
+    .quiz-level-name { display: block; font-size: 0.98rem; font-weight: 800; margin-bottom: 0.18rem; }
+    .quiz-level-desc { display: block; font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+    .quiz-feedback {
+      margin-top: 0.75rem; padding: 0.7rem 0.9rem; border-radius: var(--radius);
+      font-size: 0.88rem; font-weight: 700; line-height: 1.5; text-align: center;
+      animation: quizPop 0.35s ease;
+    }
+    .quiz-feedback[hidden] { display: none; }
+    .quiz-feedback.is-correct { background: #E7F5EB; color: #2E6B45; }
+    .quiz-feedback.is-wrong { background: var(--coral-pale); color: var(--coral); }
+    @keyframes quizPop {
+      from { opacity: 0; transform: translateY(6px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .quiz-result-coupon { font-size: 0.8rem; color: var(--text-muted); line-height: 1.5; margin: 0.35rem 0 0.15rem; }
+
+    .quiz-result { text-align: center; padding: 0.15rem 0; }
+    .quiz-result-score { font-size: 1.05rem; font-weight: 700; color: var(--coral); margin-bottom: 0.35rem; }
+    .quiz-result-lead { font-size: 1.12rem; font-weight: 700; line-height: 1.5; margin-bottom: 1.1rem; }
+    .quiz-result-block { text-align: left; background: var(--cream); border: 1px solid var(--coral-pale); border-radius: var(--radius); padding: 1rem 1.1rem; margin-bottom: 0.75rem; }
+    .quiz-result-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; color: var(--coral); margin-bottom: 0.35rem; }
+    .quiz-result-course-name { font-size: 1rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .quiz-result-course-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.55; }
+    .quiz-result-host { display: flex; align-items: center; gap: 0.85rem; }
+    .quiz-result-host-face {
+      flex: 0 0 52px; width: 52px; height: 52px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, var(--pink), var(--peach));
+      font-weight: 800; font-size: 1.15rem; color: var(--coral);
+    }
+    .quiz-result-host-name { font-size: 0.98rem; font-weight: 700; }
+    .quiz-result-host-meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.12rem; }
+    .quiz-result-host-bio { font-size: 0.84rem; color: var(--text-muted); line-height: 1.5; margin-top: 0.2rem; }
+    .quiz-result-cta {
+      display: block; width: 100%; margin-top: 0.35rem; padding: 0.95rem 1.1rem;
+      background: var(--coral); color: #fff; border: none; border-radius: var(--radius);
+      font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer; text-align: center;
+      text-decoration: none; box-sizing: border-box;
+    }
+    .quiz-result-cta:hover { background: #ff5741; }
+    .quiz-result-retry {
+      display: block; width: 100%; margin-top: 0.55rem; padding: 0.75rem 1.1rem;
+      background: transparent; color: var(--coral); border: 1.5px solid var(--coral-pale); border-radius: var(--radius);
+      font-family: inherit; font-size: 0.88rem; font-weight: 700; cursor: pointer;
+    }
+    .quiz-result-retry:hover { border-color: var(--coral); background: var(--coral-pale); }
+
+    .quiz-slides { position: relative; overflow: hidden; min-height: 300px; }
+    .quiz-slide { position: absolute; inset: 0; opacity: 0; transform: translateX(36px); pointer-events: none; transition: opacity 0.35s, transform 0.35s; }
+    .quiz-slide.active { position: relative; opacity: 1; transform: translateX(0); pointer-events: auto; }
+    .quiz-slide.exit-left { opacity: 0; transform: translateX(-36px); }
+
+    .quiz-illustration {
+      position: relative; width: 100%; aspect-ratio: 16 / 9;
+      height: auto; min-height: 0; max-height: none; margin-bottom: 1rem;
+      border-radius: var(--radius); overflow: hidden;
+      background: #f3ece6;
+    }
+    .quiz-illustration img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+      opacity: 0; transition: opacity 0.4s ease;
+    }
+    .quiz-illustration img.is-loaded { opacity: 1; }
+    .quiz-illustration-fallback { display: none; font-size: 2.6rem; line-height: 1; }
+    .quiz-illustration.is-fallback img { display: none; }
+    .quiz-illustration.is-fallback .quiz-illustration-fallback { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; }
+
+    .situation-card { background: linear-gradient(135deg, var(--pink), var(--peach)); border-radius: var(--radius); padding: 1.2rem 1.3rem; margin-bottom: 1.15rem; text-align: left; }
+    .situation-tag {
+      display: inline-block; font-size: 0.78rem; font-weight: 800; color: var(--coral);
+      background: rgba(255,252,250,.72); padding: 0.28rem 0.7rem; border-radius: 999px; margin-bottom: 0.55rem;
+    }
+    .situation-text { font-size: 0.95rem; line-height: 1.65; }
+    .quiz-options { display: flex; flex-direction: column; gap: 0.65rem; }
+    .quiz-option {
+      padding: 0.95rem 1.1rem; background: var(--cream);
+      border: 1px solid var(--coral-pale); border-radius: var(--radius);
+      cursor: pointer; text-align: left; font-family: inherit; font-size: 0.92rem;
+      transition: transform 0.2s, border-color 0.2s, background 0.2s;
+    }
+    .quiz-option:hover { transform: translateY(-1px); border-color: var(--coral); background: var(--coral-pale); }
+    .quiz-option:disabled { cursor: default; }
+    .quiz-option:disabled:hover { transform: none; }
+    .quiz-option.is-correct { border-color: #75B987; background: #E7F5EB; color: #2E6B45; font-weight: 700; }
+    .quiz-option.is-wrong { border-color: var(--coral); background: var(--coral-pale); color: var(--coral); font-weight: 700; }
+    .quiz-explanation {
+      margin-top: 0.9rem; padding: 0.85rem 1rem; border-radius: var(--radius);
+      background: var(--cream); color: var(--text-muted); font-size: 0.85rem; line-height: 1.65;
+    }
+    .quiz-next-btn {
+      display: block; width: 100%; margin-top: 1rem; padding: 0.95rem 1.1rem;
+      background: var(--coral); color: #fff; border: none; border-radius: var(--radius);
+      font-family: inherit; font-size: 0.95rem; font-weight: 700; cursor: pointer;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .quiz-next-btn[hidden] { display: none; }
+    .quiz-next-btn:hover { transform: translateY(-1px); background: #ff5741; }
+
+    .email-step { text-align: center; padding: 0.5rem 0; }
+    .email-step-title { font-size: 1.15rem; font-weight: 700; line-height: 1.5; margin-bottom: 0.65rem; }
+    .email-step-desc { font-size: 0.9rem; color: var(--text-muted); line-height: 1.65; margin-bottom: 1.25rem; }
+    .email-form { display: flex; flex-direction: column; gap: 0.65rem; }
+    .email-compose {
+      display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;
+    }
+    .email-input, .email-domain-select, .email-domain-custom {
+      padding: 0.95rem 1.1rem; border: 1px solid var(--coral-pale); border-radius: var(--radius);
+      font-family: inherit; font-size: 0.95rem; background: var(--cream); outline: none;
+    }
+    .email-input { flex: 1 1 120px; min-width: 0; }
+    .email-at { font-weight: 700; color: var(--text-muted); flex: 0 0 auto; }
+    .email-domain-select { flex: 1 1 140px; min-width: 0; cursor: pointer; appearance: auto; }
+    .email-domain-custom { flex: 1 1 140px; min-width: 0; }
+    .email-domain-custom[hidden] { display: none; }
+    .email-input:focus, .email-domain-select:focus, .email-domain-custom:focus {
+      border-color: var(--coral); box-shadow: 0 0 0 3px rgba(255,107,87,0.12);
+    }
+    .email-submit { padding: 0.95rem; background: var(--coral); color: #fff; border: none; border-radius: var(--radius); font-family: inherit; font-weight: 700; cursor: pointer; box-shadow: 0 4px 0 var(--coral-dark); }
+    .email-submit:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--coral-dark); }
+    .email-submit:disabled { opacity: 0.65; cursor: wait; transform: none; }
+
+    .quiz-lead-card {
+      text-align: left;
+      margin: 0.35rem 0 0.85rem;
+      padding: 1.15rem 1.15rem 1.2rem;
+      border: 1px solid rgba(255, 107, 87, 0.2);
+      border-radius: var(--radius);
+      background: linear-gradient(145deg, #FFF7FB, #FFE9D8 68%, #FFF6C7);
+    }
+    .quiz-lead-title {
+      font-size: 1.02rem;
+      font-weight: 800;
+      line-height: 1.5;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.45rem;
+    }
+    .quiz-lead-desc {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 0.95rem;
+    }
+    .quiz-lead-error {
+      margin: 0.15rem 0 0.55rem;
+      color: var(--coral);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .quiz-lead-error:empty { display: none; }
+    .quiz-lead-done { display: none; text-align: center; }
+    .quiz-lead-card.is-done .email-form { display: none; }
+    .quiz-lead-card.is-done .quiz-lead-done { display: block; }
+    .quiz-lead-success {
+      font-size: 0.92rem;
+      font-weight: 800;
+      line-height: 1.55;
+      margin-bottom: 0.85rem;
+    }
+    .quiz-lead-cta {
+      display: block; width: 100%; margin-top: 0.45rem; padding: 0.88rem 1.05rem;
+      background: var(--coral); color: #fff; border: none; border-radius: var(--radius);
+      font-family: inherit; font-size: 0.9rem; font-weight: 700; cursor: pointer; text-align: center;
+      text-decoration: none; box-sizing: border-box;
+    }
+    .quiz-lead-cta:hover { background: #ff5741; }
+    .quiz-lead-cta--ghost {
+      background: transparent; color: var(--coral); border: 1.5px solid var(--coral-pale);
+    }
+    .quiz-lead-cta--ghost:hover { background: var(--coral-pale); }
+
+    .site-footer {
+      text-align: center;
+      padding: 2rem 1.25rem 2.5rem;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      letter-spacing: 0.01em;
+    }
+    .site-footer a {
+      color: inherit;
+      text-decoration: none;
+    }
+    .site-footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 640px) {
+      .home-cta-btn { width: 100%; padding: 1.1rem 1.25rem; }
+    }
+
+    .chat-fab {
+      position: fixed; bottom: 1.75rem; right: 1.75rem; z-index: 250;
+      display: grid; place-items: center;
+      width: 56px; height: 56px; border-radius: 50%; border: none;
+      background: var(--coral); color: #fff;
+      cursor: pointer; box-shadow: 0 6px 24px var(--shadow-soft);
+      transition: transform 0.2s;
+    }
+    .chat-fab:hover, .chat-fab:focus-visible { transform: scale(1.06); }
+    .chat-fab-icon { display: block; width: 26px; height: 26px; }
+    .chat-fab::after {
+      content: attr(aria-label);
+      position: absolute;
+      right: calc(100% + 0.7rem);
+      top: 50%;
+      transform: translateY(-50%) translateX(8px);
+      padding: 0.5rem 0.75rem;
+      border-radius: 12px;
+      background: var(--text);
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      line-height: 1.35;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
+      box-shadow: 0 8px 20px var(--shadow-soft);
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+    }
+    .chat-fab:hover::after,
+    .chat-fab:focus-visible::after {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(-50%) translateX(0);
+    }
+    @media (hover: none) {
+      .chat-fab:hover::after,
+      .chat-fab:focus-visible::after {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
+
+    .chat-panel {
+      position: fixed; bottom: 5.25rem; right: 1.75rem; z-index: 260;
+      width: min(340px, calc(100% - 2rem)); max-height: min(480px, calc(100vh - 8rem));
+      background: var(--bg-card); border: 1px solid var(--coral-pale);
+      border-radius: var(--radius-lg); box-shadow: 0 20px 48px var(--shadow-soft);
+      display: flex; flex-direction: column;
+      opacity: 0; visibility: hidden; transform: translateY(12px);
+      transition: opacity 0.3s, visibility 0.3s, transform 0.3s; overflow: hidden;
+    }
+    .chat-panel.open { opacity: 1; visibility: visible; transform: translateY(0); }
+
+    .chat-panel-header { padding: 1rem 1.15rem; background: linear-gradient(135deg, var(--pink), var(--peach)); display: flex; align-items: center; justify-content: space-between; }
+    .chat-panel-title { font-family: 'Quicksand', sans-serif; font-weight: 700; font-size: 0.95rem; }
+    .chat-panel-close { background: rgba(255,255,255,0.5); border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; color: var(--coral); }
+
+    .chat-messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.65rem; min-height: 160px; max-height: 220px; }
+    .chat-bubble { max-width: 88%; padding: 0.7rem 0.95rem; border-radius: var(--radius); font-size: 0.88rem; line-height: 1.6; animation: bubbleIn 0.3s ease; }
+    @keyframes bubbleIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .chat-bubble--bot { align-self: flex-start; background: var(--coral-pale); border-bottom-left-radius: 4px; }
+    .chat-bubble--user { align-self: flex-end; background: var(--coral); color: #fff; border-bottom-right-radius: 4px; }
+    .chat-bubble--typing { align-self: flex-start; background: var(--coral-pale); color: var(--text-muted); font-style: italic; }
+
+    .chat-faq { padding: 0.75rem 1rem 1rem; border-top: 1px solid var(--coral-pale); display: flex; flex-direction: column; gap: 0.45rem; }
+    .chat-faq-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); }
+    .faq-chip { padding: 0.6rem 0.85rem; background: var(--cream); border: 1px solid var(--coral-pale); border-radius: var(--radius); font-family: inherit; font-size: 0.8rem; cursor: pointer; text-align: left; }
+    .faq-chip:hover { background: var(--coral-pale); border-color: var(--coral); }
+
+    .result-toast {
+      position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(80px);
+      z-index: 400; background: var(--bg-card); padding: 0.95rem 1.5rem;
+      border-radius: var(--radius); border: 1px solid var(--coral-pale);
+      font-weight: 600; font-size: 0.92rem; box-shadow: 0 10px 32px var(--shadow-soft);
+      opacity: 0; transition: transform 0.4s ease, opacity 0.3s; pointer-events: none;
+    }
+    .result-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+    /* Logged-in: dashboard card on top; landing sections stay visible for GNB scroll */
+    body.is-logged-in #authDashboard.auth-dashboard {
+      display: block;
+    }
+    body.is-logged-in .auth-lounge.lounge-carousel,
+    body.is-logged-in #loungeCarousel {
+      display: block;
+      width: 100%;
+    }
+    body.is-logged-in .lounge-grid {
+      display: grid;
+    }
+    @media (max-width: 720px) {
+      body.is-logged-in .lounge-grid {
+        display: flex;
+      }
+    }
+    body.is-logged-in .hero {
+      min-height: 0;
+      padding-top: 2.25rem;
+    }
+    .nav-auth-only { display: none; }
+    .header-actions > a.nav-auth-only,
+    .nav-drawer a.nav-auth-only {
+      display: none;
+    }
+    body.is-logged-in .header-actions > a.nav-auth-only {
+      display: inline-flex;
+    }
+    body.is-logged-in .nav-drawer a.nav-auth-only {
+      display: flex;
+    }
+    body.is-logged-in .nav-drawer a.nav-auth-only.header-cta,
+    body.is-logged-in .nav-drawer a.nav-auth-only.nav-drawer__cta {
+      display: inline-flex;
+    }
+    #service-intro, #partners, #pricing, #about, #tutors, #booking, #reviews,
+    #authDashboard, .auth-live, #loungeCarousel {
+      scroll-margin-top: 5.75rem;
+    }
+
+    /* Mobile / tablet (md 미만): hamburger + one-line header */
+    @media (max-width: 767px) {
+      .header-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        grid-template-columns: unset;
+        gap: 0.65rem;
+        padding: 0.75rem 1rem;
+      }
+      .nav-desktop { display: none; }
+      .header-actions .header-cta { display: none; }
+      .header-actions { gap: 0.4rem; }
+    }
+
+    @media (max-width: 860px) {
+      .hero-grid { grid-template-columns: 1fr; text-align: center; gap: 3rem; }
+      .hero-copy { text-align: center; }
+      .hero-subtitle { margin-left: auto; margin-right: auto; }
+      .cta-wrap { align-items: center; }
+      .journey-grid, .reviews-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
+      .review-card { transform: none !important; }
+    }
+
+    @media (max-width: 600px) {
+      .header-inner { padding: 0.75rem 1rem; }
+      .logo-text { font-size: 1.15rem; }
+      .section-inner { padding: 0 1rem; }
+      .chat-fab { bottom: 1.25rem; right: 1.25rem; }
+      .chat-fab::after {
+        right: 50%;
+        top: auto;
+        bottom: calc(100% + 0.55rem);
+        transform: translateX(50%) translateY(6px);
+        white-space: normal;
+        max-width: 11.5rem;
+        text-align: center;
+      }
+      .chat-fab:hover::after,
+      .chat-fab:focus-visible::after {
+        transform: translateX(50%) translateY(0);
+      }
+      .chat-panel { right: 1rem; }
+    }
+
+    /* Quiz modal: fit title + illustration + question + 4 options above the fold on phones */
+    @media (max-width: 640px) {
+      .modal-overlay { padding: 0.6rem; align-items: flex-start; }
+      .modal {
+        padding: 1rem 0.9rem 0.85rem;
+        max-height: 100dvh;
+        border-radius: 18px;
+      }
+      .modal-close { top: 0.65rem; right: 0.65rem; width: 30px; height: 30px; font-size: 0.85rem; }
+
+      .quiz-header { margin-bottom: 0.55rem; padding-right: 1.75rem; }
+      .quiz-badge { font-size: 0.68rem; padding: 0.18rem 0.6rem; margin-bottom: 0.3rem; }
+      .quiz-lang-tabs { gap: 0.3rem; margin-bottom: 0.55rem; }
+      .quiz-lang-tab { font-size: 0.68rem; padding: 0.3rem 0.48rem; }
+      .quiz-level-card { padding: 0.75rem 0.8rem; }
+      .quiz-level-name { font-size: 0.9rem; }
+      .quiz-level-desc { font-size: 0.76rem; }
+      .quiz-title { font-size: 1.05rem; margin-bottom: 0.4rem; }
+      .progress-wrap { height: 6px; margin-bottom: 0.2rem; }
+      .progress-label { font-size: 0.68rem; }
+
+      .quiz-slides { min-height: 0; }
+
+      .quiz-illustration {
+        aspect-ratio: 16 / 9;
+        height: auto;
+        min-height: 0;
+        max-height: none;
+        margin-bottom: 0.5rem;
+        border-radius: 14px;
+      }
+      .quiz-illustration img { width: 100%; height: 100%; object-fit: cover; }
+      .quiz-illustration-fallback { font-size: 1.8rem; }
+
+      .situation-card {
+        padding: 0.65rem 0.75rem;
+        margin-bottom: 0.55rem;
+        border-radius: 14px;
+      }
+      .situation-tag { font-size: 0.72rem; margin-bottom: 0.2rem; }
+      .situation-text { font-size: 0.82rem; line-height: 1.4; }
+
+      .quiz-options { gap: 0.4rem; }
+      .quiz-option {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.82rem;
+        border-radius: 14px;
+        line-height: 1.35;
+      }
+
+      .quiz-explanation {
+        margin-top: 0.5rem;
+        padding: 0.55rem 0.7rem;
+        font-size: 0.75rem;
+        line-height: 1.45;
+      }
+      .quiz-next-btn {
+        margin-top: 0.55rem;
+        padding: 0.7rem 0.85rem;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body data-dayo-role="learner">
+  <script src="i18n.js"></script>
+
+  <div class="mesh-bg" aria-hidden="true">
+    <div class="mesh-bg__layer mesh-bg__layer--1"></div>
+    <div class="mesh-bg__layer mesh-bg__layer--2"></div>
+    <div class="mesh-bg__layer mesh-bg__layer--3"></div>
+  </div>
+  <div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+
+  <header>
+    <div class="header-inner">
+      <a href="index.html" class="logo" data-i18n="nav.homeAria" data-i18n-attr="aria-label" aria-label="DayO 메인으로 이동">
+        <div class="logo-icon">D</div>
+        <div class="logo-text">DayO <span>돼요</span></div>
+      </a>
+
+      <nav class="nav-desktop" data-i18n="nav.mainMenuAria" data-i18n-attr="aria-label" aria-label="주요 메뉴">
+        <a href="#service-intro" data-i18n="nav.about">서비스 소개</a>
+        <a href="#partners" data-i18n="nav.partners">대화 파트너</a>
+        <a href="#reviews" data-i18n="nav.reviews">후기</a>
+        <a href="#booking" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
+      </nav>
+
+      <div class="header-actions">
+        <div data-i18n-lang="icon"></div>
+        <div class="header-mode" data-mode-switch="inline"></div>
+        <a href="room.html" class="header-cta nav-auth-only" data-ms-guard data-i18n="nav.startChat" data-ticket-gate>🚀 바로 대화 시작하기</a>
+        <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
+      </div>
+    </div>
+  </header>
+  <div class="nav-drawer-backdrop" id="mobileNavBackdrop"></div>
+  <nav class="nav-drawer" id="mobileNav" data-i18n="nav.mobileMenuAria" data-i18n-attr="aria-label" aria-label="모바일 메뉴">
+    <div class="nav-drawer__head">DayO 메뉴</div>
+    <div data-i18n-lang="drawer"></div>
+    <a href="#service-intro" data-i18n="nav.about">서비스 소개</a>
+    <a href="#partners" data-i18n="nav.partners">대화 파트너</a>
+    <a href="#reviews" data-i18n="nav.reviews">후기</a>
+    <a href="#booking" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
+    <a href="mypage.html" class="nav-auth-only" data-i18n="nav.mypage">마이페이지</a>
+    <a href="room.html" class="header-cta nav-drawer__cta nav-auth-only" data-ms-guard data-i18n="nav.startChat" data-ticket-gate data-nav-close>🚀 바로 대화 시작하기</a>
+  </nav>
+
+  <div class="page">
+
+    <!-- ===== Logged-in dashboard only (hidden for guests) ===== -->
+    <section id="authDashboard" class="auth-dashboard" aria-label="로그인 홈 대시보드">
+      <div class="auth-dashboard__inner">
+        <div class="auth-hero">
+          <div class="greeting-banner" id="greetingBanner" hidden aria-live="polite">
+            <p class="auth-greeting" id="greetingBannerText"></p>
+          </div>
+          <p class="auth-sub">다정한 글로벌 파트너, 꼼꼼한 AI 매니저가 늘 대기중이에요!</p>
+          <p class="auth-coupon-note">🎟️ 첫 세션 9,900원 체험권 <code>WELCOME_9900</code> 보유 중이에요</p>
+          <div class="auth-ticket-badge" data-tickets-open role="button" tabindex="0" aria-label="이용권 구매 / 충전">
+            <span data-ticket-badge-text>☕️ 보유 티켓: 1장</span>
+            <span aria-hidden="true"> | </span>
+            <span>💡 총 30분 · 25분 화상 대화 + 5분 미니 퀴즈/리포트</span>
+            <button type="button" class="auth-ticket-charge" data-tickets-open aria-label="이용권 충전">+ 충전</button>
+          </div>
+          <a href="room.html" class="header-cta auth-dash-cta" data-ms-guard data-ticket-gate>🚀 대화방 입장하기</a>
+        </div>
+
+        <div class="auth-live">
+          <p class="auth-live__title">
+            <span aria-hidden="true">🟢</span>
+            <span>지금</span>
+            <span class="auth-lang-chip" id="authLangChip">
+              <button type="button" class="auth-lang-chip__btn" id="authLangChipBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="authLangChipMenu">
+                <span id="authLangChipLabel">영어</span>
+                <span class="auth-lang-chip__caret" aria-hidden="true">▾</span>
+              </button>
+              <div class="auth-lang-chip__menu" id="authLangChipMenu" role="listbox" aria-label="대화 언어 선택">
+                <button type="button" class="auth-lang-chip__opt is-active" role="option" data-live-lang="영어" aria-selected="true">영어</button>
+                <button type="button" class="auth-lang-chip__opt" role="option" data-live-lang="일본어" aria-selected="false">일본어</button>
+                <button type="button" class="auth-lang-chip__opt" role="option" data-live-lang="중국어" aria-selected="false">중국어</button>
+                <button type="button" class="auth-lang-chip__opt" role="option" data-live-lang="스페인어" aria-selected="false">스페인어</button>
+                <button type="button" class="auth-lang-chip__opt" role="option" data-live-lang="프랑스어" aria-selected="false">프랑스어</button>
+              </div>
+            </span>
+            <span>대화 가능한 파트너들이에요</span>
+            <span class="auth-live__online">(12명 온라인)</span>
+          </p>
+          <div class="auth-partner-row" role="list">
+            <article class="auth-partner" role="listitem">
+              <p class="auth-partner__bubble">#커피사랑 ☕️</p>
+              <span class="auth-partner__face" aria-hidden="true">👩🏼</span>
+              <span class="auth-partner__name">Elena</span>
+            </article>
+            <article class="auth-partner" role="listitem">
+              <p class="auth-partner__bubble">#부산여행 🌊</p>
+              <span class="auth-partner__face" aria-hidden="true">🧑🏻</span>
+              <span class="auth-partner__name">Sam</span>
+            </article>
+            <article class="auth-partner" role="listitem">
+              <p class="auth-partner__bubble">#강아지집사 🐶</p>
+              <span class="auth-partner__face" aria-hidden="true">👩🏻</span>
+              <span class="auth-partner__name">Kate</span>
+            </article>
+            <article class="auth-partner" role="listitem">
+              <p class="auth-partner__bubble">#캠핑덕후 ⛺️</p>
+              <span class="auth-partner__face" aria-hidden="true">👨🏼</span>
+              <span class="auth-partner__name">Alex</span>
+            </article>
+          </div>
+        </div>
+
+        <div class="lounge-carousel auth-lounge" id="loungeCarousel" aria-label="DayO 라운지">
+          <div class="lounge-head">
+            <h2 class="lounge-head__title">DayO 라운지</h2>
+            <p class="lounge-head__sub">소식 · 이벤트 · 팁을 한눈에</p>
+          </div>
+          <div class="lounge-grid" id="loungeTrack">
+            <article class="lounge-card" data-lounge-slide>
+              <span class="lounge-card__label">📢 DayO 소식</span>
+              <span class="lounge-card__body">영국인 레이나와 함께하는 인스타 촬영 현장 비하인드!</span>
+            </article>
+            <article class="lounge-card" data-lounge-slide>
+              <span class="lounge-card__label">🎉 진행 중인 이벤트</span>
+              <span class="lounge-card__body">[8월 한정] 첫 대화 완주 시 스타벅스 커피 쿠폰!</span>
+            </article>
+            <article class="lounge-card" data-lounge-slide>
+              <span class="lounge-card__label">☕️ 오늘의 1분 팁</span>
+              <span class="lounge-card__body">원어민이 매일 쓰는 "I'm down!" (나도 낄게) 표현</span>
+            </article>
+            <article class="lounge-card" data-lounge-slide>
+              <span class="lounge-card__label">🎙️ DayO 라이브 웨비나</span>
+              <span class="lounge-card__body">"외국인 파트너와 어색함 깨부수는 3가지 꿀팁"</span>
+            </article>
+            <article class="lounge-card" data-lounge-slide>
+              <span class="lounge-card__label">💡 스몰토크 질문집</span>
+              <span class="lounge-card__body">첫 인사 때 물꼬 터주는 질문 모음집</span>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Guest landing hero (untouched for logged-out) ===== -->
+    <section class="hero home-stage" data-landing-hero>
+      <div class="section-inner home-stage-inner">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <h1 class="hero-title">
+              <span aria-live="polite"><span class="title-rotator" id="titleRotator">베트남어, 이제</span></span><br><em id="titleEm">돼요!</em>
+            </h1>
+            <p class="hero-subtitle" data-i18n="hero.subtitle">오픽부터 워홀까지, 눈 맞추며 시작하는 1:1 라이브 대화</p>
+            <div class="cta-wrap">
+              <a href="room.html" class="home-cta-btn" data-ms-guard data-i18n="nav.startChat">🚀 바로 대화 시작하기</a>
+              <button class="home-quiz-link cta-btn" id="startQuizBtn" type="button" data-i18n="hero.cta">🍰 내 스피킹 감각 무료로 테스트하기 ›</button>
+            </div>
+          </div>
+
+          <div class="hero-visual">
+            <div class="visual-card">
+              <span class="live-badge" data-i18n="hero.liveBadge">AI 코파일럿 실시간 지원 중</span>
+              <div class="phone-frame">
+                <div class="partner-profile" id="partnerProfile">
+                  <div class="partner-avatar" id="partnerAvatar" data-hair="bob"
+                       role="img" aria-label="미소 짓는 Linh 파스텔 아바타">
+                    <span class="avatar-body"></span>
+                    <span class="avatar-neck"></span>
+                    <span class="avatar-hair"></span>
+                    <span class="avatar-face">
+                      <span class="avatar-eye avatar-eye--left"></span>
+                      <span class="avatar-eye avatar-eye--right"></span>
+                      <span class="avatar-blush avatar-blush--left"></span>
+                      <span class="avatar-blush avatar-blush--right"></span>
+                      <span class="avatar-smile"></span>
+                    </span>
+                    <span class="avatar-fringe"></span>
+                  </div>
+                  <div class="partner-name" id="partnerName">Linh from Vietnam</div>
+                </div>
+                <div class="speech-bubble" id="partnerGreeting">Xin chào! Bạn khỏe không? 🌿</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3Step Journey -->
+    <section class="journey" id="service-intro" data-landing-only>
+      <div class="section-inner">
+        <p class="section-label reveal" data-i18n="journey.eyebrow">How it works</p>
+        <h2 class="section-title reveal" data-i18n="journey.title">3단계로 완성하는 나만의 회화 여정</h2>
+        <div class="journey-grid">
+          <article class="journey-card reveal reveal-delay-1">
+            <span class="journey-step" data-i18n="journey.step1.tag">STEP 01</span>
+            <span class="journey-icon">🍰</span>
+            <h3 class="journey-title" data-i18n="journey.step1.title">스피킹 감각 테스트</h3>
+            <p class="journey-desc" data-i18n="journey.step1.desc">부담 없이 확인하는 내 스피킹 위치</p>
+          </article>
+          <article class="journey-card reveal reveal-delay-2">
+            <span class="journey-step" data-i18n="journey.step2.tag">STEP 02</span>
+            <span class="journey-icon">🎙️</span>
+            <h3 class="journey-title" data-i18n="journey.step2.title">AI 실시간 코칭</h3>
+            <p class="journey-desc" data-i18n="journey.step2.desc">대화 중 막혀도 AI가 실시간으로 단어와 문장 지원</p>
+          </article>
+          <article class="journey-card reveal reveal-delay-3">
+            <span class="journey-step" data-i18n="journey.step3.tag">STEP 03</span>
+            <span class="journey-icon">💬</span>
+            <h3 class="journey-title" data-i18n="journey.step3.title">1:1 원어민 눈맞춤 대화</h3>
+            <p class="journey-desc" data-i18n="journey.step3.desc">울렁증 없이 친구처럼 다정하게 트이는 실전 회화</p>
+          </article>
+        </div>
+        <div class="dayo-video-wrapper reveal">
+          <div class="dayo-video-wrapper__label">
+            <span class="dayo-video-wrapper__badge" data-i18n="journey.videoLabel">🎬 DayO 돼요 글로벌 화상회화 서비스 소개</span>
+          </div>
+          <div class="dayo-video-wrapper__frame">
+            <iframe
+              id="service-intro-video"
+              width="100%"
+              height="100%"
+              src="https://www.youtube.com/embed/0OzKMDUEc4o"
+              title="DayO 돼요 서비스 소개 영상"
+              data-i18n="journey.videoTitle"
+              data-i18n-attr="title"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Partners teaser -->
+    <section class="journey" id="partners" style="padding-top: 0;" data-landing-only>
+      <div class="section-inner">
+        <p class="section-label reveal" data-i18n="partnersTeaser.eyebrow">Partners</p>
+        <h2 class="section-title reveal" data-i18n="partnersTeaser.title">다정한 대화 파트너와 눈 맞추며</h2>
+        <div class="journey-grid">
+          <article class="journey-card reveal reveal-delay-1">
+            <span class="journey-icon">🥐</span>
+            <h3 class="journey-title">Camille from France</h3>
+            <p class="journey-desc" data-i18n="partnersTeaser.card1.desc">카페 같은 분위기로 천천히 이끌어 주는 프랑스어 대화 파트너</p>
+          </article>
+          <article class="journey-card reveal reveal-delay-2">
+            <span class="journey-icon">🍵</span>
+            <h3 class="journey-title">Kate from USA</h3>
+            <p class="journey-desc" data-i18n="partnersTeaser.card2.desc">오픽·워홀 실전 상황으로 자연스럽게 말문이 트이는 코칭</p>
+          </article>
+          <article class="journey-card reveal reveal-delay-3">
+            <span class="journey-icon">🍰</span>
+            <h3 class="journey-title">Yui from Japan</h3>
+            <p class="journey-desc" data-i18n="partnersTeaser.card3.desc">친구처럼 다정한 일본어 대화로 울렁증 없이 시작해요</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Booking CTA -->
+    <section class="journey" id="booking" style="padding-top: 0; padding-bottom: var(--section-gap);" data-landing-only>
+      <div class="section-inner" style="text-align: center;">
+        <p class="section-label reveal" data-i18n="bookingCta.eyebrow">Booking</p>
+        <h2 class="section-title reveal" style="margin-bottom: 1.25rem;" data-i18n="bookingCta.title">지금, 화상 회화 스튜디오에서 만나요</h2>
+        <p class="reveal" style="color: var(--text-muted); margin-bottom: 1.75rem; line-height: 1.7;" data-i18n="bookingCta.desc">원어민과 눈 맞추며 대화하는 라이브 룸으로 바로 이동해요.</p>
+        <div class="reveal" style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center;">
+          <button type="button" class="header-cta" style="display: inline-flex; border: none; font-family: inherit; cursor: pointer;" data-booking-open data-i18n="bookingCta.book">📅 대화 예약하기</button>
+          <a href="room.html" class="header-cta" style="display: inline-flex;" data-ms-guard data-i18n="nav.startChat">☕ 대화 시작해요!</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Social Proof -->
+    <section class="reviews" id="reviews" data-landing-only>
+      <div class="section-inner">
+        <p class="section-label reveal" data-i18n="reviews.eyebrow">Real Stories</p>
+        <h2 class="section-title reveal" data-i18n="reviews.title">2030, 직접 경험한 후기</h2>
+        <div class="reviews-grid">
+          <article class="review-card reveal reveal-delay-1">
+            <div class="review-emoji">🎓</div>
+            <p class="review-text" data-i18n="reviews.card1.text">"워홀 가기 전 한 달 동안 했는데 외국인 울렁증 완전 사라졌어요!"</p>
+            <span class="review-author" data-i18n="reviews.card1.author">워홀 준비생 20대 K님</span>
+          </article>
+          <article class="review-card reveal reveal-delay-2">
+            <div class="review-emoji">🎯</div>
+            <p class="review-text" data-i18n="reviews.card2.text">"오픽 AL 한 번에 달성! 막힐 때 AI 코파일럿이 살려준 덕분이에요"</p>
+            <span class="review-author" data-i18n="reviews.card2.author">취준생 20대 L님</span>
+          </article>
+          <article class="review-card reveal reveal-delay-3">
+            <div class="review-emoji">✈️</div>
+            <p class="review-text" data-i18n="reviews.card3.text">"해외 여행 가서 현지인 카페 주문 완벽 성공! 진짜 돼요!"</p>
+            <span class="review-author" data-i18n="reviews.card3.author">직장인 30대 P님</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer class="site-footer">
+    <a href="mailto:dayo.speak@gmail.com">dayo.speak@gmail.com</a>
+    <div>© 2026 DayO. All rights reserved.</div>
+  </footer>
+
+  <!-- Quiz Modal -->
+  <div class="modal-overlay" id="quizModal">
+    <div class="modal" role="dialog" aria-labelledby="quizTitle" aria-modal="true">
+      <button class="modal-close" id="modalClose" data-i18n="quiz.closeAria" data-i18n-attr="aria-label" aria-label="닫기">✕</button>
+      <div class="quiz-header">
+        <div class="quiz-badge" data-i18n="quiz.badge">10초 레벨테스트</div>
+        <div class="quiz-lang-tabs" role="tablist" aria-label="테스트 언어 선택" id="quizLangTabs">
+          <button type="button" class="quiz-lang-tab is-on" role="tab" aria-selected="true" data-quiz-lang="en"><span class="quiz-lang-flag" aria-hidden="true">🇺🇸</span><span data-i18n="quiz.lang.en">영어</span></button>
+          <button type="button" class="quiz-lang-tab" role="tab" aria-selected="false" data-quiz-lang="fr"><span class="quiz-lang-flag" aria-hidden="true">🇫🇷</span><span data-i18n="quiz.lang.fr">프랑스어</span></button>
+          <button type="button" class="quiz-lang-tab" role="tab" aria-selected="false" data-quiz-lang="ja"><span class="quiz-lang-flag" aria-hidden="true">🇯🇵</span><span data-i18n="quiz.lang.ja">일본어</span></button>
+          <button type="button" class="quiz-lang-tab" role="tab" aria-selected="false" data-quiz-lang="zh"><span class="quiz-lang-flag" aria-hidden="true">🇨🇳</span><span data-i18n="quiz.lang.zh">중국어</span></button>
+          <button type="button" class="quiz-lang-tab" role="tab" aria-selected="false" data-quiz-lang="es"><span class="quiz-lang-flag" aria-hidden="true">🇪🇸</span><span data-i18n="quiz.lang.es">스페인어</span></button>
+          <button type="button" class="quiz-lang-tab" role="tab" aria-selected="false" data-quiz-lang="ko"><span class="quiz-lang-flag" aria-hidden="true">🇰🇷</span><span data-i18n="quiz.lang.ko">한국어</span></button>
+        </div>
+        <h2 class="quiz-title" id="quizTitle">외국인 앞 7초 침묵 탈출, 돼요! ☕</h2>
+        <div class="progress-wrap" id="quizProgressWrap" hidden><div class="progress-bar" id="progressBar"></div></div>
+        <div class="progress-label" id="progressLabel" hidden>20%</div>
+      </div>
+      <div class="quiz-slides" id="quizSlides"></div>
+    </div>
+  </div>
+
+  <!-- Chatbot -->
+  <button class="chat-fab" id="chatFab" type="button" data-i18n="chatbot.fabTooltip" data-i18n-attr="aria-label,title" aria-label="도움이 필요하신가요? 질문하기" title="도움이 필요하신가요? 질문하기">
+    <svg class="chat-fab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.15" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"></circle>
+      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+    </svg>
+  </button>
+  <div class="chat-panel" id="chatPanel" role="dialog" data-i18n="chatbot.panelAria" data-i18n-attr="aria-label" aria-label="FAQ 챗봇">
+    <div class="chat-panel-header">
+      <span class="chat-panel-title" data-i18n="chatbot.title">DayO 도우미</span>
+      <button class="chat-panel-close" id="chatClose" data-i18n="chatbot.closeAria" data-i18n-attr="aria-label" aria-label="닫기">✕</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-bubble chat-bubble--bot" data-i18n="chatbot.greeting">안녕하세요! DayO 도우미예요. 궁금한 점을 골라주시면 알려드릴게요.</div>
+    </div>
+    <div class="chat-faq">
+      <span class="chat-faq-label" data-i18n="chatbot.faqLabel">자주 묻는 질문</span>
+      <button class="faq-chip" data-faq="class" data-i18n="chatbot.q.class">세션은 어떻게 진행되나요?</button>
+      <button class="faq-chip" data-faq="teachers" data-i18n="chatbot.q.teachers">대화 파트너는 어떤 분들인가요?</button>
+      <button class="faq-chip" data-faq="beginner" data-i18n="chatbot.q.beginner">영어를 아예 못해도 참여할 수 있나요?</button>
+      <button class="faq-chip" data-faq="free" data-i18n="chatbot.q.free">스피킹 테스트는 무료인가요?</button>
+      <button class="faq-chip" data-faq="policy" data-i18n="chatbot.q.policy">취소·일정 변경 규정은 어떻게 되나요?</button>
+    </div>
+  </div>
+
+  <div class="result-toast" id="resultToast"></div>
+
+  <script src="mobile-nav.js"></script>
+  <script>
+    (function initCursorGlow() {
+      const glow = document.getElementById('cursorGlow');
+      if (!glow || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+      document.addEventListener('mousemove', (e) => {
+        document.documentElement.style.setProperty('--mouse-x', e.clientX + 'px');
+        document.documentElement.style.setProperty('--mouse-y', e.clientY + 'px');
+        glow.classList.add('active');
+      }, { passive: true });
+      document.documentElement.addEventListener('mouseleave', () => glow.classList.remove('active'));
+    })();
+
+    /* Scroll reveal */
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+    /* Title rotator synced with live partner card */
+    function t(key, vars) {
+      if (!window.DayOI18n) return key;
+      return vars ? window.DayOI18n.tf(key, vars) : window.DayOI18n.t(key);
+    }
+    function langName(id) {
+      return window.DayOI18n ? window.DayOI18n.langName(id) : id;
+    }
+
+    const partners = [
+      { langId: 'vi', name: 'Linh from Vietnam', greeting: 'Xin chào! Bạn khỏe không? 🌿',
+        avatar: { hair: 'bob', hairColor: '#211713', skin: '#F1C7A2', bg: '#FFD1DC' } },
+      { langId: 'es', name: 'Elena from Spain', greeting: '¡Hola! ¿Cómo estás? 💃',
+        avatar: { hair: 'wave', hairColor: '#4A2C24', skin: '#E8B78D', bg: '#FFE5B4' } },
+      { langId: 'ru', name: 'Sasha from Russia', greeting: 'Привет! Как дела? ❄️',
+        avatar: { hair: 'wave', hairColor: '#C79D62', skin: '#F3D8C1', bg: '#FFF9C4' } },
+      { langId: 'en', name: 'Kate from USA', greeting: 'Hi there! Ready to chat? ☕',
+        avatar: { hair: 'bun', hairColor: '#C98E52', skin: '#F2CDB1', bg: '#FFE8E3' } },
+      { langId: 'zh', name: 'Mei from China', greeting: '你好！今天过得怎么样？ 🧋',
+        avatar: { hair: 'bob', hairColor: '#181311', skin: '#F0C9A8', bg: '#FFD1DC' } },
+      { langId: 'ja', name: 'Yui from Japan', greeting: 'こんにちは！今日もお疲れ様です✨',
+        avatar: { hair: 'bun', hairColor: '#261B18', skin: '#F2D2B7', bg: '#FFE5B4' } },
+      { langId: 'it', name: 'Marco from Italy', greeting: 'Ciao! Come stai? 🍕',
+        avatar: { hair: 'short', hairColor: '#342119', skin: '#DFAB82', bg: '#FFF9C4' } },
+      { langId: 'fr', name: 'Camille from France', greeting: 'Bonjour! Comment ça va? ☕',
+        avatar: { hair: 'wave', hairColor: '#8B5C3D', skin: '#F0CFB2', bg: '#FFE8E3' } },
+      { langId: 'de', name: 'Anna from Germany', greeting: "Guten Tag! Wie geht's? 🥨",
+        avatar: { hair: 'bob', hairColor: '#D3A05E', skin: '#F3D6BD', bg: '#FFD1DC' } }
+    ];
+
+    const titleRotator = document.getElementById('titleRotator');
+    const titleEm = document.getElementById('titleEm');
+    const partnerProfile = document.getElementById('partnerProfile');
+    const partnerAvatar = document.getElementById('partnerAvatar');
+    const partnerName = document.getElementById('partnerName');
+    const partnerGreeting = document.getElementById('partnerGreeting');
+    let langIndex = 0;
+
+    function renderPartner(index) {
+      const partner = partners[index];
+      titleRotator.textContent = t('hero.titleLead', { lang: langName(partner.langId) });
+      titleEm.textContent = t('hero.titleEm');
+      partnerAvatar.dataset.hair = partner.avatar.hair;
+      partnerAvatar.style.setProperty('--avatar-bg', partner.avatar.bg);
+      partnerAvatar.style.setProperty('--avatar-skin', partner.avatar.skin);
+      partnerAvatar.style.setProperty('--avatar-hair', partner.avatar.hairColor);
+      partnerAvatar.setAttribute('aria-label', t('hero.avatarAriaFormat', { name: partner.name }));
+      partnerName.textContent = partner.name;
+      partnerGreeting.textContent = partner.greeting;
+    }
+
+    renderPartner(langIndex);
+
+    document.addEventListener('dayo:langchange', () => renderPartner(langIndex));
+
+    setInterval(() => {
+      titleRotator.classList.add('fade-out');
+      partnerProfile.classList.add('fade-out');
+      partnerGreeting.classList.add('fade-out');
+
+      setTimeout(() => {
+        langIndex = (langIndex + 1) % partners.length;
+        renderPartner(langIndex);
+        titleRotator.classList.remove('fade-out');
+        partnerProfile.classList.remove('fade-out');
+        partnerGreeting.classList.remove('fade-out');
+      }, 550);
+    }, 2000);
+
+    /* Quiz — 6-language & level-adaptive diagnostic funnel */
+    const QUIZ_LANGS = ['en', 'fr', 'ja', 'zh', 'es', 'ko'];
+    const QUIZ_LEVELS = ['intro', 'basic', 'challenge'];
+    const QUIZ_LEVEL_META = [
+      { id: 'intro', emoji: '🌱' },
+      { id: 'basic', emoji: '☕' },
+      { id: 'challenge', emoji: '💬' }
+    ];
+    const QUIZ_HEADLINES = {
+      en: '외국인 앞 7초 침묵 탈출, 돼요! ☕',
+      fr: '일주일 안에 프랑스어로 자기소개, 돼요! 🥐',
+      ja: '현지 이자카야에서 막힘없이 주문, 돼요! 🍣',
+      zh: '현지 카페에서 유창하게 주문, 돼요! 🧋',
+      es: '여행지에서 현지 친구 사귀기, 돼요! 💃',
+      ko: '처음 보는 사람과도 자연스럽게 대화, 돼요! 🍵'
+    };
+    const QUIZ_HOSTS = {
+      en: { id: 'layna', name: 'Layna from UK', country: '영국', flag: '🇬🇧', initial: 'L', bio: '첫 인사부터 따뜻하게 받아주는 영국 파트너예요.' },
+      fr: { id: 'emma', name: 'Emma from Belgium', country: '벨기에', flag: '🇧🇪', initial: 'E', bio: '벨기에 출신 Emma와 함께 인사부터 자기소개까지 차근차근 연습해요.' },
+      ja: { id: 'yui', name: 'Yui from Japan', country: '일본', flag: '🇯🇵', initial: 'Y', bio: '천천히, 정확하게 받아주는 일본 파트너 Yui예요.' },
+      zh: { id: 'mei', name: 'Mei from China', country: '중국', flag: '🇨🇳', initial: 'M', bio: '천천히 받아주는 중국 파트너 Mei와 인사부터 주문까지 연습해요.' },
+      es: { id: 'sofia', name: 'Sofia from Spain', country: '스페인', flag: '🇪🇸', initial: 'S', bio: '밝게 말을 걸어주는 스페인 파트너 Sofia와 여행 스몰토크를 연습해요.' },
+      ko: { id: 'jiwoo', name: 'Jiwoo from Seoul', country: '한국', flag: '🇰🇷', initial: 'J', bio: '편안하게 받아주는 서울 파트너 지우와 첫 인사를 연습해요.' }
+    };
+    const QUIZ_THEME_IMAGES = {
+      fr: {
+        cafe: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=600&q=80',
+        restaurant: 'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=600&q=80',
+        street: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80',
+        hotel: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80'
+      },
+      en: {
+        cafe: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=600&q=80',
+        restaurant: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80',
+        street: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=600&q=80',
+        hotel: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=600&q=80'
+      },
+      ja: {
+        cafe: 'https://images.unsplash.com/photo-1582293041079-7814c2f12063?auto=format&fit=crop&w=600&q=80',
+        restaurant: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80',
+        street: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80',
+        hotel: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=600&q=80'
+      },
+      ko: {
+        cafe: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=600&q=80',
+        restaurant: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=600&q=80',
+        street: 'https://images.unsplash.com/photo-1517154421773-0529f29ea451?auto=format&fit=crop&w=600&q=80',
+        hotel: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=600&q=80'
+      },
+      es: {
+        cafe: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80',
+        restaurant: 'https://images.unsplash.com/photo-1515443961218-a51367888e4b?auto=format&fit=crop&w=600&q=80',
+        street: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?auto=format&fit=crop&w=600&q=80',
+        hotel: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=600&q=80'
+      },
+      zh: {
+        cafe: 'https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=600&q=80',
+        restaurant: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?auto=format&fit=crop&w=600&q=80',
+        street: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=600&q=80',
+        hotel: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80'
+      }
+    };
+    function quizThemeImage(lang, theme) {
+      const pack = QUIZ_THEME_IMAGES[lang] || QUIZ_THEME_IMAGES.en;
+      return (theme && pack[theme]) || pack.cafe;
+    }
+    const FALLBACK_QUIZ_BY_LANG = {
+      en: [
+        { theme: 'cafe', themeIndex: 1, question: '브런치 카페에서 직원이 "What can I get for you?"라고 물었어요. 가장 자연스러운 주문은?', options: ['Coffee me.', 'Can I get a latte, please?', 'Give me now.', 'I am coffee.'], answer: 1, imageUrl: quizThemeImage('en', 'cafe') },
+        { theme: 'restaurant', themeIndex: 2, question: '식당 입구에서 "두 명 자리 있나요?"를 영어로 자연스럽게 말하면?', options: ['I am two.', 'Hi — a table for two, please.', 'Two me table.', 'Check-in two.'], answer: 1, imageUrl: quizThemeImage('en', 'restaurant') },
+        { theme: 'street', themeIndex: 3, question: '길에서 "지하철역이 어디예요?"를 물을 때 제일 자연스러운 한 줄은?', options: ['Subway me where.', 'I am station.', "Excuse me, where's the subway station?", 'Hotel subway please.'], answer: 2, imageUrl: quizThemeImage('en', 'street') },
+        { theme: 'hotel', themeIndex: 4, question: '호텔 직원이 "Under what name is the reservation?"이라고 했어요. 뜻은?', options: ['예약하신 성함이 어떻게 되세요?', '몇 시에 체크아웃하세요?', '커피 드릴까요?', '지하철이 어디예요?'], answer: 0, imageUrl: quizThemeImage('en', 'hotel') }
+      ]
+    };
+
+    function escapeHtml(str) {
+      return String(str == null ? '' : str).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function scenarioEmoji(scenario) {
+      const match = String(scenario || '').match(/^\p{Extended_Pictographic}+/u);
+      return match ? match[0] : '🖼️';
+    }
+
+    function normalizeQuizItem(raw) {
+      const theme = raw.theme || null;
+      const imageUrl = raw.imageUrl || raw.image || (theme && quizThemeImage(quizLang, theme)) || null;
+      return {
+        theme,
+        themeIndex: raw.themeIndex || null,
+        scenario: raw.scenario || '',
+        question: raw.question || '',
+        image: imageUrl,
+        imageUrl,
+        options: raw.options || [],
+        answerIndex: typeof raw.answer === 'number' ? raw.answer : null,
+        explanation: raw.explanation || null
+      };
+    }
+
+    function extractLevelQuestions(block, lang, level) {
+      if (block && block[level] && Array.isArray(block[level].questions)) return block[level].questions;
+      if (block && Array.isArray(block[level])) return block[level];
+      if (block && block.levels && block.levels[level] && Array.isArray(block.levels[level].questions)) {
+        return block.levels[level].questions;
+      }
+      if (block && block.questions && !Array.isArray(block.questions) && Array.isArray(block.questions[level])) {
+        return block.questions[level];
+      }
+      if (Array.isArray(block)) return block.slice(0, 4);
+      if (block && Array.isArray(block.questions)) return block.questions.slice(0, 4);
+      return (FALLBACK_QUIZ_BY_LANG[lang] || FALLBACK_QUIZ_BY_LANG.en).slice(0, 4);
+    }
+
+    function extractLevelCourse(block, level) {
+      if (block && block[level] && block[level].course) return block[level].course;
+      if (block && block.levels && block.levels[level] && block.levels[level].course) return block.levels[level].course;
+      if (block && block.course) return block.course;
+      return { name: '', desc: '' };
+    }
+
+    function packFromLangMap(map) {
+      const out = {};
+      QUIZ_LANGS.forEach((lang) => {
+        const block = map && map[lang];
+        const levels = {};
+        QUIZ_LEVELS.forEach((level) => {
+          levels[level] = {
+            course: extractLevelCourse(block, level),
+            questions: extractLevelQuestions(block, lang, level).slice(0, 4).map(normalizeQuizItem)
+          };
+        });
+        out[lang] = {
+          headline: (block && block.headline) || QUIZ_HEADLINES[lang],
+          host: (block && block.host) || QUIZ_HOSTS[lang],
+          levels
+        };
+      });
+      return out;
+    }
+
+    const quizModal = document.getElementById('quizModal');
+    const quizSlides = document.getElementById('quizSlides');
+    const quizTitle = document.getElementById('quizTitle');
+    const quizProgressWrap = document.getElementById('quizProgressWrap');
+    const progressBar = document.getElementById('progressBar');
+    const progressLabel = document.getElementById('progressLabel');
+    const startBtn = document.getElementById('startQuizBtn');
+    const modalClose = document.getElementById('modalClose');
+    const toast = document.getElementById('resultToast');
+    let currentStep = 0, isTransitioning = false;
+    let quizPhase = 'level';
+    let quizLang = 'en';
+    let quizLevel = 'basic';
+    let quizScore = 0;
+    let quizPack = packFromLangMap(FALLBACK_QUIZ_BY_LANG);
+    let quizItems = quizPack.en.levels.basic.questions;
+    let quizLoadPromise = null;
+
+    function currentPack() {
+      return quizPack[quizLang] || quizPack.en;
+    }
+
+    function currentLevelBlock() {
+      const pack = currentPack();
+      return (pack.levels && pack.levels[quizLevel]) || pack.levels.basic;
+    }
+
+    function refreshQuizItems() {
+      const block = currentLevelBlock();
+      quizItems = (block && block.questions) || [];
+    }
+
+    function setQuizProgressVisible(visible) {
+      quizProgressWrap.hidden = !visible;
+      progressLabel.hidden = !visible;
+    }
+
+    function setQuizProgress(filled, total) {
+      const pct = total ? (filled / total) * 100 : 0;
+      progressBar.style.width = pct + '%';
+      progressLabel.textContent = t('quiz.progressFormat', { current: String(Math.min(filled, total)), total: String(total) });
+    }
+
+    function applyQuizHeadline() {
+      quizTitle.textContent = currentPack().headline || QUIZ_HEADLINES[quizLang];
+    }
+
+    function syncQuizLangTabs() {
+      document.querySelectorAll('[data-quiz-lang]').forEach((btn) => {
+        const on = btn.getAttribute('data-quiz-lang') === quizLang;
+        btn.classList.toggle('is-on', on);
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+    }
+
+    function derivePace(selfLevel, score) {
+      if (selfLevel === 'intro') return score >= 3 ? 'basic' : 'intro';
+      if (selfLevel === 'basic') {
+        if (score <= 1) return 'intro';
+        if (score >= 4) return 'challenge';
+        return 'basic';
+      }
+      return score <= 1 ? 'basic' : 'challenge';
+    }
+
+    function goToLevelSelect() {
+      currentStep = 0;
+      quizScore = 0;
+      isTransitioning = false;
+      quizPhase = 'level';
+      quizSlides.innerHTML = '';
+      quizSlides.appendChild(renderLevelStep());
+    }
+
+    function applyQuizLang(lang, opts) {
+      const restart = !opts || opts.restart !== false;
+      if (!quizPack[lang]) lang = 'en';
+      const changed = lang !== quizLang;
+      quizLang = lang;
+      refreshQuizItems();
+      applyQuizHeadline();
+      syncQuizLangTabs();
+      if (!restart || !changed || !quizModal.classList.contains('active')) return;
+      goToLevelSelect();
+    }
+
+    function loadQuizData() {
+      if (quizLoadPromise) return quizLoadPromise;
+      quizLoadPromise = fetch('quizData.json')
+        .then((res) => { if (!res.ok) throw new Error('quiz fetch failed: ' + res.status); return res.json(); })
+        .then((data) => {
+          quizPack = packFromLangMap(Array.isArray(data) ? { en: data } : data);
+          refreshQuizItems();
+          applyQuizHeadline();
+        })
+        .catch(() => {
+          quizPack = packFromLangMap(FALLBACK_QUIZ_BY_LANG);
+          refreshQuizItems();
+          applyQuizHeadline();
+        });
+      return quizLoadPromise;
+    }
+
+    function startQuizAtLevel(level) {
+      quizLevel = QUIZ_LEVELS.indexOf(level) >= 0 ? level : 'basic';
+      refreshQuizItems();
+      currentStep = 0;
+      quizScore = 0;
+      quizPhase = 'quiz';
+      quizItems.forEach((item) => {
+        const src = item.imageUrl || item.image;
+        if (!src) return;
+        const pre = new Image();
+        pre.src = src;
+      });
+      quizSlides.innerHTML = '';
+      quizSlides.appendChild(renderQuestion(0));
+    }
+
+    function renderLevelStep() {
+      setQuizProgressVisible(false);
+      const slide = document.createElement('div');
+      slide.className = 'quiz-slide active';
+      const cards = QUIZ_LEVEL_META.map((meta) => (
+        `<button type="button" class="quiz-level-card" data-quiz-level="${meta.id}">` +
+          `<span class="quiz-level-emoji" aria-hidden="true">${meta.emoji}</span>` +
+          `<span><span class="quiz-level-name">${escapeHtml(t('quiz.level.' + meta.id + '.name'))}</span>` +
+          `<span class="quiz-level-desc">${escapeHtml(t('quiz.level.' + meta.id + '.desc'))}</span></span>` +
+        `</button>`
+      )).join('');
+      slide.innerHTML = `<div class="quiz-start"><p class="quiz-start-desc">${escapeHtml(t('quiz.levelHint'))}</p><div class="quiz-level-grid">${cards}</div></div>`;
+      slide.querySelectorAll('[data-quiz-level]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (isTransitioning) return;
+          isTransitioning = true;
+          slide.classList.add('exit-left');
+          const level = btn.getAttribute('data-quiz-level');
+          setTimeout(() => {
+            slide.remove();
+            startQuizAtLevel(level);
+            isTransitioning = false;
+          }, 350);
+        });
+      });
+      return slide;
+    }
+
+    function bindQuizIllustration(slide, q, nextQ) {
+      const wrap = slide.querySelector('.quiz-illustration');
+      const img = wrap && wrap.querySelector('img');
+      if (!img) return;
+      const show = () => img.classList.add('is-loaded');
+      if (img.complete && img.naturalWidth) show();
+      else img.addEventListener('load', show, { once: true });
+      img.addEventListener('error', () => { wrap.classList.add('is-fallback'); }, { once: true });
+      if (nextQ && (nextQ.imageUrl || nextQ.image)) {
+        const pre = new Image();
+        pre.src = nextQ.imageUrl || nextQ.image;
+      }
+    }
+
+    function situationBadge(q, index, total) {
+      const label = t('quiz.theme.' + (q.theme || 'cafe'));
+      return t('quiz.themeBadge', { n: String(index + 1), total: String(total), label });
+    }
+
+    function renderQuestion(index) {
+      const q = quizItems[index];
+      setQuizProgressVisible(true);
+      setQuizProgress(index, quizItems.length);
+      const slide = document.createElement('div');
+      slide.className = 'quiz-slide active';
+      const src = q.imageUrl || q.image || quizThemeImage(quizLang, q.theme);
+      const imageBlock = src
+        ? `<div class="quiz-illustration"><img src="${escapeHtml(src)}" alt="${escapeHtml(t('quiz.theme.' + (q.theme || 'cafe')))}" decoding="async" onerror="this.onerror=null;this.closest('.quiz-illustration').classList.add('is-fallback');"><div class="quiz-illustration-fallback" aria-hidden="true">${q.theme === 'hotel' ? '🏨' : q.theme === 'street' ? '🗺️' : q.theme === 'restaurant' ? '🍽️' : '☕'}</div></div>`
+        : '';
+      slide.innerHTML = `${imageBlock}<div class="situation-card"><div class="situation-tag">${escapeHtml(situationBadge(q, index, quizItems.length))}</div><p class="situation-text">${escapeHtml(q.question)}</p></div><div class="quiz-options">${q.options.map((o, i) => `<button class="quiz-option" data-index="${i}">${escapeHtml(o)}</button>`).join('')}</div><p class="quiz-feedback" hidden></p><p class="quiz-explanation" hidden></p><button class="quiz-next-btn" type="button" hidden></button>`;
+      bindQuizIllustration(slide, q, quizItems[index + 1]);
+      slide.querySelectorAll('.quiz-option').forEach(btn => btn.addEventListener('click', () => handleAnswer(slide, index, btn)));
+      return slide;
+    }
+
+    function renderResultStep() {
+      setQuizProgressVisible(true);
+      setQuizProgress(quizItems.length, quizItems.length);
+      const pack = currentPack();
+      const host = pack.host || QUIZ_HOSTS[quizLang];
+      const pace = derivePace(quizLevel, quizScore);
+      const course = (currentLevelBlock() && currentLevelBlock().course) || { name: '', desc: '' };
+      const levelLabel = t('quiz.level.' + quizLevel + '.name');
+      const leadTitle = t('quiz.lead.title.' + quizLang, { level: levelLabel });
+      const slide = document.createElement('div');
+      slide.className = 'quiz-slide active';
+      slide.innerHTML = `<div class="quiz-result">
+        <p class="quiz-result-score">${escapeHtml(t('quiz.resultScore', { score: String(quizScore), total: String(quizItems.length) }))}</p>
+        <h3 class="quiz-result-lead">${escapeHtml(t('quiz.resultLead'))}</h3>
+        <div class="quiz-result-block">
+          <p class="quiz-result-label">${escapeHtml(t('quiz.paceLabel'))}</p>
+          <p class="quiz-result-course-name">${escapeHtml(t('quiz.pace.' + pace + '.name'))}</p>
+          <p class="quiz-result-course-desc">${escapeHtml(t('quiz.pace.' + pace + '.desc'))}</p>
+        </div>
+        <div class="quiz-result-block">
+          <p class="quiz-result-label">${escapeHtml(t('quiz.resultCourseLabel'))}</p>
+          <p class="quiz-result-course-name">${escapeHtml(course.name)}</p>
+          <p class="quiz-result-course-desc">${escapeHtml(course.desc)}</p>
+        </div>
+        <div class="quiz-result-block">
+          <p class="quiz-result-label">${escapeHtml(t('quiz.resultHostLabel'))}</p>
+          <div class="quiz-result-host">
+            <span class="quiz-result-host-face" aria-hidden="true">${escapeHtml(host.initial || host.name.charAt(0))}</span>
+            <div>
+              <p class="quiz-result-host-name">${escapeHtml(host.flag || '')} ${escapeHtml(host.name)}</p>
+              <p class="quiz-result-host-meta">${escapeHtml(host.country || '')}</p>
+              <p class="quiz-result-host-bio">${escapeHtml(host.bio || '')}</p>
+            </div>
+          </div>
+        </div>
+        <div class="quiz-lead-card" id="quizLeadCard">
+          <p class="quiz-lead-title">${escapeHtml(leadTitle)}</p>
+          <p class="quiz-lead-desc">${escapeHtml(t('quiz.emailDesc'))}</p>
+          <form class="email-form" id="quizLeadForm" novalidate>
+            <div class="email-compose">
+              <input class="email-input" id="quizEmailLocal" type="text" autocomplete="username" inputmode="email" placeholder="${escapeHtml(t('quiz.emailLocalPlaceholder'))}" aria-label="${escapeHtml(t('quiz.emailLocalPlaceholder'))}">
+              <span class="email-at" aria-hidden="true">@</span>
+              <select class="email-domain-select" id="quizEmailDomain" aria-label="${escapeHtml(t('quiz.emailDomainAria'))}">
+                <option value="naver.com">${escapeHtml(t('quiz.emailDomain.naver'))}</option>
+                <option value="gmail.com">${escapeHtml(t('quiz.emailDomain.gmail'))}</option>
+                <option value="daum.net">${escapeHtml(t('quiz.emailDomain.daum'))}</option>
+                <option value="icloud.com">${escapeHtml(t('quiz.emailDomain.icloud'))}</option>
+                <option value="outlook.com">${escapeHtml(t('quiz.emailDomain.outlook'))}</option>
+                <option value="yahoo.com">${escapeHtml(t('quiz.emailDomain.yahoo'))}</option>
+                <option value="hanmail.net">${escapeHtml(t('quiz.emailDomain.hanmail'))}</option>
+                <option value="custom">${escapeHtml(t('quiz.emailDomain.custom'))}</option>
+              </select>
+              <input class="email-domain-custom" id="quizEmailDomainCustom" type="text" hidden placeholder="${escapeHtml(t('quiz.emailDomainCustomPlaceholder'))}" aria-label="${escapeHtml(t('quiz.emailDomainCustomPlaceholder'))}">
+            </div>
+            <p class="quiz-lead-error" id="quizLeadError" role="alert"></p>
+            <button class="email-submit" type="submit">${escapeHtml(t('quiz.emailSubmit'))}</button>
+          </form>
+          <div class="quiz-lead-done">
+            <p class="quiz-lead-success">${escapeHtml(t('quiz.lead.success'))}</p>
+            <a class="quiz-lead-cta" href="room.html" data-ms-guard data-ticket-gate data-quiz-start-cta>${escapeHtml(t('quiz.lead.startCta'))}</a>
+            <a class="quiz-lead-cta quiz-lead-cta--ghost" href="cheat-sheet.html?lang=${encodeURIComponent(quizLang)}&amp;level=${encodeURIComponent(quizLevel)}">${escapeHtml(t('quiz.lead.cheatCta'))}</a>
+          </div>
+        </div>
+        <button class="quiz-result-retry" type="button">${escapeHtml(t('quiz.resultRetry'))}</button>
+      </div>`;
+      bindQuizLeadForm(slide);
+      slide.querySelector('.quiz-result-retry').addEventListener('click', goToLevelSelect);
+      return slide;
+    }
+
+    function composeQuizEmail(slide) {
+      const local = String((slide.querySelector('#quizEmailLocal') || {}).value || '').trim();
+      const domainSel = String((slide.querySelector('#quizEmailDomain') || {}).value || '');
+      const custom = String((slide.querySelector('#quizEmailDomainCustom') || {}).value || '').trim().replace(/^@/, '');
+      const domain = domainSel === 'custom' ? custom : domainSel;
+      if (!local || !domain) return '';
+      return (local + '@' + domain).toLowerCase();
+    }
+
+    function isValidEmail(value) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || ''));
+    }
+
+    function bindQuizLeadForm(slide) {
+      const card = slide.querySelector('#quizLeadCard');
+      const form = slide.querySelector('#quizLeadForm');
+      const domainSel = slide.querySelector('#quizEmailDomain');
+      const custom = slide.querySelector('#quizEmailDomainCustom');
+      const errorEl = slide.querySelector('#quizLeadError');
+      if (!form || !card) return;
+
+      if (domainSel && custom) {
+        domainSel.addEventListener('change', () => {
+          const isCustom = domainSel.value === 'custom';
+          custom.hidden = !isCustom;
+          if (isCustom) custom.focus();
+        });
+      }
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const email = composeQuizEmail(slide);
+        if (!isValidEmail(email)) {
+          if (errorEl) errorEl.textContent = t('quiz.lead.errorEmail');
+          return;
+        }
+        if (errorEl) errorEl.textContent = '';
+        const submitBtn = form.querySelector('.email-submit');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = t('quiz.emailSending');
+        }
+        try {
+          window.localStorage.setItem('lead_email', email);
+        } catch (e) { /* ignore */ }
+
+        const store = window.DayOProfileStore;
+        const finishSuccess = function () {
+          card.classList.add('is-done');
+          showToast(t('quiz.lead.success'));
+        };
+        const finishError = function () {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = t('quiz.emailSubmit');
+          }
+          if (errorEl) errorEl.textContent = t('quiz.lead.errorSave');
+        };
+
+        const saveLead = function () {
+          if (!store || typeof store.saveQuizLead !== 'function') {
+            return Promise.resolve({ ok: true, local: true });
+          }
+          return store.saveQuizLead({
+            email: email,
+            language: quizLang || 'en',
+            level: quizLevel || 'starter',
+            score: quizScore
+          });
+        };
+
+        fetch('/api/send-lead-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: email,
+            language: quizLang || 'en',
+            level: quizLevel || 'starter',
+            score: quizScore,
+            origin: window.location.origin
+          })
+        }).then(function (resp) {
+          return resp.json().catch(function () { return {}; }).then(function (data) {
+            return { resp: resp, data: data };
+          });
+        }).then(function (result) {
+          const pending = (store && typeof store.ready === 'function')
+            ? store.ready().then(saveLead).catch(saveLead)
+            : saveLead();
+          return Promise.resolve(pending).then(function () { return result; }, function () { return result; });
+        }).then(function (result) {
+          if (result && result.resp && result.resp.ok && result.data && result.data.ok) {
+            finishSuccess();
+            return;
+          }
+          finishError();
+        }).catch(function () {
+          finishError();
+        });
+      });
+
+      const startCta = slide.querySelector('[data-quiz-start-cta]');
+      if (startCta) {
+        startCta.addEventListener('click', () => {
+          setTimeout(closeQuizModal, 0);
+        });
+      }
+    }
+
+    function handleAnswer(slide, index, btn) {
+      if (isTransitioning) return;
+      const q = quizItems[index];
+      const clickedIndex = parseInt(btn.dataset.index, 10);
+      slide.querySelectorAll('.quiz-option').forEach((b) => { b.disabled = true; });
+
+      let isCorrect = true;
+      if (typeof q.answerIndex === 'number') {
+        isCorrect = clickedIndex === q.answerIndex;
+        if (isCorrect) quizScore += 1;
+        btn.classList.add(isCorrect ? 'is-correct' : 'is-wrong');
+        if (!isCorrect) {
+          const correctBtn = slide.querySelector(`.quiz-option[data-index="${q.answerIndex}"]`);
+          if (correctBtn) correctBtn.classList.add('is-correct');
+        }
+      }
+
+      setQuizProgress(index + 1, quizItems.length);
+
+      const feedback = slide.querySelector('.quiz-feedback');
+      feedback.textContent = t(isCorrect ? 'quiz.feedback.correct' : 'quiz.feedback.wrong');
+      feedback.classList.add(isCorrect ? 'is-correct' : 'is-wrong');
+      feedback.hidden = false;
+
+      if (q.explanation) {
+        const exp = slide.querySelector('.quiz-explanation');
+        exp.textContent = '💡 ' + q.explanation;
+        exp.hidden = false;
+      }
+
+      const isLast = index + 1 >= quizItems.length;
+      const nextBtn = slide.querySelector('.quiz-next-btn');
+      nextBtn.textContent = t(isLast ? 'quiz.resultBtn' : 'quiz.nextBtn');
+      nextBtn.hidden = false;
+      nextBtn.addEventListener('click', () => advanceQuiz(slide, index), { once: true });
+      nextBtn.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+
+    function advanceQuiz(slide, index) {
+      if (isTransitioning) return;
+      isTransitioning = true;
+      slide.classList.add('exit-left');
+      setTimeout(() => {
+        slide.remove();
+        currentStep = index + 1;
+        if (currentStep < quizItems.length) {
+          quizPhase = 'quiz';
+          quizSlides.appendChild(renderQuestion(currentStep));
+        } else {
+          quizPhase = 'result';
+          quizSlides.appendChild(renderResultStep());
+        }
+        isTransitioning = false;
+      }, 350);
+    }
+
+    function rerenderCurrentQuizSlide() {
+      if (!quizModal.classList.contains('active')) return;
+      refreshQuizItems();
+      applyQuizHeadline();
+      syncQuizLangTabs();
+      quizSlides.innerHTML = '';
+      if (quizPhase === 'level' || quizPhase === 'start') quizSlides.appendChild(renderLevelStep());
+      else if (quizPhase === 'result') quizSlides.appendChild(renderResultStep());
+      else if (quizItems.length) quizSlides.appendChild(renderQuestion(currentStep));
+    }
+    document.addEventListener('dayo:langchange', rerenderCurrentQuizSlide);
+
+    document.getElementById('quizLangTabs').addEventListener('click', (e) => {
+      const tab = e.target.closest('[data-quiz-lang]');
+      if (!tab) return;
+      applyQuizLang(tab.getAttribute('data-quiz-lang'), { restart: true });
+    });
+
+    function openQuizModal() {
+      currentStep = 0;
+      quizScore = 0;
+      isTransitioning = false;
+      quizPhase = 'level';
+      quizSlides.innerHTML = '';
+      quizModal.classList.add('active');
+      applyQuizHeadline();
+      syncQuizLangTabs();
+      quizSlides.appendChild(renderLevelStep());
+      if (window.DayOScrollLock) window.DayOScrollLock.lock();
+      else document.body.style.overflow = 'hidden';
+      loadQuizData().then(() => {
+        if (!quizModal.classList.contains('active') || quizPhase !== 'level') return;
+        applyQuizHeadline();
+      });
+    }
+
+    function closeQuizModal() {
+      if (!quizModal.classList.contains('active')) return;
+      quizModal.classList.remove('active');
+      if (window.DayOScrollLock) window.DayOScrollLock.unlock();
+      else document.body.style.overflow = '';
+      quizSlides.innerHTML = '';
+      quizPhase = 'level';
+      progressBar.style.width = '0%';
+      progressLabel.textContent = t('quiz.progressFormat', { current: '0', total: '4' });
+      setQuizProgressVisible(false);
+    }
+
+    startBtn.addEventListener('click', openQuizModal);
+    modalClose.addEventListener('click', closeQuizModal);
+    quizModal.addEventListener('click', (e) => { if (e.target === quizModal) closeQuizModal(); });
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    /* Chatbot */
+    const chatFab = document.getElementById('chatFab');
+    const chatPanel = document.getElementById('chatPanel');
+    const chatClose = document.getElementById('chatClose');
+    const chatMessages = document.getElementById('chatMessages');
+
+    function openChat() { chatPanel.classList.add('open'); }
+    function closeChat() { chatPanel.classList.remove('open'); }
+    chatFab.addEventListener('click', () => chatPanel.classList.contains('open') ? closeChat() : openChat());
+    chatClose.addEventListener('click', closeChat);
+
+    function syncChatFabTitle() {
+      var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+      if (finePointer) chatFab.removeAttribute('title');
+      else chatFab.setAttribute('title', chatFab.getAttribute('aria-label') || '도움이 필요하신가요? 질문하기');
+    }
+    syncChatFabTitle();
+    document.addEventListener('dayo:langchange', syncChatFabTitle);
+
+    document.querySelectorAll('[data-chat-open], a[href="#faq"]').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        openChat();
+        if (window.DayOMobileNav) window.DayOMobileNav.close();
+      });
+    });
+
+    function addBubble(text, type) {
+      const b = document.createElement('div');
+      b.className = `chat-bubble chat-bubble--${type}`;
+      b.textContent = text;
+      chatMessages.appendChild(b);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      return b;
+    }
+
+    function typeBotReply(text) {
+      const typing = addBubble(t('chatbot.typing'), 'typing');
+      setTimeout(() => {
+        typing.remove();
+        let i = 0;
+        const bubble = addBubble('', 'bot');
+        const timer = setInterval(() => {
+          bubble.textContent += text[i++];
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+          if (i >= text.length) clearInterval(timer);
+        }, 18);
+      }, 500);
+    }
+
+    document.querySelectorAll('.faq-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        addBubble(chip.textContent, 'user');
+        typeBotReply(t('chatbot.a.' + chip.dataset.faq));
+      });
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (quizModal.classList.contains('active')) closeQuizModal();
+        if (chatPanel.classList.contains('open')) closeChat();
+      }
+    });
+  </script>
+  <script src="supabase-env.js"></script>
+  <script type="module" src="profile-store.js"></script>
+  <script src="chat-prefs.js"></script>
+  <script src="ticket-wallet.js"></script>
+  <script src="booking-modal.js"></script>
+  <script src="tickets-modal.js"></script>
+  <script src="mode-switch.js"></script>
+  <script src="greeting-banner.js"></script>
+  <script src="logged-in-home.js"></script>
+  <script src="lounge-carousel.js"></script>
+  <script src="live-partners.js"></script>
+</body>
+</html>

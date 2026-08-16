@@ -8,8 +8,5 @@
         { "key": "Access-Control-Allow-Headers", "value": "Content-Type" }
       ]
     }
-  ],
-  "rewrites": [
-    { "source": "/public/cheat-sheet.html", "destination": "/cheat-sheet.html" }
   ]
 }
