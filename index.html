@@ -906,10 +906,24 @@
     /* Reviews */
     .reviews { padding: 0 0 var(--section-gap); }
 
+    .reviews-viewport {
+      overflow: hidden;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
     .reviews-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
+      display: flex;
+      gap: 0;
+      transition: transform 0.4s ease-in-out;
+      will-change: transform;
+    }
+
+    .reviews-grid .review-card {
+      flex: 0 0 100%;
+      min-width: 100%;
+      box-sizing: border-box;
     }
 
     .review-card {
@@ -1337,7 +1351,7 @@
       .hero-copy { text-align: center; }
       .hero-subtitle { margin-left: auto; margin-right: auto; }
       .cta-wrap { align-items: center; }
-      .journey-grid, .reviews-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
+      .journey-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
       .review-card { transform: none !important; }
     }
 
@@ -1699,7 +1713,8 @@
       <div class="section-inner">
         <p class="section-label reveal" data-i18n="reviews.eyebrow">Real Stories</p>
         <h2 class="section-title reveal" data-i18n="reviews.title">DayO와 함께 말문이 트인 실제 유저들의 이야기</h2>
-        <div class="reviews-grid">
+        <div class="reviews-viewport" id="reviewsCarousel">
+        <div class="reviews-grid" id="reviewsTrack">
           <article class="review-card reveal reveal-delay-1">
             <div class="review-emoji">🎓</div>
             <p class="review-text" data-i18n="reviews.card1.text">"외국계 미팅에서 침묵이 사라졌어요"</p>
@@ -1720,6 +1735,7 @@
             <p class="review-text" data-i18n="reviews.card4.text">"나이 상관없이 내 속도에 맞춰 편하게 대화할 수 있어 좋아요"</p>
             <span class="review-author" data-i18n="reviews.card4.author">취미/자기계발 최OO님</span>
           </article>
+        </div>
         </div>
       </div>
     </section>
@@ -2559,6 +2575,7 @@
   <script src="greeting-banner.js"></script>
   <script src="logged-in-home.js"></script>
   <script src="lounge-carousel.js"></script>
+  <script src="reviews-carousel.js"></script>
   <script src="live-partners.js"></script>
 </body>
 </html>
