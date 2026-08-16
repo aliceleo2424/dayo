@@ -867,40 +867,56 @@
     /* ===== Reviews (index.html) ===== */
     'reviews.eyebrow': { KO: 'Real Stories', EN: 'Real Stories', ZH: 'Real Stories', JA: 'Real Stories', FR: 'Real Stories', ES: 'Real Stories' },
     'reviews.title': {
-      KO: '2030, 직접 경험한 후기', EN: 'Real reviews from users in their 20s-30s', ZH: '2030真实体验后记', JA: '20〜30代のリアルな体験談', FR: 'Avis réels de la génération 20-30 ans', ES: 'Opiniones reales de 20-30 años'
+      KO: 'DayO와 함께 말문이 트인 실제 유저들의 이야기',
+      EN: 'Real stories from people who found their voice with DayO',
+      ZH: '与DayO一起打开话匣子的真实用户故事',
+      JA: 'DayOと一緒に話せるようになったリアルなユーザーの声',
+      FR: 'Les histoires de vrais utilisateurs qui ont trouvé leurs mots avec DayO',
+      ES: 'Historias reales de usuarios que encontraron su voz con DayO'
     },
     'reviews.card1.text': {
-      KO: '"워홀 가기 전 한 달 동안 했는데 외국인 울렁증 완전 사라졌어요!"',
-      EN: '"I did it for a month before my working holiday and my fear of foreigners totally disappeared!"',
-      ZH: '"在打工度假前做了一个月，对外国人的紧张感完全消失了！"',
-      JA: '"ワーホリ前に1ヶ月やったら外国人への緊張感が完全になくなりました！"',
-      FR: '"Un mois avant mon PVT et ma peur des étrangers a disparu !"',
-      ES: '"¡Un mes antes de mi working holiday y mi miedo a hablar con extranjeros desapareció!"'
+      KO: '"외국계 미팅에서 침묵이 사라졌어요"',
+      EN: '"The silence in my English meetings is gone"',
+      ZH: '"外企会议里的沉默消失了"',
+      JA: '"外資系ミーティングでの沈黙がなくなりました"',
+      FR: '"Le silence a disparu de mes réunions en anglais"',
+      ES: '"El silencio desapareció en mis reuniones en inglés"'
     },
     'reviews.card1.author': {
-      KO: '워홀 준비생 20대 K님', EN: 'K, 20s, preparing for a working holiday', ZH: '打工度假准备生 20多岁K先生', JA: 'ワーホリ準備中の20代Kさん', FR: 'K, 20 ans, prépare son PVT', ES: 'K, de 20 años, prepara su working holiday'
+      KO: '직장인 김OO님', EN: 'Kim, office worker', ZH: '职场人金OO', JA: '会社員のキムさん', FR: 'Kim, salarié', ES: 'Kim, oficinista'
     },
     'reviews.card2.text': {
-      KO: '"오픽 AL 한 번에 달성! 막힐 때 AI 코파일럿이 살려준 덕분이에요"',
-      EN: '"Got OPIc AL on the first try — the AI copilot saved me whenever I got stuck!"',
-      ZH: '"OPIc AL 一次达成！卡壳时全靠AI副驾救场"',
-      JA: '"OPIc AL一発達成！詰まった時にAIコパイロットが助けてくれたおかげです"',
-      FR: '"OPIc AL du premier coup grâce au copilote IA quand je bloquais !"',
-      ES: '"¡Logré el OPIc AL a la primera gracias al copiloto IA cuando me trababa!"'
+      KO: '"외운 티 안 나는 자연스러운 표현 덕분에 목표 달성!"',
+      EN: '"I hit my goal with natural phrases that don’t sound memorized!"',
+      ZH: '"靠看不出背过的自然表达达成了目标！"',
+      JA: '"暗記感のない自然な表現のおかげで目標達成！"',
+      FR: '"Objectif atteint grâce à des phrases naturelles, pas apprises par cœur !"',
+      ES: '"¡Logré mi meta con expresiones naturales que no suenan memorizadas!"'
     },
     'reviews.card2.author': {
-      KO: '취준생 20대 L님', EN: 'L, 20s, job seeker', ZH: '求职者 20多岁L先生', JA: '就活中の20代Lさん', FR: 'L, 20 ans, en recherche d\'emploi', ES: 'L, de 20 años, buscando trabajo'
+      KO: '스피킹 시험 준비생 이OO님', EN: 'Lee, speaking-test prep', ZH: '口语考试备考生李OO', JA: 'スピーキング試験準備中のイさん', FR: 'Lee, préparation d’un test oral', ES: 'Lee, preparando un examen oral'
     },
     'reviews.card3.text': {
-      KO: '"해외 여행 가서 현지인 카페 주문 완벽 성공! 진짜 돼요!"',
-      EN: '"Ordered perfectly at a local café while traveling abroad — it really works!"',
-      ZH: '"出国旅行时在当地咖啡馆完美点单成功！真的可以！"',
-      JA: '"海外旅行で現地カフェの注文に完璧成功！本当にできる！"',
-      FR: '"Commande réussie dans un café local en voyage — ça marche vraiment !"',
-      ES: '"¡Pedí perfecto en un café local de viaje — de verdad funciona!"'
+      KO: '"현지 식당에서 당황하지 않고 여유롭게 주문했어요"',
+      EN: '"I ordered at a local restaurant without panicking — calmly"',
+      ZH: '"在当地餐厅从容点餐，没有慌张"',
+      JA: '"現地のレストランで慌てずに、落ち着いて注文できました"',
+      FR: '"J’ai commandé au restaurant local sans paniquer, tranquillement"',
+      ES: '"Pedí con calma en un restaurante local, sin ponerme nervioso"'
     },
     'reviews.card3.author': {
-      KO: '직장인 30대 P님', EN: 'P, 30s, office worker', ZH: '职场人 30多岁P先生', JA: '会社員の30代Pさん', FR: 'P, 30 ans, employé de bureau', ES: 'P, de 30 años, empleado de oficina'
+      KO: '여행 준비생 박OO님', EN: 'Park, travel prep', ZH: '旅行准备生朴OO', JA: '旅行準備中のパクさん', FR: 'Park, préparation de voyage', ES: 'Park, preparando un viaje'
+    },
+    'reviews.card4.text': {
+      KO: '"나이 상관없이 내 속도에 맞춰 편하게 대화할 수 있어 좋아요"',
+      EN: '"I can talk at my own pace, whatever my age — that feels great"',
+      ZH: '"不论年龄，都能按自己的节奏轻松对话，很喜欢"',
+      JA: '"年齢に関係なく、自分のペースで気楽に話せるのがいい"',
+      FR: '"Quel que soit l’âge, je parle à mon rythme — et c’est agréable"',
+      ES: '"Da igual la edad: puedo hablar a mi ritmo y con calma"'
+    },
+    'reviews.card4.author': {
+      KO: '취미/자기계발 최OO님', EN: 'Choi, hobby & self-growth', ZH: '兴趣/自我提升崔OO', JA: '趣味・自己研鑽のチェさん', FR: 'Choi, loisir & développement perso', ES: 'Choi, hobby y crecimiento personal'
     },
 
     /* ===== Quiz modal (index.html) ===== */
