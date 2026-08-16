@@ -218,6 +218,16 @@
       display: flex; flex-direction: column; align-items: flex-start; gap: 0.75rem;
     }
 
+    .hero-visual {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 0 1rem;
+      box-sizing: border-box;
+    }
+
     .cta-badge { display: none; }
 
     .home-cta-btn {
@@ -666,8 +676,11 @@
 
     .visual-card {
       position: relative;
-      width: min(280px, 85vw);
+      width: 100%;
+      max-width: 340px;
+      margin: 0 auto;
       padding: 1.75rem 1.5rem 2rem;
+      box-sizing: border-box;
       background: var(--bg-card);
       border: 1px solid rgba(255,209,220,0.5);
       border-radius: 32px;
@@ -676,6 +689,8 @@
 
     .live-badge {
       position: absolute; top: -0.75rem; left: 50%; transform: translateX(-50%);
+      align-self: center;
+      margin: 0 auto 0.5rem auto;
       white-space: nowrap;
       padding: 0.35rem 0.9rem;
       background: linear-gradient(135deg, var(--pink), var(--peach));
@@ -1351,6 +1366,21 @@
       .hero-copy { text-align: center; }
       .hero-subtitle { margin-left: auto; margin-right: auto; }
       .cta-wrap { align-items: center; }
+      .hero-visual {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 0 1rem;
+        box-sizing: border-box;
+      }
+      .visual-card {
+        width: 100%;
+        max-width: 340px;
+        margin: 0 auto;
+        box-sizing: border-box;
+      }
       .journey-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
       .review-card { transform: none !important; }
     }
