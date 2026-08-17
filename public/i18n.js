@@ -606,12 +606,12 @@
       ES: 'Una lectura rápida antes de la sesión hace la conversación más fácil.'
     },
     'partner.tips.1.title': {
-      KO: '꿀팁 1: 대화 중 7초 침묵이 흐를 때 쓸 수 있는 만능 질문 5가지',
-      EN: 'Tip 1: Five all-purpose questions for a 7-second silence',
-      ZH: '小贴士1：对话中出现7秒沉默时可使用的5个万能问题',
-      JA: 'ヒント1：会話で7秒の沈黙が流れたときに使える万能質問5つ',
-      FR: 'Astuce 1 : 5 questions passe-partout quand le silence dure 7 secondes',
-      ES: 'Consejo 1: 5 preguntas comodín cuando hay 7 segundos de silencio'
+      KO: '꿀팁 1: 대화 중 어색한 침묵이 흐를 때 쓸 수 있는 만능 질문 5가지',
+      EN: 'Tip 1: Five all-purpose questions when conversation goes quiet',
+      ZH: '小贴士1：对话陷入尴尬沉默时可使用的5个万能问题',
+      JA: 'ヒント1：会話で気まずい沈黙が流れたときに使える万能質問5つ',
+      FR: 'Astuce 1 : 5 questions passe-partout quand le silence devient gênant',
+      ES: 'Consejo 1: 5 preguntas comodín cuando el silencio se vuelve incómodo'
     },
     'partner.tips.1.body': {
       KO: '<ol><li>오늘 하루 중에서 제일 작게라도 웃게 만든 일이 있었나요?</li><li>이번 주에 시간이 조금 난다면, 어디에 가보고 싶어요?</li><li>매일 먹어도 질리지 않는 음식이 있나요?</li><li>요즘 머릿속에 자꾸 맴도는 노래가 있나요?</li><li>이번 주를 조금 더 따뜻하게 만들어 준 작은 일이 있었나요?</li></ol><p>질문은 짧게, 그리고 상대의 답을 한 박자 기다려 주세요. 침묵을 채우기보다 “듣고 있다”는 눈빛을 먼저 보여 주면 대화가 다시 흘러가요.</p>',
@@ -921,10 +921,10 @@
 
     /* ===== Quiz modal (index.html) ===== */
     'quiz.badge': {
-      KO: '10초 레벨테스트', EN: '10-second level test', ZH: '10秒水平测试', JA: '10秒レベルテスト', FR: 'Test de niveau 10 s', ES: 'Test de nivel de 10 s'
+      KO: '무료 스피킹 감각 테스트', EN: 'Free speaking sense test', ZH: '免费口语感觉测试', JA: '無料スピーキング感覚テスト', FR: 'Test de speaking gratuit', ES: 'Test de speaking gratis'
     },
     'quiz.title': {
-      KO: '외국인 앞 7초 침묵 탈출, 돼요! ☕', EN: 'Break the 7-second freeze, you can! ☕', ZH: '7秒沉默逃脱，真的可以！☕', JA: '外国人の前の7秒沈黙から脱出、できる！☕', FR: 'Fini le silence de 7 secondes, ça marche ! ☕', ES: 'Sal del silencio de 7 segundos, ¡se puede! ☕'
+      KO: '외국인 앞 어색한 침묵 탈출, 돼요! ☕', EN: 'Break the awkward freeze, you can! ☕', ZH: '打破面对外国人时的尴尬沉默，真的可以！☕', JA: '外国人の前の気まずい沈黙から脱出、できる！☕', FR: 'Fini le silence gênant, ça marche ! ☕', ES: 'Sal del silencio incómodo, ¡se puede! ☕'
     },
     'quiz.lang.en': { KO: '영어', EN: 'English', ZH: '英语', JA: '英語', FR: 'Anglais', ES: 'Inglés' },
     'quiz.lang.fr': { KO: '프랑스어', EN: 'French', ZH: '法语', JA: 'フランス語', FR: 'Français', ES: 'Francés' },
@@ -1149,12 +1149,12 @@
       ES: '🎁 [{level}] Frases de supervivencia para París PDF'
     },
     'quiz.lead.title.en': {
-      KO: '🎁 [{level}] 원어민 앞 7초 침묵 탈출 만능 표현 20선 PDF',
-      EN: '🎁 [{level}] 20 go-to phrases to beat the 7-second freeze PDF',
-      ZH: '🎁 [{level}] 母语者面前7秒沉默逃生万能表达20句 PDF',
-      JA: '🎁 [{level}] ネイティブの前の7秒沈黙を抜ける万能フレーズ20 PDF',
-      FR: '🎁 [{level}] 20 phrases pour briser les 7 secondes de silence PDF',
-      ES: '🎁 [{level}] 20 frases comodín para salir del silencio de 7 segundos PDF'
+      KO: '🎁 [{level}] 원어민 앞 어색한 침묵 탈출 만능 표현 20선 PDF',
+      EN: '🎁 [{level}] 20 go-to phrases to beat an awkward freeze PDF',
+      ZH: '🎁 [{level}] 母语者面前打破尴尬沉默的万能表达20句 PDF',
+      JA: '🎁 [{level}] ネイティブの前の気まずい沈黙を抜ける万能フレーズ20 PDF',
+      FR: '🎁 [{level}] 20 phrases pour briser un silence gênant PDF',
+      ES: '🎁 [{level}] 20 frases comodín para salir de un silencio incómodo PDF'
     },
     'quiz.lead.title.es': {
       KO: '🎁 [{level}] 바르셀로나 타파스 바 소통 가이드 PDF',
