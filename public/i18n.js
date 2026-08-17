@@ -1611,6 +1611,14 @@
     'room.toastDailyDemo': { KO: '화상 연결이 어려워 데모 화면으로 보여드릴게요 ☕️', EN: 'Video couldn\'t connect, so here\'s the demo view ☕️', ZH: '视频连接失败，先用演示画面 ☕️', JA: '映像接続ができないのでデモ画面でお見せします ☕️', FR: 'La vidéo n\'a pas pu se connecter, voici la démo ☕️', ES: 'No se pudo conectar el video, aquí va la vista demo ☕️' },
     'room.toastSttOff': { KO: '이 브라우저는 음성 인식을 지원하지 않아요. 데모 힌트를 보여드릴게요.', EN: 'This browser doesn\'t support speech recognition. Showing demo hints.', ZH: '此浏览器不支持语音识别。将显示演示提示。', JA: 'このブラウザは音声認識に対応していません。デモヒントを表示します。', FR: 'Ce navigateur ne prend pas en charge la reconnaissance vocale. Indices démo.', ES: 'Este navegador no admite reconocimiento de voz. Mostrando pistas demo.' },
     'room.toastDailyLive': { KO: '1:1 화상 대화방에 입장했어요 🎥', EN: 'You\'re in the 1:1 video room 🎥', ZH: '已进入1:1视频对话 🎥', JA: '1:1ビデオ通話に入りました 🎥', FR: 'Vous êtes dans la visio 1:1 🎥', ES: 'Entraste a la videollamada 1:1 🎥' },
+    'room.sessionWrapUpWarning': {
+      KO: '⏰ 대화 종료까지 1분 남았습니다. 파트너와 인사를 나누며 대화를 마무리해 주세요!',
+      EN: '⏰ 1 minute left. Wrap up with your partner and say goodbye!',
+      ZH: '⏰ 还剩1分钟。请和伙伴道别，结束对话吧！',
+      JA: '⏰ あと1分です。パートナーと挨拶を交わして会話を締めくくりましょう！',
+      FR: '⏰ Plus qu\'1 minute. Terminez en saluant votre partenaire !',
+      ES: '⏰ Queda 1 minuto. Despídete de tu compañero y cierra la conversación.'
+    },
 
     'page.title.index': { KO: 'DayO 돼요 — AI 회화 코파일럿', EN: 'DayO — AI Conversation Copilot', ZH: 'DayO — AI对话副驾驶', JA: 'DayO — AI会話コパイロット', FR: 'DayO — Copilote de conversation IA', ES: 'DayO — Copiloto de conversación con IA' },
     'page.title.room': { KO: 'DayO 돼요 — 화상 회화 스튜디오', EN: 'DayO — Video Conversation Studio', ZH: 'DayO — 视频对话工作室', JA: 'DayO — ビデオ会話スタジオ', FR: 'DayO — Studio de conversation vidéo', ES: 'DayO — Estudio de conversación por video' },

@@ -96,6 +96,46 @@
       justify-content: center;
     }
 
+    .timer.is-warning {
+      animation: timerPulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes timerPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.35); }
+      50% { box-shadow: 0 0 0 6px rgba(255, 107, 107, 0); }
+    }
+
+    .session-wrap-banner {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 0.8rem 1rem;
+      background: linear-gradient(135deg, #FFF5F8 0%, #FFE8EE 100%);
+      border-bottom: 1px solid rgba(255, 182, 193, 0.55);
+      box-shadow: 0 4px 18px rgba(113, 83, 72, 0.1);
+      transform: translateY(-100%);
+      opacity: 0;
+      transition: transform 0.45s ease, opacity 0.45s ease;
+      pointer-events: none;
+    }
+
+    .session-wrap-banner.is-visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .session-wrap-banner__text {
+      margin: 0;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.88rem;
+      color: var(--coral);
+      line-height: 1.55;
+      word-break: keep-all;
+    }
+
     .tutor-chip {
       display: inline-flex;
       align-items: center;
@@ -1928,7 +1968,7 @@
   <div class="studio">
     <header class="top-bar">
       <div class="top-left">
-        <div class="timer" id="timer" aria-live="polite">⏱️ 19:50</div>
+        <div class="timer" id="timer" aria-live="polite">⏱️ 03:00</div>
         <div class="tutor-chip">
           <div class="tutor-avatar">C</div>
           <div>
@@ -2180,6 +2220,10 @@
     </div>
   </div>
 
+  <div class="session-wrap-banner" id="sessionWrapBanner" role="status" aria-live="polite" hidden>
+    <p class="session-wrap-banner__text" id="sessionWrapBannerText"></p>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <div class="prefs-sheet-overlay" id="prefsSheetOverlay" hidden>
@@ -2206,19 +2250,95 @@
   <script src="chat-prefs.js"></script>
   <script src="room-live.js"></script>
   <script>
-    /* Timer */
-    (function initTimer() {
+    /* Session timer */
+    (function initSessionTimer() {
+      // 테스트용 3분 (실제 런칭 시 25로 1초 만에 변경 가능)
+      const SESSION_DURATION_MINUTES = 3;
+      const TOTAL_SESSION_SECONDS = SESSION_DURATION_MINUTES * 60;
+      const WRAP_UP_WARNING_SECONDS = 60;
+
       const el = document.getElementById('timer');
-      let remaining = 19 * 60 + 50;
+      const banner = document.getElementById('sessionWrapBanner');
+      const bannerText = document.getElementById('sessionWrapBannerText');
+      if (!el) return;
+
+      let remainingSeconds = TOTAL_SESSION_SECONDS;
+      let tickInterval = null;
+      let sessionEnded = false;
+      let warningShown = false;
+
       function render() {
-        const m = Math.floor(remaining / 60);
-        const s = remaining % 60;
+        const m = Math.floor(remainingSeconds / 60);
+        const s = remainingSeconds % 60;
         el.textContent = `⏱️ ${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
       }
+
+      function playWrapUpChime() {
+        try {
+          const Ctx = window.AudioContext || window.webkitAudioContext;
+          if (!Ctx) return;
+          const ctx = new Ctx();
+          [523.25, 659.25].forEach(function (freq, i) {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const startAt = ctx.currentTime + i * 0.15;
+            osc.type = 'sine';
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.0001, startAt);
+            gain.gain.exponentialRampToValueAtTime(0.12, startAt + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.0001, startAt + 0.45);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(startAt);
+            osc.stop(startAt + 0.5);
+          });
+        } catch (e) { /* ignore */ }
+      }
+
+      function showWrapUpWarning() {
+        if (warningShown) return;
+        warningShown = true;
+        const msg = typeof t === 'function'
+          ? t('room.sessionWrapUpWarning')
+          : '⏰ 대화 종료까지 1분 남았습니다. 파트너와 인사를 나누며 대화를 마무리해 주세요!';
+        if (banner && bannerText) {
+          bannerText.textContent = msg;
+          banner.hidden = false;
+          requestAnimationFrame(function () { banner.classList.add('is-visible'); });
+        }
+        el.classList.add('is-warning');
+        playWrapUpChime();
+      }
+
+      function endSession() {
+        if (sessionEnded) return;
+        sessionEnded = true;
+        if (tickInterval) clearInterval(tickInterval);
+        tickInterval = null;
+        remainingSeconds = 0;
+        render();
+        el.classList.remove('is-warning');
+        document.dispatchEvent(new CustomEvent('dayo:session-ended'));
+      }
+
+      function tick() {
+        if (remainingSeconds <= 0) {
+          endSession();
+          return;
+        }
+        if (remainingSeconds === WRAP_UP_WARNING_SECONDS) showWrapUpWarning();
+        remainingSeconds -= 1;
+        render();
+        if (remainingSeconds <= 0) endSession();
+      }
+
       render();
-      setInterval(() => {
-        if (remaining > 0) { remaining -= 1; render(); }
-      }, 1000);
+      tickInterval = setInterval(tick, 1000);
+
+      window.DayOSessionTimer = {
+        getRemainingSeconds: function () { return remainingSeconds; },
+        endSession: endSession
+      };
     })();
 
     const toast = document.getElementById('toast');
@@ -2709,6 +2829,12 @@
 
     document.getElementById('endBtn').addEventListener('click', () => {
       persistTranscript();
+      openFeedback();
+    });
+
+    document.addEventListener('dayo:session-ended', () => {
+      persistTranscript();
+      stopAllMedia();
       openFeedback();
     });
 
