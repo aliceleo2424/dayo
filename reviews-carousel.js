@@ -3,6 +3,7 @@
   'use strict';
 
   var INTERVAL_MS = 3000;
+  var TRANSITION_MS = 400;
   var TRANSITION = 'transform 0.4s ease-in-out';
 
   function initReviewsCarousel() {
@@ -13,41 +14,64 @@
     var cards = track.querySelectorAll('.review-card');
     if (cards.length < 2) return;
 
-    var firstClone = cards[0].cloneNode(true);
-    firstClone.setAttribute('aria-hidden', 'true');
-    firstClone.classList.remove('reveal', 'reveal-delay-1', 'reveal-delay-2', 'reveal-delay-3', 'visible');
-    firstClone.style.opacity = '1';
-    firstClone.style.transform = '';
-    track.appendChild(firstClone);
+    Array.prototype.forEach.call(cards, function (card) {
+      card.classList.add('visible');
+    });
 
-    var count = cards.length;
-    var index = 0;
     var timer = null;
-    var jumping = false;
+    var animating = false;
+    var settleTimer = null;
 
-    function applyTransform(i, animate) {
+    function getStepPx() {
+      var card = track.querySelector('.review-card');
+      var nextCard = card && card.nextElementSibling;
+      if (card && nextCard) {
+        return nextCard.offsetLeft - card.offsetLeft;
+      }
+      return card ? card.getBoundingClientRect().width : 0;
+    }
+
+    function resetTrack(animate) {
       track.style.transition = animate ? TRANSITION : 'none';
-      track.style.transform = 'translateX(-' + i * 100 + '%)';
+      track.style.transform = 'translateX(0)';
       if (!animate) {
         void track.offsetWidth;
         track.style.transition = TRANSITION;
       }
     }
 
+    function recycleFrontCard() {
+      var first = track.querySelector('.review-card');
+      if (first) track.appendChild(first);
+      resetTrack(false);
+      animating = false;
+    }
+
     function next() {
-      if (jumping) return;
-      index += 1;
-      applyTransform(index, true);
-      if (index !== count) return;
-      jumping = true;
-      track.addEventListener('transitionend', function onEnd(event) {
-        if (event.target !== track) return;
-        if (event.propertyName && event.propertyName !== 'transform') return;
-        track.removeEventListener('transitionend', onEnd);
-        index = 0;
-        applyTransform(0, false);
-        jumping = false;
-      });
+      if (animating) return;
+      var step = getStepPx();
+      if (step <= 0) return;
+
+      animating = true;
+      track.style.transition = TRANSITION;
+      track.style.transform = 'translateX(-' + step + 'px)';
+
+      var settled = false;
+      function settle(event) {
+        if (event && event.target !== track) return;
+        if (event && event.propertyName && event.propertyName !== 'transform') return;
+        if (settled) return;
+        settled = true;
+        track.removeEventListener('transitionend', settle);
+        if (settleTimer) {
+          clearTimeout(settleTimer);
+          settleTimer = null;
+        }
+        recycleFrontCard();
+      }
+
+      track.addEventListener('transitionend', settle);
+      settleTimer = setTimeout(settle, TRANSITION_MS + 80);
     }
 
     function startAuto() {
@@ -66,7 +90,16 @@
     viewport.addEventListener('touchend', startAuto);
     viewport.addEventListener('touchcancel', startAuto);
 
-    applyTransform(0, false);
+    window.addEventListener('resize', function () {
+      if (settleTimer) {
+        clearTimeout(settleTimer);
+        settleTimer = null;
+      }
+      animating = false;
+      resetTrack(false);
+    });
+
+    resetTrack(false);
     startAuto();
   }
 
