@@ -752,6 +752,23 @@
       if (ticketsOpen) {
         closeAllMenus();
       }
+
+      var bookingTrigger = e.target.closest('[data-booking-open], a[href="#booking"], a[href*="#booking"], a[href*="booking=open"]');
+      if (bookingTrigger) {
+        if (window.DayOBooking && typeof window.DayOBooking.requestOpen === 'function') {
+          return;
+        }
+        e.preventDefault();
+        var dest = 'index.html?booking=open';
+        if (!isMember()) {
+          showToast(t('login.required'));
+          openLogin(dest);
+          return;
+        }
+        window.location.href = dest;
+        return;
+      }
+
       var guarded = e.target.closest('[data-ms-guard]');
       if (!guarded || isMember()) return;
       e.preventDefault();

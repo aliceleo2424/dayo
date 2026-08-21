@@ -178,6 +178,11 @@
   var el = {};
   var lastFocused = null;
   var toastTimer = null;
+  var DRAFT_KEY = 'dayo.bookingDraft';
+  var PENDING_OPEN_KEY = 'dayo.pendingBookingOpen';
+  var RESUME_KEY = 'dayo.bookingResumeAfterTopup';
+  var ZERO_TICKET_MSG = '보유하신 세션 티켓이 없습니다. 첫 체험권(9,900원) 또는 세션 패스를 충전해 주세요.';
+  var BOOKING_TRIGGER = '[data-booking-open], a[href="#booking"], a[href*="#booking"], a[href*="booking=open"]';
 
   function startOfToday() {
     var d = new Date();
@@ -283,7 +288,7 @@
 
     var overlay = document.createElement('div');
     overlay.className = 'bk-overlay';
-    overlay.id = 'bkOverlay';
+    overlay.id = 'booking-modal';
     document.body.appendChild(overlay);
 
     var toast = document.createElement('div');
@@ -405,6 +410,10 @@
     el.prevBtn.addEventListener('click', function () { goTo(state.step - 1); });
     el.nextBtn.addEventListener('click', function () {
       if (state.step === 4) { confirmBooking(); return; }
+      if (state.step === 0 && isStepReady(0) && needsTicketTopup()) {
+        routeToTicketTopup();
+        return;
+      }
       goTo(state.step + 1);
     });
   }
@@ -636,8 +645,162 @@
   function confirmBooking() {
     if (!isStepReady(3)) return;
     persistComfortPrefs(true);
+    clearDraft();
+    clearFlag(RESUME_KEY);
     close();
     showToast(t('book.confirmToastFormat', { partner: getPartner(state.partner).name }));
+  }
+
+  function storageGet(key) {
+    try { return window.sessionStorage.getItem(key); } catch (e) { return null; }
+  }
+
+  function storageSet(key, value) {
+    try { window.sessionStorage.setItem(key, value); } catch (e) { /* ignore */ }
+  }
+
+  function storageRemove(key) {
+    try { window.sessionStorage.removeItem(key); } catch (e) { /* ignore */ }
+  }
+
+  function setFlag(key) { storageSet(key, '1'); }
+  function hasFlag(key) { return storageGet(key) === '1'; }
+  function clearFlag(key) { storageRemove(key); }
+
+  function saveDraft() {
+    storageSet(DRAFT_KEY, JSON.stringify({
+      language: state.language,
+      purposes: state.purposes.slice(),
+      style: state.style,
+      chatSpeed: state.chatSpeed,
+      chatStyle: state.chatStyle,
+      chatRequest: state.chatRequest,
+      date: state.date,
+      time: state.time,
+      partner: state.partner,
+      step: state.step
+    }));
+  }
+
+  function loadDraft() {
+    try {
+      var raw = storageGet(DRAFT_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function clearDraft() {
+    storageRemove(DRAFT_KEY);
+  }
+
+  function applyDraft(draft) {
+    if (!draft) return;
+    state.language = draft.language || null;
+    state.purposes = Array.isArray(draft.purposes) ? draft.purposes.slice() : [];
+    state.style = draft.style || null;
+    if (draft.chatSpeed) state.chatSpeed = draft.chatSpeed;
+    if (draft.chatStyle) state.chatStyle = draft.chatStyle;
+    if (draft.chatRequest) state.chatRequest = draft.chatRequest;
+    state.date = draft.date || null;
+    state.time = draft.time || null;
+    state.partner = draft.partner || null;
+    if (state.date) {
+      var parts = String(state.date).split('-');
+      if (parts.length === 3) {
+        state.viewYear = Number(parts[0]);
+        state.viewMonth = Number(parts[1]) - 1;
+      }
+    }
+    ['language', 'purpose', 'style', 'time', 'chatSpeed', 'chatStyle', 'chatRequest'].forEach(syncChips);
+    updateFirstTip();
+    el.slots.hidden = !state.date;
+    renderCalendar();
+    goTo(typeof draft.step === 'number' ? draft.step : 0);
+  }
+
+  function getTicketCount() {
+    if (window.DayOTicketWallet && typeof window.DayOTicketWallet.getCount === 'function') {
+      var n = Number(window.DayOTicketWallet.getCount());
+      return Number.isFinite(n) && n > 0 ? n : 0;
+    }
+    return 0;
+  }
+
+  function needsTicketTopup() {
+    return getTicketCount() <= 0;
+  }
+
+  function isLoggedIn() {
+    if (window.DayOMode && typeof window.DayOMode.isMember === 'function') {
+      return !!window.DayOMode.isMember();
+    }
+    try {
+      return !!(window.localStorage.getItem('userName') || '').trim();
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function findBookingTrigger(target) {
+    if (!target || !target.closest) return null;
+    return target.closest(BOOKING_TRIGGER);
+  }
+
+  function zeroTicketMessage() {
+    if (window.DayOI18n && typeof window.DayOI18n.t === 'function') {
+      var msg = window.DayOI18n.t('book.needTicketsToast');
+      if (msg && msg !== 'book.needTicketsToast') return msg;
+    }
+    return ZERO_TICKET_MSG;
+  }
+
+  function routeToTicketTopup() {
+    saveDraft();
+    setFlag(RESUME_KEY);
+    showToast(zeroTicketMessage());
+    close();
+    if (window.DayOTickets && typeof window.DayOTickets.open === 'function') {
+      window.DayOTickets.open();
+      return;
+    }
+    var pricing = document.getElementById('pricing');
+    if (pricing && typeof pricing.scrollIntoView === 'function') {
+      pricing.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    window.location.href = 'index.html?tickets=open';
+  }
+
+  function openLoginForBooking() {
+    setFlag(PENDING_OPEN_KEY);
+    function showLogin() {
+      if (!window.DayOMode || typeof window.DayOMode.openLogin !== 'function') return false;
+      if (typeof window.DayOMode.toast === 'function') {
+        window.DayOMode.toast(t('login.required'));
+      }
+      window.DayOMode.openLogin(null);
+      return true;
+    }
+    if (showLogin()) return;
+    var tries = 0;
+    var timer = setInterval(function () {
+      tries += 1;
+      if (showLogin() || tries > 40) clearInterval(timer);
+    }, 50);
+  }
+
+  function welcomeOpen() {
+    var welcome = document.querySelector('.ms-welcome-overlay.is-open');
+    return !!(welcome);
+  }
+
+  function tryOpenPendingBooking() {
+    if (!isLoggedIn() || !hasFlag(PENDING_OPEN_KEY)) return;
+    if (welcomeOpen()) return;
+    clearFlag(PENDING_OPEN_KEY);
+    open();
   }
 
   function loadComfortIntoState() {
@@ -668,13 +831,27 @@
     goTo(0);
   }
 
-  function open() {
+  function open(opts) {
+    opts = opts || {};
     lastFocused = document.activeElement;
     reset();
+    var draft = loadDraft();
+    if (draft) applyDraft(draft);
+    if (opts.resume && getTicketCount() > 0 && state.step === 0 && isStepReady(0)) {
+      goTo(1);
+    }
     el.overlay.classList.add('is-open');
     if (window.DayOScrollLock) window.DayOScrollLock.lock();
     else document.body.style.overflow = 'hidden';
     el.modal.querySelector('.bk-close').focus();
+  }
+
+  function requestOpen() {
+    if (!isLoggedIn()) {
+      openLoginForBooking();
+      return;
+    }
+    open();
   }
 
   function close() {
@@ -699,7 +876,7 @@
     var fromQuery = /[?&]booking=open(&|$)/.test(window.location.search);
     var fromHash = window.location.hash === '#booking';
     if (!fromQuery && !fromHash) return;
-    open();
+    requestOpen();
     if (fromQuery && window.history && window.history.replaceState) {
       var clean = window.location.search.replace(/([?&])booking=open(&|$)/, '$1').replace(/[?&]$/, '');
       window.history.replaceState({}, '', window.location.pathname + clean + window.location.hash);
@@ -709,14 +886,35 @@
   function init() {
     mount();
     document.addEventListener('click', function (e) {
-      var trigger = e.target.closest('[data-booking-open]');
+      var trigger = findBookingTrigger(e.target);
       if (!trigger) return;
       e.preventDefault();
-      open();
+      e.stopPropagation();
+      requestOpen();
     });
     document.addEventListener('dayo:langchange', refreshOnLangChange);
-    window.DayOBooking = { open: open, close: close };
+    document.addEventListener('dayo:authchange', function (e) {
+      if (!e.detail || !e.detail.loggedIn) return;
+      setTimeout(tryOpenPendingBooking, 350);
+    });
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('[data-ms-welcome-close]')) return;
+      setTimeout(tryOpenPendingBooking, 350);
+    });
+    document.addEventListener('dayo:ticketchange', function (e) {
+      var count = e.detail && typeof e.detail.ticketCount === 'number'
+        ? e.detail.ticketCount
+        : getTicketCount();
+      if (count <= 0 || !hasFlag(RESUME_KEY)) return;
+      clearFlag(RESUME_KEY);
+      if (window.DayOTickets && typeof window.DayOTickets.close === 'function') {
+        window.DayOTickets.close();
+      }
+      open({ resume: true });
+    });
+    window.DayOBooking = { open: open, close: close, requestOpen: requestOpen };
     openFromQuery();
+    if (isLoggedIn()) tryOpenPendingBooking();
   }
 
   if (document.readyState === 'loading') {

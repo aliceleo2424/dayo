@@ -106,11 +106,17 @@
       if (getCount() > 0) return;
       e.preventDefault();
       e.stopPropagation();
+      if (window.DayOBooking && typeof window.DayOBooking.requestOpen === 'function') {
+        window.DayOBooking.requestOpen();
+        return;
+      }
       var msg = '티켓이 부족해요! 이용권을 충전하고 바로 대화를 시작해 보세요 ☕️';
       if (window.DayOTickets && typeof window.DayOTickets.promptPurchase === 'function') {
         window.DayOTickets.promptPurchase(msg);
       } else if (window.DayOTickets && typeof window.DayOTickets.open === 'function') {
         window.DayOTickets.open();
+      } else {
+        window.location.href = 'index.html?booking=open';
       }
     }, true);
   }

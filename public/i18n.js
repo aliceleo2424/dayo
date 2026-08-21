@@ -1458,6 +1458,14 @@
       FR: 'Réservation confirmée ! À bientôt avec {partner} 💖',
       ES: '¡Reserva confirmada! Nos vemos con {partner} 💖'
     },
+    'book.needTicketsToast': {
+      KO: '보유하신 세션 티켓이 없습니다. 첫 체험권(9,900원) 또는 세션 패스를 충전해 주세요.',
+      EN: 'You have no session tickets. Please top up with the first trial (9,900 KRW) or a session pass.',
+      ZH: '您还没有课时券。请先充值首次体验券（9,900韩元）或课时套餐。',
+      JA: 'セッションチケットがありません。初回体験券（9,900ウォン）またはセッションパスをチャージしてください。',
+      FR: 'Vous n’avez plus de tickets. Rechargez avec l’essai (9 900 KRW) ou un pass session.',
+      ES: 'No tienes tickets de sesión. Recarga con la prueba (9.900 KRW) o un pase.'
+    },
     'book.lang.en': { KO: '영어', EN: 'English', ZH: '英语', JA: '英語', FR: 'Anglais', ES: 'Inglés' },
     'book.lang.es': { KO: '스페인어', EN: 'Spanish', ZH: '西班牙语', JA: 'スペイン語', FR: 'Espagnol', ES: 'Español' },
     'book.lang.fr': { KO: '프랑스어', EN: 'French', ZH: '法语', JA: 'フランス語', FR: 'Français', ES: 'Francés' },

@@ -608,7 +608,7 @@
     <div class="nav-drawer__head">DayO 메뉴</div>
     <div data-i18n-lang="drawer"></div>
     <a href="index.html" data-i18n="nav.homeAria">홈으로</a>
-    <a href="index.html?booking=open" data-i18n="nav.booking">대화 예약하기</a>
+    <a href="index.html?booking=open" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
     <a href="partner.html"><span aria-hidden="true">🤝</span> <span data-i18n="nav.partnerStudio">파트너 스튜디오로 이동</span></a>
     <button type="button" class="nav-drawer__link" data-tickets-open>
       <span data-ticket-badge-text>☕️ 보유 티켓: 1장</span>
@@ -657,7 +657,7 @@
           <h2 class="card-title" id="statusTitle" data-i18n="mypage.status.title">🎓 내 대화 현황</h2>
           <p class="card-subtitle" data-i18n="mypage.status.sub">이번 달 나의 대화 기록과 남은 이용권이에요.</p>
         </div>
-        <a class="primary-btn" href="index.html?booking=open" data-i18n="mypage.status.newBooking">📅 새 대화 예약하기</a>
+        <a class="primary-btn" href="index.html?booking=open" data-booking-open data-i18n="mypage.status.newBooking">📅 새 대화 예약하기</a>
       </div>
 
       <div class="status-grid">
@@ -871,5 +871,7 @@
   <script src="mode-switch.js"></script>
   <script src="ticket-wallet.js"></script>
   <script src="tickets-modal.js"></script>
+  <script src="chat-prefs.js"></script>
+  <script src="booking-modal.js"></script>
 </body>
 </html>
