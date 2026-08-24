@@ -16,7 +16,7 @@
       id: 'mistakes',
       original: "It's okay to make mistakes — that's how conversations get brave.",
       ko: '실수해도 괜찮아요. 그게 대화를 용기 있게 만드는 길이니까요.',
-      cheer: '틀려도 돼요. DayO가 옆에서 같이 고쳐줄게요 💬'
+      cheer: '틀려도 돼요. DayO는 대화 중간에 AI매니저의 도움을 받을 수 있어요💬'
     },
     {
       id: 'small-talk',
