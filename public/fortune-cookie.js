@@ -108,24 +108,25 @@
     if (el.ko) el.ko.textContent = card.ko;
     if (el.cheer) el.cheer.textContent = card.cheer;
     if (el.saveBanner) {
-      el.saveBanner.hidden = isLoggedIn();
-      el.saveBanner.style.display = isLoggedIn() ? 'none' : '';
+      var guest = !isLoggedIn();
+      el.saveBanner.hidden = !guest;
+      el.saveBanner.style.display = guest ? '' : 'none';
     }
   }
 
   function resetCrack() {
     cracking = false;
-    if (el.cookieWrapper) el.cookieWrapper.classList.remove('is-cracking');
+    if (el.cookieTrigger) el.cookieTrigger.classList.remove('is-cracking');
   }
 
   function playCrackThenOpen() {
     if (cracking) return;
     if (el.modal && !el.modal.hidden) return;
     cracking = true;
-    if (el.cookieWrapper) {
-      el.cookieWrapper.classList.remove('is-cracking');
-      void el.cookieWrapper.offsetWidth;
-      el.cookieWrapper.classList.add('is-cracking');
+    if (el.cookieTrigger) {
+      el.cookieTrigger.classList.remove('is-cracking');
+      void el.cookieTrigger.offsetWidth;
+      el.cookieTrigger.classList.add('is-cracking');
     }
     clearTimeout(crackTimer);
     crackTimer = setTimeout(function () {
@@ -189,14 +190,9 @@
   }
 
   function bind() {
-    if (el.openBtn) {
-      el.openBtn.addEventListener('click', function (e) {
+    if (el.cookieTrigger) {
+      el.cookieTrigger.addEventListener('click', function (e) {
         e.preventDefault();
-        playCrackThenOpen();
-      });
-    }
-    if (el.cookieWrapper) {
-      el.cookieWrapper.addEventListener('click', function () {
         playCrackThenOpen();
       });
     }
@@ -211,7 +207,7 @@
         e.preventDefault();
         copyCard();
       }
-      if (e.target.closest('.dayo-fortune-save-banner')) {
+      if (e.target.closest('[data-fortune-login]')) {
         e.preventDefault();
         openLogin();
       }
@@ -230,28 +226,15 @@
   }
 
   function init() {
-    el.openBtn = document.getElementById('btn-open-fortune');
+    el.cookieTrigger = document.getElementById('dayo-cookie-trigger');
     el.modal = document.getElementById('dayo-fortune-modal');
-    if (!el.openBtn || !el.modal) return;
-    el.cookieWrapper = document.querySelector('.dayo-fortune-section .cookie-wrapper');
+    if (!el.cookieTrigger || !el.modal) return;
 
     el.dear = document.getElementById('dayo-fortune-dear');
     el.original = el.modal.querySelector('[data-fortune-original]');
     el.ko = el.modal.querySelector('[data-fortune-ko]');
     el.cheer = el.modal.querySelector('[data-fortune-cheer]');
     el.saveBanner = el.modal.querySelector('.dayo-fortune-save-banner');
-
-    if (el.saveBanner) {
-      el.saveBanner.setAttribute('role', 'button');
-      el.saveBanner.setAttribute('tabindex', '0');
-      el.saveBanner.style.cursor = 'pointer';
-      el.saveBanner.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          openLogin();
-        }
-      });
-    }
 
     bind();
     window.DayOFortune = {
