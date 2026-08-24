@@ -1511,6 +1511,73 @@
       display: block;
       margin-bottom: 0.7rem;
     }
+    .dayo-fortune-section .cookie-wrapper {
+      position: relative;
+      width: 4.6rem;
+      height: 4.6rem;
+      margin: 0 auto 0.7rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .dayo-fortune-section .cookie-piece {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.2rem;
+      line-height: 1;
+      transform-origin: center bottom;
+      will-change: transform, opacity;
+    }
+    .dayo-fortune-section .cookie-piece.left {
+      clip-path: inset(0 50% 0 0);
+    }
+    .dayo-fortune-section .cookie-piece.right {
+      clip-path: inset(0 0 0 50%);
+    }
+    .dayo-fortune-section .fortune-paper-mini {
+      position: absolute;
+      left: 50%;
+      top: 52%;
+      z-index: 1;
+      padding: 0.28rem 0.5rem;
+      border-radius: 8px;
+      background: #FFFCFA;
+      border: 1px solid rgba(255, 196, 90, 0.7);
+      box-shadow: 0 4px 10px rgba(255, 184, 76, 0.28);
+      font-size: 0.62rem;
+      font-weight: 800;
+      color: #5C4A42;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translate(-50%, -40%) scale(0.7);
+      pointer-events: none;
+    }
+    @keyframes dayo-fortune-shake {
+      0%, 100% { transform: translateX(0) rotate(0); }
+      25% { transform: translateX(-5px) rotate(-6deg); }
+      75% { transform: translateX(5px) rotate(6deg); }
+    }
+    .dayo-fortune-section .cookie-wrapper.is-cracking {
+      animation: dayo-fortune-shake 0.1s ease;
+    }
+    .dayo-fortune-section .cookie-wrapper.is-cracking .cookie-piece.left {
+      transition: transform 0.4s ease, opacity 0.4s ease;
+      transform: rotate(-30deg) translate(-20px, 10px);
+      opacity: 0;
+    }
+    .dayo-fortune-section .cookie-wrapper.is-cracking .cookie-piece.right {
+      transition: transform 0.4s ease, opacity 0.4s ease;
+      transform: rotate(30deg) translate(20px, 10px);
+      opacity: 0;
+    }
+    .dayo-fortune-section .cookie-wrapper.is-cracking .fortune-paper-mini {
+      transition: transform 0.3s ease 0.08s, opacity 0.3s ease 0.08s;
+      transform: translate(-50%, calc(-50% - 30px)) scale(1.1);
+      opacity: 1;
+    }
     .dayo-fortune-copy {
       margin: 0 auto 1.15rem;
       max-width: 22rem;
@@ -1848,7 +1915,11 @@
 
     <section class="dayo-fortune-section" aria-label="오늘의 포춘쿠키">
       <div class="dayo-fortune-card">
-        <span class="dayo-fortune-emoji" aria-hidden="true">🥠</span>
+        <div class="cookie-wrapper" aria-hidden="true">
+          <span class="cookie-piece left">🥠</span>
+          <span class="cookie-piece right">🥠</span>
+          <div class="fortune-paper-mini">✨ 오늘의 한마디</div>
+        </div>
         <p class="dayo-fortune-copy">바삭! 포춘쿠키를 눌러서 오늘의 카드를 열어보세요</p>
         <button type="button" id="btn-open-fortune" class="dayo-fortune-open-btn">쿠키 열어보기</button>
       </div>

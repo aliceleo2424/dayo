@@ -34,6 +34,8 @@
 
   var el = {};
   var lastFocused = null;
+  var cracking = false;
+  var crackTimer = null;
 
   function todayISO() {
     var d = new Date();
@@ -111,6 +113,27 @@
     }
   }
 
+  function resetCrack() {
+    cracking = false;
+    if (el.cookieWrapper) el.cookieWrapper.classList.remove('is-cracking');
+  }
+
+  function playCrackThenOpen() {
+    if (cracking) return;
+    if (el.modal && !el.modal.hidden) return;
+    cracking = true;
+    if (el.cookieWrapper) {
+      el.cookieWrapper.classList.remove('is-cracking');
+      void el.cookieWrapper.offsetWidth;
+      el.cookieWrapper.classList.add('is-cracking');
+    }
+    clearTimeout(crackTimer);
+    crackTimer = setTimeout(function () {
+      openModal();
+      resetCrack();
+    }, 400);
+  }
+
   function openModal() {
     var card = getOrAssignTodayCard();
     renderCard(card);
@@ -169,7 +192,12 @@
     if (el.openBtn) {
       el.openBtn.addEventListener('click', function (e) {
         e.preventDefault();
-        openModal();
+        playCrackThenOpen();
+      });
+    }
+    if (el.cookieWrapper) {
+      el.cookieWrapper.addEventListener('click', function () {
+        playCrackThenOpen();
       });
     }
 
@@ -205,6 +233,7 @@
     el.openBtn = document.getElementById('btn-open-fortune');
     el.modal = document.getElementById('dayo-fortune-modal');
     if (!el.openBtn || !el.modal) return;
+    el.cookieWrapper = document.querySelector('.dayo-fortune-section .cookie-wrapper');
 
     el.dear = document.getElementById('dayo-fortune-dear');
     el.original = el.modal.querySelector('[data-fortune-original]');
