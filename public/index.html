@@ -1744,6 +1744,170 @@
       .dayo-fortune-piece { font-size: 3.5rem; }
       .dayo-fortune-cookie { width: 5rem; height: 5rem; }
     }
+
+    /* Live webinar pre-register — .dayo-webinar- prefix only */
+    .dayo-webinar-section {
+      position: relative;
+      z-index: 1;
+      padding: 0 1.25rem var(--section-gap);
+    }
+    .dayo-webinar-inner {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 1.75rem;
+      background: linear-gradient(160deg, #FFF7FB 0%, #FFE9D8 58%, #FFF6C7 100%);
+      border: 1px solid rgba(255, 107, 87, 0.22);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 14px 36px var(--shadow-soft);
+      text-align: center;
+    }
+    .dayo-webinar-eyebrow {
+      display: inline-block;
+      margin-bottom: 0.55rem;
+      padding: 0.22rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(255, 107, 87, 0.12);
+      color: var(--coral);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .dayo-webinar-title {
+      margin: 0 auto 0.65rem;
+      font-size: clamp(1.2rem, 3.4vw, 1.55rem);
+      font-weight: 800;
+      line-height: 1.45;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .dayo-webinar-sub {
+      margin: 0 auto 1.35rem;
+      max-width: 32rem;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      font-weight: 600;
+      line-height: 1.7;
+    }
+    .dayo-webinar-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      justify-content: center;
+      margin-bottom: 1.35rem;
+    }
+    .dayo-webinar-tab {
+      padding: 0.55rem 0.95rem;
+      border: 1.5px solid rgba(255, 107, 87, 0.28);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.7);
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
+    }
+    .dayo-webinar-tab:hover { transform: translateY(-1px); border-color: var(--coral); }
+    .dayo-webinar-tab.is-active {
+      background: var(--coral);
+      border-color: var(--coral);
+      color: #fff;
+      box-shadow: 0 4px 0 var(--coral-dark);
+    }
+    .dayo-webinar-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+      text-align: left;
+    }
+    .dayo-webinar-field { display: flex; flex-direction: column; gap: 0.35rem; }
+    .dayo-webinar-label {
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .dayo-webinar-form input {
+      width: 100%;
+      padding: 0.95rem 1.1rem;
+      border: 1px solid var(--coral-pale);
+      border-radius: var(--radius);
+      background: var(--cream);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+    }
+    .dayo-webinar-form input:focus {
+      border-color: var(--coral);
+      box-shadow: 0 0 0 3px rgba(255, 107, 87, 0.12);
+    }
+    .dayo-webinar-error {
+      min-height: 1.15rem;
+      margin: 0.1rem 0 0;
+      color: var(--coral);
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+    .dayo-webinar-error:empty { min-height: 0; }
+    .dayo-webinar-submit {
+      width: 100%;
+      margin-top: 0.15rem;
+      padding: 1rem 1.1rem;
+      border: none;
+      border-radius: var(--radius);
+      background: var(--coral);
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.98rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 4px 0 var(--coral-dark);
+      transition: transform 0.15s, background 0.2s;
+    }
+    .dayo-webinar-submit:hover { background: #ff5741; transform: translateY(-1px); }
+    .dayo-webinar-submit:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--coral-dark); }
+    .dayo-webinar-submit:disabled { opacity: 0.7; cursor: wait; transform: none; }
+    .dayo-webinar-submit.is-loading {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .dayo-webinar-toast {
+      position: fixed;
+      left: 50%;
+      bottom: 1.75rem;
+      z-index: 520;
+      width: min(440px, calc(100% - 2rem));
+      padding: 1rem 1.2rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--coral-pale);
+      background: var(--bg-card);
+      color: var(--text);
+      font-size: 0.9rem;
+      font-weight: 700;
+      line-height: 1.55;
+      text-align: center;
+      box-shadow: 0 12px 32px var(--shadow-soft);
+      transform: translateX(-50%) translateY(80px);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.35s ease, opacity 0.3s ease;
+    }
+    .dayo-webinar-toast.is-show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+    .dayo-webinar-toast.is-error {
+      border-color: rgba(255, 107, 87, 0.45);
+      color: var(--coral-dark);
+    }
+    @media (max-width: 600px) {
+      .dayo-webinar-section { padding: 0 1rem 3.5rem; }
+      .dayo-webinar-inner { padding: 1.5rem 1.05rem 1.35rem; }
+      .dayo-webinar-tab { width: 100%; }
+    }
   </style>
 </head>
 <body data-dayo-role="learner">
@@ -2089,6 +2253,34 @@
       </div>
     </section>
 
+    <section class="dayo-webinar-section" id="webinar" aria-labelledby="dayo-webinar-title">
+      <div class="dayo-webinar-inner">
+        <p class="dayo-webinar-eyebrow">Live Webinar</p>
+        <h2 class="dayo-webinar-title" id="dayo-webinar-title">🎙️ DayO 라이브 웨비나 사전 신청</h2>
+        <p class="dayo-webinar-sub">외국인 앞 울렁증 극복 꿀팁부터 AI 힌트를 활용한 실전 회화 전략까지, 실시간 라이브로 만나보세요.</p>
+        <div class="dayo-webinar-tabs" role="tablist" aria-label="웨비나 유형 선택">
+          <button type="button" class="dayo-webinar-tab is-active" role="tab" aria-selected="true" data-webinar-type="free">무료 웨비나 (선착순 LIVE)</button>
+          <button type="button" class="dayo-webinar-tab" role="tab" aria-selected="false" data-webinar-type="paid">심화 실전 마스터 (유료)</button>
+        </div>
+        <form class="dayo-webinar-form" id="webinar-form" novalidate>
+          <label class="dayo-webinar-field" for="webinar-name">
+            <span class="dayo-webinar-label">이름</span>
+            <input type="text" id="webinar-name" name="name" placeholder="이름을 입력해 주세요" required autocomplete="name">
+          </label>
+          <label class="dayo-webinar-field" for="webinar-phone">
+            <span class="dayo-webinar-label">연락처</span>
+            <input type="tel" id="webinar-phone" name="phone" placeholder="휴대폰 번호 (010-0000-0000)" required autocomplete="tel" inputmode="numeric">
+          </label>
+          <label class="dayo-webinar-field" for="webinar-email">
+            <span class="dayo-webinar-label">이메일</span>
+            <input type="email" id="webinar-email" name="email" placeholder="알림받을 이메일 주소" required autocomplete="email">
+          </label>
+          <p class="dayo-webinar-error" id="webinar-error" role="alert"></p>
+          <button type="submit" id="btn-webinar-submit" class="dayo-webinar-submit">웨비나 무료 알림 신청하기</button>
+        </form>
+      </div>
+    </section>
+
   </div>
 
   <footer class="site-footer">
@@ -2145,6 +2337,7 @@
   </div>
 
   <div class="result-toast" id="resultToast"></div>
+  <div class="dayo-webinar-toast" id="dayo-webinar-toast" role="status" aria-live="polite" hidden></div>
 
   <script src="mobile-nav.js"></script>
   <script>
@@ -2936,6 +3129,7 @@
   <script src="tickets-modal.js"></script>
   <script src="mode-switch.js"></script>
   <script src="fortune-cookie.js"></script>
+  <script type="module" src="webinar-apply.js"></script>
   <script src="greeting-banner.js"></script>
   <script src="logged-in-home.js"></script>
   <script src="lounge-carousel.js"></script>
