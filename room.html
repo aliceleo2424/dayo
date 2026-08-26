@@ -2,6 +2,39 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <script>
+    (function checkInApp() {
+      const ua = navigator.userAgent.toLowerCase();
+      const isKakao = ua.indexOf('kakaotalk') !== -1;
+      const isLine = ua.indexOf('line') !== -1;
+      const isInstagram = ua.indexOf('instagram') !== -1;
+      const isInApp = isKakao || isLine || isInstagram;
+
+      if (!isInApp) return;
+
+      // 1) 안드로이드: 크롬 브라우저 자동 실행
+      if (ua.indexOf('android') !== -1) {
+        const cleanUrl = location.href.replace(/https?:\/\//i, '');
+        location.href = `intent://${cleanUrl}#Intent;scheme=https;package=com.android.chrome;end`;
+        return;
+      }
+
+      // 2) iOS (아이폰): 사파리 전환 유도 상단 고정 배너 표시
+      if (ua.indexOf('iphone') !== -1 || ua.indexOf('ipad') !== -1) {
+        window.addEventListener('DOMContentLoaded', () => {
+          const banner = document.createElement('div');
+          banner.id = 'inapp-safari-banner';
+          banner.innerHTML = `
+            <div style="position:fixed; top:0; left:0; width:100%; background:#FF6B57; color:#fff; padding:12px 14px; font-size:13px; font-weight:700; text-align:center; z-index:999999; box-shadow:0 4px 12px rgba(0,0,0,0.2); display:flex; justify-content:space-between; align-items:center;">
+              <span>🎙️ 마이크/음성 인식을 위해 <strong>우측 하단 [공유] ➔ [Safari로 열기]</strong>를 눌러주세요!</span>
+              <button onclick="this.parentElement.remove()" style="background:none; border:none; color:#fff; font-size:16px; font-weight:bold; cursor:pointer; margin-left:8px;">✕</button>
+            </div>
+          `;
+          document.body.prepend(banner);
+        });
+      }
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title data-i18n="page.title.room">DayO 돼요 — 화상 회화 스튜디오</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -9,7 +42,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="mobile-nav.css">
   <script src="scroll-lock.js"></script>
-  <script src="inapp-browser-escape.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
