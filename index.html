@@ -78,6 +78,26 @@
       -webkit-font-smoothing: antialiased;
     }
 
+    body.theme-learner {
+      background: linear-gradient(180deg, #FFF9F2 0%, #FFF0ED 100%);
+    }
+    body.theme-partner {
+      background: linear-gradient(180deg, #F0F9F5 0%, #E6F4EE 100%);
+    }
+    body.theme-partner header {
+      background: rgba(240, 249, 245, 0.88);
+      border-bottom-color: rgba(45, 159, 117, 0.16);
+    }
+    body.theme-partner .mesh-bg__layer--1 {
+      background: radial-gradient(circle at 30% 40%, #C8EDE0 0%, transparent 42%);
+    }
+    body.theme-partner .mesh-bg__layer--2 {
+      background: radial-gradient(circle at 70% 25%, #D7F3E8 0%, transparent 40%);
+    }
+    body.theme-partner .mesh-bg__layer--3 {
+      background: radial-gradient(circle at 55% 75%, #E6F4EE 0%, transparent 45%);
+    }
+
     .mesh-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
     .mesh-bg__layer { position: absolute; inset: -50%; width: 200%; height: 200%; opacity: 0.65; }
     .mesh-bg__layer--1 { background: radial-gradient(circle at 30% 40%, var(--pink) 0%, transparent 42%); animation: meshDrift1 14s ease-in-out infinite alternate; }
@@ -1943,7 +1963,18 @@
     }
   </style>
 </head>
-<body data-dayo-role="learner">
+<body class="theme-learner" data-dayo-role="learner">
+  <script>
+    (function applyPartnerTheme() {
+      try {
+        var role = String(new URLSearchParams(location.search).get('role') || '').toLowerCase();
+        if (role !== 'partner') return;
+        document.body.classList.remove('theme-learner');
+        document.body.classList.add('theme-partner');
+        document.body.setAttribute('data-dayo-role', 'partner');
+      } catch (e) {}
+    })();
+  </script>
   <script src="i18n.js"></script>
 
   <div class="mesh-bg" aria-hidden="true">
