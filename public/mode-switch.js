@@ -581,7 +581,45 @@
     });
   }
 
+  function handleNaverTestLogin() {
+    var name = 'DayO테스터';
+    var email = 'tester@dayo.com';
+    pendingHref = null;
+
+    try {
+      window.localStorage.setItem('dayo_user_email', email);
+      window.localStorage.setItem('dayo_user_name', name);
+      window.localStorage.setItem('dayo_ticket_count', '1');
+      window.localStorage.setItem('dayo_is_logged_in', 'true');
+      window.localStorage.setItem(USER_KEY, name);
+      window.localStorage.setItem(EMAIL_KEY, email);
+      window.localStorage.setItem(MEMBER_KEY, 'active');
+      window.localStorage.setItem('ticketCount', '1');
+    } catch (e) { /* ignore */ }
+
+    if (window.DayOTicketWallet && typeof window.DayOTicketWallet.setCount === 'function') {
+      window.DayOTicketWallet.setCount(1);
+    }
+
+    try {
+      window.localStorage.setItem(USER_KEY, name);
+      window.localStorage.setItem(EMAIL_KEY, email);
+      window.localStorage.setItem(MEMBER_KEY, 'active');
+      window.localStorage.setItem('dayo_user_name', name);
+      window.localStorage.setItem('dayo_ticket_count', '1');
+    } catch (e) { /* ignore */ }
+
+    closeLogin();
+    render();
+    notifyAuthChange();
+    showToast('🎉 테스트 계정으로 간편 로그인되었습니다!', 1000);
+  }
+
   function handleSocialAuth(provider) {
+    if (provider === 'naver') {
+      handleNaverTestLogin();
+      return;
+    }
     if (provider !== 'google') {
       showToast(t('login.socialSoon'));
       return;
