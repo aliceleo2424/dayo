@@ -58,6 +58,21 @@
     }, ms || 2600);
   }
 
+  function isPartnerRoomMode() {
+    if (typeof window.isPartnerRoomMode === 'function') {
+      return window.isPartnerRoomMode();
+    }
+    try {
+      if (document.body && document.body.classList.contains('theme-partner')) return true;
+      if (String(localStorage.getItem('dayo_current_mode') || '').toUpperCase() === 'PARTNER') {
+        return true;
+      }
+      var role = String(new URLSearchParams(location.search).get('role') || '').toLowerCase();
+      if (role === 'partner') return true;
+    } catch (e) { /* ignore */ }
+    return false;
+  }
+
   function escapeHtml(str) {
     return String(str == null ? '' : str).replace(/[&<>"']/g, function (ch) {
       return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
@@ -616,7 +631,7 @@
     if (nodes.host) nodes.host.classList.remove('is-on', 'is-pending');
     if (nodes.stage) nodes.stage.classList.remove('is-daily');
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      showToast(t('room.toastNoMedia'), 3200);
+      if (!isPartnerRoomMode()) showToast(t('room.toastNoMedia'), 3200);
       return Promise.resolve();
     }
     return navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(function (stream) {
@@ -624,6 +639,7 @@
       if (nodes.selfVideo) nodes.selfVideo.srcObject = stream;
       applyLocalTracks();
     }).catch(function () {
+      if (isPartnerRoomMode()) return;
       var toast = document.getElementById('toast');
       if (toast) toast.classList.add('toast--notice');
       showToast(t('room.toastNoMedia'), 3200);

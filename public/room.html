@@ -229,6 +229,12 @@
       background: rgba(234, 248, 242, 0.92);
     }
 
+    body.theme-partner .camera-off-tip,
+    body.theme-partner .camera-tip-banner,
+    body.theme-partner #cameraTipPopup {
+      display: none !important;
+    }
+
     .studio {
       height: 100%;
       height: 100dvh;
@@ -535,6 +541,51 @@
       bottom: calc(var(--bottom-h) + 1.15rem);
       height: auto;
       z-index: 90;
+    }
+
+    .camera-tip-banner,
+    #cameraTipPopup {
+      position: fixed;
+      left: 50%;
+      bottom: calc(var(--bottom-h) + 1.15rem);
+      transform: translateX(-50%);
+      z-index: 95;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: min(380px, calc(100% - 2rem));
+      padding: 0.75rem 1rem;
+      background: linear-gradient(135deg, rgba(255, 252, 250, 0.98), rgba(255, 241, 232, 0.96));
+      border: 1px solid rgba(255, 209, 220, 0.8);
+      border-radius: 18px;
+      box-shadow: 0 10px 28px rgba(113, 83, 72, 0.14);
+    }
+
+    .camera-tip-banner[hidden],
+    #cameraTipPopup[hidden] {
+      display: none !important;
+    }
+
+    .camera-off-tip__text {
+      flex: 1;
+      margin: 0;
+      font-size: 0.84rem;
+      font-weight: 700;
+      line-height: 1.45;
+      color: var(--text);
+    }
+
+    .camera-off-tip__close {
+      flex-shrink: 0;
+      padding: 0.45rem 0.85rem;
+      border: 1px solid var(--coral-pale);
+      border-radius: 999px;
+      background: var(--bg-card);
+      color: var(--coral-dark);
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
     }
 
     .top-btn {
@@ -2197,6 +2248,7 @@
         document.body.setAttribute('data-mode', 'partner');
         document.body.setAttribute('data-dayo-role', 'partner');
         schedulePartnerRoomCopy();
+        if (typeof window.hideCameraOffGuidance === 'function') window.hideCameraOffGuidance();
       }
       function enterLearner() {
         document.body.classList.remove('theme-partner');
@@ -2216,6 +2268,18 @@
       window.toggleMode = function(mode) {
         if (mode === 'partner') window.goToView('viewPartnerHome');
         else window.goToView('viewLearnerHome');
+      };
+
+      window.isPartnerRoomMode = function() {
+        if (document.body && document.body.classList.contains('theme-partner')) return true;
+        try {
+          if (String(localStorage.getItem('dayo_current_mode') || '').toUpperCase() === 'PARTNER') {
+            return true;
+          }
+          var role = String(new URLSearchParams(location.search).get('role') || '').toLowerCase();
+          if (role === 'partner') return true;
+        } catch (e) {}
+        return false;
       };
       try {
         var params = new URLSearchParams(location.search);
@@ -2507,6 +2571,11 @@
   </div>
 
   <div class="toast" id="toast"></div>
+
+  <div id="cameraTipPopup" class="camera-tip-banner camera-off-tip" role="status" aria-live="polite" hidden>
+    <p class="camera-off-tip__text">카메라를 끌 수 있어요 📹</p>
+    <button type="button" class="camera-off-tip__close" id="cameraTipDismiss" aria-label="닫기">확인</button>
+  </div>
 
   <div class="prefs-sheet-overlay" id="prefsSheetOverlay" hidden>
     <div class="prefs-sheet" role="dialog" aria-modal="true" aria-labelledby="prefsSheetTitle">
@@ -2827,6 +2896,40 @@
 
     renderMicLabel();
     renderCamLabel();
+
+    /* Camera-off guidance — learner only */
+    (function initCameraOffGuidance() {
+      var popup = document.getElementById('cameraTipPopup');
+      var dismissBtn = document.getElementById('cameraTipDismiss');
+      if (!popup) return;
+
+      var tipTimer = 0;
+
+      function hideCameraTip() {
+        clearTimeout(tipTimer);
+        popup.hidden = true;
+      }
+
+      function showCameraTip() {
+        if (window.isPartnerRoomMode && window.isPartnerRoomMode()) return;
+        popup.hidden = false;
+      }
+
+      function scheduleCameraTip() {
+        if (window.isPartnerRoomMode && window.isPartnerRoomMode()) return;
+        clearTimeout(tipTimer);
+        tipTimer = setTimeout(showCameraTip, 2000);
+      }
+
+      if (dismissBtn) dismissBtn.addEventListener('click', hideCameraTip);
+      window.hideCameraOffGuidance = hideCameraTip;
+
+      if (window.isPartnerRoomMode && window.isPartnerRoomMode()) {
+        hideCameraTip();
+        return;
+      }
+      scheduleCameraTip();
+    })();
 
     /* Chat */
     const mainStage = document.getElementById('mainStage');
