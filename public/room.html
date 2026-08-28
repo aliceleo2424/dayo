@@ -2476,12 +2476,46 @@
 
       scheduleRoleTextUpdates();
 
+      function isPartnerCameraTipBlocked() {
+        try {
+          return document.body.classList.contains('theme-partner') ||
+            localStorage.getItem('dayo_current_mode') === 'PARTNER' ||
+            String(localStorage.getItem('dayo_current_mode') || '').toUpperCase() === 'PARTNER' ||
+            new URLSearchParams(window.location.search).get('role') === 'partner';
+        } catch (e) {
+          return false;
+        }
+      }
+
+      function purgeCameraTipPopupForPartner() {
+        if (!isPartnerCameraTipBlocked()) return;
+        var popup = document.getElementById('cameraTipPopup');
+        if (!popup) return;
+        popup.hidden = true;
+        popup.style.setProperty('display', 'none', 'important');
+        popup.setAttribute('aria-hidden', 'true');
+        popup.remove();
+      }
+
+      function schedulePartnerCameraTipBlock() {
+        function run() { purgeCameraTipPopupForPartner(); }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', run);
+        } else {
+          run();
+        }
+        window.addEventListener('load', run);
+      }
+
+      schedulePartnerCameraTipBlock();
+
       function enterPartner() {
         document.body.classList.add('theme-partner');
         document.body.classList.remove('theme-learner');
         document.body.setAttribute('data-mode', 'partner');
         document.body.setAttribute('data-dayo-role', 'partner');
         applyPartnerRoomCopy();
+        purgeCameraTipPopupForPartner();
         if (typeof window.hideCameraOffGuidance === 'function') window.hideCameraOffGuidance();
       }
       function enterLearner() {
@@ -3179,36 +3213,77 @@
 
     /* Camera-off guidance — learner only */
     (function initCameraOffGuidance() {
+      function isPartnerCameraTipBlocked() {
+        try {
+          return document.body.classList.contains('theme-partner') ||
+            localStorage.getItem('dayo_current_mode') === 'PARTNER' ||
+            String(localStorage.getItem('dayo_current_mode') || '').toUpperCase() === 'PARTNER' ||
+            new URLSearchParams(window.location.search).get('role') === 'partner';
+        } catch (e) {
+          return false;
+        }
+      }
+
+      function purgeCameraTipPopup() {
+        var popup = document.getElementById('cameraTipPopup');
+        if (!popup) return null;
+        popup.hidden = true;
+        popup.style.setProperty('display', 'none', 'important');
+        popup.setAttribute('aria-hidden', 'true');
+        popup.remove();
+        return null;
+      }
+
       var popup = document.getElementById('cameraTipPopup');
       var dismissBtn = document.getElementById('cameraTipDismiss');
       if (!popup) return;
 
+      if (isPartnerCameraTipBlocked()) {
+        purgeCameraTipPopup();
+        window.hideCameraOffGuidance = function () {};
+        return;
+      }
+
       var tipTimer = 0;
 
       function hideCameraTip() {
+        if (isPartnerCameraTipBlocked()) return;
         clearTimeout(tipTimer);
+        if (!popup || !popup.isConnected) return;
         popup.hidden = true;
       }
 
       function showCameraTip() {
-        if (window.isPartnerRoomMode && window.isPartnerRoomMode()) return;
+        if (isPartnerCameraTipBlocked()) return;
+        if (!popup || !popup.isConnected) return;
         popup.hidden = false;
       }
 
       function scheduleCameraTip() {
-        if (window.isPartnerRoomMode && window.isPartnerRoomMode()) return;
+        if (isPartnerCameraTipBlocked()) return;
         clearTimeout(tipTimer);
-        tipTimer = setTimeout(showCameraTip, 2000);
+        tipTimer = setTimeout(function () {
+          if (isPartnerCameraTipBlocked()) return;
+          showCameraTip();
+        }, 2000);
       }
 
       if (dismissBtn) dismissBtn.addEventListener('click', hideCameraTip);
       window.hideCameraOffGuidance = hideCameraTip;
 
-      if (window.isPartnerRoomMode && window.isPartnerRoomMode()) {
-        hideCameraTip();
-        return;
+      function bootCameraTip() {
+        if (isPartnerCameraTipBlocked()) {
+          purgeCameraTipPopup();
+          return;
+        }
+        scheduleCameraTip();
       }
-      scheduleCameraTip();
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bootCameraTip);
+      } else {
+        bootCameraTip();
+      }
     })();
 
     /* Chat */
