@@ -73,6 +73,8 @@
 
     html, body {
       height: 100%;
+      height: 100dvh;
+      max-height: 100dvh;
       max-width: 100%;
       font-family: 'Gowun Dodum', 'Quicksand', -apple-system, sans-serif;
       background: var(--cream);
@@ -80,6 +82,18 @@
       overflow: hidden;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
+    }
+
+    body.is-room {
+      height: 100dvh;
+      max-height: 100dvh;
+      overflow: hidden;
+    }
+
+    body.is-room.theme-partner {
+      min-height: 0;
+      height: 100dvh;
+      max-height: 100dvh;
     }
 
     body.theme-learner {
@@ -254,17 +268,24 @@
     }
 
     .studio {
-      height: 100%;
       height: 100dvh;
+      max-height: 100dvh;
+      min-height: 0;
       max-width: 100%;
-      overflow-x: hidden;
-      display: grid;
-      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
       background:
         radial-gradient(circle at 12% 18%, rgba(255, 209, 220, 0.55), transparent 42%),
         radial-gradient(circle at 88% 12%, rgba(255, 229, 180, 0.5), transparent 40%),
         radial-gradient(circle at 70% 88%, rgba(255, 249, 196, 0.45), transparent 45%),
         var(--cream);
+    }
+
+    .tab-pane,
+    .card-box {
+      margin-bottom: 0;
     }
 
     /* Top Bar */
@@ -273,6 +294,7 @@
       grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
       align-items: center;
       gap: 0.65rem;
+      flex: 0 0 auto;
       min-height: var(--top-h);
       padding: 0.55rem 0.85rem;
       background: rgba(255, 252, 250, 0.92);
@@ -479,7 +501,9 @@
       justify-content: space-between;
       gap: 0.65rem;
       flex-wrap: wrap;
-      padding: 0.45rem 1rem 0.55rem;
+      flex: 0 0 auto;
+      margin: 0;
+      padding: 0.35rem 0.85rem 0.4rem;
       background: rgba(255, 252, 250, 0.94);
       border-bottom: 1px solid rgba(255, 209, 220, 0.35);
       z-index: 28;
@@ -730,13 +754,14 @@
 
     /* Main Stage — never overlaps chat */
     .main-stage {
+      flex: 1 1 auto;
       min-height: 0;
-      padding: 0.45rem 0.85rem 0.35rem;
+      padding: 0.35rem 0.85rem 0;
       display: grid;
       grid-template-columns: minmax(0, 1fr) var(--chat-w);
-      gap: 0.55rem;
-      align-items: start;
-      align-content: start;
+      gap: 0.45rem;
+      align-items: stretch;
+      align-content: stretch;
       overflow: hidden;
     }
 
@@ -749,15 +774,16 @@
       position: relative;
       min-width: 0;
       min-height: 0;
-      display: grid;
-      grid-template-rows: auto auto;
-      align-content: start;
-      gap: 0.45rem;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 0.35rem;
       overflow: hidden;
     }
 
     .video-column.sharing {
-      grid-template-rows: auto auto auto;
+      gap: 0.35rem;
     }
 
     .video-stage,
@@ -765,14 +791,25 @@
       position: relative;
       width: 100%;
       min-height: 0;
+      flex: 1 1 auto;
       height: auto;
-      aspect-ratio: 16 / 10;
-      max-height: min(52vh, 500px);
+      max-height: 100%;
       border-radius: var(--radius-lg);
       overflow: hidden;
       background: linear-gradient(160deg, #F7D6DE 0%, #FFE2C8 50%, #FFF1C9 100%);
       box-shadow: 0 8px 28px var(--shadow-warm);
       border: 1px solid rgba(255, 209, 220, 0.5);
+    }
+
+    .video-column.sharing .share-stage {
+      flex: 0 1 42%;
+      min-height: 0;
+      max-height: 42%;
+    }
+
+    .video-column.sharing .video-stage {
+      flex: 1 1 58%;
+      min-height: 0;
     }
 
     .daily-host {
@@ -982,10 +1019,12 @@
     /* Live AI copilot hint cards */
     .copilot-bar {
       flex-shrink: 0;
+      flex: 0 0 auto;
       display: flex;
       flex-direction: column;
-      gap: 0.45rem;
-      padding: 0.55rem 0.7rem 0.6rem;
+      gap: 0.4rem;
+      margin: 0;
+      padding: 0.5rem 0.65rem 0.55rem;
       background: var(--bg-card);
       border: 1px solid var(--coral-pale);
       border-radius: var(--radius-lg);
@@ -1218,10 +1257,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.55rem;
+      gap: 0.5rem;
+      flex: 0 0 auto;
       flex-wrap: wrap;
+      margin: 0;
       min-height: var(--bottom-h);
-      padding: 0.75rem 1rem;
+      padding: 0.45rem 0.85rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
       background: rgba(255, 252, 250, 0.94);
       backdrop-filter: blur(14px);
       border-top: 1px solid rgba(255, 209, 220, 0.4);
@@ -2177,21 +2218,23 @@
     }
 
     @media (max-width: 767px) {
-      :root { --chat-w: 100%; --bottom-h: 72px; }
+      :root { --chat-w: 100%; --bottom-h: 64px; }
 
-      html, body {
-        height: auto;
-        min-height: 100%;
-        max-width: 100%;
-        overflow: auto;
-        overflow-x: hidden;
+      html, body,
+      body.is-room {
+        height: 100dvh;
+        max-height: 100dvh;
+        min-height: 0;
+        overflow: hidden;
       }
 
       .studio {
-        height: auto;
-        min-height: 100dvh;
+        height: 100dvh;
+        max-height: 100dvh;
+        min-height: 0;
         display: flex;
         flex-direction: column;
+        overflow: hidden;
       }
 
       .top-bar {
@@ -2257,7 +2300,8 @@
       .tutor-status { display: none; }
 
       .prefs-bar {
-        padding: 0.45rem 1rem 0.55rem;
+        padding: 0.3rem 0.75rem 0.35rem;
+        flex: 0 0 auto;
       }
 
       .main-stage,
@@ -2266,33 +2310,45 @@
         flex-direction: column;
         flex: 1 1 auto;
         min-height: 0;
-        overflow: visible;
-        padding: 0.45rem 0.75rem 0.35rem;
-        gap: 0.45rem;
+        overflow: hidden;
+        padding: 0.3rem 0.75rem 0;
+        gap: 0.35rem;
         grid-template-columns: none;
         grid-template-rows: none;
-        align-content: start;
+        align-content: stretch;
+        justify-content: flex-start;
       }
 
       .video-column,
       .video-column.sharing {
         display: flex;
         flex-direction: column;
-        gap: 0.45rem;
-        overflow: visible;
+        flex: 1 1 auto;
+        min-height: 0;
+        height: auto;
+        gap: 0.35rem;
+        overflow: hidden;
         grid-template-rows: none;
-        flex: 0 0 auto;
       }
 
       .video-stage,
       .share-stage,
       .video-column.sharing .share-stage {
         width: 100%;
-        aspect-ratio: 16 / 10;
-        height: auto;
-        max-height: min(42vh, 360px);
-        flex: none;
+        flex: 1 1 auto;
         min-height: 0;
+        max-height: none;
+        aspect-ratio: unset;
+        height: auto;
+      }
+
+      .video-column.sharing .share-stage {
+        flex: 0 1 38%;
+        max-height: 38%;
+      }
+
+      .video-column.sharing .video-stage {
+        flex: 1 1 62%;
       }
 
       .chat-panel {
@@ -2338,16 +2394,20 @@
       }
 
       .copilot-bar {
-        padding: 0.6rem 0.7rem;
+        flex: 0 0 auto;
+        margin: 0;
+        padding: 0.45rem 0.6rem 0.5rem;
       }
 
       .bottom-bar {
-        position: sticky;
-        bottom: 0;
+        position: relative;
+        bottom: auto;
+        flex: 0 0 auto;
+        margin: 0;
         flex-wrap: nowrap;
         justify-content: space-between;
         gap: 0.35rem;
-        padding: 0.65rem 1rem;
+        padding: 0.45rem 0.75rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
         max-width: 100%;
         overflow-x: auto;
         overscroll-behavior-x: contain;
