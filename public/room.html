@@ -167,6 +167,45 @@
       display: none !important;
     }
 
+    body.theme-partner .prefs-bar {
+      display: none !important;
+    }
+
+    .prefs-badges {
+      display: none !important;
+    }
+
+    .tutor-name-line {
+      display: inline-flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0;
+    }
+
+    .pace-badge-tag {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-left: 6px;
+      background: #FFF4D6;
+      color: #966914;
+      border: 1px solid #FFEAA7;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .pace-badge-tag.pace-native {
+      background: #EAF8F2;
+      color: #247552;
+      border-color: #B8E2C8;
+    }
+
+    body.theme-partner .header-partner-sub,
+    body.theme-partner .partner-badge-sub {
+      display: none !important;
+    }
+
     body.theme-partner .copilot-learner-only {
       display: none !important;
     }
@@ -2332,6 +2371,28 @@
         }
       }
 
+      function getUserPace() {
+        try {
+          var pace = localStorage.getItem('dayo_user_pace');
+          if (!pace) pace = localStorage.getItem('dayo.chat.speed');
+          if (!pace && window.DayOChatPrefs && typeof window.DayOChatPrefs.getPrefs === 'function') {
+            pace = window.DayOChatPrefs.getPrefs().speed;
+          }
+          return pace === 'native' ? 'native' : 'slow';
+        } catch (e) {
+          return 'slow';
+        }
+      }
+
+      function renderPartnerPaceBadge() {
+        var badge = document.getElementById('headerPaceBadge');
+        if (!badge) return;
+        var pace = getUserPace();
+        badge.className = 'pace-badge-tag ' + (pace === 'native' ? 'pace-native' : 'pace-slow');
+        badge.textContent = pace === 'native' ? '🐇 원어민 페이스' : '🐢 천천히';
+        badge.hidden = false;
+      }
+
       window.updateRoomRoleText = function updateRoomRoleText() {
         var isPartner =
           document.body.classList.contains('theme-partner') ||
@@ -2364,9 +2425,11 @@
 
         var headerPartnerSub = document.querySelector('.header-partner-sub') || document.querySelector('.partner-badge-sub');
         if (headerPartnerSub) {
-          headerPartnerSub.innerText = 'Live · 유저 매칭 완료';
+          headerPartnerSub.hidden = true;
           headerPartnerSub.removeAttribute('data-i18n');
         }
+
+        renderPartnerPaceBadge();
 
         var pipLabel = document.querySelector('.pip-label');
         if (pipLabel) pipLabel.textContent = '내 화면';
@@ -2387,6 +2450,7 @@
         window.addEventListener('load', runRoleTextUpdate);
         document.addEventListener('dayo:langchange', runRoleTextUpdate);
         document.addEventListener('dayo:room-ready', runRoleTextUpdate);
+        document.addEventListener('dayo:chatprefschange', runRoleTextUpdate);
       }
 
       scheduleRoleTextUpdates();
@@ -2452,7 +2516,10 @@
         <div class="tutor-chip">
           <div class="tutor-avatar">C</div>
           <div>
-            <div class="tutor-name partner-name" id="header-partner-name">Camille</div>
+            <div class="tutor-name-line">
+              <div class="tutor-name partner-name" id="header-partner-name">Camille</div>
+              <span class="pace-badge-tag pace-slow" id="headerPaceBadge" hidden aria-label="유저 발화 속도"></span>
+            </div>
             <div class="tutor-status header-partner-sub partner-badge-sub" data-i18n="room.partnerStatus">Live · 프랑스어 대화 파트너</div>
           </div>
         </div>
@@ -2472,16 +2539,6 @@
       <div class="speed-toggle" role="group" aria-label="말하기 속도">
         <button type="button" class="speed-toggle__btn" id="speedSlowBtn" data-speed="slow" aria-pressed="false">🐢 천천히</button>
         <button type="button" class="speed-toggle__btn" id="speedNativeBtn" data-speed="native" aria-pressed="false">🐰 원어민</button>
-      </div>
-      <div class="prefs-badges">
-        <button type="button" class="prefs-badge" id="styleBadgeBtn" data-prefs-sheet="style" aria-haspopup="dialog">
-          <span id="styleBadgeLabel">☕️ 편안한 수다</span>
-          <span class="prefs-badge__caret" aria-hidden="true">▾</span>
-        </button>
-        <button type="button" class="prefs-badge" id="requestBadgeBtn" data-prefs-sheet="request" aria-haspopup="dialog">
-          <span id="requestBadgeLabel">👏 칭찬 위주</span>
-          <span class="prefs-badge__caret" aria-hidden="true">▾</span>
-        </button>
       </div>
     </div>
 
