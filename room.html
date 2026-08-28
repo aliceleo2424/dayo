@@ -152,6 +152,52 @@
       color: var(--partner-mint-deep) !important;
     }
 
+    body.theme-partner .video-stage:not(.is-daily) {
+      background: linear-gradient(160deg, #D9F0E4 0%, #EAF8F2 50%, #FFF6DC 100%);
+      border-color: var(--partner-mint);
+    }
+
+    body.theme-partner .tutor-video:not(.has-stream) {
+      background:
+        radial-gradient(circle at 50% 35%, rgba(255,255,255,0.5), transparent 55%),
+        linear-gradient(160deg, #D9F0E4, #EAF8F2 55%, #FFF6DC);
+    }
+
+    #partner-copilot-dock {
+      display: none;
+      padding: 0 1rem 0.9rem;
+    }
+    body.theme-partner #partner-copilot-dock {
+      display: block;
+    }
+    body.theme-partner #wordHelpBtn,
+    body.theme-partner #sentenceHelpBtn,
+    body.theme-partner .ctrl-divider {
+      display: none !important;
+    }
+    #partner-copilot-dock .partner-copilot-inner {
+      width: min(720px, 100%);
+      margin: 0 auto;
+    }
+    #btn-partner-ask:disabled,
+    #btn-partner-topic:disabled {
+      opacity: 0.6;
+      cursor: progress;
+    }
+    .partner-topic-item {
+      margin-bottom: 8px;
+    }
+    .partner-topic-item:last-child {
+      margin-bottom: 0;
+    }
+    .partner-topic-ko {
+      display: block;
+      margin-top: 2px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #7A6A62;
+    }
+
     .studio {
       height: 100%;
       height: 100dvh;
@@ -2108,8 +2154,12 @@
       try {
         var params = new URLSearchParams(location.search);
         var role = String(params.get('role') || params.get('mode') || '').toLowerCase();
+        var storedMode = '';
+        try {
+          storedMode = String(localStorage.getItem('dayo_current_mode') || '').toUpperCase();
+        } catch (e) {}
         var fromPartner = /partner\.html/i.test(document.referrer || '');
-        if (role === 'partner' || fromPartner) enterPartner();
+        if (role === 'partner' || storedMode === 'PARTNER' || fromPartner) enterPartner();
       } catch (e) {}
     })();
   </script>
@@ -2227,6 +2277,23 @@
       <button class="ctrl-btn ctrl-btn--ai" id="wordHelpBtn" type="button" data-i18n="room.wordHelp">💡 단어도움</button>
       <button class="ctrl-btn ctrl-btn--ai" id="sentenceHelpBtn" type="button" data-i18n="room.sentenceHelp">📝 문장도움</button>
     </footer>
+
+    <div id="partner-copilot-dock" aria-live="polite">
+      <div class="partner-copilot-inner">
+        <div id="partner-control-bar" style="display: flex; gap: 10px; justify-content: center; margin-top: 12px;">
+          <button type="button" id="btn-partner-ask" onclick="generatePartnerTopicHint('question')" style="background: #B8E2C8; color: #247552; border: 1.5px solid #247552; font-weight: 800; padding: 10px 16px; border-radius: 12px; cursor: pointer;">
+            💡 다음 꼬리질문 추천
+          </button>
+          <button type="button" id="btn-partner-topic" onclick="generatePartnerTopicHint('topic')" style="background: #FFEAA7; color: #966914; border: 1.5px solid #FFEAA7; font-weight: 800; padding: 10px 16px; border-radius: 12px; cursor: pointer;">
+            🔄 새 대화 주제 전환
+          </button>
+        </div>
+        <div id="partner-topic-card" style="display: none; background: #FFF9E8; border: 1.5px solid #FFEAA7; border-radius: 14px; padding: 14px; margin-top: 10px;">
+          <div style="font-size: 11px; font-weight: 800; color: #966914; margin-bottom: 4px;">✨ Host Guide Prompt</div>
+          <div id="partner-topic-content" style="font-size: 13px; color: #3E322D; font-weight: 700; line-height: 1.5;"></div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Word Help Bottom Sheet -->
@@ -3593,6 +3660,182 @@
         showStep: showStep,
         start: startQuiz,
         getTranscript: function () { return sessionTranscript.slice(); }
+      };
+    })();
+  </script>
+  <script>
+    /* Partner copilot — on-demand host question prompter (partner role only) */
+    (function partnerQuestionPrompter() {
+      'use strict';
+
+      var GEMINI_MODEL = 'gemini-1.5-flash';
+      var HINT_TIMEOUT_MS = 3000;
+      var busy = false;
+
+      var FALLBACK = {
+        question: [
+          { en: 'What was the most fun part of your week so far?', ko: '이번 주에 가장 즐거웠던 일은 뭐였어요?' },
+          { en: 'Can you tell me a little more about that?', ko: '그 이야기를 조금 더 자세히 들려줄 수 있어요?' }
+        ],
+        topic: [
+          { en: 'Do you have a favorite cafe or place to relax in your city?', ko: '살고 있는 도시에서 좋아하는 카페나 쉬는 장소가 있어요?' },
+          { en: 'If you could travel anywhere next month, where would you go?', ko: '다음 달에 어디든 여행할 수 있다면 어디로 가고 싶어요?' }
+        ]
+      };
+
+      function escapeHtml(value) {
+        return String(value == null ? '' : value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function readTranscript() {
+        var raw = window.sessionTranscript || '';
+        if (typeof raw === 'string' && raw.trim()) return raw.trim();
+        var rows = [];
+        if (Array.isArray(raw) && raw.length) {
+          rows = raw;
+        } else if (window.DayOLive && typeof window.DayOLive.getTranscript === 'function') {
+          try { rows = window.DayOLive.getTranscript() || []; } catch (e) { rows = []; }
+        }
+        if (!Array.isArray(rows)) return '';
+        return rows.slice(-6).map(function (row) {
+          if (!row) return '';
+          if (typeof row === 'string') return row;
+          var who = row.speaker === 'partner' ? 'Partner' : 'Learner';
+          return who + ': ' + String(row.text || '');
+        }).filter(Boolean).join('\n').trim();
+      }
+
+      function geminiKey() {
+        var bag = window.__DAYO_ENV__ || {};
+        var fromEnv = String(bag.NEXT_PUBLIC_GEMINI_API_KEY || '').trim();
+        if (fromEnv) return fromEnv;
+        try {
+          return String(localStorage.getItem('NEXT_PUBLIC_GEMINI_API_KEY') || '').trim();
+        } catch (e) {
+          return '';
+        }
+      }
+
+      function systemPrompt(mode) {
+        var base = '너는 외국인 대화 호스트(파트너)를 돕는 AI 가이드다. 최근 대화 맥락을 파악하여 파트너가 학습자(한국인 초보자)에게 자연스럽게 건넬 수 있는 친근하고 열린 질문(Open-ended Question) 2개와 한국어 해석을 JSON 형태로 반환하라.';
+        var shape = ' 반드시 {"questions":[{"en":"...","ko":"..."},{"en":"...","ko":"..."}]} 형식의 JSON만 출력하라.';
+        var focus = mode === 'topic'
+          ? ' 지금까지의 주제에서 벗어나 완전히 새로운 대화 주제로 자연스럽게 전환하는 질문을 만들어라.'
+          : ' 방금 학습자가 말한 내용을 이어받는 꼬리질문을 만들어라.';
+        return base + focus + shape;
+      }
+
+      function parseQuestions(text) {
+        var body = String(text || '').trim();
+        var match = body.match(/\{[\s\S]*\}/);
+        if (match) body = match[0];
+        var data = JSON.parse(body);
+        var list = Array.isArray(data) ? data : (data.questions || data.items || []);
+        return list.map(function (item) {
+          if (typeof item === 'string') return { en: item, ko: '' };
+          return {
+            en: String((item && (item.en || item.question || item.text)) || '').trim(),
+            ko: String((item && (item.ko || item.translation || item.meaning)) || '').trim()
+          };
+        }).filter(function (item) { return item.en; }).slice(0, 2);
+      }
+
+      function askGemini(mode, transcript) {
+        var key = geminiKey();
+        if (!key) return Promise.reject(new Error('no key'));
+        var url = 'https://generativelanguage.googleapis.com/v1beta/models/' +
+          GEMINI_MODEL + ':generateContent?key=' + encodeURIComponent(key);
+        var userText = '최근 대화 스크립트:\n' + (transcript || '(아직 대화 기록이 없음)');
+        return fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            systemInstruction: { parts: [{ text: systemPrompt(mode) }] },
+            contents: [{ role: 'user', parts: [{ text: userText }] }],
+            generationConfig: { temperature: 0.8, responseMimeType: 'application/json' }
+          })
+        }).then(function (res) {
+          if (!res.ok) throw new Error('gemini ' + res.status);
+          return res.json();
+        }).then(function (json) {
+          var text = '';
+          try {
+            text = json.candidates[0].content.parts.map(function (part) {
+              return part.text || '';
+            }).join('');
+          } catch (e) {
+            throw new Error('empty gemini');
+          }
+          var questions = parseQuestions(text);
+          if (!questions.length) throw new Error('no questions');
+          return questions;
+        });
+      }
+
+      function withTimeout(promise, ms) {
+        return new Promise(function (resolve, reject) {
+          var timer = setTimeout(function () { reject(new Error('timeout')); }, ms);
+          Promise.resolve(promise).then(function (value) {
+            clearTimeout(timer);
+            resolve(value);
+          }, function (err) {
+            clearTimeout(timer);
+            reject(err);
+          });
+        });
+      }
+
+      function render(questions, isFallback) {
+        var card = document.getElementById('partner-topic-card');
+        var content = document.getElementById('partner-topic-content');
+        if (!card || !content) return;
+        var rows = (questions || []).slice(0, 2).map(function (item, index) {
+          var ko = item.ko
+            ? '<span class="partner-topic-ko">' + escapeHtml(item.ko) + '</span>'
+            : '';
+          return '<div class="partner-topic-item">' + (index + 1) + '. ' +
+            escapeHtml(item.en) + ko + '</div>';
+        }).join('');
+        var note = isFallback
+          ? '<div class="partner-topic-ko">기본 추천 질문이에요. 잠시 후 다시 눌러보세요.</div>'
+          : '';
+        content.innerHTML = rows + note;
+        card.style.display = 'block';
+      }
+
+      function setBusy(on) {
+        busy = !!on;
+        ['btn-partner-ask', 'btn-partner-topic'].forEach(function (id) {
+          var btn = document.getElementById(id);
+          if (btn) btn.disabled = busy;
+        });
+      }
+
+      window.generatePartnerTopicHint = function (mode) {
+        if (busy) return;
+        var kind = mode === 'topic' ? 'topic' : 'question';
+        var content = document.getElementById('partner-topic-content');
+        var card = document.getElementById('partner-topic-card');
+        if (content && card) {
+          content.innerHTML = '<div class="partner-topic-item">AI가 추천 질문을 정리하는 중...</div>';
+          card.style.display = 'block';
+        }
+        setBusy(true);
+
+        withTimeout(askGemini(kind, readTranscript()), HINT_TIMEOUT_MS)
+          .then(function (questions) {
+            render(questions, false);
+          })
+          .catch(function () {
+            render(FALLBACK[kind], true);
+          })
+          .then(function () {
+            setBusy(false);
+          });
       };
     })();
   </script>
