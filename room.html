@@ -292,6 +292,34 @@
       animation: timerPulse 1.2s ease-in-out infinite;
     }
 
+    .badge-dayo-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #FFF0ED;
+      color: #E0533C;
+      border: 1px solid #FF8E7A;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 3px 9px;
+      border-radius: 12px;
+      letter-spacing: 0.05em;
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      background: #E0533C;
+      border-radius: 50%;
+      box-shadow: 0 0 6px #E0533C;
+      animation: liveBlink 1.2s infinite ease-in-out;
+    }
+
+    @keyframes liveBlink {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
     @keyframes timerPulse {
       0%, 100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.35); }
       50% { box-shadow: 0 0 0 6px rgba(255, 107, 107, 0); }
@@ -821,6 +849,46 @@
       border: 2px solid rgba(255,255,255,0.9);
       box-shadow: 0 8px 22px var(--shadow);
       z-index: 5;
+      cursor: pointer;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .self-pip:hover {
+      box-shadow: 0 10px 26px rgba(62, 50, 45, 0.28);
+      transform: translateY(-1px);
+    }
+
+    .video-stage.is-swapped .self-pip {
+      inset: 0;
+      right: auto;
+      bottom: auto;
+      width: 100%;
+      height: 100%;
+      aspect-ratio: auto;
+      border-radius: inherit;
+      border-width: 0;
+      transform: none;
+      z-index: 3;
+    }
+
+    .video-stage.is-swapped .tutor-video {
+      position: absolute;
+      right: 0.75rem;
+      bottom: 0.75rem;
+      width: min(140px, 28%);
+      height: auto;
+      aspect-ratio: 4 / 3;
+      min-height: 0;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 2px solid rgba(255,255,255,0.9);
+      box-shadow: 0 8px 22px var(--shadow);
+      z-index: 5;
+      cursor: pointer;
+    }
+
+    .video-stage.is-swapped .tutor-video:hover {
+      box-shadow: 0 10px 26px rgba(62, 50, 45, 0.28);
     }
 
     .self-pip video {
@@ -2260,7 +2328,8 @@
 
       function applyPartnerRoomCopy() {
         if (!document.body.classList.contains('theme-partner')) return;
-        var centerStatus = document.querySelector('.tutor-placeholder-sub');
+        var centerStatus = document.getElementById('centerStatusText') ||
+          document.querySelector('.tutor-placeholder-sub');
         if (centerStatus) centerStatus.textContent = '학습자와 1:1 대화 중';
         var headerStatus = document.querySelector('.tutor-status');
         if (headerStatus) {
@@ -2337,6 +2406,7 @@
     <header class="top-bar">
       <div class="top-left">
         <div class="timer" id="timer" aria-live="polite">⏱️ 03:00</div>
+        <span class="badge-dayo-live" aria-label="DayO 라이브 세션"><span class="live-dot" aria-hidden="true"></span>DayO LIVE</span>
         <span class="host-mode-badge partner-mode-badge badge-partner" aria-label="호스트 모드">☕ 호스트 모드</span>
         <div class="tutor-chip">
           <div class="tutor-avatar">C</div>
@@ -2388,11 +2458,11 @@
             <div class="tutor-placeholder">
               <div class="tutor-placeholder-avatar">C</div>
               <div class="tutor-placeholder-name">Camille</div>
-              <div class="tutor-placeholder-sub" data-i18n="room.chatting">원어민 대화 파트너와 대화 중</div>
+              <div class="tutor-placeholder-sub" id="centerStatusText" data-i18n="room.chatting">원어민 대화 파트너와 대화 중</div>
             </div>
           </div>
 
-          <div class="self-pip" id="selfPip">
+          <div class="self-pip" id="selfPip" title="클릭하여 화면 맞바꾸기" role="button" tabindex="0" aria-label="내 화면 — 클릭하여 화면 맞바꾸기">
             <span class="pip-label" data-i18n="room.selfPipLabel">나</span>
             <video id="selfVideo" playsinline muted autoplay></video>
             <div class="self-placeholder">
@@ -2751,6 +2821,41 @@
       };
 
       window.skipToTimerEnd = skipToEnd;
+    })();
+
+    (function initVideoSwap() {
+      var stage = document.getElementById('videoStage');
+      var pip = document.getElementById('selfPip');
+      var tutorBox = document.getElementById('tutorVideoBox');
+      if (!stage || !pip) return;
+
+      function toggleSwap() {
+        if (stage.classList.contains('is-daily')) return;
+        stage.classList.toggle('is-swapped');
+        var swapped = stage.classList.contains('is-swapped');
+        pip.setAttribute('aria-pressed', swapped ? 'true' : 'false');
+        if (tutorBox) {
+          tutorBox.setAttribute('title', swapped ? '클릭하여 화면 맞바꾸기' : '');
+        }
+      }
+
+      pip.addEventListener('click', function (e) {
+        e.stopPropagation();
+        toggleSwap();
+      });
+      pip.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleSwap();
+        }
+      });
+      if (tutorBox) {
+        tutorBox.addEventListener('click', function (e) {
+          if (!stage.classList.contains('is-swapped')) return;
+          e.stopPropagation();
+          toggleSwap();
+        });
+      }
     })();
 
     const toast = document.getElementById('toast');
