@@ -214,6 +214,21 @@
       color: #7A6A62;
     }
 
+    body.theme-partner .self-pip {
+      background: linear-gradient(135deg, #EAF8F2 0%, #B8E2C8 100%) !important;
+      border: 1.5px solid #91BFA0 !important;
+    }
+
+    body.theme-partner .pip-label,
+    body.theme-partner .self-placeholder,
+    body.theme-partner .self-placeholder span {
+      color: #247552 !important;
+    }
+
+    body.theme-partner .pip-label {
+      background: rgba(234, 248, 242, 0.92);
+    }
+
     .studio {
       height: 100%;
       height: 100dvh;
@@ -2142,11 +2157,46 @@
 <body class="is-room theme-learner">
   <script>
     (function applyPartnerTheme() {
+      function getLearnerDisplayName() {
+        try {
+          var fromUrl = String(new URLSearchParams(location.search).get('learner') || '').trim();
+          if (fromUrl) return fromUrl;
+          var fromStorage = localStorage.getItem('dayo_learner_name') ||
+            localStorage.getItem('dayo_session_learner_name') || '';
+          if (String(fromStorage).trim()) return String(fromStorage).trim();
+        } catch (e) {}
+        return '20대 K님';
+      }
+
+      function applyPartnerRoomCopy() {
+        if (!document.body.classList.contains('theme-partner')) return;
+        var centerStatus = document.querySelector('.tutor-placeholder-sub');
+        if (centerStatus) centerStatus.textContent = '학습자와 1:1 대화 중';
+        var headerStatus = document.querySelector('.tutor-status');
+        if (headerStatus) {
+          var learnerName = getLearnerDisplayName();
+          headerStatus.textContent = learnerName
+            ? ('Live · ' + learnerName)
+            : '학습자 매칭 완료';
+        }
+        var pipLabel = document.querySelector('.pip-label');
+        if (pipLabel) pipLabel.textContent = '내 화면';
+      }
+
+      function schedulePartnerRoomCopy() {
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', applyPartnerRoomCopy);
+        } else {
+          applyPartnerRoomCopy();
+        }
+      }
+
       function enterPartner() {
         document.body.classList.add('theme-partner');
         document.body.classList.remove('theme-learner');
         document.body.setAttribute('data-mode', 'partner');
         document.body.setAttribute('data-dayo-role', 'partner');
+        schedulePartnerRoomCopy();
       }
       function enterLearner() {
         document.body.classList.remove('theme-partner');
