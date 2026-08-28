@@ -328,6 +328,45 @@
       word-break: keep-all;
     }
 
+    #toastBanner,
+    .toast-banner,
+    .time-toast-alert {
+      position: fixed !important;
+      top: 72px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      width: auto !important;
+      max-width: 90% !important;
+      background: #FFF5F2 !important;
+      color: #E0533C !important;
+      border: 1.5px solid #FF8E7A !important;
+      border-radius: 30px !important;
+      padding: 10px 22px !important;
+      font-size: 13px !important;
+      font-weight: 800 !important;
+      text-align: center !important;
+      box-shadow: 0 6px 20px rgba(224, 83, 60, 0.18) !important;
+      z-index: 9999 !important;
+      pointer-events: none !important;
+      animation: slideDownToast 0.3s ease-out !important;
+    }
+
+    #toastBanner[hidden],
+    .toast-banner[hidden] {
+      display: none !important;
+    }
+
+    @keyframes slideDownToast {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -12px);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+    }
+
     .tutor-chip {
       display: inline-flex;
       align-items: center;
@@ -2570,6 +2609,8 @@
     <p class="session-wrap-banner__text" id="sessionWrapBannerText"></p>
   </div>
 
+  <div class="toast-banner time-toast-alert" id="toastBanner" role="status" aria-live="polite" hidden></div>
+
   <div class="toast" id="toast"></div>
 
   <div id="cameraTipPopup" class="camera-tip-banner camera-off-tip" role="status" aria-live="polite" hidden>
@@ -2617,13 +2658,16 @@
       let warned1Min = false;
 
       function toastMsg(msg, durationMs) {
-        var toast = document.getElementById('toast');
-        if (!toast) return;
-        toast.textContent = msg;
-        toast.classList.add('show');
+        var banner = document.getElementById('toastBanner');
+        if (!banner) return;
+        banner.textContent = msg;
+        banner.hidden = false;
+        banner.style.animation = 'none';
+        void banner.offsetWidth;
+        banner.style.animation = '';
         clearTimeout(toastMsg._timer);
         toastMsg._timer = setTimeout(function () {
-          toast.classList.remove('show');
+          banner.hidden = true;
         }, durationMs || 3200);
       }
 
