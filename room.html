@@ -2488,8 +2488,8 @@
     </div>
   </div>
 
-  <!-- AI Review Quiz (mobile-first, 3 steps) -->
-  <div class="rq-overlay" id="reviewQuizModal" hidden>
+    <!-- AI Review Quiz (mobile-first, 3 steps) -->
+  <div class="rq-overlay" id="reviewQuizModal" data-view="viewQuizSection" hidden>
     <div class="rq-sheet" role="dialog" aria-modal="true" aria-labelledby="rqTitle">
       <header class="rq-head">
         <p class="rq-kicker" id="rqKicker">AI 복습 퀴즈</p>
@@ -2601,27 +2601,36 @@
   <script src="chat-prefs.js"></script>
   <script src="room-live.js"></script>
   <script>
-    /* Session timer */
+    /* Session timer — 25 min live chat + 5 min quiz block */
     (function initSessionTimer() {
-      // 테스트용 3분 (실제 런칭 시 25로 1초 만에 변경 가능)
-      const SESSION_DURATION_MINUTES = 3;
-      const TOTAL_SESSION_SECONDS = SESSION_DURATION_MINUTES * 60;
-      const WRAP_UP_WARNING_SECONDS = 60;
+      const TOTAL_SESSION_SECONDS = 25 * 60;
+      const WARN_AT_3_MIN = 3 * 60;
+      const WARN_AT_1_MIN = 60;
 
       const el = document.getElementById('timer');
-      const banner = document.getElementById('sessionWrapBanner');
-      const bannerText = document.getElementById('sessionWrapBannerText');
       if (!el) return;
 
       let remainingSeconds = TOTAL_SESSION_SECONDS;
       let tickInterval = null;
       let sessionEnded = false;
-      let warningShown = false;
+      let warned3Min = false;
+      let warned1Min = false;
+
+      function toastMsg(msg, durationMs) {
+        var toast = document.getElementById('toast');
+        if (!toast) return;
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toastMsg._timer);
+        toastMsg._timer = setTimeout(function () {
+          toast.classList.remove('show');
+        }, durationMs || 3200);
+      }
 
       function render() {
         const m = Math.floor(remainingSeconds / 60);
         const s = remainingSeconds % 60;
-        el.textContent = `⏱️ ${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+        el.textContent = '⏱️ ' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
       }
 
       function playWrapUpChime() {
@@ -2646,17 +2655,16 @@
         } catch (e) { /* ignore */ }
       }
 
-      function showWrapUpWarning() {
-        if (warningShown) return;
-        warningShown = true;
-        const msg = typeof t === 'function'
-          ? t('room.sessionWrapUpWarning')
-          : '⏰ 대화 종료까지 1분 남았습니다. 파트너와 인사를 나누며 대화를 마무리해 주세요!';
-        if (banner && bannerText) {
-          bannerText.textContent = msg;
-          banner.hidden = false;
-          requestAnimationFrame(function () { banner.classList.add('is-visible'); });
-        }
+      function showThreeMinWarning() {
+        if (warned3Min) return;
+        warned3Min = true;
+        toastMsg('⏰ 대화 종료 3분 전입니다. 대화를 정리해 보세요!', 3400);
+      }
+
+      function showOneMinWarning() {
+        if (warned1Min) return;
+        warned1Min = true;
+        toastMsg('⏰ 대화 종료 1분 전입니다. 마무리 인사를 나눠주세요!', 3400);
         el.classList.add('is-warning');
         playWrapUpChime();
       }
@@ -2677,10 +2685,16 @@
           endSession();
           return;
         }
-        if (remainingSeconds === WRAP_UP_WARNING_SECONDS) showWrapUpWarning();
+        if (remainingSeconds === WARN_AT_3_MIN) showThreeMinWarning();
+        if (remainingSeconds === WARN_AT_1_MIN) showOneMinWarning();
         remainingSeconds -= 1;
         render();
         if (remainingSeconds <= 0) endSession();
+      }
+
+      function skipToEnd() {
+        remainingSeconds = 0;
+        endSession();
       }
 
       render();
@@ -2688,8 +2702,11 @@
 
       window.DayOSessionTimer = {
         getRemainingSeconds: function () { return remainingSeconds; },
-        endSession: endSession
+        endSession: endSession,
+        skipToEnd: skipToEnd
       };
+
+      window.skipToTimerEnd = skipToEnd;
     })();
 
     const toast = document.getElementById('toast');
@@ -3200,16 +3217,31 @@
       }
     }
 
-    function openReviewFromTranscript(result) {
+    function openReviewFromTranscript(result, options) {
+      options = options || {};
       var transcript = (result && result.transcript)
         || (window.DayOLive && window.DayOLive.getTranscript && window.DayOLive.getTranscript())
         || window.DayOLastTranscript
         || [];
       if (window.DayOReviewQuiz && typeof window.DayOReviewQuiz.open === 'function') {
-        window.DayOReviewQuiz.open({ transcript: transcript });
+        window.DayOReviewQuiz.open({
+          transcript: transcript,
+          autoStart: !!options.autoStart
+        });
         return;
       }
       setTimeout(function () { window.location.href = 'index.html'; }, 1400);
+    }
+
+    function handleTimedSessionExpiry(result) {
+      if (window.isPartnerRoomMode && window.isPartnerRoomMode()) {
+        showToast('🎉 25분 세션 완료! 피드백 검수 후 +6,000P가 적립되었습니다.', 4200);
+        setTimeout(function () {
+          window.location.href = 'partner.html#viewPartnerHome';
+        }, 1600);
+        return;
+      }
+      openReviewFromTranscript(result, { autoStart: true });
     }
 
     document.getElementById('endBtn').addEventListener('click', () => {
@@ -3218,9 +3250,10 @@
     });
 
     document.addEventListener('dayo:session-ended', () => {
-      persistTranscript();
       stopAllMedia();
-      openFeedback();
+      persistTranscript().then(handleTimedSessionExpiry).catch(function () {
+        handleTimedSessionExpiry(null);
+      });
     });
 
     starButtons.forEach((btn) => {
@@ -3510,7 +3543,11 @@
         applyTranscriptIntro();
         overlay.hidden = false;
         overlay.classList.add('is-open');
-        showStep(1);
+        if (options.autoStart) {
+          startQuiz();
+        } else {
+          showStep(1);
+        }
         if (window.DayOScrollLock) window.DayOScrollLock.lock();
       }
 
