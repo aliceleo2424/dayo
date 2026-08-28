@@ -60,6 +60,12 @@
       --shadow-warm: rgba(92, 74, 66, 0.08);
       --radius: 18px;
       --radius-lg: 24px;
+      --partner-mint: #B8E2C8;
+      --partner-mint-deep: #247552;
+      --partner-mint-soft: #EAF8F2;
+      --partner-butter: #FFEAA7;
+      --partner-butter-deep: #966914;
+      --partner-butter-soft: #FFF9E8;
       --chat-w: min(300px, 32vw);
       --bottom-h: 76px;
       --top-h: 64px;
@@ -79,36 +85,71 @@
     body.theme-learner {
       background: linear-gradient(180deg, #FFF9F2 0%, #FFF0ED 100%);
     }
-    body.theme-partner {
-      background: linear-gradient(180deg, #F0F9F5 0%, #E6F4EE 100%);
+    body.theme-partner,
+    body[data-mode="partner"],
+    .partner-page-body,
+    #viewPartnerHome {
+      background: linear-gradient(180deg, #F0F9F5 0%, #E6F4EE 100%) !important;
+      min-height: 100vh;
     }
     body.theme-partner .studio {
       background:
-        radial-gradient(circle at 12% 18%, rgba(45, 159, 117, 0.14), transparent 42%),
-        radial-gradient(circle at 88% 12%, rgba(200, 237, 224, 0.55), transparent 40%),
-        radial-gradient(circle at 70% 88%, rgba(230, 244, 238, 0.7), transparent 45%),
+        radial-gradient(circle at 12% 18%, rgba(184, 226, 200, 0.42), transparent 42%),
+        radial-gradient(circle at 88% 12%, rgba(255, 234, 167, 0.5), transparent 40%),
+        radial-gradient(circle at 70% 88%, rgba(234, 248, 242, 0.7), transparent 45%),
         linear-gradient(180deg, #F0F9F5 0%, #E6F4EE 100%);
     }
     body.theme-partner .top-bar {
       background: rgba(240, 249, 245, 0.94);
-      border-bottom-color: rgba(45, 159, 117, 0.18);
+      border-bottom-color: var(--partner-mint);
     }
-    .host-mode-badge {
+    .host-mode-badge,
+    .partner-mode-badge,
+    #demoModeBadge.partner-mode,
+    .badge-partner {
       display: none;
       align-items: center;
       gap: 0.2rem;
-      padding: 0.35rem 0.72rem;
-      border-radius: 999px;
-      background: #2D9F75;
-      color: #fff;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: var(--partner-mint-soft) !important;
+      color: var(--partner-mint-deep) !important;
+      border: 1.5px solid var(--partner-mint) !important;
       font-size: 0.75rem;
       font-weight: 800;
       letter-spacing: -0.02em;
       white-space: nowrap;
-      box-shadow: 0 4px 12px rgba(45, 159, 117, 0.28);
     }
-    body.theme-partner .host-mode-badge {
+    body.theme-partner .host-mode-badge,
+    body.theme-partner .partner-mode-badge {
       display: inline-flex;
+    }
+    .btn-partner-mint,
+    body.theme-partner .btn-primary {
+      background: var(--partner-mint) !important;
+      color: var(--partner-mint-deep) !important;
+      border: 1.5px solid var(--partner-mint-deep) !important;
+      font-weight: 800;
+      box-shadow: 0 4px 14px rgba(184, 226, 200, 0.4);
+    }
+    .partner-stat-card,
+    .partner-point-box,
+    .partner-guide-card {
+      background: var(--partner-butter-soft) !important;
+      border: 1.5px solid var(--partner-butter) !important;
+      border-radius: 16px;
+      padding: 18px;
+    }
+    .partner-point-val,
+    .partner-stat-val {
+      color: var(--partner-butter-deep) !important;
+      font-weight: 900;
+    }
+    .partner-slot-create-box {
+      background: #FFFFFF !important;
+      border: 2px dashed var(--partner-mint) !important;
+      border-radius: 14px;
+      color: var(--partner-mint-deep) !important;
     }
 
     .studio {
@@ -2039,14 +2080,36 @@
 <body class="is-room theme-learner">
   <script>
     (function applyPartnerTheme() {
+      function enterPartner() {
+        document.body.classList.add('theme-partner');
+        document.body.classList.remove('theme-learner');
+        document.body.setAttribute('data-mode', 'partner');
+        document.body.setAttribute('data-dayo-role', 'partner');
+      }
+      function enterLearner() {
+        document.body.classList.remove('theme-partner');
+        document.body.classList.add('theme-learner');
+        document.body.removeAttribute('data-mode');
+      }
+      window.goToView = function(viewId) {
+        var id = String(viewId || '');
+        if (id === 'viewPartnerHome' || id === 'partner') {
+          enterPartner();
+          return;
+        }
+        if (id === 'viewLearnerHome' || id === 'learner') {
+          enterLearner();
+        }
+      };
+      window.toggleMode = function(mode) {
+        if (mode === 'partner') window.goToView('viewPartnerHome');
+        else window.goToView('viewLearnerHome');
+      };
       try {
         var params = new URLSearchParams(location.search);
         var role = String(params.get('role') || params.get('mode') || '').toLowerCase();
         var fromPartner = /partner\.html/i.test(document.referrer || '');
-        if (role !== 'partner' && !fromPartner) return;
-        document.body.classList.remove('theme-learner');
-        document.body.classList.add('theme-partner');
-        document.body.setAttribute('data-dayo-role', 'partner');
+        if (role === 'partner' || fromPartner) enterPartner();
       } catch (e) {}
     })();
   </script>
@@ -2055,7 +2118,7 @@
     <header class="top-bar">
       <div class="top-left">
         <div class="timer" id="timer" aria-live="polite">⏱️ 03:00</div>
-        <span class="host-mode-badge" aria-label="호스트 모드">☕ 호스트 모드</span>
+        <span class="host-mode-badge partner-mode-badge badge-partner" aria-label="호스트 모드">☕ 호스트 모드</span>
         <div class="tutor-chip">
           <div class="tutor-avatar">C</div>
           <div>

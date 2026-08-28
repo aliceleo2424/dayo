@@ -22,6 +22,12 @@
       --coral-dark: #E85B48;
       --coral-pale: #FFE9E4;
       --sage: #A8B89F;
+      --partner-mint: #B8E2C8;
+      --partner-mint-deep: #247552;
+      --partner-mint-soft: #EAF8F2;
+      --partner-butter: #FFEAA7;
+      --partner-butter-deep: #966914;
+      --partner-butter-soft: #FFF9E8;
       --text: #594842;
       --muted: #927E77;
       --line: rgba(146, 126, 119, 0.14);
@@ -51,10 +57,10 @@
       font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
       color: var(--text);
       background:
-        radial-gradient(circle at 8% 4%, rgba(255, 214, 223, 0.68), transparent 29rem),
-        radial-gradient(circle at 94% 15%, rgba(255, 229, 196, 0.66), transparent 28rem),
-        radial-gradient(circle at 72% 92%, rgba(255, 246, 199, 0.55), transparent 30rem),
-        var(--cream);
+        radial-gradient(circle at 8% 4%, rgba(184, 226, 200, 0.55), transparent 29rem),
+        radial-gradient(circle at 94% 15%, rgba(255, 234, 167, 0.58), transparent 28rem),
+        radial-gradient(circle at 72% 92%, rgba(234, 248, 242, 0.7), transparent 30rem),
+        #F0F9F5;
       -webkit-font-smoothing: antialiased;
     }
 
@@ -1193,7 +1199,8 @@
 
     body.theme-partner,
     body[data-mode="partner"],
-    .partner-page-body {
+    .partner-page-body,
+    #viewPartnerHome {
       background: linear-gradient(180deg, #F0F9F5 0%, #E6F4EE 100%) !important;
       min-height: 100vh;
     }
@@ -1206,18 +1213,96 @@
 
     body.theme-partner .topbar {
       background: rgba(240, 249, 245, 0.92) !important;
-      border-bottom-color: rgba(36, 117, 82, 0.16) !important;
+      border-bottom-color: var(--partner-mint) !important;
     }
 
-    .partner-mode-badge {
-      background: #E2F5ED !important;
-      color: #247552 !important;
-      border: 1px solid #91BFA0 !important;
+    body.theme-partner .brand-mark {
+      color: var(--partner-mint-deep) !important;
+      background: linear-gradient(135deg, var(--partner-mint), var(--partner-butter)) !important;
+      box-shadow: 0 6px 16px rgba(184, 226, 200, 0.45) !important;
+    }
+
+    .partner-mode-badge,
+    #demoModeBadge.partner-mode,
+    .badge-partner {
+      background: var(--partner-mint-soft) !important;
+      color: var(--partner-mint-deep) !important;
+      border: 1.5px solid var(--partner-mint) !important;
       font-weight: 800;
       padding: 4px 10px;
       border-radius: 20px;
       font-size: 0.75rem;
       white-space: nowrap;
+    }
+
+    .btn-partner-mint,
+    body.theme-partner .btn-primary,
+    body.theme-partner .studio-link,
+    body.theme-partner .save-button {
+      background: var(--partner-mint) !important;
+      color: var(--partner-mint-deep) !important;
+      border: 1.5px solid var(--partner-mint-deep) !important;
+      font-weight: 800;
+      box-shadow: 0 4px 14px rgba(184, 226, 200, 0.4) !important;
+    }
+
+    .partner-stat-card,
+    .partner-point-box,
+    .partner-guide-card,
+    body.theme-partner .stat-box,
+    body.theme-partner .tips-card {
+      background: var(--partner-butter-soft) !important;
+      border: 1.5px solid var(--partner-butter) !important;
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .partner-point-val,
+    .partner-stat-val,
+    body.theme-partner .stat-value {
+      color: var(--partner-butter-deep) !important;
+      font-weight: 900;
+    }
+
+    .partner-slot-create-box,
+    body.theme-partner .time-grid {
+      background: #FFFFFF !important;
+      border: 2px dashed var(--partner-mint) !important;
+      border-radius: 14px;
+      color: var(--partner-mint-deep) !important;
+    }
+
+    body.theme-partner .promo-card {
+      background: var(--partner-mint-soft) !important;
+      border-color: var(--partner-mint) !important;
+    }
+
+    body.theme-partner .convert-banner {
+      background: linear-gradient(135deg, var(--partner-butter-soft), var(--partner-butter) 62%, var(--partner-mint-soft)) !important;
+      border-color: var(--partner-butter) !important;
+    }
+
+    body.theme-partner .convert-eyebrow {
+      color: var(--partner-butter-deep) !important;
+    }
+
+    body.theme-partner .day-tab.active,
+    body.theme-partner .time-chip.open,
+    body.theme-partner .guide-dot.open {
+      background: var(--partner-mint) !important;
+      border-color: var(--partner-mint-deep) !important;
+      color: var(--partner-mint-deep) !important;
+      box-shadow: 0 5px 12px rgba(184, 226, 200, 0.35) !important;
+    }
+
+    body.theme-partner .welcome-dot,
+    body.theme-partner .session-status {
+      color: var(--partner-mint-deep);
+    }
+
+    body.theme-partner .welcome-dot {
+      background: var(--partner-mint-deep) !important;
+      box-shadow: 0 0 0 5px rgba(184, 226, 200, 0.35) !important;
     }
   </style>
 </head>
@@ -1229,6 +1314,26 @@
       body.classList.add('theme-partner', 'partner-page-body');
       body.classList.remove('theme-learner');
       body.setAttribute('data-mode', 'partner');
+
+      window.goToView = function(viewId) {
+        var id = String(viewId || '');
+        if (id === 'viewPartnerHome' || id === 'partner') {
+          body.classList.add('theme-partner', 'partner-page-body');
+          body.classList.remove('theme-learner');
+          body.setAttribute('data-mode', 'partner');
+          return;
+        }
+        if (id === 'viewLearnerHome' || id === 'learner') {
+          body.classList.remove('theme-partner', 'partner-page-body');
+          body.classList.add('theme-learner');
+          body.removeAttribute('data-mode');
+        }
+      };
+
+      window.toggleMode = function(mode) {
+        if (mode === 'partner') window.goToView('viewPartnerHome');
+        else window.goToView('viewLearnerHome');
+      };
     })();
   </script>
   <header class="topbar">
@@ -1248,7 +1353,7 @@
             <span data-i18n="partner.welcome">Camille 님, 반갑습니다! ☕</span>
           </div>
         </div>
-        <span class="partner-mode-badge">☕ 호스트 모드</span>
+        <span class="partner-mode-badge badge-partner">☕ 호스트 모드</span>
         <div data-mode-switch="inline"></div>
         <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
       </div>
@@ -1262,7 +1367,7 @@
     <a href="mypage.html"><span aria-hidden="true">👤</span> <span data-i18n="nav.learnerMypage">마이페이지로 이동</span></a>
   </nav>
 
-  <main class="page partner-dashboard-wrap">
+  <main class="page partner-dashboard-wrap" id="viewPartnerHome">
     <div class="page-heading">
       <p class="eyebrow" data-i18n="partner.eyebrow">PARTNER LOUNGE</p>
       <h1 data-i18n="partner.heading">오늘도 다정한 대화를 준비해 볼까요? 🍰</h1>
@@ -1288,18 +1393,18 @@
 
     <section class="lounge-stats" aria-labelledby="loungeStatsTitle">
       <h2 class="visually-hidden" id="loungeStatsTitle">활동비 현황</h2>
-      <article class="stat-box">
+      <article class="stat-box partner-stat-card">
         <p class="stat-label" data-i18n="partner.stats.monthCount">이번 달 완료한 대화</p>
-        <p class="stat-value" id="statMonthCount">불러오는 중…</p>
+        <p class="stat-value partner-stat-val" id="statMonthCount">불러오는 중…</p>
       </article>
-      <article class="stat-box">
+      <article class="stat-box partner-stat-card partner-point-box">
         <p class="stat-label" data-i18n="partner.stats.pending">정산 예정 활동비</p>
-        <p class="stat-value" id="statPendingWon">불러오는 중…</p>
+        <p class="stat-value partner-stat-val partner-point-val" id="statPendingWon">불러오는 중…</p>
         <p class="stat-hint" data-i18n="partner.stats.pendingHint">대화 1회 × 6,000원</p>
       </article>
-      <article class="stat-box">
+      <article class="stat-box partner-stat-card partner-point-box">
         <p class="stat-label" data-i18n="partner.stats.settled">누적 정산 완료 금액</p>
-        <p class="stat-value" id="statSettledWon">불러오는 중…</p>
+        <p class="stat-value partner-stat-val partner-point-val" id="statSettledWon">불러오는 중…</p>
         <p class="stat-hint" data-i18n="partner.stats.settledHint">지난달까지 완료된 세션</p>
       </article>
     </section>
@@ -1396,8 +1501,8 @@
           <span class="guide-item"><span class="guide-dot open"></span><span data-i18n="partner.schedule.guideOpen">가능</span></span>
           <span class="guide-item"><span class="guide-dot"></span><span data-i18n="partner.schedule.guideClosed">불가능</span></span>
         </div>
-        <div class="time-grid" id="timeGrid" aria-live="polite"></div>
-        <button class="save-button" type="button" id="saveSchedule" data-i18n="partner.schedule.save">💾 변경된 스케줄 저장하기</button>
+        <div class="time-grid partner-slot-create-box" id="timeGrid" aria-live="polite"></div>
+        <button class="save-button btn-partner-mint" type="button" id="saveSchedule" data-i18n="partner.schedule.save">💾 변경된 스케줄 저장하기</button>
       </section>
 
       <aside class="side-column">
@@ -1415,7 +1520,7 @@
             <p class="session-purpose" data-i18n="partner.session1.purpose">목적: ✈️ 프랑스 여행 회화</p>
             <p class="session-time" data-i18n="partner.session1.time">오늘 20:00</p>
             <div class="session-actions">
-              <a class="studio-link" href="room.html?role=partner" data-i18n="partner.sessions.enter">☕ 스튜디오 입장</a>
+              <a class="studio-link btn-partner-mint" href="room.html?role=partner" data-i18n="partner.sessions.enter">☕ 스튜디오 입장</a>
               <button class="material-link" type="button" data-material="fr-travel" data-i18n="partner.sessions.materials">📚 대화 자료 보기</button>
             </div>
           </article>
@@ -1423,7 +1528,7 @@
       </aside>
     </div>
 
-    <section class="card tips-card" aria-labelledby="tipsTitle">
+    <section class="card tips-card partner-guide-card" aria-labelledby="tipsTitle">
       <div class="card-head">
         <div>
           <h2 class="card-title" id="tipsTitle" data-i18n="partner.tips.title">💡 실전 대화 팁 & 가이드북</h2>

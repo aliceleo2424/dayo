@@ -18,6 +18,12 @@
       --peach: #FFE5C4;
       --yellow: #FFF6C7;
       --mint: #DDEFE4;
+      --partner-mint: #B8E2C8;
+      --partner-mint-deep: #247552;
+      --partner-mint-soft: #EAF8F2;
+      --partner-butter: #FFEAA7;
+      --partner-butter-deep: #966914;
+      --partner-butter-soft: #FFF9E8;
       --coral: #FF6B57;
       --coral-dark: #E85B48;
       --coral-pale: #FFE9E4;
@@ -578,7 +584,8 @@
 
     body.theme-partner,
     body[data-mode="partner"],
-    .partner-page-body {
+    .partner-page-body,
+    #viewPartnerHome {
       background: linear-gradient(180deg, #F0F9F5 0%, #E6F4EE 100%) !important;
       min-height: 100vh;
     }
@@ -589,13 +596,46 @@
       background: #F0F9F5 !important;
     }
 
-    .partner-mode-badge {
-      background: #E2F5ED !important;
-      color: #247552 !important;
-      border: 1px solid #91BFA0 !important;
+    .partner-mode-badge,
+    #demoModeBadge.partner-mode,
+    .badge-partner {
+      background: var(--partner-mint-soft) !important;
+      color: var(--partner-mint-deep) !important;
+      border: 1.5px solid var(--partner-mint) !important;
       font-weight: 800;
       padding: 4px 10px;
       border-radius: 20px;
+    }
+
+    .btn-partner-mint,
+    body.theme-partner .btn-primary {
+      background: var(--partner-mint) !important;
+      color: var(--partner-mint-deep) !important;
+      border: 1.5px solid var(--partner-mint-deep) !important;
+      font-weight: 800;
+      box-shadow: 0 4px 14px rgba(184, 226, 200, 0.4);
+    }
+
+    .partner-stat-card,
+    .partner-point-box,
+    .partner-guide-card {
+      background: var(--partner-butter-soft) !important;
+      border: 1.5px solid var(--partner-butter) !important;
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .partner-point-val,
+    .partner-stat-val {
+      color: var(--partner-butter-deep) !important;
+      font-weight: 900;
+    }
+
+    .partner-slot-create-box {
+      background: #FFFFFF !important;
+      border: 2px dashed var(--partner-mint) !important;
+      border-radius: 14px;
+      color: var(--partner-mint-deep) !important;
     }
   </style>
 </head>
@@ -607,15 +647,40 @@
         document.body.classList.remove('theme-learner');
         document.body.setAttribute('data-mode', 'partner');
       }
+      function enterLearnerView() {
+        document.body.classList.remove('theme-partner', 'partner-page-body');
+        document.body.classList.add('theme-learner');
+        document.body.removeAttribute('data-mode');
+      }
       function isPartnerView() {
         var hash = String(location.hash || '').replace(/^#/, '');
         return hash === 'viewPartnerHome' || hash === 'partner';
       }
+      function isLearnerView() {
+        var hash = String(location.hash || '').replace(/^#/, '');
+        return hash === 'viewLearnerHome' || hash === 'learner';
+      }
       if (isPartnerView()) enterPartnerView();
+      else if (isLearnerView()) enterLearnerView();
       window.addEventListener('hashchange', function () {
         if (isPartnerView()) enterPartnerView();
+        else if (isLearnerView() || document.body.classList.contains('theme-partner')) enterLearnerView();
       });
       window.enterPartnerView = enterPartnerView;
+      window.goToView = function(viewId) {
+        var id = String(viewId || '');
+        if (id === 'viewPartnerHome' || id === 'partner') {
+          enterPartnerView();
+          return;
+        }
+        if (id === 'viewLearnerHome' || id === 'learner') {
+          enterLearnerView();
+        }
+      };
+      window.toggleMode = function(mode) {
+        if (mode === 'partner') window.goToView('viewPartnerHome');
+        else window.goToView('viewLearnerHome');
+      };
     })();
   </script>
   <header class="topbar">
