@@ -163,33 +163,49 @@
         linear-gradient(160deg, #D9F0E4, #EAF8F2 55%, #FFF6DC);
     }
 
-    #partner-copilot-dock {
-      display: none;
-      padding: 0 1rem 0.9rem;
+    body.theme-partner .speed-toggle {
+      display: none !important;
     }
-    body.theme-partner #partner-copilot-dock {
+
+    body.theme-partner .copilot-learner-only {
+      display: none !important;
+    }
+
+    .copilot-partner-only {
+      display: none;
+    }
+
+    body.theme-partner .copilot-partner-only {
       display: block;
     }
+
     body.theme-partner #wordHelpBtn,
     body.theme-partner #sentenceHelpBtn,
     body.theme-partner .ctrl-divider {
       display: none !important;
     }
-    #partner-copilot-dock .partner-copilot-inner {
-      width: min(720px, 100%);
-      margin: 0 auto;
+
+    #partner-control-bar {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
     }
+
     #btn-partner-ask:disabled,
     #btn-partner-topic:disabled {
       opacity: 0.6;
       cursor: progress;
     }
+
     .partner-topic-item {
       margin-bottom: 8px;
     }
+
     .partner-topic-item:last-child {
       margin-bottom: 0;
     }
+
     .partner-topic-ko {
       display: block;
       margin-top: 2px;
@@ -2234,16 +2250,32 @@
         </div>
 
         <section class="copilot-bar" id="copilotBar" aria-live="polite">
-          <div class="copilot-bar__head">
-            <span class="copilot-bar__badge" data-i18n="room.copilotBadge">✨ AI 코파일럿</span>
-            <span class="copilot-bar__status" id="copilotStatus">듣고 있어요</span>
+          <div class="copilot-learner-only">
+            <div class="copilot-bar__head">
+              <span class="copilot-bar__badge" data-i18n="room.copilotBadge">✨ AI 코파일럿</span>
+              <span class="copilot-bar__status" id="copilotStatus">듣고 있어요</span>
+            </div>
+            <p class="copilot-bar__label" data-i18n="room.copilotPhrasesLabel">지금 말하기 좋은 추천 영어 표현</p>
+            <div class="copilot-phrases" id="copilotPhrases"></div>
+            <p class="copilot-grammar" id="copilotGrammar">
+              <strong data-i18n="room.copilotGrammarLabel">문법 교정 힌트</strong>
+              <span id="copilotGrammarText"></span>
+            </p>
           </div>
-          <p class="copilot-bar__label" data-i18n="room.copilotPhrasesLabel">지금 말하기 좋은 추천 영어 표현</p>
-          <div class="copilot-phrases" id="copilotPhrases"></div>
-          <p class="copilot-grammar" id="copilotGrammar">
-            <strong data-i18n="room.copilotGrammarLabel">문법 교정 힌트</strong>
-            <span id="copilotGrammarText"></span>
-          </p>
+          <div class="copilot-partner-only">
+            <div id="partner-control-bar">
+              <button type="button" id="btn-partner-ask" onclick="generatePartnerTopicHint('question')" style="background: #B8E2C8; color: #247552; border: 1.5px solid #247552; font-weight: 800; padding: 10px 16px; border-radius: 12px; cursor: pointer;">
+                💡 다음 꼬리질문 추천
+              </button>
+              <button type="button" id="btn-partner-topic" onclick="generatePartnerTopicHint('topic')" style="background: #FFEAA7; color: #966914; border: 1.5px solid #FFEAA7; font-weight: 800; padding: 10px 16px; border-radius: 12px; cursor: pointer;">
+                🔄 새 대화 주제 전환
+              </button>
+            </div>
+            <div id="partner-topic-card" style="display: none; background: #FFF9E8; border: 1.5px solid #FFEAA7; border-radius: 14px; padding: 14px; margin-top: 10px;">
+              <div style="font-size: 11px; font-weight: 800; color: #966914; margin-bottom: 4px;">✨ Host Guide Prompt</div>
+              <div id="partner-topic-content" style="font-size: 13px; color: #3E322D; font-weight: 700; line-height: 1.5;"></div>
+            </div>
+          </div>
         </section>
       </div>
 
@@ -2277,23 +2309,6 @@
       <button class="ctrl-btn ctrl-btn--ai" id="wordHelpBtn" type="button" data-i18n="room.wordHelp">💡 단어도움</button>
       <button class="ctrl-btn ctrl-btn--ai" id="sentenceHelpBtn" type="button" data-i18n="room.sentenceHelp">📝 문장도움</button>
     </footer>
-
-    <div id="partner-copilot-dock" aria-live="polite">
-      <div class="partner-copilot-inner">
-        <div id="partner-control-bar" style="display: flex; gap: 10px; justify-content: center; margin-top: 12px;">
-          <button type="button" id="btn-partner-ask" onclick="generatePartnerTopicHint('question')" style="background: #B8E2C8; color: #247552; border: 1.5px solid #247552; font-weight: 800; padding: 10px 16px; border-radius: 12px; cursor: pointer;">
-            💡 다음 꼬리질문 추천
-          </button>
-          <button type="button" id="btn-partner-topic" onclick="generatePartnerTopicHint('topic')" style="background: #FFEAA7; color: #966914; border: 1.5px solid #FFEAA7; font-weight: 800; padding: 10px 16px; border-radius: 12px; cursor: pointer;">
-            🔄 새 대화 주제 전환
-          </button>
-        </div>
-        <div id="partner-topic-card" style="display: none; background: #FFF9E8; border: 1.5px solid #FFEAA7; border-radius: 14px; padding: 14px; margin-top: 10px;">
-          <div style="font-size: 11px; font-weight: 800; color: #966914; margin-bottom: 4px;">✨ Host Guide Prompt</div>
-          <div id="partner-topic-content" style="font-size: 13px; color: #3E322D; font-weight: 700; line-height: 1.5;"></div>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- Word Help Bottom Sheet -->
