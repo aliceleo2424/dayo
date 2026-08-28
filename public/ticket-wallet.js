@@ -7,6 +7,11 @@
 
   function readCount() {
     try {
+      var dayoRaw = window.localStorage.getItem('dayo_ticket_count');
+      if (dayoRaw != null && dayoRaw !== '') {
+        var dayoN = parseInt(dayoRaw, 10);
+        if (Number.isFinite(dayoN) && dayoN >= 0) return dayoN;
+      }
       var raw = window.localStorage.getItem(TICKET_KEY);
       if (raw == null || raw === '') return DEFAULT_COUNT;
       var n = parseInt(raw, 10);
@@ -20,6 +25,7 @@
     var value = Math.max(0, Math.floor(Number(n) || 0));
     try {
       window.localStorage.setItem(TICKET_KEY, String(value));
+      window.localStorage.setItem('dayo_ticket_count', String(value));
     } catch (e) { /* ignore */ }
     return value;
   }

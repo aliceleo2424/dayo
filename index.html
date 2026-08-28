@@ -3,6 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <script>
+    window.checkUserLoggedIn = function() {
+      var isLogged = localStorage.getItem('dayo_is_logged_in') === 'true';
+      var userEmail = localStorage.getItem('dayo_user_email');
+      var userName = localStorage.getItem('dayo_user_name');
+      return !!(isLogged || userEmail || userName || (localStorage.getItem('userName') || '').trim());
+    };
+
     window.handleNaverFastLogin = function(e) {
       if (e) {
         e.preventDefault();

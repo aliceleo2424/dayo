@@ -181,7 +181,7 @@
   var DRAFT_KEY = 'dayo.bookingDraft';
   var PENDING_OPEN_KEY = 'dayo.pendingBookingOpen';
   var RESUME_KEY = 'dayo.bookingResumeAfterTopup';
-  var ZERO_TICKET_MSG = '보유하신 세션 티켓이 없습니다. 첫 체험권(9,900원) 또는 세션 패스를 충전해 주세요.';
+  var ZERO_TICKET_MSG = '보유 이용권이 없습니다. 이용권을 충전해 주세요.';
   var BOOKING_TRIGGER = '[data-booking-open], a[href="#booking"], a[href*="#booking"], a[href*="booking=open"]';
 
   function startOfToday() {
@@ -398,6 +398,7 @@
     el.calGrid.addEventListener('click', function (e) {
       var day = e.target.closest('.bk-day');
       if (!day || day.disabled || !day.dataset.date) return;
+      if (!ensureLoggedInForBooking()) return;
       state.date = day.dataset.date;
       state.time = null;
       state.partner = null;
@@ -450,6 +451,7 @@
       state.style = id;
       state.partner = null;
     } else if (group === 'time') {
+      if (!ensureLoggedInForBooking()) return;
       state.time = id;
       state.partner = null;
     } else if (group === 'chatSpeed' || group === 'chatStyle' || group === 'chatRequest') {
@@ -721,10 +723,18 @@
   }
 
   function getTicketCount() {
+    try {
+      var fromDayo = parseInt(localStorage.getItem('dayo_ticket_count'), 10);
+      if (Number.isFinite(fromDayo) && fromDayo >= 0) return fromDayo;
+    } catch (err) { /* ignore */ }
     if (window.DayOTicketWallet && typeof window.DayOTicketWallet.getCount === 'function') {
       var n = Number(window.DayOTicketWallet.getCount());
-      return Number.isFinite(n) && n > 0 ? n : 0;
+      if (Number.isFinite(n) && n >= 0) return n;
     }
+    try {
+      var fromWallet = parseInt(localStorage.getItem('ticketCount'), 10);
+      if (Number.isFinite(fromWallet) && fromWallet >= 0) return fromWallet;
+    } catch (err2) { /* ignore */ }
     return 0;
   }
 
@@ -732,15 +742,36 @@
     return getTicketCount() <= 0;
   }
 
-  function isLoggedIn() {
+  function checkUserLoggedIn() {
+    try {
+      var isLogged = localStorage.getItem('dayo_is_logged_in') === 'true';
+      var userEmail = localStorage.getItem('dayo_user_email');
+      var userName = localStorage.getItem('dayo_user_name');
+      if (isLogged || userEmail || userName) return true;
+      if ((localStorage.getItem('userName') || '').trim()) return true;
+    } catch (err) { /* ignore */ }
     if (window.DayOMode && typeof window.DayOMode.isMember === 'function') {
       return !!window.DayOMode.isMember();
     }
-    try {
-      return !!(window.localStorage.getItem('userName') || '').trim();
-    } catch (e) {
+    return false;
+  }
+  window.checkUserLoggedIn = checkUserLoggedIn;
+
+  function isLoggedIn() {
+    return checkUserLoggedIn();
+  }
+
+  function ensureLoggedInForBooking() {
+    if (!checkUserLoggedIn()) {
+      close();
+      openLoginForBooking();
       return false;
     }
+    if (getTicketCount() < 1) {
+      routeToTicketTopup();
+      return false;
+    }
+    return true;
   }
 
   function findBookingTrigger(target) {
@@ -759,7 +790,7 @@
   function routeToTicketTopup() {
     saveDraft();
     setFlag(RESUME_KEY);
-    showToast(zeroTicketMessage());
+    showToast(ZERO_TICKET_MSG);
     close();
     if (window.DayOTickets && typeof window.DayOTickets.open === 'function') {
       window.DayOTickets.open();
@@ -776,12 +807,22 @@
   function openLoginForBooking() {
     setFlag(PENDING_OPEN_KEY);
     function showLogin() {
-      if (!window.DayOMode || typeof window.DayOMode.openLogin !== 'function') return false;
-      if (typeof window.DayOMode.toast === 'function') {
-        window.DayOMode.toast(t('login.required'));
+      var modal = document.getElementById('login-modal')
+        || document.querySelector('.login-modal-overlay')
+        || document.querySelector('.ms-overlay');
+      if (window.DayOMode && typeof window.DayOMode.openLogin === 'function') {
+        if (typeof window.DayOMode.toast === 'function') {
+          window.DayOMode.toast(t('login.required'));
+        }
+        window.DayOMode.openLogin(null);
+        return true;
       }
-      window.DayOMode.openLogin(null);
-      return true;
+      if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('is-open');
+        return true;
+      }
+      return false;
     }
     if (showLogin()) return;
     var tries = 0;
@@ -847,8 +888,12 @@
   }
 
   function requestOpen() {
-    if (!isLoggedIn()) {
+    if (!checkUserLoggedIn()) {
       openLoginForBooking();
+      return;
+    }
+    if (getTicketCount() < 1) {
+      routeToTicketTopup();
       return;
     }
     open();

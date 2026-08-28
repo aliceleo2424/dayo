@@ -144,27 +144,41 @@
     if (window.DayOI18n) window.DayOI18n.apply();
   }
 
+  function checkUserLoggedIn() {
+    try {
+      var isLogged = localStorage.getItem('dayo_is_logged_in') === 'true';
+      var userEmail = localStorage.getItem('dayo_user_email');
+      var userNameFast = localStorage.getItem('dayo_user_name');
+      if (isLogged || userEmail || userNameFast) return true;
+      if ((localStorage.getItem(USER_KEY) || '').trim()) return true;
+    } catch (err) { /* ignore */ }
+    if (window.DayOProfileStore && typeof window.DayOProfileStore.isSignedIn === 'function') {
+      if (window.DayOProfileStore.isSignedIn()) return true;
+    }
+    return false;
+  }
+  window.checkUserLoggedIn = checkUserLoggedIn;
+
   function getUserName() {
     try {
+      var fastName = (window.localStorage.getItem('dayo_user_name') || '').trim();
       if (window.DayOProfileStore && typeof window.DayOProfileStore.getUser === 'function') {
         var user = window.DayOProfileStore.getUser();
         if (user) {
           var meta = user.user_metadata || {};
           return String(meta.user_name || meta.full_name || meta.name || '').trim()
-            || (window.localStorage.getItem(USER_KEY) || '').trim();
+            || (window.localStorage.getItem(USER_KEY) || '').trim()
+            || fastName;
         }
       }
-      return (window.localStorage.getItem(USER_KEY) || '').trim();
+      return (window.localStorage.getItem(USER_KEY) || '').trim() || fastName;
     } catch (e) {
       return '';
     }
   }
 
   function isMember() {
-    if (window.DayOProfileStore && typeof window.DayOProfileStore.isSignedIn === 'function') {
-      if (window.DayOProfileStore.isSignedIn()) return true;
-    }
-    return !!getUserName();
+    return checkUserLoggedIn() || !!getUserName();
   }
 
   function waitForStore() {
@@ -827,7 +841,7 @@
         }
         e.preventDefault();
         var dest = 'index.html?booking=open';
-        if (!isMember()) {
+        if (!checkUserLoggedIn()) {
           showToast(t('login.required'));
           openLogin(dest);
           return;
@@ -837,7 +851,7 @@
       }
 
       var guarded = e.target.closest('[data-ms-guard]');
-      if (!guarded || isMember()) return;
+      if (!guarded || checkUserLoggedIn()) return;
       e.preventDefault();
       showToast(t('login.required'));
       openLogin(guarded.getAttribute('href'));
@@ -863,6 +877,7 @@
 
     window.DayOMode = {
       isMember: isMember,
+      checkUserLoggedIn: checkUserLoggedIn,
       getUserName: getUserName,
       getUserId: function () {
         if (window.DayOProfileStore && typeof window.DayOProfileStore.getUserId === 'function') {
