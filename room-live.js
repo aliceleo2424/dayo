@@ -710,6 +710,8 @@
       if (stage) stage.classList.add('is-daily');
       syncMediaFromDaily();
       showToast(t('room.toastDailyLive'), 2200);
+      if (typeof window.updateRoomRoleText === 'function') window.updateRoomRoleText();
+      document.dispatchEvent(new CustomEvent('dayo:room-ready'));
     });
 
     callFrame.on('participant-updated', function (ev) {
@@ -955,6 +957,8 @@
 
       boot.then(function () {
         if (hungUp) return;
+        if (typeof window.updateRoomRoleText === 'function') window.updateRoomRoleText();
+        document.dispatchEvent(new CustomEvent('dayo:room-ready'));
         try { startSpeech(); } catch (e) { setStatus(t('room.copilotDemo'), false); }
         if (!geminiKey()) {
           setStatus(t('room.copilotDemo'), sttOn);

@@ -2327,35 +2327,77 @@
       }
 
       function applyPartnerRoomCopy() {
-        if (!document.body.classList.contains('theme-partner')) return;
-        var centerStatus = document.getElementById('centerStatusText') ||
-          document.querySelector('.tutor-placeholder-sub');
-        if (centerStatus) centerStatus.textContent = '학습자와 1:1 대화 중';
-        var headerStatus = document.querySelector('.tutor-status');
-        if (headerStatus) {
-          var learnerName = getLearnerDisplayName();
-          headerStatus.textContent = learnerName
-            ? ('Live · ' + learnerName)
-            : '학습자 매칭 완료';
+        if (typeof window.updateRoomRoleText === 'function') {
+          window.updateRoomRoleText();
         }
-        var pipLabel = document.querySelector('.pip-label');
-        if (pipLabel) pipLabel.textContent = '내 화면';
       }
 
-      function schedulePartnerRoomCopy() {
-        if (document.readyState === 'loading') {
-          document.addEventListener('DOMContentLoaded', applyPartnerRoomCopy);
-        } else {
-          applyPartnerRoomCopy();
+      window.updateRoomRoleText = function updateRoomRoleText() {
+        var isPartner =
+          document.body.classList.contains('theme-partner') ||
+          (function () {
+            try { return localStorage.getItem('dayo_current_mode') === 'PARTNER'; } catch (e) { return false; }
+          })() ||
+          new URLSearchParams(window.location.search).get('role') === 'partner';
+
+        if (!isPartner) return;
+
+        var partnerStatusSub = document.querySelector('.partner-status-sub') ||
+          document.querySelector('.video-center-desc') ||
+          document.getElementById('center-status-text');
+        if (partnerStatusSub) {
+          partnerStatusSub.innerText = '학습자와 1:1 대화 중';
+          partnerStatusSub.removeAttribute('data-i18n');
         }
+
+        var partnerNameEl = document.querySelector('.partner-name') || document.getElementById('center-target-name');
+        var partnerNameNodes = document.querySelectorAll('.partner-name, #center-target-name, #header-partner-name');
+        if (partnerNameNodes.length) {
+          partnerNameNodes.forEach(function (el) {
+            if (el.innerText.includes('Camille')) el.innerText = '학습자 (User)';
+          });
+        } else if (partnerNameEl && partnerNameEl.innerText.includes('Camille')) {
+          partnerNameEl.innerText = '학습자 (User)';
+        }
+
+        var headerPartnerSub = document.querySelector('.header-partner-sub') || document.querySelector('.partner-badge-sub');
+        if (headerPartnerSub) {
+          var learnerName = getLearnerDisplayName();
+          headerPartnerSub.innerText = learnerName
+            ? ('Live · ' + learnerName)
+            : 'Live · 학습자 매칭 완료';
+          headerPartnerSub.removeAttribute('data-i18n');
+        }
+
+        var pipLabel = document.querySelector('.pip-label');
+        if (pipLabel) pipLabel.textContent = '내 화면';
+      };
+
+      function scheduleRoleTextUpdates() {
+        function runRoleTextUpdate() {
+          if (typeof window.updateRoomRoleText === 'function') window.updateRoomRoleText();
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', function () {
+            runRoleTextUpdate();
+            setTimeout(runRoleTextUpdate, 0);
+          });
+        } else {
+          runRoleTextUpdate();
+        }
+        window.addEventListener('load', runRoleTextUpdate);
+        document.addEventListener('dayo:langchange', runRoleTextUpdate);
+        document.addEventListener('dayo:room-ready', runRoleTextUpdate);
       }
+
+      scheduleRoleTextUpdates();
 
       function enterPartner() {
         document.body.classList.add('theme-partner');
         document.body.classList.remove('theme-learner');
         document.body.setAttribute('data-mode', 'partner');
         document.body.setAttribute('data-dayo-role', 'partner');
-        schedulePartnerRoomCopy();
+        applyPartnerRoomCopy();
         if (typeof window.hideCameraOffGuidance === 'function') window.hideCameraOffGuidance();
       }
       function enterLearner() {
@@ -2411,8 +2453,8 @@
         <div class="tutor-chip">
           <div class="tutor-avatar">C</div>
           <div>
-            <div class="tutor-name">Camille</div>
-            <div class="tutor-status" data-i18n="room.partnerStatus">Live · 프랑스어 대화 파트너</div>
+            <div class="tutor-name partner-name" id="header-partner-name">Camille</div>
+            <div class="tutor-status header-partner-sub partner-badge-sub" data-i18n="room.partnerStatus">Live · 프랑스어 대화 파트너</div>
           </div>
         </div>
       </div>
@@ -2457,8 +2499,8 @@
             <video id="tutorVideo" playsinline muted></video>
             <div class="tutor-placeholder">
               <div class="tutor-placeholder-avatar">C</div>
-              <div class="tutor-placeholder-name">Camille</div>
-              <div class="tutor-placeholder-sub" id="centerStatusText" data-i18n="room.chatting">원어민 대화 파트너와 대화 중</div>
+              <div class="tutor-placeholder-name partner-name" id="center-target-name">Camille</div>
+              <div class="tutor-placeholder-sub partner-status-sub video-center-desc" id="center-status-text" data-i18n="room.chatting">원어민 대화 파트너와 대화 중</div>
             </div>
           </div>
 
