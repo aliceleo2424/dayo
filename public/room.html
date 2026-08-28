@@ -4090,5 +4090,24 @@
   </script>
   <script src="mobile-nav.js"></script>
   <script src="mode-switch.js"></script>
+  <script>
+    window.handleDevSkipClick = function (e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (typeof window.skipToTimerEnd === 'function') {
+        window.skipToTimerEnd();
+      } else if (typeof handleSessionTimeout === 'function') {
+        handleSessionTimeout();
+      } else {
+        alert('세션 종료 로직을 호출합니다.');
+        window.location.reload();
+      }
+    };
+  </script>
+  <button type="button" id="dev-test-skip-btn" onclick="handleDevSkipClick(event)" style="position: fixed; bottom: 16px; left: 16px; z-index: 99999; background: #3E322D; color: #FFEAA7; border: 1.5px solid #FFEAA7; border-radius: 20px; padding: 8px 14px; font-size: 11px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.25); opacity: 0.85; transition: opacity 0.2s;">
+    ⚡ [테스트] 25분 종료 트리거
+  </button>
 </body>
 </html>
