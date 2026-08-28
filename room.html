@@ -2346,7 +2346,7 @@
           document.querySelector('.video-center-desc') ||
           document.getElementById('center-status-text');
         if (partnerStatusSub) {
-          partnerStatusSub.innerText = '학습자와 1:1 대화 중';
+          partnerStatusSub.innerText = '유저와 1:1 대화 중';
           partnerStatusSub.removeAttribute('data-i18n');
         }
 
@@ -2354,18 +2354,17 @@
         var partnerNameNodes = document.querySelectorAll('.partner-name, #center-target-name, #header-partner-name');
         if (partnerNameNodes.length) {
           partnerNameNodes.forEach(function (el) {
-            if (el.innerText.includes('Camille')) el.innerText = '학습자 (User)';
+            if (el.innerText.includes('Camille') || el.innerText.includes('학습자')) {
+              el.innerText = '유저 (User)';
+            }
           });
-        } else if (partnerNameEl && partnerNameEl.innerText.includes('Camille')) {
-          partnerNameEl.innerText = '학습자 (User)';
+        } else if (partnerNameEl && (partnerNameEl.innerText.includes('Camille') || partnerNameEl.innerText.includes('학습자'))) {
+          partnerNameEl.innerText = '유저 (User)';
         }
 
         var headerPartnerSub = document.querySelector('.header-partner-sub') || document.querySelector('.partner-badge-sub');
         if (headerPartnerSub) {
-          var learnerName = getLearnerDisplayName();
-          headerPartnerSub.innerText = learnerName
-            ? ('Live · ' + learnerName)
-            : 'Live · 학습자 매칭 완료';
+          headerPartnerSub.innerText = 'Live · 유저 매칭 완료';
           headerPartnerSub.removeAttribute('data-i18n');
         }
 
@@ -4100,7 +4099,7 @@
         return rows.slice(-6).map(function (row) {
           if (!row) return '';
           if (typeof row === 'string') return row;
-          var who = row.speaker === 'partner' ? 'Partner' : 'Learner';
+          var who = row.speaker === 'partner' ? 'Partner' : 'User';
           return who + ': ' + String(row.text || '');
         }).filter(Boolean).join('\n').trim();
       }
@@ -4117,11 +4116,11 @@
       }
 
       function systemPrompt(mode) {
-        var base = '너는 외국인 대화 호스트(파트너)를 돕는 AI 가이드다. 최근 대화 맥락을 파악하여 파트너가 학습자(한국인 초보자)에게 자연스럽게 건넬 수 있는 친근하고 열린 질문(Open-ended Question) 2개와 한국어 해석을 JSON 형태로 반환하라.';
+        var base = '너는 외국인 대화 호스트(파트너)를 돕는 AI 가이드다. 최근 대화 맥락을 파악하여 파트너가 유저(한국인 초보자)에게 자연스럽게 건넬 수 있는 친근하고 열린 질문(Open-ended Question) 2개와 한국어 해석을 JSON 형태로 반환하라.';
         var shape = ' 반드시 {"questions":[{"en":"...","ko":"..."},{"en":"...","ko":"..."}]} 형식의 JSON만 출력하라.';
         var focus = mode === 'topic'
           ? ' 지금까지의 주제에서 벗어나 완전히 새로운 대화 주제로 자연스럽게 전환하는 질문을 만들어라.'
-          : ' 방금 학습자가 말한 내용을 이어받는 꼬리질문을 만들어라.';
+          : ' 방금 유저가 말한 내용을 이어받는 꼬리질문을 만들어라.';
         return base + focus + shape;
       }
 
