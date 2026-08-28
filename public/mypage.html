@@ -575,9 +575,49 @@
     @media (max-width: 620px) {
       .status-grid { grid-template-columns: 1fr; }
     }
+
+    body.theme-partner,
+    body[data-mode="partner"],
+    .partner-page-body {
+      background: linear-gradient(180deg, #F0F9F5 0%, #E6F4EE 100%) !important;
+      min-height: 100vh;
+    }
+
+    body.theme-partner .app-container,
+    body.theme-partner .main-content,
+    .partner-dashboard-wrap {
+      background: #F0F9F5 !important;
+    }
+
+    .partner-mode-badge {
+      background: #E2F5ED !important;
+      color: #247552 !important;
+      border: 1px solid #91BFA0 !important;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
   </style>
 </head>
 <body data-dayo-role="member">
+  <script>
+    (function partnerThemeBridge() {
+      function enterPartnerView() {
+        document.body.classList.add('theme-partner', 'partner-page-body');
+        document.body.classList.remove('theme-learner');
+        document.body.setAttribute('data-mode', 'partner');
+      }
+      function isPartnerView() {
+        var hash = String(location.hash || '').replace(/^#/, '');
+        return hash === 'viewPartnerHome' || hash === 'partner';
+      }
+      if (isPartnerView()) enterPartnerView();
+      window.addEventListener('hashchange', function () {
+        if (isPartnerView()) enterPartnerView();
+      });
+      window.enterPartnerView = enterPartnerView;
+    })();
+  </script>
   <header class="topbar">
     <div class="topbar-inner">
       <a class="brand" href="index.html" data-i18n="nav.homeAria" data-i18n-attr="aria-label" aria-label="DayO 메인으로 이동">
