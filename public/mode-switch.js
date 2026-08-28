@@ -2,6 +2,31 @@
 (function () {
   'use strict';
 
+  window.handleNaverFastLogin = function(e) {
+    if (e) {
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+      if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
+    try {
+      localStorage.setItem('dayo_user_email', 'tester@dayo.com');
+      localStorage.setItem('dayo_user_name', 'DayO테스터');
+      localStorage.setItem('dayo_ticket_count', '1');
+      localStorage.setItem('dayo_is_logged_in', 'true');
+      localStorage.setItem('userName', 'DayO테스터');
+      localStorage.setItem('dayo_userEmail', 'tester@dayo.com');
+      localStorage.setItem('dayo.memberSession', 'active');
+      localStorage.setItem('ticketCount', '1');
+    } catch (err) { /* ignore */ }
+
+    var modal = document.getElementById('login-modal')
+      || document.querySelector('.login-modal-overlay')
+      || document.querySelector('.ms-overlay');
+    if (modal) modal.style.display = 'none';
+
+    alert('🎉 테스터 계정(DayO테스터)으로 간편 로그인되었습니다!');
+    window.location.reload();
+  };
+
   var USER_KEY = 'userName';
   var MEMBER_KEY = 'dayo.memberSession';
   var USERS_KEY = 'dayo_users';
@@ -70,7 +95,7 @@
     '.ms-social-btn:hover{transform:translateY(-1px);opacity:.96;}',
     '.ms-social-btn:disabled{opacity:.6;pointer-events:none;transform:none;}',
     '.ms-social-btn--kakao{background:#FEE500;color:#191919;}',
-    '.ms-social-btn--naver{background:#03C75A;color:#fff;}',
+    '.ms-social-btn--naver,.btn-naver{background:#03C75A;color:#fff;}',
     '.ms-social-btn--google{background:#fff;color:#5C4A42;border:1px solid rgba(154,133,128,.28);}',
     '.ms-dismiss{margin-top:.9rem;border:none;background:none;cursor:pointer;font-family:inherit;',
     'color:var(--muted,#9A8580);font-size:.78rem;font-weight:700;}',
@@ -617,7 +642,10 @@
 
   function handleSocialAuth(provider) {
     if (provider === 'naver') {
-      handleNaverTestLogin();
+      if (typeof window.handleNaverFastLogin === 'function') {
+        window.handleNaverFastLogin();
+        return;
+      }
       return;
     }
     if (provider !== 'google') {
@@ -647,7 +675,7 @@
     var submit = overlay.querySelector('.ms-login');
     var divider = overlay.querySelector('.ms-divider');
     var kakao = overlay.querySelector('[data-ms-social="kakao"]');
-    var naver = overlay.querySelector('[data-ms-social="naver"]');
+    var naver = overlay.querySelector('[data-ms-social="naver"], .btn-naver, .ms-social-btn--naver');
     var google = overlay.querySelector('[data-ms-social="google"]');
     var dismiss = overlay.querySelector('[data-ms-close]');
     if (title) title.textContent = t('login.title');
@@ -664,7 +692,8 @@
 
   function mountLogin() {
     overlay = document.createElement('div');
-    overlay.className = 'ms-overlay';
+    overlay.id = 'login-modal';
+    overlay.className = 'ms-overlay login-modal-overlay';
     overlay.innerHTML = [
       '<div class="ms-modal" role="dialog" aria-modal="true" aria-labelledby="msLoginTitle">',
       '  <div class="ms-key" aria-hidden="true">☕️</div>',
@@ -682,7 +711,7 @@
       '  <div class="ms-divider" data-i18n="login.socialDivider">', t('login.socialDivider'), '</div>',
       '  <div class="ms-social">',
       '    <button class="ms-social-btn ms-social-btn--kakao" type="button" data-ms-social="kakao">', t('login.social.kakao'), '</button>',
-      '    <button class="ms-social-btn ms-social-btn--naver" type="button" data-ms-social="naver">', t('login.social.naver'), '</button>',
+      '    <button type="button" class="ms-social-btn ms-social-btn--naver btn-naver" onclick="handleNaverFastLogin(event); return false;">', t('login.social.naver'), '</button>',
       '    <button class="ms-social-btn ms-social-btn--google" type="button" data-ms-social="google">', t('login.social.google'), '</button>',
       '  </div>',
       '  <button class="ms-dismiss" type="button" data-ms-close data-i18n="login.dismiss">', t('login.dismiss'), '</button>',

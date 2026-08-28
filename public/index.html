@@ -3,6 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <script>
+    window.handleNaverFastLogin = function(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      localStorage.setItem('dayo_user_email', 'tester@dayo.com');
+      localStorage.setItem('dayo_user_name', 'DayO테스터');
+      localStorage.setItem('dayo_ticket_count', '1');
+      localStorage.setItem('dayo_is_logged_in', 'true');
+      localStorage.setItem('userName', 'DayO테스터');
+      localStorage.setItem('dayo_userEmail', 'tester@dayo.com');
+      localStorage.setItem('dayo.memberSession', 'active');
+      localStorage.setItem('ticketCount', '1');
+
+      const modal = document.getElementById('login-modal') || document.querySelector('.login-modal-overlay') || document.querySelector('.ms-overlay');
+      if (modal) modal.style.display = 'none';
+
+      alert('🎉 테스터 계정(DayO테스터)으로 간편 로그인되었습니다!');
+      window.location.reload();
+    };
+
     (function checkInApp() {
       const ua = navigator.userAgent.toLowerCase();
       const isKakao = ua.indexOf('kakaotalk') !== -1;
