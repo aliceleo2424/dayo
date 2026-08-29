@@ -116,10 +116,6 @@
     return t('chatPrefs.firstUserTip');
   }
 
-  function safetyToast() {
-    return t('chatPrefs.safetyToast');
-  }
-
   window.DayOChatPrefs = {
     SPEED_IDS: SPEED_IDS,
     STYLE_IDS: STYLE_IDS,
@@ -134,7 +130,6 @@
     styleLabel: styleLabel,
     requestLabel: requestLabel,
     requestBadgeLabel: requestBadgeLabel,
-    firstUserTip: firstUserTip,
-    safetyToast: safetyToast
+    firstUserTip: firstUserTip
   };
 })();
