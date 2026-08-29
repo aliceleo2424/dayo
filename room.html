@@ -1750,10 +1750,19 @@
     .rq-overlay[hidden] {
       display: none !important;
     }
-    .rq-overlay.is-open {
+    .rq-overlay.is-open,
+    #quizModal.rq-overlay.is-open {
+      display: flex !important;
       opacity: 1;
       visibility: visible;
       pointer-events: auto;
+    }
+
+    body.session-ended-user #videoStage,
+    body.session-ended-user #videoColumn,
+    body.session-ended-user #shareStage,
+    body.session-ended-user #dailyHost {
+      display: none !important;
     }
     .rq-sheet {
       display: flex;
@@ -3106,7 +3115,7 @@
   </div>
 
     <!-- AI Review Quiz (mobile-first, 3 steps) -->
-  <div class="rq-overlay" id="reviewQuizModal" data-view="viewQuizSection" hidden>
+  <div class="rq-overlay" id="quizModal" data-view="viewQuizSection" hidden>
     <div class="rq-sheet" role="dialog" aria-modal="true" aria-labelledby="rqTitle">
       <header class="rq-head">
         <p class="rq-kicker" id="rqKicker">AI 복습 퀴즈</p>
@@ -3175,7 +3184,7 @@
           </div>
 
           <div class="rq-actions">
-            <button class="rq-cta" type="button" id="rqSaveVocab">단어장에 저장하기</button>
+            <button class="rq-cta" type="button" id="rqSaveVocab">단어장에 저장하고 완료</button>
             <button class="rq-cta rq-cta--ghost" type="button" id="rqDone">확인 / 대화 마치기</button>
           </div>
         </section>
@@ -3299,6 +3308,10 @@
         } catch (e) { /* leave call only */ }
       }
 
+      function isPartnerSession() {
+        return typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode();
+      }
+
       function openPartnerPopupNow() {
         if (typeof window.openPartnerReportPopup === 'function') {
           window.openPartnerReportPopup();
@@ -3314,7 +3327,7 @@
         render();
         el.classList.remove('is-warning');
         hangUpCallOnly();
-        openPartnerPopupNow();
+        if (isPartnerSession()) openPartnerPopupNow();
         document.dispatchEvent(new CustomEvent('dayo:session-ended'));
       }
 
@@ -3332,8 +3345,6 @@
 
       function skipToEnd() {
         remainingSeconds = 0;
-        hangUpCallOnly();
-        openPartnerPopupNow();
         endSession();
       }
 
@@ -3616,6 +3627,10 @@
       var dismissBtn = document.getElementById('cameraTipDismiss');
       if (!popup) return;
 
+      if (typeof window.hasCameraToastShown === 'undefined') {
+        window.hasCameraToastShown = false;
+      }
+
       if (isPartnerCameraTipBlocked()) {
         purgeCameraTipPopup();
         window.hideCameraOffGuidance = function () {};
@@ -3624,16 +3639,27 @@
 
       var tipTimer = 0;
 
+      function removeExistingCameraToasts() {
+        document.querySelectorAll('.camera-toast, #cameraTipToast').forEach(function (node) {
+          try { node.remove(); } catch (e) { /* ignore */ }
+        });
+      }
+
       function hideCameraTip() {
         if (isPartnerCameraTipBlocked()) return;
         clearTimeout(tipTimer);
+        popup = document.getElementById('cameraTipPopup');
         if (!popup || !popup.isConnected) return;
         popup.hidden = true;
       }
 
       function showCameraTip() {
         if (isPartnerCameraTipBlocked()) return;
+        if (window.hasCameraToastShown) return;
+        removeExistingCameraToasts();
+        popup = document.getElementById('cameraTipPopup');
         if (!popup || !popup.isConnected) return;
+        window.hasCameraToastShown = true;
         popup.hidden = false;
       }
 
@@ -3933,14 +3959,38 @@
       }
     }
 
+    function isPartnerSessionMode() {
+      return typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode();
+    }
+
+    function hideLiveVideoStage() {
+      document.body.classList.add('session-ended-user');
+      ['videoStage', 'videoColumn', 'shareStage', 'dailyHost'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.hidden = true;
+        el.style.setProperty('display', 'none', 'important');
+      });
+    }
+
+    function revealUserQuizModal() {
+      var quiz = document.getElementById('quizModal') || document.getElementById('reviewQuizModal');
+      if (!quiz) return;
+      quiz.hidden = false;
+      quiz.classList.add('is-open');
+      quiz.style.setProperty('display', 'flex', 'important');
+      quiz.style.setProperty('align-items', 'center', 'important');
+      quiz.style.setProperty('justify-content', 'center', 'important');
+      quiz.style.setProperty('z-index', '500000', 'important');
+    }
+
     function openReviewFromTranscript(result, options) {
-      if (typeof window.openPartnerReportPopup === 'function' &&
-          (document.body.classList.contains('theme-partner') ||
-           (function () { try { return localStorage.getItem('dayo_current_mode') === 'PARTNER'; } catch (e) { return false; } })())) {
+      if (isPartnerSessionMode() && typeof window.openPartnerReportPopup === 'function') {
         window.openPartnerReportPopup();
         return;
       }
       options = options || {};
+      revealUserQuizModal();
       var transcript = (result && result.transcript)
         || (window.DayOLive && window.DayOLive.getTranscript && window.DayOLive.getTranscript())
         || window.DayOLastTranscript
@@ -3958,31 +4008,49 @@
       openReviewFromTranscript(result, { autoStart: true });
     };
 
-    function handleTimedSessionExpiry(result) {
-      if (typeof window.openPartnerReportPopup === 'function') {
-        window.openPartnerReportPopup();
-        return;
+    function beginUserSessionEndFlow(result) {
+      stopAllMedia();
+      hideLiveVideoStage();
+      if (typeof window.hideCameraOffGuidance === 'function') {
+        window.hideCameraOffGuidance();
       }
       openReviewFromTranscript(result, { autoStart: true });
     }
 
+    function handleTimedSessionExpiry(result) {
+      if (isPartnerSessionMode()) {
+        if (typeof window.openPartnerReportPopup === 'function') {
+          window.openPartnerReportPopup();
+        }
+        return;
+      }
+      beginUserSessionEndFlow(result);
+    }
+
+    window.handleUserQuizComplete = function handleUserQuizComplete() {
+      if (window._dayoUserQuizCompleteNavigating) return;
+      window._dayoUserQuizCompleteNavigating = true;
+      alert('🎉 복습 퀴즈가 완료되었습니다! 마이페이지 단어장으로 이동합니다.');
+      try { sessionStorage.setItem('dayo_goto', 'mypage'); } catch (e) { /* ignore */ }
+      window.location.href = 'index.html?view=mypage';
+    };
+
     document.getElementById('endBtn').addEventListener('click', () => {
       persistTranscript();
       stopAllMedia();
-      if (typeof window.openPartnerReportPopup === 'function' &&
-          (document.body.classList.contains('theme-partner') ||
-           (function () { try { return localStorage.getItem('dayo_current_mode') === 'PARTNER'; } catch (e) { return false; } })())) {
-        window.openPartnerReportPopup();
+      if (isPartnerSessionMode()) {
+        if (typeof window.openPartnerReportPopup === 'function') {
+          window.openPartnerReportPopup();
+        }
         return;
       }
-      openFeedback();
+      beginUserSessionEndFlow(null);
     });
 
     document.addEventListener('dayo:session-ended', () => {
       stopAllMedia();
-      persistTranscript().then(handleTimedSessionExpiry).catch(function () {
-        handleTimedSessionExpiry(null);
-      });
+      handleTimedSessionExpiry(null);
+      persistTranscript();
     });
 
     starButtons.forEach((btn) => {
@@ -4023,7 +4091,7 @@
   </script>
   <script>
     (function () {
-      var overlay = document.getElementById('reviewQuizModal');
+      var overlay = document.getElementById('quizModal') || document.getElementById('reviewQuizModal');
       if (!overlay) return;
 
       var TYPE_LABELS = {
@@ -4193,7 +4261,7 @@
         if (els.jamCount) els.jamCount.textContent = '0';
         if (els.save) {
           els.save.disabled = false;
-          els.save.textContent = '단어장에 저장하기';
+          els.save.textContent = '단어장에 저장하고 완료';
         }
         clearFeedback();
       }
@@ -4272,6 +4340,10 @@
         applyTranscriptIntro();
         overlay.hidden = false;
         overlay.classList.add('is-open');
+        overlay.style.setProperty('display', 'flex', 'important');
+        overlay.style.setProperty('align-items', 'center', 'important');
+        overlay.style.setProperty('justify-content', 'center', 'important');
+        overlay.style.setProperty('z-index', '500000', 'important');
         if (options.autoStart) {
           startQuiz();
         } else {
@@ -4445,8 +4517,11 @@
         advanceTimer = setTimeout(function () {
           advanceTimer = 0;
           index += 1;
-          if (index >= QUESTIONS.length) showReport();
-          else renderQuestion();
+          if (index >= QUESTIONS.length) {
+            showReport();
+            return;
+          }
+          renderQuestion();
         }, last ? 420 : 500);
       }
 
@@ -4547,6 +4622,9 @@
           vocabSaved = true;
           if (els.save) els.save.textContent = '저장 완료!';
           notify('단어장에 저장했어요');
+          if (typeof window.handleUserQuizComplete === 'function') {
+            window.handleUserQuizComplete();
+          }
         };
         if (store && typeof store.mergeVocab === 'function') {
           store.mergeVocab(items).then(done).catch(function () {
@@ -4561,7 +4639,12 @@
 
       function finishSession() {
         close();
-        window.location.href = 'mypage.html';
+        if (typeof window.handleUserQuizComplete === 'function') {
+          window.handleUserQuizComplete();
+          return;
+        }
+        try { sessionStorage.setItem('dayo_goto', 'mypage'); } catch (e) { /* ignore */ }
+        window.location.href = 'index.html?view=mypage';
       }
 
       els.mcq.addEventListener('click', function (e) {
@@ -4795,7 +4878,15 @@
 
     window.handleDevSkipClick = function (e) {
       if (e) { e.preventDefault(); e.stopPropagation(); }
-      window.openPartnerReportPopup();
+      if (typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode()) {
+        window.openPartnerReportPopup();
+        return;
+      }
+      if (window.DayOSessionTimer && typeof window.DayOSessionTimer.skipToEnd === 'function') {
+        window.DayOSessionTimer.skipToEnd();
+        return;
+      }
+      document.dispatchEvent(new CustomEvent('dayo:session-ended'));
     };
   </script>
   <button type="button" id="dev-test-skip-btn" onclick="handleDevSkipClick(event)" style="position: fixed; bottom: 16px; left: 16px; z-index: 9999999; background: #3E322D; color: #FFEAA7; border: 1.5px solid #FFEAA7; border-radius: 20px; padding: 8px 14px; font-size: 11px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.25); opacity: 0.85;">

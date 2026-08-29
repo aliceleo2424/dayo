@@ -10,6 +10,18 @@
       return !!(isLogged || userEmail || userName || (localStorage.getItem('userName') || '').trim());
     };
 
+    (function redirectMypageView() {
+      try {
+        var view = new URLSearchParams(location.search).get('view');
+        var gotoMypage = view === 'mypage';
+        try { gotoMypage = gotoMypage || sessionStorage.getItem('dayo_goto') === 'mypage'; } catch (e) {}
+        if (gotoMypage) {
+          try { sessionStorage.removeItem('dayo_goto'); } catch (e) {}
+          location.replace('mypage.html');
+        }
+      } catch (e) { /* ignore */ }
+    })();
+
     window.handleNaverFastLogin = function(e) {
       if (e) {
         e.preventDefault();
