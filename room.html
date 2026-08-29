@@ -2424,7 +2424,7 @@
     #partner-report-modal {
       position: fixed;
       inset: 0;
-      z-index: 99999;
+      z-index: 999999;
       background: rgba(0, 0, 0, 0.6);
       display: none;
       align-items: center;
@@ -2432,7 +2432,8 @@
       padding: 16px;
     }
     #partner-report-modal.is-open {
-      display: flex;
+      display: flex !important;
+      z-index: 999999;
     }
     body.partner-report-open #dev-test-skip-btn {
       display: none !important;
@@ -3297,6 +3298,37 @@
         playWrapUpChime();
       }
 
+      function isPartnerEnd() {
+        try {
+          if (document.body && document.body.classList.contains('theme-partner')) return true;
+          if (localStorage.getItem('dayo_current_mode') === 'PARTNER') return true;
+          if (new URLSearchParams(window.location.search).get('role') === 'partner') return true;
+        } catch (e) {}
+        return !!(window.isPartnerRoomMode && window.isPartnerRoomMode());
+      }
+
+      function hangUpCallOnly() {
+        try {
+          if (window.DayOLive && typeof window.DayOLive.hangUp === 'function') {
+            window.DayOLive.hangUp();
+          }
+        } catch (e) { /* leave call only */ }
+      }
+
+      function openPartnerReportModalNow() {
+        var partnerModal = document.getElementById('partner-report-modal');
+        if (partnerModal) {
+          partnerModal.classList.add('is-open');
+          partnerModal.style.setProperty('display', 'flex', 'important');
+          partnerModal.style.zIndex = '999999';
+          partnerModal.setAttribute('aria-hidden', 'false');
+          document.body.classList.add('partner-report-open');
+          if (typeof window.initPartnerReportData === 'function') {
+            window.initPartnerReportData();
+          }
+        }
+      }
+
       function endSession() {
         if (sessionEnded) return;
         sessionEnded = true;
@@ -3305,6 +3337,8 @@
         remainingSeconds = 0;
         render();
         el.classList.remove('is-warning');
+        hangUpCallOnly();
+        if (isPartnerEnd()) openPartnerReportModalNow();
         document.dispatchEvent(new CustomEvent('dayo:session-ended'));
       }
 
@@ -3322,6 +3356,8 @@
 
       function skipToEnd() {
         remainingSeconds = 0;
+        hangUpCallOnly();
+        if (isPartnerEnd()) openPartnerReportModalNow();
         endSession();
       }
 
@@ -3921,7 +3957,22 @@
       }
     }
 
+    function isPartnerSessionEnd() {
+      try {
+        if (document.body.classList.contains('theme-partner')) return true;
+        if (localStorage.getItem('dayo_current_mode') === 'PARTNER') return true;
+        if (new URLSearchParams(window.location.search).get('role') === 'partner') return true;
+      } catch (e) {}
+      return !!(window.isPartnerRoomMode && window.isPartnerRoomMode());
+    }
+
     function openReviewFromTranscript(result, options) {
+      if (isPartnerSessionEnd()) {
+        if (typeof window.handleSessionTimeout === 'function') {
+          window.handleSessionTimeout(result);
+        }
+        return;
+      }
       options = options || {};
       var transcript = (result && result.transcript)
         || (window.DayOLive && window.DayOLive.getTranscript && window.DayOLive.getTranscript())
@@ -3942,19 +3993,14 @@
     };
 
     function handleTimedSessionExpiry(result) {
-      if (typeof window.handleSessionEndRouting === 'function') {
-        window.handleSessionEndRouting(result);
-        return;
-      }
-      if (window.isPartnerRoomMode && window.isPartnerRoomMode()) {
+      if (isPartnerSessionEnd()) {
         if (typeof window.handleSessionTimeout === 'function') {
           window.handleSessionTimeout(result);
-          return;
         }
-        showToast('🎉 25분 세션 완료! 피드백 검수 후 +6,000P가 적립되었습니다.', 4200);
-        setTimeout(function () {
-          window.location.href = 'index.html?mode=partner';
-        }, 1600);
+        return;
+      }
+      if (typeof window.handleSessionEndRouting === 'function') {
+        window.handleSessionEndRouting(result);
         return;
       }
       openReviewFromTranscript(result, { autoStart: true });
@@ -3962,18 +4008,11 @@
 
     document.getElementById('endBtn').addEventListener('click', () => {
       persistTranscript();
-      var isPartner = false;
-      try {
-        isPartner =
-          document.body.classList.contains('theme-partner') ||
-          localStorage.getItem('dayo_current_mode') === 'PARTNER' ||
-          new URLSearchParams(window.location.search).get('role') === 'partner';
-      } catch (e) {
-        isPartner = document.body.classList.contains('theme-partner');
-      }
-      if (isPartner && typeof window.handleSessionEndRouting === 'function') {
-        stopAllMedia();
-        window.handleSessionEndRouting();
+      stopAllMedia();
+      if (isPartnerSessionEnd()) {
+        if (typeof window.handleSessionTimeout === 'function') {
+          window.handleSessionTimeout();
+        }
         return;
       }
       openFeedback();
@@ -4972,13 +5011,22 @@
 
       function openPartnerReportModal(result) {
         hideUserRatingModals();
-        var modal = document.getElementById('partner-report-modal');
-        if (!modal) return;
-        initPartnerReportData(result);
-        modal.classList.add('is-open');
-        modal.style.display = 'flex';
-        modal.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('partner-report-open');
+        try {
+          if (window.DayOLive && typeof window.DayOLive.hangUp === 'function') {
+            window.DayOLive.hangUp();
+          }
+        } catch (e) {}
+        var partnerModal = document.getElementById('partner-report-modal');
+        if (partnerModal) {
+          partnerModal.classList.add('is-open');
+          partnerModal.style.setProperty('display', 'flex', 'important');
+          partnerModal.style.zIndex = '999999';
+          partnerModal.setAttribute('aria-hidden', 'false');
+          document.body.classList.add('partner-report-open');
+          if (typeof initPartnerReportData === 'function') {
+            initPartnerReportData(result);
+          }
+        }
         if (window.DayOScrollLock) window.DayOScrollLock.lock();
       }
 
@@ -5002,13 +5050,30 @@
       window.handleSessionEndRouting = handleSessionEndRouting;
 
       window.handleSessionTimeout = function (result) {
-        handleSessionEndRouting(result);
+        try {
+          if (window.DayOLive && typeof window.DayOLive.hangUp === 'function') {
+            window.DayOLive.hangUp();
+          }
+        } catch (e) {}
+        if (!isPartner()) return;
+        var partnerModal = document.getElementById('partner-report-modal');
+        if (partnerModal) {
+          partnerModal.classList.add('is-open');
+          partnerModal.style.setProperty('display', 'flex', 'important');
+          partnerModal.style.zIndex = '999999';
+          partnerModal.setAttribute('aria-hidden', 'false');
+          document.body.classList.add('partner-report-open');
+          if (typeof initPartnerReportData === 'function') {
+            initPartnerReportData(result);
+          }
+        }
       };
 
       window.completePartnerReport = function () {
         if (submitting) return;
         submitting = true;
-        var cta = document.getElementById('partner-report-submit');
+        var cta = document.getElementById('btn-partner-report-complete') ||
+          document.getElementById('partner-report-submit');
         if (cta) {
           cta.disabled = true;
           cta.textContent = '정산 처리 중...';
@@ -5026,15 +5091,11 @@
         try {
           localStorage.setItem('dayo_partner_last_report', JSON.stringify(payload));
         } catch (e) {}
-        var msg = '🎉 세션 리포트 전송 완료! +6,000P가 적립되었습니다.';
-        if (typeof showToast === 'function') {
-          showToast(msg, 3200);
-        } else {
-          alert(msg);
+        alert('🎉 세션 리포트 검수 완료! +6,000P가 적립되었습니다.');
+        if (typeof goToView === 'function') {
+          goToView('viewPartnerHome');
         }
-        setTimeout(function () {
-          window.location.href = 'index.html?mode=partner';
-        }, 900);
+        window.location.href = 'index.html?mode=partner';
       };
 
       document.addEventListener('click', function (e) {
@@ -5067,13 +5128,16 @@
         e.preventDefault();
         e.stopPropagation();
       }
+      try {
+        if (window.DayOLive && typeof window.DayOLive.hangUp === 'function') {
+          window.DayOLive.hangUp();
+        }
+      } catch (err) {}
       if (typeof window.skipToTimerEnd === 'function') {
         window.skipToTimerEnd();
-      } else if (typeof handleSessionTimeout === 'function') {
-        handleSessionTimeout();
-      } else {
-        alert('세션 종료 로직을 호출합니다.');
-        window.location.reload();
+      }
+      if (typeof window.handleSessionTimeout === 'function') {
+        window.handleSessionTimeout();
       }
     };
   </script>
@@ -5152,7 +5216,7 @@
         </section>
 
         <div class="partner-report-cta">
-          <button type="button" class="partner-report-cta-btn" id="partner-report-submit" onclick="completePartnerReport()">✨ 검수 완료 및 6,000P 정산 받기</button>
+          <button type="button" class="partner-report-cta-btn" id="btn-partner-report-complete" onclick="completePartnerReport()">✨ 검수 완료 및 6,000P 정산 받기</button>
         </div>
       </div>
     </div>
