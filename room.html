@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -3323,6 +3323,7 @@
         var partnerModal = document.getElementById('partner-report-modal');
         if (partnerModal) {
           partnerModal.style.setProperty('display', 'flex', 'important');
+          partnerModal.style.zIndex = '999999';
         }
       }
 
@@ -5056,14 +5057,15 @@
             window.DayOLive.hangUp();
           }
         } catch (e) {}
+        if (typeof window.openPartnerReportModal === 'function') {
+          window.openPartnerReportModal();
+          return;
+        }
         if (!isPartner()) return;
         var partnerModal = document.getElementById('partner-report-modal');
         if (partnerModal) {
-          partnerModal.classList.add('is-open');
           partnerModal.style.setProperty('display', 'flex', 'important');
           partnerModal.style.zIndex = '999999';
-          partnerModal.setAttribute('aria-hidden', 'false');
-          document.body.classList.add('partner-report-open');
           if (typeof initPartnerReportData === 'function') {
             initPartnerReportData(result);
           }
@@ -5128,6 +5130,13 @@
       var modal = document.getElementById('partner-report-modal');
       if (modal) {
         modal.style.setProperty('display', 'flex', 'important');
+        modal.style.setProperty('align-items', 'center', 'important');
+        modal.style.setProperty('justify-content', 'center', 'important');
+        modal.style.zIndex = '999999';
+        modal.classList.add('is-open');
+        if (typeof window.initPartnerReportData === 'function') {
+          try { window.initPartnerReportData(); } catch (err) {}
+        }
       }
     };
 
@@ -5135,25 +5144,17 @@
       alert('🎉 세션 리포트 검수 완료! +6,000P가 적립되었습니다.');
       if (typeof goToView === 'function') {
         goToView('viewPartnerHome');
-      } else {
-        window.location.href = 'index.html?mode=partner';
       }
+      window.location.href = 'index.html?mode=partner';
     };
     window.completePartnerReport = window.completePartnerReportAction;
 
     window.handleDevSkipClick = function (e) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      window.openPartnerReportModal();
-    };
-
-    window.handleSessionTimeout = function () {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
       window.openPartnerReportModal();
     };
   </script>
-  <button type="button" id="dev-test-skip-btn" onclick="handleDevSkipClick(event)" style="position: fixed; bottom: 16px; left: 16px; z-index: 99999; background: #3E322D; color: #FFEAA7; border: 1.5px solid #FFEAA7; border-radius: 20px; padding: 8px 14px; font-size: 11px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.25); opacity: 0.85; transition: opacity 0.2s;">
+  <button type="button" id="dev-test-skip-btn" onclick="handleDevSkipClick(event)" style="position: fixed; bottom: 16px; left: 16px; z-index: 999999; background: #3E322D; color: #FFEAA7; border: 1.5px solid #FFEAA7; border-radius: 20px; padding: 8px 14px; font-size: 11px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.25); opacity: 0.85; transition: opacity 0.2s;">
     ⚡ [테스트] 25분 종료 트리거
   </button>
 
@@ -5172,7 +5173,7 @@
 
       <!-- 우측 65%: AI 리포트 검수 및 파트너 휴먼터치 -->
       <div style="width: 65%; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; background: #FFFFFF;">
-        <div style="font-size: 16px; font-weight: 800; color: #3E4A42;">✨ 파트너 피드백 &amp; AI 리포트 검수</div>
+        <div style="font-size: 16px; font-weight: 800; color: #3E4A42;">✨ 파트너 피드백 & AI 리포트 검수</div>
 
         <!-- 1. 파트너 다정 코멘트 -->
         <div>
