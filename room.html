@@ -2419,6 +2419,312 @@
 
       .bottom-sheet { max-height: 45vh; }
     }
+
+    /* Partner post-session report review modal */
+    #partner-report-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    #partner-report-modal.is-open {
+      display: flex;
+    }
+    body.partner-report-open #dev-test-skip-btn {
+      display: none !important;
+    }
+    .partner-report-dialog {
+      width: min(960px, 100%);
+      max-width: 960px;
+      height: 85vh;
+      background: #FFFFFF;
+      border-radius: 20px;
+      display: flex;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+    }
+    .partner-report-left {
+      width: 35%;
+      background: #F8FAF9;
+      border-right: 1px solid #E5E7EB;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .partner-report-left h2 {
+      font-size: 15px;
+      font-weight: 800;
+      color: #247552;
+      margin-bottom: 14px;
+      letter-spacing: -0.02em;
+    }
+    #partner-transcript-viewer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+    .pr-bubble-row {
+      display: flex;
+      flex-direction: column;
+      max-width: 92%;
+    }
+    .pr-bubble-row.is-partner {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+    .pr-bubble-row.is-user {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+    .pr-bubble-who {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6B7280;
+      margin-bottom: 4px;
+    }
+    .pr-bubble {
+      padding: 8px 12px;
+      border-radius: 16px;
+      font-size: 13px;
+      line-height: 1.45;
+      color: #191919;
+      word-break: break-word;
+    }
+    .pr-bubble-row.is-partner .pr-bubble {
+      background: #FEE500;
+      border-bottom-right-radius: 4px;
+    }
+    .pr-bubble-row.is-user .pr-bubble {
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
+      border-bottom-left-radius: 4px;
+    }
+    .pr-transcript-empty {
+      font-size: 13px;
+      color: #6B7280;
+      line-height: 1.5;
+      padding: 12px 0;
+    }
+    .partner-report-right {
+      width: 65%;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-width: 0;
+      background: #FFFFFF;
+    }
+    .partner-report-section h3 {
+      font-size: 14px;
+      font-weight: 800;
+      color: #3E322D;
+      margin-bottom: 10px;
+    }
+    #partner-comment-input {
+      width: 100%;
+      min-height: 72px;
+      resize: vertical;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font: inherit;
+      font-size: 13px;
+      color: #3E322D;
+      background: #FAFBFA;
+    }
+    #partner-comment-input:focus {
+      outline: none;
+      border-color: #91BFA0;
+      box-shadow: 0 0 0 3px rgba(184, 226, 200, 0.45);
+    }
+    #ai-suggested-comments {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    #ai-suggested-comments button {
+      border: 1.5px solid #B8E2C8;
+      background: #EAF8F2;
+      color: #247552;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 7px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      line-height: 1.3;
+    }
+    #ai-suggested-comments button:hover {
+      background: #B8E2C8;
+    }
+    .partner-stamp-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .partner-stamp-chip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1.5px solid #E5E7EB;
+      background: #FFFFFF;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #3E322D;
+      cursor: pointer;
+    }
+    .partner-stamp-chip input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .partner-stamp-chip:has(input:checked),
+    .partner-stamp-chip.is-on {
+      background: #FFF6DC;
+      border-color: #FFEAA7;
+      color: #966914;
+    }
+    .partner-synonym-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .partner-synonym-row input,
+    .partner-report-section input[type="text"] {
+      flex: 1;
+      min-width: 0;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 10px;
+      padding: 9px 11px;
+      font: inherit;
+      font-size: 13px;
+      color: #3E322D;
+    }
+    .partner-synonym-arrow {
+      font-weight: 800;
+      color: #91BFA0;
+      flex: 0 0 auto;
+    }
+    .partner-correction-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #6B7280;
+      margin: 8px 0 4px;
+    }
+    .partner-regen-btn {
+      margin-top: 10px;
+      align-self: flex-start;
+      border: 1.5px dashed #91BFA0;
+      background: #F8FAF9;
+      color: #247552;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .partner-share-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .partner-share-card {
+      position: relative;
+      display: block;
+      cursor: pointer;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #FFFFFF;
+    }
+    .partner-share-card input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .partner-share-card:has(input:checked),
+    .partner-share-card.is-on {
+      border-color: #247552;
+      box-shadow: 0 0 0 2px rgba(184, 226, 200, 0.7);
+    }
+    .partner-share-card-thumb {
+      display: block;
+      min-height: 120px;
+      padding: 14px 12px;
+    }
+    .partner-share-card-thumb--mood {
+      background: linear-gradient(160deg, #EAF8F2 0%, #FFF6DC 100%);
+    }
+    .partner-share-card-thumb--wit {
+      background: linear-gradient(160deg, #FFEAA7 0%, #FFD1DC 100%);
+    }
+    .partner-share-card-thumb small {
+      display: block;
+      font-size: 11px;
+      font-weight: 800;
+      color: #247552;
+      margin-bottom: 8px;
+    }
+    .partner-share-card-thumb--wit small { color: #966914; }
+    .partner-share-card-thumb p {
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.45;
+      color: #3E322D;
+    }
+    .partner-report-cta {
+      margin-top: auto;
+      position: sticky;
+      bottom: 0;
+      padding-top: 8px;
+      background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #FFFFFF 28%);
+    }
+    .partner-report-cta-btn {
+      width: 100%;
+      background: #B8E2C8;
+      color: #247552;
+      border: 1.5px solid #247552;
+      font-weight: 800;
+      padding: 14px 16px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    .partner-report-cta-btn:disabled {
+      opacity: 0.65;
+      cursor: progress;
+    }
+    @media (max-width: 760px) {
+      .partner-report-dialog {
+        flex-direction: column;
+        height: 90vh;
+      }
+      .partner-report-left,
+      .partner-report-right {
+        width: 100%;
+      }
+      .partner-report-left {
+        max-height: 34%;
+        border-right: none;
+        border-bottom: 1px solid #E5E7EB;
+      }
+      .partner-share-cards {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body class="is-room theme-learner">
@@ -3633,6 +3939,10 @@
 
     function handleTimedSessionExpiry(result) {
       if (window.isPartnerRoomMode && window.isPartnerRoomMode()) {
+        if (typeof window.handleSessionTimeout === 'function') {
+          window.handleSessionTimeout(result);
+          return;
+        }
         showToast('🎉 25분 세션 완료! 피드백 검수 후 +6,000P가 적립되었습니다.', 4200);
         setTimeout(function () {
           window.location.href = 'partner.html#viewPartnerHome';
@@ -4445,6 +4755,241 @@
   <script src="mobile-nav.js"></script>
   <script src="mode-switch.js"></script>
   <script>
+    /* Partner post-session report review modal */
+    (function partnerReportModal() {
+      'use strict';
+
+      var ANALYSIS = [
+        {
+          word: 'like',
+          alts: 'prefer, enjoy',
+          corrections: [
+            'I like coffee. → I prefer coffee.',
+            'It was good. → It was really enjoyable.'
+          ]
+        },
+        {
+          word: 'very',
+          alts: 'really, so, pretty',
+          corrections: [
+            'I am very happy. → I am really happy.',
+            'It was very fun. → It was so much fun.'
+          ]
+        },
+        {
+          word: 'good',
+          alts: 'great, wonderful, lovely',
+          corrections: [
+            'That is good. → That sounds wonderful.',
+            'I had a good time. → I had a lovely time.'
+          ]
+        }
+      ];
+
+      var SHARE_MOOD = [
+        '오늘 25분의 대화가 마음에 남는 하루가 되었어요 ☕',
+        '천천히 이어진 말이 서로를 조금 더 가까이 데려왔어요.',
+        '작은 문장들이 모여 따뜻한 오후가 되었네요.'
+      ];
+      var SHARE_WIT = [
+        '영어 근육 오늘도 잘 썼다 💪 다음엔 더 센 표현 각이야',
+        '25분 만에 발화량 레벨업. 내일의 나도 기대하는 중.',
+        'Like 대신 prefer 쓰는 그날, 바로 오늘.'
+      ];
+
+      var analysisIndex = 0;
+      var shareIndex = 0;
+      var submitting = false;
+
+      function escapeHtml(value) {
+        return String(value == null ? '' : value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+
+      function isPartner() {
+        if (window.isPartnerRoomMode && window.isPartnerRoomMode()) return true;
+        try {
+          if (document.body && document.body.classList.contains('theme-partner')) return true;
+          var role = String(new URLSearchParams(location.search).get('role') || '').toLowerCase();
+          if (role === 'partner') return true;
+        } catch (e) {}
+        return false;
+      }
+
+      function normalizeRows(raw) {
+        if (typeof raw === 'string' && raw.trim()) {
+          return raw.split(/\n+/).map(function (line) {
+            var text = line.replace(/^(User|Partner|Tutor|유저|파트너)\s*[:：]\s*/i, '').trim();
+            var speaker = /^(Partner|Tutor|파트너)/i.test(line) ? 'partner' : 'user';
+            return { speaker: speaker, text: text || line.trim() };
+          }).filter(function (row) { return row.text; });
+        }
+        if (!Array.isArray(raw)) return [];
+        return raw.map(function (row) {
+          if (!row) return null;
+          if (typeof row === 'string') return { speaker: 'user', text: row.trim() };
+          var speaker = String(row.speaker || row.role || 'user').toLowerCase();
+          if (speaker === 'tutor' || speaker === 'host') speaker = 'partner';
+          if (speaker !== 'partner') speaker = 'user';
+          var text = String(row.text || row.message || row.content || '').trim();
+          return text ? { speaker: speaker, text: text } : null;
+        }).filter(Boolean);
+      }
+
+      function collectTranscript(result) {
+        var rows = [];
+        if (result && result.transcript) rows = normalizeRows(result.transcript);
+        if (!rows.length) rows = normalizeRows(window.sessionTranscript);
+        if (!rows.length && window.DayOLive && typeof window.DayOLive.getTranscript === 'function') {
+          try { rows = normalizeRows(window.DayOLive.getTranscript()); } catch (e) { rows = []; }
+        }
+        if (!rows.length) rows = normalizeRows(window.DayOLastTranscript);
+        if (!rows.length) {
+          try {
+            rows = normalizeRows(JSON.parse(localStorage.getItem('last_session_transcript') || '[]'));
+          } catch (e) { rows = []; }
+        }
+        if (!rows.length) {
+          var bubbles = document.querySelectorAll('#chatMessages .bubble');
+          rows = Array.prototype.map.call(bubbles, function (el) {
+            var text = String(el.textContent || '').trim();
+            if (!text) return null;
+            var speaker = el.classList.contains('bubble--me') || el.classList.contains('bubble--self')
+              ? 'partner'
+              : 'user';
+            return { speaker: speaker, text: text };
+          }).filter(Boolean);
+        }
+        return rows;
+      }
+
+      function renderTranscript(rows) {
+        var viewer = document.getElementById('partner-transcript-viewer');
+        if (!viewer) return;
+        if (!rows.length) {
+          viewer.innerHTML = '<p class="pr-transcript-empty">아직 수집된 대화 로그가 없어요. 세션 중 발화가 쌓이면 여기에 말풍선으로 보여요.</p>';
+          return;
+        }
+        viewer.innerHTML = rows.map(function (row) {
+          var mine = row.speaker === 'partner';
+          var who = mine ? '파트너' : '유저';
+          return '<div class="pr-bubble-row ' + (mine ? 'is-partner' : 'is-user') + '">' +
+            '<span class="pr-bubble-who">' + who + '</span>' +
+            '<div class="pr-bubble">' + escapeHtml(row.text) + '</div>' +
+            '</div>';
+        }).join('');
+        viewer.scrollTop = viewer.scrollHeight;
+      }
+
+      function fillAnalysis(index) {
+        var item = ANALYSIS[((index % ANALYSIS.length) + ANALYSIS.length) % ANALYSIS.length];
+        var word = document.getElementById('partner-synonym-word');
+        var alts = document.getElementById('partner-synonym-alts');
+        var c1 = document.getElementById('partner-correction-1');
+        var c2 = document.getElementById('partner-correction-2');
+        if (word) word.value = item.word;
+        if (alts) alts.value = item.alts;
+        if (c1) c1.value = item.corrections[0];
+        if (c2) c2.value = item.corrections[1];
+      }
+
+      function fillShareCards(index) {
+        var mood = document.getElementById('partner-share-mood-copy');
+        var wit = document.getElementById('partner-share-wit-copy');
+        if (mood) mood.textContent = SHARE_MOOD[((index % SHARE_MOOD.length) + SHARE_MOOD.length) % SHARE_MOOD.length];
+        if (wit) wit.textContent = SHARE_WIT[((index % SHARE_WIT.length) + SHARE_WIT.length) % SHARE_WIT.length];
+      }
+
+      function syncChipState(selector, onClass) {
+        document.querySelectorAll(selector).forEach(function (el) {
+          var input = el.querySelector('input');
+          el.classList.toggle(onClass || 'is-on', !!(input && input.checked));
+        });
+      }
+
+      function openPartnerReportModal(result) {
+        var modal = document.getElementById('partner-report-modal');
+        if (!modal) return;
+        renderTranscript(collectTranscript(result));
+        fillAnalysis(analysisIndex);
+        fillShareCards(shareIndex);
+        syncChipState('.partner-stamp-chip');
+        syncChipState('.partner-share-card');
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('partner-report-open');
+        if (window.DayOScrollLock) window.DayOScrollLock.lock();
+      }
+
+      function readChecked(name, fallback) {
+        var el = document.querySelector('input[name="' + name + '"]:checked');
+        return el ? el.value : fallback;
+      }
+
+      window.openPartnerReportModal = openPartnerReportModal;
+
+      window.handleSessionTimeout = function (result) {
+        if (!isPartner()) return;
+        openPartnerReportModal(result);
+      };
+
+      window.completePartnerReport = function () {
+        if (submitting) return;
+        submitting = true;
+        var cta = document.getElementById('partner-report-submit');
+        if (cta) {
+          cta.disabled = true;
+          cta.textContent = '정산 처리 중...';
+        }
+        var payload = {
+          comment: (document.getElementById('partner-comment-input') || {}).value || '',
+          stamp: readChecked('partner-stamp', 'warm'),
+          synonymWord: (document.getElementById('partner-synonym-word') || {}).value || '',
+          synonymAlts: (document.getElementById('partner-synonym-alts') || {}).value || '',
+          correction1: (document.getElementById('partner-correction-1') || {}).value || '',
+          correction2: (document.getElementById('partner-correction-2') || {}).value || '',
+          shareCard: readChecked('partner-share-card', 'mood'),
+          completedAt: new Date().toISOString()
+        };
+        try {
+          localStorage.setItem('dayo_partner_last_report', JSON.stringify(payload));
+        } catch (e) {}
+        if (typeof showToast === 'function') {
+          showToast('🎉 검수 완료! +6,000P가 정산됩니다.', 3200);
+        }
+        setTimeout(function () {
+          window.location.href = 'partner.html#viewPartnerHome';
+        }, 900);
+      };
+
+      document.addEventListener('click', function (e) {
+        var suggest = e.target.closest('#ai-suggested-comments button');
+        if (suggest) {
+          var textarea = document.getElementById('partner-comment-input');
+          if (textarea) textarea.value = suggest.getAttribute('data-comment') || suggest.textContent || '';
+          return;
+        }
+        if (e.target.closest('#partner-regen-analysis')) {
+          analysisIndex += 1;
+          fillAnalysis(analysisIndex);
+          return;
+        }
+        if (e.target.closest('#partner-regen-cards')) {
+          shareIndex += 1;
+          fillShareCards(shareIndex);
+        }
+      });
+
+      document.addEventListener('change', function (e) {
+        if (e.target && e.target.name === 'partner-stamp') syncChipState('.partner-stamp-chip');
+        if (e.target && e.target.name === 'partner-share-card') syncChipState('.partner-share-card');
+      });
+    })();
+  </script>
+  <script>
     window.handleDevSkipClick = function (e) {
       if (e) {
         e.preventDefault();
@@ -4463,5 +5008,82 @@
   <button type="button" id="dev-test-skip-btn" onclick="handleDevSkipClick(event)" style="position: fixed; bottom: 16px; left: 16px; z-index: 99999; background: #3E322D; color: #FFEAA7; border: 1.5px solid #FFEAA7; border-radius: 20px; padding: 8px 14px; font-size: 11px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.25); opacity: 0.85; transition: opacity 0.2s;">
     ⚡ [테스트] 25분 종료 트리거
   </button>
+
+  <div id="partner-report-modal" aria-hidden="true">
+    <div class="partner-report-dialog" role="dialog" aria-modal="true" aria-labelledby="partner-report-log-title">
+      <aside class="partner-report-left">
+        <h2 id="partner-report-log-title">💬 25분 대화 스크롤 로그</h2>
+        <div id="partner-transcript-viewer"></div>
+      </aside>
+      <div class="partner-report-right">
+        <section class="partner-report-section">
+          <h3>파트너 다정 코멘트</h3>
+          <textarea id="partner-comment-input" placeholder="유저에게 따뜻한 한 줄 코멘트를 남겨주세요 (선택)"></textarea>
+          <div id="ai-suggested-comments">
+            <button type="button" data-comment="오늘 발화량이 정말 훌륭했어요!">오늘 발화량이 정말 훌륭했어요!</button>
+            <button type="button" data-comment="새로운 표현에 적극적인 모습이 멋져요!">새로운 표현에 적극적인 모습이 멋져요!</button>
+            <button type="button" data-comment="편안하게 대화 즐겨주셔서 감사합니다!">편안하게 대화 즐겨주셔서 감사합니다!</button>
+          </div>
+        </section>
+
+        <section class="partner-report-section">
+          <h3>응원 이모지 스탬프</h3>
+          <div class="partner-stamp-row" role="radiogroup" aria-label="응원 이모지 스탬프">
+            <label class="partner-stamp-chip is-on">
+              <input type="radio" name="partner-stamp" value="warm" checked>
+              ☕ 따뜻한 대화
+            </label>
+            <label class="partner-stamp-chip">
+              <input type="radio" name="partner-stamp" value="growth">
+              🚀 폭풍 성장
+            </label>
+            <label class="partner-stamp-chip">
+              <input type="radio" name="partner-stamp" value="heal">
+              💖 힐링 메이트
+            </label>
+          </div>
+        </section>
+
+        <section class="partner-report-section">
+          <h3>AI 학습 리포트 검수</h3>
+          <div class="partner-synonym-row">
+            <input type="text" id="partner-synonym-word" value="like" aria-label="빈출 단어">
+            <span class="partner-synonym-arrow">→</span>
+            <input type="text" id="partner-synonym-alts" value="prefer, enjoy" aria-label="대체 유의어">
+          </div>
+          <span class="partner-correction-label">교정 문장 1</span>
+          <input type="text" id="partner-correction-1" value="I like coffee. → I prefer coffee.">
+          <span class="partner-correction-label">교정 문장 2</span>
+          <input type="text" id="partner-correction-2" value="It was good. → It was really enjoyable.">
+          <button type="button" class="partner-regen-btn" id="partner-regen-analysis">🔄 AI 분석 내용 다시 생성</button>
+        </section>
+
+        <section class="partner-report-section">
+          <h3>&lt;From DayO&gt; 인스타 공유 카드 (선택)</h3>
+          <div class="partner-share-cards" role="radiogroup" aria-label="인스타 공유 카드">
+            <label class="partner-share-card is-on">
+              <input type="radio" name="partner-share-card" value="mood" checked>
+              <span class="partner-share-card-thumb partner-share-card-thumb--mood">
+                <small>감성 톤</small>
+                <p id="partner-share-mood-copy">오늘 25분의 대화가 마음에 남는 하루가 되었어요 ☕</p>
+              </span>
+            </label>
+            <label class="partner-share-card">
+              <input type="radio" name="partner-share-card" value="wit">
+              <span class="partner-share-card-thumb partner-share-card-thumb--wit">
+                <small>위트 톤</small>
+                <p id="partner-share-wit-copy">영어 근육 오늘도 잘 썼다 💪 다음엔 더 센 표현 각이야</p>
+              </span>
+            </label>
+          </div>
+          <button type="button" class="partner-regen-btn" id="partner-regen-cards">🔄 카드 문구 재생성</button>
+        </section>
+
+        <div class="partner-report-cta">
+          <button type="button" class="partner-report-cta-btn" id="partner-report-submit" onclick="completePartnerReport()">✨ 검수 완료 및 6,000P 정산 받기</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
