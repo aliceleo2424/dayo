@@ -2422,21 +2422,19 @@
 
     /* Partner post-session report review modal */
     #partner-report-modal {
-      position: fixed;
-      inset: 0;
-      z-index: 999999;
-      background: rgba(0, 0, 0, 0.6);
       display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background: rgba(0, 0, 0, 0.7) !important;
+      z-index: 99999999 !important;
+      justify-content: center !important;
+      align-items: center !important;
     }
     #partner-report-modal.is-open {
       display: flex !important;
-      z-index: 999999;
-    }
-    body.partner-report-open #dev-test-skip-btn {
-      display: none !important;
     }
     .partner-report-dialog {
       width: min(960px, 100%);
@@ -5126,20 +5124,6 @@
     })();
   </script>
   <script>
-    window.openPartnerReportModal = function () {
-      var modal = document.getElementById('partner-report-modal');
-      if (modal) {
-        modal.style.setProperty('display', 'flex', 'important');
-        modal.style.setProperty('align-items', 'center', 'important');
-        modal.style.setProperty('justify-content', 'center', 'important');
-        modal.style.zIndex = '999999';
-        modal.classList.add('is-open');
-        if (typeof window.initPartnerReportData === 'function') {
-          try { window.initPartnerReportData(); } catch (err) {}
-        }
-      }
-    };
-
     window.completePartnerReportAction = function () {
       alert('🎉 세션 리포트 검수 완료! +6,000P가 적립되었습니다.');
       if (typeof goToView === 'function') {
@@ -5151,15 +5135,23 @@
 
     window.handleDevSkipClick = function (e) {
       if (e) { e.preventDefault(); e.stopPropagation(); }
-      window.openPartnerReportModal();
+      console.log('⚡ 테스트 종료 버튼 클릭됨 -> 파트너 모달 오픈 시도');
+
+      var modal = document.getElementById('partner-report-modal');
+      if (modal) {
+        modal.style.setProperty('display', 'flex', 'important');
+        console.log('✅ 파트너 모달 display: flex 완료');
+      } else {
+        alert('오류: #partner-report-modal 요소를 찾을 수 없습니다.');
+      }
     };
   </script>
-  <button type="button" id="dev-test-skip-btn" onclick="handleDevSkipClick(event)" style="position: fixed; bottom: 16px; left: 16px; z-index: 999999; background: #3E322D; color: #FFEAA7; border: 1.5px solid #FFEAA7; border-radius: 20px; padding: 8px 14px; font-size: 11px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.25); opacity: 0.85; transition: opacity 0.2s;">
+  <button type="button" id="dev-test-skip-btn" onclick="handleDevSkipClick(event)" style="position: fixed; bottom: 16px; left: 16px; z-index: 99999999; background: #3E322D; color: #FFEAA7; border: 1.5px solid #FFEAA7; border-radius: 20px; padding: 8px 14px; font-size: 11px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.25); opacity: 0.85; transition: opacity 0.2s;">
     ⚡ [테스트] 25분 종료 트리거
   </button>
 
   <!-- 파트너 리포트 검수 모달 -->
-  <div id="partner-report-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 999999; align-items: center; justify-content: center; padding: 20px;">
+  <div id="partner-report-modal" style="display: none; position: fixed !important; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.7); z-index: 99999999; justify-content: center; align-items: center; padding: 20px;">
     <div style="background: #FFFFFF; width: 100%; max-width: 960px; height: 85vh; border-radius: 20px; display: flex; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 1px solid #EDE4D5;">
 
       <!-- 좌측 35%: 25분 대화 스크롤 로그 -->
