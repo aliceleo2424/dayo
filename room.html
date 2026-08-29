@@ -3937,7 +3937,15 @@
       setTimeout(function () { window.location.href = 'index.html'; }, 1400);
     }
 
+    window.openQuizModal = function (result) {
+      openReviewFromTranscript(result, { autoStart: true });
+    };
+
     function handleTimedSessionExpiry(result) {
+      if (typeof window.handleSessionEndRouting === 'function') {
+        window.handleSessionEndRouting(result);
+        return;
+      }
       if (window.isPartnerRoomMode && window.isPartnerRoomMode()) {
         if (typeof window.handleSessionTimeout === 'function') {
           window.handleSessionTimeout(result);
@@ -3945,7 +3953,7 @@
         }
         showToast('🎉 25분 세션 완료! 피드백 검수 후 +6,000P가 적립되었습니다.', 4200);
         setTimeout(function () {
-          window.location.href = 'partner.html#viewPartnerHome';
+          window.location.href = 'index.html?mode=partner';
         }, 1600);
         return;
       }
@@ -3954,6 +3962,20 @@
 
     document.getElementById('endBtn').addEventListener('click', () => {
       persistTranscript();
+      var isPartner = false;
+      try {
+        isPartner =
+          document.body.classList.contains('theme-partner') ||
+          localStorage.getItem('dayo_current_mode') === 'PARTNER' ||
+          new URLSearchParams(window.location.search).get('role') === 'partner';
+      } catch (e) {
+        isPartner = document.body.classList.contains('theme-partner');
+      }
+      if (isPartner && typeof window.handleSessionEndRouting === 'function') {
+        stopAllMedia();
+        window.handleSessionEndRouting();
+        return;
+      }
       openFeedback();
     });
 
@@ -4759,13 +4781,21 @@
     (function partnerReportModal() {
       'use strict';
 
+      var DEMO_TRANSCRIPT = [
+        { speaker: 'partner', text: 'Hi! How has your day been so far?' },
+        { speaker: 'user', text: 'I like coffee in the morning. It was good!' },
+        { speaker: 'partner', text: 'Nice — do you usually drink it at a cafe?' },
+        { speaker: 'user', text: 'Yes, I am very agree. Small talk is fun.' },
+        { speaker: 'partner', text: 'Small talk makes a big day. You did great today!' }
+      ];
+
       var ANALYSIS = [
         {
-          word: 'like',
-          alts: 'prefer, enjoy',
+          word: 'like (좋아하다)',
+          alts: 'prefer, enjoy 추천',
           corrections: [
-            'I like coffee. → I prefer coffee.',
-            'It was good. → It was really enjoyable.'
+            'I am very agree ➔ I totally agree',
+            'I like coffee. ➔ I prefer coffee.'
           ]
         },
         {
@@ -4787,14 +4817,14 @@
       ];
 
       var SHARE_MOOD = [
-        '오늘 25분의 대화가 마음에 남는 하루가 되었어요 ☕',
+        "☕ 오늘 나눈 따뜻한 이야기: 'Small talk makes a big day.'",
         '천천히 이어진 말이 서로를 조금 더 가까이 데려왔어요.',
         '작은 문장들이 모여 따뜻한 오후가 되었네요.'
       ];
       var SHARE_WIT = [
+        "🥐 '얼죽아의 하루' 밈 카드",
         '영어 근육 오늘도 잘 썼다 💪 다음엔 더 센 표현 각이야',
-        '25분 만에 발화량 레벨업. 내일의 나도 기대하는 중.',
-        'Like 대신 prefer 쓰는 그날, 바로 오늘.'
+        '25분 만에 발화량 레벨업. 내일의 나도 기대하는 중.'
       ];
 
       var analysisIndex = 0;
@@ -4810,12 +4840,12 @@
       }
 
       function isPartner() {
-        if (window.isPartnerRoomMode && window.isPartnerRoomMode()) return true;
         try {
           if (document.body && document.body.classList.contains('theme-partner')) return true;
-          var role = String(new URLSearchParams(location.search).get('role') || '').toLowerCase();
-          if (role === 'partner') return true;
+          if (localStorage.getItem('dayo_current_mode') === 'PARTNER') return true;
+          if (new URLSearchParams(window.location.search).get('role') === 'partner') return true;
         } catch (e) {}
+        if (window.isPartnerRoomMode && window.isPartnerRoomMode()) return true;
         return false;
       }
 
@@ -4851,17 +4881,6 @@
           try {
             rows = normalizeRows(JSON.parse(localStorage.getItem('last_session_transcript') || '[]'));
           } catch (e) { rows = []; }
-        }
-        if (!rows.length) {
-          var bubbles = document.querySelectorAll('#chatMessages .bubble');
-          rows = Array.prototype.map.call(bubbles, function (el) {
-            var text = String(el.textContent || '').trim();
-            if (!text) return null;
-            var speaker = el.classList.contains('bubble--me') || el.classList.contains('bubble--self')
-              ? 'partner'
-              : 'user';
-            return { speaker: speaker, text: text };
-          }).filter(Boolean);
         }
         return rows;
       }
@@ -4910,18 +4929,67 @@
         });
       }
 
-      function openPartnerReportModal(result) {
-        var modal = document.getElementById('partner-report-modal');
-        if (!modal) return;
-        renderTranscript(collectTranscript(result));
-        fillAnalysis(analysisIndex);
-        fillShareCards(shareIndex);
+      function hideUserRatingModals() {
+        ['ratingModal', 'feedbackModal'].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (!el) return;
+          el.classList.remove('active', 'is-open');
+          el.style.display = 'none';
+          el.setAttribute('aria-hidden', 'true');
+        });
+        document.querySelectorAll('.user-rating-modal').forEach(function (el) {
+          el.style.display = 'none';
+        });
+        var quiz = document.getElementById('reviewQuizModal');
+        if (quiz) {
+          quiz.classList.remove('is-open');
+          quiz.hidden = true;
+        }
+      }
+
+      function initPartnerReportData(result) {
+        var rows = collectTranscript(result);
+        if (!rows.length) rows = DEMO_TRANSCRIPT.slice();
+        renderTranscript(rows);
+
+        var word = document.getElementById('partner-synonym-word');
+        var alts = document.getElementById('partner-synonym-alts');
+        var c1 = document.getElementById('partner-correction-1');
+        var c2 = document.getElementById('partner-correction-2');
+        if (word) word.value = 'like (좋아하다)';
+        if (alts) alts.value = 'prefer, enjoy 추천';
+        if (c1) c1.value = 'I am very agree ➔ I totally agree';
+        if (c2) c2.value = 'I like coffee. ➔ I prefer coffee.';
+
+        var mood = document.getElementById('partner-share-mood-copy');
+        var wit = document.getElementById('partner-share-wit-copy');
+        if (mood) mood.textContent = SHARE_MOOD[0];
+        if (wit) wit.textContent = SHARE_WIT[0];
+
         syncChipState('.partner-stamp-chip');
         syncChipState('.partner-share-card');
+      }
+
+      function openPartnerReportModal(result) {
+        hideUserRatingModals();
+        var modal = document.getElementById('partner-report-modal');
+        if (!modal) return;
+        initPartnerReportData(result);
         modal.classList.add('is-open');
+        modal.style.display = 'flex';
         modal.setAttribute('aria-hidden', 'false');
         document.body.classList.add('partner-report-open');
         if (window.DayOScrollLock) window.DayOScrollLock.lock();
+      }
+
+      function handleSessionEndRouting(result) {
+        if (isPartner()) {
+          openPartnerReportModal(result);
+          return;
+        }
+        if (typeof window.openQuizModal === 'function') {
+          window.openQuizModal(result);
+        }
       }
 
       function readChecked(name, fallback) {
@@ -4930,10 +4998,11 @@
       }
 
       window.openPartnerReportModal = openPartnerReportModal;
+      window.initPartnerReportData = initPartnerReportData;
+      window.handleSessionEndRouting = handleSessionEndRouting;
 
       window.handleSessionTimeout = function (result) {
-        if (!isPartner()) return;
-        openPartnerReportModal(result);
+        handleSessionEndRouting(result);
       };
 
       window.completePartnerReport = function () {
@@ -4957,11 +5026,14 @@
         try {
           localStorage.setItem('dayo_partner_last_report', JSON.stringify(payload));
         } catch (e) {}
+        var msg = '🎉 세션 리포트 전송 완료! +6,000P가 적립되었습니다.';
         if (typeof showToast === 'function') {
-          showToast('🎉 검수 완료! +6,000P가 정산됩니다.', 3200);
+          showToast(msg, 3200);
+        } else {
+          alert(msg);
         }
         setTimeout(function () {
-          window.location.href = 'partner.html#viewPartnerHome';
+          window.location.href = 'index.html?mode=partner';
         }, 900);
       };
 
@@ -5047,14 +5119,14 @@
         <section class="partner-report-section">
           <h3>AI 학습 리포트 검수</h3>
           <div class="partner-synonym-row">
-            <input type="text" id="partner-synonym-word" value="like" aria-label="빈출 단어">
-            <span class="partner-synonym-arrow">→</span>
-            <input type="text" id="partner-synonym-alts" value="prefer, enjoy" aria-label="대체 유의어">
+            <input type="text" id="partner-synonym-word" value="like (좋아하다)" aria-label="빈출 단어">
+            <span class="partner-synonym-arrow">➔</span>
+            <input type="text" id="partner-synonym-alts" value="prefer, enjoy 추천" aria-label="대체 유의어">
           </div>
-          <span class="partner-correction-label">교정 문장 1</span>
-          <input type="text" id="partner-correction-1" value="I like coffee. → I prefer coffee.">
+          <span class="partner-correction-label">자연스러운 뉘앙스 교정</span>
+          <input type="text" id="partner-correction-1" value="I am very agree ➔ I totally agree">
           <span class="partner-correction-label">교정 문장 2</span>
-          <input type="text" id="partner-correction-2" value="It was good. → It was really enjoyable.">
+          <input type="text" id="partner-correction-2" value="I like coffee. ➔ I prefer coffee.">
           <button type="button" class="partner-regen-btn" id="partner-regen-analysis">🔄 AI 분석 내용 다시 생성</button>
         </section>
 
@@ -5065,14 +5137,14 @@
               <input type="radio" name="partner-share-card" value="mood" checked>
               <span class="partner-share-card-thumb partner-share-card-thumb--mood">
                 <small>감성 톤</small>
-                <p id="partner-share-mood-copy">오늘 25분의 대화가 마음에 남는 하루가 되었어요 ☕</p>
+                <p id="partner-share-mood-copy">☕ 오늘 나눈 따뜻한 이야기: 'Small talk makes a big day.'</p>
               </span>
             </label>
             <label class="partner-share-card">
               <input type="radio" name="partner-share-card" value="wit">
               <span class="partner-share-card-thumb partner-share-card-thumb--wit">
                 <small>위트 톤</small>
-                <p id="partner-share-wit-copy">영어 근육 오늘도 잘 썼다 💪 다음엔 더 센 표현 각이야</p>
+                <p id="partner-share-wit-copy">🥐 '얼죽아의 하루' 밈 카드</p>
               </span>
             </label>
           </div>
