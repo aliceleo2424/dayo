@@ -220,6 +220,47 @@
       line-height: 1.7;
     }
 
+    .dayo-approved-card {
+      margin-bottom: 1.25rem;
+      padding: 1.5rem;
+    }
+
+    .dayo-approved-card-mount {
+      display: flex;
+      justify-content: center;
+      margin-top: 0.75rem;
+    }
+
+    .dayo-approved-card-preview {
+      width: min(220px, 100%);
+      min-height: 260px;
+      border-radius: 16px;
+      padding: 14px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 10px 24px rgba(113, 83, 72, 0.12);
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .dayo-card-comment {
+      margin-top: 0.85rem;
+      padding: 0.75rem 0.9rem;
+      border-radius: 12px;
+      background: var(--pink-soft);
+      color: var(--text);
+      font-size: 0.84rem;
+      line-height: 1.55;
+    }
+
+    .dayo-card-meta {
+      margin-top: 0.55rem;
+      color: var(--muted);
+      font-size: 0.76rem;
+      text-align: center;
+    }
+
     .gauge-list {
       display: grid;
       gap: 0.9rem;
@@ -756,6 +797,18 @@
       </div>
     </section>
 
+    <section class="card dayo-approved-card" id="dayoApprovedCardSection" aria-labelledby="dayoCardTitle" hidden>
+      <div class="card-head">
+        <div>
+          <h2 class="card-title" id="dayoCardTitle">✨ 오늘의 DayO 카드</h2>
+          <p class="card-subtitle">파트너가 검수해 보낸 오늘의 베스트 표현이에요.</p>
+        </div>
+      </div>
+      <div class="dayo-approved-card-mount" id="dayo-approved-card-mount"></div>
+      <p class="dayo-card-comment" id="dayo-approved-card-comment" hidden></p>
+      <p class="dayo-card-meta" id="dayo-approved-card-meta" hidden></p>
+    </section>
+
     <section class="card status-card" aria-labelledby="statusTitle">
       <div class="card-head">
         <div>
@@ -978,5 +1031,62 @@
   <script src="tickets-modal.js"></script>
   <script src="chat-prefs.js"></script>
   <script src="booking-modal.js"></script>
+  <script>
+    (function renderApprovedDayOCard() {
+      var section = document.getElementById('dayoApprovedCardSection');
+      var mount = document.getElementById('dayo-approved-card-mount');
+      var commentEl = document.getElementById('dayo-approved-card-comment');
+      var metaEl = document.getElementById('dayo-approved-card-meta');
+      if (!section || !mount) return;
+
+      var raw = '';
+      try { raw = localStorage.getItem('dayo_last_approved_card') || ''; } catch (e) { raw = ''; }
+      if (!raw) return;
+
+      var data;
+      try { data = JSON.parse(raw); } catch (e) { return; }
+      if (!data || !data.sentence || !data.theme) return;
+
+      function esc(str) {
+        return String(str == null ? '' : str).replace(/[&<>"']/g, function (c) {
+          return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+        });
+      }
+
+      var theme = data.theme;
+      var bg = theme.bg || theme.bgColor || 'linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%)';
+      var textColor = theme.textColor || '#7C3AED';
+      var subText = theme.subText || theme.mood || '';
+      var sentence = String(data.sentence).replace(/^["“”]+|["“”]+$/g, '');
+
+      section.hidden = false;
+      mount.innerHTML =
+        '<div class="dayo-approved-card-preview" style="background:' + esc(bg) + '; border:2px solid ' + esc(textColor) + '33;">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;width:100%;">' +
+            '<span style="font-size:10px;font-weight:800;color:' + esc(textColor) + ';background:rgba(255,255,255,0.85);padding:4px 10px;border-radius:12px;">From DayO</span>' +
+            '<span style="font-size:11px;font-weight:800;color:' + esc(textColor) + ';">' + esc(theme.tag || '') + '</span>' +
+          '</div>' +
+          '<div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px 0;">' +
+            '<img src="' + esc(theme.illust || '') + '" alt="Card Illust" style="width:72px;height:72px;filter:drop-shadow(0 6px 12px rgba(0,0,0,0.1));">' +
+            '<div style="font-size:11px;color:' + esc(textColor) + ';font-weight:700;margin-top:6px;opacity:0.85;text-align:center;line-height:1.35;">' + esc(subText) + '</div>' +
+          '</div>' +
+          '<div style="background:#FFFFFF;border-radius:10px;padding:12px;box-shadow:0 4px 12px rgba(0,0,0,0.06);text-align:center;border:1px solid rgba(0,0,0,0.05);">' +
+            '<div style="font-size:13px;font-weight:800;color:#202124;line-height:1.4;word-break:keep-all;">' + esc(sentence) + '</div>' +
+            '<div style="font-size:10px;color:#70757A;margin-top:4px;font-weight:600;">DayO 1:1 Live Session</div>' +
+          '</div>' +
+        '</div>';
+
+      if (data.partnerComment && commentEl) {
+        commentEl.hidden = false;
+        commentEl.textContent = '💬 파트너 코멘트: ' + data.partnerComment;
+      }
+
+      if (metaEl) {
+        metaEl.hidden = false;
+        var stampLabel = data.stamp === 'rocket' ? '🚀 폭풍 성장' : (data.stamp === 'heart' ? '💖 힐링 메이트' : '☕ 따뜻한 수다');
+        metaEl.textContent = (data.createdAt ? data.createdAt + ' · ' : '') + stampLabel;
+      }
+    })();
+  </script>
 </body>
 </html>
