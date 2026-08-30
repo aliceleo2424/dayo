@@ -942,8 +942,17 @@
     }
 
     .self-pip.has-stream video,
-    .self-pip video.has-stream { display: block; }
+    .self-pip video.has-stream,
+    .self-pip #local-video-preview,
+    .self-pip #selfVideo {
+      display: block;
+    }
     .self-pip.has-stream .self-placeholder { display: none; }
+
+    body > video,
+    body > #local-video-preview {
+      display: none !important;
+    }
 
     .self-placeholder {
       width: 100%; height: 100%;
@@ -4481,59 +4490,81 @@
       }
     };
 
-    async function initLocalCameraStream() {
+    function purgeStrayLocalVideos(pipBox) {
+      document.querySelectorAll('video#local-video-preview, video#selfVideo').forEach(function (el) {
+        if (pipBox && pipBox.contains(el)) return;
+        try {
+          if (el.srcObject) el.srcObject.getTracks().forEach(function (track) { track.stop(); });
+        } catch (e) { /* ignore */ }
+        el.remove();
+      });
+      Array.from(document.body.children).forEach(function (el) {
+        if (el.tagName === 'VIDEO') el.remove();
+      });
+    }
+
+    function findPipBox() {
+      var pip = document.getElementById('selfPip')
+        || document.querySelector('.self-pip')
+        || document.querySelector('.pip-container')
+        || document.querySelector('.pip-box');
+      if (pip) return pip;
+      return Array.from(document.querySelectorAll('div')).find(function (el) {
+        return el.innerText && el.innerText.trim().indexOf('내 화면') !== -1 && el.offsetWidth < 200 && el.offsetWidth > 40;
+      }) || null;
+    }
+
+    async function attachLocalStreamToPip() {
       if (window.__localCamBound) return;
       try {
+        const pipBox = findPipBox();
+        purgeStrayLocalVideos(pipBox);
+        if (!pipBox) return;
+
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { width: { ideal: 640 }, height: { ideal: 480 } },
           audio: true
         });
 
-        let pipContainer = document.getElementById('selfPip')
-          || document.querySelector('.self-pip')
-          || document.querySelector('.pip-container')
-          || document.querySelector('[class*="pip"]')
-          || document.getElementById('my-video-container');
-
-        let localVideo = document.getElementById('selfVideo') || document.getElementById('local-video-preview');
-        if (!localVideo) {
-          localVideo = document.createElement('video');
-          localVideo.id = 'local-video-preview';
-          if (pipContainer) pipContainer.appendChild(localVideo);
+        if (window.getComputedStyle(pipBox).position === 'static') {
+          pipBox.style.position = 'relative';
         }
+        pipBox.style.overflow = 'hidden';
+        pipBox.classList.add('has-stream');
 
-        localVideo.autoplay = true;
-        localVideo.playsInline = true;
-        localVideo.muted = true;
-        localVideo.setAttribute('playsinline', '');
-        localVideo.style.cssText = 'width: 100%; height: 100%; object-fit: cover; border-radius: 12px; position: absolute; inset: 0; z-index: 2; display: block;';
+        Array.from(pipBox.children).forEach(function (child) {
+          if (child.tagName !== 'VIDEO') child.style.display = 'none';
+        });
 
-        if (pipContainer) {
-          pipContainer.style.position = 'relative';
-          pipContainer.classList.add('has-stream');
+        let videoEl = pipBox.querySelector('video');
+        if (!videoEl) {
+          videoEl = document.createElement('video');
+          pipBox.appendChild(videoEl);
         }
+        videoEl.id = 'local-video-preview';
+        videoEl.autoplay = true;
+        videoEl.playsInline = true;
+        videoEl.muted = true;
+        videoEl.setAttribute('playsinline', '');
+        videoEl.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; z-index: 10; display: block;';
 
-        localVideo.srcObject = stream;
-        localVideo.classList.add('has-stream');
-        await localVideo.play().catch(function () { /* autoplay policy */ });
-
-        const pipAvatar = document.querySelector('.self-placeholder') || document.querySelector('.pip-avatar');
-        if (pipAvatar) pipAvatar.style.display = 'none';
+        videoEl.srcObject = stream;
+        await videoEl.play().catch(function () { /* autoplay policy */ });
 
         window.__localCamBound = true;
         window.__localCamStream = stream;
-        console.log('✅ 로컬 웹캠 스트림 바인딩 성공');
       } catch (err) {
-        console.error('❌ 카메라 스트림 바인딩 실패:', err);
+        console.error('웹캠 바인딩 에러:', err);
       }
     }
 
-    window.initLocalCameraStream = initLocalCameraStream;
+    window.attachLocalStreamToPip = attachLocalStreamToPip;
+    window.initLocalCameraStream = attachLocalStreamToPip;
 
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initLocalCameraStream);
+      document.addEventListener('DOMContentLoaded', attachLocalStreamToPip);
     } else {
-      initLocalCameraStream();
+      attachLocalStreamToPip();
     }
   </script>
   <button type="button" id="dev-test-skip-btn" onclick="handleDevSkipClick(event)" style="position: fixed; bottom: 16px; left: 16px; z-index: 99999; background: #3E322D; color: #FFEAA7; border: 1.5px solid #FFEAA7; border-radius: 20px; padding: 8px 14px; font-size: 11px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.25); opacity: 0.85; transition: opacity 0.2s;">
