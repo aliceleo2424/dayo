@@ -2543,7 +2543,7 @@
       </div>
       <div class="top-right" id="roomHeaderActions">
         <button class="top-btn" id="shareBtn" type="button" data-i18n="room.share">🖥️ 화면 공유</button>
-        <button class="top-btn top-btn--end" id="endBtn" type="button" data-i18n="room.end">🚪 세션 종료</button>
+        <button class="top-btn top-btn--end btn-end-session" id="endBtn" type="button" data-i18n="room.end">🚪 세션 종료</button>
       </div>
     </header>
 
@@ -3578,8 +3578,11 @@
       handleSessionEndRouting(result);
     }
 
-    document.getElementById('endBtn').addEventListener('click', () => {
-      handleSessionEndRouting(null);
+    document.getElementById('endBtn').addEventListener('click', function (e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      if (typeof window.handleHeaderExitClick === 'function') {
+        window.handleHeaderExitClick();
+      }
     });
 
     document.addEventListener('dayo:session-ended', () => {
@@ -4421,6 +4424,48 @@
       }
     };
 
+    window.handleHeaderExitClick = function () {
+      const isPartner =
+        document.body.classList.contains('theme-partner') ||
+        localStorage.getItem('dayo_current_mode') === 'PARTNER' ||
+        new URLSearchParams(window.location.search).get('role') === 'partner';
+
+      if (isPartner) {
+        if (typeof window.openPartnerReportPopup === 'function') window.openPartnerReportPopup();
+        return;
+      }
+
+      const modal = document.getElementById('early-exit-modal');
+      if (modal) modal.style.setProperty('display', 'flex', 'important');
+    };
+
+    window.closeEarlyExitModal = function () {
+      const modal = document.getElementById('early-exit-modal');
+      if (modal) modal.style.setProperty('display', 'none', 'important');
+    };
+
+    window.confirmEarlyExit = function () {
+      window.closeEarlyExitModal();
+      if (typeof window.handleSessionEndRouting === 'function') {
+        window.handleSessionEndRouting();
+      }
+    };
+
+    window.handleTechIssueExit = function () {
+      window.closeEarlyExitModal();
+      alert('연결 문제로 인한 종료가 접수되었습니다. 이용권 차감 여부 확인 후 복구 처리됩니다.');
+      window.location.href = 'index.html?view=mypage';
+    };
+
+    var endSessionBtn = document.getElementById('endBtn')
+      || document.querySelector('.btn-end-session')
+      || document.querySelector('.top-btn--end')
+      || document.getElementById('btnEndSession')
+      || document.querySelector('[class*="end-session"]');
+    if (endSessionBtn) {
+      endSessionBtn.onclick = window.handleHeaderExitClick;
+    }
+
     window.handleDevSkipClick = function (e) {
       if (e) { e.preventDefault(); e.stopPropagation(); }
       if (typeof window.handleSessionEndRouting === 'function') {
@@ -4458,5 +4503,29 @@
       </div>
     </div>
   </div>
+
+<div id="early-exit-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 99999999; justify-content: center; align-items: center; padding: 20px;">
+  <div style="background: #FFFFFF; width: 100%; max-width: 420px; border-radius: 20px; padding: 26px 22px; text-align: center; box-shadow: 0 16px 40px rgba(0,0,0,0.3); border: 1.5px solid #EDE4D5;">
+    <div style="font-size: 32px; margin-bottom: 8px;">☕</div>
+    <div style="font-size: 17px; font-weight: 800; color: #3E4A42; margin-bottom: 6px;">아직 대화 시간이 남아있어요!</div>
+    <p style="font-size: 12.5px; color: #55635A; line-height: 1.5; margin-bottom: 18px;">
+      지금 나가시면 남은 시간과 관계없이 대화가 종료되며 <strong>이용권 1회가 정상 차감</strong>돼요.
+    </p>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <button type="button" onclick="closeEarlyExitModal()" style="width: 100%; padding: 13px; background: #9AB89E; color: #FFFFFF; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer;">
+        계속 대화하기
+      </button>
+      <button type="button" onclick="confirmEarlyExit()" style="width: 100%; padding: 11px; background: #F8FAF9; color: #6E7A72; border: 1px solid #EDE4D5; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer;">
+        개인 사정으로 지금 종료
+      </button>
+    </div>
+
+    <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed #EDE4D5; display: flex; justify-content: space-around; font-size: 11.5px;">
+      <a href="javascript:void(0)" onclick="handleTechIssueExit()" style="color: #4F7460; font-weight: 700; text-decoration: underline;">🛠️ 음성/연결 오류로 종료</a>
+      <a href="javascript:void(0)" onclick="alert('신고 접수 후 안전 종료됩니다.')" style="color: #F07A68; font-weight: 700; text-decoration: underline;">🚨 비매너 신고</a>
+    </div>
+  </div>
+</div>
 </body>
 </html>
