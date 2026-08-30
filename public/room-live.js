@@ -631,7 +631,6 @@
     if (nodes.host) nodes.host.classList.remove('is-on', 'is-pending');
     if (nodes.stage) nodes.stage.classList.remove('is-daily');
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      if (!isPartnerRoomMode()) showToast(t('room.toastNoMedia'), 3200);
       return Promise.resolve();
     }
     return navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(function (stream) {
@@ -639,13 +638,7 @@
       if (nodes.selfVideo) nodes.selfVideo.srcObject = stream;
       applyLocalTracks();
     }).catch(function () {
-      if (isPartnerRoomMode()) return;
-      var toast = document.getElementById('toast');
-      if (toast) toast.classList.add('toast--notice');
-      showToast(t('room.toastNoMedia'), 3200);
-      setTimeout(function () {
-        if (toast) toast.classList.remove('toast--notice');
-      }, 3500);
+      /* camera guidance is handled by the single #dayo-final-single-toast in room.html */
     });
   }
 

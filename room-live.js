@@ -638,7 +638,7 @@
       if (nodes.selfVideo) nodes.selfVideo.srcObject = stream;
       applyLocalTracks();
     }).catch(function () {
-      /* camera guidance is handled by the single #dayo-unified-toast in room.html */
+      /* camera guidance is handled by the single #dayo-final-single-toast in room.html */
     });
   }
 

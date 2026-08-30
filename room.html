@@ -2799,7 +2799,6 @@
         document.body.setAttribute('data-mode', 'partner');
         document.body.setAttribute('data-dayo-role', 'partner');
         applyPartnerRoomCopy();
-        if (typeof window.hideCameraOffGuidance === 'function') window.hideCameraOffGuidance();
       }
       function enterLearner() {
         document.body.classList.remove('theme-partner');
@@ -3504,105 +3503,6 @@
     renderMicLabel();
     renderCamLabel();
 
-    /* Single camera guidance toast — learner only, once per session */
-    (function initUnifiedCameraToast() {
-      var showTimer = 0;
-      var hideTimer = 0;
-      var fadeTimer = 0;
-
-      function isPartnerMode() {
-        if (typeof window.isPartnerRoomMode === 'function') return window.isPartnerRoomMode();
-        try {
-          return document.body.classList.contains('theme-partner') ||
-            String(localStorage.getItem('dayo_current_mode') || '').toUpperCase() === 'PARTNER' ||
-            new URLSearchParams(window.location.search).get('role') === 'partner';
-        } catch (e) {
-          return false;
-        }
-      }
-
-      function purgeLegacyCameraToasts() {
-        document.querySelectorAll(
-          '#cameraTipPopup, #cameraTipToast, .camera-toast, .camera-tip-banner, .camera-off-tip'
-        ).forEach(function (node) {
-          try { node.remove(); } catch (e) { /* ignore */ }
-        });
-      }
-
-      function hideUnifiedToast() {
-        clearTimeout(showTimer);
-        clearTimeout(hideTimer);
-        clearTimeout(fadeTimer);
-        var el = document.getElementById('dayo-unified-toast');
-        if (!el) return;
-        el.style.opacity = '0';
-        fadeTimer = setTimeout(function () {
-          if (el.parentNode) el.remove();
-        }, 500);
-      }
-
-      window.hideCameraOffGuidance = hideUnifiedToast;
-
-      function showUnifiedToast() {
-        if (window.isToastInitialized) return;
-        window.isToastInitialized = true;
-        purgeLegacyCameraToasts();
-        if (isPartnerMode()) return;
-
-        var prev = document.getElementById('dayo-unified-toast');
-        if (prev) prev.remove();
-
-        var toast = document.createElement('div');
-        toast.id = 'dayo-unified-toast';
-        toast.setAttribute('role', 'status');
-        toast.textContent = '☕ 편안하게 카메라를 끈 상태로도 대화가 가능해요';
-        toast.style.cssText = [
-          'position:fixed',
-          'bottom:90px',
-          'left:50%',
-          'transform:translateX(-50%)',
-          'background:rgba(62, 74, 66, 0.9)',
-          'color:#FFFFFF',
-          'font-size:12px',
-          'font-weight:600',
-          'padding:8px 16px',
-          'border-radius:20px',
-          'z-index:9999',
-          'box-shadow:0 4px 12px rgba(0,0,0,0.15)',
-          'pointer-events:none',
-          'transition:opacity 0.5s ease',
-          'opacity:0'
-        ].join(';');
-        document.body.appendChild(toast);
-        requestAnimationFrame(function () {
-          toast.style.opacity = '1';
-        });
-
-        hideTimer = setTimeout(function () {
-          toast.style.opacity = '0';
-          fadeTimer = setTimeout(function () {
-            if (toast.parentNode) toast.remove();
-          }, 500);
-        }, 4000);
-      }
-
-      function boot() {
-        purgeLegacyCameraToasts();
-        if (isPartnerMode()) {
-          window.isToastInitialized = true;
-          return;
-        }
-        clearTimeout(showTimer);
-        showTimer = setTimeout(showUnifiedToast, 3000);
-      }
-
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', boot);
-      } else {
-        boot();
-      }
-    })();
-
     /* Chat */
     const mainStage = document.getElementById('mainStage');
     const chatPanel = document.getElementById('chatPanel');
@@ -3924,9 +3824,6 @@
     function beginUserSessionEndFlow(result) {
       stopAllMedia();
       hideLiveVideoStage();
-      if (typeof window.hideCameraOffGuidance === 'function') {
-        window.hideCameraOffGuidance();
-      }
       openReviewFromTranscript(result, { autoStart: true });
     }
 
@@ -4801,6 +4698,65 @@
       }
       document.dispatchEvent(new CustomEvent('dayo:session-ended'));
     };
+
+(function renderSingleCameraToast() {
+  if (window.__singleToastDone) return;
+  window.__singleToastDone = true;
+
+  // 파트너 모드일 때는 노출 차단
+  const isPartner = 
+    document.body.classList.contains('theme-partner') ||
+    localStorage.getItem('dayo_current_mode') === 'PARTNER' ||
+    new URLSearchParams(window.location.search).get('role') === 'partner';
+  if (isPartner) return;
+
+  // 세션 입장 2초 후 1회 노출
+  setTimeout(() => {
+    // 기존에 혹시 남아있을 수 있는 토스트 강제 제거
+    document.querySelectorAll('[id*="toast"], [class*="toast"]').forEach(el => {
+      if (el.id === 'dayo-final-single-toast' || el.id === 'toast' || el.id === 'toastBanner') return;
+      if (el.id.includes('btn') || el.classList.contains('ms-toast')) return;
+      el.remove();
+    });
+
+    const toast = document.createElement('div');
+    toast.id = 'dayo-final-single-toast';
+    toast.innerText = '카메라를 꺼도 대화할 수 있어요';
+
+    Object.assign(toast.style, {
+      position: 'fixed',
+      bottom: '100px',
+      left: '50%',
+      transform: 'translateX(-50%) translateY(10px)',
+      background: 'rgba(62, 74, 66, 0.92)',
+      color: '#FFFFFF',
+      fontSize: '12.5px',
+      fontWeight: '600',
+      padding: '9px 20px',
+      borderRadius: '24px',
+      zIndex: '99999',
+      boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
+      opacity: '0',
+      transition: 'all 0.35s ease',
+      pointerEvents: 'none'
+    });
+
+    document.body.appendChild(toast);
+
+    // 페이드 인
+    requestAnimationFrame(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateX(-50%) translateY(0)';
+    });
+
+    // 3초 유지 후 페이드 아웃 및 DOM 완전 삭제
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(-50%) translateY(10px)';
+      setTimeout(() => toast.remove(), 400);
+    }, 3000);
+  }, 2000);
+})();
   </script>
   <button type="button" id="dev-test-skip-btn" onclick="handleDevSkipClick(event)" style="position: fixed; bottom: 16px; left: 16px; z-index: 9999999; background: #3E322D; color: #FFEAA7; border: 1.5px solid #FFEAA7; border-radius: 20px; padding: 8px 14px; font-size: 11px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.25); opacity: 0.85;">
     ⚡ [테스트] 25분 종료 트리거
