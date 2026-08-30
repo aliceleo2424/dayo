@@ -1579,6 +1579,16 @@
       visibility: visible;
     }
 
+    #ratingModal.active,
+    .rating-modal.active {
+      z-index: 9999999;
+    }
+
+    body.theme-partner #ratingModal,
+    body.theme-partner .rating-modal {
+      display: none !important;
+    }
+
     .feedback-modal {
       width: min(440px, 100%);
       max-height: min(88vh, 640px);
@@ -3003,7 +3013,7 @@
   </div>
 
   <!-- Feedback Modal -->
-  <div class="modal-overlay" id="feedbackModal">
+  <div class="modal-overlay rating-modal" id="ratingModal">
     <div class="feedback-modal" role="dialog" aria-labelledby="feedbackTitle" aria-modal="true">
       <h2 class="feedback-title" id="feedbackTitle" data-i18n="room.feedbackTitle">오늘 세션은 어떠하셨나요? 🍰</h2>
       <div class="stars" id="starRating" role="group" data-i18n="room.starAria" data-i18n-attr="aria-label" aria-label="별점">
@@ -3216,16 +3226,6 @@
         } catch (e) { /* leave call only */ }
       }
 
-      function isPartnerSession() {
-        return typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode();
-      }
-
-      function openPartnerPopupNow() {
-        if (typeof window.openPartnerReportPopup === 'function') {
-          window.openPartnerReportPopup();
-        }
-      }
-
       function endSession() {
         if (sessionEnded) return;
         sessionEnded = true;
@@ -3235,7 +3235,6 @@
         render();
         el.classList.remove('is-warning');
         hangUpCallOnly();
-        if (isPartnerSession()) openPartnerPopupNow();
         document.dispatchEvent(new CustomEvent('dayo:session-ended'));
       }
 
@@ -3738,16 +3737,59 @@
       });
     });
 
-    /* Feedback modal on end */
-    const feedbackModal = document.getElementById('feedbackModal');
+    /* Feedback / rating modal on end */
+    const feedbackModal = document.getElementById('ratingModal') || document.getElementById('feedbackModal') || document.querySelector('.rating-modal');
     const starButtons = [...document.querySelectorAll('.star-btn')];
     const feedbackChips = [...document.querySelectorAll('.feedback-chip')];
     let selectedStars = 0;
 
-    function openFeedback() {
-      feedbackModal.classList.add('active');
+    function isPartnerEndMode() {
+      try {
+        return document.body.classList.contains('theme-partner') ||
+          localStorage.getItem('dayo_current_mode') === 'PARTNER' ||
+          new URLSearchParams(window.location.search).get('role') === 'partner' ||
+          (typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode());
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function getUserRatingModal() {
+      return document.getElementById('ratingModal') || document.getElementById('feedbackModal') || document.querySelector('.rating-modal');
+    }
+
+    function getUserQuizModal() {
+      return document.getElementById('quizModal') || document.getElementById('reviewQuizModal');
+    }
+
+    function openRatingModal() {
+      if (isPartnerEndMode()) return;
+      var userRatingModal = getUserRatingModal();
+      if (!userRatingModal) return;
+      userRatingModal.hidden = false;
+      userRatingModal.classList.add('active');
+      userRatingModal.style.setProperty('display', 'flex', 'important');
+      userRatingModal.style.setProperty('z-index', '9999999', 'important');
+      userRatingModal.style.setProperty('opacity', '1', 'important');
+      userRatingModal.style.setProperty('visibility', 'visible', 'important');
       if (window.DayOScrollLock) window.DayOScrollLock.lock();
     }
+
+    function closeRatingModal() {
+      var userRatingModal = getUserRatingModal();
+      if (!userRatingModal) return;
+      userRatingModal.classList.remove('active');
+      userRatingModal.style.removeProperty('display');
+      userRatingModal.style.removeProperty('opacity');
+      userRatingModal.style.removeProperty('visibility');
+      if (window.DayOScrollLock) window.DayOScrollLock.unlock();
+    }
+
+    function openFeedback() {
+      openRatingModal();
+    }
+
+    window.openRatingModal = openRatingModal;
 
     function stopAllMedia() {
       if (window.DayOLive && typeof window.DayOLive.hangUp === 'function') {
@@ -3818,23 +3860,66 @@
     }
 
     window.openQuizModal = function (result) {
+      if (isPartnerEndMode()) return;
       openReviewFromTranscript(result, { autoStart: true });
     };
 
-    function beginUserSessionEndFlow(result) {
-      stopAllMedia();
-      hideLiveVideoStage();
-      openReviewFromTranscript(result, { autoStart: true });
-    }
+    function handleSessionEndRouting(result) {
+      if (window.__dayoSessionEndRouted) return;
+      window.__dayoSessionEndRouted = true;
 
-    function handleTimedSessionExpiry(result) {
-      if (isPartnerSessionMode()) {
+      const isPartner =
+        document.body.classList.contains('theme-partner') ||
+        localStorage.getItem('dayo_current_mode') === 'PARTNER' ||
+        new URLSearchParams(window.location.search).get('role') === 'partner';
+
+      try { stopAllMedia(); } catch (e) { /* ignore */ }
+      try { persistTranscript(); } catch (e) { /* ignore */ }
+
+      // 1) 파트너인 경우: 유저용 모달 차단 및 파트너 리포트 검수 팝업만 오픈
+      if (isPartner) {
+        const userRating = getUserRatingModal();
+        if (userRating) {
+          userRating.classList.remove('active');
+          userRating.style.display = 'none';
+        }
+        const quizModal = getUserQuizModal();
+        if (quizModal) {
+          quizModal.style.display = 'none';
+          quizModal.hidden = true;
+          quizModal.classList.remove('is-open');
+        }
+
         if (typeof window.openPartnerReportPopup === 'function') {
           window.openPartnerReportPopup();
         }
         return;
       }
-      beginUserSessionEndFlow(result);
+
+      // 2) 유저인 경우: 파트너 팝업 차단 및 유저 별점 평가 모달(#ratingModal) 정상 오픈
+      const partnerPopup = document.getElementById('partner-report-popup');
+      if (partnerPopup) partnerPopup.style.display = 'none';
+
+      hideLiveVideoStage();
+
+      const userRatingModal = getUserRatingModal();
+      if (userRatingModal) {
+        openRatingModal();
+      } else if (typeof openRatingModal === 'function') {
+        openRatingModal();
+      } else if (typeof openQuizModal === 'function') {
+        openQuizModal(result);
+      }
+    }
+
+    window.handleSessionEndRouting = handleSessionEndRouting;
+
+    function beginUserSessionEndFlow(result) {
+      handleSessionEndRouting(result);
+    }
+
+    function handleTimedSessionExpiry(result) {
+      handleSessionEndRouting(result);
     }
 
     window.handleUserQuizComplete = function handleUserQuizComplete() {
@@ -3846,21 +3931,11 @@
     };
 
     document.getElementById('endBtn').addEventListener('click', () => {
-      persistTranscript();
-      stopAllMedia();
-      if (isPartnerSessionMode()) {
-        if (typeof window.openPartnerReportPopup === 'function') {
-          window.openPartnerReportPopup();
-        }
-        return;
-      }
-      beginUserSessionEndFlow(null);
+      handleSessionEndRouting(null);
     });
 
     document.addEventListener('dayo:session-ended', () => {
-      stopAllMedia();
-      handleTimedSessionExpiry(null);
-      persistTranscript();
+      handleSessionEndRouting(null);
     });
 
     starButtons.forEach((btn) => {
@@ -3877,12 +3952,13 @@
     });
 
     document.getElementById('feedbackSubmit').addEventListener('click', () => {
-      feedbackModal.classList.remove('active');
-      if (window.DayOScrollLock) window.DayOScrollLock.unlock();
+      closeRatingModal();
       showToast(t('room.toastFeedbackSent'));
       stopAllMedia();
-      persistTranscript().then(openReviewFromTranscript).catch(function () {
-        openReviewFromTranscript(null);
+      persistTranscript().then(function (result) {
+        openReviewFromTranscript(result, { autoStart: true });
+      }).catch(function () {
+        openReviewFromTranscript(null, { autoStart: true });
       });
     });
 
@@ -3892,9 +3968,8 @@
         const name = o.id.replace(/SheetOverlay$/, '');
         closeSheet(name);
       });
-      if (feedbackModal.classList.contains('active')) {
-        feedbackModal.classList.remove('active');
-        if (window.DayOScrollLock) window.DayOScrollLock.unlock();
+      if (feedbackModal && feedbackModal.classList.contains('active')) {
+        closeRatingModal();
       }
       if (window.DayOReviewQuiz) window.DayOReviewQuiz.close();
     });
@@ -4688,15 +4763,9 @@
 
     window.handleDevSkipClick = function (e) {
       if (e) { e.preventDefault(); e.stopPropagation(); }
-      if (typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode()) {
-        window.openPartnerReportPopup();
-        return;
+      if (typeof window.handleSessionEndRouting === 'function') {
+        window.handleSessionEndRouting();
       }
-      if (window.DayOSessionTimer && typeof window.DayOSessionTimer.skipToEnd === 'function') {
-        window.DayOSessionTimer.skipToEnd();
-        return;
-      }
-      document.dispatchEvent(new CustomEvent('dayo:session-ended'));
     };
 
 (function renderSingleCameraToast() {

@@ -1579,6 +1579,16 @@
       visibility: visible;
     }
 
+    #ratingModal.active,
+    .rating-modal.active {
+      z-index: 9999999;
+    }
+
+    body.theme-partner #ratingModal,
+    body.theme-partner .rating-modal {
+      display: none !important;
+    }
+
     .feedback-modal {
       width: min(440px, 100%);
       max-height: min(88vh, 640px);
@@ -1698,10 +1708,19 @@
     .rq-overlay[hidden] {
       display: none !important;
     }
-    .rq-overlay.is-open {
+    .rq-overlay.is-open,
+    #quizModal.rq-overlay.is-open {
+      display: flex !important;
       opacity: 1;
       visibility: visible;
       pointer-events: auto;
+    }
+
+    body.session-ended-user #videoStage,
+    body.session-ended-user #videoColumn,
+    body.session-ended-user #shareStage,
+    body.session-ended-user #dailyHost {
+      display: none !important;
     }
     .rq-sheet {
       display: flex;
@@ -2694,7 +2713,7 @@
   </div>
 
   <!-- Feedback Modal -->
-  <div class="modal-overlay" id="feedbackModal">
+  <div class="modal-overlay rating-modal" id="ratingModal">
     <div class="feedback-modal" role="dialog" aria-labelledby="feedbackTitle" aria-modal="true">
       <h2 class="feedback-title" id="feedbackTitle" data-i18n="room.feedbackTitle">오늘 세션은 어떠하셨나요? 🍰</h2>
       <div class="stars" id="starRating" role="group" data-i18n="room.starAria" data-i18n-attr="aria-label" aria-label="별점">
@@ -2719,7 +2738,7 @@
   </div>
 
     <!-- AI Review Quiz (mobile-first, 3 steps) -->
-  <div class="rq-overlay" id="reviewQuizModal" data-view="viewQuizSection" hidden>
+  <div class="rq-overlay" id="quizModal" data-view="viewQuizSection" hidden>
     <div class="rq-sheet" role="dialog" aria-modal="true" aria-labelledby="rqTitle">
       <header class="rq-head">
         <p class="rq-kicker" id="rqKicker">AI 복습 퀴즈</p>
@@ -3409,16 +3428,69 @@
       });
     });
 
-    /* Feedback modal on end */
-    const feedbackModal = document.getElementById('feedbackModal');
+    /* Feedback / rating modal on end */
+    const feedbackModal = document.getElementById('ratingModal') || document.getElementById('feedbackModal') || document.querySelector('.rating-modal');
     const starButtons = [...document.querySelectorAll('.star-btn')];
     const feedbackChips = [...document.querySelectorAll('.feedback-chip')];
     let selectedStars = 0;
 
-    function openFeedback() {
-      feedbackModal.classList.add('active');
+    function isPartnerEndMode() {
+      try {
+        return document.body.classList.contains('theme-partner') ||
+          localStorage.getItem('dayo_current_mode') === 'PARTNER' ||
+          new URLSearchParams(window.location.search).get('role') === 'partner' ||
+          (typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode());
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function getUserRatingModal() {
+      return document.getElementById('ratingModal') || document.getElementById('feedbackModal') || document.querySelector('.rating-modal');
+    }
+
+    function getUserQuizModal() {
+      return document.getElementById('quizModal') || document.getElementById('reviewQuizModal');
+    }
+
+    function hideLiveVideoStage() {
+      document.body.classList.add('session-ended-user');
+      ['videoStage', 'videoColumn', 'shareStage', 'dailyHost'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.hidden = true;
+        el.style.setProperty('display', 'none', 'important');
+      });
+    }
+
+    function openRatingModal() {
+      if (isPartnerEndMode()) return;
+      var userRatingModal = getUserRatingModal();
+      if (!userRatingModal) return;
+      userRatingModal.hidden = false;
+      userRatingModal.classList.add('active');
+      userRatingModal.style.setProperty('display', 'flex', 'important');
+      userRatingModal.style.setProperty('z-index', '9999999', 'important');
+      userRatingModal.style.setProperty('opacity', '1', 'important');
+      userRatingModal.style.setProperty('visibility', 'visible', 'important');
       if (window.DayOScrollLock) window.DayOScrollLock.lock();
     }
+
+    function closeRatingModal() {
+      var userRatingModal = getUserRatingModal();
+      if (!userRatingModal) return;
+      userRatingModal.classList.remove('active');
+      userRatingModal.style.removeProperty('display');
+      userRatingModal.style.removeProperty('opacity');
+      userRatingModal.style.removeProperty('visibility');
+      if (window.DayOScrollLock) window.DayOScrollLock.unlock();
+    }
+
+    function openFeedback() {
+      openRatingModal();
+    }
+
+    window.openRatingModal = openRatingModal;
 
     function stopAllMedia() {
       if (window.DayOLive && typeof window.DayOLive.hangUp === 'function') {
@@ -3443,8 +3515,24 @@
       }
     }
 
+    function revealUserQuizModal() {
+      var quiz = getUserQuizModal();
+      if (!quiz) return;
+      quiz.hidden = false;
+      quiz.classList.add('is-open');
+      quiz.style.setProperty('display', 'flex', 'important');
+      quiz.style.setProperty('align-items', 'center', 'important');
+      quiz.style.setProperty('justify-content', 'center', 'important');
+      quiz.style.setProperty('z-index', '500000', 'important');
+    }
+
     function openReviewFromTranscript(result, options) {
+      if (isPartnerEndMode() && typeof window.openPartnerReportPopup === 'function') {
+        window.openPartnerReportPopup();
+        return;
+      }
       options = options || {};
+      revealUserQuizModal();
       var transcript = (result && result.transcript)
         || (window.DayOLive && window.DayOLive.getTranscript && window.DayOLive.getTranscript())
         || window.DayOLastTranscript
@@ -3456,30 +3544,71 @@
         });
         return;
       }
-      setTimeout(function () { window.location.href = 'index.html'; }, 1400);
     }
 
-    function handleTimedSessionExpiry(result) {
-      if (window.isPartnerRoomMode && window.isPartnerRoomMode()) {
-        showToast('🎉 25분 세션 완료! 피드백 검수 후 +6,000P가 적립되었습니다.', 4200);
-        setTimeout(function () {
-          window.location.href = 'partner.html#viewPartnerHome';
-        }, 1600);
+    window.openQuizModal = function (result) {
+      if (isPartnerEndMode()) return;
+      openReviewFromTranscript(result, { autoStart: true });
+    };
+
+    function handleSessionEndRouting(result) {
+      if (window.__dayoSessionEndRouted) return;
+      window.__dayoSessionEndRouted = true;
+
+      const isPartner =
+        document.body.classList.contains('theme-partner') ||
+        localStorage.getItem('dayo_current_mode') === 'PARTNER' ||
+        new URLSearchParams(window.location.search).get('role') === 'partner';
+
+      try { stopAllMedia(); } catch (e) { /* ignore */ }
+      try { persistTranscript(); } catch (e) { /* ignore */ }
+
+      if (isPartner) {
+        const userRating = getUserRatingModal();
+        if (userRating) {
+          userRating.classList.remove('active');
+          userRating.style.display = 'none';
+        }
+        const quizModal = getUserQuizModal();
+        if (quizModal) {
+          quizModal.style.display = 'none';
+          quizModal.hidden = true;
+          quizModal.classList.remove('is-open');
+        }
+
+        if (typeof window.openPartnerReportPopup === 'function') {
+          window.openPartnerReportPopup();
+        }
         return;
       }
-      openReviewFromTranscript(result, { autoStart: true });
+
+      const partnerPopup = document.getElementById('partner-report-popup');
+      if (partnerPopup) partnerPopup.style.display = 'none';
+
+      hideLiveVideoStage();
+
+      const userRatingModal = getUserRatingModal();
+      if (userRatingModal) {
+        openRatingModal();
+      } else if (typeof openRatingModal === 'function') {
+        openRatingModal();
+      } else if (typeof openQuizModal === 'function') {
+        openQuizModal(result);
+      }
+    }
+
+    window.handleSessionEndRouting = handleSessionEndRouting;
+
+    function handleTimedSessionExpiry(result) {
+      handleSessionEndRouting(result);
     }
 
     document.getElementById('endBtn').addEventListener('click', () => {
-      persistTranscript();
-      openFeedback();
+      handleSessionEndRouting(null);
     });
 
     document.addEventListener('dayo:session-ended', () => {
-      stopAllMedia();
-      persistTranscript().then(handleTimedSessionExpiry).catch(function () {
-        handleTimedSessionExpiry(null);
-      });
+      handleSessionEndRouting(null);
     });
 
     starButtons.forEach((btn) => {
@@ -3496,12 +3625,13 @@
     });
 
     document.getElementById('feedbackSubmit').addEventListener('click', () => {
-      feedbackModal.classList.remove('active');
-      if (window.DayOScrollLock) window.DayOScrollLock.unlock();
+      closeRatingModal();
       showToast(t('room.toastFeedbackSent'));
       stopAllMedia();
-      persistTranscript().then(openReviewFromTranscript).catch(function () {
-        openReviewFromTranscript(null);
+      persistTranscript().then(function (result) {
+        openReviewFromTranscript(result, { autoStart: true });
+      }).catch(function () {
+        openReviewFromTranscript(null, { autoStart: true });
       });
     });
 
@@ -3511,16 +3641,15 @@
         const name = o.id.replace(/SheetOverlay$/, '');
         closeSheet(name);
       });
-      if (feedbackModal.classList.contains('active')) {
-        feedbackModal.classList.remove('active');
-        if (window.DayOScrollLock) window.DayOScrollLock.unlock();
+      if (feedbackModal && feedbackModal.classList.contains('active')) {
+        closeRatingModal();
       }
       if (window.DayOReviewQuiz) window.DayOReviewQuiz.close();
     });
   </script>
   <script>
     (function () {
-      var overlay = document.getElementById('reviewQuizModal');
+      var overlay = document.getElementById('quizModal') || document.getElementById('reviewQuizModal');
       if (!overlay) return;
 
       var TYPE_LABELS = {
@@ -4332,23 +4461,59 @@
   <script src="mobile-nav.js"></script>
   <script src="mode-switch.js"></script>
   <script>
-    window.handleDevSkipClick = function (e) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
+    window.openPartnerReportPopup = function () {
+      var popup = document.getElementById('partner-report-popup');
+      if (popup) {
+        document.body.appendChild(popup);
+        popup.style.setProperty('display', 'flex', 'important');
       }
-      if (typeof window.skipToTimerEnd === 'function') {
-        window.skipToTimerEnd();
-      } else if (typeof handleSessionTimeout === 'function') {
-        handleSessionTimeout();
+    };
+
+    window.submitPartnerReportAndLeave = function () {
+      alert('🎉 세션 리포트 전송 완료! +6,000P가 적립되었습니다.');
+      if (typeof goToView === 'function') {
+        goToView('viewPartnerHome');
       } else {
-        alert('세션 종료 로직을 호출합니다.');
-        window.location.reload();
+        window.location.href = 'index.html?mode=partner';
+      }
+    };
+
+    window.handleDevSkipClick = function (e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      if (typeof window.handleSessionEndRouting === 'function') {
+        window.handleSessionEndRouting();
       }
     };
   </script>
   <button type="button" id="dev-test-skip-btn" onclick="handleDevSkipClick(event)" style="position: fixed; bottom: 16px; left: 16px; z-index: 99999; background: #3E322D; color: #FFEAA7; border: 1.5px solid #FFEAA7; border-radius: 20px; padding: 8px 14px; font-size: 11px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.25); opacity: 0.85; transition: opacity 0.2s;">
     ⚡ [테스트] 25분 종료 트리거
   </button>
+
+  <div id="partner-report-popup" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); z-index: 9999999; justify-content: center; align-items: center; padding: 20px;">
+    <div style="background: #FFFFFF; width: 100%; max-width: 920px; max-height: 90vh; border-radius: 20px; display: flex; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.4); border: 1.5px solid #EDE4D5;">
+
+      <div style="width: 35%; background: #F8FAF9; border-right: 1.5px solid #EDE4D5; padding: 20px; display: flex; flex-direction: column;">
+        <div style="font-weight: 800; font-size: 13px; color: #4F7460; margin-bottom: 10px;">💬 25분 대화 스크롤 로그</div>
+        <div id="popup-transcript-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 12px; padding-right: 4px;">
+          <div style="background: #FFF; padding: 8px 10px; border-radius: 8px; border: 1px solid #E5E7EB;"><strong>Partner:</strong> What did you do this weekend?</div>
+          <div style="background: #EAF8F2; padding: 8px 10px; border-radius: 8px; border: 1px solid #B8E2C8;"><strong>User:</strong> I like walking in the park and drink coffee.</div>
+          <div style="background: #FFF; padding: 8px 10px; border-radius: 8px; border: 1px solid #E5E7EB;"><strong>Partner:</strong> Sounds relaxing! Which park did you go to?</div>
+        </div>
+      </div>
+
+      <div style="width: 65%; padding: 22px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; background: #FFFFFF;">
+        <div style="font-size: 16px; font-weight: 800; color: #3E4A42;">✨ 파트너 피드백 & AI 리포트 검수</div>
+
+        <div>
+          <label style="font-size: 12px; font-weight: 800; color: #3E4A42; display: block; margin-bottom: 4px;">1. 파트너 다정 코멘트</label>
+          <textarea id="popup-partner-comment" rows="2" style="width: 100%; border: 1.5px solid #EDE4D5; border-radius: 8px; padding: 8px 10px; font-size: 12.5px; resize: none;" placeholder="유저에게 따뜻한 한 줄 코멘트를 남겨주세요."></textarea>
+        </div>
+
+        <button type="button" onclick="submitPartnerReportAndLeave()" style="background: #4F7460; color: #FFF; border: none; border-radius: 10px; padding: 12px; font-size: 13.5px; font-weight: 800; cursor: pointer; margin-top: 6px; box-shadow: 0 4px 12px rgba(79, 116, 96, 0.25);">
+          ✨ 검수 완료 및 6,000P 정산 받기
+        </button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
