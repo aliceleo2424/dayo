@@ -1176,13 +1176,16 @@
       gap: 0.5rem;
       flex: 0 0 auto;
       flex-wrap: wrap;
-      margin: 0;
+      margin: 0 auto;
+      width: 100%;
+      max-width: 480px;
       min-height: var(--bottom-h);
       padding: 0.45rem 0.85rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
       background: rgba(255, 252, 250, 0.94);
       backdrop-filter: blur(14px);
       border-top: 1px solid rgba(255, 209, 220, 0.4);
       z-index: 30;
+      box-sizing: border-box;
     }
 
     .ctrl-btn {
@@ -1200,6 +1203,17 @@
       cursor: pointer;
       transition: transform 0.15s, background 0.2s, box-shadow 0.2s, opacity 0.2s;
       box-shadow: 0 3px 10px var(--shadow-warm);
+      min-width: 0;
+    }
+
+    .ctrl-btn__icon {
+      font-size: 1rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .ctrl-btn__text {
+      line-height: 1.2;
     }
 
     .ctrl-btn:hover { transform: translateY(-2px); background: var(--coral-pale); }
@@ -2349,26 +2363,42 @@
         max-width: 480px;
         display: flex;
         flex-wrap: nowrap;
-        justify-content: center;
+        justify-content: space-between;
+        align-items: center;
         gap: 6px;
-        padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
+        padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
         overflow-x: auto;
         overscroll-behavior-x: contain;
         box-sizing: border-box;
       }
 
       .ctrl-btn {
-        padding: 8px 10px;
-        flex: 1 1 0;
+        flex: 1;
         min-width: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         justify-content: center;
-        font-size: 11px;
-        border-radius: 999px;
+        gap: 3px;
+        padding: 8px 4px;
+        border-radius: 14px;
+        white-space: nowrap;
+        word-break: keep-all;
+        font-size: 10.5px;
+        font-weight: 700;
+        line-height: 1.1;
       }
 
+      .ctrl-btn__icon {
+        font-size: 16px;
+        line-height: 1;
+      }
+
+      .ctrl-btn__text,
       .ctrl-btn span.label {
-        display: inline;
-        font-size: 11px;
+        display: block;
+        font-size: inherit;
+        line-height: inherit;
       }
 
       .ctrl-divider { display: none; }
@@ -2889,17 +2919,26 @@
 
     <footer class="bottom-bar">
       <button class="ctrl-btn" id="micBtn" type="button" aria-pressed="true" aria-label="마이크 켜짐">
-        <span class="ctrl-icon" aria-hidden="true">🎤</span>
-        <span class="label" data-i18n="room.micOn">마이크 켜짐</span>
+        <span class="ctrl-btn__icon" aria-hidden="true">🎤</span>
+        <span class="ctrl-btn__text label">마이크 켜짐</span>
       </button>
       <button class="ctrl-btn camera-toggle" id="camBtn" type="button" aria-pressed="true" aria-label="카메라 켜짐">
-        <span class="ctrl-icon" aria-hidden="true">📹</span>
-        <span class="label" data-i18n="room.camOn">카메라 켜짐</span>
+        <span class="ctrl-btn__icon" aria-hidden="true">📹</span>
+        <span class="ctrl-btn__text label">카메라 켜짐</span>
       </button>
-      <button class="ctrl-btn" id="chatToggle" type="button">💬 <span class="label" data-i18n="room.chatLabel">채팅</span></button>
+      <button class="ctrl-btn" id="chatToggle" type="button">
+        <span class="ctrl-btn__icon" aria-hidden="true">💬</span>
+        <span class="ctrl-btn__text label" data-i18n="room.chatLabel">채팅</span>
+      </button>
       <div class="ctrl-divider" aria-hidden="true"></div>
-      <button class="ctrl-btn ctrl-btn--ai" id="wordHelpBtn" type="button" data-i18n="room.wordHelp">💡 단어도움</button>
-      <button class="ctrl-btn ctrl-btn--ai" id="sentenceHelpBtn" type="button" data-i18n="room.sentenceHelp">📝 문장도움</button>
+      <button class="ctrl-btn ctrl-btn--ai" id="wordHelpBtn" type="button">
+        <span class="ctrl-btn__icon" aria-hidden="true">💡</span>
+        <span class="ctrl-btn__text label">단어도움</span>
+      </button>
+      <button class="ctrl-btn ctrl-btn--ai" id="sentenceHelpBtn" type="button">
+        <span class="ctrl-btn__icon" aria-hidden="true">📝</span>
+        <span class="ctrl-btn__text label">문장도움</span>
+      </button>
     </footer>
   </div>
 
@@ -3231,17 +3270,29 @@
       return window.DayOLive || null;
     }
 
+    function ctrlBtnLabel(key) {
+      return String(t(key)).replace(/^[^\s]+\s*/, '');
+    }
+
+    function setCtrlBtnContent(btn, icon, labelKey) {
+      if (!btn) return;
+      btn.innerHTML =
+        '<span class="ctrl-btn__icon" aria-hidden="true">' + icon + '</span>' +
+        '<span class="ctrl-btn__text label">' + ctrlBtnLabel(labelKey) + '</span>';
+    }
+
+    function renderHelpBtnLabels() {
+      setCtrlBtnContent(document.getElementById('wordHelpBtn'), '💡', 'room.wordHelp');
+      setCtrlBtnContent(document.getElementById('sentenceHelpBtn'), '📝', 'room.sentenceHelp');
+    }
+
     function renderMicLabel() {
       const api = liveApi();
       const on = api ? !!api.isMicOn() : true;
-      const label = on
-        ? t('room.micOn').replace(/^[^\s]+\s*/, '')
-        : t('room.micOff').replace(/^[^\s]+\s*/, '');
       micBtn.classList.toggle('off', !on);
       micBtn.setAttribute('aria-pressed', String(on));
       micBtn.setAttribute('aria-label', on ? t('room.micOn') : t('room.micOff'));
-      micBtn.innerHTML = '<span class="ctrl-icon" aria-hidden="true">' + (on ? '🎤' : '🔇') + '</span>' +
-        ' <span class="label">' + label + '</span>';
+      setCtrlBtnContent(micBtn, on ? '🎤' : '🔇', on ? 'room.micOn' : 'room.micOff');
     }
 
     function renderCamLabel(forcedOn) {
@@ -3250,14 +3301,10 @@
       const on = typeof forcedOn === 'boolean'
         ? forcedOn
         : (track ? track.enabled : (api ? !!api.isCamOn() : true));
-      const label = on
-        ? t('room.camOn').replace(/^[^\s]+\s*/, '')
-        : t('room.camOff').replace(/^[^\s]+\s*/, '');
       camBtn.classList.toggle('off', !on);
       camBtn.setAttribute('aria-pressed', String(on));
       camBtn.setAttribute('aria-label', on ? t('room.camOn') : t('room.camOff'));
-      camBtn.innerHTML = '<span class="ctrl-icon" aria-hidden="true">' + (on ? '📹' : '🚫') + '</span>' +
-        ' <span class="label">' + label + '</span>';
+      setCtrlBtnContent(camBtn, on ? '📹' : '🚫', on ? 'room.camOn' : 'room.camOff');
       camBtn.style.opacity = on ? '1' : '0.7';
       camBtn.style.background = on ? '' : '#EDE4D5';
     }
@@ -3326,6 +3373,7 @@
     document.addEventListener('dayo:langchange', () => {
       renderMicLabel();
       renderCamLabel();
+      renderHelpBtnLabels();
     });
     document.addEventListener('dayo:livemedia', () => {
       renderMicLabel();
@@ -3344,6 +3392,7 @@
 
     renderMicLabel();
     renderCamLabel();
+    renderHelpBtnLabels();
 
     /* Chat */
     const mainStage = document.getElementById('mainStage');
