@@ -156,10 +156,6 @@
         linear-gradient(160deg, #D9F0E4, #EAF8F2 55%, #FFF6DC);
     }
 
-    body.theme-partner .speed-toggle {
-      display: none !important;
-    }
-
     body.theme-partner .prefs-bar {
       display: none !important;
     }
@@ -173,25 +169,8 @@
       align-items: center;
       flex-wrap: wrap;
       gap: 0;
-    }
-
-    .pace-badge-tag {
-      font-size: 11px;
-      font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 12px;
-      margin-left: 6px;
-      background: #FFF4D6;
-      color: #966914;
-      border: 1px solid #FFEAA7;
-      display: inline-flex;
-      align-items: center;
-    }
-
-    .pace-badge-tag.pace-native {
-      background: #EAF8F2;
-      color: #247552;
-      border-color: #B8E2C8;
+      justify-content: center;
+      width: 100%;
     }
 
     body.theme-partner .header-partner-sub,
@@ -515,35 +494,7 @@
       color: var(--text);
     }
     .prefs-bar__tip[hidden] { display: none; }
-    .speed-toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.2rem;
-      border-radius: 999px;
-      background: var(--cream);
-      border: 1px solid var(--coral-pale);
-    }
-    .speed-toggle__btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.2rem;
-      padding: 0.4rem 0.75rem;
-      border: none;
-      border-radius: 999px;
-      background: transparent;
-      color: var(--text-muted);
-      font-family: inherit;
-      font-size: 0.78rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s, transform 0.15s;
-    }
-    .speed-toggle__btn.is-on {
-      background: linear-gradient(135deg, #FF7A68, var(--coral));
-      color: #fff;
-      box-shadow: 0 3px 10px rgba(255, 107, 87, 0.22);
-    }
+
     .prefs-badges {
       display: inline-flex;
       align-items: center;
@@ -2211,41 +2162,52 @@
       }
 
       .top-bar {
-        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-        padding: 0.5rem 0.75rem;
-        gap: 0.4rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 14px;
+        width: 100%;
+        box-sizing: border-box;
+        gap: 6px;
       }
 
       .top-left {
+        flex: 0 0 auto;
         flex-wrap: nowrap;
         min-width: 0;
       }
 
+      .top-left .badge-dayo-live {
+        display: none;
+      }
+
       .top-center {
-        max-width: min(46vw, 180px);
+        flex: 1;
+        min-width: 0;
+        max-width: none;
+        justify-content: center;
+        text-align: center;
       }
 
       .top-center .tutor-chip {
         padding: 0.22rem 0.55rem 0.22rem 0.22rem;
         max-width: 100%;
+        width: 100%;
+        justify-content: center;
       }
 
       .top-center .tutor-name {
-        font-size: 0.78rem;
+        font-size: 13px;
+        font-weight: 700;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        max-width: 5.5rem;
-      }
-
-      .top-center .pace-badge-tag {
-        margin-left: 4px;
-        padding: 2px 6px;
-        font-size: 10px;
+        max-width: 100%;
       }
 
       .top-right {
         position: static;
+        flex: 0 0 auto;
         width: auto;
         height: auto;
         max-height: none;
@@ -2261,20 +2223,26 @@
         visibility: visible;
         pointer-events: auto;
         flex-direction: row;
-        gap: 0.35rem;
+        gap: 4px;
       }
 
       .top-right .top-btn {
         width: auto;
-        padding: 0.45rem 0.65rem;
-        font-size: 0.72rem;
+        padding: 6px 9px;
+        font-size: 11px;
+        border-radius: 10px;
+      }
+
+      .timer {
+        font-size: 13px;
+        padding: 6px 10px;
+        min-width: auto;
       }
 
       .tutor-status { display: none; }
 
       .prefs-bar {
-        padding: 0.3rem 0.75rem 0.35rem;
-        flex: 0 0 auto;
+        display: none !important;
       }
 
       .main-stage,
@@ -2376,18 +2344,33 @@
         position: relative;
         bottom: auto;
         flex: 0 0 auto;
-        margin: 0;
+        margin: 0 auto;
+        width: 100%;
+        max-width: 480px;
+        display: flex;
         flex-wrap: nowrap;
-        justify-content: space-between;
-        gap: 0.35rem;
-        padding: 0.45rem 0.75rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
-        max-width: 100%;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0px));
         overflow-x: auto;
         overscroll-behavior-x: contain;
+        box-sizing: border-box;
       }
 
-      .ctrl-btn span.label { display: none; }
-      .ctrl-btn { padding: 0.7rem 0.75rem; flex: 1 1 auto; justify-content: center; }
+      .ctrl-btn {
+        padding: 8px 10px;
+        flex: 1 1 0;
+        min-width: 0;
+        justify-content: center;
+        font-size: 11px;
+        border-radius: 999px;
+      }
+
+      .ctrl-btn span.label {
+        display: inline;
+        font-size: 11px;
+      }
+
       .ctrl-divider { display: none; }
 
       .bottom-sheet { max-height: 45vh; }
@@ -2726,28 +2709,6 @@
         }
       }
 
-      function getUserPace() {
-        try {
-          var pace = localStorage.getItem('dayo_user_pace');
-          if (!pace) pace = localStorage.getItem('dayo.chat.speed');
-          if (!pace && window.DayOChatPrefs && typeof window.DayOChatPrefs.getPrefs === 'function') {
-            pace = window.DayOChatPrefs.getPrefs().speed;
-          }
-          return pace === 'native' ? 'native' : 'slow';
-        } catch (e) {
-          return 'slow';
-        }
-      }
-
-      function renderPartnerPaceBadge() {
-        var badge = document.getElementById('headerPaceBadge');
-        if (!badge) return;
-        var pace = getUserPace();
-        badge.className = 'pace-badge-tag ' + (pace === 'native' ? 'pace-native' : 'pace-slow');
-        badge.textContent = pace === 'native' ? '🐇 원어민 페이스' : '🐢 천천히';
-        badge.hidden = false;
-      }
-
       window.updateRoomRoleText = function updateRoomRoleText() {
         var isPartner = typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode();
 
@@ -2779,8 +2740,6 @@
           headerPartnerSub.removeAttribute('data-i18n');
         }
 
-        renderPartnerPaceBadge();
-
         var pipLabel = document.querySelector('.pip-label');
         if (pipLabel) pipLabel.textContent = '내 화면';
       };
@@ -2788,12 +2747,7 @@
       function scheduleRoleTextUpdates() {
         function runRoleTextUpdate() {
           var isPartner = typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode();
-          if (isPartner) {
-            window.updateRoomRoleText();
-            return;
-          }
-          var paceBadge = document.getElementById('headerPaceBadge');
-          if (paceBadge) paceBadge.hidden = true;
+          if (isPartner) window.updateRoomRoleText();
         }
         if (document.readyState === 'loading') {
           document.addEventListener('DOMContentLoaded', function () {
@@ -2861,7 +2815,6 @@
           <div class="tutor-avatar">C</div>
           <div class="tutor-name-line">
             <div class="tutor-name partner-name" id="header-partner-name">Camille</div>
-            <span class="pace-badge-tag pace-slow" id="headerPaceBadge" hidden aria-label="유저 발화 속도"></span>
           </div>
         </div>
         <div class="tutor-status header-partner-sub partner-badge-sub" data-i18n="room.partnerStatus" hidden aria-hidden="true">Live · 프랑스어 대화 파트너</div>
@@ -2871,14 +2824,6 @@
         <button class="top-btn top-btn--end btn-end-session" id="endBtn" type="button" data-i18n="room.end">🚪 세션 종료</button>
       </div>
     </header>
-
-    <div class="prefs-bar" id="prefsBar">
-      <p class="prefs-bar__tip" id="prefsFirstTip" hidden></p>
-      <div class="speed-toggle" role="group" aria-label="말하기 속도">
-        <button type="button" class="speed-toggle__btn" id="speedSlowBtn" data-speed="slow" aria-pressed="false">🐢 천천히</button>
-        <button type="button" class="speed-toggle__btn" id="speedNativeBtn" data-speed="native" aria-pressed="false">🐰 원어민</button>
-      </div>
-    </div>
 
     <main class="main-stage chat-collapsed" id="mainStage">
       <div class="video-column" id="videoColumn">
@@ -3104,24 +3049,6 @@
 
   <div class="toast" id="toast"></div>
 
-  <div class="prefs-sheet-overlay" id="prefsSheetOverlay" hidden>
-    <div class="prefs-sheet" role="dialog" aria-modal="true" aria-labelledby="prefsSheetTitle">
-      <div class="prefs-sheet__handle" aria-hidden="true"></div>
-      <div class="prefs-sheet__head">
-        <h2 class="prefs-sheet__title" id="prefsSheetTitle">대화 옵션 바꾸기</h2>
-        <button type="button" class="prefs-sheet__close" id="prefsSheetClose" aria-label="닫기">✕</button>
-      </div>
-      <div class="prefs-sheet__group" id="prefsSheetStyleGroup">
-        <p class="prefs-sheet__label" data-i18n="chatPrefs.styleLabel">대화 스타일</p>
-        <div class="prefs-sheet__chips" id="prefsSheetStyles"></div>
-      </div>
-      <div class="prefs-sheet__group" id="prefsSheetRequestGroup">
-        <p class="prefs-sheet__label" data-i18n="chatPrefs.requestLabel">요청사항</p>
-        <div class="prefs-sheet__chips" id="prefsSheetRequests"></div>
-      </div>
-    </div>
-  </div>
-
   <script crossorigin src="https://unpkg.com/@daily-co/daily-js"></script>
   <script src="supabase-env.js"></script>
   <script type="module" src="profile-store.js"></script>
@@ -3295,125 +3222,6 @@
       if (!window.DayOI18n) return key;
       return vars ? window.DayOI18n.tf(key, vars) : window.DayOI18n.t(key);
     }
-
-    /* In-chat speed toggle + style/request badges */
-    (function initChatPrefsBar() {
-      const api = window.DayOChatPrefs;
-      if (!api) return;
-
-      const tipEl = document.getElementById('prefsFirstTip');
-      const slowBtn = document.getElementById('speedSlowBtn');
-      const nativeBtn = document.getElementById('speedNativeBtn');
-      const styleBadgeLabel = document.getElementById('styleBadgeLabel');
-      const requestBadgeLabel = document.getElementById('requestBadgeLabel');
-      const sheetOverlay = document.getElementById('prefsSheetOverlay');
-      const sheetTitle = document.getElementById('prefsSheetTitle');
-      const sheetClose = document.getElementById('prefsSheetClose');
-      const stylesWrap = document.getElementById('prefsSheetStyles');
-      const requestsWrap = document.getElementById('prefsSheetRequests');
-      const styleGroup = document.getElementById('prefsSheetStyleGroup');
-      const requestGroup = document.getElementById('prefsSheetRequestGroup');
-
-      api.applyFirstUserPresetIfNeeded();
-
-      function renderBar() {
-        const prefs = api.getPrefs();
-        [slowBtn, nativeBtn].forEach((btn) => {
-          if (!btn) return;
-          const on = btn.dataset.speed === prefs.speed;
-          btn.classList.toggle('is-on', on);
-          btn.setAttribute('aria-pressed', on ? 'true' : 'false');
-          btn.textContent = api.speedLabel(btn.dataset.speed);
-        });
-        if (styleBadgeLabel) styleBadgeLabel.textContent = api.styleLabel(prefs.style);
-        if (requestBadgeLabel) requestBadgeLabel.textContent = api.requestBadgeLabel(prefs.request);
-        if (tipEl) {
-          const showTip = api.isFirstUser();
-          tipEl.hidden = !showTip;
-          if (showTip) tipEl.textContent = api.firstUserTip();
-        }
-      }
-
-      function renderSheetChips() {
-        const prefs = api.getPrefs();
-        stylesWrap.innerHTML = api.STYLE_IDS.map((id) =>
-          `<button type="button" class="prefs-sheet__chip${prefs.style === id ? ' is-on' : ''}" data-pref-style="${id}">${api.styleLabel(id)}</button>`
-        ).join('');
-        requestsWrap.innerHTML = api.REQUEST_IDS.map((id) =>
-          `<button type="button" class="prefs-sheet__chip${prefs.request === id ? ' is-on' : ''}" data-pref-request="${id}">${api.requestLabel(id)}</button>`
-        ).join('');
-      }
-
-      function openSheet(focus) {
-        const alreadyOpen = sheetOverlay.classList.contains('is-open');
-        sheetTitle.textContent = t('chatPrefs.sheetTitle');
-        styleGroup.hidden = focus === 'request';
-        requestGroup.hidden = focus === 'style';
-        if (!focus) {
-          styleGroup.hidden = false;
-          requestGroup.hidden = false;
-        }
-        renderSheetChips();
-        sheetOverlay.hidden = false;
-        requestAnimationFrame(() => sheetOverlay.classList.add('is-open'));
-        if (!alreadyOpen && window.DayOScrollLock) window.DayOScrollLock.lock();
-      }
-
-      function closeSheet() {
-        if (!sheetOverlay.classList.contains('is-open')) return;
-        sheetOverlay.classList.remove('is-open');
-        setTimeout(() => { sheetOverlay.hidden = true; }, 280);
-        if (window.DayOScrollLock) window.DayOScrollLock.unlock();
-      }
-
-      slowBtn?.addEventListener('click', () => {
-        api.setPrefs({ speed: 'slow' }, { clearFirstUser: true });
-        renderBar();
-        showToast(api.speedLabel('slow'), 1600);
-      });
-      nativeBtn?.addEventListener('click', () => {
-        api.setPrefs({ speed: 'native' }, { clearFirstUser: true });
-        renderBar();
-        showToast(api.speedLabel('native'), 1600);
-      });
-
-      document.getElementById('styleBadgeBtn')?.addEventListener('click', () => openSheet('style'));
-      document.getElementById('requestBadgeBtn')?.addEventListener('click', () => openSheet('request'));
-      sheetClose?.addEventListener('click', closeSheet);
-      sheetOverlay?.addEventListener('click', (e) => {
-        if (e.target === sheetOverlay) closeSheet();
-      });
-
-      stylesWrap?.addEventListener('click', (e) => {
-        const chip = e.target.closest('[data-pref-style]');
-        if (!chip) return;
-        api.setPrefs({ style: chip.dataset.prefStyle }, { clearFirstUser: true });
-        renderBar();
-        renderSheetChips();
-        showToast(api.styleLabel(chip.dataset.prefStyle), 1600);
-        closeSheet();
-      });
-      requestsWrap?.addEventListener('click', (e) => {
-        const chip = e.target.closest('[data-pref-request]');
-        if (!chip) return;
-        api.setPrefs({ request: chip.dataset.prefRequest }, { clearFirstUser: true });
-        renderBar();
-        renderSheetChips();
-        showToast(api.requestBadgeLabel(chip.dataset.prefRequest), 1600);
-        closeSheet();
-      });
-
-      document.addEventListener('dayo:chatprefschange', renderBar);
-      document.addEventListener('dayo:langchange', () => {
-        renderBar();
-        if (sheetOverlay.classList.contains('is-open')) renderSheetChips();
-      });
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && sheetOverlay.classList.contains('is-open')) closeSheet();
-      });
-
-      renderBar();
-    })();
 
     /* Media — Daily.co live frame, or local camera fallback */
     const micBtn = document.getElementById('micBtn');
@@ -5175,7 +4983,7 @@
   }, 2000);
 })();
   </script>
-  <button type="button" id="dev-test-skip-btn" onclick="handleDevSkipClick(event)" style="position: fixed; bottom: 16px; left: 16px; z-index: 9999999; background: #3E322D; color: #FFEAA7; border: 1.5px solid #FFEAA7; border-radius: 20px; padding: 8px 14px; font-size: 11px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.25); opacity: 0.85;">
+  <button type="button" id="dev-test-skip-btn" onclick="handleDevSkipClick(event)" style="position: fixed; top: 58px; left: 12px; z-index: 999999; background: rgba(0,0,0,0.65); color: #FFF; font-size: 10.5px; padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3); opacity: 0.8; cursor: pointer;">
     ⚡ [테스트] 25분 종료 트리거
   </button>
 
