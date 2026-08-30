@@ -2120,46 +2120,17 @@
       font-size: 0.78rem;
       font-weight: 700;
     }
-    .rq-jam {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.45rem;
-      padding: 1.1rem 1rem;
-      border-radius: 22px;
-      background: linear-gradient(145deg, #FFF9C4, #FFE5B4);
-      border: 1px solid rgba(255, 209, 220, 0.65);
+    .rq-complete-note {
+      margin: 0;
+      padding: 1rem 1.05rem;
+      border-radius: 18px;
+      background: #F8FAF9;
+      border: 1px solid #EDE4D5;
       text-align: center;
-    }
-    .rq-jam.is-award { animation: rqJamCard 0.55s ease both; }
-    .rq-jam__burst {
-      font-size: 2.2rem;
-      line-height: 1;
-    }
-    .rq-jam.is-award .rq-jam__burst { animation: rqJamPop 0.7s ease both; }
-    .rq-jam__label {
-      font-size: 1.05rem;
-      font-weight: 800;
-    }
-    .rq-jam__num {
-      display: inline-block;
-      min-width: 1.35em;
-      font-variant-numeric: tabular-nums;
-    }
-    .rq-jam__sub {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-muted);
-    }
-    @keyframes rqJamPop {
-      0% { transform: scale(0.6); opacity: 0; }
-      60% { transform: scale(1.12); opacity: 1; }
-      100% { transform: scale(1); }
-    }
-    @keyframes rqJamCard {
-      0% { transform: scale(0.86); opacity: 0; }
-      70% { transform: scale(1.05); opacity: 1; }
-      100% { transform: scale(1); }
+      font-size: 0.92rem;
+      font-weight: 700;
+      line-height: 1.5;
+      color: var(--text);
     }
     .rq-actions {
       display: flex;
@@ -3100,11 +3071,7 @@
             <div class="rq-phrases" id="rqPhrases"></div>
           </article>
 
-          <div class="rq-jam" id="rqJam">
-            <div class="rq-jam__burst" aria-hidden="true">🍓</div>
-            <p class="rq-jam__label">+<span class="rq-jam__num" id="rqJamCount">0</span> Jam 획득!</p>
-            <p class="rq-jam__sub">복습 퀴즈를 마쳐 달콤한 잼을 받았어요</p>
-          </div>
+          <p class="rq-complete-note">🎉 오늘 대화 복습 완료! 핵심 표현이 단어장에 저장되었습니다.</p>
 
           <div class="rq-actions">
             <button class="rq-cta" type="button" id="rqSaveVocab">단어장에 저장하고 완료</button>
@@ -3925,7 +3892,7 @@
     window.handleUserQuizComplete = function handleUserQuizComplete() {
       if (window._dayoUserQuizCompleteNavigating) return;
       window._dayoUserQuizCompleteNavigating = true;
-      alert('🎉 복습 퀴즈가 완료되었습니다! 마이페이지 단어장으로 이동합니다.');
+      alert('복습 퀴즈 완료! 마이페이지 단어장으로 이동합니다.');
       try { sessionStorage.setItem('dayo_goto', 'mypage'); } catch (e) { /* ignore */ }
       window.location.href = 'index.html?view=mypage';
     };
@@ -4041,7 +4008,6 @@
         }
       ];
 
-      var JAM_REWARD = 20;
       var KEY_PHRASES = [
         { word: 'latte', meaning: '라떼', kind: 'word' },
         { word: 'reserve', meaning: '예약하다', kind: 'word' },
@@ -4072,9 +4038,7 @@
         feedback: document.getElementById('rqFeedback'),
         reportTitle: document.getElementById('rqReportTitle'),
         reportList: document.getElementById('rqReportList'),
-        phrases: document.getElementById('rqPhrases'),
-        jam: document.getElementById('rqJam'),
-        jamCount: document.getElementById('rqJamCount')
+        phrases: document.getElementById('rqPhrases')
       };
 
       var index = 0;
@@ -4082,7 +4046,6 @@
       var busy = false;
       var wordTotal = 0;
       var advanceTimer = 0;
-      var jamAwarded = false;
       var vocabSaved = false;
 
       function showStep(step) {
@@ -4135,15 +4098,12 @@
         correctCount = 0;
         busy = false;
         wordTotal = 0;
-        jamAwarded = false;
         vocabSaved = false;
         if (advanceTimer) {
           clearTimeout(advanceTimer);
           advanceTimer = 0;
         }
         if (els.fill) els.fill.style.width = '0%';
-        if (els.jam) els.jam.classList.remove('is-award');
-        if (els.jamCount) els.jamCount.textContent = '0';
         if (els.save) {
           els.save.disabled = false;
           els.save.textContent = '단어장에 저장하고 완료';
@@ -4410,32 +4370,6 @@
         }, last ? 420 : 500);
       }
 
-      function countUp(el, to, ms) {
-        if (!el) return;
-        var start = performance.now();
-        function tick(now) {
-          var t = Math.min(1, (now - start) / ms);
-          var eased = 1 - Math.pow(1 - t, 3);
-          el.textContent = String(Math.round(eased * to));
-          if (t < 1) requestAnimationFrame(tick);
-        }
-        requestAnimationFrame(tick);
-      }
-
-      function awardJam() {
-        if (jamAwarded) return;
-        jamAwarded = true;
-        var store = window.DayOProfileStore;
-        if (store && typeof store.addJam === 'function') {
-          store.addJam(JAM_REWARD).catch(function () { /* local already mirrored */ });
-        } else {
-          try {
-            var prev = parseInt(localStorage.getItem('dayo.jamCount') || '0', 10) || 0;
-            localStorage.setItem('dayo.jamCount', String(prev + JAM_REWARD));
-          } catch (err) { /* ignore */ }
-        }
-      }
-
       function showReport() {
         busy = false;
         if (els.fill) els.fill.style.width = '100%';
@@ -4459,13 +4393,6 @@
           }).join('');
         }
         showStep(3);
-        awardJam();
-        if (els.jam) {
-          els.jam.classList.remove('is-award');
-          void els.jam.offsetWidth;
-          els.jam.classList.add('is-award');
-        }
-        countUp(els.jamCount, JAM_REWARD, 900);
       }
 
       function notify(msg) {
