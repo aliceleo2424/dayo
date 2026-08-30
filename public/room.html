@@ -4522,6 +4522,25 @@
       return Array.isArray(rows) ? rows : [];
     }
 
+    function splitSpokenIntoSentences(rawText) {
+      if (!rawText) return [];
+      var chunks = String(rawText).split(/(?<=[.?!])\s+/);
+      var refined = [];
+      chunks.forEach(function (chunk) {
+        var trimmed = chunk.trim();
+        if (trimmed.split(' ').length > 6) {
+          var subChunks = trimmed.split(/\s+(?=(?:and|they|because|so|but|my|i like|i have)\b)/i);
+          subChunks.forEach(function (s) {
+            s = s.trim();
+            if (s.length > 5) refined.push(s);
+          });
+        } else if (trimmed.length > 3) {
+          refined.push(trimmed);
+        }
+      });
+      return refined.length > 0 ? refined : [String(rawText).trim()];
+    }
+
     function extractUserSpokenQuotes() {
       var rows = collectSessionTranscriptRows();
       var seen = {};
@@ -4530,14 +4549,18 @@
       rows.forEach(function (log) {
         if (!log) return;
         var text = String((typeof log === 'string') ? log : (log.text || log.message || '')).trim();
-        if (!text || text.length <= 8) return;
-        var key = text.toLowerCase();
-        if (seen[key]) return;
-        seen[key] = true;
+        if (!text) return;
         var speaker = String((typeof log === 'object' && log.speaker) || '').toLowerCase();
         var isUser = !speaker || speaker === 'user' || speaker === 'me' || speaker === 'learner';
-        if (isUser) userQuotes.push(text);
-        else anyQuotes.push(text);
+        var splitList = splitSpokenIntoSentences(text);
+        splitList.forEach(function (sentence) {
+          if (!sentence || sentence.length <= 5) return;
+          var key = sentence.toLowerCase();
+          if (seen[key]) return;
+          seen[key] = true;
+          if (isUser) userQuotes.push(sentence);
+          else anyQuotes.push(sentence);
+        });
       });
       return userQuotes.length ? userQuotes : anyQuotes;
     }
@@ -4577,12 +4600,12 @@
         var abs = (window.visibleCardStartIndex + i) % pool.length;
         var card = pool[abs];
         var selected = abs === window.currentCardIndex;
-        html += '<label style="display: flex; align-items: center; gap: 8px; font-size: 11.5px; background: ' +
+        html += '<label style="display: flex; align-items: flex-start; gap: 8px; width: 100%; font-size: 11.5px; background: ' +
           (selected ? '#FFF9ED' : '#FFFFFF') + '; border: 1.5px solid ' +
-          (selected ? '#F6D365' : '#EDE4D5') + '; padding: 7px 10px; border-radius: 8px; cursor: pointer;">' +
+          (selected ? '#F6D365' : '#EDE4D5') + '; padding: 7px 10px; border-radius: 8px; cursor: pointer; box-sizing: border-box;">' +
           '<input type="radio" name="insta_sentence_select" value="' + escapeInstaCardText(card.id) + '"' +
-          (selected ? ' checked' : '') + ' onchange="selectInstaCard(' + abs + ')">' +
-          '<span style="font-weight: 700; color: #3E4A42;">' + escapeInstaCardText(card.quote) + '</span>' +
+          (selected ? ' checked' : '') + ' onchange="selectInstaCard(' + abs + ')" style="flex-shrink: 0; margin-top: 2px;">' +
+          '<span style="flex: 1; min-width: 0; font-weight: 700; color: #3E4A42; word-break: normal; overflow-wrap: break-word; line-height: 1.45;">' + escapeInstaCardText(card.quote) + '</span>' +
           '</label>';
       }
       container.innerHTML = html;
@@ -4893,14 +4916,14 @@
 
         <div style="background: #FDFBF7; border: 1.5px solid #EDE4D5; border-radius: 12px; padding: 12px 14px;">
           <div style="font-size: 12.5px; font-weight: 800; color: #4F7460; margin-bottom: 8px;">3. AI 학습 리포트 검수 (필요 시 직접 수정)</div>
-          <div style="font-size: 12px; color: #3E4A42; display: flex; flex-direction: column; gap: 6px;">
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-weight: 700; width: 75px;">• 빈출 유의어:</span>
-              <input type="text" value="like ➔ prefer, be fond of" style="flex: 1; border: 1px solid #EDE4D5; border-radius: 6px; padding: 4px 8px; font-size: 12px;">
+          <div style="font-size: 12px; color: #3E4A42; display: flex; flex-direction: column; gap: 0;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; margin-bottom: 8px;">
+              <span style="font-size: 11.5px; font-weight: 700; color: #4F7460; white-space: nowrap; word-break: keep-all;">• 빈출 유의어:</span>
+              <input type="text" value="like ➔ prefer, be fond of" style="width: 100%; box-sizing: border-box; border: 1.5px solid #EDE4D5; border-radius: 8px; padding: 7px 10px; font-size: 12px;">
             </div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <span style="font-weight: 700; width: 75px;">• 뉘앙스 교정:</span>
-              <input type="text" value="I am very agree ➔ I totally agree" style="flex: 1; border: 1px solid #EDE4D5; border-radius: 6px; padding: 4px 8px; font-size: 12px;">
+            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; margin-bottom: 8px;">
+              <span style="font-size: 11.5px; font-weight: 700; color: #4F7460; white-space: nowrap; word-break: keep-all;">• 뉘앙스 교정:</span>
+              <input type="text" value="I am very agree ➔ I totally agree" style="width: 100%; box-sizing: border-box; border: 1.5px solid #EDE4D5; border-radius: 8px; padding: 7px 10px; font-size: 12px;">
             </div>
           </div>
         </div>
@@ -4908,20 +4931,20 @@
         <div style="background: #FAFBF9; border: 1.5px solid #EDE4D5; border-radius: 14px; padding: 14px 16px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
             <label style="font-size: 12.5px; font-weight: 800; color: #3E4A42;">4. &lt;From DayO&gt; 인스타 카드 선택 & 문장 매칭</label>
-            <button type="button" onclick="regenerateInstaCard()" style="background: #FFFFFF; border: 1px solid #9AB89E; color: #4F7460; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 14px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-              🔄 다른 카드 재생성
+            <button type="button" onclick="regenerateInstaCard()" title="다른 카드 재생성" style="background: #FFFFFF; border: 1.5px solid #9AB89E; color: #4F7460; font-size: 15px; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+              🔄
             </button>
           </div>
 
-          <div style="display: flex; gap: 14px; align-items: stretch;">
-            <div style="flex: 1.2; display: flex; flex-direction: column; gap: 8px;">
+          <div class="card-section-body" style="display: flex; flex-direction: column; width: 100%; gap: 12px;">
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 8px;">
               <div style="font-size: 11px; color: #55635A; font-weight: 600;">대화 속 베스트 문장 선택:</div>
-              <div id="card-sentence-options" style="display: flex; flex-direction: column; gap: 6px;"></div>
+              <div id="card-sentence-options" style="display: flex; flex-direction: column; gap: 6px; width: 100%;"></div>
             </div>
 
-            <div style="flex: 0.8; display: flex; flex-direction: column; align-items: center;">
-              <div id="insta-card-preview-box" style="width: 140px; height: 180px; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 8px 18px rgba(0,0,0,0.12); display: flex; flex-direction: column; justify-content: space-between; padding: 12px; box-sizing: border-box; transition: background 0.3s ease, border-color 0.3s ease;"></div>
-              <span style="font-size: 10px; color: #88928B; margin-top: 6px;">유저 마이페이지에 자동 발행</span>
+            <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+              <div id="insta-card-preview-box" style="width: 100%; max-width: 240px; min-height: 190px; margin: 0 auto; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 8px 18px rgba(0,0,0,0.12); display: flex; flex-direction: column; justify-content: space-between; padding: 12px; box-sizing: border-box; transition: background 0.3s ease, border-color 0.3s ease;"></div>
+              <div style="font-size: 10px; color: #88928B; margin-top: 6px; text-align: center; width: 100%;">유저 마이페이지에 자동 발행</div>
             </div>
           </div>
         </div>
