@@ -2397,6 +2397,18 @@
 <body class="is-room theme-learner">
   <script>
     (function applyPartnerTheme() {
+      window.isPartnerRoomMode = function() {
+        try {
+          var urlParams = new URLSearchParams(window.location.search);
+          var roleParam = String(urlParams.get('role') || '').toLowerCase();
+          if (roleParam === 'partner') return true;
+          if (roleParam === 'user' || roleParam === 'learner') return false;
+          return localStorage.getItem('dayo_current_mode') === 'PARTNER';
+        } catch (e) {
+          return false;
+        }
+      };
+
       function getLearnerDisplayName() {
         try {
           var fromUrl = String(new URLSearchParams(location.search).get('learner') || '').trim();
@@ -2437,12 +2449,7 @@
       }
 
       window.updateRoomRoleText = function updateRoomRoleText() {
-        var isPartner =
-          document.body.classList.contains('theme-partner') ||
-          (function () {
-            try { return localStorage.getItem('dayo_current_mode') === 'PARTNER'; } catch (e) { return false; }
-          })() ||
-          new URLSearchParams(window.location.search).get('role') === 'partner';
+        var isPartner = typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode();
 
         if (!isPartner) return;
 
@@ -2480,12 +2487,7 @@
 
       function scheduleRoleTextUpdates() {
         function runRoleTextUpdate() {
-          var isPartner =
-            document.body.classList.contains('theme-partner') ||
-            (function () {
-              try { return localStorage.getItem('dayo_current_mode') === 'PARTNER'; } catch (e) { return false; }
-            })() ||
-            new URLSearchParams(window.location.search).get('role') === 'partner';
+          var isPartner = typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode();
           if (isPartner) {
             window.updateRoomRoleText();
             return;
@@ -2510,16 +2512,21 @@
       scheduleRoleTextUpdates();
 
       function enterPartner() {
-        document.body.classList.add('theme-partner');
+        document.body.classList.add('is-room', 'theme-partner');
         document.body.classList.remove('theme-learner');
+        document.body.style.background = 'linear-gradient(180deg, #F0F9F5 0%, #E6F4EE 100%)';
         document.body.setAttribute('data-mode', 'partner');
         document.body.setAttribute('data-dayo-role', 'partner');
+        try { localStorage.setItem('dayo_current_mode', 'PARTNER'); } catch (e) {}
         applyPartnerRoomCopy();
       }
       function enterLearner() {
+        document.body.classList.add('is-room', 'theme-learner');
         document.body.classList.remove('theme-partner');
-        document.body.classList.add('theme-learner');
+        document.body.style.background = 'linear-gradient(180deg, #FFF9F2 0%, #FFF0ED 100%)';
         document.body.removeAttribute('data-mode');
+        document.body.setAttribute('data-dayo-role', 'learner');
+        try { localStorage.setItem('dayo_current_mode', 'LEARNER'); } catch (e) {}
       }
       window.goToView = function(viewId) {
         var id = String(viewId || '');
@@ -2536,26 +2543,9 @@
         else window.goToView('viewLearnerHome');
       };
 
-      window.isPartnerRoomMode = function() {
-        if (document.body && document.body.classList.contains('theme-partner')) return true;
-        try {
-          if (String(localStorage.getItem('dayo_current_mode') || '').toUpperCase() === 'PARTNER') {
-            return true;
-          }
-          var role = String(new URLSearchParams(location.search).get('role') || '').toLowerCase();
-          if (role === 'partner') return true;
-        } catch (e) {}
-        return false;
-      };
       try {
-        var params = new URLSearchParams(location.search);
-        var role = String(params.get('role') || params.get('mode') || '').toLowerCase();
-        var storedMode = '';
-        try {
-          storedMode = String(localStorage.getItem('dayo_current_mode') || '').toUpperCase();
-        } catch (e) {}
-        var fromPartner = /partner\.html/i.test(document.referrer || '');
-        if (role === 'partner' || storedMode === 'PARTNER' || fromPartner) enterPartner();
+        if (window.isPartnerRoomMode()) enterPartner();
+        else enterLearner();
       } catch (e) {}
     })();
   </script>
@@ -2611,7 +2601,7 @@
           <div class="self-pip" id="selfPip" title="클릭하여 화면 맞바꾸기" role="button" tabindex="0" aria-label="내 화면 — 클릭하여 화면 맞바꾸기">
             <span class="pip-label" data-i18n="room.selfPipLabel">나</span>
             <video id="selfVideo" playsinline muted autoplay></video>
-            <div class="self-placeholder">
+            <div class="self-placeholder pip-avatar">
               <div class="self-placeholder-icon">👤</div>
               <span data-i18n="room.selfPlaceholderLabel">내 화면</span>
             </div>
@@ -2669,7 +2659,7 @@
         <span class="ctrl-icon" aria-hidden="true">🎤</span>
         <span class="label" data-i18n="room.micOn">마이크 켜짐</span>
       </button>
-      <button class="ctrl-btn" id="camBtn" type="button" aria-pressed="true" aria-label="카메라 켜짐">
+      <button class="ctrl-btn camera-toggle" id="camBtn" type="button" aria-pressed="true" aria-label="카메라 켜짐">
         <span class="ctrl-icon" aria-hidden="true">📹</span>
         <span class="label" data-i18n="room.camOn">카메라 켜짐</span>
       </button>
@@ -3149,9 +3139,12 @@
         ' <span class="label">' + label + '</span>';
     }
 
-    function renderCamLabel() {
+    function renderCamLabel(forcedOn) {
       const api = liveApi();
-      const on = api ? !!api.isCamOn() : true;
+      const track = getLocalVideoTrack();
+      const on = typeof forcedOn === 'boolean'
+        ? forcedOn
+        : (track ? track.enabled : (api ? !!api.isCamOn() : true));
       const label = on
         ? t('room.camOn').replace(/^[^\s]+\s*/, '')
         : t('room.camOff').replace(/^[^\s]+\s*/, '');
@@ -3160,7 +3153,60 @@
       camBtn.setAttribute('aria-label', on ? t('room.camOn') : t('room.camOff'));
       camBtn.innerHTML = '<span class="ctrl-icon" aria-hidden="true">' + (on ? '📹' : '🚫') + '</span>' +
         ' <span class="label">' + label + '</span>';
+      camBtn.style.opacity = on ? '1' : '0.7';
+      camBtn.style.background = on ? '' : '#EDE4D5';
     }
+
+    function getLocalMediaStream() {
+      var preview = document.getElementById('local-video-preview') || document.getElementById('selfVideo');
+      return window.localMediaStream || window.__localCamStream || (preview && preview.srcObject) || null;
+    }
+
+    function getLocalVideoTrack() {
+      var stream = getLocalMediaStream();
+      if (!stream || typeof stream.getVideoTracks !== 'function') return null;
+      return stream.getVideoTracks()[0] || null;
+    }
+
+    function applyLocalCameraPipUi(isCameraOn) {
+      var localVideo = document.getElementById('local-video-preview') || document.getElementById('selfVideo');
+      var pipAvatar = document.querySelector('.pip-avatar') || document.querySelector('.self-placeholder');
+      if (localVideo) localVideo.style.opacity = isCameraOn ? '1' : '0';
+      if (pipAvatar) pipAvatar.style.display = isCameraOn ? 'none' : 'flex';
+    }
+
+    window.toggleLocalCamera = function () {
+      var stream = getLocalMediaStream();
+      if (stream) {
+        window.localMediaStream = stream;
+        window.__localCamStream = stream;
+      }
+
+      var videoTrack = stream && stream.getVideoTracks && stream.getVideoTracks()[0];
+      var api = liveApi();
+      var isCameraOn;
+
+      if (videoTrack) {
+        videoTrack.enabled = !videoTrack.enabled;
+        isCameraOn = videoTrack.enabled;
+        if (api && typeof api.toggleCam === 'function' && typeof api.isCamOn === 'function' && !!api.isCamOn() !== isCameraOn) {
+          Promise.resolve(api.toggleCam()).finally(function () { renderCamLabel(isCameraOn); });
+        }
+      } else if (api && typeof api.toggleCam === 'function') {
+        Promise.resolve(api.toggleCam()).finally(function () {
+          var on = !!api.isCamOn();
+          applyLocalCameraPipUi(on);
+          renderCamLabel(on);
+        });
+        return;
+      } else {
+        console.warn('활성화된 로컬 미디어 스트림이 없습니다.');
+        return;
+      }
+
+      applyLocalCameraPipUi(isCameraOn);
+      renderCamLabel(isCameraOn);
+    };
 
     micBtn.addEventListener('click', () => {
       const api = liveApi();
@@ -3168,11 +3214,7 @@
       Promise.resolve(api.toggleMic()).finally(renderMicLabel);
     });
 
-    camBtn.addEventListener('click', () => {
-      const api = liveApi();
-      if (!api || typeof api.toggleCam !== 'function') return;
-      Promise.resolve(api.toggleCam()).finally(renderCamLabel);
-    });
+    camBtn.onclick = window.toggleLocalCamera;
 
     document.addEventListener('dayo:langchange', () => {
       renderMicLabel();
@@ -3439,10 +3481,7 @@
 
     function isPartnerEndMode() {
       try {
-        return document.body.classList.contains('theme-partner') ||
-          localStorage.getItem('dayo_current_mode') === 'PARTNER' ||
-          new URLSearchParams(window.location.search).get('role') === 'partner' ||
-          (typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode());
+        return typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode();
       } catch (e) {
         return false;
       }
@@ -3569,10 +3608,7 @@
       if (window.__dayoSessionEndRouted) return;
       window.__dayoSessionEndRouted = true;
 
-      const isPartner =
-        document.body.classList.contains('theme-partner') ||
-        localStorage.getItem('dayo_current_mode') === 'PARTNER' ||
-        new URLSearchParams(window.location.search).get('role') === 'partner';
+      const isPartner = typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode();
 
       try { stopAllMedia(); } catch (e) { /* ignore */ }
       try { persistTranscript(); } catch (e) { /* ignore */ }
@@ -4439,10 +4475,7 @@
   window.__singleToastDone = true;
 
   // 파트너 모드일 때는 노출 차단
-  const isPartner = 
-    document.body.classList.contains('theme-partner') ||
-    localStorage.getItem('dayo_current_mode') === 'PARTNER' ||
-    new URLSearchParams(window.location.search).get('role') === 'partner';
+  const isPartner = typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode();
   if (isPartner) return;
 
   // 세션 입장 2초 후 1회 노출
@@ -4517,10 +4550,7 @@
     window.submitPartnerReportAndLeave = window.executePartnerPayoutAndExit;
 
     window.handleHeaderExitClick = function () {
-      const isPartner =
-        document.body.classList.contains('theme-partner') ||
-        localStorage.getItem('dayo_current_mode') === 'PARTNER' ||
-        new URLSearchParams(window.location.search).get('role') === 'partner';
+      const isPartner = typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode();
 
       if (isPartner) {
         if (typeof window.openPartnerReportPopup === 'function') window.openPartnerReportPopup();
@@ -4649,6 +4679,7 @@
 
         window.__localCamBound = true;
         window.__localCamStream = stream;
+        window.localMediaStream = stream;
       } catch (err) {
         console.error('웹캠 바인딩 에러:', err);
       }

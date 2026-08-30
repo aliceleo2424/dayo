@@ -2120,7 +2120,7 @@
       <div class="header-actions">
         <div data-i18n-lang="icon"></div>
         <div class="header-mode" data-mode-switch="inline"></div>
-        <a href="room.html" class="header-cta nav-auth-only" data-ms-guard data-i18n="nav.startChat" data-ticket-gate>🚀 바로 대화 시작하기</a>
+        <a href="room.html?role=user" class="header-cta nav-auth-only" data-ms-guard data-i18n="nav.startChat" data-ticket-gate>🚀 바로 대화 시작하기</a>
         <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
       </div>
     </div>
@@ -2134,7 +2134,7 @@
     <a href="#reviews" data-i18n="nav.reviews">후기</a>
     <a href="#booking" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
     <a href="mypage.html" class="nav-auth-only" data-i18n="nav.mypage">마이페이지</a>
-    <a href="room.html" class="header-cta nav-drawer__cta nav-auth-only" data-ms-guard data-i18n="nav.startChat" data-ticket-gate data-nav-close>🚀 바로 대화 시작하기</a>
+    <a href="room.html?role=user" class="header-cta nav-drawer__cta nav-auth-only" data-ms-guard data-i18n="nav.startChat" data-ticket-gate data-nav-close>🚀 바로 대화 시작하기</a>
   </nav>
 
   <div class="page">
@@ -2154,7 +2154,7 @@
             <span>💡 총 30분 · 25분 화상 대화 + 5분 미니 퀴즈/리포트</span>
             <button type="button" class="auth-ticket-charge" data-tickets-open aria-label="이용권 충전">+ 충전</button>
           </div>
-          <a href="room.html" class="header-cta auth-dash-cta" data-ms-guard data-ticket-gate>🚀 대화방 입장하기</a>
+          <a href="room.html?role=user" class="header-cta auth-dash-cta" data-ms-guard data-ticket-gate>🚀 대화방 입장하기</a>
         </div>
 
         <div class="auth-live">
@@ -2992,7 +2992,7 @@
           </form>
           <div class="quiz-lead-done">
             <p class="quiz-lead-success" id="quizLeadSuccess"></p>
-            <a class="quiz-lead-cta" href="room.html" data-ms-guard data-ticket-gate data-quiz-start-cta>${escapeHtml(t('quiz.lead.startCta'))}</a>
+            <a class="quiz-lead-cta" href="room.html?role=user" data-ms-guard data-ticket-gate data-quiz-start-cta>${escapeHtml(t('quiz.lead.startCta'))}</a>
           </div>
         </div>
         <button class="quiz-result-retry" type="button">${escapeHtml(t('quiz.resultRetry'))}</button>
