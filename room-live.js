@@ -48,6 +48,7 @@
   }
 
   function showToast(msg, ms) {
+    if (!msg) return;
     var toast = document.getElementById('toast');
     if (!toast) return;
     toast.textContent = msg;
@@ -551,17 +552,17 @@
       if (data && data.phrases && data.phrases.length) {
         geminiOk = true;
         renderHints(data);
-        setStatus(sttOn ? t('room.copilotListening') : t('room.copilotDemo'), sttOn);
+        setStatus(sttOn ? t('room.copilotListening') : t('room.copilotListening'), sttOn);
         return;
       }
       geminiOk = false;
       renderHints(demoHints(joined));
-      setStatus(t('room.copilotDemo'), false);
+      setStatus(t('room.copilotListening'), false);
     }).catch(function () {
       geminiBusy = false;
       geminiOk = false;
       renderHints(demoHints(joined));
-      setStatus(t('room.copilotDemo'), false);
+      setStatus(t('room.copilotListening'), false);
     });
   }
 
@@ -742,8 +743,7 @@
   function startSpeech() {
     var Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!Ctor) {
-      setStatus(t('room.copilotDemo'), false);
-      showToast(t('room.toastSttOff'), 2800);
+      setStatus(t('room.copilotListening'), false);
       return;
     }
 
@@ -770,7 +770,7 @@
       recognition.onerror = function (event) {
         if (event && (event.error === 'not-allowed' || event.error === 'service-not-allowed')) {
           sttOn = false;
-          setStatus(t('room.copilotDemo'), false);
+          setStatus(t('room.copilotListening'), false);
         }
       };
 
@@ -787,7 +787,7 @@
       }
     } catch (err) {
       sttOn = false;
-      setStatus(t('room.copilotDemo'), false);
+      setStatus(t('room.copilotListening'), false);
     }
   }
 
@@ -802,7 +802,7 @@
     sttOn = false;
     if (!recognition) return;
     try { recognition.stop(); } catch (e) { /* ignore */ }
-    setStatus(geminiOk ? t('room.copilotListening') : t('room.copilotDemo'), false);
+    setStatus(geminiOk ? t('room.copilotListening') : t('room.copilotListening'), false);
   }
 
   function resumeSpeech() {
@@ -944,7 +944,7 @@
       utteranceSeq = 0;
       backupTranscriptLocal();
       renderHints(demoHints(''));
-      setStatus(t('room.copilotDemo'), false);
+      setStatus(t('room.copilotListening'), false);
       bindCopilotClicks();
       bindChatToCopilot();
 
@@ -952,7 +952,6 @@
         demoMode = false;
       }).catch(function () {
         try { destroyDaily(); } catch (e) { /* ignore */ }
-        showToast(t('room.toastDailyDemo'), 2800);
         return startDemoMedia();
       });
 
@@ -960,9 +959,9 @@
         if (hungUp) return;
         if (typeof window.updateRoomRoleText === 'function') window.updateRoomRoleText();
         document.dispatchEvent(new CustomEvent('dayo:room-ready'));
-        try { startSpeech(); } catch (e) { setStatus(t('room.copilotDemo'), false); }
+        try { startSpeech(); } catch (e) { setStatus(t('room.copilotListening'), false); }
         if (!geminiKey()) {
-          setStatus(t('room.copilotDemo'), sttOn);
+          setStatus(t('room.copilotListening'), sttOn);
         }
       }).catch(function () {
         try { startDemoMedia(); } catch (e) { /* ignore */ }
@@ -971,7 +970,7 @@
     } catch (err) {
       try { startDemoMedia(); } catch (e) { /* ignore */ }
       renderHints(demoHints(''));
-      setStatus(t('room.copilotDemo'), false);
+      setStatus(t('room.copilotListening'), false);
     }
   }
 
@@ -992,7 +991,7 @@
   document.addEventListener('dayo:langchange', function () {
     if (els().status) {
       setStatus(
-        sttOn ? t('room.copilotListening') : t('room.copilotDemo'),
+        sttOn ? t('room.copilotListening') : t('room.copilotListening'),
         sttOn
       );
     }
