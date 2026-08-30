@@ -1601,12 +1601,30 @@
       z-index: 9999999;
     }
 
+    .rating-modal-close,
+    #ratingModal .close-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 32px;
+      height: 32px;
+      border: none;
+      border-radius: 999px;
+      background: #F4F1EC;
+      color: #3E4A42;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      line-height: 1;
+    }
+
     body.theme-partner #ratingModal,
     body.theme-partner .rating-modal {
       display: none !important;
     }
 
     .feedback-modal {
+      position: relative;
       width: min(440px, 100%);
       max-height: min(88vh, 640px);
       overflow-y: auto;
@@ -2703,6 +2721,7 @@
   <!-- Feedback Modal -->
   <div class="modal-overlay rating-modal" id="ratingModal">
     <div class="feedback-modal" role="dialog" aria-labelledby="feedbackTitle" aria-modal="true">
+      <button type="button" class="close-btn rating-modal-close" id="ratingModalClose" data-dismiss="rating" aria-label="닫기">✕</button>
       <h2 class="feedback-title" id="feedbackTitle" data-i18n="room.feedbackTitle">오늘 세션은 어떠하셨나요? 🍰</h2>
       <div class="stars" id="starRating" role="group" data-i18n="room.starAria" data-i18n-attr="aria-label" aria-label="별점">
         <button class="star-btn" type="button" data-star="1" data-i18n="room.star1" data-i18n-attr="aria-label" aria-label="1점">★</button>
@@ -3510,7 +3529,18 @@
       quiz.style.setProperty('z-index', '500000', 'important');
     }
 
+    function goToMypage() {
+      try { sessionStorage.setItem('dayo_goto', 'mypage'); } catch (e) { /* ignore */ }
+      window.location.href = 'index.html?view=mypage';
+    }
+
+    window.goToMypage = goToMypage;
+
     function openReviewFromTranscript(result, options) {
+      if (window.isEarlyExit) {
+        goToMypage();
+        return;
+      }
       if (isPartnerEndMode() && typeof window.openPartnerReportPopup === 'function') {
         window.openPartnerReportPopup();
         return;
@@ -3571,12 +3601,21 @@
 
       hideLiveVideoStage();
 
+      if (window.isEarlyExit) {
+        const quizModal = getUserQuizModal();
+        if (quizModal) {
+          quizModal.style.display = 'none';
+          quizModal.hidden = true;
+          quizModal.classList.remove('is-open');
+        }
+      }
+
       const userRatingModal = getUserRatingModal();
       if (userRatingModal) {
         openRatingModal();
       } else if (typeof openRatingModal === 'function') {
         openRatingModal();
-      } else if (typeof openQuizModal === 'function') {
+      } else if (!window.isEarlyExit && typeof openQuizModal === 'function') {
         openQuizModal(result);
       }
     }
@@ -3586,10 +3625,23 @@
     window.handleUserQuizComplete = function handleUserQuizComplete() {
       if (window._dayoUserQuizCompleteNavigating) return;
       window._dayoUserQuizCompleteNavigating = true;
-      alert('복습 퀴즈 완료! 마이페이지 단어장으로 이동합니다.');
-      try { sessionStorage.setItem('dayo_goto', 'mypage'); } catch (e) { /* ignore */ }
-      window.location.href = 'index.html?view=mypage';
+      goToMypage();
     };
+
+    function handleRatingDismiss() {
+      if (window.isEarlyExit) {
+        goToMypage();
+        return;
+      }
+      closeRatingModal();
+      if (typeof openQuizModal === 'function') {
+        openQuizModal();
+        return;
+      }
+      goToMypage();
+    }
+
+    window.handleRatingDismiss = handleRatingDismiss;
 
     function handleTimedSessionExpiry(result) {
       handleSessionEndRouting(result);
@@ -3621,6 +3673,10 @@
 
     document.getElementById('feedbackSubmit').addEventListener('click', () => {
       closeRatingModal();
+      if (window.isEarlyExit) {
+        goToMypage();
+        return;
+      }
       showToast(t('room.toastFeedbackSent'));
       stopAllMedia();
       persistTranscript().then(function (result) {
@@ -3628,6 +3684,10 @@
       }).catch(function () {
         openReviewFromTranscript(null, { autoStart: true });
       });
+    });
+
+    document.querySelectorAll('#ratingModal .close-btn, #ratingModal [data-dismiss]').forEach(function (btn) {
+      btn.onclick = handleRatingDismiss;
     });
 
     document.addEventListener('keydown', (e) => {
@@ -3904,6 +3964,12 @@
         overlay.hidden = true;
         busy = false;
         if (wasOpen && window.DayOScrollLock) window.DayOScrollLock.unlock();
+        if (!wasOpen) return;
+        if (typeof window.goToMypage === 'function') {
+          window.goToMypage();
+          return;
+        }
+        window.location.href = 'index.html?view=mypage';
       }
 
       function startQuiz() {
@@ -4174,6 +4240,12 @@
 
       if (els.start) els.start.addEventListener('click', startQuiz);
       if (els.close) els.close.addEventListener('click', close);
+      document.querySelectorAll('#quizModal .close-btn, #quizModal [data-dismiss]').forEach(function (btn) {
+        btn.onclick = function () {
+          if (typeof window.goToMypage === 'function') window.goToMypage();
+          else window.location.href = 'index.html?view=mypage';
+        };
+      });
       if (els.done) els.done.addEventListener('click', finishSession);
       if (els.save) els.save.addEventListener('click', saveVocab);
 
@@ -4462,15 +4534,36 @@
     };
 
     window.confirmEarlyExit = function () {
+      window.isEarlyExit = true;
       window.closeEarlyExitModal();
+      try {
+        if (window.DayOLive && typeof window.DayOLive.hangUp === 'function') window.DayOLive.hangUp();
+        if (window.__localCamStream) {
+          window.__localCamStream.getTracks().forEach(function (track) { track.stop(); });
+        }
+      } catch (e) { /* ignore */ }
       if (typeof window.handleSessionEndRouting === 'function') {
         window.handleSessionEndRouting();
+      } else if (typeof window.openRatingModal === 'function') {
+        window.openRatingModal();
       }
     };
 
     window.handleTechIssueExit = function () {
       window.closeEarlyExitModal();
       alert('연결 문제로 인한 종료가 접수되었습니다. 이용권 차감 여부 확인 후 복구 처리됩니다.');
+      window.location.href = 'index.html?view=mypage';
+    };
+
+    window.handleReportExit = function () {
+      window.closeEarlyExitModal();
+      try {
+        if (window.DayOLive && typeof window.DayOLive.hangUp === 'function') window.DayOLive.hangUp();
+        if (window.__localCamStream) {
+          window.__localCamStream.getTracks().forEach(function (track) { track.stop(); });
+        }
+      } catch (e) { /* ignore */ }
+      alert('신고가 접수되었으며 안전을 위해 세션이 즉시 종료됩니다. 운영팀에서 확인 후 신속히 조치하겠습니다.');
       window.location.href = 'index.html?view=mypage';
     };
 
@@ -4617,7 +4710,7 @@
 
     <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed #EDE4D5; display: flex; justify-content: space-around; font-size: 11.5px;">
       <a href="javascript:void(0)" onclick="handleTechIssueExit()" style="color: #4F7460; font-weight: 700; text-decoration: underline;">🛠️ 음성/연결 오류로 종료</a>
-      <a href="javascript:void(0)" onclick="alert('신고 접수 후 안전 종료됩니다.')" style="color: #F07A68; font-weight: 700; text-decoration: underline;">🚨 비매너 신고</a>
+      <a href="javascript:void(0)" onclick="handleReportExit()" style="color: #F07A68; font-weight: 700; text-decoration: underline;">🚨 비매너 신고</a>
     </div>
   </div>
 </div>
