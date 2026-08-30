@@ -2399,7 +2399,7 @@
       position: fixed !important;
       inset: 0 !important;
       background: rgba(0, 0, 0, 0.75) !important;
-      z-index: 9999999 !important;
+      z-index: 99999999 !important;
       justify-content: center !important;
       align-items: center !important;
       padding: 20px;
@@ -4771,14 +4771,17 @@
       }
     };
 
-    window.submitPartnerReportAndLeave = function () {
-      alert('🎉 세션 리포트 전송 완료! +6,000P가 적립되었습니다.');
+    window.executePartnerPayoutAndExit = function () {
+      console.log('✨ 파트너 리포트 검수 완료 트리거');
+      alert('🎉 세션 리포트 전송 완료! +6,000P가 정산 지갑에 적립되었습니다.');
+      try { localStorage.setItem('dayo_current_mode', 'PARTNER'); } catch (e) {}
       if (typeof goToView === 'function') {
-        goToView('viewPartnerHome');
-      } else {
-        window.location.href = 'index.html?mode=partner';
+        try { goToView('viewPartnerHome'); } catch (e) {}
       }
+      window.location.href = 'partner.html';
     };
+
+    window.submitPartnerReportAndLeave = window.executePartnerPayoutAndExit;
 
     window.handleHeaderExitClick = function () {
       const isPartner =
@@ -4990,60 +4993,78 @@
     ⚡ [테스트] 25분 종료 트리거
   </button>
 
-  <div id="partner-report-popup" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); z-index: 9999999; justify-content: center; align-items: center; padding: 20px;">
-    <div style="background: #FFFFFF; width: 100%; max-width: 920px; max-height: 90vh; border-radius: 20px; display: flex; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.4); border: 1.5px solid #EDE4D5;">
+  <div id="partner-report-popup" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); z-index: 99999999; justify-content: center; align-items: center; padding: 20px;">
+    <div style="background: #FFFFFF; width: 100%; max-width: 940px; height: 86vh; border-radius: 20px; display: flex; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,0.35); border: 1.5px solid #EDE4D5;">
 
       <div style="width: 35%; background: #F8FAF9; border-right: 1.5px solid #EDE4D5; padding: 20px; display: flex; flex-direction: column;">
-        <div style="font-weight: 800; font-size: 13px; color: #4F7460; margin-bottom: 10px;">💬 25분 대화 스크롤 로그</div>
-        <div id="popup-transcript-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; font-size: 12px; padding-right: 4px;">
-          <div style="background: #FFF; padding: 8px 10px; border-radius: 8px; border: 1px solid #E5E7EB;"><strong>Partner:</strong> What did you do this weekend?</div>
-          <div style="background: #EAF8F2; padding: 8px 10px; border-radius: 8px; border: 1px solid #B8E2C8;"><strong>User:</strong> I like walking in the park and drink coffee.</div>
-          <div style="background: #FFF; padding: 8px 10px; border-radius: 8px; border: 1px solid #E5E7EB;"><strong>Partner:</strong> Sounds relaxing! Which park did you go to?</div>
+        <div style="font-weight: 800; font-size: 13.5px; color: #4F7460; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+          <span>💬</span> 25분 대화 스크롤 로그
+        </div>
+        <div id="popup-transcript-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 9px; font-size: 12px; padding-right: 6px;">
+          <div style="background: #FFF; padding: 9px 12px; border-radius: 10px; border: 1px solid #E5E7EB; line-height: 1.4;"><strong>Partner:</strong> What did you do this weekend?</div>
+          <div style="background: #EAF8F2; padding: 9px 12px; border-radius: 10px; border: 1px solid #B8E2C8; line-height: 1.4;"><strong>User:</strong> I like walking in the park and drink coffee.</div>
+          <div style="background: #FFF; padding: 9px 12px; border-radius: 10px; border: 1px solid #E5E7EB; line-height: 1.4;"><strong>Partner:</strong> Sounds relaxing! Which park did you go to?</div>
+          <div style="background: #EAF8F2; padding: 9px 12px; border-radius: 10px; border: 1px solid #B8E2C8; line-height: 1.4;"><strong>User:</strong> I went to Han River park with my friend.</div>
         </div>
       </div>
 
-      <div style="width: 65%; padding: 22px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; background: #FFFFFF;">
-        <div style="font-size: 16px; font-weight: 800; color: #3E4A42;">✨ 파트너 피드백 & AI 리포트 검수</div>
+      <div style="width: 65%; padding: 24px 28px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: #FFFFFF;">
+        <div style="font-size: 17px; font-weight: 800; color: #3E4A42;">✨ 파트너 피드백 & AI 리포트 검수</div>
 
         <div>
-          <label style="font-size: 12px; font-weight: 800; color: #3E4A42; display: block; margin-bottom: 4px;">1. 파트너 다정 코멘트</label>
-          <textarea id="popup-partner-comment" rows="2" style="width: 100%; border: 1.5px solid #EDE4D5; border-radius: 8px; padding: 8px 10px; font-size: 12.5px; resize: none;" placeholder="유저에게 따뜻한 한 줄 코멘트를 남겨주세요."></textarea>
-          <div style="display: flex; gap: 6px; margin-top: 5px; flex-wrap: wrap;">
-            <button type="button" onclick="document.getElementById('popup-partner-comment').value=this.innerText;" style="font-size: 11px; background: #FFF9ED; border: 1px solid #F6D365; border-radius: 10px; padding: 3px 8px; cursor: pointer;">오늘 발화량이 정말 훌륭했어요!</button>
-            <button type="button" onclick="document.getElementById('popup-partner-comment').value=this.innerText;" style="font-size: 11px; background: #FFF9ED; border: 1px solid #F6D365; border-radius: 10px; padding: 3px 8px; cursor: pointer;">적극적으로 표현하는 모습이 멋져요!</button>
+          <label style="font-size: 12.5px; font-weight: 800; color: #3E4A42; display: block; margin-bottom: 6px;">1. 파트너 다정 코멘트 (직접 입력 또는 AI 추천 칩 탭)</label>
+          <textarea id="popup-partner-comment" rows="2" style="width: 100%; border: 1.5px solid #EDE4D5; border-radius: 10px; padding: 10px; font-size: 13px; resize: none; outline: none; box-sizing: border-box;" placeholder="유저에게 따뜻한 응원의 한마디를 남겨주세요."></textarea>
+          <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
+            <button type="button" onclick="document.getElementById('popup-partner-comment').value=this.innerText;" style="font-size: 11px; background: #FFF9ED; border: 1px solid #F6D365; border-radius: 12px; padding: 4px 10px; cursor: pointer; color: #3E4A42; font-weight: 600;">오늘 발화량이 정말 훌륭했어요! 👏</button>
+            <button type="button" onclick="document.getElementById('popup-partner-comment').value=this.innerText;" style="font-size: 11px; background: #FFF9ED; border: 1px solid #F6D365; border-radius: 12px; padding: 4px 10px; cursor: pointer; color: #3E4A42; font-weight: 600;">새로운 표현에 적극적인 모습이 멋져요! 🌟</button>
+            <button type="button" onclick="document.getElementById('popup-partner-comment').value=this.innerText;" style="font-size: 11px; background: #FFF9ED; border: 1px solid #F6D365; border-radius: 12px; padding: 4px 10px; cursor: pointer; color: #3E4A42; font-weight: 600;">편안하게 대화 이끌어주셔서 감사합니다! ☕</button>
           </div>
         </div>
 
         <div>
-          <label style="font-size: 12px; font-weight: 800; color: #3E4A42; display: block; margin-bottom: 4px;">2. 응원 이모지 스탬프</label>
-          <div style="display: flex; gap: 8px;">
-            <label style="font-size: 12px; background: #F8FAF9; border: 1px solid #B8E2C8; padding: 5px 10px; border-radius: 8px; cursor: pointer;"><input type="radio" name="stamp_choice" value="coffee" checked> ☕ 따뜻한 수다</label>
-            <label style="font-size: 12px; background: #F8FAF9; border: 1px solid #B8E2C8; padding: 5px 10px; border-radius: 8px; cursor: pointer;"><input type="radio" name="stamp_choice" value="rocket"> 🚀 폭풍 성장</label>
-            <label style="font-size: 12px; background: #F8FAF9; border: 1px solid #B8E2C8; padding: 5px 10px; border-radius: 8px; cursor: pointer;"><input type="radio" name="stamp_choice" value="heart"> 💖 힐링 메이트</label>
-          </div>
-        </div>
-
-        <div style="background: #FDFBF7; border: 1.5px solid #EDE4D5; border-radius: 10px; padding: 10px 12px;">
-          <div style="font-size: 12px; font-weight: 800; color: #4F7460; margin-bottom: 4px;">3. AI 학습 리포트 검수</div>
-          <div style="font-size: 12px; color: #3E4A42; line-height: 1.5;">
-            • 유의어 추천: <input type="text" value="like ➔ prefer, be fond of" style="border: 1px solid #EDE4D5; border-radius: 6px; padding: 2px 6px; font-size: 11.5px; width: 65%;"><br>
-            • 뉘앙스 교정: <input type="text" value="drink coffee ➔ drinking coffee" style="border: 1px solid #EDE4D5; border-radius: 6px; padding: 2px 6px; font-size: 11.5px; width: 65%; margin-top: 3px;">
-          </div>
-        </div>
-
-        <div>
-          <label style="font-size: 12px; font-weight: 800; color: #3E4A42; display: block; margin-bottom: 4px;">4. &lt;From DayO&gt; 인스타 공유 카드 선택</label>
-          <div style="display: flex; gap: 8px;">
-            <label style="flex: 1; border: 1.5px solid #F6D365; background: #FFFDF9; border-radius: 8px; padding: 8px; font-size: 11px; cursor: pointer;">
-              <input type="radio" name="insta_card_choice" value="cafe" checked> <strong>[감성 톤]</strong><br>"Small talk makes a big day ☕"
+          <label style="font-size: 12.5px; font-weight: 800; color: #3E4A42; display: block; margin-bottom: 6px;">2. 유저에게 보낼 응원 스탬프</label>
+          <div style="display: flex; gap: 10px;">
+            <label style="flex: 1; display: flex; align-items: center; gap: 6px; font-size: 12px; background: #F8FAF9; border: 1.5px solid #B8E2C8; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-weight: 700; color: #3E4A42;">
+              <input type="radio" name="popup_stamp" value="coffee" checked> ☕ 따뜻한 수다
             </label>
-            <label style="flex: 1; border: 1.5px solid #EDE4D5; background: #FFF; border-radius: 8px; padding: 8px; font-size: 11px; cursor: pointer;">
-              <input type="radio" name="insta_card_choice" value="humor"> <strong>[위트 톤]</strong><br>"얼죽아의 하루 🥐"
+            <label style="flex: 1; display: flex; align-items: center; gap: 6px; font-size: 12px; background: #F8FAF9; border: 1.5px solid #B8E2C8; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-weight: 700; color: #3E4A42;">
+              <input type="radio" name="popup_stamp" value="rocket"> 🚀 폭풍 성장
+            </label>
+            <label style="flex: 1; display: flex; align-items: center; gap: 6px; font-size: 12px; background: #F8FAF9; border: 1.5px solid #B8E2C8; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-weight: 700; color: #3E4A42;">
+              <input type="radio" name="popup_stamp" value="heart"> 💖 힐링 메이트
             </label>
           </div>
         </div>
 
-        <button type="button" onclick="submitPartnerReportAndLeave()" style="background: #4F7460; color: #FFF; border: none; border-radius: 10px; padding: 12px; font-size: 13.5px; font-weight: 800; cursor: pointer; margin-top: 6px; box-shadow: 0 4px 12px rgba(79, 116, 96, 0.25);">
+        <div style="background: #FDFBF7; border: 1.5px solid #EDE4D5; border-radius: 12px; padding: 12px 14px;">
+          <div style="font-size: 12.5px; font-weight: 800; color: #4F7460; margin-bottom: 8px;">3. AI 학습 리포트 검수 (필요 시 직접 수정)</div>
+          <div style="font-size: 12px; color: #3E4A42; display: flex; flex-direction: column; gap: 6px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-weight: 700; width: 75px;">• 빈출 유의어:</span>
+              <input type="text" value="like ➔ prefer, be fond of" style="flex: 1; border: 1px solid #EDE4D5; border-radius: 6px; padding: 4px 8px; font-size: 12px;">
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span style="font-weight: 700; width: 75px;">• 뉘앙스 교정:</span>
+              <input type="text" value="I am very agree ➔ I totally agree" style="flex: 1; border: 1px solid #EDE4D5; border-radius: 6px; padding: 4px 8px; font-size: 12px;">
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 12.5px; font-weight: 800; color: #3E4A42; display: block; margin-bottom: 6px;">4. &lt;From DayO&gt; 인스타 카드 선택</label>
+          <div style="display: flex; gap: 10px;">
+            <label style="flex: 1; border: 1.5px solid #F6D365; background: #FFFDF9; border-radius: 10px; padding: 10px; font-size: 11.5px; cursor: pointer; display: block;">
+              <input type="radio" name="popup_insta_card" value="cafe" checked> <strong>[감성 톤]</strong><br>
+              <span style="color: #55635A; display: inline-block; margin-top: 2px;">"Small talk makes a big day ☕"</span>
+            </label>
+            <label style="flex: 1; border: 1.5px solid #EDE4D5; background: #FFFFFF; border-radius: 10px; padding: 10px; font-size: 11.5px; cursor: pointer; display: block;">
+              <input type="radio" name="popup_insta_card" value="humor"> <strong>[위트 톤]</strong><br>
+              <span style="color: #55635A; display: inline-block; margin-top: 2px;">"오늘 외국인 앞에서 뇌정지 안 옴! 🥐"</span>
+            </label>
+          </div>
+        </div>
+
+        <button type="button" id="btn-final-partner-submit" onclick="executePartnerPayoutAndExit()" style="background: #4F7460; color: #FFF; border: none; border-radius: 12px; padding: 14px; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 4px; box-shadow: 0 4px 14px rgba(79, 116, 96, 0.28); transition: opacity 0.2s;">
           ✨ 검수 완료 및 6,000P 정산 받기
         </button>
       </div>

@@ -2073,7 +2073,11 @@
         else window.goToView('viewLearnerHome');
       };
       try {
-        var role = String(new URLSearchParams(location.search).get('role') || '').toLowerCase();
+        var params = new URLSearchParams(location.search);
+        var role = String(params.get('role') || params.get('mode') || '').toLowerCase();
+        if (!role) {
+          try { role = String(localStorage.getItem('dayo_current_mode') || '').toLowerCase(); } catch (e) {}
+        }
         if (role === 'partner') enterPartner();
       } catch (e) {}
     })();
