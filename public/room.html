@@ -4572,20 +4572,81 @@
       });
     }
 
-    function renderInstaSentenceOptions(startIndex) {
+    function collectSessionTranscriptRows() {
+      var rows = [];
+      if (Array.isArray(window.sessionTranscript) && window.sessionTranscript.length) {
+        rows = window.sessionTranscript;
+      } else if (window.DayOLive && typeof window.DayOLive.getTranscript === 'function') {
+        try { rows = window.DayOLive.getTranscript() || []; } catch (e) { rows = []; }
+      }
+      if ((!rows || !rows.length) && Array.isArray(window.DayOLastTranscript)) {
+        rows = window.DayOLastTranscript;
+      }
+      if (!rows || !rows.length) {
+        try { rows = JSON.parse(localStorage.getItem('last_session_transcript') || '[]'); } catch (e) { rows = []; }
+      }
+      return Array.isArray(rows) ? rows : [];
+    }
+
+    function extractUserSpokenQuotes() {
+      var rows = collectSessionTranscriptRows();
+      var seen = {};
+      var userQuotes = [];
+      var anyQuotes = [];
+      rows.forEach(function (log) {
+        if (!log) return;
+        var text = String((typeof log === 'string') ? log : (log.text || log.message || '')).trim();
+        if (!text || text.length <= 8) return;
+        var key = text.toLowerCase();
+        if (seen[key]) return;
+        seen[key] = true;
+        var speaker = String((typeof log === 'object' && log.speaker) || '').toLowerCase();
+        var isUser = !speaker || speaker === 'user' || speaker === 'me' || speaker === 'learner';
+        if (isUser) userQuotes.push(text);
+        else anyQuotes.push(text);
+      });
+      return userQuotes.length ? userQuotes : anyQuotes;
+    }
+
+    function buildActiveInstaCards() {
       var templates = window.instaCardTemplates || [];
+      var userQuotes = extractUserSpokenQuotes();
+      var activeCards = [];
+      if (userQuotes.length) {
+        userQuotes.slice(-3).forEach(function (sentence, idx) {
+          var preset = templates[idx % templates.length] || templates[0] || {};
+          activeCards.push({
+            id: 'stt-' + (idx + 1),
+            mood: idx === 0 ? '✨ 오늘의 원픽' : '💬 실전 발화',
+            quote: sentence.replace(/^["“”]+|["“”]+$/g, ''),
+            sub: '내가 직접 말한 베스트 표현',
+            bgImage: preset.bgImage
+          });
+        });
+      }
+      var i = 0;
+      while (activeCards.length < 3 && templates[i]) {
+        activeCards.push(templates[i]);
+        i += 1;
+      }
+      return activeCards;
+    }
+
+    function renderInstaSentenceOptions(startIndex) {
+      var pool = window.activeCardPool || [];
       var container = document.getElementById('card-sentence-options');
-      if (!container || !templates.length) return;
-      window.visibleCardStartIndex = startIndex;
+      if (!container || !pool.length) return;
+      window.visibleCardStartIndex = startIndex || 0;
       var html = '';
-      for (var i = 0; i < 3; i++) {
-        var abs = (startIndex + i) % templates.length;
-        var card = templates[abs];
+      var count = Math.min(3, pool.length);
+      for (var i = 0; i < count; i++) {
+        var abs = (window.visibleCardStartIndex + i) % pool.length;
+        var card = pool[abs];
         var selected = abs === window.currentCardIndex;
         html += '<label style="display: flex; align-items: center; gap: 8px; font-size: 11.5px; background: ' +
           (selected ? '#FFF9ED' : '#FFFFFF') + '; border: 1.5px solid ' +
           (selected ? '#F6D365' : '#EDE4D5') + '; padding: 7px 10px; border-radius: 8px; cursor: pointer;">' +
-          '<input type="radio" name="insta_sentence_select" value="' + card.id + '"' +
+          '<input type="radio" name="insta_sentence_select" value="' + escapeInstaCardText(card.id) + '"' +
           (selected ? ' checked' : '') + ' onchange="selectInstaCard(' + abs + ')">' +
           '<span style="font-weight: 700; color: #3E4A42;">' + escapeInstaCardText(card.quote) + '</span>' +
           '</label>';
@@ -4601,40 +4662,45 @@
       if (!box || !card) return;
       box.style.backgroundImage = "linear-gradient(rgba(0,0,0,0.15), rgba(0,0,0,0.25)), url('" + card.bgImage + "')";
       box.style.backgroundColor = '';
-      if (quoteEl) quoteEl.innerText = '"' + card.quote.replace(/^"|"$/g, '') + '"';
+      if (quoteEl) quoteEl.innerText = '"' + String(card.quote || '').replace(/^["“”]+|["“”]+$/g, '') + '"';
       if (subEl) subEl.innerText = card.sub;
       if (moodEl) moodEl.innerText = card.mood;
     };
 
     window.selectInstaCard = function (index) {
-      var templates = window.instaCardTemplates || [];
-      if (!templates[index]) return;
+      var pool = window.activeCardPool || [];
+      if (!pool[index]) return;
       window.currentCardIndex = index;
-      window.updateCardPreview(templates[index]);
-      var labels = document.querySelectorAll('#card-sentence-options label');
-      labels.forEach(function (lbl, i) {
-        var abs = (window.visibleCardStartIndex + i) % templates.length;
-        var selected = abs === index;
-        lbl.style.background = selected ? '#FFF9ED' : '#FFFFFF';
-        lbl.style.borderColor = selected ? '#F6D365' : '#EDE4D5';
-      });
+      window.updateCardPreview(pool[index]);
+      renderInstaSentenceOptions(window.visibleCardStartIndex || 0);
     };
 
     window.initInstaCardSection = function () {
-      var templates = window.instaCardTemplates || [];
-      if (!templates.length) return;
+      var container = document.getElementById('card-sentence-options');
+      if (!container) return;
+      var activeCards = buildActiveInstaCards();
+      if (!activeCards.length) return;
+      window.activeCardPool = activeCards;
       window.currentCardIndex = 0;
       renderInstaSentenceOptions(0);
-      window.updateCardPreview(templates[0]);
+      window.updateCardPreview(activeCards[0]);
     };
 
     window.regenerateInstaCard = function () {
-      var templates = window.instaCardTemplates || [];
-      if (!templates.length) return;
-      window.currentCardIndex = (window.currentCardIndex + 1) % templates.length;
+      var pool = window.activeCardPool || buildActiveInstaCards();
+      if (!pool.length) return;
+      window.activeCardPool = pool;
+      window.currentCardIndex = (window.currentCardIndex + 1) % pool.length;
       renderInstaSentenceOptions(window.currentCardIndex);
-      window.updateCardPreview(templates[window.currentCardIndex]);
+      window.updateCardPreview(pool[window.currentCardIndex]);
     };
+
+    document.addEventListener('dayo:transcript', function () {
+      var popup = document.getElementById('partner-report-popup');
+      if (popup && getComputedStyle(popup).display !== 'none' && typeof window.initInstaCardSection === 'function') {
+        window.initInstaCardSection();
+      }
+    });
 
     window.openPartnerReportPopup = function () {
       var popup = document.getElementById('partner-report-popup');

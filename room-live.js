@@ -121,6 +121,7 @@
       window.localStorage.setItem('last_session_transcript', JSON.stringify(serialized));
     } catch (e) { /* quota / private mode */ }
     window.DayOLastTranscript = serialized;
+    window.sessionTranscript = serialized.slice();
     return serialized;
   }
 
@@ -138,6 +139,7 @@
       timestamp: new Date()
     };
     sessionTranscript.push(entry);
+    window.sessionTranscript = sessionTranscript.slice();
     backupTranscriptLocal();
     document.dispatchEvent(new CustomEvent('dayo:transcript', { detail: entry }));
     return entry;
@@ -941,6 +943,7 @@
     try {
       sessionStartedAt = new Date().toISOString();
       sessionTranscript = [];
+      window.sessionTranscript = [];
       utteranceSeq = 0;
       backupTranscriptLocal();
       renderHints(demoHints(''));
