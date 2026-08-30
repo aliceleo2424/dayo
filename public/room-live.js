@@ -34,6 +34,10 @@
   var sessionTranscript = [];
   var sessionStartedAt = new Date().toISOString();
   var utteranceSeq = 0;
+  var sttRestartTimer = 0;
+
+  window.sessionTranscript = window.sessionTranscript || [];
+  window.dayoSessionEnded = false;
 
   function env(key) {
     var bag = window.__DAYO_ENV__ || {};
@@ -125,6 +129,58 @@
     return serialized;
   }
 
+  function shouldKeepSttAlive() {
+    return wantListen && micOn && !hungUp && !window.dayoSessionEnded;
+  }
+
+  function scheduleSttRestart(delayMs) {
+    if (!shouldKeepSttAlive()) return;
+    clearTimeout(sttRestartTimer);
+    sttRestartTimer = setTimeout(function () {
+      if (!shouldKeepSttAlive() || !recognition) return;
+      try {
+        recognition.start();
+        sttOn = true;
+        setStatus(t('room.copilotListening'), true);
+      } catch (e) { /* already started */ }
+    }, delayMs || 300);
+  }
+
+  function appendTranscriptRowToViewer(entry) {
+    if (!entry || !entry.text) return;
+    var viewer = document.getElementById('popup-transcript-list') ||
+      document.getElementById('partner-transcript-viewer');
+    if (!viewer) return;
+    var speaker = String(entry.speaker || 'user').toLowerCase();
+    var isUser = speaker !== 'partner';
+    var row = document.createElement('div');
+    row.style.cssText = isUser
+      ? 'background: #EAF8F2; padding: 9px 12px; border-radius: 10px; border: 1px solid #B8E2C8; line-height: 1.4; font-size: 12px;'
+      : 'background: #FFF; padding: 9px 12px; border-radius: 10px; border: 1px solid #E5E7EB; line-height: 1.4; font-size: 12px;';
+    row.innerHTML = '<strong>' + (isUser ? 'User' : 'Partner') + ':</strong> ' + escapeHtml(entry.text);
+    viewer.appendChild(row);
+    viewer.scrollTop = viewer.scrollHeight;
+  }
+
+  function bindMobileSttBootstrap() {
+    if (window.__dayoSttBootstrapped) return;
+    window.__dayoSttBootstrapped = true;
+    var bootStart = function () {
+      if (window.dayoSessionEnded) return;
+      wantListen = true;
+      if (!recognition) startSpeech();
+      else if (micOn) resumeSpeech();
+    };
+    var startSTT = function () {
+      bootStart();
+      console.log('🚀 STT 엔진 가동 완료');
+      document.removeEventListener('click', startSTT, true);
+      document.removeEventListener('touchstart', startSTT, true);
+    };
+    document.addEventListener('click', startSTT, { once: true, capture: true });
+    document.addEventListener('touchstart', startSTT, { once: true, capture: true, passive: true });
+  }
+
   function pushTranscript(text, speaker) {
     var cleaned = String(text || '').trim();
     if (!cleaned) return null;
@@ -140,6 +196,8 @@
     };
     sessionTranscript.push(entry);
     window.sessionTranscript = sessionTranscript.slice();
+    console.log('🎤 [STT 인식 성공]:', cleaned);
+    appendTranscriptRowToViewer(entry);
     backupTranscriptLocal();
     document.dispatchEvent(new CustomEvent('dayo:transcript', { detail: entry }));
     return entry;
@@ -745,44 +803,53 @@
   function startSpeech() {
     var Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!Ctor) {
+      console.warn('이 브라우저는 Web Speech API를 지원하지 않습니다 (사파리/크롬 권장).');
       setStatus(t('room.copilotListening'), false);
+      return;
+    }
+
+    if (recognition) {
+      window.dayoSTT = recognition;
+      if (micOn && shouldKeepSttAlive()) resumeSpeech();
       return;
     }
 
     try {
       recognition = new Ctor();
+      window.dayoSTT = recognition;
       recognition.continuous = true;
-      recognition.interimResults = true;
+      recognition.interimResults = false;
       recognition.lang = 'en-US';
       recognition.maxAlternatives = 1;
 
       recognition.onresult = function (event) {
-        var finalText = '';
         for (var i = event.resultIndex; i < event.results.length; i++) {
+          if (!event.results[i].isFinal) continue;
           var chunk = event.results[i][0] && event.results[i][0].transcript;
-          if (event.results[i].isFinal && chunk) finalText += chunk + ' ';
-        }
-        finalText = finalText.trim();
-        if (finalText) {
-          pushTranscript(finalText, 'user');
-          scheduleCopilot(finalText);
+          var finalText = String(chunk || '').trim();
+          if (finalText) {
+            pushTranscript(finalText, 'user');
+            scheduleCopilot(finalText);
+          }
         }
       };
 
       recognition.onerror = function (event) {
-        if (event && (event.error === 'not-allowed' || event.error === 'service-not-allowed')) {
+        var err = event && event.error;
+        console.warn('STT 일시 오류 (재시작 시도):', err);
+        if (err === 'not-allowed' || err === 'service-not-allowed') {
           sttOn = false;
           setStatus(t('room.copilotListening'), false);
+          return;
         }
+        if (shouldKeepSttAlive()) scheduleSttRestart(500);
       };
 
       recognition.onend = function () {
-        if (wantListen && micOn && !hungUp && recognition) {
-          try { recognition.start(); } catch (e) { /* already started */ }
-        }
+        if (shouldKeepSttAlive()) scheduleSttRestart(120);
       };
 
-      if (micOn) {
+      if (micOn && shouldKeepSttAlive()) {
         recognition.start();
         sttOn = true;
         setStatus(t('room.copilotListening'), true);
@@ -796,6 +863,7 @@
   function stopSpeech() {
     wantListen = false;
     sttOn = false;
+    clearTimeout(sttRestartTimer);
     if (!recognition) return;
     try { recognition.onend = null; recognition.stop(); } catch (e) { /* ignore */ }
   }
@@ -898,7 +966,9 @@
 
   function hangUp() {
     hungUp = true;
+    window.dayoSessionEnded = true;
     wantListen = false;
+    clearTimeout(sttRestartTimer);
     stopSpeech();
     destroyDaily();
     stopShareDemo();
@@ -941,11 +1011,13 @@
 
   function start() {
     try {
+      window.dayoSessionEnded = false;
       sessionStartedAt = new Date().toISOString();
       sessionTranscript = [];
       window.sessionTranscript = [];
       utteranceSeq = 0;
       backupTranscriptLocal();
+      bindMobileSttBootstrap();
       renderHints(demoHints(''));
       setStatus(t('room.copilotListening'), false);
       bindCopilotClicks();
@@ -985,6 +1057,11 @@
     toggleCam: toggleCam,
     toggleShare: toggleShare,
     hangUp: hangUp,
+    startSpeech: function () {
+      wantListen = true;
+      startSpeech();
+      if (micOn) resumeSpeech();
+    },
     getTranscript: function () { return serializeTranscript(sessionTranscript); },
     suggestWords: suggestWords,
     suggestSentences: suggestSentences,

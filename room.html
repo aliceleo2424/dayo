@@ -3520,7 +3520,9 @@
     micBtn.addEventListener('click', () => {
       const api = liveApi();
       if (!api || typeof api.toggleMic !== 'function') return;
-      Promise.resolve(api.toggleMic()).finally(renderMicLabel);
+      Promise.resolve(api.toggleMic()).then(function (on) {
+        if (on && typeof api.startSpeech === 'function') api.startSpeech();
+      }).finally(renderMicLabel);
     });
 
     camBtn.onclick = window.toggleLocalCamera;
@@ -3920,6 +3922,7 @@
     function handleSessionEndRouting(result) {
       if (window.__dayoSessionEndRouted) return;
       window.__dayoSessionEndRouted = true;
+      window.dayoSessionEnded = true;
 
       const isPartner = typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode();
 
@@ -4965,10 +4968,36 @@
       window.updateCardPreview(pool[window.currentCardIndex]);
     };
 
+    window.hydratePopupTranscriptList = function () {
+      var viewer = document.getElementById('popup-transcript-list') ||
+        document.getElementById('partner-transcript-viewer');
+      if (!viewer) return;
+      var rows = collectSessionTranscriptRows();
+      viewer.innerHTML = '';
+      if (!rows.length) {
+        viewer.innerHTML = '<div style="font-size: 12px; color: #88928B; padding: 8px 4px; line-height: 1.5;">아직 인식된 발화가 없습니다.<br>마이크를 켜고 영어로 말해 보세요.</div>';
+        return;
+      }
+      rows.forEach(function (log) {
+        var text = String((typeof log === 'string') ? log : (log.text || log.message || '')).trim();
+        if (!text) return;
+        var speaker = String((typeof log === 'object' && log.speaker) || 'user').toLowerCase();
+        var isUser = speaker !== 'partner';
+        var row = document.createElement('div');
+        row.style.cssText = isUser
+          ? 'background: #EAF8F2; padding: 9px 12px; border-radius: 10px; border: 1px solid #B8E2C8; line-height: 1.4;'
+          : 'background: #FFF; padding: 9px 12px; border-radius: 10px; border: 1px solid #E5E7EB; line-height: 1.4;';
+        row.innerHTML = '<strong>' + (isUser ? 'User' : 'Partner') + ':</strong> ' + escapeInstaCardText(text);
+        viewer.appendChild(row);
+      });
+      viewer.scrollTop = viewer.scrollHeight;
+    };
+
     document.addEventListener('dayo:transcript', function () {
       var popup = document.getElementById('partner-report-popup');
-      if (popup && getComputedStyle(popup).display !== 'none' && typeof window.initInstaCardSection === 'function') {
-        window.initInstaCardSection();
+      if (popup && getComputedStyle(popup).display !== 'none') {
+        if (typeof window.hydratePopupTranscriptList === 'function') window.hydratePopupTranscriptList();
+        if (typeof window.initInstaCardSection === 'function') window.initInstaCardSection();
       }
     });
 
@@ -4978,10 +5007,12 @@
         document.body.appendChild(popup);
         popup.style.setProperty('display', 'flex', 'important');
       }
+      if (typeof window.hydratePopupTranscriptList === 'function') window.hydratePopupTranscriptList();
       if (typeof window.initInstaCardSection === 'function') window.initInstaCardSection();
     };
 
     window.executePartnerPayoutAndExit = function () {
+      window.dayoSessionEnded = true;
       console.log('✨ 파트너 리포트 검수 완료 트리거');
       alert('🎉 세션 리포트 전송 완료! +6,000P가 정산 지갑에 적립되었습니다.');
       try { localStorage.setItem('dayo_current_mode', 'PARTNER'); } catch (e) {}
@@ -5205,12 +5236,7 @@
         <div style="font-weight: 800; font-size: 13.5px; color: #4F7460; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
           <span>💬</span> 25분 대화 스크롤 로그
         </div>
-        <div id="popup-transcript-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 9px; font-size: 12px; padding-right: 6px;">
-          <div style="background: #FFF; padding: 9px 12px; border-radius: 10px; border: 1px solid #E5E7EB; line-height: 1.4;"><strong>Partner:</strong> What did you do this weekend?</div>
-          <div style="background: #EAF8F2; padding: 9px 12px; border-radius: 10px; border: 1px solid #B8E2C8; line-height: 1.4;"><strong>User:</strong> I like walking in the park and drink coffee.</div>
-          <div style="background: #FFF; padding: 9px 12px; border-radius: 10px; border: 1px solid #E5E7EB; line-height: 1.4;"><strong>Partner:</strong> Sounds relaxing! Which park did you go to?</div>
-          <div style="background: #EAF8F2; padding: 9px 12px; border-radius: 10px; border: 1px solid #B8E2C8; line-height: 1.4;"><strong>User:</strong> I went to Han River park with my friend.</div>
-        </div>
+        <div id="popup-transcript-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 9px; font-size: 12px; padding-right: 6px;"></div>
       </div>
 
       <div style="width: 65%; padding: 24px 28px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: #FFFFFF;">
