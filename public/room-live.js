@@ -635,7 +635,15 @@
     }
     return navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then(function (stream) {
       localStream = stream;
-      if (nodes.selfVideo) nodes.selfVideo.srcObject = stream;
+      if (nodes.selfVideo) {
+        nodes.selfVideo.srcObject = stream;
+        nodes.selfVideo.muted = true;
+        var playPromise = nodes.selfVideo.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+          playPromise.catch(function () { /* autoplay policy */ });
+        }
+      }
+      if (nodes.selfPip) nodes.selfPip.classList.add('has-stream');
       applyLocalTracks();
     }).catch(function () {
       /* camera guidance is handled by the single #dayo-final-single-toast in room.html */

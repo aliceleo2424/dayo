@@ -792,9 +792,13 @@
       background: #1E1A19;
     }
 
-    .video-stage.is-daily .tutor-video,
-    .video-stage.is-daily .self-pip {
+    .video-stage.is-daily .tutor-video {
       display: none;
+    }
+
+    .video-stage.is-daily .self-pip {
+      display: block;
+      z-index: 6;
     }
 
     .share-stage {
@@ -932,9 +936,13 @@
       object-fit: cover;
       display: none;
       transform: scaleX(-1);
+      position: absolute;
+      inset: 0;
+      z-index: 2;
     }
 
-    .self-pip.has-stream video { display: block; }
+    .self-pip.has-stream video,
+    .self-pip video.has-stream { display: block; }
     .self-pip.has-stream .self-placeholder { display: none; }
 
     .self-placeholder {
@@ -4739,6 +4747,61 @@
         window.handleSessionEndRouting();
       }
     };
+
+    async function initLocalCameraStream() {
+      if (window.__localCamBound) return;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 640 }, height: { ideal: 480 } },
+          audio: true
+        });
+
+        let pipContainer = document.getElementById('selfPip')
+          || document.querySelector('.self-pip')
+          || document.querySelector('.pip-container')
+          || document.querySelector('[class*="pip"]')
+          || document.getElementById('my-video-container');
+
+        let localVideo = document.getElementById('selfVideo') || document.getElementById('local-video-preview');
+        if (!localVideo) {
+          localVideo = document.createElement('video');
+          localVideo.id = 'local-video-preview';
+          if (pipContainer) pipContainer.appendChild(localVideo);
+        }
+
+        localVideo.autoplay = true;
+        localVideo.playsInline = true;
+        localVideo.muted = true;
+        localVideo.setAttribute('playsinline', '');
+        localVideo.style.cssText = 'width: 100%; height: 100%; object-fit: cover; border-radius: 12px; position: absolute; inset: 0; z-index: 2; display: block;';
+
+        if (pipContainer) {
+          pipContainer.style.position = 'relative';
+          pipContainer.classList.add('has-stream');
+        }
+
+        localVideo.srcObject = stream;
+        localVideo.classList.add('has-stream');
+        await localVideo.play().catch(function () { /* autoplay policy */ });
+
+        const pipAvatar = document.querySelector('.self-placeholder') || document.querySelector('.pip-avatar');
+        if (pipAvatar) pipAvatar.style.display = 'none';
+
+        window.__localCamBound = true;
+        window.__localCamStream = stream;
+        console.log('✅ 로컬 웹캠 스트림 바인딩 성공');
+      } catch (err) {
+        console.error('❌ 카메라 스트림 바인딩 실패:', err);
+      }
+    }
+
+    window.initLocalCameraStream = initLocalCameraStream;
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initLocalCameraStream);
+    } else {
+      initLocalCameraStream();
+    }
 
 (function renderSingleCameraToast() {
   if (window.__singleToastDone) return;
