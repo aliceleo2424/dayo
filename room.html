@@ -4799,12 +4799,120 @@
   <script src="mobile-nav.js"></script>
   <script src="mode-switch.js"></script>
   <script>
+    window.instaCardTemplates = [
+      {
+        id: 1,
+        mood: '☕ 감성 톤',
+        quote: 'Small talk makes a big day ☕',
+        sub: '오늘 나눈 따뜻한 일상 영어',
+        bg: 'linear-gradient(135deg, #F6D365 0%, #FDA085 100%)',
+        bgImage: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=300&q=80'
+      },
+      {
+        id: 2,
+        mood: '🥐 위트 톤',
+        quote: '오늘 외국인 앞에서 뇌정지 안 옴! 🎉',
+        sub: '말문 트임 미션 완벽 클리어',
+        bg: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
+        bgImage: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&q=80'
+      },
+      {
+        id: 3,
+        mood: '🌿 힐링 톤',
+        quote: 'Taking a walk clears my mind ✨',
+        sub: '자연스럽게 꺼낸 오늘의 원픽 표현',
+        bg: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+        bgImage: 'https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=300&q=80'
+      },
+      {
+        id: 4,
+        mood: '🚀 성장 톤',
+        quote: 'Step by step, my English grows! 🌟',
+        sub: '자신감이 2배로 상승한 25분',
+        bg: 'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)',
+        bgImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=300&q=80'
+      }
+    ];
+    window.currentCardIndex = 0;
+    window.visibleCardStartIndex = 0;
+
+    function escapeInstaCardText(str) {
+      return String(str == null ? '' : str).replace(/[&<>"']/g, function (c) {
+        return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+      });
+    }
+
+    function renderInstaSentenceOptions(startIndex) {
+      var templates = window.instaCardTemplates || [];
+      var container = document.getElementById('card-sentence-options');
+      if (!container || !templates.length) return;
+      window.visibleCardStartIndex = startIndex;
+      var html = '';
+      for (var i = 0; i < 3; i++) {
+        var abs = (startIndex + i) % templates.length;
+        var card = templates[abs];
+        var selected = abs === window.currentCardIndex;
+        html += '<label style="display: flex; align-items: center; gap: 8px; font-size: 11.5px; background: ' +
+          (selected ? '#FFF9ED' : '#FFFFFF') + '; border: 1.5px solid ' +
+          (selected ? '#F6D365' : '#EDE4D5') + '; padding: 7px 10px; border-radius: 8px; cursor: pointer;">' +
+          '<input type="radio" name="insta_sentence_select" value="' + card.id + '"' +
+          (selected ? ' checked' : '') + ' onchange="selectInstaCard(' + abs + ')">' +
+          '<span style="font-weight: 700; color: #3E4A42;">' + escapeInstaCardText(card.quote) + '</span>' +
+          '</label>';
+      }
+      container.innerHTML = html;
+    }
+
+    window.updateCardPreview = function (card) {
+      var box = document.getElementById('insta-card-preview-box');
+      var quoteEl = document.getElementById('preview-card-quote');
+      var subEl = document.getElementById('preview-card-sub');
+      var moodEl = document.getElementById('preview-card-mood-tag');
+      if (!box || !card) return;
+      box.style.backgroundImage = "linear-gradient(rgba(0,0,0,0.15), rgba(0,0,0,0.25)), url('" + card.bgImage + "')";
+      box.style.backgroundColor = '';
+      if (quoteEl) quoteEl.innerText = '"' + card.quote.replace(/^"|"$/g, '') + '"';
+      if (subEl) subEl.innerText = card.sub;
+      if (moodEl) moodEl.innerText = card.mood;
+    };
+
+    window.selectInstaCard = function (index) {
+      var templates = window.instaCardTemplates || [];
+      if (!templates[index]) return;
+      window.currentCardIndex = index;
+      window.updateCardPreview(templates[index]);
+      var labels = document.querySelectorAll('#card-sentence-options label');
+      labels.forEach(function (lbl, i) {
+        var abs = (window.visibleCardStartIndex + i) % templates.length;
+        var selected = abs === index;
+        lbl.style.background = selected ? '#FFF9ED' : '#FFFFFF';
+        lbl.style.borderColor = selected ? '#F6D365' : '#EDE4D5';
+      });
+    };
+
+    window.initInstaCardSection = function () {
+      var templates = window.instaCardTemplates || [];
+      if (!templates.length) return;
+      window.currentCardIndex = 0;
+      renderInstaSentenceOptions(0);
+      window.updateCardPreview(templates[0]);
+    };
+
+    window.regenerateInstaCard = function () {
+      var templates = window.instaCardTemplates || [];
+      if (!templates.length) return;
+      window.currentCardIndex = (window.currentCardIndex + 1) % templates.length;
+      renderInstaSentenceOptions(window.currentCardIndex);
+      window.updateCardPreview(templates[window.currentCardIndex]);
+    };
+
     window.openPartnerReportPopup = function () {
       var popup = document.getElementById('partner-report-popup');
       if (popup) {
         document.body.appendChild(popup);
         popup.style.setProperty('display', 'flex', 'important');
       }
+      if (typeof window.initInstaCardSection === 'function') window.initInstaCardSection();
     };
 
     window.executePartnerPayoutAndExit = function () {
@@ -5081,17 +5189,33 @@
           </div>
         </div>
 
-        <div>
-          <label style="font-size: 12.5px; font-weight: 800; color: #3E4A42; display: block; margin-bottom: 6px;">4. &lt;From DayO&gt; 인스타 카드 선택</label>
-          <div style="display: flex; gap: 10px;">
-            <label style="flex: 1; border: 1.5px solid #F6D365; background: #FFFDF9; border-radius: 10px; padding: 10px; font-size: 11.5px; cursor: pointer; display: block;">
-              <input type="radio" name="popup_insta_card" value="cafe" checked> <strong>[감성 톤]</strong><br>
-              <span style="color: #55635A; display: inline-block; margin-top: 2px;">"Small talk makes a big day ☕"</span>
-            </label>
-            <label style="flex: 1; border: 1.5px solid #EDE4D5; background: #FFFFFF; border-radius: 10px; padding: 10px; font-size: 11.5px; cursor: pointer; display: block;">
-              <input type="radio" name="popup_insta_card" value="humor"> <strong>[위트 톤]</strong><br>
-              <span style="color: #55635A; display: inline-block; margin-top: 2px;">"오늘 외국인 앞에서 뇌정지 안 옴! 🥐"</span>
-            </label>
+        <div style="background: #FAFBF9; border: 1.5px solid #EDE4D5; border-radius: 14px; padding: 14px 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <label style="font-size: 12.5px; font-weight: 800; color: #3E4A42;">4. &lt;From DayO&gt; 인스타 카드 선택 & 문장 매칭</label>
+            <button type="button" onclick="regenerateInstaCard()" style="background: #FFFFFF; border: 1px solid #9AB89E; color: #4F7460; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 14px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+              🔄 다른 카드 재생성
+            </button>
+          </div>
+
+          <div style="display: flex; gap: 14px; align-items: stretch;">
+            <div style="flex: 1.2; display: flex; flex-direction: column; gap: 8px;">
+              <div style="font-size: 11px; color: #55635A; font-weight: 600;">대화 속 베스트 문장 선택:</div>
+              <div id="card-sentence-options" style="display: flex; flex-direction: column; gap: 6px;"></div>
+            </div>
+
+            <div style="flex: 0.8; display: flex; flex-direction: column; align-items: center;">
+              <div id="insta-card-preview-box" style="width: 140px; height: 180px; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 8px 18px rgba(0,0,0,0.12); border: 1px solid rgba(0,0,0,0.08); display: flex; flex-direction: column; justify-content: space-between; padding: 12px; box-sizing: border-box; background-size: cover; background-position: center; transition: all 0.3s ease;">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 9px; font-weight: 800; color: #FFFFFF; background: rgba(0,0,0,0.35); padding: 2px 6px; border-radius: 8px; backdrop-filter: blur(4px);">From DayO</span>
+                  <span id="preview-card-mood-tag" style="font-size: 9px; font-weight: 700; color: #FFF; text-shadow: 0 1px 2px rgba(0,0,0,0.5);">☕ 감성</span>
+                </div>
+                <div style="background: rgba(255,255,255,0.92); border-radius: 8px; padding: 8px; text-align: center; backdrop-filter: blur(6px); box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                  <div id="preview-card-quote" style="font-size: 10.5px; font-weight: 800; color: #3E4A42; line-height: 1.35; word-break: keep-all;">"Small talk makes a big day ☕"</div>
+                  <div id="preview-card-sub" style="font-size: 8.5px; color: #7B8780; margin-top: 3px;">DayO 1:1 Live Session</div>
+                </div>
+              </div>
+              <span style="font-size: 10px; color: #88928B; margin-top: 6px;">유저 마이페이지에 자동 발행</span>
+            </div>
           </div>
         </div>
 
