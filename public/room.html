@@ -199,7 +199,7 @@
       display: none !important;
     }
 
-    body.theme-partner .copilot-learner-only {
+    body.theme-learner #copilotBar {
       display: none !important;
     }
 
@@ -2609,18 +2609,6 @@
         </div>
 
         <section class="copilot-bar" id="copilotBar" aria-live="polite">
-          <div class="copilot-learner-only">
-            <div class="copilot-bar__head">
-              <span class="copilot-bar__badge" data-i18n="room.copilotBadge">✨ AI 코파일럿</span>
-              <span class="copilot-bar__status" id="copilotStatus">듣고 있어요</span>
-            </div>
-            <p class="copilot-bar__label" data-i18n="room.copilotPhrasesLabel">지금 말하기 좋은 추천 영어 표현</p>
-            <div class="copilot-phrases" id="copilotPhrases"></div>
-            <p class="copilot-grammar" id="copilotGrammar">
-              <strong data-i18n="room.copilotGrammarLabel">문법 교정 힌트</strong>
-              <span id="copilotGrammarText"></span>
-            </p>
-          </div>
           <div class="copilot-partner-only">
             <div id="partner-control-bar">
               <button type="button" id="btn-partner-ask" onclick="generatePartnerTopicHint('question')" style="background: #B8E2C8; color: #247552; border: 1.5px solid #247552; font-weight: 800; padding: 10px 16px; border-radius: 12px; cursor: pointer;">
@@ -3306,174 +3294,136 @@
       });
     });
 
-    /* Word Help — Gemini copilot from recent transcript */
-    const wordHelpBtn = document.getElementById('wordHelpBtn');
-    const wordCards = document.getElementById('wordCards');
-    const wordLoading = document.getElementById('wordLoading');
-    let wordHelpBusy = false;
+    /* Word / Sentence Help — on-demand popup from sessionTranscript */
+    const defaultWordHints = [
+      { word: 'actually', meaning: '사실은, 실제로는' },
+      { word: 'comfortable', meaning: '편안한, 아늑한' },
+      { word: 'recommend', meaning: '추천하다' }
+    ];
+    const defaultSentenceHints = [
+      { text: 'Could you tell me more about that?', meaning: '그거에 대해 좀 더 말씀해 주실래요?' },
+      { text: 'I totally agree with you.', meaning: '완전 공감해요!' },
+      { text: 'How do you usually spend your weekend?', meaning: '주말에는 보통 뭐 하세요?' }
+    ];
 
-    function escapeWord(str) {
+    function escapeHelpHtml(str) {
       return String(str == null ? '' : str)
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
-    function setWordHelpBusy(on) {
-      if (!wordHelpBtn) return;
-      wordHelpBusy = !!on;
-      wordHelpBtn.classList.toggle('is-busy', wordHelpBusy);
-      wordHelpBtn.disabled = wordHelpBusy;
-      wordHelpBtn.setAttribute('aria-busy', String(wordHelpBusy));
-      if (wordHelpBusy) {
-        wordHelpBtn.textContent = t('room.wordHelpLoading');
-      } else {
-        wordHelpBtn.textContent = t('room.wordHelp');
+    function getHelpTranscriptText() {
+      var rows = [];
+      if (Array.isArray(window.sessionTranscript) && window.sessionTranscript.length) {
+        rows = window.sessionTranscript;
+      } else if (window.DayOLive && typeof window.DayOLive.getTranscript === 'function') {
+        try { rows = window.DayOLive.getTranscript() || []; } catch (e) { rows = []; }
       }
-      if (wordLoading) wordLoading.classList.toggle('is-on', wordHelpBusy);
+      if (!rows.length && Array.isArray(window.DayOLastTranscript)) rows = window.DayOLastTranscript;
+      return rows.map(function (row) {
+        return String((row && row.text) || row || '').trim();
+      }).filter(Boolean).join(' ').toLowerCase();
     }
 
-    function renderWordCards(words) {
-      const list = Array.isArray(words) ? words.slice(0, 3) : [];
-      wordCards.innerHTML = list.map(function (item, i) {
-        const word = escapeWord(item.word || item.en || '');
-        const meaning = escapeWord(item.meaning || item.ko || '');
-        return '' +
-          '<button class="word-card" type="button" data-word="' + word + '">' +
-            '<div class="word-card-num">' + (i + 1) + '</div>' +
-            '<div class="word-card-text">' + word + '</div>' +
-            (meaning ? '<div class="word-card-meaning">' + meaning + '</div>' : '') +
-            '<div class="word-card-hint">탭하면 복사돼요</div>' +
-          '</button>';
+    function buildWordHints() {
+      var context = getHelpTranscriptText();
+      if (/cafe|coffee|latte|americano|커피|카페/.test(context)) {
+        return [
+          { word: 'atmosphere', meaning: '카페 분위기' },
+          { word: 'beverage', meaning: '음료 메뉴' },
+          { word: 'favorite', meaning: '가장 좋아하는' }
+        ];
+      }
+      if (/walk|park|weekend|산책|공원/.test(context)) {
+        return [
+          { word: 'refreshing', meaning: '상쾌한' },
+          { word: 'scenery', meaning: '풍경' },
+          { word: 'relaxing', meaning: '편안한, 여유로운' }
+        ];
+      }
+      return defaultWordHints.slice();
+    }
+
+    function buildSentenceHints() {
+      var context = getHelpTranscriptText();
+      if (/cafe|coffee|latte|americano|커피|카페/.test(context)) {
+        return [
+          { text: 'Can I get a hot Americano, please?', meaning: '따뜻한 아메리카노 주세요.' },
+          { text: 'What do you usually get here?', meaning: '여기서 보통 뭐 시키세요?' },
+          { text: 'This café has such a cozy vibe.', meaning: '이 카페 분위기 정말 아늑하네요.' }
+        ];
+      }
+      if (/walk|park|weekend|산책|공원/.test(context)) {
+        return [
+          { text: 'I like walking in the park on weekends.', meaning: '주말에 공원 산책하는 걸 좋아해요.' },
+          { text: 'The weather was perfect for a walk.', meaning: '산책하기 딱 좋은 날씨였어요.' },
+          { text: 'Do you have a favorite spot nearby?', meaning: '근처에 자주 가는 장소 있어요?' }
+        ];
+      }
+      return defaultSentenceHints.slice();
+    }
+
+    window.closeHelpModal = function () {
+      var modal = document.getElementById('dayo-help-hint-modal');
+      if (modal) modal.style.display = 'none';
+    };
+
+    window.copyHintText = function (text) {
+      var value = String(text || '');
+      if (!value) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(value).catch(function () {});
+      }
+      alert('📋 "' + value + '" 복사 완료!');
+      window.closeHelpModal();
+    };
+
+    window.openWordHelp = function () {
+      var modal = document.getElementById('dayo-help-hint-modal');
+      var title = document.getElementById('help-modal-title');
+      var content = document.getElementById('help-modal-content');
+      if (!modal || !content) return;
+      if (title) title.innerText = '💡 추천 단어 힌트 (막힐 때 써보세요)';
+      var hints = buildWordHints();
+      content.innerHTML = hints.map(function (item) {
+        return '<div data-copy="' + escapeHelpHtml(item.word) + '" style="background: #FFFDF9; border: 1px solid #EDE4D5; border-radius: 8px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">' +
+          '<strong style="color: #3E4A42; font-size: 12.5px;">' + escapeHelpHtml(item.word) + '</strong>' +
+          '<span style="color: #6E7A72; font-size: 11.5px;">' + escapeHelpHtml(item.meaning) + '</span>' +
+          '</div>';
       }).join('');
-      wordCards.hidden = list.length === 0;
-      wordCards.querySelectorAll('.word-card').forEach(function (card) {
-        card.addEventListener('click', function () {
-          const phrase = card.getAttribute('data-word') || '';
-          if (!phrase) return;
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(phrase).catch(function () {});
-          }
-          showToast(t('room.wordCopiedFormat', { phrase: phrase }));
-          closeSheet('word');
-        });
-      });
-    }
+      modal.style.display = 'block';
+    };
 
-    function fallbackWordHelp() {
-      return [
-        { word: 'actually', meaning: '사실은' },
-        { word: 'maybe', meaning: '아마도' },
-        { word: 'really', meaning: '정말' }
-      ];
-    }
-
-    wordHelpBtn.addEventListener('click', function () {
-      if (wordHelpBusy) return;
-      setWordHelpBusy(true);
-      wordCards.innerHTML = '';
-      openSheet('word');
-
-      var api = window.DayOLive;
-      var request = (api && typeof api.suggestWords === 'function')
-        ? api.suggestWords()
-        : Promise.resolve({ words: fallbackWordHelp(), fallback: true });
-
-      Promise.resolve(request).then(function (result) {
-        var words = result && Array.isArray(result.words) && result.words.length
-          ? result.words
-          : fallbackWordHelp();
-        renderWordCards(words);
-      }).catch(function () {
-        renderWordCards(fallbackWordHelp());
-      }).then(function () {
-        setWordHelpBusy(false);
-      });
-    });
-
-    /* Sentence Help — Gemini copilot from recent transcript */
-    const sentenceHelpBtn = document.getElementById('sentenceHelpBtn');
-    const sentenceCards = document.getElementById('sentenceCards');
-    const sentenceLoading = document.getElementById('sentenceLoading');
-    let sentenceHelpBusy = false;
-
-    function fallbackSentenceHelp() {
-      return [
-        {
-          sentence: 'That sounds really interesting! Tell me more about it.',
-          translation: '정말 흥미롭네요! 더 자세히 알려주세요.'
-        },
-        {
-          sentence: 'I see what you mean. In my opinion...',
-          translation: '무슨 말씀이신지 알겠어요. 제 생각에는...'
-        },
-        {
-          sentence: 'Could you explain that again in a simpler way?',
-          translation: '그 부분을 조금 더 쉽게 다시 설명해주실 수 있나요?'
-        }
-      ];
-    }
-
-    function setSentenceHelpBusy(on) {
-      if (!sentenceHelpBtn) return;
-      sentenceHelpBusy = !!on;
-      sentenceHelpBtn.classList.toggle('is-busy', sentenceHelpBusy);
-      sentenceHelpBtn.disabled = sentenceHelpBusy;
-      sentenceHelpBtn.setAttribute('aria-busy', String(sentenceHelpBusy));
-      sentenceHelpBtn.textContent = sentenceHelpBusy ? t('room.sentenceHelpLoading') : t('room.sentenceHelp');
-      if (sentenceLoading) sentenceLoading.classList.toggle('is-on', sentenceHelpBusy);
-    }
-
-    function renderSentenceCards(sentences) {
-      const list = Array.isArray(sentences) ? sentences.slice(0, 3) : [];
-      sentenceCards.innerHTML = list.map(function (item, i) {
-        const sentence = escapeWord(item.sentence || item.en || '');
-        const translation = escapeWord(item.translation || item.meaning || item.ko || '');
-        return '' +
-          '<button class="word-card" type="button" data-sentence="' + sentence + '">' +
-            '<div class="word-card-num">' + (i + 1) + '</div>' +
-            '<div class="word-card-text word-card-text--sentence">' + sentence + '</div>' +
-            (translation ? '<div class="word-card-meaning">' + translation + '</div>' : '') +
-            '<div class="word-card-hint">탭하면 문장이 복사돼요</div>' +
-          '</button>';
+    window.openSentenceHelp = function () {
+      var modal = document.getElementById('dayo-help-hint-modal');
+      var title = document.getElementById('help-modal-title');
+      var content = document.getElementById('help-modal-content');
+      if (!modal || !content) return;
+      if (title) title.innerText = '📝 추천 문장 힌트 (티키타카 이어가기)';
+      var hints = buildSentenceHints();
+      content.innerHTML = hints.map(function (item) {
+        return '<div data-copy="' + escapeHelpHtml(item.text) + '" style="background: #F8FAF9; border: 1px solid #B8E2C8; border-radius: 8px; padding: 8px 10px; cursor: pointer;">' +
+          '<div style="color: #3E4A42; font-size: 12px; font-weight: 700; line-height: 1.3;">"' + escapeHelpHtml(item.text) + '"</div>' +
+          '<div style="color: #55635A; font-size: 10.5px; margin-top: 2px;">' + escapeHelpHtml(item.meaning) + '</div>' +
+          '</div>';
       }).join('');
-      sentenceCards.hidden = list.length === 0;
-      sentenceCards.querySelectorAll('.word-card').forEach(function (card) {
-        card.addEventListener('click', function () {
-          const phrase = card.getAttribute('data-sentence') || '';
-          if (!phrase) return;
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(phrase).catch(function () {});
-          }
-          showToast(t('room.wordCopiedFormat', { phrase: phrase }));
-          closeSheet('sentence');
-        });
+      modal.style.display = 'block';
+    };
+
+    var wordHelpBtn = document.getElementById('wordHelpBtn');
+    var sentenceHelpBtn = document.getElementById('sentenceHelpBtn');
+    var helpModalContent = document.getElementById('help-modal-content');
+    if (helpModalContent) {
+      helpModalContent.addEventListener('click', function (e) {
+        var row = e.target.closest('[data-copy]');
+        if (row) window.copyHintText(row.getAttribute('data-copy'));
       });
     }
-
-    sentenceHelpBtn.addEventListener('click', function () {
-      if (sentenceHelpBusy) return;
-      setSentenceHelpBusy(true);
-      sentenceCards.innerHTML = '';
-      openSheet('sentence');
-
-      var api = window.DayOLive;
-      var request = (api && typeof api.suggestSentences === 'function')
-        ? api.suggestSentences()
-        : Promise.resolve({ sentences: fallbackSentenceHelp(), fallback: true });
-
-      Promise.resolve(request).then(function (result) {
-        var sentences = result && Array.isArray(result.sentences) && result.sentences.length
-          ? result.sentences
-          : fallbackSentenceHelp();
-        renderSentenceCards(sentences);
-      }).catch(function () {
-        renderSentenceCards(fallbackSentenceHelp());
-      }).then(function () {
-        setSentenceHelpBusy(false);
-      });
-    });
+    if (wordHelpBtn) wordHelpBtn.onclick = window.openWordHelp;
+    if (sentenceHelpBtn) sentenceHelpBtn.onclick = window.openSentenceHelp;
 
     /* Feedback / rating modal on end */
     const feedbackModal = document.getElementById('ratingModal') || document.getElementById('feedbackModal') || document.querySelector('.rating-modal');
@@ -5015,5 +4965,14 @@
     </div>
   </div>
 </div>
+<div id="dayo-help-hint-modal" style="display: none; position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); z-index: 99999; background: #FFFFFF; border: 1.5px solid #F6D365; border-radius: 16px; padding: 14px 18px; box-shadow: 0 12px 30px rgba(0,0,0,0.18); width: 90%; max-width: 440px; box-sizing: border-box;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+    <div id="help-modal-title" style="font-size: 12px; font-weight: 800; color: #4F7460;">💡 추천 단어 힌트</div>
+    <button type="button" onclick="closeHelpModal()" style="background: none; border: none; font-size: 16px; color: #88928B; cursor: pointer; padding: 0 4px;">&times;</button>
+  </div>
+  <div id="help-modal-content" style="display: flex; flex-direction: column; gap: 6px;"></div>
+  <div style="font-size: 10px; color: #A0AAB0; margin-top: 6px; text-align: center;">터치하면 클립보드에 복사돼요 📋</div>
+</div>
+
 </body>
 </html>
