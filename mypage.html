@@ -1045,7 +1045,8 @@
 
       var data;
       try { data = JSON.parse(raw); } catch (e) { return; }
-      if (!data || !data.sentence || !data.theme) return;
+      if (!data || !data.sentence) return;
+      if (!data.illustUrl && !(data.theme && data.theme.illust)) return;
 
       function esc(str) {
         return String(str == null ? '' : str).replace(/[&<>"']/g, function (c) {
@@ -1053,26 +1054,23 @@
         });
       }
 
-      var theme = data.theme;
-      var bg = theme.bg || theme.bgColor || 'linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%)';
-      var textColor = theme.textColor || '#7C3AED';
-      var subText = theme.subText || theme.mood || '';
       var sentence = String(data.sentence).replace(/^["“”]+|["“”]+$/g, '');
+      var keyword = data.keyword || '';
+      var illustUrl = data.illustUrl || (data.theme && data.theme.illust) || '';
 
       section.hidden = false;
       mount.innerHTML =
-        '<div class="dayo-approved-card-preview" style="background:' + esc(bg) + '; border:2px solid ' + esc(textColor) + '33;">' +
+        '<div class="dayo-approved-card-preview" style="background:linear-gradient(135deg, #FFF9ED 0%, #FEE8D6 100%); border:1.5px solid #EDE4D5;">' +
           '<div style="display:flex;justify-content:space-between;align-items:center;width:100%;">' +
-            '<span style="font-size:10px;font-weight:800;color:' + esc(textColor) + ';background:rgba(255,255,255,0.85);padding:4px 10px;border-radius:12px;">From DayO</span>' +
-            '<span style="font-size:11px;font-weight:800;color:' + esc(textColor) + ';">' + esc(theme.tag || '') + '</span>' +
+            '<span style="font-size:10px;font-weight:800;color:#4F7460;background:#FFFFFF;padding:4px 10px;border-radius:12px;border:1px solid #EDE4D5;">From DayO</span>' +
+            '<span style="font-size:11px;font-weight:800;color:#D97706;">✨ 오늘의 원픽</span>' +
           '</div>' +
-          '<div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px 0;">' +
-            '<img src="' + esc(theme.illust || '') + '" alt="Card Illust" style="width:72px;height:72px;filter:drop-shadow(0 6px 12px rgba(0,0,0,0.1));">' +
-            '<div style="font-size:11px;color:' + esc(textColor) + ';font-weight:700;margin-top:6px;opacity:0.85;text-align:center;line-height:1.35;">' + esc(subText) + '</div>' +
+          '<div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px 0;min-height:110px;">' +
+            '<img src="' + esc(illustUrl) + '" alt="' + esc(keyword || 'Card Illust') + '" style="width:88px;height:88px;object-fit:contain;border-radius:12px;filter:drop-shadow(0 4px 10px rgba(0,0,0,0.08));" onerror="this.src=\'https://api.iconify.design/fluent-emoji:sparkles.svg\'">' +
+            (keyword ? '<div style="font-size:11px;color:#6E7A72;font-weight:700;margin-top:6px;">#' + esc(keyword) + '</div>' : '') +
           '</div>' +
-          '<div style="background:#FFFFFF;border-radius:10px;padding:12px;box-shadow:0 4px 12px rgba(0,0,0,0.06);text-align:center;border:1px solid rgba(0,0,0,0.05);">' +
-            '<div style="font-size:13px;font-weight:800;color:#202124;line-height:1.4;word-break:keep-all;">' + esc(sentence) + '</div>' +
-            '<div style="font-size:10px;color:#70757A;margin-top:4px;font-weight:600;">DayO 1:1 Live Session</div>' +
+          '<div style="background:#FFFFFF;border-radius:10px;padding:12px;text-align:center;border:1px solid #EDE4D5;">' +
+            '<div style="font-size:13px;font-weight:800;color:#3E4A42;line-height:1.4;word-break:keep-all;">"' + esc(sentence) + '"</div>' +
           '</div>' +
         '</div>';
 

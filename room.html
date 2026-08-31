@@ -4609,172 +4609,82 @@
   <script src="mobile-nav.js"></script>
   <script src="mode-switch.js"></script>
   <script>
-    var dynamicIllustDictionary = [
-      {
-        category: 'pet_animal',
-        keywords: ['hamster', 'mouse', 'rat', 'guinea pig', 'rabbit', 'bunny'],
-        illust: 'https://api.iconify.design/fluent-emoji:hamster.svg',
-        mood: '🐹 귀염 햄찌',
-        tag: '오늘의 엉뚱 발화 🏆',
-        bg: 'linear-gradient(135deg, #FFF6E6 0%, #FFE8CC 100%)',
-        textColor: '#D97706',
-        subText: '햄찌도 인정한 오늘의 한마디'
-      },
-      {
-        category: 'dog_cat',
-        keywords: ['dog', 'puppy', 'cat', 'kitten'],
-        illust: 'https://api.iconify.design/fluent-emoji:dog-face.svg',
-        mood: '🐾 댕냥이 감성',
-        tag: '심쿵 일상 토크 🐶',
-        bg: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)',
-        textColor: '#2563EB',
-        subText: '댕냥이도 좋아할 법한 표현'
-      },
-      {
-        category: 'reptile',
-        keywords: ['alligator', 'crocodile', 'lizard', 'snake'],
-        illust: 'https://api.iconify.design/fluent-emoji:crocodile.svg',
-        mood: '🐊 위트 악어',
-        tag: '오늘의 엉뚱 발화 🏆',
-        bg: 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)',
-        textColor: '#059669',
-        subText: '악어가 윙크하며 엄지척 날리는 중'
-      },
-      {
-        category: 'cafe_dessert',
-        keywords: ['matcha', 'latte', 'coffee', 'tea', 'cafe', 'cake', 'bread', 'dessert'],
-        illust: 'https://api.iconify.design/fluent-emoji:teacup-without-handle.svg',
-        mood: '🍵 디저트 수다',
-        tag: '달콤한 티키타카 ☕',
-        bg: 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)',
-        textColor: '#D97706',
-        subText: '따뜻한 카페 감성 한 스푼'
-      }
-    ];
-
-    var instaThemeVariantPool = [
-      { category: 'pet_animal', illust: 'https://api.iconify.design/fluent-emoji:hamster.svg', mood: '🐹 귀염 햄찌', tag: '오늘의 엉뚱 발화 🏆', bg: 'linear-gradient(135deg, #FFF6E6 0%, #FFE8CC 100%)', textColor: '#D97706', subText: '햄찌도 인정한 오늘의 한마디' },
-      { category: 'pet_animal', illust: 'https://api.iconify.design/fluent-emoji:rabbit-face.svg', mood: '🐰 힙스터 토끼', tag: '깡총깡총 위트 🐰', bg: 'linear-gradient(135deg, #FFF0ED 0%, #FFD7CC 100%)', textColor: '#E11D48', subText: '귀여움 폭발! 오늘의 베스트' },
-      { category: 'pet_animal', illust: 'https://api.iconify.design/fluent-emoji:mouse-face.svg', mood: '🐭 감성 쥐', tag: '소소한 일상 토크 🐭', bg: 'linear-gradient(135deg, #F5F5F4 0%, #E7E5E4 100%)', textColor: '#57534E', subText: '작지만 확실한 한마디' },
-      { category: 'dog_cat', illust: 'https://api.iconify.design/fluent-emoji:dog-face.svg', mood: '🐾 댕냥이 감성', tag: '심쿵 일상 토크 🐶', bg: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)', textColor: '#2563EB', subText: '댕냥이도 좋아할 법한 표현' },
-      { category: 'dog_cat', illust: 'https://api.iconify.design/fluent-emoji:cat-face.svg', mood: '🐱 힙스터 고양이', tag: '츤데레 영어 🐱', bg: 'linear-gradient(135deg, #FDF2F8 0%, #FCE7F3 100%)', textColor: '#DB2777', subText: '냥스러운 오늘의 한마디' },
-      { category: 'dog_cat', illust: 'https://api.iconify.design/fluent-emoji:guide-dog.svg', mood: '🦮 다정 멍멍', tag: '힐링 수다 🐶', bg: 'linear-gradient(135deg, #ECFEFF 0%, #CFFAFE 100%)', textColor: '#0E7490', subText: '따뜻하게 전달된 표현' },
-      { category: 'reptile', illust: 'https://api.iconify.design/fluent-emoji:crocodile.svg', mood: '🐊 위트 악어', tag: '오늘의 엉뚱 발화 🏆', bg: 'linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)', textColor: '#059669', subText: '악어가 윙크하며 엄지척 날리는 중' },
-      { category: 'reptile', illust: 'https://api.iconify.design/fluent-emoji:lizard.svg', mood: '🦎 힙스터 도마뱀', tag: '익살 MAX 🦎', bg: 'linear-gradient(135deg, #F3E8FD 0%, #E8DEF8 100%)', textColor: '#6750A4', subText: '엉뚱하지만 완벽한 한마디' },
-      { category: 'reptile', illust: 'https://api.iconify.design/fluent-emoji:snake.svg', mood: '🐍 감성 스네이크', tag: '슬ither & speak 🐍', bg: 'linear-gradient(135deg, #E0F2F1 0%, #B2DFDB 100%)', textColor: '#00695C', subText: '매끈하게 뱉은 오늘의 표현' },
-      { category: 'cafe_dessert', illust: 'https://api.iconify.design/fluent-emoji:teacup-without-handle.svg', mood: '🍵 디저트 수다', tag: '달콤한 티키타카 ☕', bg: 'linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)', textColor: '#D97706', subText: '따뜻한 카페 감성 한 스푼' },
-      { category: 'cafe_dessert', illust: 'https://api.iconify.design/fluent-emoji:shortcake.svg', mood: '🍰 위트 케이크', tag: '달콤 위트 🍰', bg: 'linear-gradient(135deg, #FFF0EB 0%, #FFD7CC 100%)', textColor: '#C5221F', subText: '디저트처럼 달콤한 한마디' },
-      { category: 'cafe_dessert', illust: 'https://api.iconify.design/fluent-emoji:croissant.svg', mood: '🥐 감성 브런치', tag: '침샘 자극 영어 🥐', bg: 'linear-gradient(135deg, #FFF9ED 0%, #FDE293 100%)', textColor: '#B06000', subText: '오늘 가장 맛있게 뱉은 한마디' },
-      { category: 'general', illust: 'https://api.iconify.design/fluent-emoji:sparkles.svg', mood: '✨ 반짝이는 표현', tag: '오늘의 베스트 픽 🌟', bg: 'linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%)', textColor: '#7C3AED', subText: 'DayO와 함께한 특별한 순간' },
-      { category: 'general', illust: 'https://api.iconify.design/fluent-emoji:partying-face.svg', mood: '🚀 뇌정지 탈출', tag: '실전 말문 트임 🎉', bg: 'linear-gradient(135deg, #E8F0FE 0%, #D2E3FC 100%)', textColor: '#1A73E8', subText: '외국인 앞에서 당당하게 한마디!' },
-      { category: 'general', illust: 'https://api.iconify.design/fluent-emoji:star-struck.svg', mood: '✨ 힙스터 성장', tag: '레벨업 직전 ⭐', bg: 'linear-gradient(135deg, #EDE7F6 0%, #D1C4E9 100%)', textColor: '#4527A0', subText: '오늘 나를 업그레이드한 문장' }
-    ];
-
-    var generalThemeDefault = {
-      category: 'general',
-      illust: 'https://api.iconify.design/fluent-emoji:sparkles.svg',
-      mood: '✨ 반짝이는 표현',
-      tag: '오늘의 베스트 픽 🌟',
-      bg: 'linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%)',
-      textColor: '#7C3AED',
-      subText: 'DayO와 함께한 특별한 순간'
-    };
-
-    window.dynamicIllustDictionary = dynamicIllustDictionary;
-    window.currentCardIndex = 0;
-    window.visibleCardStartIndex = 0;
-    window.currentThemeVariantIndex = 0;
-    window.currentSelectedCard = null;
-
-    function normalizeTheme(theme) {
-      if (!theme) return normalizeTheme(generalThemeDefault);
-      return {
-        category: theme.category || 'general',
-        illust: theme.illust,
-        mood: theme.mood || '',
-        tag: theme.tag || 'From DayO',
-        bgColor: theme.bg || theme.bgColor,
-        textColor: theme.textColor || '#3E4A42',
-        subText: theme.subText || theme.mood || ''
-      };
-    }
-
-    function resolveThemeCategory(sentence) {
-      var lower = String(sentence || '').toLowerCase();
-      for (var i = 0; i < dynamicIllustDictionary.length; i++) {
-        var item = dynamicIllustDictionary[i];
-        if (item.keywords.some(function (kw) { return lower.includes(kw); })) {
-          return item.category;
-        }
-      }
-      return 'general';
-    }
-
-    function resolveThemeForSentence(sentence) {
-      var lower = String(sentence || '').toLowerCase();
-      for (var i = 0; i < dynamicIllustDictionary.length; i++) {
-        var item = dynamicIllustDictionary[i];
-        if (item.keywords.some(function (kw) { return lower.includes(kw); })) {
-          return normalizeTheme(item);
-        }
-      }
-      return normalizeTheme(generalThemeDefault);
-    }
-
-    function getThemeVariantsForSentence(sentence) {
-      var category = resolveThemeCategory(sentence);
-      var variants = instaThemeVariantPool.filter(function (item) {
-        return item.category === category;
-      });
-      if (!variants.length) return [resolveThemeForSentence(sentence)];
-      return variants.map(normalizeTheme);
-    }
-
-    window.resolveThemeForSentence = resolveThemeForSentence;
-
-    window.renderInstaVisualCard = function (sentence, theme) {
-      var box = document.getElementById('insta-card-preview-box');
-      if (!box || !theme) return;
-
-      var normalized = normalizeTheme(theme);
-      var cleanSentence = String(sentence || '').replace(/^["“”]+|["“”]+$/g, '');
-      box.style.background = normalized.bgColor;
-      box.style.backgroundImage = 'none';
-      box.style.border = '2px solid ' + normalized.textColor + '33';
-      box.innerHTML =
-        '<div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">' +
-          '<span style="font-size: 9px; font-weight: 800; color: ' + normalized.textColor + '; background: rgba(255,255,255,0.85); padding: 3px 8px; border-radius: 12px;">From DayO</span>' +
-          '<span style="font-size: 10px; font-weight: 800; color: ' + normalized.textColor + ';">' + escapeInstaCardText(normalized.tag) + '</span>' +
-        '</div>' +
-        '<div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 10px 0;">' +
-          '<img src="' + escapeInstaCardText(normalized.illust) + '" style="width: 58px; height: 58px; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.1));" alt="Card Illust">' +
-          '<div style="font-size: 10px; color: ' + normalized.textColor + '; font-weight: 700; margin-top: 4px; opacity: 0.85; text-align: center; line-height: 1.3;">' + escapeInstaCardText(normalized.subText) + '</div>' +
-        '</div>' +
-        '<div style="background: #FFFFFF; border-radius: 10px; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); text-align: center; border: 1px solid rgba(0,0,0,0.05);">' +
-          '<div style="font-size: 11.5px; font-weight: 800; color: #202124; line-height: 1.35; word-break: keep-all;">' + escapeInstaCardText(cleanSentence) + '</div>' +
-          '<div style="font-size: 9px; color: #70757A; margin-top: 4px; font-weight: 600;">DayO 1:1 Live Session</div>' +
-        '</div>';
-    };
-
-    window.selectCardSentence = function (sentence) {
-      var cleanSentence = String(sentence || '').replace(/^["“”]+|["“”]+$/g, '');
-      var theme = resolveThemeForSentence(cleanSentence);
-      window.currentThemeVariantIndex = 0;
-      window.currentSelectedCard = {
-        sentence: cleanSentence,
-        theme: theme,
-        partnerComment: (document.getElementById('popup-partner-comment') || {}).value || '',
-        stamp: (document.querySelector('input[name="popup_stamp"]:checked') || {}).value || 'coffee',
-        createdAt: new Date().toLocaleDateString('ko-KR')
-      };
-      window.renderInstaVisualCard(cleanSentence, theme);
-    };
-
     function escapeInstaCardText(str) {
       return String(str == null ? '' : str).replace(/[&<>"']/g, function (c) {
         return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
       });
     }
+
+    function extractCoreSubject(sentence) {
+      if (!sentence) return 'coffee';
+      // 불용어(Stopwords) 제거 후 가장 의미 있는 핵심 명사 추출
+      const stopWords = new Set(['i', 'like', 'the', 'a', 'an', 'and', 'my', 'is', 'are', 'was', 'were', 'to', 'in', 'on', 'at', 'have', 'had', 'they', 'very', 'so', 'there', 'who', 'help', 'clean', 'eat', 'look', 'name', 'loves']);
+      const words = sentence.toLowerCase().replace(/[^a-z\s]/g, '').split(/\s+/);
+      const meaningfulWords = words.filter(w => !stopWords.has(w) && w.length > 2);
+
+      return meaningfulWords.length > 0 ? meaningfulWords[0] : (words[words.length - 1] || 'smile');
+    }
+
+    function generateAiIllustUrl(keyword, styleVariation) {
+      if (styleVariation == null) styleVariation = 0;
+      const styles = [
+        'cute 3d pastel clay illustration, warm cozy aesthetic, minimalist sticker on clean solid background',
+        'cute aesthetic doodle vector illustration, soft pastel colors, lovely character',
+        'humorous witty character drawing, minimal pop art, soft peach tones'
+      ];
+      const selectedStyle = styles[styleVariation % styles.length];
+      const prompt = encodeURIComponent('cute ' + keyword + ', ' + selectedStyle);
+      return 'https://image.pollinations.ai/prompt/' + prompt + '?width=400&height=400&nologo=true&seed=' + Math.floor(Math.random() * 1000);
+    }
+
+    window.currentCardVariation = 0;
+    window.currentSelectedSentence = '';
+    window.currentCardIndex = 0;
+    window.visibleCardStartIndex = 0;
+    window.currentSelectedCard = null;
+
+    window.selectCardSentence = function (sentence) {
+      window.currentSelectedSentence = sentence;
+      const keyword = extractCoreSubject(sentence);
+      const illustUrl = generateAiIllustUrl(keyword, window.currentCardVariation);
+
+      const box = document.getElementById('insta-card-preview-box');
+      if (box) {
+        box.style.background = 'linear-gradient(135deg, #FFF9ED 0%, #FEE8D6 100%)';
+        box.style.backgroundImage = 'none';
+        box.style.border = '1.5px solid #EDE4D5';
+        var safeKeyword = escapeInstaCardText(keyword);
+        var safeSentence = escapeInstaCardText(String(sentence || '').replace(/^["“”]+|["“”]+$/g, ''));
+        var safeUrl = escapeInstaCardText(illustUrl);
+        box.innerHTML =
+          '<div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">' +
+            '<span style="font-size: 9px; font-weight: 800; color: #4F7460; background: #FFFFFF; padding: 3px 8px; border-radius: 12px; border: 1px solid #EDE4D5;">From DayO</span>' +
+            '<span style="font-size: 10px; font-weight: 800; color: #D97706;">✨ 오늘의 원픽</span>' +
+          '</div>' +
+          '<div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 6px 0; min-height: 90px;">' +
+            '<img src="' + safeUrl + '" style="width: 80px; height: 80px; object-fit: contain; border-radius: 12px; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.08));" alt="' + safeKeyword + '" onerror="this.src=\'https://api.iconify.design/fluent-emoji:sparkles.svg\'">' +
+            '<div style="font-size: 10px; color: #6E7A72; font-weight: 700; margin-top: 4px;">#' + safeKeyword + '</div>' +
+          '</div>' +
+          '<div style="background: #FFFFFF; border-radius: 10px; padding: 8px 10px; text-align: center; border: 1px solid #EDE4D5;">' +
+            '<div style="font-size: 11px; font-weight: 800; color: #3E4A42; line-height: 1.35; word-break: keep-all;">"' + safeSentence + '"</div>' +
+          '</div>';
+      }
+
+      window.currentSelectedCard = {
+        sentence: sentence,
+        keyword: keyword,
+        illustUrl: illustUrl,
+        partnerComment: (document.getElementById('popup-partner-comment') || {}).value || '',
+        stamp: (document.querySelector('input[name="popup_stamp"]:checked') || {}).value || 'coffee',
+        createdAt: new Date().toLocaleDateString()
+      };
+    };
+
+    window.regenerateInstaCard = function () {
+      if (!window.currentSelectedSentence) return;
+      window.currentCardVariation++;
+      window.selectCardSentence(window.currentSelectedSentence);
+    };
 
     function collectSessionTranscriptRows() {
       var rows = [];
@@ -4901,27 +4811,9 @@
       if (!activeCards.length) return;
       window.activeCardPool = activeCards;
       window.currentCardIndex = 0;
-      window.currentThemeVariantIndex = 0;
+      window.currentCardVariation = 0;
       renderInstaSentenceOptions(0);
       window.selectCardSentence(activeCards[0].quote);
-    };
-
-    window.regenerateInstaCard = function () {
-      if (!window.currentSelectedCard) {
-        var pool = window.activeCardPool || buildActiveInstaCards();
-        var card = pool[window.currentCardIndex] || pool[0];
-        if (card) window.selectCardSentence(card.quote);
-      }
-      if (!window.currentSelectedCard) return;
-
-      var curr = window.currentSelectedCard;
-      var variants = getThemeVariantsForSentence(curr.sentence);
-      window.currentThemeVariantIndex = ((window.currentThemeVariantIndex || 0) + 1) % variants.length;
-      curr.theme = variants[window.currentThemeVariantIndex];
-      curr.partnerComment = (document.getElementById('popup-partner-comment') || {}).value || curr.partnerComment || '';
-      curr.stamp = (document.querySelector('input[name="popup_stamp"]:checked') || {}).value || curr.stamp || 'coffee';
-      window.renderInstaVisualCard(curr.sentence, curr.theme);
-      renderInstaSentenceOptions(window.visibleCardStartIndex || 0);
     };
 
     window.hydratePopupTranscriptList = function () {
