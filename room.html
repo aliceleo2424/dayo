@@ -2,6 +2,9 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-env.js"></script>
+  <script src="supabase-client.js"></script>
   <script>
     (function checkInApp() {
       const ua = navigator.userAgent.toLowerCase();
@@ -4859,7 +4862,7 @@
       if (typeof window.initInstaCardSection === 'function') window.initInstaCardSection();
     };
 
-    window.executePartnerPayoutAndExit = function () {
+    window.executePartnerPayoutAndExit = async function () {
       window.dayoSessionEnded = true;
 
       if (!window.currentSelectedCard) {
@@ -4872,17 +4875,33 @@
         window.selectCardSentence(firstSentence);
       }
 
-      if (window.currentSelectedCard) {
-        window.currentSelectedCard.partnerComment = (document.getElementById('popup-partner-comment') || {}).value || '';
-        window.currentSelectedCard.stamp = (document.querySelector('input[name="popup_stamp"]:checked') || {}).value || 'coffee';
-        window.currentSelectedCard.approvedAt = new Date().toISOString();
+      var cardData = window.currentSelectedCard || {
+        sentence: 'Small talk makes a big day',
+        keyword: 'coffee',
+        illustUrl: 'https://api.iconify.design/fluent-emoji:sparkles.svg',
+        partnerComment: (document.getElementById('popup-partner-comment') || {}).value || 'Great job!',
+        stamp: (document.querySelector('input[name="popup_stamp"]:checked') || {}).value || 'coffee'
+      };
+      cardData.partnerComment = (document.getElementById('popup-partner-comment') || {}).value || cardData.partnerComment || '';
+      cardData.stamp = (document.querySelector('input[name="popup_stamp"]:checked') || {}).value || cardData.stamp || 'coffee';
+      cardData.approvedAt = new Date().toISOString();
+
+      var user = null;
+      if (window.supabaseClient) {
         try {
-          localStorage.setItem('dayo_last_approved_card', JSON.stringify(window.currentSelectedCard));
-        } catch (e) { /* ignore */ }
+          var authRes = await window.supabaseClient.auth.getUser();
+          user = authRes && authRes.data && authRes.data.user;
+        } catch (e) { user = null; }
+      }
+
+      if (user && typeof window.persistSessionReport === 'function') {
+        await window.persistSessionReport(cardData);
+      } else {
+        try { localStorage.setItem('dayo_last_approved_card', JSON.stringify(cardData)); } catch (e) { /* ignore */ }
       }
 
       console.log('✨ 파트너 리포트 검수 완료 트리거');
-      alert('🎉 세션 리포트 검수가 완료되었습니다! 유저에게 카드가 발행되고 +6,000P가 정산되었습니다.');
+      alert('🎉 세션 리포트가 유저 계정으로 전송되었으며, 6,000P가 정산되었습니다.');
       try { localStorage.setItem('dayo_current_mode', 'PARTNER'); } catch (e) {}
       window.location.href = 'index.html?mode=partner';
     };

@@ -7,24 +7,17 @@
       if (typeof e.preventDefault === 'function') e.preventDefault();
       if (typeof e.stopPropagation === 'function') e.stopPropagation();
     }
-    try {
-      localStorage.setItem('dayo_user_email', 'tester@dayo.com');
-      localStorage.setItem('dayo_user_name', 'DayO테스터');
-      localStorage.setItem('dayo_ticket_count', '1');
-      localStorage.setItem('dayo_is_logged_in', 'true');
-      localStorage.setItem('userName', 'DayO테스터');
-      localStorage.setItem('dayo_userEmail', 'tester@dayo.com');
-      localStorage.setItem('dayo.memberSession', 'active');
-      localStorage.setItem('ticketCount', '1');
-    } catch (err) { /* ignore */ }
-
+    if (typeof window.DayOMode === 'object' && typeof window.DayOMode.openLogin === 'function') {
+      window.DayOMode.openLogin();
+      return;
+    }
     var modal = document.getElementById('login-modal')
       || document.querySelector('.login-modal-overlay')
       || document.querySelector('.ms-overlay');
-    if (modal) modal.style.display = 'none';
-
-    alert('🎉 테스터 계정(DayO테스터)으로 간편 로그인되었습니다!');
-    window.location.reload();
+    if (modal) {
+      modal.style.display = 'flex';
+      modal.classList.add('is-open');
+    }
   };
 
   var USER_KEY = 'userName';
@@ -145,40 +138,48 @@
   }
 
   function checkUserLoggedIn() {
-    try {
-      var isLogged = localStorage.getItem('dayo_is_logged_in') === 'true';
-      var userEmail = localStorage.getItem('dayo_user_email');
-      var userNameFast = localStorage.getItem('dayo_user_name');
-      if (isLogged || userEmail || userNameFast) return true;
-      if ((localStorage.getItem(USER_KEY) || '').trim()) return true;
-    } catch (err) { /* ignore */ }
+    if (window._dayoAuthUser) return true;
     if (window.DayOProfileStore && typeof window.DayOProfileStore.isSignedIn === 'function') {
-      if (window.DayOProfileStore.isSignedIn()) return true;
+      try { if (window.DayOProfileStore.isSignedIn()) return true; } catch (e) { /* ignore */ }
     }
+    try {
+      var keys = Object.keys(localStorage);
+      for (var i = 0; i < keys.length; i++) {
+        if (keys[i].indexOf('sb-') !== 0 || keys[i].indexOf('-auth-token') < 0) continue;
+        var raw = localStorage.getItem(keys[i]);
+        if (!raw) continue;
+        var parsed = JSON.parse(raw);
+        if (parsed && (parsed.access_token || (parsed.currentSession && parsed.currentSession.access_token))) return true;
+      }
+    } catch (err) { /* ignore */ }
     return false;
   }
   window.checkUserLoggedIn = checkUserLoggedIn;
 
   function getUserName() {
     try {
-      var fastName = (window.localStorage.getItem('dayo_user_name') || '').trim();
+      var profile = window._dayoAuthProfile;
+      if (profile && (profile.nickname || profile.user_name)) {
+        return String(profile.nickname || profile.user_name).trim();
+      }
       if (window.DayOProfileStore && typeof window.DayOProfileStore.getUser === 'function') {
         var user = window.DayOProfileStore.getUser();
         if (user) {
           var meta = user.user_metadata || {};
           return String(meta.user_name || meta.full_name || meta.name || '').trim()
-            || (window.localStorage.getItem(USER_KEY) || '').trim()
-            || fastName;
+            || (window.localStorage.getItem(USER_KEY) || '').trim();
         }
       }
-      return (window.localStorage.getItem(USER_KEY) || '').trim() || fastName;
+      if (!checkUserLoggedIn()) return '';
+      return (window.localStorage.getItem(USER_KEY) || '').trim()
+        || (window.localStorage.getItem('dayo_user_name') || '').trim();
     } catch (e) {
       return '';
     }
   }
 
   function isMember() {
-    return checkUserLoggedIn() || !!getUserName();
+    return checkUserLoggedIn();
   }
 
   function waitForStore() {
@@ -295,6 +296,16 @@
       window.localStorage.removeItem(USER_KEY);
       window.localStorage.removeItem(MEMBER_KEY);
       window.localStorage.removeItem(EMAIL_KEY);
+      window.localStorage.removeItem('dayo_is_logged_in');
+      window.localStorage.removeItem('dayo_user_name');
+      window.localStorage.removeItem('dayo_user_email');
+      window.localStorage.removeItem('dayo_userEmail');
+      window.localStorage.removeItem('dayo_point_balance');
+    } catch (e) { /* ignore */ }
+    window._dayoAuthUser = null;
+    window._dayoAuthProfile = null;
+    try {
+      if (window.supabaseClient && window.supabaseClient.auth) window.supabaseClient.auth.signOut();
     } catch (e) { /* ignore */ }
   }
 
@@ -372,6 +383,16 @@
 
   function buttonFor(role) {
     var name = getUserName();
+    var loggedIn = checkUserLoggedIn();
+
+    if (!loggedIn) {
+      return {
+        href: '#',
+        icon: '🔑',
+        label: '카카오 / 이메일로 3초 로그인',
+        openLogin: true
+      };
+    }
 
     if (role === 'partner') {
       return { href: 'mypage.html', icon: '👤', i18n: 'nav.mypage' };
@@ -391,10 +412,10 @@
     }
 
     return {
-      href: '#',
-      icon: '🔑',
-      i18n: 'login.headerBtn',
-      openLogin: true
+      href: 'mypage.html',
+      avatar: '👤',
+      label: t('login.greetingFormat', { name: 'DayO' }),
+      loggedIn: true
     };
   }
 
@@ -414,12 +435,17 @@
     }
 
     if (config.loggedIn) {
-      var ticketLabel = '☕️ 보유 티켓: 1장';
+      var ticketCount = 0;
+      var pointBalance = 0;
       try {
-        if (window.DayOTicketWallet && typeof window.DayOTicketWallet.getCount === 'function') {
-          ticketLabel = '☕️ 보유 티켓: ' + window.DayOTicketWallet.getCount() + '장';
+        if (window._dayoAuthProfile) {
+          if (window._dayoAuthProfile.ticket_count != null) ticketCount = Number(window._dayoAuthProfile.ticket_count) || 0;
+          if (window._dayoAuthProfile.point_balance != null) pointBalance = Number(window._dayoAuthProfile.point_balance) || 0;
+        } else if (window.DayOTicketWallet && typeof window.DayOTicketWallet.getCount === 'function') {
+          ticketCount = window.DayOTicketWallet.getCount();
         }
       } catch (e) { /* ignore */ }
+      var ticketLabel = '☕️ 티켓 ' + ticketCount + '장 · ✨ ' + pointBalance + 'P';
 
       return [
         '<div class="ms-profile">',
@@ -586,6 +612,14 @@
     }
 
     setLoginBusy(true);
+    if (typeof window.handleAuthLogin === 'function') {
+      Promise.resolve(window.handleAuthLogin(cleanedEmail, cleanedPass)).catch(function (err) {
+        setLoginBusy(false);
+        showToast((err && err.message) || t('login.authError'));
+      });
+      return;
+    }
+
     waitForStore().then(function (store) {
       if (!store || typeof store.signInWithEmail !== 'function') {
         throw new Error('unavailable');
@@ -621,45 +655,20 @@
   }
 
   function handleNaverTestLogin() {
-    var name = 'DayO테스터';
-    var email = 'tester@dayo.com';
-    pendingHref = null;
-
-    try {
-      window.localStorage.setItem('dayo_user_email', email);
-      window.localStorage.setItem('dayo_user_name', name);
-      window.localStorage.setItem('dayo_ticket_count', '1');
-      window.localStorage.setItem('dayo_is_logged_in', 'true');
-      window.localStorage.setItem(USER_KEY, name);
-      window.localStorage.setItem(EMAIL_KEY, email);
-      window.localStorage.setItem(MEMBER_KEY, 'active');
-      window.localStorage.setItem('ticketCount', '1');
-    } catch (e) { /* ignore */ }
-
-    if (window.DayOTicketWallet && typeof window.DayOTicketWallet.setCount === 'function') {
-      window.DayOTicketWallet.setCount(1);
-    }
-
-    try {
-      window.localStorage.setItem(USER_KEY, name);
-      window.localStorage.setItem(EMAIL_KEY, email);
-      window.localStorage.setItem(MEMBER_KEY, 'active');
-      window.localStorage.setItem('dayo_user_name', name);
-      window.localStorage.setItem('dayo_ticket_count', '1');
-    } catch (e) { /* ignore */ }
-
-    closeLogin();
-    render();
-    notifyAuthChange();
-    showToast('🎉 테스트 계정으로 간편 로그인되었습니다!', 1000);
+    showToast('네이버 로그인은 준비 중이에요. 이메일로 3초 로그인해 주세요 ☕️');
   }
 
   function handleSocialAuth(provider) {
-    if (provider === 'naver') {
-      if (typeof window.handleNaverFastLogin === 'function') {
-        window.handleNaverFastLogin();
+    if (provider === 'kakao') {
+      if (typeof window.handleKakaoLogin === 'function') {
+        window.handleKakaoLogin();
         return;
       }
+      showToast(t('login.socialSoon'));
+      return;
+    }
+    if (provider === 'naver') {
+      showToast('네이버 로그인은 준비 중이에요. 이메일로 3초 로그인해 주세요 ☕️');
       return;
     }
     if (provider !== 'google') {
@@ -725,7 +734,7 @@
       '  <div class="ms-divider" data-i18n="login.socialDivider">', t('login.socialDivider'), '</div>',
       '  <div class="ms-social">',
       '    <button class="ms-social-btn ms-social-btn--kakao" type="button" data-ms-social="kakao">', t('login.social.kakao'), '</button>',
-      '    <button type="button" class="ms-social-btn ms-social-btn--naver btn-naver" onclick="handleNaverFastLogin(event); return false;">', t('login.social.naver'), '</button>',
+      '    <button type="button" class="ms-social-btn ms-social-btn--naver btn-naver" data-ms-social="naver">', t('login.social.naver'), '</button>',
       '    <button class="ms-social-btn ms-social-btn--google" type="button" data-ms-social="google">', t('login.social.google'), '</button>',
       '  </div>',
       '  <button class="ms-dismiss" type="button" data-ms-close data-i18n="login.dismiss">', t('login.dismiss'), '</button>',
@@ -868,6 +877,10 @@
     });
 
     document.addEventListener('dayo:authchange', function () {
+      render();
+    });
+
+    document.addEventListener('dayo:authprofile', function () {
       render();
     });
 

@@ -63,6 +63,10 @@ function lsSet(key, value) {
 }
 
 function getClient() {
+  if (window.supabaseClient) {
+    supabase = window.supabaseClient;
+    return supabase;
+  }
   if (supabase) return supabase;
   var url = normalizeUrl(env('NEXT_PUBLIC_SUPABASE_URL'));
   var key = env('NEXT_PUBLIC_SUPABASE_ANON_KEY');
@@ -216,8 +220,10 @@ function defaultsFromLocal() {
 function applyProfileToLocal(profile) {
   if (!profile) return;
   if (profile.user_name) lsSet(USER_KEY, profile.user_name);
+  if (profile.nickname) lsSet(USER_KEY, profile.nickname);
   if (profile.email) lsSet(EMAIL_KEY, profile.email);
   if (profile.ticket_count != null) lsSet(TICKET_KEY, profile.ticket_count);
+  if (profile.point_balance != null) lsSet('dayo_point_balance', profile.point_balance);
   if (profile.has_welcome_coupon != null) lsSet(WELCOME_COUPON_KEY, profile.has_welcome_coupon ? '1' : '0');
   if (profile.streak_count != null) lsSet(STREAK_KEY, profile.streak_count);
   if (profile.last_login_date != null) lsSet(LAST_LOGIN_KEY, profile.last_login_date || '');

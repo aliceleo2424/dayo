@@ -2,14 +2,10 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-env.js"></script>
+  <script src="supabase-client.js"></script>
   <script>
-    window.checkUserLoggedIn = function() {
-      var isLogged = localStorage.getItem('dayo_is_logged_in') === 'true';
-      var userEmail = localStorage.getItem('dayo_user_email');
-      var userName = localStorage.getItem('dayo_user_name');
-      return !!(isLogged || userEmail || userName || (localStorage.getItem('userName') || '').trim());
-    };
-
     (function redirectMypageView() {
       try {
         var view = new URLSearchParams(location.search).get('view');
@@ -21,27 +17,6 @@
         }
       } catch (e) { /* ignore */ }
     })();
-
-    window.handleNaverFastLogin = function(e) {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      localStorage.setItem('dayo_user_email', 'tester@dayo.com');
-      localStorage.setItem('dayo_user_name', 'DayO테스터');
-      localStorage.setItem('dayo_ticket_count', '1');
-      localStorage.setItem('dayo_is_logged_in', 'true');
-      localStorage.setItem('userName', 'DayO테스터');
-      localStorage.setItem('dayo_userEmail', 'tester@dayo.com');
-      localStorage.setItem('dayo.memberSession', 'active');
-      localStorage.setItem('ticketCount', '1');
-
-      const modal = document.getElementById('login-modal') || document.querySelector('.login-modal-overlay') || document.querySelector('.ms-overlay');
-      if (modal) modal.style.display = 'none';
-
-      alert('🎉 테스터 계정(DayO테스터)으로 간편 로그인되었습니다!');
-      window.location.reload();
-    };
 
     (function checkInApp() {
       const ua = navigator.userAgent.toLowerCase();
@@ -2253,6 +2228,10 @@
             <button type="button" class="auth-ticket-charge" data-tickets-open aria-label="이용권 충전">+ 충전</button>
           </div>
           <a href="room.html?role=user" class="header-cta auth-dash-cta" data-ms-guard data-ticket-gate>🚀 대화방 입장하기</a>
+          <div class="auth-report-feed" style="margin-top:1.1rem; text-align:left;">
+            <p style="font-size:13px; font-weight:800; color:#3E4A42; margin-bottom:8px;">✨ 나의 세션 리포트</p>
+            <div id="mypage-card-feed"></div>
+          </div>
         </div>
 
         <div class="auth-live">

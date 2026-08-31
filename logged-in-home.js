@@ -7,6 +7,9 @@
   var USER_KEY = 'userName';
 
   function isLoggedIn() {
+    if (typeof window.checkUserLoggedIn === 'function') {
+      try { return !!window.checkUserLoggedIn(); } catch (e) { /* ignore */ }
+    }
     try {
       return !!(window.localStorage.getItem(USER_KEY) || '').trim();
     } catch (e) {

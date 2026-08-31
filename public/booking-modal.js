@@ -743,19 +743,15 @@
   }
 
   function checkUserLoggedIn() {
-    try {
-      var isLogged = localStorage.getItem('dayo_is_logged_in') === 'true';
-      var userEmail = localStorage.getItem('dayo_user_email');
-      var userName = localStorage.getItem('dayo_user_name');
-      if (isLogged || userEmail || userName) return true;
-      if ((localStorage.getItem('userName') || '').trim()) return true;
-    } catch (err) { /* ignore */ }
+    if (typeof window.checkUserLoggedIn === 'function' && window.checkUserLoggedIn !== checkUserLoggedIn) {
+      try { return !!window.checkUserLoggedIn(); } catch (e) { /* ignore */ }
+    }
     if (window.DayOMode && typeof window.DayOMode.isMember === 'function') {
       return !!window.DayOMode.isMember();
     }
+    if (window._dayoAuthUser) return true;
     return false;
   }
-  window.checkUserLoggedIn = checkUserLoggedIn;
 
   function isLoggedIn() {
     return checkUserLoggedIn();

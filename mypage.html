@@ -2,6 +2,9 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-env.js"></script>
+  <script src="supabase-client.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="DayO 마이페이지 — 내 대화 현황과 예약 세션, 대화 자료를 한 곳에서 관리하세요.">
   <title data-i18n="page.title.mypage">DayO 마이페이지 — 내 대화 라운지</title>
@@ -797,16 +800,14 @@
       </div>
     </section>
 
-    <section class="card dayo-approved-card" id="dayoApprovedCardSection" aria-labelledby="dayoCardTitle" hidden>
+    <section class="card dayo-approved-card" id="dayoApprovedCardSection" aria-labelledby="dayoCardTitle">
       <div class="card-head">
         <div>
-          <h2 class="card-title" id="dayoCardTitle">✨ 오늘의 DayO 카드</h2>
-          <p class="card-subtitle">파트너가 검수해 보낸 오늘의 베스트 표현이에요.</p>
+          <h2 class="card-title" id="dayoCardTitle">✨ 나의 DayO 리포트</h2>
+          <p class="card-subtitle">파트너가 검수해 보낸 베스트 표현이 계정에 쌓여요.</p>
         </div>
       </div>
-      <div class="dayo-approved-card-mount" id="dayo-approved-card-mount"></div>
-      <p class="dayo-card-comment" id="dayo-approved-card-comment" hidden></p>
-      <p class="dayo-card-meta" id="dayo-approved-card-meta" hidden></p>
+      <div id="mypage-card-feed"></div>
     </section>
 
     <section class="card status-card" aria-labelledby="statusTitle">
@@ -1032,59 +1033,7 @@
   <script src="chat-prefs.js"></script>
   <script src="booking-modal.js"></script>
   <script>
-    (function renderApprovedDayOCard() {
-      var section = document.getElementById('dayoApprovedCardSection');
-      var mount = document.getElementById('dayo-approved-card-mount');
-      var commentEl = document.getElementById('dayo-approved-card-comment');
-      var metaEl = document.getElementById('dayo-approved-card-meta');
-      if (!section || !mount) return;
-
-      var raw = '';
-      try { raw = localStorage.getItem('dayo_last_approved_card') || ''; } catch (e) { raw = ''; }
-      if (!raw) return;
-
-      var data;
-      try { data = JSON.parse(raw); } catch (e) { return; }
-      if (!data || !data.sentence) return;
-      if (!data.illustUrl && !(data.theme && data.theme.illust)) return;
-
-      function esc(str) {
-        return String(str == null ? '' : str).replace(/[&<>"']/g, function (c) {
-          return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
-        });
-      }
-
-      var sentence = String(data.sentence).replace(/^["“”]+|["“”]+$/g, '');
-      var keyword = data.keyword || '';
-      var illustUrl = data.illustUrl || (data.theme && data.theme.illust) || '';
-
-      section.hidden = false;
-      mount.innerHTML =
-        '<div class="dayo-approved-card-preview" style="background:linear-gradient(135deg, #FFF9ED 0%, #FEE8D6 100%); border:1.5px solid #EDE4D5;">' +
-          '<div style="display:flex;justify-content:space-between;align-items:center;width:100%;">' +
-            '<span style="font-size:10px;font-weight:800;color:#4F7460;background:#FFFFFF;padding:4px 10px;border-radius:12px;border:1px solid #EDE4D5;">From DayO</span>' +
-            '<span style="font-size:11px;font-weight:800;color:#D97706;">✨ 오늘의 원픽</span>' +
-          '</div>' +
-          '<div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:12px 0;min-height:110px;">' +
-            '<img src="' + esc(illustUrl) + '" alt="' + esc(keyword || 'Card Illust') + '" style="width:88px;height:88px;object-fit:contain;border-radius:12px;filter:drop-shadow(0 4px 10px rgba(0,0,0,0.08));" onerror="this.src=\'https://api.iconify.design/fluent-emoji:sparkles.svg\'">' +
-            (keyword ? '<div style="font-size:11px;color:#6E7A72;font-weight:700;margin-top:6px;">#' + esc(keyword) + '</div>' : '') +
-          '</div>' +
-          '<div style="background:#FFFFFF;border-radius:10px;padding:12px;text-align:center;border:1px solid #EDE4D5;">' +
-            '<div style="font-size:13px;font-weight:800;color:#3E4A42;line-height:1.4;word-break:keep-all;">"' + esc(sentence) + '"</div>' +
-          '</div>' +
-        '</div>';
-
-      if (data.partnerComment && commentEl) {
-        commentEl.hidden = false;
-        commentEl.textContent = '💬 파트너 코멘트: ' + data.partnerComment;
-      }
-
-      if (metaEl) {
-        metaEl.hidden = false;
-        var stampLabel = data.stamp === 'rocket' ? '🚀 폭풍 성장' : (data.stamp === 'heart' ? '💖 힐링 메이트' : '☕ 따뜻한 수다');
-        metaEl.textContent = (data.createdAt ? data.createdAt + ' · ' : '') + stampLabel;
-      }
-    })();
+    if (typeof window.loadUserReports === 'function') window.loadUserReports();
   </script>
 </body>
 </html>
