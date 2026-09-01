@@ -45,6 +45,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="mobile-nav.css">
   <script src="scroll-lock.js"></script>
+  <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -785,6 +786,7 @@
     }
 
     .tutor-video {
+      position: relative;
       width: 100%;
       height: 100%;
       min-height: 0;
@@ -804,9 +806,17 @@
       height: 100%;
       object-fit: cover;
       display: none;
+      z-index: 2;
+      background: #1E1A19;
+      transform: none;
     }
 
-    .tutor-video.has-stream video { display: block; }
+    .tutor-video.has-stream video,
+    .tutor-video video.remote-stream-video.has-stream {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+    }
     .tutor-video.has-stream .tutor-placeholder { display: none; }
 
     .tutor-placeholder {
@@ -2915,7 +2925,7 @@
         <div class="video-stage" id="videoStage">
           <div class="daily-host" id="dailyHost"></div>
           <div class="tutor-video" id="tutorVideoBox">
-            <video id="tutorVideo" playsinline muted></video>
+            <video id="tutorVideo" class="remote-stream-video" playsinline webkit-playsinline autoplay></video>
             <div class="tutor-placeholder">
               <div class="tutor-placeholder-avatar">C</div>
               <div class="tutor-placeholder-name partner-name" id="center-target-name">Camille</div>
@@ -2925,7 +2935,7 @@
 
           <div class="self-pip" id="selfPip" title="클릭하여 화면 맞바꾸기" role="button" tabindex="0" aria-label="내 화면 — 클릭하여 화면 맞바꾸기">
             <span class="pip-label" data-i18n="room.selfPipLabel">나</span>
-            <video id="selfVideo" playsinline muted autoplay></video>
+            <video id="selfVideo" class="local-stream-video" playsinline webkit-playsinline muted autoplay></video>
             <div class="self-placeholder pip-avatar">
               <div class="self-placeholder-icon">👤</div>
               <span data-i18n="room.selfPlaceholderLabel">내 화면</span>
@@ -3080,7 +3090,230 @@
   <script src="supabase-env.js"></script>
   <script type="module" src="profile-store.js"></script>
   <script src="chat-prefs.js"></script>
+  <script>window.__dayoUsePeerJS = true;</script>
   <script src="room-live.js"></script>
+  <script>
+    /* 1:1 WebRTC (PeerJS) — Partner = host/receiver, User = guest/caller */
+    (function initDayOPeerVideo() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const currentRole = (urlParams.get('role') || 'user').toLowerCase();
+      const currentRoomId = String(
+        urlParams.get('roomId') || urlParams.get('room') || urlParams.get('session') || 'dayo_room_1'
+      ).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40) || 'dayo_room_1';
+
+      const localVideo = document.getElementById('local-video')
+        || document.getElementById('selfVideo')
+        || document.querySelector('.local-stream-video');
+      const remoteVideo = document.getElementById('remote-video')
+        || document.getElementById('tutorVideo')
+        || document.querySelector('.remote-stream-video');
+
+      let localStream = null;
+      let peer = null;
+      let activeCall = null;
+      let hostCallTimer = 0;
+      let hostCallAttempts = 0;
+      let destroyed = false;
+      const HOST_ID = currentRoomId + '_host';
+      const MAX_HOST_CALL_ATTEMPTS = 12;
+
+      function setupVideoElement(videoEl, isMuted) {
+        if (!videoEl) return;
+        videoEl.setAttribute('autoplay', '');
+        videoEl.setAttribute('playsinline', '');
+        videoEl.setAttribute('webkit-playsinline', '');
+        videoEl.autoplay = true;
+        videoEl.playsInline = true;
+        videoEl.setAttribute('playsInline', 'true');
+        if (isMuted) {
+          videoEl.muted = true;
+          videoEl.setAttribute('muted', '');
+        } else {
+          videoEl.muted = false;
+          videoEl.removeAttribute('muted');
+        }
+      }
+
+      setupVideoElement(localVideo, true);
+      setupVideoElement(remoteVideo, false);
+
+      function bindLocalPip() {
+        var pipBox = document.getElementById('selfPip') || document.querySelector('.self-pip');
+        if (!pipBox || !localVideo || !localStream) return;
+        pipBox.classList.add('has-stream');
+        localVideo.classList.add('has-stream');
+        localVideo.style.display = 'block';
+        localVideo.srcObject = localStream;
+        localVideo.play().catch(function () { /* autoplay policy */ });
+        window.__localCamBound = true;
+        window.__localCamStream = localStream;
+        window.localMediaStream = localStream;
+      }
+
+      function attachRemoteStream(stream) {
+        if (!remoteVideo || !stream) return;
+        setupVideoElement(remoteVideo, false);
+        remoteVideo.srcObject = stream;
+        remoteVideo.classList.add('has-stream');
+        remoteVideo.style.display = 'block';
+        remoteVideo.style.visibility = 'visible';
+        remoteVideo.style.opacity = '1';
+        var box = document.getElementById('tutorVideoBox') || remoteVideo.closest('.tutor-video');
+        if (box) box.classList.add('has-stream');
+
+        var playRemote = function () {
+          var attempt = remoteVideo.play();
+          if (attempt && typeof attempt.catch === 'function') {
+            attempt.catch(function (e) {
+              console.log('Autoplay waiting for touch gesture:', e);
+              remoteVideo.muted = true;
+              remoteVideo.play().catch(function () { /* ignore */ });
+              var unlockPlay = function () {
+                remoteVideo.muted = false;
+                remoteVideo.play().catch(function () { /* ignore */ });
+                document.removeEventListener('click', unlockPlay);
+                document.removeEventListener('touchstart', unlockPlay);
+              };
+              document.addEventListener('click', unlockPlay);
+              document.addEventListener('touchstart', unlockPlay, { passive: true });
+            });
+          }
+        };
+        playRemote();
+        Array.prototype.forEach.call(stream.getTracks(), function (track) {
+          track.addEventListener('unmute', playRemote);
+        });
+      }
+
+      function callHostPeer(hostPeerId) {
+        if (destroyed || !peer || !localStream || currentRole === 'partner') return;
+        if (activeCall) {
+          try { activeCall.close(); } catch (e) { /* ignore */ }
+          activeCall = null;
+        }
+        hostCallAttempts += 1;
+        console.log('📞 Calling host peer:', hostPeerId, 'attempt', hostCallAttempts);
+        const call = peer.call(hostPeerId, localStream);
+        if (!call) return;
+        activeCall = call;
+        call.on('stream', function (incomingStream) {
+          attachRemoteStream(incomingStream);
+        });
+        call.on('close', function () {
+          if (activeCall === call) activeCall = null;
+        });
+        call.on('error', function (err) {
+          console.warn('Host call error:', err && err.type ? err.type : err);
+        });
+      }
+
+      function scheduleHostCall() {
+        if (destroyed || currentRole === 'partner') return;
+        clearTimeout(hostCallTimer);
+        hostCallTimer = setTimeout(function () {
+          callHostPeer(HOST_ID);
+        }, hostCallAttempts === 0 ? 1500 : 1500);
+      }
+
+      async function initWebRTC() {
+        if (destroyed) return;
+        try {
+          if (typeof Peer === 'undefined') {
+            console.error('PeerJS library missing');
+            window.__dayoUsePeerJS = false;
+            if (typeof window.attachLocalStreamToPip === 'function') window.attachLocalStreamToPip();
+            return;
+          }
+
+          localStream = (window.localMediaStream && window.localMediaStream.getVideoTracks && window.localMediaStream.getVideoTracks().length)
+            ? window.localMediaStream
+            : await navigator.mediaDevices.getUserMedia({
+              video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
+              audio: true
+            });
+          bindLocalPip();
+
+          const myPeerId = (currentRole === 'partner')
+            ? HOST_ID
+            : (currentRoomId + '_guest_' + Math.floor(Math.random() * 1000));
+
+          peer = new Peer(myPeerId, {
+            debug: 1,
+            config: {
+              iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+              ]
+            }
+          });
+
+          peer.on('open', function (id) {
+            console.log('✅ My Peer ID:', id);
+            if (currentRole === 'user' || currentRole === 'learner') {
+              scheduleHostCall();
+            }
+          });
+
+          peer.on('call', function (call) {
+            if (!localStream) return;
+            activeCall = call;
+            call.answer(localStream);
+            call.on('stream', function (incomingStream) {
+              attachRemoteStream(incomingStream);
+            });
+          });
+
+          peer.on('error', function (err) {
+            var type = err && err.type;
+            console.warn('PeerJS Status:', type || err);
+            if (type === 'unavailable-id' && peer && typeof peer.reconnect === 'function') {
+              peer.reconnect();
+            }
+            if (type === 'peer-unavailable' && currentRole !== 'partner' && hostCallAttempts < MAX_HOST_CALL_ATTEMPTS) {
+              scheduleHostCall();
+            }
+            if (type === 'disconnected' && peer && typeof peer.reconnect === 'function') {
+              peer.reconnect();
+            }
+          });
+
+          peer.on('disconnected', function () {
+            if (destroyed || !peer) return;
+            try { peer.reconnect(); } catch (e) { /* ignore */ }
+          });
+        } catch (err) {
+          console.error('카메라/마이크 접근 오류:', err);
+          alert('카메라 및 마이크 권한을 허용해 주세요.');
+        }
+      }
+
+      function destroy() {
+        destroyed = true;
+        clearTimeout(hostCallTimer);
+        try { if (activeCall) activeCall.close(); } catch (e) { /* ignore */ }
+        activeCall = null;
+        try { if (peer) peer.destroy(); } catch (e) { /* ignore */ }
+        peer = null;
+        if (localStream) {
+          try { localStream.getTracks().forEach(function (track) { track.stop(); }); } catch (e) { /* ignore */ }
+          localStream = null;
+        }
+      }
+
+      window.DayOPeerVideo = {
+        init: initWebRTC,
+        destroy: destroy,
+        getLocalStream: function () { return localStream; },
+        getPeerId: function () { return peer && peer.id; }
+      };
+
+      if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', initWebRTC);
+      } else {
+        initWebRTC();
+      }
+    })();
+  </script>
   <script>
     /* Session timer — 25 min live chat + 5 min quiz block */
     (function initSessionTimer() {
@@ -4649,6 +4882,7 @@
     }
 
     async function attachLocalStreamToPip() {
+      if (window.__dayoUsePeerJS) return;
       if (window.__localCamBound) return;
       try {
         const pipBox = findPipBox();

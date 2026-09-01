@@ -627,9 +627,10 @@
   }
 
   function applyLocalTracks() {
-    if (!localStream) return;
-    localStream.getAudioTracks().forEach(function (track) { track.enabled = micOn; });
-    localStream.getVideoTracks().forEach(function (track) { track.enabled = camOn; });
+    var stream = localStream || window.localMediaStream || window.__localCamStream;
+    if (!stream) return;
+    stream.getAudioTracks().forEach(function (track) { track.enabled = micOn; });
+    stream.getVideoTracks().forEach(function (track) { track.enabled = camOn; });
     var pip = els().selfPip;
     if (!pip) return;
     if (camOn) pip.classList.add('has-stream');
@@ -687,6 +688,7 @@
   }
 
   function startDemoMedia() {
+    if (window.__dayoUsePeerJS) return Promise.resolve();
     demoMode = true;
     var nodes = els();
     if (nodes.host) nodes.host.classList.remove('is-on', 'is-pending');
@@ -970,6 +972,9 @@
     wantListen = false;
     clearTimeout(sttRestartTimer);
     stopSpeech();
+    if (window.DayOPeerVideo && typeof window.DayOPeerVideo.destroy === 'function') {
+      try { window.DayOPeerVideo.destroy(); } catch (e) { /* ignore */ }
+    }
     destroyDaily();
     stopShareDemo();
     if (localStream) {
@@ -1023,12 +1028,18 @@
       bindCopilotClicks();
       bindChatToCopilot();
 
-      var boot = withTimeout(joinDaily(), 8000).then(function () {
+      var boot;
+      if (window.__dayoUsePeerJS) {
         demoMode = false;
-      }).catch(function () {
-        try { destroyDaily(); } catch (e) { /* ignore */ }
-        return startDemoMedia();
-      });
+        boot = Promise.resolve();
+      } else {
+        boot = withTimeout(joinDaily(), 8000).then(function () {
+          demoMode = false;
+        }).catch(function () {
+          try { destroyDaily(); } catch (e) { /* ignore */ }
+          return startDemoMedia();
+        });
+      }
 
       boot.then(function () {
         if (hungUp) return;
