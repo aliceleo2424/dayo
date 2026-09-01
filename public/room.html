@@ -1587,7 +1587,9 @@
     }
 
     body.theme-partner #ratingModal,
-    body.theme-partner .rating-modal {
+    body.theme-partner .rating-modal,
+    body.theme-partner #quiz-modal,
+    body.theme-partner #quizModal {
       display: none !important;
     }
 
@@ -1712,11 +1714,56 @@
       display: none !important;
     }
     .rq-overlay.is-open,
-    #quizModal.rq-overlay.is-open {
+    #quizModal.rq-overlay.is-open,
+    #quiz-modal.rq-overlay.is-open {
       display: flex !important;
       opacity: 1;
       visibility: visible;
       pointer-events: auto;
+    }
+    #quiz-modal.rq-overlay,
+    #quiz-modal.rq-overlay.is-open {
+      align-items: center !important;
+      justify-content: center !important;
+      padding: 12px;
+    }
+    #quiz-modal .quiz-modal-card {
+      width: 92% !important;
+      max-width: 420px !important;
+      max-height: 85vh !important;
+      padding: 16px !important;
+      overflow-y: auto !important;
+      box-sizing: border-box !important;
+      display: flex;
+      flex-direction: column;
+      margin: 0 auto;
+      border-radius: 18px;
+      background: #FFFDF9;
+      border: 1.5px solid #EDE4D5;
+      box-shadow: 0 18px 40px rgba(113, 83, 72, 0.18);
+      color: var(--text);
+    }
+    #quiz-modal .quiz-modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    #quiz-modal .quiz-modal-kicker {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 800;
+      color: #E76F51;
+      letter-spacing: 0.02em;
+    }
+    #quiz-modal .quiz-modal-head .rq-close {
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+    }
+    #quiz-modal #quiz-done-btn {
+      margin-top: 4px;
     }
 
     body.session-ended-user #videoStage,
@@ -2709,77 +2756,15 @@
     </div>
   </div>
 
-    <!-- AI Review Quiz (mobile-first, 3 steps) -->
-  <div class="rq-overlay" id="quizModal" data-view="viewQuizSection" hidden>
-    <div class="rq-sheet" role="dialog" aria-modal="true" aria-labelledby="rqTitle">
-      <header class="rq-head">
-        <p class="rq-kicker" id="rqKicker">AI 복습 퀴즈</p>
+    <!-- Instant STT review quiz -->
+  <div class="rq-overlay" id="quiz-modal" data-view="viewQuizSection" hidden>
+    <div class="quiz-modal-card" role="dialog" aria-modal="true" aria-labelledby="quizModalTitle">
+      <header class="quiz-modal-head">
+        <p class="quiz-modal-kicker" id="quizModalTitle">방금 말한 문장 복습 퀴즈</p>
         <button class="rq-close" type="button" id="rqClose" aria-label="닫기">✕</button>
       </header>
-
-      <div class="rq-body">
-        <!-- Step 1: Intro -->
-        <section class="rq-step is-active" data-rq-step="1" aria-labelledby="rqTitle">
-          <div class="rq-intro">
-            <div class="rq-intro__emoji" aria-hidden="true">🎉</div>
-            <h2 class="rq-intro__title" id="rqTitle">오늘 대화 정말 잘하셨어요!</h2>
-            <p class="rq-intro__summary" id="rqSummary">
-              오늘 Camille와 <strong>카페 주문</strong>을 주제로 이야기했어요.
-              막힌 순간에도 천천히 이어서 말해 보셨네요 ☕
-            </p>
-            <p class="rq-intro__hint">방금 나눈 표현으로 짧은 복습 퀴즈 7문항을 풀어볼까요?</p>
-          </div>
-          <button class="rq-cta" type="button" id="rqStart">복습 퀴즈 시작하기</button>
-        </section>
-
-        <!-- Step 2: Quiz -->
-        <section class="rq-step" data-rq-step="2" aria-labelledby="rqQuestionText">
-          <div class="rq-progress" aria-label="퀴즈 진행">
-            <div class="rq-progress__meta">
-              <span class="rq-progress__count"><span id="rqCurrent">1</span> / <span id="rqTotal">7</span></span>
-              <span id="rqProgressLabel">문항 1</span>
-            </div>
-            <div class="rq-progress__track">
-              <span class="rq-progress__fill" id="rqProgressFill"></span>
-            </div>
-          </div>
-
-          <div class="rq-question">
-            <span class="rq-question__type" id="rqQuestionType">유형 1 · 사지선다</span>
-            <p class="rq-question__text" id="rqQuestionText">바리스타가 “What can I get for you today?”라고 했어요. 가장 자연스러운 대답은?</p>
-          </div>
-
-          <!-- Types 1–4: multiple choice -->
-          <div class="rq-layout rq-mcq" data-rq-layout="mcq" id="rqMcq"></div>
-
-          <!-- Type 5: word-block sentence builder -->
-          <div class="rq-layout rq-words" data-rq-layout="words" id="rqWords" hidden>
-            <div class="rq-assemble" id="rqAssemble" aria-label="완성한 문장"></div>
-            <div class="rq-bank" id="rqBank" aria-label="단어 블록"></div>
-          </div>
-
-          <p class="rq-feedback" id="rqFeedback" aria-live="polite"></p>
-          <button class="rq-cta" type="button" id="rqQuizNext" hidden>다음 문항</button>
-        </section>
-
-        <!-- Step 3: Report -->
-        <section class="rq-step rq-report" data-rq-step="3" aria-labelledby="rqReportTitle">
-          <article class="rq-report__card">
-            <h2 class="rq-report__title" id="rqReportTitle">🏆 오늘 세션 복습 완료!</h2>
-            <ul class="rq-report__list" id="rqReportList">
-              <li>🎯 복습 퀴즈 7문항을 모두 풀었어요.</li>
-            </ul>
-            <div class="rq-phrases" id="rqPhrases"></div>
-          </article>
-
-          <p class="rq-complete-note">🎉 오늘 대화 복습 완료! 핵심 표현이 단어장에 저장되었습니다.</p>
-
-          <div class="rq-actions">
-            <button class="rq-cta" type="button" id="rqSaveVocab">단어장에 저장하기</button>
-            <button class="rq-cta rq-cta--ghost" type="button" id="rqDone">확인 / 대화 마치기</button>
-          </div>
-        </section>
-      </div>
+      <div id="quiz-content-box"></div>
+      <button class="rq-cta" type="button" id="quiz-done-btn">확인 / 대화 마치기</button>
     </div>
   </div>
 
@@ -3304,7 +3289,7 @@
     }
 
     function getUserQuizModal() {
-      return document.getElementById('quizModal') || document.getElementById('reviewQuizModal');
+      return document.getElementById('quiz-modal') || document.getElementById('quizModal') || document.getElementById('reviewQuizModal');
     }
 
     function hideLiveVideoStage() {
@@ -3397,6 +3382,16 @@
         return;
       }
       options = options || {};
+      if (result && result.transcript) {
+        window.DayOLastTranscript = result.transcript;
+        if (!window.sessionTranscript || !window.sessionTranscript.length) {
+          window.sessionTranscript = result.transcript;
+        }
+      }
+      if (typeof window.openQuizModalImmediately === 'function') {
+        window.openQuizModalImmediately();
+        return;
+      }
       revealUserQuizModal();
       var transcript = (result && result.transcript)
         || (window.DayOLive && window.DayOLive.getTranscript && window.DayOLive.getTranscript())
@@ -3413,6 +3408,10 @@
 
     window.openQuizModal = function (result) {
       if (isPartnerEndMode()) return;
+      if (typeof window.openQuizModalImmediately === 'function') {
+        window.openQuizModalImmediately();
+        return;
+      }
       openReviewFromTranscript(result, { autoStart: true });
     };
 
@@ -3483,6 +3482,10 @@
         return;
       }
       closeRatingModal();
+      if (typeof window.openQuizModalImmediately === 'function') {
+        window.openQuizModalImmediately();
+        return;
+      }
       if (typeof openQuizModal === 'function') {
         openQuizModal();
         return;
@@ -3528,11 +3531,12 @@
       }
       showToast(t('room.toastFeedbackSent'));
       stopAllMedia();
-      persistTranscript().then(function (result) {
-        openReviewFromTranscript(result, { autoStart: true });
-      }).catch(function () {
+      if (typeof window.openQuizModalImmediately === 'function') {
+        window.openQuizModalImmediately();
+      } else {
         openReviewFromTranscript(null, { autoStart: true });
-      });
+      }
+      persistTranscript();
     });
 
     document.querySelectorAll('#ratingModal .close-btn, #ratingModal [data-dismiss]').forEach(function (btn) {
@@ -3553,558 +3557,210 @@
   </script>
   <script>
     (function () {
-      var overlay = document.getElementById('quizModal') || document.getElementById('reviewQuizModal');
-      if (!overlay) return;
+      function collectSessionTranscripts() {
+        var transcripts = [];
+        if (Array.isArray(window.sessionTranscript) && window.sessionTranscript.length) {
+          transcripts = window.sessionTranscript;
+        } else if (window.DayOLive && typeof window.DayOLive.getTranscript === 'function') {
+          try { transcripts = window.DayOLive.getTranscript() || []; } catch (e) { transcripts = []; }
+        }
+        if ((!transcripts || !transcripts.length) && Array.isArray(window.DayOLastTranscript)) {
+          transcripts = window.DayOLastTranscript;
+        }
+        if (!Array.isArray(transcripts) || !transcripts.length) {
+          try { transcripts = JSON.parse(localStorage.getItem('last_session_transcript') || '[]'); } catch (err) { transcripts = []; }
+        }
+        return Array.isArray(transcripts) ? transcripts : [];
+      }
 
-      var TYPE_LABELS = {
-        1: '유형 1 · 단어 뜻',
-        2: '유형 2 · 빈칸 채우기',
-        3: '유형 3 · 자연스러운 표현',
-        4: '유형 4 · 상황별 멘트',
-        5: '유형 5 · 문장 완성'
+      function isUserUtterance(t) {
+        if (!t) return false;
+        var role = String(t.role || '').toLowerCase();
+        var speaker = String(t.speaker || '').toLowerCase();
+        if (role === 'partner' || speaker === 'partner' || role === 'host' || speaker === 'host' || role === 'tutor' || speaker === 'tutor') {
+          return false;
+        }
+        return role === 'user' || speaker === 'user' || !role;
+      }
+
+      window.generateDynamicReviewQuiz = function generateDynamicReviewQuiz() {
+        const transcripts = collectSessionTranscripts();
+        const userSentences = transcripts
+          .filter(function (t) {
+            return isUserUtterance(t) && t.text && t.text.trim().split(' ').length >= 3;
+          })
+          .map(function (t) { return t.text.trim(); });
+
+        const baseSentences = userSentences.length > 0 ? userSentences : [
+          'I like talking with my partner',
+          'English conversation is very fun',
+          'Today was a great session'
+        ];
+
+        const quizList = [];
+        const dummyDistractors = ['coffee', 'yesterday', 'happy', 'together', 'important', 'delicious', 'travel', 'morning'];
+
+        baseSentences.slice(-3).forEach(function (sentence, idx) {
+          const words = sentence.split(/\s+/);
+          const stopWords = new Set(['i', 'a', 'an', 'the', 'is', 'are', 'was', 'were', 'to', 'in', 'on', 'at', 'and', 'my', 'it']);
+          const candidateIndices = words
+            .map(function (w, i) {
+              return (!stopWords.has(w.toLowerCase().replace(/[^a-z]/g, '')) && w.length >= 3 ? i : -1);
+            })
+            .filter(function (i) { return i !== -1; });
+
+          const targetIdx = candidateIndices.length > 0
+            ? candidateIndices[Math.floor(Math.random() * candidateIndices.length)]
+            : 0;
+
+          const rawTargetWord = words[targetIdx] || words[0] || 'fun';
+          const cleanTargetWord = rawTargetWord.replace(/[^a-zA-Z0-9]/g, '') || rawTargetWord;
+          const blankSentence = words.map(function (w, i) {
+            return (i === targetIdx ? ' [ ______ ] ' : w);
+          }).join(' ');
+
+          const wrongOptions = dummyDistractors
+            .filter(function (d) { return d.toLowerCase() !== String(cleanTargetWord).toLowerCase(); })
+            .sort(function () { return 0.5 - Math.random(); })
+            .slice(0, 2);
+
+          const options = [cleanTargetWord].concat(wrongOptions).sort(function () { return 0.5 - Math.random(); });
+
+          quizList.push({
+            id: idx + 1,
+            question: 'Q' + (idx + 1) + '. 방금 내가 말한 문장의 빈칸에 들어갈 단어는?',
+            sentence: blankSentence,
+            answer: cleanTargetWord,
+            options: options
+          });
+        });
+
+        return quizList;
       };
 
-      var QUESTIONS = [
-        {
-          type: 1,
-          prompt: '"latte"의 뜻으로 가장 알맞은 것은?',
-          layout: 'mcq',
-          choices: ['라떼', '에스프레소', '주스', '케이크'],
-          answer: 0,
-          vocab: { word: 'latte', meaning: '라떼' }
-        },
-        {
-          type: 1,
-          prompt: '"reserve"의 뜻으로 가장 알맞은 것은?',
-          layout: 'mcq',
-          choices: ['취소하다', '계산하다', '예약하다', '기다리다'],
-          answer: 2,
-          vocab: { word: 'reserve', meaning: '예약하다' }
-        },
-        {
-          type: 2,
-          prompt: '빈칸에 들어갈 말로 알맞은 것은?\nCan I have a latte, ____?',
-          layout: 'mcq',
-          choices: ['now', 'please', 'you', 'yes'],
-          answer: 1
-        },
-        {
-          type: 2,
-          prompt: '빈칸에 들어갈 말로 알맞은 것은?\nI\'d like to ____ a table for two.',
-          layout: 'mcq',
-          choices: ['order', 'drink', 'sit', 'reserve'],
-          answer: 3
-        },
-        {
-          type: 3,
-          prompt: '바리스타가 "What can I get for you today?"라고 했어요. 가장 자연스러운 대답은?',
-          layout: 'mcq',
-          choices: ['I want coffee.', 'Can I have a latte, please?', 'Coffee me.', 'Give me latte now.'],
-          answer: 1
-        },
-        {
-          type: 4,
-          prompt: '카페가 붐빌 때, 빈자리인지 확인하고 싶어요. 가장 알맞은 멘트는?',
-          layout: 'mcq',
-          choices: ['You move, please.', 'I sit here now.', 'Is this seat taken?', 'Give me this chair.'],
-          answer: 2
-        },
-        {
-          type: 5,
-          prompt: '단어를 순서대로 눌러 문장을 완성해 보세요.\n(두 명 테이블을 예약하고 싶어요)',
-          layout: 'words',
-          words: ["I'd", 'like', 'to reserve', 'a table', 'for', 'two'],
-          answer: ["I'd", 'like', 'to reserve', 'a table', 'for', 'two']
-        }
-      ];
+      function escapeQuizHtml(str) {
+        return String(str == null ? '' : str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
 
-      var KEY_PHRASES = [
-        { word: 'latte', meaning: '라떼', kind: 'word' },
-        { word: 'reserve', meaning: '예약하다', kind: 'word' },
-        { word: 'please', meaning: '부탁할 때 붙이는 말', kind: 'word' },
-        { word: "I'd like ~", meaning: '~을 원해요', kind: 'expr' },
-        { word: 'Can I have a latte, please?', meaning: '라떼 주세요', kind: 'expr' },
-        { word: 'Is this seat taken?', meaning: '이 자리 비었나요?', kind: 'expr' },
-        { word: "I'd like to reserve a table for two.", meaning: '두 명 테이블을 예약하고 싶어요', kind: 'expr' }
-      ];
+      function escapeQuizJs(str) {
+        return String(str == null ? '' : str).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      }
 
-      var sessionTranscript = [];
-
-      var els = {
-        start: document.getElementById('rqStart'),
-        close: document.getElementById('rqClose'),
-        done: document.getElementById('rqDone'),
-        save: document.getElementById('rqSaveVocab'),
-        current: document.getElementById('rqCurrent'),
-        total: document.getElementById('rqTotal'),
-        label: document.getElementById('rqProgressLabel'),
-        fill: document.getElementById('rqProgressFill'),
-        type: document.getElementById('rqQuestionType'),
-        text: document.getElementById('rqQuestionText'),
-        mcq: document.getElementById('rqMcq'),
-        words: document.getElementById('rqWords'),
-        assemble: document.getElementById('rqAssemble'),
-        bank: document.getElementById('rqBank'),
-        feedback: document.getElementById('rqFeedback'),
-        reportTitle: document.getElementById('rqReportTitle'),
-        reportList: document.getElementById('rqReportList'),
-        phrases: document.getElementById('rqPhrases')
-      };
-
-      var index = 0;
-      var correctCount = 0;
-      var busy = false;
-      var wordTotal = 0;
-      var advanceTimer = 0;
-      var vocabSaved = false;
-
-      function showStep(step) {
-        overlay.querySelectorAll('[data-rq-step]').forEach(function (el) {
-          el.classList.toggle('is-active', Number(el.getAttribute('data-rq-step')) === step);
+      window.checkQuizAnswer = function (btn, selected, correct) {
+        if (!btn) return;
+        const parent = btn.parentElement;
+        if (!parent) return;
+        parent.querySelectorAll('.quiz-opt-btn').forEach(function (b) {
+          b.disabled = true;
+          b.style.opacity = '0.6';
         });
-      }
 
-      function showLayout(layout) {
-        overlay.querySelectorAll('[data-rq-layout]').forEach(function (el) {
-          el.hidden = el.getAttribute('data-rq-layout') !== layout;
-        });
-      }
-
-      function shuffle(list) {
-        var arr = list.slice();
-        for (var i = arr.length - 1; i > 0; i--) {
-          var j = Math.floor(Math.random() * (i + 1));
-          var tmp = arr[i];
-          arr[i] = arr[j];
-          arr[j] = tmp;
-        }
-        return arr;
-      }
-
-      function clearFeedback() {
-        if (!els.feedback) return;
-        els.feedback.textContent = '';
-        els.feedback.classList.remove('is-ok', 'is-ng');
-      }
-
-      function setFeedback(ok, message) {
-        if (!els.feedback) return;
-        els.feedback.textContent = message;
-        els.feedback.classList.toggle('is-ok', ok);
-        els.feedback.classList.toggle('is-ng', !ok);
-      }
-
-      function updateProgress() {
-        var total = QUESTIONS.length;
-        var current = Math.min(index + 1, total);
-        if (els.current) els.current.textContent = String(current);
-        if (els.total) els.total.textContent = String(total);
-        if (els.label) els.label.textContent = '문항 ' + current;
-        if (els.fill) els.fill.style.width = ((current / total) * 100) + '%';
-      }
-
-      function resetQuiz() {
-        index = 0;
-        correctCount = 0;
-        busy = false;
-        wordTotal = 0;
-        vocabSaved = false;
-        if (advanceTimer) {
-          clearTimeout(advanceTimer);
-          advanceTimer = 0;
-        }
-        if (els.fill) els.fill.style.width = '0%';
-        if (els.save) {
-          els.save.disabled = false;
-          els.save.textContent = '단어장에 저장하기';
-        }
-        clearFeedback();
-      }
-
-      function escapeRq(str) {
-        return String(str == null ? '' : str).replace(/[&<>"']/g, function (ch) {
-          return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
-        });
-      }
-
-      function normalizeTranscript(raw) {
-        if (!Array.isArray(raw)) return [];
-        return raw.map(function (row, i) {
-          return {
-            id: (row && row.id) || ('t-' + i),
-            speaker: (row && row.speaker) || 'user',
-            text: String((row && row.text) || '').trim(),
-            timestamp: (row && row.timestamp) || null
-          };
-        }).filter(function (row) { return row.text; });
-      }
-
-      function readStoredTranscript() {
-        if (window.DayOLive && typeof window.DayOLive.getTranscript === 'function') {
-          var live = normalizeTranscript(window.DayOLive.getTranscript());
-          if (live.length) return live;
-        }
-        if (window.DayOLastTranscript) {
-          var last = normalizeTranscript(window.DayOLastTranscript);
-          if (last.length) return last;
-        }
-        if (window.DayOProfileStore && typeof window.DayOProfileStore.getLastTranscript === 'function') {
-          var stored = normalizeTranscript(window.DayOProfileStore.getLastTranscript());
-          if (stored.length) return stored;
-        }
-        try {
-          return normalizeTranscript(JSON.parse(localStorage.getItem('last_session_transcript') || '[]'));
-        } catch (err) {
-          return [];
-        }
-      }
-
-      function transcriptBlob() {
-        return sessionTranscript.map(function (row) { return row.text; }).join(' ');
-      }
-
-      function applyTranscriptIntro() {
-        var summary = document.getElementById('rqSummary');
-        if (!summary) return;
-        if (!sessionTranscript.length) return;
-        var count = sessionTranscript.length;
-        var preview = sessionTranscript[sessionTranscript.length - 1].text;
-        summary.innerHTML =
-          '오늘 세션에서 <strong>' + count + '개의 발화</strong>를 남겼어요. ' +
-          '마지막에 이렇게 말해 보셨네요: <strong>' + escapeRq(preview) + '</strong> ☕';
-      }
-
-      function transcriptReportPhrases() {
-        var seen = {};
-        return sessionTranscript.map(function (row) {
-          return { word: row.text, meaning: '오늘 직접 말한 표현', kind: 'expr' };
-        }).filter(function (item) {
-          var key = item.word.toLowerCase();
-          if (seen[key]) return false;
-          seen[key] = true;
-          return true;
-        }).slice(-7);
-      }
-
-      function open(options) {
-        options = options || {};
-        sessionTranscript = normalizeTranscript(options.transcript);
-        if (!sessionTranscript.length) sessionTranscript = readStoredTranscript();
-        window.DayOLastTranscript = sessionTranscript;
-        resetQuiz();
-        applyTranscriptIntro();
-        overlay.hidden = false;
-        overlay.classList.add('is-open');
-        if (options.autoStart) {
-          startQuiz();
+        if (String(selected).toLowerCase() === String(correct).toLowerCase()) {
+          btn.style.background = '#ECFDF5';
+          btn.style.borderColor = '#10B981';
+          btn.style.color = '#059669';
+          btn.style.opacity = '1';
+          btn.innerHTML = '✅ ' + escapeQuizHtml(selected) + ' (정답!)';
         } else {
-          showStep(1);
+          btn.style.background = '#FEF2F2';
+          btn.style.borderColor = '#EF4444';
+          btn.style.color = '#DC2626';
+          btn.style.opacity = '1';
+          btn.innerHTML = '❌ ' + escapeQuizHtml(selected) + ' (정답: ' + escapeQuizHtml(correct) + ')';
         }
+      };
+
+      window.openQuizModalImmediately = function () {
+        const ratingModal = document.getElementById('rating-modal') || document.getElementById('ratingModal') || document.querySelector('.rating-modal');
+        if (ratingModal) {
+          ratingModal.style.display = 'none';
+          ratingModal.classList.remove('active');
+          ratingModal.style.removeProperty('opacity');
+          ratingModal.style.removeProperty('visibility');
+        }
+
+        const quizModal = document.getElementById('quiz-modal') || document.getElementById('quizModal') || document.getElementById('reviewQuizModal');
+        const quizContainer = document.getElementById('quiz-content-box');
+        if (!quizModal || !quizContainer) return;
+
+        const dynamicQuiz = generateDynamicReviewQuiz();
+
+        quizContainer.innerHTML = dynamicQuiz.map(function (q) {
+          return (
+            '<div style="background: #FFFFFF; border: 1.5px solid #EDE4D5; border-radius: 12px; padding: 12px; margin-bottom: 12px; text-align: left;">' +
+              '<div style="font-size: 11px; font-weight: 800; color: #E76F51; margin-bottom: 4px;">' + escapeQuizHtml(q.question) + '</div>' +
+              '<div style="font-size: 13px; font-weight: 700; color: #264653; line-height: 1.4; margin-bottom: 10px; background: #F8F9FA; padding: 8px 10px; border-radius: 8px; word-break: keep-all;">' +
+                '"' + escapeQuizHtml(q.sentence) + '"' +
+              '</div>' +
+              '<div style="display: flex; flex-direction: column; gap: 6px;">' +
+                q.options.map(function (opt) {
+                  return (
+                    '<button type="button" class="quiz-opt-btn" data-opt="' + escapeQuizHtml(opt) + '" data-answer="' + escapeQuizHtml(q.answer) + '" ' +
+                      'onclick="checkQuizAnswer(this, \'' + escapeQuizJs(opt) + '\', \'' + escapeQuizJs(q.answer) + '\')" ' +
+                      'style="width: 100%; padding: 8px 12px; font-size: 12px; font-weight: 600; text-align: left; border: 1px solid #E5E7EB; border-radius: 8px; background: #FFFFFF; cursor: pointer; transition: all 0.2s;">' +
+                      '⚪ ' + escapeQuizHtml(opt) +
+                    '</button>'
+                  );
+                }).join('') +
+              '</div>' +
+            '</div>'
+          );
+        }).join('');
+
+        quizModal.hidden = false;
+        quizModal.classList.add('is-open');
+        quizModal.style.setProperty('display', 'flex', 'important');
+        quizModal.style.setProperty('align-items', 'center', 'important');
+        quizModal.style.setProperty('justify-content', 'center', 'important');
+        quizModal.style.setProperty('z-index', '500000', 'important');
+        quizModal.style.setProperty('opacity', '1', 'important');
+        quizModal.style.setProperty('visibility', 'visible', 'important');
         if (window.DayOScrollLock) window.DayOScrollLock.lock();
-      }
+      };
 
-      function close() {
-        var wasOpen = overlay.classList.contains('is-open') || !overlay.hidden;
-        if (advanceTimer) {
-          clearTimeout(advanceTimer);
-          advanceTimer = 0;
+      function closeInstantQuiz() {
+        var quizModal = document.getElementById('quiz-modal') || document.getElementById('quizModal') || document.getElementById('reviewQuizModal');
+        var wasOpen = !!(quizModal && (quizModal.classList.contains('is-open') || !quizModal.hidden));
+        if (quizModal) {
+          quizModal.classList.remove('is-open');
+          quizModal.hidden = true;
+          quizModal.style.removeProperty('display');
+          quizModal.style.removeProperty('opacity');
+          quizModal.style.removeProperty('visibility');
         }
-        overlay.classList.remove('is-open');
-        overlay.hidden = true;
-        busy = false;
         if (wasOpen && window.DayOScrollLock) window.DayOScrollLock.unlock();
-        if (!wasOpen) return;
-        if (typeof window.goToMypage === 'function') {
-          window.goToMypage();
-          return;
-        }
-        window.location.href = 'index.html?view=mypage';
-      }
-
-      function startQuiz() {
-        index = 0;
-        correctCount = 0;
-        busy = false;
-        showStep(2);
-        if (els.fill) els.fill.style.width = '0%';
-        requestAnimationFrame(function () {
-          renderQuestion();
-        });
-      }
-
-      function currentQuestion() {
-        return QUESTIONS[index];
-      }
-
-      function renderQuestion() {
-        var q = currentQuestion();
-        if (!q) {
-          showReport();
-          return;
-        }
-        busy = false;
-        clearFeedback();
-        if (els.type) els.type.textContent = TYPE_LABELS[q.type] || ('유형 ' + q.type);
-        if (els.text) els.text.textContent = q.prompt;
-        showLayout(q.layout === 'words' ? 'words' : 'mcq');
-        updateProgress();
-        if (q.layout === 'words') renderWords(q);
-        else renderMcq(q);
-      }
-
-      function renderMcq(q) {
-        els.mcq.innerHTML = '';
-        q.choices.forEach(function (text, i) {
-          var btn = document.createElement('button');
-          btn.className = 'rq-choice';
-          btn.type = 'button';
-          btn.setAttribute('data-rq-choice', String(i));
-          btn.textContent = text;
-          els.mcq.appendChild(btn);
-        });
-      }
-
-      function placeholderChip() {
-        var span = document.createElement('span');
-        span.className = 'rq-assemble__placeholder';
-        span.id = 'rqAssemblePlaceholder';
-        span.textContent = '단어를 순서대로 눌러 문장을 완성해 보세요';
-        return span;
-      }
-
-      function renderWords(q) {
-        wordTotal = q.words.length;
-        els.assemble.classList.remove('is-correct', 'is-wrong');
-        els.assemble.innerHTML = '';
-        els.assemble.appendChild(placeholderChip());
-        els.bank.innerHTML = '';
-        shuffle(q.words.map(function (word) {
-          return word;
-        })).forEach(function (word, bankPos) {
-          var chip = document.createElement('button');
-          chip.className = 'rq-chip';
-          chip.type = 'button';
-          chip.textContent = word;
-          chip.setAttribute('data-rq-word', word);
-          chip.setAttribute('data-rq-bank', String(bankPos));
-          els.bank.appendChild(chip);
-        });
-      }
-
-      function assembledChips() {
-        return Array.prototype.slice.call(els.assemble.querySelectorAll('.rq-chip'));
-      }
-
-      function restoreChipToBank(chip) {
-        chip.classList.remove('rq-chip--filled', 'is-correct', 'is-wrong');
-        var order = Number(chip.getAttribute('data-rq-bank'));
-        var bankChips = Array.prototype.slice.call(els.bank.querySelectorAll('.rq-chip'));
-        var inserted = false;
-        for (var i = 0; i < bankChips.length; i++) {
-          if (Number(bankChips[i].getAttribute('data-rq-bank')) > order) {
-            els.bank.insertBefore(chip, bankChips[i]);
-            inserted = true;
-            break;
-          }
-        }
-        if (!inserted) els.bank.appendChild(chip);
-        if (!assembledChips().length) {
-          els.assemble.innerHTML = '';
-          els.assemble.appendChild(placeholderChip());
-        }
-      }
-
-      function moveChipToAssemble(chip) {
-        var placeholder = els.assemble.querySelector('.rq-assemble__placeholder');
-        if (placeholder) placeholder.remove();
-        chip.classList.add('rq-chip--filled');
-        els.assemble.appendChild(chip);
-      }
-
-      function lockMcq() {
-        Array.prototype.forEach.call(els.mcq.querySelectorAll('.rq-choice'), function (btn) {
-          btn.disabled = true;
-        });
-      }
-
-      function lockWords() {
-        Array.prototype.forEach.call(overlay.querySelectorAll('#rqAssemble .rq-chip, #rqBank .rq-chip'), function (btn) {
-          btn.disabled = true;
-        });
-      }
-
-      function submitMcq(choiceIndex) {
-        if (busy) return;
-        var q = currentQuestion();
-        if (!q || q.layout === 'words') return;
-        busy = true;
-        lockMcq();
-        var ok = choiceIndex === q.answer;
-        if (ok) correctCount += 1;
-        var buttons = els.mcq.querySelectorAll('.rq-choice');
-        if (buttons[choiceIndex]) {
-          buttons[choiceIndex].classList.add(ok ? 'is-correct' : 'is-wrong');
-        }
-        if (!ok && buttons[q.answer]) buttons[q.answer].classList.add('is-correct');
-        setFeedback(ok, ok ? '정답이에요!' : '아쉬워요, 정답을 표시해 두었어요');
-        scheduleNext();
-      }
-
-      function checkWordsIfComplete() {
-        if (busy) return;
-        var chips = assembledChips();
-        if (chips.length !== wordTotal) return;
-        busy = true;
-        lockWords();
-        var q = currentQuestion();
-        var ok = chips.every(function (chip, i) {
-          return chip.getAttribute('data-rq-word') === q.answer[i];
-        });
-        if (ok) correctCount += 1;
-        els.assemble.classList.add(ok ? 'is-correct' : 'is-wrong');
-        chips.forEach(function (chip, i) {
-          chip.classList.add(chip.getAttribute('data-rq-word') === q.answer[i] ? 'is-correct' : 'is-wrong');
-        });
-        setFeedback(ok, ok ? '문장을 완벽하게 완성했어요!' : '순서가 조금 달랐어요');
-        scheduleNext();
-      }
-
-      function scheduleNext() {
-        var last = index >= QUESTIONS.length - 1;
-        advanceTimer = setTimeout(function () {
-          advanceTimer = 0;
-          index += 1;
-          if (index >= QUESTIONS.length) showReport();
-          else renderQuestion();
-        }, last ? 420 : 500);
-      }
-
-      function showReport() {
-        busy = false;
-        if (els.fill) els.fill.style.width = '100%';
-        if (els.reportTitle) els.reportTitle.textContent = '🏆 오늘 세션 복습 완료!';
-        var spoken = transcriptBlob();
-        if (els.reportList) {
-          els.reportList.innerHTML =
-            '<li>🎯 복습 퀴즈 7문항 중 <strong>' + correctCount + '문항</strong>을 맞혔어요.</li>' +
-            (sessionTranscript.length
-              ? '<li>🎙️ 오늘 남긴 발화 <strong>' + sessionTranscript.length + '개</strong>를 바탕으로 피드백을 정리했어요.</li>'
-              : '<li>💬 오늘 습득한 핵심 표현을 아래에 모아 두었어요.</li>') +
-            (spoken
-              ? '<li>📝 대화 스크립트: “' + escapeRq(spoken.slice(0, 140)) + (spoken.length > 140 ? '…' : '') + '”</li>'
-              : '');
-        }
-        var reportPhrases = transcriptReportPhrases();
-        if (!reportPhrases.length) reportPhrases = KEY_PHRASES;
-        if (els.phrases) {
-          els.phrases.innerHTML = reportPhrases.map(function (item) {
-            return '<p class="rq-phrase"><strong>' + escapeRq(item.word) + '</strong><span>' + escapeRq(item.meaning) + '</span></p>';
-          }).join('');
-        }
-        showStep(3);
-      }
-
-      function notify(msg) {
-        var toast = document.getElementById('toast');
-        if (!toast) return;
-        toast.textContent = msg;
-        toast.classList.add('show');
-        clearTimeout(notify._timer);
-        notify._timer = setTimeout(function () { toast.classList.remove('show'); }, 2200);
-      }
-
-      function fallbackSaveVocab(items) {
-        try {
-          var prev = JSON.parse(localStorage.getItem('dayo.reviewVocab') || '[]');
-          if (!Array.isArray(prev)) prev = [];
-          items.forEach(function (item) {
-            if (!prev.some(function (row) { return row.word === item.word; })) prev.push(item);
-          });
-          localStorage.setItem('dayo.reviewVocab', JSON.stringify(prev));
-        } catch (err) { /* ignore quota / private mode */ }
-      }
-
-      function saveVocab() {
-        if (vocabSaved) return;
-        var items = KEY_PHRASES.map(function (item) {
-          return {
-            word: item.word,
-            meaning: item.meaning,
-            kind: item.kind,
-            savedAt: new Date().toISOString()
-          };
-        });
-        var store = window.DayOProfileStore;
-        if (els.save) {
-          els.save.disabled = true;
-          els.save.textContent = '저장 중...';
-        }
-        var done = function () {
-          vocabSaved = true;
-          if (els.save) els.save.textContent = '저장 완료!';
-          notify('단어장에 저장했어요');
-          if (typeof window.handleUserQuizComplete === 'function') {
-            window.handleUserQuizComplete();
-          }
-        };
-        if (store && typeof store.mergeVocab === 'function') {
-          store.mergeVocab(items).then(done).catch(function () {
-            fallbackSaveVocab(items);
-            done();
-          });
-        } else {
-          fallbackSaveVocab(items);
-          done();
-        }
-      }
-
-      function finishSession() {
-        close();
         if (typeof window.handleUserQuizComplete === 'function') {
           window.handleUserQuizComplete();
+          return;
+        }
+        if (typeof window.goToMypage === 'function') {
+          window.goToMypage();
           return;
         }
         try { sessionStorage.setItem('dayo_goto', 'mypage'); } catch (e) { /* ignore */ }
         window.location.href = 'index.html?view=mypage';
       }
 
-      els.mcq.addEventListener('click', function (e) {
-        var btn = e.target.closest('.rq-choice');
-        if (!btn || btn.disabled) return;
-        submitMcq(Number(btn.getAttribute('data-rq-choice')));
-      });
-
-      els.bank.addEventListener('click', function (e) {
-        var chip = e.target.closest('.rq-chip');
-        if (!chip || busy || chip.disabled) return;
-        moveChipToAssemble(chip);
-        checkWordsIfComplete();
-      });
-
-      els.assemble.addEventListener('click', function (e) {
-        var chip = e.target.closest('.rq-chip');
-        if (!chip || busy || chip.disabled) return;
-        restoreChipToBank(chip);
-      });
-
-      if (els.start) els.start.addEventListener('click', startQuiz);
-      if (els.close) els.close.addEventListener('click', close);
-      document.querySelectorAll('#quizModal .close-btn, #quizModal [data-dismiss]').forEach(function (btn) {
-        btn.onclick = function () {
-          if (typeof window.goToMypage === 'function') window.goToMypage();
-          else window.location.href = 'index.html?view=mypage';
-        };
-      });
-      if (els.done) els.done.addEventListener('click', finishSession);
-      if (els.save) els.save.addEventListener('click', saveVocab);
-
       window.DayOReviewQuiz = {
-        open: open,
-        close: close,
-        showStep: showStep,
-        start: startQuiz,
-        getTranscript: function () { return sessionTranscript.slice(); }
+        open: function () { window.openQuizModalImmediately(); },
+        close: closeInstantQuiz,
+        showStep: function () { window.openQuizModalImmediately(); },
+        start: function () { window.openQuizModalImmediately(); },
+        getTranscript: function () { return collectSessionTranscripts().slice(); }
       };
+
+      var closeBtn = document.getElementById('rqClose');
+      if (closeBtn) closeBtn.addEventListener('click', closeInstantQuiz);
+      var doneBtn = document.getElementById('quiz-done-btn');
+      if (doneBtn) doneBtn.addEventListener('click', closeInstantQuiz);
+      document.querySelectorAll('#quiz-modal .close-btn, #quiz-modal [data-dismiss], #quizModal .close-btn, #quizModal [data-dismiss]').forEach(function (btn) {
+        btn.onclick = closeInstantQuiz;
+      });
     })();
   </script>
   <script>
