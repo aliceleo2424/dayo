@@ -79,14 +79,17 @@
     }
 
     .topbar-inner {
-      width: min(1120px, calc(100% - 2rem));
+      width: 100%;
+      max-width: 1280px;
       min-height: 72px;
       margin: 0 auto;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
-      max-width: 100%;
+      padding-left: 24px;
+      padding-right: 24px;
+      box-sizing: border-box;
     }
 
     .brand {
@@ -152,20 +155,24 @@
     }
 
     .page {
-      width: min(1120px, calc(100% - 2rem));
+      width: 100%;
+      max-width: 1280px;
       margin: 0 auto;
-      padding: 2rem 0 4rem;
-      max-width: 100%;
+      padding: 2rem 24px 4rem;
       overflow-x: hidden;
       box-sizing: border-box;
     }
 
     .partner-container,
-    .partner-dashboard-wrap {
-      width: 100%;
-      max-width: 100%;
-      overflow-x: hidden;
-      box-sizing: border-box;
+    .partner-dashboard-wrap,
+    main {
+      width: 100% !important;
+      max-width: 1280px !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      padding-left: 24px !important;
+      padding-right: 24px !important;
+      box-sizing: border-box !important;
     }
 
     .page-heading {
@@ -1299,11 +1306,20 @@
 
       .page {
         width: 100%;
-        padding-left: 1rem;
-        padding-right: 1rem;
+        padding-left: 16px;
+        padding-right: 16px;
         padding-top: 2rem;
         padding-bottom: 4rem;
         box-sizing: border-box;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .partner-container,
+      .partner-dashboard-wrap,
+      main {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
       }
 
       .ms-opt { padding: 0.4rem 0.55rem; font-size: 0.7rem; }
@@ -1489,7 +1505,7 @@
     <a href="mypage.html"><span aria-hidden="true">👤</span> <span data-i18n="nav.learnerMypage">마이페이지로 이동</span></a>
   </nav>
 
-  <main class="page partner-dashboard-wrap" id="viewPartnerHome">
+  <main class="page partner-container partner-dashboard-wrap" id="viewPartnerHome">
     <div class="page-heading">
       <p class="eyebrow" data-i18n="partner.eyebrow">PARTNER LOUNGE</p>
       <h1 data-i18n="partner.heading">오늘도 다정한 대화를 준비해 볼까요? 🍰</h1>
