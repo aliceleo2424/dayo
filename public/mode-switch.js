@@ -127,10 +127,80 @@
     google: { name: '구글 유저', email: 'google_test@dayo.app' }
   };
 
+  var LOGIN_I18N = {
+    ko: {
+      title: '대화 라운지 로그인',
+      desc: '글로벌 파트너와의 가벼운 일상 대화를 시작해 보세요',
+      emailPlaceholder: '이메일 주소 입력',
+      passwordPlaceholder: '비밀번호 입력',
+      startBtn: '이메일로 시작하기',
+      socialDivider: '간편 로그인',
+      social: { kakao: '카카오로 계속하기', naver: '네이버로 계속하기', google: 'Google로 계속하기' },
+      dismiss: '다음에 하기'
+    },
+    en: {
+      title: 'Welcome to DayO',
+      desc: 'Start casual conversations with global partners',
+      emailPlaceholder: 'Enter your email',
+      passwordPlaceholder: 'Enter your password',
+      startBtn: 'Continue with Email',
+      socialDivider: 'Social Login',
+      social: { kakao: 'Continue with Kakao', naver: 'Continue with Naver', google: 'Continue with Google' },
+      dismiss: 'Maybe later'
+    },
+    fr: {
+      title: 'Connexion à DayO',
+      desc: 'Échangez naturellement avec des partenaires du monde entier',
+      emailPlaceholder: 'Adresse e-mail',
+      passwordPlaceholder: 'Mot de passe',
+      startBtn: "Continuer avec l'e-mail",
+      socialDivider: 'Connexion rapide',
+      social: { kakao: 'Continuer avec Kakao', naver: 'Continuer avec Naver', google: 'Continuer avec Google' },
+      dismiss: 'Plus tard'
+    },
+    es: {
+      title: 'Iniciar sesión en DayO',
+      desc: 'Inicia conversaciones casuales con compañeros globales',
+      emailPlaceholder: 'Correo electrónico',
+      passwordPlaceholder: 'Contraseña',
+      startBtn: 'Continuar con el correo',
+      socialDivider: 'Acceso rápido',
+      social: { kakao: 'Continuar con Kakao', naver: 'Continuar con Naver', google: 'Continuar con Google' },
+      dismiss: 'Más tarde'
+    }
+  };
+
+  function loginLang() {
+    var lang = 'ko';
+    try {
+      if (window.DayOI18n && typeof window.DayOI18n.getLang === 'function') {
+        lang = String(window.DayOI18n.getLang() || 'KO').toLowerCase();
+      } else {
+        lang = String(localStorage.getItem('dayo_lang') || 'KO').toLowerCase();
+      }
+    } catch (e) {
+      lang = 'ko';
+    }
+    if (lang === 'zh' || lang === 'ja' || lang === 'cn' || lang === 'kr') lang = 'ko';
+    return LOGIN_I18N[lang] ? lang : 'ko';
+  }
+
+  function loginText(key, lang) {
+    var parts = String(key || '').replace(/^login\./, '').split('.');
+    var cur = LOGIN_I18N[lang] || LOGIN_I18N.ko;
+    for (var i = 0; i < parts.length; i++) {
+      if (!cur || typeof cur !== 'object') return null;
+      cur = cur[parts[i]];
+    }
+    return typeof cur === 'string' ? cur : null;
+  }
+
   function t(key, vars) {
-    if (!window.DayOI18n) return key;
-    if (vars) return window.DayOI18n.tf(key, vars);
-    return window.DayOI18n.t(key);
+    if (window.DayOI18n) {
+      var translated = vars ? window.DayOI18n.tf(key, vars) : window.DayOI18n.t(key);
+      if (translated && translated !== key) return translated;
+    }
+    return loginText(key, loginLang()) || loginText(key, 'ko') || key;
   }
 
   function applyI18n() {
@@ -545,6 +615,7 @@
 
   function openLogin(href) {
     pendingHref = href || null;
+    syncLoginI18n();
     showAuthLayer(overlay);
     if (window.DayOScrollLock) window.DayOScrollLock.lock();
     else document.body.style.overflow = 'hidden';
@@ -711,6 +782,7 @@
     if (naver) naver.textContent = t('login.social.naver');
     if (google) google.textContent = t('login.social.google');
     if (dismiss) dismiss.textContent = t('login.dismiss');
+    applyI18n();
   }
 
   function mountLogin() {
@@ -733,9 +805,9 @@
       '  </form>',
       '  <div class="ms-divider" data-i18n="login.socialDivider">', t('login.socialDivider'), '</div>',
       '  <div class="ms-social">',
-      '    <button class="ms-social-btn ms-social-btn--kakao" type="button" data-ms-social="kakao">', t('login.social.kakao'), '</button>',
-      '    <button type="button" class="ms-social-btn ms-social-btn--naver btn-naver" data-ms-social="naver">', t('login.social.naver'), '</button>',
-      '    <button class="ms-social-btn ms-social-btn--google" type="button" data-ms-social="google">', t('login.social.google'), '</button>',
+      '    <button class="ms-social-btn ms-social-btn--kakao" type="button" data-ms-social="kakao" data-i18n="login.social.kakao">', t('login.social.kakao'), '</button>',
+      '    <button type="button" class="ms-social-btn ms-social-btn--naver btn-naver" data-ms-social="naver" data-i18n="login.social.naver">', t('login.social.naver'), '</button>',
+      '    <button class="ms-social-btn ms-social-btn--google" type="button" data-ms-social="google" data-i18n="login.social.google">', t('login.social.google'), '</button>',
       '  </div>',
       '  <button class="ms-dismiss" type="button" data-ms-close data-i18n="login.dismiss">', t('login.dismiss'), '</button>',
       '</div>'
@@ -806,6 +878,7 @@
     document.body.appendChild(toastEl);
 
     mountLogin();
+    syncLoginI18n();
     render();
 
     document.addEventListener('click', function (e) {

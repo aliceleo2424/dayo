@@ -343,6 +343,248 @@
     .status-value { margin-top: 0.28rem; font-size: 1.35rem; font-weight: 900; letter-spacing: -0.03em; }
     .status-note { margin-top: 0.3rem; color: var(--muted); font-size: 0.72rem; }
 
+    .status-fortune-row {
+      display: grid;
+      grid-template-columns: 1fr minmax(220px, 280px);
+      gap: 0.9rem;
+      align-items: stretch;
+    }
+    .dayo-fortune-checkin {
+      padding: 1.1rem 1rem 1.15rem;
+      border-radius: 20px;
+      background: linear-gradient(145deg, #FFF4D6, #FFE8B0);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 196, 90, 0.55);
+      box-shadow: 0 8px 20px rgba(255, 184, 76, 0.18);
+    }
+    .dayo-fortune-title {
+      margin: 0 auto 0.35rem;
+      font-size: 0.92rem;
+      font-weight: 800;
+      line-height: 1.45;
+      color: #5C4A42;
+    }
+    .dayo-fortune-sub {
+      margin: 0 auto 0.85rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      line-height: 1.45;
+      color: #9A8580;
+    }
+    .dayo-fortune-cookie {
+      position: relative;
+      width: 5.2rem;
+      height: 5.2rem;
+      margin: 0 auto;
+      padding: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: inline-block;
+      animation: dayo-fortune-bounce 1.5s infinite;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .dayo-fortune-cookie:focus-visible {
+      outline: 3px solid rgba(255, 107, 87, 0.55);
+      outline-offset: 4px;
+      border-radius: 16px;
+    }
+    @keyframes dayo-fortune-bounce {
+      0%, 100% { transform: translateY(0) scale(1); }
+      40% { transform: translateY(-10px) scale(1.06); }
+      55% { transform: translateY(0) scale(0.96); }
+      70% { transform: translateY(-5px) scale(1.03); }
+    }
+    .dayo-fortune-piece {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3.6rem;
+      line-height: 1;
+      transform-origin: center bottom;
+      pointer-events: none;
+    }
+    .dayo-fortune-piece--left { clip-path: inset(0 50% 0 0); }
+    .dayo-fortune-piece--right { clip-path: inset(0 0 0 50%); }
+    .dayo-fortune-paper-mini {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      z-index: 1;
+      padding: 0.3rem 0.55rem;
+      border-radius: 8px;
+      background: #FFFCFA;
+      border: 1px solid rgba(255, 196, 90, 0.7);
+      box-shadow: 0 4px 10px rgba(255, 184, 76, 0.28);
+      font-size: 0.62rem;
+      font-weight: 800;
+      color: #5C4A42;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translate(-50%, -40%) scale(0.7);
+      pointer-events: none;
+    }
+    @keyframes dayo-fortune-shake {
+      0%, 100% { transform: translateX(0) rotate(0); }
+      25% { transform: translateX(-5px) rotate(-6deg); }
+      75% { transform: translateX(5px) rotate(6deg); }
+    }
+    .dayo-fortune-cookie.is-cracking { animation: dayo-fortune-shake 0.1s ease; }
+    .dayo-fortune-cookie.is-cracking .dayo-fortune-piece--left {
+      transition: transform 0.4s ease, opacity 0.4s ease;
+      transform: rotate(-25deg) translate(-15px, 5px);
+      opacity: 0;
+    }
+    .dayo-fortune-cookie.is-cracking .dayo-fortune-piece--right {
+      transition: transform 0.4s ease, opacity 0.4s ease;
+      transform: rotate(25deg) translate(15px, 5px);
+      opacity: 0;
+    }
+    .dayo-fortune-cookie.is-cracking .dayo-fortune-paper-mini {
+      transition: transform 0.3s ease 0.08s, opacity 0.3s ease 0.08s;
+      transform: translate(-50%, calc(-50% - 20px)) scale(1.1);
+      opacity: 1;
+    }
+    .dayo-fortune-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 980;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+      background: rgba(92, 74, 66, 0.38);
+      backdrop-filter: blur(8px);
+      box-sizing: border-box;
+    }
+    .dayo-fortune-modal-card {
+      width: 100%;
+      max-width: 420px;
+      max-height: min(90vh, 90dvh);
+      overflow-y: auto;
+      background: #FFFCFA;
+      border-radius: 24px;
+      border: 1px solid rgba(255, 209, 220, 0.75);
+      box-shadow: 0 24px 56px rgba(113, 83, 72, 0.22);
+      color: #5C4A42;
+    }
+    .dayo-fortune-modal-head {
+      padding: 1.35rem 1.35rem 1rem;
+      background: linear-gradient(135deg, #FFD1DC, #FFE5B4 60%, #FFF4D6);
+      border-radius: 24px 24px 0 0;
+      text-align: center;
+    }
+    .dayo-fortune-modal-icon {
+      font-size: 2.2rem;
+      line-height: 1;
+      display: block;
+      margin-bottom: 0.45rem;
+    }
+    .dayo-fortune-modal-dear {
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .dayo-fortune-modal-body {
+      padding: 1.2rem 1.35rem 0.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+    .dayo-fortune-modal-block {
+      margin: 0;
+      padding: 0.85rem 0.95rem;
+      border-radius: 16px;
+      background: #FFF8F5;
+      border: 1px solid #FFE8E3;
+      text-align: left;
+    }
+    .dayo-fortune-modal-label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      color: #FF6B57;
+      margin-bottom: 0.35rem;
+    }
+    .dayo-fortune-modal-original {
+      font-size: 1.02rem;
+      font-weight: 800;
+      line-height: 1.5;
+    }
+    .dayo-fortune-modal-ko {
+      font-size: 0.92rem;
+      font-weight: 700;
+      line-height: 1.55;
+    }
+    .dayo-fortune-modal-cheer {
+      font-size: 0.88rem;
+      font-weight: 600;
+      line-height: 1.55;
+      color: #9A8580;
+    }
+    .dayo-fortune-save-banner {
+      margin: 0.35rem 1.35rem 0;
+      padding: 0.95rem 1rem;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(255, 209, 220, 0.7), rgba(255, 244, 214, 0.9));
+      border: 1px dashed rgba(255, 107, 87, 0.4);
+      text-align: center;
+      color: #5C4A42;
+    }
+    .dayo-fortune-save-banner__text {
+      margin: 0 0 0.7rem;
+      font-size: 0.84rem;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+    .dayo-fortune-login-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.65rem 1.1rem;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.86rem;
+      font-weight: 800;
+      color: #fff;
+      background: linear-gradient(135deg, #FF7A68, #FF6B57 55%, #FF8A4C);
+      box-shadow: 0 3px 0 #E55A45;
+    }
+    .dayo-fortune-modal-actions {
+      display: flex;
+      gap: 0.6rem;
+      padding: 1rem 1.35rem 1.3rem;
+    }
+    .dayo-fortune-btn {
+      flex: 1;
+      padding: 0.75rem 0.9rem;
+      border-radius: 14px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .dayo-fortune-btn-close {
+      border: 1px solid #FFE8E3;
+      background: #FFF8F5;
+      color: #9A8580;
+    }
+    .dayo-fortune-btn-copy {
+      border: none;
+      background: #FF6B57;
+      color: #fff;
+      box-shadow: 0 3px 0 #E55A45;
+    }
+
     .pass-bar {
       height: 8px;
       margin-top: 0.7rem;
@@ -619,6 +861,7 @@
       .welcome,
       .topbar-extras { display: none; }
       .status-grid { grid-template-columns: 1fr; }
+      .status-fortune-row { grid-template-columns: 1fr; }
       .status-card, .sessions-card, .library-card, .coupon-card { padding: 1.1rem; }
       .coupon-item .primary-btn { width: 100%; }
       .session { grid-template-columns: 1fr; }
@@ -631,6 +874,7 @@
 
     @media (max-width: 620px) {
       .status-grid { grid-template-columns: 1fr; }
+      .status-fortune-row { grid-template-columns: 1fr; }
     }
 
     body.theme-partner,
@@ -826,6 +1070,7 @@
         <a class="primary-btn" href="index.html?booking=open" data-booking-open data-i18n="mypage.status.newBooking">📅 새 대화 예약하기</a>
       </div>
 
+      <div class="status-fortune-row">
       <div class="status-grid">
         <div class="status-item">
           <div class="status-icon" aria-hidden="true">☕</div>
@@ -850,6 +1095,16 @@
           <p class="status-value">240분</p>
           <p class="status-note" data-i18n="mypage.status.timeNote">연속 3주째 대화를 이어가는 중이에요 💖</p>
         </div>
+      </div>
+      <aside class="dayo-fortune-checkin" aria-label="오늘의 대화 포춘쿠키">
+        <p class="dayo-fortune-title">오늘의 대화 포춘쿠키</p>
+        <p class="dayo-fortune-sub">매일 1회, 가볍게 열어보는 체크인</p>
+        <button type="button" id="dayo-cookie-trigger" class="dayo-fortune-cookie" aria-label="포춘쿠키 열기">
+          <span class="dayo-fortune-piece dayo-fortune-piece--left" aria-hidden="true">🥠</span>
+          <span class="dayo-fortune-piece dayo-fortune-piece--right" aria-hidden="true">🥠</span>
+          <span class="dayo-fortune-paper-mini" aria-hidden="true">✨ 오늘의 한마디</span>
+        </button>
+      </aside>
       </div>
     </section>
 
@@ -1029,6 +1284,37 @@
     </section>
   </main>
 
+  <div id="dayo-fortune-modal" class="dayo-fortune-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="dayo-fortune-dear" hidden>
+    <div class="dayo-fortune-modal-card">
+      <div class="dayo-fortune-modal-head">
+        <span class="dayo-fortune-modal-icon" aria-hidden="true">🍰</span>
+        <p class="dayo-fortune-modal-dear" id="dayo-fortune-dear">Dear. ...</p>
+      </div>
+      <div class="dayo-fortune-modal-body">
+        <p class="dayo-fortune-modal-block">
+          <span class="dayo-fortune-modal-label">TODAY’S CARD</span>
+          <span class="dayo-fortune-modal-original" data-fortune-original>Your fortune is waiting to be opened.</span>
+        </p>
+        <p class="dayo-fortune-modal-block">
+          <span class="dayo-fortune-modal-label">한국어</span>
+          <span class="dayo-fortune-modal-ko" data-fortune-ko>오늘의 카드가 곧 열릴 거예요.</span>
+        </p>
+        <p class="dayo-fortune-modal-block">
+          <span class="dayo-fortune-modal-label">DayO의 응원</span>
+          <span class="dayo-fortune-modal-cheer" data-fortune-cheer>한 걸음씩, 오늘도 말문이 트일 거예요.</span>
+        </p>
+      </div>
+      <div class="dayo-fortune-save-banner" data-fortune-guest-only>
+        <p class="dayo-fortune-save-banner__text">✨ 로그인하시고, 내 닉네임을 넣은 나만의 카드를 받아보세요!</p>
+        <button type="button" class="dayo-fortune-login-btn" data-fortune-login>3초 만에 로그인</button>
+      </div>
+      <div class="dayo-fortune-modal-actions">
+        <button type="button" class="dayo-fortune-btn dayo-fortune-btn-close" data-fortune-close>닫기</button>
+        <button type="button" class="dayo-fortune-btn dayo-fortune-btn-copy" data-fortune-copy>📋 문장 복사</button>
+      </div>
+    </div>
+  </div>
+
   <script src="i18n.js"></script>
   <script src="materials.js"></script>
   <script src="supabase-env.js"></script>
@@ -1041,6 +1327,7 @@
   <script src="availability-slots.js"></script>
   <script src="booking-modal.js"></script>
   <script src="insta-card-export.js"></script>
+  <script src="fortune-cookie.js"></script>
   <script>
     if (typeof window.loadUserReports === 'function') window.loadUserReports();
   </script>

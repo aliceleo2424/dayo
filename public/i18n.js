@@ -1,16 +1,15 @@
-/* DayO 경량 다국어 엔진 — 6개 국어 (KO, EN, ZH, JA, FR, ES) */
+/* DayO 경량 다국어 엔진 — 4개 국어 (KO, EN, FR, ES) */
 (function () {
   'use strict';
 
   var STORAGE_KEY = 'dayo_lang';
-  var SUPPORTED = ['KO', 'EN', 'ZH', 'JA', 'FR', 'ES'];
+  var SUPPORTED = ['KO', 'EN', 'FR', 'ES'];
   var FALLBACK = ['KO', 'EN'];
+  var LANG_ALIAS = { ZH: 'KO', JA: 'KO', CN: 'KO', KR: 'KO' };
 
   var LANG_META = {
     KO: { flag: '🇰🇷', label: '한국어' },
     EN: { flag: '🇺🇸', label: 'English' },
-    ZH: { flag: '🇨🇳', label: '中文' },
-    JA: { flag: '🇯🇵', label: '日本語' },
     FR: { flag: '🇫🇷', label: 'Français' },
     ES: { flag: '🇪🇸', label: 'Español' }
   };
@@ -130,55 +129,43 @@
       KO: '{name}님', EN: '{name}', ZH: '{name}', JA: '{name}さん', FR: '{name}', ES: '{name}'
     },
     'login.title': {
-      KO: '세계 어디서나, 나를 기다리는 다정한 대화 파트너 ☕️',
-      EN: 'A warm conversation partner waiting for you, anywhere ☕️',
-      ZH: '无论身在何处，都有温柔的对话伙伴在等你 ☕️',
-      JA: '世界のどこでも、あなたを待つあたたかい会話パートナー ☕️',
-      FR: 'Un partenaire chaleureux qui vous attend partout ☕️',
-      ES: 'Un compañero cálido que te espera en cualquier lugar ☕️'
+      KO: '대화 라운지 로그인',
+      EN: 'Welcome to DayO',
+      FR: 'Connexion à DayO',
+      ES: 'Iniciar sesión en DayO'
     },
     'login.desc': {
-      KO: '로그인하고 오늘의 대화 기록을 받아보세요!',
-      EN: 'Sign in to receive today’s talk record!',
-      ZH: '登录后领取今天的对话记录！',
-      JA: 'ログインして今日の会話記録を受け取ろう！',
-      FR: 'Connectez-vous pour recevoir le récap de la conversation !',
-      ES: 'Inicia sesión para recibir el registro de hoy.'
-    },
-      EN: 'Sign in and get your own AI speaking report!',
-      ZH: '登录后领取专属 AI 口语报告！',
-      JA: 'ログインして、あなただけのAIスピーキングレポートを受け取りましょう！',
-      FR: 'Connectez-vous et recevez votre rapport IA !',
-      ES: '¡Inicia sesión y recibe tu informe de speaking con IA!'
+      KO: '글로벌 파트너와의 가벼운 일상 대화를 시작해 보세요',
+      EN: 'Start casual conversations with global partners',
+      FR: 'Échangez naturellement avec des partenaires du monde entier',
+      ES: 'Inicia conversaciones casuales con compañeros globales'
     },
     'login.emailPlaceholder': {
-      KO: '이메일 주소 입력', EN: 'Enter email address', ZH: '输入邮箱地址', JA: 'メールアドレスを入力', FR: 'Adresse e-mail', ES: 'Correo electrónico'
+      KO: '이메일 주소 입력', EN: 'Enter your email', FR: 'Adresse e-mail', ES: 'Correo electrónico'
     },
     'login.passwordPlaceholder': {
-      KO: '비밀번호 입력', EN: 'Enter password', ZH: '输入密码', JA: 'パスワードを入力', FR: 'Mot de passe', ES: 'Contraseña'
+      KO: '비밀번호 입력', EN: 'Enter your password', FR: 'Mot de passe', ES: 'Contraseña'
     },
     'login.nicknamePlaceholder': {
       KO: '닉네임 또는 이메일을 입력해 주세요', EN: 'Enter nickname or email', ZH: '请输入昵称或邮箱', JA: 'ニックネームまたはメールを入力', FR: 'Pseudo ou e-mail', ES: 'Apodo o correo'
     },
     'login.startBtn': {
-      KO: 'DayO 시작하기 🚀', EN: 'Start DayO 🚀', ZH: '开始 DayO 🚀', JA: 'DayOをはじめる 🚀', FR: 'Commencer DayO 🚀', ES: 'Empezar DayO 🚀'
+      KO: '이메일로 시작하기', EN: 'Continue with Email', FR: "Continuer avec l'e-mail", ES: 'Continuar con el correo'
     },
     'login.socialDivider': {
-      KO: '또는 소셜 계정으로 시작하기',
-      EN: 'Or continue with a social account',
-      ZH: '或使用社交账号开始',
-      JA: 'またはソーシャルアカウントで始める',
-      FR: 'Ou continuer avec un compte social',
-      ES: 'O continúa con una cuenta social'
+      KO: '간편 로그인',
+      EN: 'Social Login',
+      FR: 'Connexion rapide',
+      ES: 'Acceso rápido'
     },
     'login.social.kakao': {
-      KO: '카카오로 시작하기', EN: 'Continue with Kakao', ZH: '用 Kakao 开始', JA: 'Kakaoで始める', FR: 'Continuer avec Kakao', ES: 'Continuar con Kakao'
+      KO: '카카오로 계속하기', EN: 'Continue with Kakao', FR: 'Continuer avec Kakao', ES: 'Continuar con Kakao'
     },
     'login.social.naver': {
-      KO: '네이버로 시작하기', EN: 'Continue with Naver', ZH: '用 Naver 开始', JA: 'Naverで始める', FR: 'Continuer avec Naver', ES: 'Continuar con Naver'
+      KO: '네이버로 계속하기', EN: 'Continue with Naver', FR: 'Continuer avec Naver', ES: 'Continuar con Naver'
     },
     'login.social.google': {
-      KO: 'Google로 시작하기', EN: 'Continue with Google', ZH: '用 Google 开始', JA: 'Googleで始める', FR: 'Continuer avec Google', ES: 'Continuar con Google'
+      KO: 'Google로 계속하기', EN: 'Continue with Google', FR: 'Continuer avec Google', ES: 'Continuar con Google'
     },
     'login.passwordMismatch': {
       KO: '비밀번호가 올바르지 않습니다.',
@@ -273,7 +260,7 @@
       KO: '파트너 스튜디오 둘러보기', EN: 'Explore Partner Studio', ZH: '浏览伙伴工作室', JA: 'パートナースタジオを見る', FR: 'Découvrir le Studio', ES: 'Explorar el Estudio'
     },
     'login.dismiss': {
-      KO: '다음에 할게요', EN: 'Maybe later', ZH: '稍后再说', JA: 'あとで', FR: 'Plus tard', ES: 'Más tarde'
+      KO: '다음에 하기', EN: 'Maybe later', FR: 'Plus tard', ES: 'Más tarde'
     },
     'login.success': {
       KO: '로그인되었습니다! 마이페이지로 이동할게요 💖', EN: 'Signed in! Going to My Page 💖', ZH: '已登录！前往我的页面 💖', JA: 'ログインしました！マイページへ 💖', FR: 'Connecté ! Direction Mon espace 💖', ES: '¡Sesión iniciada! 💖'
@@ -1992,18 +1979,21 @@
   ].join('');
 
   function detectLang() {
-    var raw = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    var raw = (navigator.language || navigator.userLanguage || 'ko').toLowerCase();
     if (/^ko/.test(raw)) return 'KO';
-    if (/^zh/.test(raw)) return 'ZH';
-    if (/^ja/.test(raw)) return 'JA';
     if (/^fr/.test(raw)) return 'FR';
     if (/^es/.test(raw)) return 'ES';
-    return 'EN';
+    if (/^en/.test(raw)) return 'EN';
+    return 'KO';
   }
 
   function normalizeLang(code) {
     var upper = String(code || '').toUpperCase();
-    return SUPPORTED.indexOf(upper) > -1 ? upper : detectLang();
+    if (LANG_ALIAS[upper]) upper = LANG_ALIAS[upper];
+    if (SUPPORTED.indexOf(upper) > -1) return upper;
+    var detected = detectLang();
+    if (LANG_ALIAS[detected]) detected = LANG_ALIAS[detected];
+    return SUPPORTED.indexOf(detected) > -1 ? detected : 'KO';
   }
 
   function getLang() {
@@ -2068,7 +2058,7 @@
   }
 
   function htmlLang(code) {
-    return { KO: 'ko', EN: 'en', ZH: 'zh', JA: 'ja', FR: 'fr', ES: 'es' }[code] || 'en';
+    return { KO: 'ko', EN: 'en', FR: 'fr', ES: 'es' }[code] || 'ko';
   }
 
   function apply() {
@@ -2202,9 +2192,9 @@
   function init() {
     try {
       var saved = localStorage.getItem(STORAGE_KEY);
-      currentLang = saved ? normalizeLang(saved) : detectLang();
+      currentLang = saved ? normalizeLang(saved) : 'KO';
     } catch (e) {
-      currentLang = detectLang();
+      currentLang = 'KO';
     }
 
     var style = document.createElement('style');

@@ -8,8 +8,7 @@ var PHONE_RE = /^01[016789]\d{7,8}$/;
 var SUCCESS_MSG = '🎉 웨비나 신청이 완료되었습니다! 라이브 시작 전 문자/이메일로 접속 링크를 보내드립니다.';
 var FAIL_MSG = '신청 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
 var BTN_LABEL = {
-  free: '웨비나 무료 알림 신청하기',
-  paid: '심화 실전 마스터 알림 신청하기'
+  free: '웨비나 무료 알림 신청하기'
 };
 
 var supabase = null;
@@ -84,14 +83,14 @@ function setError(el, message) {
 }
 
 function setTabs(type) {
-  selectedType = type === 'paid' ? 'paid' : 'free';
+  selectedType = 'free';
   document.querySelectorAll('[data-webinar-type]').forEach(function (btn) {
     var on = btn.getAttribute('data-webinar-type') === selectedType;
     btn.classList.toggle('is-active', on);
     btn.setAttribute('aria-selected', on ? 'true' : 'false');
   });
   var submit = document.getElementById('btn-webinar-submit');
-  if (submit && !submit.disabled) submit.textContent = BTN_LABEL[selectedType];
+  if (submit && !submit.disabled) submit.textContent = BTN_LABEL.free;
 }
 
 function validate(name, phone, email) {
@@ -113,7 +112,7 @@ async function submitApplication(userName, userPhone, userEmail) {
         name: userName,
         phone: userPhone,
         email: userEmail,
-        webinar_type: selectedType || 'free'
+        webinar_type: 'free'
       }
     ]);
   return { error: error || null };
@@ -182,7 +181,7 @@ function init() {
     } finally {
       submitBtn.disabled = false;
       submitBtn.classList.remove('is-loading');
-      submitBtn.textContent = BTN_LABEL[selectedType];
+      submitBtn.textContent = BTN_LABEL.free;
     }
   });
 }
