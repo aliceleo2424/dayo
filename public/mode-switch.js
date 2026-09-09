@@ -506,16 +506,14 @@
 
     if (config.loggedIn) {
       var ticketCount = 0;
-      var pointBalance = 0;
       try {
-        if (window._dayoAuthProfile) {
-          if (window._dayoAuthProfile.ticket_count != null) ticketCount = Number(window._dayoAuthProfile.ticket_count) || 0;
-          if (window._dayoAuthProfile.point_balance != null) pointBalance = Number(window._dayoAuthProfile.point_balance) || 0;
+        if (window._dayoAuthProfile && window._dayoAuthProfile.ticket_count != null) {
+          ticketCount = Number(window._dayoAuthProfile.ticket_count) || 0;
         } else if (window.DayOTicketWallet && typeof window.DayOTicketWallet.getCount === 'function') {
           ticketCount = window.DayOTicketWallet.getCount();
         }
       } catch (e) { /* ignore */ }
-      var ticketLabel = '☕️ 티켓 ' + ticketCount + '장 · ✨ ' + pointBalance + 'P';
+      var ticketLabel = '☕️ 보유 티켓: ' + ticketCount + '장';
 
       return [
         '<div class="ms-profile">',

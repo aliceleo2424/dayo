@@ -14,7 +14,6 @@ var LAST_LOGIN_KEY = 'lastLoginDate';
 var SPEED_KEY = 'dayo.chat.speed';
 var STYLE_KEY = 'dayo.chat.style';
 var REQUEST_KEY = 'dayo.chat.request';
-var JAM_KEY = 'dayo.jamCount';
 var WELCOME_COUPON_KEY = 'dayo.hasWelcomeCoupon';
 var WELCOME_COUPON_CODE = 'WELCOME_9900';
 var WELCOME_COUPON_CODES = { WELCOME_9900: true, WELCOME9900: true };
@@ -25,7 +24,6 @@ var LAST_LOGIN_KEY = 'lastLoginDate';
 var SPEED_KEY = 'dayo.chat.speed';
 var STYLE_KEY = 'dayo.chat.style';
 var REQUEST_KEY = 'dayo.chat.request';
-var JAM_KEY = 'dayo.jamCount';
 
 var supabase = null;
 var profileCache = null;
@@ -154,15 +152,6 @@ function clearAuthLocal() {
   } catch (e) { /* ignore */ }
 }
 
-function getJamCount() {
-  var remote = profileCache && profileCache.jam_count;
-  var remoteN = Number(remote);
-  var localN = parseInt(lsGet(JAM_KEY, '0'), 10);
-  var local = Number.isFinite(localN) ? localN : 0;
-  if (Number.isFinite(remoteN)) return Math.max(remoteN, local);
-  return local;
-}
-
 function defaultsFromLocal() {
   var ticket = parseInt(lsGet(TICKET_KEY, '0'), 10);
   var streak = parseInt(lsGet(STREAK_KEY, '1'), 10);
@@ -176,7 +165,6 @@ function defaultsFromLocal() {
     speech_speed: lsGet(SPEED_KEY, 'slow') || 'slow',
     preferred_style: lsGet(STYLE_KEY, 'casual') || 'casual',
     preferred_request: lsGet(REQUEST_KEY, 'praise') || 'praise',
-    jam_count: getJamCount(),
     has_welcome_coupon: lsGet(WELCOME_COUPON_KEY, '') === '1'
   };
 }
@@ -194,11 +182,6 @@ function applyProfileToLocal(profile) {
   if (profile.speech_speed) lsSet(SPEED_KEY, profile.speech_speed);
   if (profile.preferred_style) lsSet(STYLE_KEY, profile.preferred_style);
   if (profile.preferred_request) lsSet(REQUEST_KEY, profile.preferred_request);
-  if (profile.jam_count != null) {
-    var jam = Math.max(Number(profile.jam_count) || 0, parseInt(lsGet(JAM_KEY, '0'), 10) || 0);
-    lsSet(JAM_KEY, jam);
-    profile.jam_count = jam;
-  }
 
   if (window.DayOTicketWallet && typeof window.DayOTicketWallet.syncUI === 'function') {
     window.DayOTicketWallet.syncUI(Number(profile.ticket_count));
@@ -277,7 +260,6 @@ function mirrorLocalFields(profile) {
   if (profile.speech_speed) lsSet(SPEED_KEY, profile.speech_speed);
   if (profile.preferred_style) lsSet(STYLE_KEY, profile.preferred_style);
   if (profile.preferred_request) lsSet(REQUEST_KEY, profile.preferred_request);
-  if (profile.jam_count != null) lsSet(JAM_KEY, Number(profile.jam_count) || 0);
 }
 
 async function updateProfile(partial, options) {
@@ -311,23 +293,13 @@ async function updateProfile(partial, options) {
       preferred_request: next.preferred_request || 'praise',
       updated_at: next.updated_at
     };
-    var withRewards = Object.assign({}, payload, {
-      jam_count: Number(next.jam_count) || 0
-    });
 
     var result = await client
       .from('profiles')
-      .upsert(withRewards, { onConflict: 'client_key' })
+      .upsert(payload, { onConflict: 'client_key' })
       .select('*')
       .single();
 
-    if (result.error) {
-      result = await client
-        .from('profiles')
-        .upsert(payload, { onConflict: 'client_key' })
-        .select('*')
-        .single();
-    }
     if (result.error) {
       var noUserCol = Object.assign({}, payload);
       delete noUserCol.user_id;
@@ -339,9 +311,7 @@ async function updateProfile(partial, options) {
     }
 
     if (result.error) throw result.error;
-    profileCache = Object.assign({}, result.data, {
-      jam_count: withRewards.jam_count
-    });
+    profileCache = Object.assign({}, result.data);
     return profileCache;
   } catch (err) {
     console.warn('[DayO] profiles update failed — localStorage kept', err);
@@ -951,13 +921,6 @@ function getProfile() {
 }
 
 function syncRewardUI() {
-  var jam = getJamCount();
-  Array.prototype.forEach.call(document.querySelectorAll('[data-jam-count]'), function (el) {
-    el.textContent = String(jam);
-  });
-  Array.prototype.forEach.call(document.querySelectorAll('[data-jam-count-text]'), function (el) {
-    el.textContent = jam + ' Jam';
-  });
   syncCouponUI();
 }
 
@@ -967,19 +930,6 @@ function escapeHtml(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
-}
-
-function addJam(amount) {
-  var add = Math.max(0, Math.floor(Number(amount) || 0));
-  var next = getJamCount() + add;
-  lsSet(JAM_KEY, next);
-  return updateProfile({ jam_count: next }).then(function (profile) {
-    document.dispatchEvent(new CustomEvent('dayo:jamchange', {
-      detail: { jamCount: next, added: add }
-    }));
-    syncRewardUI();
-    return { jamCount: next, added: add, profile: profile };
-  });
 }
 
 var LAST_TRANSCRIPT_KEY = 'last_session_transcript';
@@ -1285,8 +1235,6 @@ window.DayOProfileStore = {
   signInWithEmail: signInWithEmail,
   signInWithGoogle: signInWithGoogle,
   signOut: signOutAuth,
-  getJamCount: getJamCount,
-  addJam: addJam,
   saveSessionLog: saveSessionLog,
   getLastTranscript: getLastTranscript,
   fetchPartnerSessionLogs: fetchPartnerSessionLogs,

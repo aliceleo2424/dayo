@@ -334,7 +334,7 @@
       KO: '이번 달 참여 대화', EN: 'Chats this month', ZH: '本月参与对话', JA: '今月の会話', FR: 'Sessions ce mois', ES: 'Charlas este mes'
     },
     'mypage.status.remaining': {
-      KO: '잔여 대화 세션 이용권', EN: 'Sessions remaining', ZH: '剩余对话次数', JA: '残りセッション', FR: 'Sessions restantes', ES: 'Sesiones restantes'
+      KO: '보유 세션 티켓', EN: 'Session tickets', ZH: '会话票', JA: 'セッションチケット', FR: 'Tickets de session', ES: 'Tickets de sesión'
     },
     'mypage.status.time': {
       KO: '이번 달 대화 시간', EN: 'Chat time this month', ZH: '本月对话时间', JA: '今月の会話時間', FR: 'Temps de conversation', ES: 'Tiempo de charla'
@@ -343,15 +343,15 @@
       KO: '지난달보다 3회 더 이야기했어요!', EN: '3 more chats than last month!', ZH: '比上月多3次！', JA: '先月より3回多い！', FR: '3 sessions de plus !', ES: '¡3 charlas más!'
     },
     'mypage.status.remainingValue': {
-      KO: '4회 남음', EN: '4 left', ZH: '剩余4次', JA: '残り4回', FR: '4 restantes', ES: '4 restantes'
+      KO: '0장', EN: '0 tickets', ZH: '0张', JA: '0枚', FR: '0 ticket', ES: '0 tickets'
     },
     'mypage.status.remainingNote': {
-      KO: '모든 이용권은 결제 후 90일 내 소진 필수.',
-      EN: 'All passes must be used within 90 days of payment.',
-      ZH: '所有次数券须在付款后90天内用完。',
-      JA: 'すべての利用券は決済後90日以内に使い切る必要があります。',
-      FR: 'Tous les tickets doivent être utilisés dans les 90 jours après paiement.',
-      ES: 'Todos los pases deben usarse en 90 días tras el pago.'
+      KO: '결제일로부터 90일 이내 이용 가능',
+      EN: 'Usable within 90 days of purchase.',
+      ZH: '付款后90天内可用。',
+      JA: '決済日から90日以内に利用可能',
+      FR: 'Valable 90 jours après l’achat.',
+      ES: 'Disponible durante 90 días desde el pago.'
     },
     'mypage.status.timeNote': {
       KO: '연속 3주째 대화를 이어가는 중이에요 💖', EN: '3 weeks in a row — keep it up! 💖', ZH: '已连续3周对话 💖', JA: '3週連続で会話中 💖', FR: '3 semaines d\'affilée 💖', ES: '¡3 semanas seguidas! 💖'
@@ -563,7 +563,7 @@
       KO: '정산 예정 활동비', EN: 'Activity pay pending', ZH: '待结算活动费', JA: '精算予定の活動費', FR: 'Activité à régler', ES: 'Actividad pendiente'
     },
     'partner.stats.pendingHint': {
-      KO: '대화 1회 × 6,000원', EN: '6,000 KRW per conversation', ZH: '每次对话 × 6,000韩元', JA: '会話1回 × 6,000ウォン', FR: '6 000 KRW par conversation', ES: '6.000 KRW por conversación'
+      KO: '대화 1회 × 6,000P (원)', EN: '6,000P (KRW) per conversation', ZH: '每次对话 × 6,000P (韩元)', JA: '会話1回 × 6,000P (円相当)', FR: '6 000P (KRW) par conversation', ES: '6.000P (KRW) por conversación'
     },
     'partner.stats.settled': {
       KO: '누적 정산 완료 금액', EN: 'Settled activity pay', ZH: '累计已结算金额', JA: '累計精算済み金額', FR: 'Montant déjà réglé', ES: 'Importe ya liquidado'
@@ -578,7 +578,7 @@
       KO: '{n}회', EN: '{n}', ZH: '{n}次', JA: '{n}回', FR: '{n}', ES: '{n}'
     },
     'partner.stats.wonFormat': {
-      KO: '{amount}원', EN: '₩{amount}', ZH: '₩{amount}', JA: '₩{amount}', FR: '{amount} ₩', ES: '₩{amount}'
+      KO: '{amount}P (원)', EN: '{amount}P (KRW)', ZH: '{amount}P (韩元)', JA: '{amount}P (円相当)', FR: '{amount}P (KRW)', ES: '{amount}P (KRW)'
     },
     'partner.promo.eyebrow': {
       KO: 'EVENT & PROMOTION', EN: 'EVENT & PROMOTION', ZH: 'EVENT & PROMOTION', JA: 'EVENT & PROMOTION', FR: 'EVENT & PROMOTION', ES: 'EVENT & PROMOTION'

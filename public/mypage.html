@@ -447,8 +447,32 @@
       to { transform: scaleX(1); transform-origin: left; }
     }
 
-    /* 대화 현황 */
-    .status-card { margin-bottom: 1.25rem; padding: 1.5rem; }
+    .session-ticket-card {
+      background: #fff;
+      border: 1px solid #FFEBE4;
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .session-ticket-card h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #222;
+      margin: 0;
+    }
+    .session-ticket-card .session-ticket-value {
+      font-size: 28px;
+      font-weight: 900;
+      margin: 6px 0 4px;
+      letter-spacing: -0.03em;
+      color: #222;
+    }
+    .session-ticket-card .session-ticket-note {
+      font-size: 12px;
+      color: #888;
+      margin: 0;
+    }
 
     .status-grid {
       display: grid;
@@ -1130,6 +1154,12 @@
         </button>
       </div>
     </div>
+
+    <section class="session-ticket-card" aria-labelledby="sessionTicketTitle">
+      <h3 id="sessionTicketTitle" data-i18n="mypage.status.remaining">보유 세션 티켓</h3>
+      <p class="session-ticket-value"><strong data-summary-ticket>0장</strong></p>
+      <p class="session-ticket-note" data-i18n="mypage.status.remainingNote">결제일로부터 90일 이내 이용 가능</p>
+    </section>
 
     <section class="talk-history-section" style="margin-top: 32px;">
       <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; gap: 12px; flex-wrap: wrap;">
