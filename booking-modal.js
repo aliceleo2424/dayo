@@ -119,6 +119,7 @@
     '.bk-day.is-on{background:var(--coral,#FF6B57);border-color:var(--coral,#FF6B57);color:#fff;font-weight:700;}',
     '.bk-slots{margin-top:1.2rem;}',
     '.bk-slots[hidden]{display:none;}',
+    '.bk-live-slots{display:flex;flex-wrap:wrap;gap:4px;margin-top:.45rem;min-height:2rem;}',
     '.bk-partners{display:flex;flex-direction:column;gap:.65rem;}',
     '.bk-partner{width:100%;display:flex;align-items:center;gap:.85rem;padding:.8rem;border:1px solid var(--coral-pale,#FFE8E3);',
     'border-radius:var(--radius,18px);background:var(--cream,#FFF8F5);font-family:inherit;color:inherit;text-align:left;cursor:pointer;',
@@ -257,6 +258,8 @@
             '<div class="bk-slots" id="bkSlots" hidden>' +
               '<p class="bk-label">' + t('book.slotsLabel') + '</p>' +
               '<div class="bk-chips" id="bkTimes"></div>' +
+              '<p class="bk-label" style="margin-top:12px;">열린 파트너 시간</p>' +
+              '<div id="partner-slots-container" class="bk-live-slots"></div>' +
             '</div>' +
           '</section>' +
           '<section class="bk-step" data-step="3">' +
@@ -390,6 +393,9 @@
       state.partner = partner.dataset.id;
       renderAvailablePartners();
       updateFooter();
+      if (typeof window.loadAvailableSlots === 'function') {
+        window.loadAvailableSlots(partner.dataset.id);
+      }
     });
 
     el.prevMonth.addEventListener('click', function () { shiftMonth(-1); });
@@ -406,6 +412,9 @@
       el.slots.hidden = false;
       syncChips('time');
       updateFooter();
+      if (typeof window.loadAvailableSlotsForDate === 'function') {
+        window.loadAvailableSlotsForDate(state.date);
+      }
     });
 
     el.prevBtn.addEventListener('click', function () { goTo(state.step - 1); });

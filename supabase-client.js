@@ -292,10 +292,12 @@
     if (!supabase) return null;
     var insertRes = await supabase.from('bookings').insert([{
       learner_id: row.learner_id,
-      partner_user_id: row.partner_user_id || null,
+      partner_user_id: row.partner_user_id || row.partner_id || null,
+      partner_id: row.partner_id || row.partner_user_id || null,
       partner_name: row.partner_name || '',
       language: row.language || '',
       scheduled_at: row.scheduled_at || null,
+      slot_id: row.slot_id || null,
       status: 'pending'
     }]).select('id').single();
     if (insertRes.error) {

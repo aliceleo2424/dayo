@@ -6,6 +6,9 @@
   <meta name="description" content="DayO 대화 파트너 프로필 및 스케줄 관리 포털">
   <title data-i18n="page.title.partner">DayO Partner Lounge — 대화 파트너 라운지</title>
   <link rel="stylesheet" href="mobile-nav.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-env.js"></script>
+  <script src="supabase-client.js"></script>
   <script src="scroll-lock.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1640,7 +1643,7 @@
           <span class="guide-item"><span class="guide-dot"></span><span data-i18n="partner.schedule.guideClosed">불가능</span></span>
         </div>
         <div class="time-grid partner-slot-create-box" id="timeGrid" aria-live="polite"></div>
-        <button class="save-button btn-partner-mint" type="button" id="saveSchedule" data-i18n="partner.schedule.save">💾 변경된 스케줄 저장하기</button>
+        <button class="save-button btn-partner-mint btn-save-schedule" type="button" id="saveSchedule" data-i18n="partner.schedule.save">💾 변경된 스케줄 저장하기</button>
       </section>
 
       <aside class="side-column">
@@ -1827,8 +1830,8 @@
       timeGrid.innerHTML = TIMES.map((time) => {
         const isOpen = schedule[activeDay].has(time);
         return `
-          <button class="time-chip${isOpen ? ' open' : ''}" type="button"
-                  data-time="${time}" aria-pressed="${isOpen}">
+          <button class="time-chip${isOpen ? ' open slot-open' : ''}" type="button"
+                  data-time="${time}" data-day="${activeDay}" aria-pressed="${isOpen}">
             ${time}
             <span>${isOpen ? t('partner.schedule.timeOpen') : t('partner.schedule.timeClosed')}</span>
           </button>
@@ -1843,10 +1846,15 @@
       toastTimer = setTimeout(() => toast.classList.remove('show'), 3200);
     }
 
+    window.__dayoPartnerSchedule = schedule;
+    window.__dayoPartnerActiveDay = activeDay;
+    window.__dayoRenderPartnerTimes = renderTimes;
+
     dayTabs.addEventListener('click', (event) => {
       const tab = event.target.closest('[data-day]');
       if (!tab) return;
       activeDay = tab.dataset.day;
+      window.__dayoPartnerActiveDay = activeDay;
       renderDays();
       renderTimes();
     });
@@ -1870,6 +1878,10 @@
     });
 
     document.getElementById('saveSchedule').addEventListener('click', () => {
+      if (typeof window.savePartnerSchedule === 'function') {
+        window.savePartnerSchedule();
+        return;
+      }
       showToast(t('partner.toast.scheduleSaved'));
     });
 
@@ -2063,6 +2075,7 @@
     renderTimes();
     renderAvatarOptions();
     renderHistory();
+    if (typeof window.loadPartnerSchedule === 'function') window.loadPartnerSchedule();
 
     document.addEventListener('dayo:langchange', () => {
       renderDays();
@@ -2121,6 +2134,7 @@
   <script src="i18n.js"></script>
   <script src="materials.js"></script>
   <script src="supabase-env.js"></script>
+  <script src="availability-slots.js"></script>
   <script type="module" src="profile-store.js"></script>
   <script>
     (function waitForPartnerStore() {
