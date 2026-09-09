@@ -960,24 +960,6 @@
       font-size: 0.86rem;
     }
 
-    .mypage-link {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.8rem 1.35rem;
-      border: 1px solid rgba(255, 255, 255, 0.9);
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.72);
-      color: var(--coral-dark);
-      font-size: 0.82rem;
-      font-weight: 800;
-      text-decoration: none;
-      white-space: nowrap;
-      transition: transform 0.18s, background 0.18s;
-    }
-
-    .mypage-link:hover { transform: translateY(-1px); background: #fff; }
-
     .day-tabs {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
@@ -1509,6 +1491,17 @@
   </nav>
 
   <main class="page partner-container partner-dashboard-wrap" id="viewPartnerHome">
+    <div class="role-switch-wrapper" style="display: flex; justify-content: center; margin: 20px auto 28px; width: 100%; max-width: 320px;">
+      <div class="role-segmented-control" style="position: relative; display: flex; width: 100%; background: #F1F3F5; padding: 4px; border-radius: 999px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.06); cursor: pointer;" role="group" aria-label="역할 전환">
+        <div id="segmented-glider" style="position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: #FFFFFF; border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,0.12); transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+        <button type="button" id="tab-user-mode" onclick="switchRoleView('user')" style="position: relative; z-index: 1; flex: 1; padding: 8px 0; border: none; background: transparent; font-size: 13px; font-weight: 700; color: #888; cursor: pointer; text-align: center; transition: color 0.2s;" aria-pressed="false">
+          🙋‍♂️ 유저 모드
+        </button>
+        <button type="button" id="tab-partner-mode" onclick="switchRoleView('partner')" style="position: relative; z-index: 1; flex: 1; padding: 8px 0; border: none; background: transparent; font-size: 13px; font-weight: 700; color: #111; cursor: pointer; text-align: center; transition: color 0.2s;" aria-pressed="true">
+          🎙️ 파트너 라운지
+        </button>
+      </div>
+    </div>
     <div class="page-heading">
       <p class="eyebrow" data-i18n="partner.eyebrow">PARTNER LOUNGE</p>
       <h1 data-i18n="partner.heading">오늘도 다정한 대화를 준비해 볼까요? 🍰</h1>
@@ -1722,7 +1715,6 @@
       </div>
       <div class="convert-actions">
         <a class="studio-link convert-cta" href="index.html?booking=open" data-booking-open data-i18n="partner.convert.booking">🎓 한국어 대화 예약하러 가기</a>
-        <a class="mypage-link" href="mypage.html"><span aria-hidden="true">👤</span> <span data-i18n="nav.learnerMypage">마이페이지로 이동</span></a>
       </div>
     </section>
   </main>
@@ -2147,5 +2139,6 @@
   </script>
   <script src="mobile-nav.js"></script>
   <script src="mode-switch.js"></script>
+  <script src="role-switch.js"></script>
 </body>
 </html>

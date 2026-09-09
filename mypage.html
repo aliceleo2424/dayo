@@ -816,36 +816,8 @@
 
     .history-copy { min-width: 0; }
 
-    /* 파트너 전환 배너 */
-    .switch-banner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1.25rem;
-      margin-top: 1.25rem;
-      padding: 1.5rem;
-      border: 1px solid rgba(255, 214, 223, 0.75);
-      border-radius: var(--radius-lg);
-      background: linear-gradient(135deg, var(--pink-soft), var(--peach) 62%, var(--yellow));
-      box-shadow: var(--shadow);
-    }
-
-    .switch-eyebrow {
-      margin-bottom: 0.4rem;
-      color: var(--coral-dark);
-      font-size: 0.72rem;
-      font-weight: 800;
-      letter-spacing: 0.07em;
-    }
-
-    .switch-copy { font-size: 1.02rem; font-weight: 800; line-height: 1.5; letter-spacing: -0.02em; }
-    .switch-sub { margin-top: 0.4rem; color: var(--muted); font-size: 0.82rem; line-height: 1.6; }
-    .switch-banner .primary-btn { flex: 0 0 auto; padding: 0.9rem 1.35rem; font-size: 0.86rem; }
-
     @media (max-width: 880px) {
       .dashboard-grid { grid-template-columns: 1fr; }
-      .switch-banner { flex-direction: column; align-items: flex-start; }
-      .switch-banner .primary-btn { width: 100%; }
     }
 
     @media (max-width: 767px) {
@@ -1016,6 +988,17 @@
   </nav>
 
   <main class="page">
+    <div class="role-switch-wrapper" style="display: flex; justify-content: center; margin: 20px auto 28px; width: 100%; max-width: 320px;">
+      <div class="role-segmented-control" style="position: relative; display: flex; width: 100%; background: #F1F3F5; padding: 4px; border-radius: 999px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.06); cursor: pointer;" role="group" aria-label="역할 전환">
+        <div id="segmented-glider" style="position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: #FFFFFF; border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,0.12); transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);"></div>
+        <button type="button" id="tab-user-mode" onclick="switchRoleView('user')" style="position: relative; z-index: 1; flex: 1; padding: 8px 0; border: none; background: transparent; font-size: 13px; font-weight: 700; color: #111; cursor: pointer; text-align: center; transition: color 0.2s;" aria-pressed="true">
+          🙋‍♂️ 유저 모드
+        </button>
+        <button type="button" id="tab-partner-mode" onclick="switchRoleView('partner')" style="position: relative; z-index: 1; flex: 1; padding: 8px 0; border: none; background: transparent; font-size: 13px; font-weight: 700; color: #888; cursor: pointer; text-align: center; transition: color 0.2s;" aria-pressed="false">
+          🎙️ 파트너 라운지
+        </button>
+      </div>
+    </div>
     <div class="page-heading">
       <p class="eyebrow" data-i18n="mypage.eyebrow">MY CONVERSATION LOUNGE</p>
       <h1 data-i18n="mypage.heading">오늘도 한 잔의 대화, 준비되셨나요? ☕</h1>
@@ -1262,15 +1245,6 @@
         </article>
       </div>
     </section>
-
-    <section class="switch-banner" aria-labelledby="switchTitle">
-      <div>
-        <p class="switch-eyebrow" data-i18n="mypage.switch.eyebrow">FOR CONVERSATION PARTNERS</p>
-        <p class="switch-copy" id="switchTitle" data-i18n="mypage.switch.title">DayO의 대화 파트너이신가요? 파트너 전용 공간으로 이동합니다 ☕</p>
-        <p class="switch-sub" data-i18n="mypage.switch.sub">프로필과 대화 가능 시간을 관리하고, 예정된 세션을 확인할 수 있어요.</p>
-      </div>
-      <a class="primary-btn" href="partner.html"><span aria-hidden="true">🤝</span> <span data-i18n="nav.partnerStudio">파트너 스튜디오로 이동</span></a>
-    </section>
   </main>
 
   <div id="dayo-fortune-modal" class="dayo-fortune-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="dayo-fortune-dear" hidden>
@@ -1317,6 +1291,7 @@
   <script src="booking-modal.js"></script>
   <script src="insta-card-export.js"></script>
   <script src="fortune-cookie.js"></script>
+  <script src="role-switch.js"></script>
   <script>
     if (typeof window.loadUserReports === 'function') window.loadUserReports();
   </script>
