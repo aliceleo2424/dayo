@@ -397,31 +397,16 @@
     });
   }
 
-  function logout() {
+  function logout(event) {
+    if (typeof window.handleLogout === 'function') {
+      return window.handleLogout(event);
+    }
     closeAllMenus();
     clearTimeout(welcomeTimer);
     closeWelcome();
-    waitForStore().then(function (store) {
-      if (store && typeof store.signOut === 'function') return store.signOut();
-      clearMemberSession();
-      notifyAuthChange();
-    }).catch(function () {
-      clearMemberSession();
-      notifyAuthChange();
-    }).then(function () {
-      render();
-      showToast(t('login.logoutToast'));
-      var leaf = (window.location.pathname || '').split('/').pop() || '';
-      if (leaf && leaf !== 'index.html' && leaf !== 'index.htm') {
-        window.location.href = 'index.html';
-        return;
-      }
-      try {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } catch (e) {
-        window.scrollTo(0, 0);
-      }
-    });
+    clearMemberSession();
+    notifyAuthChange();
+    window.location.replace('index.html');
   }
 
   function showToast(message, ms) {
@@ -462,13 +447,6 @@
         label: '카카오 / 이메일로 3초 로그인',
         openLogin: true
       };
-    }
-
-    if (role === 'partner') {
-      return { href: 'mypage.html', icon: '👤', i18n: 'nav.mypage' };
-    }
-    if (role === 'member') {
-      return { href: 'partner.html', icon: '🤝', i18n: 'nav.partnerSpace' };
     }
 
     if (name) {
@@ -526,7 +504,7 @@
         '    <button type="button" role="menuitem" data-tickets-open>🎟️ 이용권 구매 / 충전</button>',
         '    <div class="ms-menu-sep" aria-hidden="true"></div>',
         '    <a href="mypage.html" role="menuitem">👤 ', t('nav.mypage'), '</a>',
-        '    <button type="button" role="menuitem" data-ms-logout>🚪 ', t('login.logout'), '</button>',
+        '    <button type="button" onclick="handleLogout(event)" class="btn-logout" data-ms-logout style="cursor: pointer;">로그아웃</button>',
         '  </div>',
         '</div>'
       ].join('');
@@ -887,10 +865,11 @@
         return;
       }
 
-      var logoutBtn = e.target.closest('[data-ms-logout]');
+      var logoutBtn = e.target.closest('[data-ms-logout], .btn-logout');
       if (logoutBtn) {
         e.preventDefault();
-        logout();
+        e.stopPropagation();
+        logout(e);
         return;
       }
 
@@ -974,7 +953,10 @@
       openLogin: openLogin,
       closeLogin: closeLogin,
       closeAuthModal: closeAuthModal,
-      notifyAuthChange: notifyAuthChange
+      notifyAuthChange: notifyAuthChange,
+      logout: function (event) {
+        return window.handleLogout ? window.handleLogout(event) : logout(event);
+      }
     };
   }
 

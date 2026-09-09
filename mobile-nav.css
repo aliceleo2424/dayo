@@ -105,7 +105,8 @@ body.dayo-scroll-locked {
 }
 
 .nav-drawer a,
-.nav-drawer .nav-drawer__link {
+.nav-drawer .nav-drawer__link,
+.nav-drawer .btn-logout {
   display: flex;
   align-items: center;
   width: 100%;
@@ -123,7 +124,8 @@ body.dayo-scroll-locked {
 }
 
 .nav-drawer a:hover,
-.nav-drawer .nav-drawer__link:hover {
+.nav-drawer .nav-drawer__link:hover,
+.nav-drawer .btn-logout:hover {
   background: var(--coral-pale, #FFE8E3);
   color: var(--coral, #FF6B57);
 }
