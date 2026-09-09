@@ -495,7 +495,7 @@
     window.__dayoTalkAlbum = reports;
 
     var countEl = document.getElementById('talk-album-count');
-    if (countEl) countEl.textContent = '총 ' + reports.length + '장 보관 중';
+    if (countEl) countEl.textContent = '총 ' + reports.length + '장 보관';
 
     if (album) {
       if (reports.length > 0) {

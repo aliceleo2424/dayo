@@ -10,25 +10,39 @@
     }
   }
 
+  function hasSoonSession() {
+    if (hasActiveBooking()) return true;
+    try {
+      return window.localStorage.getItem('dayo_next_session_soon') === '1';
+    } catch (e) {
+      return false;
+    }
+  }
+
   function syncMainAction() {
     var btn = document.getElementById('main-action-btn');
-    if (!btn) return;
-    if (hasActiveBooking()) {
-      btn.textContent = '☕ 라운지 입장';
-      btn.onclick = function () {
-        window.location.href = 'room.html?role=user';
+    var urgent = document.getElementById('urgent-session-banner');
+    var showUrgent = hasSoonSession();
+    if (urgent && urgent.getAttribute('data-demo-soon') !== '0') showUrgent = true;
+    if (urgent) urgent.hidden = !showUrgent;
+    if (btn) {
+      btn.hidden = false;
+      btn.textContent = '대화 파트너 둘러보기 ➔';
+      btn.onclick = function (e) {
+        e.preventDefault();
+        var target = document.getElementById('partners-list');
+        if (target && typeof target.scrollIntoView === 'function') {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          return;
+        }
+        window.location.hash = 'partners-list';
       };
-      return;
     }
-    btn.textContent = '💬 대화 파트너 예약하기';
-    btn.onclick = function () {
-      if (window.DayOBooking && typeof window.DayOBooking.requestOpen === 'function') {
-        window.DayOBooking.requestOpen();
-        return;
-      }
-      window.location.href = 'index.html?booking=open';
-    };
   }
+
+  window.enterStudio = function () {
+    window.location.href = 'room.html?role=user';
+  };
 
   window.openCardDetailModal = function (index) {
     var modal = document.getElementById('card-detail-modal');

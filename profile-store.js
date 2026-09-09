@@ -496,6 +496,11 @@ function syncCouponUI(rows) {
   Array.prototype.forEach.call(document.querySelectorAll('[data-welcome-badge]'), function (el) {
     el.hidden = unused.length === 0;
   });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-coupon-bar]'), function (el) {
+    el.textContent = unused.length
+      ? ('🎟️ 보유 중인 쿠폰: ' + unused.length + '장')
+      : '🎟️ 보유 중인 쿠폰: 없음';
+  });
 }
 
 async function grantWelcomeCoupon(userId, clientKey) {

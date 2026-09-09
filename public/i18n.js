@@ -401,15 +401,15 @@
       KO: '📚 대화 자료 보기', EN: '📚 View Materials', ZH: '📚 查看资料', JA: '📚 資料を見る', FR: '📚 Voir les supports', ES: '📚 Ver materiales'
     },
     'mypage.library.title': {
-      KO: '📚 세션 대화 자료함', EN: '📚 Chat Materials', ZH: '📚 对话资料库', JA: '📚 会話資料', FR: '📚 Supports de conversation', ES: '📚 Materiales'
+      KO: '관심사 이야기 카드', EN: 'Interest story cards', ZH: '兴趣故事卡片', JA: '関心のストーリーカード', FR: 'Cartes d’histoires', ES: 'Tarjetas de temas'
     },
     'mypage.library.sub': {
-      KO: '대화 전 예습하고, 끝난 뒤 복습해 보세요.',
-      EN: 'Prep before and review after your chats.',
-      ZH: '对话前预习，结束后复习。',
-      JA: '会話前に予習、後に復習しましょう。',
-      FR: 'Préparez-vous avant, révisez après.',
-      ES: 'Prepárate antes y repasa después.'
+      KO: '다음에 나눌 이야기를 미리 들여다보세요.',
+      EN: 'Peek at stories you might share next.',
+      ZH: '先看看下次可能聊到的故事。',
+      JA: '次に話す物語を先にのぞいてみましょう。',
+      FR: 'Aperçu des histoires à partager.',
+      ES: 'Mira las historias que podrías compartir.'
     },
     'mypage.history.title': {
       KO: '🕘 지난 대화', EN: '🕘 Past Chats', ZH: '🕘 过往对话', JA: '🕘 過去の会話', FR: '🕘 Conversations passées', ES: '🕘 Charlas anteriores'
@@ -1843,12 +1843,12 @@
     'mypage.session2.time': { KO: '8월 6일 (목) 21:00 · 30분', EN: 'Aug 6 (Thu) 21:00 · 30 min', ZH: '8月6日（周四）21:00 · 30分钟', JA: '8月6日（木）21:00 · 30分', FR: '6 août (jeu) 21:00 · 30 min', ES: '6 de agosto (jue) 21:00 · 30 min' },
     'mypage.session3.meta': { KO: '목적: ☕ 자유 수다 · 스타일: ⚡ 자연스러운 실전 티키타카', EN: 'Purpose: ☕ Free Chat · Style: ⚡ Natural rapid-fire chat', ZH: '目的：☕ 自由聊天 · 风格：⚡ 自然快节奏对话', JA: '目的：☕ 自由な会話 · スタイル：⚡ 自然でスピーディなやり取り', FR: 'Objectif : ☕ Discussion libre · Style : ⚡ Échange naturel et rapide', ES: 'Propósito: ☕ Charla libre · Estilo: ⚡ Intercambio natural y rápido' },
     'mypage.session3.time': { KO: '8월 9일 (일) 11:00 · 30분', EN: 'Aug 9 (Sun) 11:00 · 30 min', ZH: '8月9日（周日）11:00 · 30分钟', JA: '8月9日（日）11:00 · 30分', FR: '9 août (dim) 11:00 · 30 min', ES: '9 de agosto (dom) 11:00 · 30 min' },
-    'mypage.library.item1.title': { KO: '이번 주 예습 기사 · 니스 여름 축제', EN: "This week's preview article · Nice Summer Festival", ZH: '本周预习文章 · 尼斯夏日节', JA: '今週の予習記事 · ニース夏祭り', FR: "Article de la semaine · Festival d'été à Nice", ES: 'Artículo de la semana · Festival de verano en Niza' },
+    'mypage.library.item1.title': { KO: '이번 주 이야기 · 니스 여름 축제', EN: "This week's story · Nice Summer Festival", ZH: '本周故事 · 尼斯夏日节', JA: '今週の話 · ニース夏祭り', FR: "Histoire de la semaine · Festival d'été à Nice", ES: 'Historia de la semana · Festival de verano en Niza' },
     'mypage.library.item1.desc': { KO: 'Camille 파트너와의 여행 회화 전에 3분만 읽어보세요.', EN: 'Take 3 minutes to read before your travel chat with partner Camille.', ZH: '在与Camille伙伴进行旅行会话前，花3分钟阅读。', JA: 'Camilleパートナーとの旅行会話の前に3分だけ読んでみてください。', FR: 'Lisez 3 minutes avant votre conversation voyage avec Camille.', ES: 'Lee 3 minutos antes de tu charla de viaje con Camille.' },
     'mypage.library.item2.title': { KO: '추천 표현 리뷰 · 카페와 주문', EN: 'Recommended expressions review · Café & Ordering', ZH: '推荐表达复习 · 咖啡厅与点单', JA: 'おすすめ表現レビュー · カフェと注文', FR: 'Révision des expressions · Café et commande', ES: 'Repaso de expresiones · Café y pedidos' },
     'mypage.library.item2.desc': { KO: '지난 대화에서 자주 막혔던 표현을 모았어요.', EN: 'Expressions you often got stuck on in past chats.', ZH: '收集了以往对话中常卡壳的表达。', JA: '過去の会話でよく詰まった表現を集めました。', FR: 'Les expressions qui vous ont souvent bloqué.', ES: 'Expresiones con las que a menudo te trababas.' },
     'mypage.library.item3.title': { KO: '요즘 나의 일상 · 재택근무 이야기', EN: 'My everyday lately · Working from home', ZH: '最近的日常 · 居家办公', JA: '最近の日常 · リモートワーク', FR: 'Mon quotidien : télétravail', ES: 'Mi día a día: trabajo remoto' },
-    'mypage.library.item3.desc': { KO: 'Kate 파트너와의 세션 전 예습 자료예요.', EN: 'Preview material before your session with partner Kate.', ZH: '与Kate伙伴会话前的预习资料。', JA: 'Kateパートナーとのセッション前の予習資料です。', FR: 'Matériel de préparation avant la session avec Kate.', ES: 'Material de preparación antes de la sesión con Kate.' },
+    'mypage.library.item3.desc': { KO: 'Kate 파트너와의 대화 전에 가볍게 읽어보세요.', EN: 'A light read before your chat with Kate.', ZH: '与Kate聊天前轻松读一读。', JA: 'Kateとの会話の前に軽く読んでみてください。', FR: 'Une lecture légère avant de parler avec Kate.', ES: 'Léelo con calma antes de hablar con Kate.' },
     'mypage.library.item4.title': { KO: '지난 대화 복습 노트', EN: 'Past conversation review notes', ZH: '过往对话复习笔记', JA: '過去の会話の復習ノート', FR: 'Notes de révision des conversations passées', ES: 'Notas de repaso de conversaciones pasadas' },
     'mypage.library.item4.desc': { KO: '파트너가 남긴 피드백 표현을 다시 확인해 보세요.', EN: 'Review the feedback expressions your partner left.', ZH: '重新查看伙伴留下的反馈表达。', JA: 'パートナーが残したフィードバック表現を再確認してみましょう。', FR: 'Revoyez les expressions de retour laissées par votre partenaire.', ES: 'Revisa las expresiones de comentarios que dejó tu compañero.' },
     'mypage.history1.meta': { KO: '2026.08.02 (일) 20:00 · 30분 · 주제 ☕ 여행 회화', EN: '2026.08.02 (Sun) 20:00 · 30 min · Topic ☕ Travel Conversation', ZH: '2026.08.02（周日）20:00 · 30分钟 · 主题 ☕ 旅行会话', JA: '2026.08.02（日）20:00 · 30分 · テーマ ☕ 旅行会話', FR: '02.08.2026 (dim) 20:00 · 30 min · Sujet ☕ Conversation voyage', ES: '02.08.2026 (dom) 20:00 · 30 min · Tema ☕ Conversación de viaje' },

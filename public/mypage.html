@@ -132,11 +132,25 @@
     }
 
     .page {
-      width: min(1120px, calc(100% - 2rem));
+      width: min(1200px, calc(100% - 2rem));
       margin: 0 auto;
       padding: 2rem 0 4rem;
       max-width: 100%;
       overflow-x: hidden;
+    }
+    .mypage-container { box-sizing: border-box; }
+    .mypage-main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (max-width: 800px) {
+      .mypage-main-grid { grid-template-columns: 1fr !important; }
+      .mypage-welcome-row,
+      .mypage-urgent-row { flex-direction: column !important; align-items: stretch !important; }
+      .mypage-welcome-row button,
+      .mypage-urgent-row button { width: 100%; }
     }
 
     .page-heading { margin-bottom: 1.5rem; }
@@ -152,6 +166,90 @@
         grid-template-columns: 1fr 1fr;
       }
     }
+    .mypage-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-width: 0;
+    }
+    .mypage-col-label {
+      font-size: 13px;
+      font-weight: 800;
+      color: #888;
+      margin: 0;
+    }
+    .urgent-session-banner {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #FF5A36;
+      color: #fff;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 13px;
+      text-decoration: none;
+      white-space: nowrap;
+      cursor: pointer;
+      font-family: inherit;
+      box-shadow: 0 4px 14px rgba(255, 90, 54, 0.28);
+    }
+    .urgent-session-banner[hidden],
+    #main-action-btn[hidden] { display: none !important; }
+    .live-partner-book {
+      background: #FF5A36 !important;
+      box-shadow: 0 4px 0 #E24A28 !important;
+      color: #fff !important;
+      border: none !important;
+    }
+    .wallet-fold {
+      margin: 8px 0 28px;
+      background: #fff;
+      border: 1px solid #FFEBE4;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+    }
+    .wallet-fold > summary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 18px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+      color: #222;
+      list-style: none;
+    }
+    .wallet-fold > summary::-webkit-details-marker { display: none; }
+    .wallet-fold > summary::after {
+      content: '▾';
+      color: #888;
+      font-size: 12px;
+    }
+    .wallet-fold[open] > summary::after { transform: rotate(180deg); }
+    .wallet-fold-meta { font-size: 13px; color: #666; font-weight: 600; }
+    .wallet-fold-body {
+      padding: 16px 18px 18px;
+      border-top: 1px solid #FFEBE4;
+      display: grid;
+      gap: 16px;
+    }
+    .wallet-fold .session-ticket-card {
+      margin: 0;
+      box-shadow: none;
+      border: 1px solid #FFF0EB;
+      background: #FFF9F5;
+    }
+    .wallet-fold .coupon-card {
+      margin: 0;
+      padding: 0;
+      border: none;
+      box-shadow: none;
+      background: transparent;
+    }
     .user-summary-bar {
       gap: 16px;
     }
@@ -160,7 +258,8 @@
         flex-direction: column;
         align-items: flex-start !important;
       }
-      .user-summary-bar #main-action-btn {
+      .user-summary-bar #main-action-btn,
+      .user-summary-bar .urgent-session-banner {
         width: 100%;
       }
     }
@@ -294,14 +393,10 @@
     }
     .talk-cards-grid {
       display: grid !important;
-      grid-template-columns: repeat(2, 1fr) !important;
-      gap: 16px !important;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+      gap: 12px !important;
     }
-    @media (min-width: 900px) {
-      .talk-cards-grid {
-        grid-template-columns: repeat(4, 1fr) !important;
-      }
-    }
+    #urgent-session-banner[hidden] { display: none !important; }
     .card-thumb-item:hover {
       transform: translateY(-3px);
       box-shadow: 0 8px 20px rgba(255, 90, 54, 0.12);
@@ -1127,252 +1222,99 @@
     </button>
   </nav>
 
-  <main class="page">
-    <div class="role-switch-wrapper" style="display: flex; justify-content: center; margin: 20px auto 28px; width: 100%; max-width: 320px;">
-      <div class="role-segmented-control" style="position: relative; display: flex; width: 100%; background: #F1F3F5; padding: 4px; border-radius: 999px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.06); cursor: pointer;" role="group" aria-label="역할 전환">
-        <div id="segmented-glider" style="position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: #FFFFFF; border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,0.12); transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);"></div>
-        <button type="button" id="tab-user-mode" onclick="switchRoleView('user')" style="position: relative; z-index: 1; flex: 1; padding: 8px 0; border: none; background: transparent; font-size: 13px; font-weight: 700; color: #111; cursor: pointer; text-align: center; transition: color 0.2s;" aria-pressed="true">
-          🙋‍♂️ 유저 모드
-        </button>
-        <button type="button" id="tab-partner-mode" onclick="switchRoleView('partner')" style="position: relative; z-index: 1; flex: 1; padding: 8px 0; border: none; background: transparent; font-size: 13px; font-weight: 700; color: #888; cursor: pointer; text-align: center; transition: color 0.2s;" aria-pressed="false">
-          🎙️ 파트너 라운지
-        </button>
+  <main class="page mypage-container" style="max-width: 1200px; margin: 0 auto; padding: 20px 24px; box-sizing: border-box;">
+
+    <div class="role-switch-wrapper" style="display: flex; justify-content: center; margin-bottom: 24px;">
+      <div class="role-segmented-control" style="position: relative; display: flex; width: 300px; background: #F1F3F5; padding: 4px; border-radius: 999px; cursor: pointer;" role="group" aria-label="역할 전환">
+        <div id="segmented-glider" style="position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: #fff; border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); transition: transform 0.25s ease;"></div>
+        <button type="button" id="tab-user-mode" onclick="switchRoleView('user')" style="position: relative; z-index: 1; flex: 1; padding: 8px 0; border: none; background: transparent; font-weight: 700; color: #111; cursor: pointer;" aria-pressed="true">🙋‍♂️ 유저 모드</button>
+        <button type="button" id="tab-partner-mode" onclick="switchRoleView('partner')" style="position: relative; z-index: 1; flex: 1; padding: 8px 0; border: none; background: transparent; font-weight: 700; color: #888; cursor: pointer;" aria-pressed="false">🎙️ 파트너 라운지</button>
       </div>
     </div>
-    <p class="heading-desc" data-i18n="mypage.headingDesc">내 대화 현황과 예약한 세션, 대화 기록을 한 곳에서 확인할 수 있어요.</p>
-    <div class="user-summary-bar" style="display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 18px 24px; border-radius: 16px; border: 1px solid #FFEBE4; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+
+    <div class="mypage-welcome-row" style="background: #fff; border: 1px solid #FFEBE4; border-radius: 16px; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 16px;">
       <div>
-        <h2 id="mypage-greeting" style="font-size: 18px; font-weight: 700; margin: 0 0 6px 0; color: #222;">오늘도 한 잔의 대화, 준비되셨나요? ☕</h2>
-        <div style="display: flex; gap: 8px; font-size: 13px; color: #666; align-items: center; flex-wrap: wrap;">
-          <span data-welcome-badge hidden style="background: #FFF0EB; color: #FF5A36; padding: 3px 8px; border-radius: 6px; font-weight: 600;">체험권 보유 중</span>
-          <span>보유 티켓 <strong data-summary-ticket>0장</strong></span>
+        <h2 id="mypage-greeting" style="font-size: 18px; font-weight: 700; margin: 0 0 6px 0; color: #222;">편안한 저녁이에요, aliceleo2424님! 🌙</h2>
+        <div style="font-size: 13px; color: #666;">
+          보유 티켓 <strong data-summary-ticket style="color: #FF5A36;">0장</strong> <span style="color: #ccc; margin: 0 8px;">|</span> 결제일로부터 90일 이내 이용 가능
         </div>
       </div>
+      <button id="main-action-btn" type="button" style="background: #FF5A36; color: #fff; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap;">
+        대화 파트너 둘러보기 ➔
+      </button>
+    </div>
+
+    <div id="urgent-session-banner" class="mypage-urgent-row" style="background: linear-gradient(135deg, #FFF4F0 0%, #FFE9E2 100%); border: 1px solid #FFD3C4; border-radius: 16px; padding: 18px 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px;" data-demo-soon="1">
       <div>
-        <button id="main-action-btn" type="button" style="background: #FF5A36; color: #fff; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-family: inherit;">
-          💬 대화 파트너 예약하기
-        </button>
+        <span style="background: #FF5A36; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 20px;">🚨 30분 후 시작</span>
+        <h3 style="margin: 6px 0 2px; font-size: 16px; color: #222;">Camille 파트너와의 대화 (오늘 20:00)</h3>
+        <p style="margin: 0; font-size: 12px; color: #777;">목적: 여행/일상 · 대화 시작 5분 전부터 라운지 입장이 가능합니다.</p>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button type="button" onclick="enterStudio()" style="background: #FF5A36; color: #fff; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap;">대화 스튜디오 입장</button>
       </div>
     </div>
 
-    <section class="session-ticket-card" aria-labelledby="sessionTicketTitle">
-      <h3 id="sessionTicketTitle" data-i18n="mypage.status.remaining">보유 세션 티켓</h3>
-      <p class="session-ticket-value"><strong data-summary-ticket>0장</strong></p>
-      <p class="session-ticket-note" data-i18n="mypage.status.remainingNote">결제일로부터 90일 이내 이용 가능</p>
-    </section>
+    <div class="mypage-main-grid">
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        <aside style="background: #FFFDF0; border: 1px solid #FEEFB3; border-radius: 16px; padding: 20px; text-align: center;" aria-label="오늘의 대화 포춘쿠키">
+          <h4 style="margin: 0 0 4px; font-size: 14px; color: #444;">오늘의 대화 포춘쿠키</h4>
+          <p style="margin: 0 0 12px; font-size: 11px; color: #888;">매일 1회, 가볍게 열어보는 체크인</p>
+          <button type="button" id="dayo-cookie-trigger" class="dayo-fortune-cookie" aria-label="포춘쿠키 열기" style="margin: 0 auto;">
+            <span class="dayo-fortune-piece dayo-fortune-piece--left" aria-hidden="true">🥠</span>
+            <span class="dayo-fortune-piece dayo-fortune-piece--right" aria-hidden="true">🥠</span>
+            <span class="dayo-fortune-paper-mini" aria-hidden="true">✨ 오늘의 한마디</span>
+          </button>
+        </aside>
 
-    <section class="talk-history-section" style="margin-top: 32px;">
-      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; gap: 12px; flex-wrap: wrap;">
-        <div>
-          <h3 style="font-size: 18px; font-weight: 700; margin: 0; color: #222;">✨ 나의 대화 기록 앨범</h3>
-          <p style="font-size: 13px; color: #888; margin: 4px 0 0;">파트너와 나눈 이야기 카드를 모아두었어요.</p>
-        </div>
-        <span id="talk-album-count" style="font-size: 12px; color: #635BFF; font-weight: 600;">총 0장 보관 중</span>
-      </div>
-      <div id="mypage-card-feed" class="talk-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px;"></div>
-    </section>
-
-    <div class="mypage-grid">
-      <aside class="dayo-fortune-checkin" aria-label="오늘의 대화 포춘쿠키">
-        <p class="dayo-fortune-title">오늘의 대화 포춘쿠키</p>
-        <p class="dayo-fortune-sub">매일 1회, 가볍게 열어보는 체크인</p>
-        <button type="button" id="dayo-cookie-trigger" class="dayo-fortune-cookie" aria-label="포춘쿠키 열기">
-          <span class="dayo-fortune-piece dayo-fortune-piece--left" aria-hidden="true">🥠</span>
-          <span class="dayo-fortune-piece dayo-fortune-piece--right" aria-hidden="true">🥠</span>
-          <span class="dayo-fortune-paper-mini" aria-hidden="true">✨ 오늘의 한마디</span>
-        </button>
-      </aside>
-
-      <section class="card live-partners-card" id="partners" aria-labelledby="livePartnersTitle">
-        <div class="card-head">
-          <div>
-            <h2 class="card-title" id="livePartnersTitle">지금 대화 가능한 파트너</h2>
-            <p class="card-subtitle">온라인 파트너와 바로 일정을 잡아 보세요.</p>
+        <section style="background: #fff; border: 1px solid #F1F3F5; border-radius: 16px; padding: 20px;" aria-labelledby="talkAlbumTitle">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <h4 id="talkAlbumTitle" style="margin: 0; font-size: 15px; color: #222;">✨ 나의 대화 기록 앨범</h4>
+            <span id="talk-album-count" style="font-size: 12px; color: #635BFF; font-weight: 600;">총 0장 보관</span>
           </div>
-        </div>
-        <div class="live-partner-list">
-          <button class="live-partner-chip" type="button" data-booking-open>
-            <span class="dot" aria-hidden="true"></span>
-            <span>
-              <span class="name">Camille from France</span>
-              <span class="meta">🥐 온라인 · 프랑스어</span>
-            </span>
+          <div id="mypage-card-feed" class="talk-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;"></div>
+        </section>
+      </div>
+
+      <div id="partners-list" style="display: flex; flex-direction: column; gap: 24px;">
+        <section id="partners" style="background: #fff; border: 1px solid #F1F3F5; border-radius: 16px; padding: 20px;">
+          <h4 style="margin: 0 0 4px; font-size: 15px; color: #222;">지금 대화 가능한 파트너</h4>
+          <p style="margin: 0 0 14px; font-size: 11px; color: #888;">온라인 파트너와 바로 일정을 잡아보세요.</p>
+          <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px;">
+            <button type="button" data-booking-open style="font-size: 12px; padding: 8px 12px; background: #F8F9FA; border: none; border-radius: 8px; display: flex; justify-content: space-between; cursor: pointer; font-family: inherit; color: inherit; width: 100%; text-align: left;">
+              <span>🟢 <strong>Camille</strong> (France)</span>
+              <span style="color: #666;">프랑스어</span>
+            </button>
+            <button type="button" data-booking-open style="font-size: 12px; padding: 8px 12px; background: #F8F9FA; border: none; border-radius: 8px; display: flex; justify-content: space-between; cursor: pointer; font-family: inherit; color: inherit; width: 100%; text-align: left;">
+              <span>🟢 <strong>Kate</strong> (USA)</span>
+              <span style="color: #666;">영어</span>
+            </button>
+          </div>
+          <button type="button" data-booking-open style="width: 100%; background: #FF5A36; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 13px; font-family: inherit;">
+            📅 예약 바로가기
           </button>
-          <button class="live-partner-chip" type="button" data-booking-open>
-            <span class="dot" aria-hidden="true"></span>
-            <span>
-              <span class="name">Kate from USA</span>
-              <span class="meta">🍵 온라인 · 영어</span>
-            </span>
-          </button>
-          <button class="live-partner-chip" type="button" data-booking-open>
-            <span class="dot" aria-hidden="true"></span>
-            <span>
-              <span class="name">Yui from Japan</span>
-              <span class="meta">🍰 온라인 · 일본어</span>
-            </span>
-          </button>
-        </div>
-        <button class="primary-btn live-partner-book" type="button" data-booking-open>📅 예약 바로가기</button>
-      </section>
+        </section>
+
+        <section style="background: #fff; border: 1px solid #F1F3F5; border-radius: 16px; padding: 20px;">
+          <h4 style="margin: 0 0 4px; font-size: 15px; color: #222;">💬 이번 세션 이야기 카드</h4>
+          <p style="margin: 0 0 12px; font-size: 11px; color: #888;">대화 전 가볍게 둘러보고 나눌 이야기를 골라보세요.</p>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <button type="button" data-material="fr-travel" data-material-view="article" style="padding: 10px 12px; background: #FAF5FF; border: none; border-radius: 8px; font-size: 12px; color: #553C9A; text-align: left; cursor: pointer; font-family: inherit;">
+              🏖️ 니스 여름 축제 이야기
+            </button>
+            <button type="button" data-material="fr-travel" data-material-view="expressions" style="padding: 10px 12px; background: #FFF5F5; border: none; border-radius: 8px; font-size: 12px; color: #C53030; text-align: left; cursor: pointer; font-family: inherit;">
+              ☕ 내가 좋아하는 카페와 추천 메뉴
+            </button>
+          </div>
+        </section>
+      </div>
     </div>
 
-    <section class="card coupon-card" aria-labelledby="couponTitle">
-      <div class="card-head">
-        <div>
-          <h2 class="card-title" id="couponTitle" data-i18n="mypage.coupon.title">🎟️ 쿠폰함</h2>
-          <p class="card-subtitle" data-i18n="mypage.coupon.sub">보유 중인 미사용 쿠폰이에요. 1회 이용권 결제 시 자동으로 적용돼요.</p>
-        </div>
-      </div>
-      <div class="coupon-list" data-coupon-wallet></div>
-      <p class="coupon-empty" data-coupon-wallet-empty data-i18n="mypage.coupon.empty">아직 사용 가능한 쿠폰이 없어요.</p>
-    </section>
-
-    <div class="dashboard-grid">
-      <section class="card sessions-card" aria-labelledby="sessionsTitle">
-        <div class="card-head">
-          <div>
-            <h2 class="card-title" id="sessionsTitle" data-i18n="mypage.sessions.title">📅 내 예약 세션</h2>
-            <p class="card-subtitle" data-i18n="mypage.sessions.sub">세션 시작 1시간 전까지 요일·시간 변경/취소가 가능해요.</p>
-          </div>
-        </div>
-
-        <div class="session-list">
-          <article class="session">
-            <span class="partner-badge" aria-hidden="true">C</span>
-            <div>
-              <div class="session-top">
-                <p class="session-name">Camille from France</p>
-                <span class="tag">🇫🇷 <span data-i18n="book.lang.fr">프랑스어</span></span>
-                <span class="tag tag--soon" data-i18n="partner.session1.status">● 30분 후 시작</span>
-              </div>
-              <p class="session-meta" data-i18n="mypage.session1.meta">목적: ✈️ 여행/일상 · 스타일: 🐢 천천히 들어주는 파트너</p>
-              <p class="session-time" data-i18n="mypage.session1.time">오늘 20:00 · 30분</p>
-              <div class="session-actions">
-                <a class="primary-btn" href="room.html?role=user" data-i18n="mypage.sessions.enter">☕ 대화 스튜디오 입장</a>
-                <button class="ghost-btn" type="button" data-material="fr-travel" data-i18n="mypage.sessions.materials">📚 대화 자료 보기</button>
-              </div>
-            </div>
-          </article>
-
-          <article class="session">
-            <span class="partner-badge" aria-hidden="true">K</span>
-            <div>
-              <div class="session-top">
-                <p class="session-name">Kate from USA</p>
-                <span class="tag">🇺🇸 <span data-i18n="book.lang.en">영어</span></span>
-              </div>
-              <p class="session-meta" data-i18n="mypage.session2.meta">주제: ☕️ 요즘 나의 일상 · 스타일: 다정하게 리액션해 주는 파트너</p>
-              <p class="session-time" data-i18n="mypage.session2.time">8월 6일 (목) 21:00 · 30분</p>
-              <div class="session-actions">
-                <a class="primary-btn" href="room.html?role=user" data-i18n="mypage.sessions.enter">☕ 대화 스튜디오 입장</a>
-                <button class="ghost-btn" type="button" data-material="en-opic" data-i18n="mypage.sessions.materials">📚 대화 자료 보기</button>
-              </div>
-            </div>
-          </article>
-
-          <article class="session">
-            <span class="partner-badge" aria-hidden="true">Y</span>
-            <div>
-              <div class="session-top">
-                <p class="session-name">Yui from Japan</p>
-                <span class="tag">🇯🇵 <span data-i18n="book.lang.ja">일본어</span></span>
-              </div>
-              <p class="session-meta" data-i18n="mypage.session3.meta">목적: ☕ 자유 수다 · 스타일: ⚡ 자연스러운 실전 티키타카</p>
-              <p class="session-time" data-i18n="mypage.session3.time">8월 9일 (일) 11:00 · 30분</p>
-              <div class="session-actions">
-                <a class="primary-btn" href="room.html?role=user" data-i18n="mypage.sessions.enter">☕ 대화 스튜디오 입장</a>
-                <button class="ghost-btn" type="button" data-material="fr-travel" data-i18n="mypage.sessions.materials">📚 대화 자료 보기</button>
-              </div>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="card library-card" aria-labelledby="libraryTitle">
-        <div class="card-head">
-          <div>
-            <h2 class="card-title" id="libraryTitle" data-i18n="mypage.library.title">📚 세션 대화 자료함</h2>
-            <p class="card-subtitle" data-i18n="mypage.library.sub">대화 전 예습하고, 끝난 뒤 복습해 보세요.</p>
-          </div>
-        </div>
-
-        <div class="library-list">
-          <button class="library-item" type="button" data-material="fr-travel" data-material-view="article">
-            <span class="library-icon" aria-hidden="true">📰</span>
-            <span class="library-copy">
-              <span class="library-title" data-i18n="mypage.library.item1.title">이번 주 예습 기사 · 니스 여름 축제</span>
-              <span class="library-desc" data-i18n="mypage.library.item1.desc">Camille 파트너와의 여행 회화 전에 3분만 읽어보세요.</span>
-            </span>
-            <span class="library-arrow" aria-hidden="true">›</span>
-          </button>
-
-          <button class="library-item" type="button" data-material="fr-travel" data-material-view="expressions">
-            <span class="library-icon" aria-hidden="true">💬</span>
-            <span class="library-copy">
-              <span class="library-title" data-i18n="mypage.library.item2.title">추천 표현 리뷰 · 카페와 주문</span>
-              <span class="library-desc" data-i18n="mypage.library.item2.desc">지난 대화에서 자주 막혔던 표현을 모았어요.</span>
-            </span>
-            <span class="library-arrow" aria-hidden="true">›</span>
-          </button>
-
-          <button class="library-item" type="button" data-material="en-opic" data-material-view="article">
-            <span class="library-icon" aria-hidden="true">🎧</span>
-            <span class="library-copy">
-              <span class="library-title" data-i18n="mypage.library.item3.title">요즘 나의 일상 · 재택근무 이야기</span>
-              <span class="library-desc" data-i18n="mypage.library.item3.desc">Kate 파트너와의 세션 전 예습 자료예요.</span>
-            </span>
-            <span class="library-arrow" aria-hidden="true">›</span>
-          </button>
-
-          <button class="library-item" type="button" data-material="ko-daily" data-material-view="expressions">
-            <span class="library-icon" aria-hidden="true">🍰</span>
-            <span class="library-copy">
-              <span class="library-title" data-i18n="mypage.library.item4.title">지난 대화 복습 노트</span>
-              <span class="library-desc" data-i18n="mypage.library.item4.desc">파트너가 남긴 피드백 표현을 다시 확인해 보세요.</span>
-            </span>
-            <span class="library-arrow" aria-hidden="true">›</span>
-          </button>
-        </div>
-      </section>
+    <div style="margin-top: 24px; padding: 12px 16px; background: #F8F9FA; border-radius: 10px; font-size: 12px; color: #888; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+      <span data-coupon-bar>🎟️ 보유 중인 쿠폰: 없음</span>
+      <span style="color: #aaa;">1회 티켓 충전 시 자동 적용</span>
     </div>
-
-    <section class="card history-card" aria-labelledby="historyTitle">
-      <div class="card-head">
-        <div>
-          <h2 class="card-title" id="historyTitle" data-i18n="mypage.history.title">🕘 지난 대화</h2>
-          <p class="card-subtitle" data-i18n="mypage.history.sub">대화가 끝난 뒤 리포트를 열어 복습해 보세요.</p>
-        </div>
-      </div>
-
-      <div class="history-list">
-        <article class="history-item">
-          <span class="partner-badge" aria-hidden="true">C</span>
-          <div class="history-copy">
-            <div class="session-top">
-              <p class="session-name">Camille from France</p>
-              <span class="tag">🇫🇷 <span data-i18n="book.lang.fr">프랑스어</span></span>
-            </div>
-            <p class="session-meta" data-i18n="mypage.history1.meta">2026.08.02 (일) 20:00 · 30분 · 주제 ☕ 여행 회화</p>
-          </div>
-          <button class="ghost-btn" type="button" data-report="r-0802" data-i18n="mypage.history.report">📊 상세 리포트 보기</button>
-        </article>
-
-        <article class="history-item">
-          <span class="partner-badge" aria-hidden="true">K</span>
-          <div class="history-copy">
-            <div class="session-top">
-              <p class="session-name">Kate from USA</p>
-              <span class="tag">🇺🇸 <span data-i18n="book.lang.en">영어</span></span>
-            </div>
-            <p class="session-meta" data-i18n="mypage.history2.meta">2026.07.29 (수) 21:00 · 25분 · 주제 ☕️ 요즘 나의 일상</p>
-          </div>
-          <button class="ghost-btn" type="button" data-report="r-0729" data-i18n="mypage.history.report">📊 상세 리포트 보기</button>
-        </article>
-      </div>
-    </section>
   </main>
-
   <div id="card-detail-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="card-detail-title">
     <div class="card-detail-backdrop" onclick="closeCardDetailModal()"></div>
     <div class="card-detail-panel">
