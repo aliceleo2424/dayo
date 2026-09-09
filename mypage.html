@@ -9,6 +9,7 @@
   <meta name="description" content="DayO 마이페이지 — 내 대화 현황과 예약 세션, 대화 자료를 한 곳에서 관리하세요.">
   <title data-i18n="page.title.mypage">DayO 마이페이지 — 내 대화 라운지</title>
   <link rel="stylesheet" href="mobile-nav.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="scroll-lock.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -262,6 +263,12 @@
       color: var(--muted);
       font-size: 0.76rem;
       text-align: center;
+    }
+
+    #insta-card-capture,
+    .viral-card {
+      overflow: hidden !important;
+      box-sizing: border-box !important;
     }
 
     .gauge-list {
@@ -1032,6 +1039,7 @@
   <script src="tickets-modal.js"></script>
   <script src="chat-prefs.js"></script>
   <script src="booking-modal.js"></script>
+  <script src="insta-card-export.js"></script>
   <script>
     if (typeof window.loadUserReports === 'function') window.loadUserReports();
   </script>

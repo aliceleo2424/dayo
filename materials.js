@@ -240,8 +240,31 @@
     if (!data) return;
     currentReportId = id;
 
+    var quote = String((data.sentences && data.sentences[0]) || '').replace(/^["“”]+|["“”]+$/g, '');
+    var keyword = String((data.words && data.words[0]) || 'talk');
+    var illustPrompt = encodeURIComponent('cute ' + keyword + ', cute 3d pastel clay illustration, warm cozy aesthetic, minimalist sticker on clean solid background');
+    var illustUrl = 'https://image.pollinations.ai/prompt/' + illustPrompt + '?width=400&height=400&nologo=true';
+
     reportBadge.textContent = t(data.dateKey) + ' · ' + t('mat.durationFormat', { min: data.durationMin });
     reportBody.innerHTML = [
+      '<div class="insta-card-export-wrap" style="display:flex;flex-direction:column;align-items:center;margin-bottom:16px;">',
+      '  <div class="viral-card" style="width:100%;max-width:320px;aspect-ratio:4/5;background:linear-gradient(135deg,#FFF9ED 0%,#FEE8D6 100%);border:1.5px solid #EDE4D5;border-radius:16px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 10px 24px rgba(113,83,72,0.12);">',
+      '    <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">',
+      '      <span style="font-size:10px;font-weight:800;color:#4F7460;background:#FFFFFF;padding:4px 10px;border-radius:12px;border:1px solid #EDE4D5;">From DayO</span>',
+      '      <span style="font-size:11px;font-weight:800;color:#D97706;">✨ 오늘의 원픽</span>',
+      '    </div>',
+      '    <div style="flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:8px 0;min-height:0;">',
+      '      <img src="' + illustUrl + '" alt="" crossorigin="anonymous" referrerpolicy="no-referrer" style="width:56%;max-width:180px;aspect-ratio:1;object-fit:contain;border-radius:16px;filter:drop-shadow(0 4px 10px rgba(0,0,0,0.08));" />',
+      '      <div style="font-size:12px;color:#6E7A72;font-weight:700;margin-top:8px;">#' + escapeHtml(keyword) + '</div>',
+      '    </div>',
+      '    <div style="background:#FFFFFF;border-radius:12px;padding:12px 14px;text-align:center;border:1px solid #EDE4D5;">',
+      '      <div style="font-size:14px;font-weight:800;color:#3E4A42;line-height:1.4;word-break:keep-all;">"' + escapeHtml(quote) + '"</div>',
+      '    </div>',
+      '  </div>',
+      '  <div style="display: flex; gap: 8px; margin-top: 14px; width: 100%; max-width: 400px;">',
+      '    <button class="btn-save-card" type="button" onclick="saveInstaCard(event)" style="flex: 1; padding: 12px; background: #635BFF; color: #fff; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; font-size: 13px;">📸 카드 이미지 저장하기</button>',
+      '  </div>',
+      '</div>',
       '<div class="mt-info">',
       '  <div class="mt-info-item"><p class="mt-info-label">' + escapeHtml(t('report.partnerLabel')) + '</p>',
       '  <p class="mt-info-value">' + escapeHtml(data.partner) + '</p></div>',

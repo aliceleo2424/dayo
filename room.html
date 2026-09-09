@@ -5,6 +5,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-env.js"></script>
   <script src="supabase-client.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     (function checkInApp() {
       const ua = navigator.userAgent.toLowerCase();
@@ -2765,6 +2766,12 @@
         grid-template-columns: 1fr;
       }
     }
+
+    #insta-card-capture,
+    .viral-card {
+      overflow: hidden !important;
+      box-sizing: border-box !important;
+    }
   </style>
 </head>
 <body class="is-room theme-learner">
@@ -4492,6 +4499,7 @@
     })();
   </script>
   <script src="mobile-nav.js"></script>
+  <script src="insta-card-export.js"></script>
   <script src="mode-switch.js"></script>
   <script>
     function escapeInstaCardText(str) {
@@ -4533,7 +4541,7 @@
       const keyword = extractCoreSubject(sentence);
       const illustUrl = generateAiIllustUrl(keyword, window.currentCardVariation);
 
-      const box = document.getElementById('insta-card-preview-box');
+      const box = document.getElementById('insta-card-capture') || document.getElementById('insta-card-preview-box');
       if (box) {
         box.style.background = 'linear-gradient(135deg, #FFF9ED 0%, #FEE8D6 100%)';
         box.style.backgroundImage = 'none';
@@ -4547,7 +4555,7 @@
             '<span style="font-size: 10px; font-weight: 800; color: #D97706;">✨ 오늘의 원픽</span>' +
           '</div>' +
           '<div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 6px 0; min-height: 90px;">' +
-            '<img src="' + safeUrl + '" style="width: 80px; height: 80px; object-fit: contain; border-radius: 12px; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.08));" alt="' + safeKeyword + '" onerror="this.src=\'https://api.iconify.design/fluent-emoji:sparkles.svg\'">' +
+            '<img src="' + safeUrl + '" crossorigin="anonymous" referrerpolicy="no-referrer" style="width: 58%; max-width: 160px; aspect-ratio: 1; object-fit: contain; border-radius: 12px; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.08));" alt="' + safeKeyword + '" onerror="this.onerror=null;this.removeAttribute(\'crossorigin\');this.style.display=\'none\';this.insertAdjacentHTML(\'afterend\',\'<span style=&quot;font-size:48px&quot;>✨</span>\')">' +
             '<div style="font-size: 10px; color: #6E7A72; font-weight: 700; margin-top: 4px;">#' + safeKeyword + '</div>' +
           '</div>' +
           '<div style="background: #FFFFFF; border-radius: 10px; padding: 8px 10px; text-align: center; border: 1px solid #EDE4D5;">' +
@@ -5062,8 +5070,13 @@
               <div id="card-sentence-options" style="display: flex; flex-direction: column; gap: 6px; width: 100%;"></div>
             </div>
 
-            <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-              <div id="insta-card-preview-box" style="width: 100%; max-width: 240px; min-height: 190px; margin: 0 auto; border-radius: 12px; overflow: hidden; position: relative; box-shadow: 0 8px 18px rgba(0,0,0,0.12); display: flex; flex-direction: column; justify-content: space-between; padding: 12px; box-sizing: border-box; transition: background 0.3s ease, border-color 0.3s ease;"></div>
+            <div class="insta-card-export-wrap" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+              <div id="insta-card-capture" class="viral-card" style="width: 100%; max-width: 280px; aspect-ratio: 4 / 5; margin: 0 auto; border-radius: 16px; overflow: hidden; position: relative; box-shadow: 0 8px 18px rgba(0,0,0,0.12); display: flex; flex-direction: column; justify-content: space-between; padding: 14px; box-sizing: border-box; transition: background 0.3s ease, border-color 0.3s ease;"></div>
+              <div style="display: flex; gap: 8px; margin-top: 14px; width: 100%; max-width: 400px;">
+                <button id="btn-save-card" class="btn-save-card" type="button" onclick="saveInstaCard()" style="flex: 1; padding: 12px; background: #635BFF; color: #fff; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; font-size: 13px;">
+                  📸 카드 이미지 저장하기
+                </button>
+              </div>
               <div style="font-size: 10px; color: #88928B; margin-top: 6px; text-align: center; width: 100%;">유저 마이페이지에 자동 발행</div>
             </div>
           </div>

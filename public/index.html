@@ -5,6 +5,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-env.js"></script>
   <script src="supabase-client.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script>
     (function checkInApp() {
       const ua = navigator.userAgent.toLowerCase();
@@ -2114,6 +2115,12 @@
       .dayo-webinar-inner { padding: 1.5rem 1.05rem 1.35rem; }
       .dayo-webinar-tab { width: 100%; }
     }
+
+    #insta-card-capture,
+    .viral-card {
+      overflow: hidden !important;
+      box-sizing: border-box !important;
+    }
   </style>
 </head>
 <body class="theme-learner" data-dayo-role="learner">
@@ -3383,5 +3390,6 @@
   <script src="lounge-carousel.js"></script>
   <script src="reviews-carousel.js"></script>
   <script src="live-partners.js"></script>
+  <script src="insta-card-export.js"></script>
 </body>
 </html>
