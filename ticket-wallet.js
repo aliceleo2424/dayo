@@ -75,6 +75,9 @@
     Array.prototype.forEach.call(document.querySelectorAll('[data-ticket-remaining-text]'), function (el) {
       el.textContent = n + '회 남음';
     });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-summary-ticket]'), function (el) {
+      el.textContent = n + '장';
+    });
   }
 
   function ensureInitialized() {

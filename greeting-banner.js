@@ -106,12 +106,20 @@
     return '👋 오늘 하루도 고생 많았어요, ' + userName + '님! ✨';
   }
 
-  function renderGreeting() {
+    function renderGreeting() {
+    var userName = getUserName();
+    if (userName) updateStreakIfNeeded();
+    var text = userName
+      ? buildGreeting(userName).replace(/^👋\s*/, '')
+      : '오늘도 한 잔의 대화, 준비되셨나요? ☕';
+
+    var mypageEl = document.getElementById('mypage-greeting');
+    if (mypageEl) mypageEl.textContent = text;
+
     var banner = document.getElementById('greetingBanner');
     var textEl = document.getElementById('greetingBannerText');
     if (!banner || !textEl) return;
 
-    var userName = getUserName();
     if (!userName) {
       banner.hidden = true;
       banner.classList.remove('is-visible');
@@ -119,8 +127,6 @@
       return;
     }
 
-    // 스트릭은 접속일 카운트용으로만 갱신 (중복 인사 줄은 노출하지 않음)
-    updateStreakIfNeeded();
     textEl.textContent = buildGreeting(userName);
     banner.hidden = false;
     banner.classList.add('is-visible');

@@ -523,6 +523,9 @@ function syncCouponUI(rows) {
   Array.prototype.forEach.call(document.querySelectorAll('[data-coupon-wallet-empty]'), function (el) {
     el.hidden = unused.length > 0;
   });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-welcome-badge]'), function (el) {
+    el.hidden = unused.length === 0;
+  });
 }
 
 async function grantWelcomeCoupon(userId, clientKey) {

@@ -141,6 +141,63 @@
 
     .page-heading { margin-bottom: 1.5rem; }
 
+    .mypage-grid {
+      display: grid;
+      gap: 24px;
+      align-items: start;
+      margin-bottom: 1.25rem;
+    }
+    @media (min-width: 900px) {
+      .mypage-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .user-summary-bar {
+      gap: 16px;
+    }
+    @media (max-width: 720px) {
+      .user-summary-bar {
+        flex-direction: column;
+        align-items: flex-start !important;
+      }
+      .user-summary-bar #main-action-btn {
+        width: 100%;
+      }
+    }
+    .live-partner-list {
+      display: grid;
+      gap: 0.7rem;
+    }
+    .live-partner-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border: 1px solid #FFEBE4;
+      border-radius: 14px;
+      background: #fff;
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+    }
+    .live-partner-chip:hover { border-color: var(--coral); }
+    .live-partner-chip .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #75B987;
+      box-shadow: 0 0 0 4px rgba(117, 185, 135, 0.16);
+      flex: 0 0 auto;
+    }
+    .live-partner-chip .name { font-size: 0.9rem; font-weight: 800; color: #222; }
+    .live-partner-chip .meta { margin-top: 0.15rem; font-size: 0.74rem; color: #888; font-weight: 600; }
+    .live-partner-book {
+      margin-top: 0.85rem;
+      width: 100%;
+    }
+    .live-partners-card { padding: 1.5rem; }
+
     .eyebrow {
       margin-bottom: 0.45rem;
       color: var(--coral);
@@ -999,59 +1056,22 @@
         </button>
       </div>
     </div>
-    <div class="page-heading">
-      <p class="eyebrow" data-i18n="mypage.eyebrow">MY CONVERSATION LOUNGE</p>
-      <h1 data-i18n="mypage.heading">오늘도 한 잔의 대화, 준비되셨나요? ☕</h1>
-      <p class="heading-desc" data-i18n="mypage.headingDesc">내 대화 현황과 예약한 세션, 예습 자료를 한 곳에서 확인할 수 있어요.</p>
+    <div class="user-summary-bar" style="display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 18px 24px; border-radius: 16px; border: 1px solid #FFEBE4; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
+      <div>
+        <h2 id="mypage-greeting" style="font-size: 18px; font-weight: 700; margin: 0 0 6px 0; color: #222;">오늘도 한 잔의 대화, 준비되셨나요? ☕</h2>
+        <div style="display: flex; gap: 8px; font-size: 13px; color: #666; align-items: center; flex-wrap: wrap;">
+          <span data-welcome-badge hidden style="background: #FFF0EB; color: #FF5A36; padding: 3px 8px; border-radius: 6px; font-weight: 600;">체험권 보유 중</span>
+          <span>보유 티켓 <strong data-summary-ticket>0장</strong></span>
+        </div>
+      </div>
+      <div>
+        <button id="main-action-btn" type="button" style="background: #FF5A36; color: #fff; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-family: inherit;">
+          💬 대화 파트너 예약하기
+        </button>
+      </div>
     </div>
 
-    <section class="card status-card" aria-labelledby="statusTitle">
-      <div class="card-head">
-        <div>
-          <h2 class="card-title" id="statusTitle" data-i18n="mypage.status.title">🎓 내 대화 현황</h2>
-          <p class="card-subtitle" data-i18n="mypage.status.sub">이번 달 나의 대화 기록과 남은 이용권이에요.</p>
-        </div>
-        <a class="primary-btn" href="index.html?booking=open" data-booking-open data-i18n="mypage.status.newBooking">📅 새 대화 예약하기</a>
-      </div>
-
-      <div class="status-fortune-row">
-      <div class="status-grid">
-        <div class="status-item">
-          <div class="status-icon" aria-hidden="true">☕</div>
-          <p class="status-label" data-i18n="mypage.status.monthly">이번 달 참여 대화</p>
-          <p class="status-value">8회</p>
-          <p class="status-note" data-i18n="mypage.status.monthlyNote">지난달보다 3회 더 이야기했어요!</p>
-        </div>
-        <div class="status-item">
-          <div class="status-icon" aria-hidden="true">🎟️</div>
-          <p class="status-label" data-i18n="mypage.status.remaining">잔여 대화 세션 이용권</p>
-          <p class="status-value" data-ticket-remaining-text>4회 남음</p>
-          <p class="status-note" data-i18n="mypage.status.remainingNote">모든 이용권은 결제 후 90일 내 소진 필수.</p>
-          <p class="status-note" style="margin-top:0.45rem;">🍓 보유 Jam <strong data-jam-count>0</strong></p>
-          <div class="pass-bar" role="img" data-i18n="mypage.status.passBarAria" data-i18n-attr="aria-label" aria-label="8회 중 4회 사용">
-            <span></span>
-          </div>
-          <button class="ghost-btn" type="button" data-tickets-open style="margin-top:0.75rem;width:100%;">☕️ 이용권 구매하기</button>
-        </div>
-        <div class="status-item">
-          <div class="status-icon" aria-hidden="true">⏱️</div>
-          <p class="status-label" data-i18n="mypage.status.time">이번 달 대화 시간</p>
-          <p class="status-value">240분</p>
-          <p class="status-note" data-i18n="mypage.status.timeNote">연속 3주째 대화를 이어가는 중이에요 💖</p>
-        </div>
-      </div>
-      <aside class="dayo-fortune-checkin" aria-label="오늘의 대화 포춘쿠키">
-        <p class="dayo-fortune-title">오늘의 대화 포춘쿠키</p>
-        <p class="dayo-fortune-sub">매일 1회, 가볍게 열어보는 체크인</p>
-        <button type="button" id="dayo-cookie-trigger" class="dayo-fortune-cookie" aria-label="포춘쿠키 열기">
-          <span class="dayo-fortune-piece dayo-fortune-piece--left" aria-hidden="true">🥠</span>
-          <span class="dayo-fortune-piece dayo-fortune-piece--right" aria-hidden="true">🥠</span>
-          <span class="dayo-fortune-paper-mini" aria-hidden="true">✨ 오늘의 한마디</span>
-        </button>
-      </aside>
-      </div>
-    </section>
-
+    <div class="mypage-grid">
     <section class="card dayo-approved-card" id="dayoApprovedCardSection" aria-labelledby="dayoCardTitle">
       <div class="card-head">
         <div>
@@ -1062,34 +1082,51 @@
       <div id="mypage-card-feed"></div>
     </section>
 
-    <section class="card speaking-card" aria-labelledby="speakingTitle">
-      <p class="speaking-eyebrow" data-i18n="mypage.speaking.eyebrow">MONTHLY SPEAKING REPORT</p>
-      <h2 class="speaking-title" id="speakingTitle" data-i18n="mypage.speaking.title" data-i18n-html="true">
-        🎉 이번 달 나는 <em>영어 🇺🇸 1시간 20분</em>, <em>프랑스어 🇫🇷 40분</em> 대화했어요!
-      </h2>
-      <p class="speaking-desc" data-i18n="mypage.speaking.desc">총 2시간, 지난달보다 45분 더 이야기했어요. 이 속도라면 다음 달엔 3시간도 문제없어요 💪</p>
+    <div class="mypage-grid-side">
+      <aside class="dayo-fortune-checkin" aria-label="오늘의 대화 포춘쿠키" style="margin-bottom: 16px;">
+        <p class="dayo-fortune-title">오늘의 대화 포춘쿠키</p>
+        <p class="dayo-fortune-sub">매일 1회, 가볍게 열어보는 체크인</p>
+        <button type="button" id="dayo-cookie-trigger" class="dayo-fortune-cookie" aria-label="포춘쿠키 열기">
+          <span class="dayo-fortune-piece dayo-fortune-piece--left" aria-hidden="true">🥠</span>
+          <span class="dayo-fortune-piece dayo-fortune-piece--right" aria-hidden="true">🥠</span>
+          <span class="dayo-fortune-paper-mini" aria-hidden="true">✨ 오늘의 한마디</span>
+        </button>
+      </aside>
 
-      <div class="gauge-list">
-        <div class="gauge">
-          <div class="gauge-top">
-            <span class="gauge-name" data-i18n="mypage.speaking.en">🇺🇸 영어</span>
-            <span class="gauge-value">80분 · 66%</span>
-          </div>
-          <div class="gauge-track">
-            <span class="gauge-fill gauge-fill--en" style="width: 66%"></span>
+      <section class="card live-partners-card" id="partners" aria-labelledby="livePartnersTitle">
+        <div class="card-head">
+          <div>
+            <h2 class="card-title" id="livePartnersTitle">지금 대화 가능한 파트너</h2>
+            <p class="card-subtitle">온라인 파트너와 바로 일정을 잡아 보세요.</p>
           </div>
         </div>
-        <div class="gauge">
-          <div class="gauge-top">
-            <span class="gauge-name" data-i18n="mypage.speaking.fr">🇫🇷 프랑스어</span>
-            <span class="gauge-value">40분 · 34%</span>
-          </div>
-          <div class="gauge-track">
-            <span class="gauge-fill gauge-fill--fr" style="width: 34%"></span>
-          </div>
+        <div class="live-partner-list">
+          <button class="live-partner-chip" type="button" data-booking-open>
+            <span class="dot" aria-hidden="true"></span>
+            <span>
+              <span class="name">Camille from France</span>
+              <span class="meta">🥐 온라인 · 프랑스어</span>
+            </span>
+          </button>
+          <button class="live-partner-chip" type="button" data-booking-open>
+            <span class="dot" aria-hidden="true"></span>
+            <span>
+              <span class="name">Kate from USA</span>
+              <span class="meta">🍵 온라인 · 영어</span>
+            </span>
+          </button>
+          <button class="live-partner-chip" type="button" data-booking-open>
+            <span class="dot" aria-hidden="true"></span>
+            <span>
+              <span class="name">Yui from Japan</span>
+              <span class="meta">🍰 온라인 · 일본어</span>
+            </span>
+          </button>
         </div>
-      </div>
-    </section>
+        <button class="primary-btn live-partner-book" type="button" data-booking-open>📅 예약 바로가기</button>
+      </section>
+    </div>
+    </div>
 
     <section class="card coupon-card" aria-labelledby="couponTitle">
       <div class="card-head">
@@ -1292,6 +1329,8 @@
   <script src="insta-card-export.js"></script>
   <script src="fortune-cookie.js"></script>
   <script src="role-switch.js"></script>
+  <script src="greeting-banner.js"></script>
+  <script src="mypage-dashboard.js"></script>
   <script>
     if (typeof window.loadUserReports === 'function') window.loadUserReports();
   </script>

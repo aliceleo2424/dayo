@@ -356,7 +356,7 @@
       spoken_sentence: r.spoken_sentence || r.sentence || '',
       keyword: r.keyword || 'daily',
       illust_url: r.illust_url || r.illustUrl || ('https://image.pollinations.ai/prompt/' + encodeURIComponent('cute coffee, cute 3d pastel clay illustration, warm cozy aesthetic') + '?width=400&height=400&nologo=true'),
-      partner_comment: r.partner_comment || r.partnerComment || '오늘 대화 훌륭했어요!',
+      partner_comment: r.partner_comment || r.partnerComment || '',
       created_at: r.created_at || r.approvedAt || r.createdAt || ''
     };
   }
@@ -367,6 +367,17 @@
     } catch (e) {
       return null;
     }
+  }
+
+  function talkQuoteLabel(r) {
+    return String((r && r.partner_name) || 'Camille').split(/\s+/)[0] || 'Camille';
+  }
+
+  function talkQuoteText(r) {
+    var raw = String((r && r.partner_comment) || '').replace(/^\s+|\s+$/g, '');
+    var banned = /발화량|점수|레벨|훌륭했어요/;
+    if (!raw || banned.test(raw)) return '성수동 서울숲 근처 카페거리를 추천해요!';
+    return raw.replace(/^["“”']+|["“”']+$/g, '');
   }
 
   function renderViralReportCard(r, isPrimary) {
@@ -395,7 +406,9 @@
             '<div style="font-size:14px; font-weight:800; color:#3E4A42; line-height:1.4; word-break:keep-all;">"' + esc(r.spoken_sentence) + '"</div>' +
           '</div>' +
         '</div>' +
-        '<p class="dayo-card-comment" style="width:100%; max-width:400px;">💬 파트너: ' + esc(r.partner_comment) + '</p>' +
+        '<div class="talk-quote-box" style="margin-top: 12px; font-size: 13px; color: #444; background: #FFF9F5; padding: 10px 14px; border-radius: 10px; width:100%; max-width:400px; box-sizing:border-box;">' +
+          '<span>☕ <strong>' + esc(talkQuoteLabel(r)) + '의 추천:</strong> "' + esc(talkQuoteText(r)) + '"</span>' +
+        '</div>' +
         '<div style="display: flex; gap: 8px; margin-top: 14px; width: 100%; max-width: 400px;">' +
           '<button' + btnId + ' class="btn-save-card" type="button" onclick="saveInstaCard(event)" style="flex: 1; padding: 12px; background: #635BFF; color: #fff; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; font-size: 13px;">' +
             '📸 카드 이미지 저장하기' +
