@@ -6,6 +6,7 @@
   <script src="supabase-env.js"></script>
   <script src="supabase-client.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script>
     (function checkInApp() {
       const ua = navigator.userAgent.toLowerCase();
@@ -1600,7 +1601,8 @@
     body.theme-partner #ratingModal,
     body.theme-partner .rating-modal,
     body.theme-partner #quiz-modal,
-    body.theme-partner #quizModal {
+    body.theme-partner #quizModal,
+    body.theme-partner #memory-game-modal {
       display: none !important;
     }
 
@@ -1826,6 +1828,37 @@
       background: #FFF8F5 !important;
       color: #5C4A42 !important;
       border: 1.5px solid #EDE4D5 !important;
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+    @keyframes pop {
+      0% { transform: scale(0.9); }
+      100% { transform: scale(1); }
+    }
+    .memory-slot-chip,
+    .memory-pool-chip {
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+    }
+    .memory-slot-chip {
+      background: #635BFF;
+      color: #fff;
+      border: none;
+      box-shadow: 0 2px 6px rgba(99,91,255,0.25);
+      animation: pop 0.15s ease;
+    }
+    .memory-pool-chip {
+      background: #F1F3F5;
+      color: #333;
+      border: 1px solid #E2E8F0;
     }
 
     body.session-ended-user #videoStage,
@@ -3124,7 +3157,23 @@
     </div>
   </div>
 
-    /* Instant STT talk record */
+  <div id="memory-game-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px);" role="dialog" aria-modal="true" aria-labelledby="memory-game-title" hidden>
+    <div style="background: #FFFFFF; border-radius: 24px; max-width: 420px; width: 100%; padding: 28px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; position: relative;">
+      <div style="font-size: 28px; margin-bottom: 8px;" aria-hidden="true">🧩</div>
+      <h3 id="memory-game-title" style="margin: 0 0 6px; font-size: 18px; font-weight: 800; color: #222;">오늘의 기억 조각 맞추기</h3>
+      <p style="margin: 0 0 20px; font-size: 13px; color: #777;">파트너와 나눈 이야기 속 한 조각을 완성해 보세요!</p>
+      <div id="game-kr-meaning" style="background: #F8F9FA; padding: 10px 14px; border-radius: 12px; font-size: 13px; color: #555; font-weight: 600; margin-bottom: 20px;">
+        "난 요즘 도예에 푹 빠져 있어"
+      </div>
+      <div id="answer-slot-container" style="min-height: 52px; border-bottom: 2px dashed #E2E8F0; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; padding-bottom: 12px; margin-bottom: 24px;"></div>
+      <div id="word-pool-container" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 24px;"></div>
+      <button type="button" onclick="skipToRecordCard()" style="background: transparent; border: none; font-size: 12px; color: #999; text-decoration: underline; cursor: pointer; font-family: inherit;">
+        건너뛰고 바로 대화 카드 보기
+      </button>
+    </div>
+  </div>
+
+  <!-- Instant STT talk record -->
   <div class="rq-overlay" id="quiz-modal" data-view="viewTalkRecord" hidden>
     <div class="quiz-modal-card talk-record-card" role="dialog" aria-modal="true" aria-labelledby="quizModalTitle">
       <header class="quiz-modal-head">
@@ -4322,6 +4371,14 @@
         if (!memorable.length) {
           memorable = ['오늘 나눈 이야기가 여기에 남을 거예요.'];
         }
+        if (window.__dayoMemorySentence) {
+          var memoryLine = String(window.__dayoMemorySentence).trim();
+          if (memoryLine) {
+            memorable = [memoryLine].concat(memorable.filter(function (line) {
+              return line !== memoryLine;
+            })).slice(0, 2);
+          }
+        }
 
         var placeRe = /(망원|한강|성수|홍대|이태원|해운대|광장시장|남산|북촌|연남|합정|공원|카페|맛집|소품숍|시장|골목)/g;
         var placeHits = [];
@@ -4431,6 +4488,7 @@
       });
     })();
   </script>
+  <script src="memory-game.js"></script>
   <script>
     /* Partner copilot — on-demand host question prompter (partner role only) */
     (function partnerQuestionPrompter() {
