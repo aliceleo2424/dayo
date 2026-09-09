@@ -446,7 +446,7 @@
         return renderViralReportCard(r, idx === 0);
       }).join('');
     } else {
-      container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">아직 완료된 세션 리포트가 없습니다.</div>';
+      container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">아직 오늘의 대화 기록이 없습니다.</div>';
     }
   };
 

@@ -56,7 +56,19 @@
 
   var DICT = {
     'nav.about': {
-      KO: '서비스 소개', EN: 'About', ZH: '服务介绍', JA: 'サービス紹介', FR: 'À propos', ES: 'Sobre nosotros'
+      KO: '대화 주제', EN: 'Topics', ZH: '话题', JA: '話題', FR: 'Sujets', ES: 'Temas'
+    },
+    'nav.topics': {
+      KO: '대화 주제', EN: 'Topics', ZH: '话题', JA: '話題', FR: 'Sujets', ES: 'Temas'
+    },
+    'nav.how': {
+      KO: '진행 방식', EN: 'How it works', ZH: '进行方式', JA: '進め方', FR: 'Comment ça marche', ES: 'Cómo funciona'
+    },
+    'nav.tickets': {
+      KO: '세션 티켓', EN: 'Session tickets', ZH: '会话券', JA: 'セッションチケット', FR: 'Tickets de session', ES: 'Tickets de sesión'
+    },
+    'nav.records': {
+      KO: '나의 대화 기록', EN: 'My talk records', ZH: '我的对话记录', JA: 'わたしの会話記録', FR: 'Mes conversations', ES: 'Mis conversaciones'
     },
     'nav.partners': {
       KO: '대화 파트너', EN: 'Partners', ZH: '对话伙伴', JA: '会話パートナー', FR: 'Partenaires', ES: 'Compañeros'
@@ -126,7 +138,13 @@
       ES: 'Un compañero cálido que te espera en cualquier lugar ☕️'
     },
     'login.desc': {
-      KO: '로그인하고 나만의 AI 스피킹 리포트를 받아보세요!',
+      KO: '로그인하고 오늘의 대화 기록을 받아보세요!',
+      EN: 'Sign in to receive today’s talk record!',
+      ZH: '登录后领取今天的对话记录！',
+      JA: 'ログインして今日の会話記録を受け取ろう！',
+      FR: 'Connectez-vous pour recevoir le récap de la conversation !',
+      ES: 'Inicia sesión para recibir el registro de hoy.'
+    },
       EN: 'Sign in and get your own AI speaking report!',
       ZH: '登录后领取专属 AI 口语报告！',
       JA: 'ログインして、あなただけのAIスピーキングレポートを受け取りましょう！',
@@ -227,7 +245,7 @@
       ES: '🎉 ¡Bienvenido/a a DayO, {name}!'
     },
     'login.welcomeBody': {
-      KO: '첫 세션 체험 할인권은 9,900원이에요. 총 30분(25분 화상 대화 + 5분 미니 퀴즈/리포트)으로 시작해 볼까요?',
+      KO: '첫 세션 체험 할인권은 9,900원이에요. 1회 25분 글로벌 대화로 시작해 볼까요?',
       EN: 'Your first-session trial coupon is 9,900 KRW. A session is 30 minutes (25 min live chat + 5 min mini quiz/report). Ready to start?',
       ZH: '首次体验券为9,900韩元。每次会话共30分钟（25分钟视频对话 + 5分钟小测验/报告）。要开始吗？',
       JA: '初回体験チケットは9,900ウォンです。1回のセッションは30分（25分のビデオ会話 + 5分のミニクイズ/レポート）で始めましょうか？',
@@ -730,6 +748,14 @@
     },
 
     /* ===== Hero (index.html) ===== */
+    'hero.title': {
+      KO: '외국인과 이야기해보고 싶지만, 어디서 어떻게 시작할지 몰랐다면',
+      EN: 'Wanted to talk with someone from another country, but didn’t know where to start?',
+      ZH: '想和外国人聊聊天，却不知道从哪里开始？',
+      JA: '外国人と話してみたいのに、始め方がわからなかったなら',
+      FR: 'Envie de parler avec quelqu’un d’ailleurs, sans savoir par où commencer ?',
+      ES: '¿Querías hablar con alguien de otro país, pero no sabías por dónde empezar?'
+    },
     'hero.titleLead': {
       KO: '{lang}, 이제', EN: '{lang}, now', ZH: '{lang}，现在', JA: '{lang}、いま', FR: '{lang}, maintenant', ES: '{lang}, ahora'
     },
@@ -737,18 +763,18 @@
       KO: '돼요!', EN: "it's possible!", ZH: '都行！', JA: 'できる！', FR: "c'est possible !", ES: '¡es posible!'
     },
     'hero.subtitle': {
-      KO: '오픽부터 워홀까지, 눈 맞추며 시작하는 1:1 라이브 대화',
-      EN: 'From OPIc to working holidays, live 1:1 conversations that start with eye contact.',
-      ZH: '从OPIc到打工度假，眼神交流开始的1:1实时对话。',
-      JA: 'OPIcからワーホリまで、目を合わせて始める1:1ライブ会話。',
-      FR: "De l'OPIc au PVT, des conversations en direct 1:1, les yeux dans les yeux.",
-      ES: 'Desde el OPIc hasta el working holiday, charlas 1:1 en vivo mirándote a los ojos.'
+      KO: '관심사가 맞는 사람과 준비된 이야기로 가볍게 만나보세요. 말이 잘 통하지 않는 순간에는 AI가 대화를 도와드려요.',
+      EN: 'Meet someone who shares your interests, with a story already prepared. When words get stuck, AI gently helps the conversation continue.',
+      ZH: '和兴趣相投的人，用准备好的话题轻松见面。说不下去的时候，AI会温柔地帮你接上。',
+      JA: '興味が近い人と、用意された話で気軽に会いましょう。言葉に詰まったときはAIが会話を助けます。',
+      FR: 'Retrouvez quelqu’un qui partage vos envies, avec une histoire déjà prête. Quand les mots manquent, l’IA relance en douceur.',
+      ES: 'Conoce a alguien con tus mismos intereses, con una historia lista. Cuando se trabe la conversación, la IA te ayuda con suavidad.'
     },
     'hero.badge': {
-      KO: '🍰 내 회화 수준 진단', EN: '🍰 Speaking level check', ZH: '🍰 会话水平诊断', JA: '🍰 会話レベル診断', FR: '🍰 Diagnostic de niveau', ES: '🍰 Diagnóstico de nivel'
+      KO: '🍰 1:1 글로벌 대화 라운지', EN: '🍰 1:1 Global Chat Lounge', ZH: '🍰 1:1 全球对话会客厅', JA: '🍰 1:1 Global Chat Lounge', FR: '🍰 1:1 Global Chat Lounge', ES: '🍰 1:1 Global Chat Lounge'
     },
     'hero.cta': {
-      KO: '🍰 내 스피킹 감각 무료로 테스트하기 ›', EN: '🍰 Test my speaking sense for free ›', ZH: '🍰 免费测试我的口语感觉 ›', JA: '🍰 スピーキング感覚を無料でテスト ›', FR: '🍰 Tester gratuitement mon niveau ›', ES: '🍰 Probar gratis mi nivel de habla ›'
+      KO: '어떤 대화를 나누나요? 👇', EN: 'What do we talk about? 👇', ZH: '会聊些什么？👇', JA: 'どんな会話をするの？👇', FR: 'De quoi parle-t-on ? 👇', ES: '¿De qué hablamos? 👇'
     },
     'hero.liveBadge': {
       KO: 'AI 코파일럿 실시간 지원 중', EN: 'AI copilot live support', ZH: 'AI副驾实时支持中', JA: 'AIコパイロットがリアルタイム支援中', FR: 'Copilote IA en direct', ES: 'Copiloto IA en vivo'
@@ -762,15 +788,15 @@
       KO: 'How it works', EN: 'How it works', ZH: 'How it works', JA: 'How it works', FR: 'How it works', ES: 'How it works'
     },
     'journey.title': {
-      KO: '3단계로 완성하는 나만의 회화 여정', EN: 'Your speaking journey in 3 simple steps', ZH: '3步完成属于我的会话之旅', JA: '3ステップで完成する会話の旅', FR: 'Votre parcours en 3 étapes', ES: 'Tu camino de conversación en 3 pasos'
+      KO: '가르치거나 평가하지 않아요', EN: 'We don’t teach or grade you', ZH: '不教学、不评分', JA: '教えたり評価したりしません', FR: 'On n’enseigne pas, on n’évalue pas', ES: 'No enseñamos ni evaluamos'
     },
     'journey.videoLabel': {
-      KO: '🎬 DayO 돼요 글로벌 화상회화 서비스 소개',
-      EN: '🎬 DayO global video chat intro',
-      ZH: '🎬 DayO 全球视频会话服务介绍',
-      JA: '🎬 DayOグローバルビデオ会話サービスの紹介',
-      FR: '🎬 Présentation DayO conversation vidéo',
-      ES: '🎬 Presentación de DayO videollamada global'
+      KO: '🎬 DayO 1:1 글로벌 대화 라운지 소개',
+      EN: '🎬 DayO 1:1 Global Chat Lounge intro',
+      ZH: '🎬 DayO 1:1 全球对话会客厅介绍',
+      JA: '🎬 DayO 1:1 Global Chat Lounge紹介',
+      FR: '🎬 Présentation du lounge de conversation DayO',
+      ES: '🎬 Presentación del lounge de conversación DayO'
     },
     'journey.videoTitle': {
       KO: 'DayO 돼요 서비스 소개 영상',
@@ -780,99 +806,203 @@
       FR: 'Vidéo de présentation DayO',
       ES: 'Vídeo de presentación de DayO'
     },
+    'topics.eyebrow': { KO: 'Talk Topics', EN: 'Talk Topics', ZH: '话题', JA: '話題', FR: 'Sujets', ES: 'Temas' },
+    'topics.title': {
+      KO: '관심사·이야기 주제로 가볍게 만나보세요',
+      EN: 'Meet lightly around shared interests and stories',
+      ZH: '用兴趣和故事轻松见面',
+      JA: '興味・話のテーマで気軽に会いましょう',
+      FR: 'Se retrouver autour d’intérêts et d’histoires',
+      ES: 'Encuéntrate alrededor de intereses e historias'
+    },
+    'topics.card1.title': { KO: '요즘 나의 일상', EN: 'My everyday lately', ZH: '最近的日常', JA: '最近のわたしの日常', FR: 'Mon quotidien en ce moment', ES: 'Mi día a día ahora' },
+    'topics.card1.a': { KO: '푹 빠진 취미', EN: 'A hobby I’m into', ZH: '最近迷上的爱好', JA: 'はまっている趣味', FR: 'Un hobby qui m’occupe', ES: 'Un hobby que me atrapa' },
+    'topics.card1.b': { KO: '쉬는 날 보내기', EN: 'How I spend days off', ZH: '休息日怎么过', JA: '休みの日の過ごし方', FR: 'Mes jours de repos', ES: 'Cómo paso el día libre' },
+    'topics.card1.c': { KO: '동네 맛집', EN: 'Favorite neighborhood spots', ZH: '附近好吃的店', JA: '近所のおいしいお店', FR: 'Bons plans du quartier', ES: 'Sitios ricos del barrio' },
+    'topics.card2.title': { KO: '한국에서 발견한 것들', EN: 'Things I found in Korea', ZH: '在韩国发现的事', JA: '韓国で見つけたもの', FR: 'Ce que j’ai découvert en Corée', ES: 'Lo que encontré en Corea' },
+    'topics.card2.a': { KO: '놀라웠던 문화', EN: 'Culture that surprised me', ZH: '让我惊讶的文化', JA: 'びっくりした文化', FR: 'Une culture qui m’a surpris', ES: 'Una cultura que me sorprendió' },
+    'topics.card2.b': { KO: '좋아하는 한국 음식', EN: 'Korean food I love', ZH: '喜欢的韩国食物', JA: '好きな韓国料理', FR: 'La cuisine coréenne que j’aime', ES: 'Comida coreana que me gusta' },
+    'topics.card2.c': { KO: '추천 장소', EN: 'Places I’d recommend', ZH: '想推荐的地方', JA: 'おすすめの場所', FR: 'Des lieux à conseiller', ES: 'Lugares que recomiendo' },
+    'topics.card3.title': { KO: '우리의 취향 비교', EN: 'Comparing our tastes', ZH: '比较我们的喜好', JA: '私たちの好みくらべ', FR: 'Comparer nos goûts', ES: 'Comparar nuestros gustos' },
+    'topics.card3.a': { KO: '집순이 vs 밖순이', EN: 'Homebody vs. always out', ZH: '宅家 vs 出门', JA: 'おうち派 vs おでかけ派', FR: 'Casanière vs. toujours dehors', ES: 'Casero vs. salir siempre' },
+    'topics.card3.b': { KO: '계획 여행 vs 즉흥 여행', EN: 'Planned trip vs. spontaneous', ZH: '计划旅行 vs 说走就走', JA: '計画旅行 vs 即興旅行', FR: 'Voyage planifié vs. improvisé', ES: 'Viaje planeado vs. espontáneo' },
+    'topics.card3.c': { KO: '영화 / 음악', EN: 'Movies / music', ZH: '电影 / 音乐', JA: '映画 / 音楽', FR: 'Films / musique', ES: 'Cine / música' },
+    'how.eyebrow': { KO: 'How it works', EN: 'How it works', ZH: '进行方式', JA: '進め方', FR: 'Comment ça marche', ES: 'Cómo funciona' },
+    'how.title': { KO: '가르치거나 평가하지 않아요', EN: 'We don’t teach or grade you', ZH: '不教学、不评分', JA: '教えたり評価したりしません', FR: 'On n’enseigne pas, on n’évalue pas', ES: 'No enseñamos ni evaluamos' },
+    'how.lead': {
+      KO: '준비된 이야기 카드로 서로 질문하고 경험을 나눕니다.',
+      EN: 'With prepared story cards, we ask each other questions and share experiences.',
+      ZH: '用准备好的故事卡片互相提问、分享经历。',
+      JA: '用意された話のカードで、互いに質問し経験を分け合います。',
+      FR: 'Avec des cartes d’histoire, on se pose des questions et on partage.',
+      ES: 'Con tarjetas de historia, nos preguntamos y compartimos experiencias.'
+    },
+    'how.step1.title': { KO: '이야기 카드', EN: 'Story cards', ZH: '故事卡片', JA: '話のカード', FR: 'Cartes d’histoire', ES: 'Tarjetas de historia' },
+    'how.step1.desc': {
+      KO: '관심사에 맞는 질문 카드가 대화를 열어 줘요. 정답은 없고, 서로의 경험을 나누면 충분해요.',
+      EN: 'Question cards matched to your interests open the talk. There is no right answer — sharing is enough.',
+      ZH: '贴合兴趣的提问卡片打开对话。没有标准答案，分享经历就够了。',
+      JA: '興味に合う質問カードが会話を開きます。正解はなく、経験を分け合えば十分です。',
+      FR: 'Des cartes-questions ouvertes lancent la discussion. Pas de bonne réponse : partager suffit.',
+      ES: 'Tarjetas de preguntas abren la charla. No hay respuesta correcta: compartir basta.'
+    },
+    'how.step2.title': { KO: '1:1 글로벌 대화', EN: '1:1 global chat', ZH: '1:1 全球对话', JA: '1:1グローバル会話', FR: 'Conversation 1:1', ES: 'Charla 1:1 global' },
+    'how.step2.desc': {
+      KO: '한국에 사는 외국인 파트너와 25분 동안 눈 맞추며 이야기해요. 친구처럼 가볍게요.',
+      EN: 'Talk for 25 minutes, eye to eye, with a partner living in Korea. Light, like a friend.',
+      ZH: '和住在韩国的外国伙伴对视交谈25分钟，像朋友一样轻松。',
+      JA: '韓国に住むパートナーと25分、目を合わせて話します。友達のように気軽に。',
+      FR: '25 minutes de conversation, les yeux dans les yeux, avec un partenaire en Corée.',
+      ES: '25 minutos de charla, cara a cara, con un compañero que vive en Corea.'
+    },
+    'how.step3.title': { KO: '1회 세션 티켓', EN: 'One-session ticket', ZH: '单次会话券', JA: '1回セッションチケット', FR: 'Ticket à la séance', ES: 'Ticket por sesión' },
+    'how.step3.desc': {
+      KO: '정기결제나 장기등록 없이, 필요할 때 티켓 한 장으로 참여해요.',
+      EN: 'No subscription or long-term sign-up. Join with one ticket when you want.',
+      ZH: '没有订阅或长期报名，想聊时用一张券即可。',
+      JA: '定期課金や長期登録なし。必要なときにチケット1枚で参加。',
+      FR: 'Pas d’abonnement. Un ticket suffit, quand vous voulez.',
+      ES: 'Sin suscripción. Un ticket cuando quieras.'
+    },
+    'how.note': {
+      KO: '1회 대화 세션은 25분이에요. 부담 없는 1회권 중심으로 언제든 다시 만날 수 있어요.',
+      EN: 'Each talk session is 25 minutes. Come back anytime with a one-time ticket.',
+      ZH: '每次对话25分钟。以轻松的单次券为主，随时可以再约。',
+      JA: '1回の会話は25分。気軽な1回券で、またいつでも会えます。',
+      FR: 'Chaque session dure 25 minutes. Revenez quand vous voulez, ticket par ticket.',
+      ES: 'Cada sesión dura 25 minutos. Vuelve cuando quieras, ticket a ticket.'
+    },
+    'aiHelp.eyebrow': { KO: 'AI Language Help', EN: 'AI Language Help', ZH: 'AI语言帮助', JA: 'AI言語ヘルプ', FR: 'Aide linguistique IA', ES: 'Ayuda lingüística IA' },
+    'aiHelp.title': {
+      KO: '말이 막힐 때만, 부드럽게 이어줘요',
+      EN: 'Only when words get stuck, it gently continues the talk',
+      ZH: '只有在说不下去时，才会温柔接上',
+      JA: '言葉に詰まったときだけ、やさしくつないでくれます',
+      FR: 'Seulement quand les mots manquent, l’IA relance en douceur',
+      ES: 'Solo cuando te trabas, continúa la charla con suavidad'
+    },
+    'aiHelp.cardTitle': { KO: 'AI 언어 도움', EN: 'AI language help', ZH: 'AI语言帮助', JA: 'AI言語ヘルプ', FR: 'Aide linguistique IA', ES: 'Ayuda lingüística IA' },
+    'aiHelp.desc': {
+      KO: '하고 싶은 말이 떠오르지 않거나 막힐 때만 화면 속 AI 언어 도우미가 부드럽게 이어줍니다. 평가하거나 고쳐 주는 선생님이 아니라, 대화가 끊기지 않게 옆에서 받아 주는 도움이에요.',
+      EN: 'Only when you can’t find the words does the on-screen helper continue the talk. Not a teacher who grades you — a sidekick so the conversation doesn’t stop.',
+      ZH: '只有在想不起要说的话或卡住时，屏幕里的AI才会温柔接上。不是打分的老师，而是让对话不断的旁边帮手。',
+      JA: '言いたいことが浮かばないときだけ、画面のAIがやさしくつないでくれます。評価する先生ではなく、会話が途切れないようにそばで受けるヘルプです。',
+      FR: 'Seulement quand les mots manquent, l’aide à l’écran relance. Pas un prof qui note — un soutien pour que ça continue.',
+      ES: 'Solo cuando no salen las palabras, el asistente en pantalla continúa. No es un profesor que evalúa: es ayuda para que no se corte.'
+    },
+    'tickets.eyebrow': { KO: 'Session Ticket', EN: 'Session Ticket', ZH: '会话券', JA: 'セッションチケット', FR: 'Ticket de session', ES: 'Ticket de sesión' },
+    'tickets.title': {
+      KO: '가볍게 쓰는 1회 세션 티켓',
+      EN: 'A light, one-session ticket',
+      ZH: '轻松使用的单次会话券',
+      JA: '気軽に使う1回セッションチケット',
+      FR: 'Un ticket léger, à la séance',
+      ES: 'Un ticket ligero, por sesión'
+    },
+    'tickets.desc': {
+      KO: '정기결제나 장기등록 없이, 대화하고 싶을 때 티켓 한 장으로 25분 1:1 글로벌 대화를 예약해요.',
+      EN: 'No subscription. When you want to talk, one ticket books a 25-minute 1:1 global chat.',
+      ZH: '没有订阅。想聊时用一张券预约25分钟1:1全球对话。',
+      JA: '定期課金なし。話したいときにチケット1枚で25分の1:1会話を予約。',
+      FR: 'Pas d’abonnement. Un ticket réserve 25 minutes de conversation 1:1.',
+      ES: 'Sin suscripción. Un ticket reserva 25 minutos de charla 1:1.'
+    },
+    'tickets.first.title': { KO: '첫 대화 체험권', EN: 'First-chat pass', ZH: '第一次对话体验券', JA: '初めての会話パス', FR: 'Pass première conversation', ES: 'Pase de primera charla' },
+    'tickets.first.price': { KO: '9,900원 · 1회 25분', EN: '₩9,900 · 25 min', ZH: '9,900韩元 · 25分钟', JA: '9,900ウォン · 25分', FR: '9 900 ₩ · 25 min', ES: '₩9,900 · 25 min' },
+    'tickets.regular.title': { KO: '세션 티켓 1장', EN: '1 session ticket', ZH: '会话券 1张', JA: 'セッションチケット1枚', FR: '1 ticket de session', ES: '1 ticket de sesión' },
+    'tickets.regular.price': { KO: '필요할 때만 충전', EN: 'Top up only when you need it', ZH: '需要时再充', JA: '必要なときだけチャージ', FR: 'Rechargez seulement si besoin', ES: 'Recarga solo cuando lo necesites' },
+    'tickets.cta': { KO: '📅 대화 세션 예약하기', EN: '📅 Book a talk session', ZH: '📅 预约对话', JA: '📅 会話セッションを予約', FR: '📅 Réserver une session', ES: '📅 Reservar una sesión' },
     'journey.step1.tag': { KO: 'STEP 01', EN: 'STEP 01', ZH: 'STEP 01', JA: 'STEP 01', FR: 'ÉTAPE 01', ES: 'PASO 01' },
     'journey.step1.title': {
-      KO: '스피킹 감각 테스트', EN: 'Speaking sense test', ZH: '口语感觉测试', JA: 'スピーキング感覚テスト', FR: 'Test de speaking', ES: 'Prueba de speaking'
+      KO: '이야기 카드', EN: 'Story cards', ZH: '故事卡片', JA: '話のカード', FR: 'Cartes d’histoire', ES: 'Tarjetas de historia'
     },
     'journey.step1.desc': {
-      KO: '부담 없이 확인하는 내 스피킹 위치',
-      EN: 'A pressure-free check of where your speaking stands.',
-      ZH: '轻松确认我的口语水平。',
-      JA: '気軽に確認できるスピーキングの立ち位置。',
-      FR: 'Un test sans pression de votre niveau.',
-      ES: 'Una prueba sin presión de tu nivel de habla.'
+      KO: '관심사에 맞는 질문으로 대화를 열어요',
+      EN: 'Open the talk with questions that match your interests',
+      ZH: '用贴合兴趣的问题打开对话',
+      JA: '興味に合う質問で会話を開きます',
+      FR: 'Des questions qui collent à vos envies',
+      ES: 'Preguntas que encajan con tus intereses'
     },
     'journey.step2.tag': { KO: 'STEP 02', EN: 'STEP 02', ZH: 'STEP 02', JA: 'STEP 02', FR: 'ÉTAPE 02', ES: 'PASO 02' },
     'journey.step2.title': {
-      KO: 'AI 실시간 코칭', EN: 'Real-time AI coaching', ZH: 'AI实时指导', JA: 'AIリアルタイムコーチング', FR: 'Coaching IA en direct', ES: 'Coaching de IA en vivo'
+      KO: 'AI 언어 도움', EN: 'AI language help', ZH: 'AI语言帮助', JA: 'AI言語ヘルプ', FR: 'Aide linguistique IA', ES: 'Ayuda lingüística IA'
     },
     'journey.step2.desc': {
-      KO: '대화 중 막혀도 AI가 실시간으로 단어와 문장 지원',
-      EN: "Stuck mid-chat? AI backs you up with words and sentences instantly.",
-      ZH: '对话中卡壳时，AI实时提供单词和句子支持。',
-      JA: '会話中に詰まってもAIがリアルタイムで単語や文をサポート。',
-      FR: "Bloqué en pleine conversation ? L'IA vous aide en temps réel.",
-      ES: '¿Te trabas? La IA te ayuda con palabras y frases al instante.'
+      KO: '대화 중 막혀도 AI가 부드럽게 이어 줘요',
+      EN: 'When you get stuck, AI gently continues the talk',
+      ZH: '卡住时AI会温柔接上',
+      JA: '詰まってもAIがやさしくつないでくれます',
+      FR: 'Quand ça bloque, l’IA relance en douceur',
+      ES: 'Si te trabas, la IA continúa con suavidad'
     },
     'journey.step3.tag': { KO: 'STEP 03', EN: 'STEP 03', ZH: 'STEP 03', JA: 'STEP 03', FR: 'ÉTAPE 03', ES: 'PASO 03' },
     'journey.step3.title': {
-      KO: '1:1 원어민 눈맞춤 대화', EN: '1:1 eye-contact conversation', ZH: '1:1面对面对话', JA: '1:1で目を合わせる会話', FR: 'Conversation 1:1 en face à face', ES: 'Conversación 1:1 cara a cara'
+      KO: '1:1 글로벌 대화', EN: '1:1 global chat', ZH: '1:1 全球对话', JA: '1:1グローバル会話', FR: 'Conversation 1:1', ES: 'Charla 1:1 global'
     },
     'journey.step3.desc': {
-      KO: '울렁증 없이 친구처럼 다정하게 트이는 실전 회화',
-      EN: 'No jitters — real conversations that open up like chatting with a friend.',
-      ZH: '没有紧张感，像朋友一样自然打开的实战会话。',
-      JA: '緊張なく友達のように話せる実践会話。',
-      FR: 'Sans stress, des conversations qui coulent comme entre amis.',
-      ES: 'Sin nervios, charlas reales como con un amigo.'
+      KO: '친구처럼 다정하게 서로의 경험을 나눠요',
+      EN: 'Share experiences, warmly, like friends',
+      ZH: '像朋友一样分享彼此的经历',
+      JA: '友達のように経験を分け合います',
+      FR: 'On partage, comme entre amis',
+      ES: 'Compartimos experiencias, como amigos'
     },
 
     /* ===== Partners teaser (index.html) ===== */
     'partnersTeaser.eyebrow': { KO: 'Partners', EN: 'Partners', ZH: 'Partners', JA: 'Partners', FR: 'Partners', ES: 'Partners' },
     'partnersTeaser.title': {
-      KO: '다정한 대화 파트너와 눈 맞추며', EN: 'Eye to eye with a warm conversation partner', ZH: '与温暖的对话伙伴眼神交流', JA: '温かい会話パートナーと目を合わせて', FR: 'Face à un partenaire chaleureux', ES: 'Frente a un compañero cálido'
+      KO: '한국에서 일상을 사는 대화 파트너', EN: 'Partners living their everyday life in Korea', ZH: '在韩国过日常的对话伙伴', JA: '韓国で日常を暮らす会話パートナー', FR: 'Des partenaires qui vivent en Corée', ES: 'Compañeros que viven su día a día en Corea'
     },
     'partnersTeaser.card1.desc': {
-      KO: '카페 같은 분위기로 천천히 이끌어 주는 프랑스어 대화 파트너',
-      EN: 'A French partner who guides you slowly, café-style.',
-      ZH: '以咖啡馆般的氛围慢慢引导的法语对话伙伴。',
-      JA: 'カフェのような雰囲気でゆっくり導くフランス語会話パートナー。',
-      FR: 'Un partenaire français qui vous guide en douceur, esprit café.',
-      ES: 'Un compañero francés que te guía con calma, ambiente de café.'
+      KO: '서울 골목 카페와 주말 마켓을 좋아하는 프랑스 파트너. 취미와 일상을 천천히 나눠 줘요.',
+      EN: 'A French partner who loves Seoul alley cafés and weekend markets. Slow chats about hobbies and everyday life.',
+      ZH: '喜欢首尔巷子咖啡和周末市集的法国伙伴，慢慢分享爱好和日常。',
+      JA: 'ソウルの路地カフェと週末マーケットが好きなフランスのパートナー。趣味と日常をゆっくり分けます。',
+      FR: 'Une partenaire française qui aime les cafés de ruelle et les marchés. On parle hobbies et quotidien, tout doucement.',
+      ES: 'Una compañera francesa que ama cafés de callejón y mercadillos. Comparte hobbies y el día a día, sin prisa.'
     },
     'partnersTeaser.card2.desc': {
-      KO: '오픽·워홀 실전 상황으로 자연스럽게 말문이 트이는 코칭',
-      EN: 'Coaching with real OPIc and working-holiday scenarios to open you up naturally.',
-      ZH: '通过OPIc·打工度假实战场景自然打开话题的辅导。',
-      JA: 'OPIc・ワーホリの実戦シーンで自然に話が出てくるコーチング。',
-      FR: "Un coaching avec des scénarios réels d'OPIc et de PVT.",
-      ES: 'Coaching con escenarios reales de OPIc y working holiday.'
+      KO: '한국 음식과 즉흥 산책을 좋아하는 미국 파트너. 취향을 비교하며 이야기를 이어 가요.',
+      EN: 'An American partner into Korean food and spontaneous walks. You compare tastes and keep the story going.',
+      ZH: '喜欢韩国食物和即兴散步的美国伙伴，比较彼此喜好继续聊。',
+      JA: '韓国料理と即興の散歩が好きなアメリカのパートナー。好みをくらべながら話を続けます。',
+      FR: 'Une partenaire américaine, cuisine coréenne et balades improvisées. On compare les goûts et on continue.',
+      ES: 'Una compañera de EE. UU. a la que le gusta la comida coreana y pasear sin plan. Comparáis gustos y seguís.'
     },
     'partnersTeaser.card3.desc': {
-      KO: '친구처럼 다정한 일본어 대화로 울렁증 없이 시작해요',
-      EN: 'Start jitter-free with friendly Japanese conversation, like chatting with a friend.',
-      ZH: '像朋友一样亲切的日语对话，没有紧张感地开始吧。',
-      JA: '友達のように温かい日本語会話で緊張せずに始めましょう。',
-      FR: 'Commencez sans stress avec une conversation japonaise amicale.',
-      ES: 'Empieza sin nervios con una charla en japonés amistosa.'
+      KO: '성수·망원을 즐겨 찾는 일본 파트너. 서로 추천한 장소 이야기로 금세 친해져요.',
+      EN: 'A Japanese partner who hangs around Seongsu and Mangwon. Place recs make you friends quickly.',
+      ZH: '常去圣水、望远的日本伙伴，互相推荐的地方让你们很快熟悉。',
+      JA: '聖水・望遠が好きな日本のパートナー。おすすめの場所の話ですぐ仲良くなれます。',
+      FR: 'Une partenaire japonaise qui aime Seongsu et Mangwon. Les lieux recommandés rapprochent vite.',
+      ES: 'Una compañera japonesa de Seongsu y Mangwon. Los sitios recomendados os hacen amigos rápido.'
     },
-
     /* ===== Booking CTA section (index.html) ===== */
-    'bookingCta.eyebrow': { KO: 'Booking', EN: 'Booking', ZH: 'Booking', JA: 'Booking', FR: 'Booking', ES: 'Booking' },
+    'bookingCta.eyebrow': { KO: 'Session Ticket', EN: 'Session Ticket', ZH: '会话券', JA: 'セッションチケット', FR: 'Ticket', ES: 'Ticket' },
     'bookingCta.title': {
-      KO: '지금, 화상 회화 스튜디오에서 만나요', EN: 'Meet now in the video conversation studio', ZH: '现在，在视频会话工作室见面吧', JA: '今すぐ、ビデオ会話スタジオで会いましょう', FR: 'Rejoignez le studio vidéo maintenant', ES: 'Reúnete ahora en el estudio de video'
+      KO: '가볍게 쓰는 1회 세션 티켓', EN: 'A light, one-session ticket', ZH: '轻松使用的单次会话券', JA: '気軽に使う1回セッションチケット', FR: 'Un ticket léger, à la séance', ES: 'Un ticket ligero, por sesión'
     },
     'bookingCta.desc': {
-      KO: '원어민과 눈 맞추며 대화하는 라이브 룸으로 바로 이동해요.',
-      EN: 'Head straight into a live room and talk face-to-face with a native speaker.',
-      ZH: '直接进入与母语者眼神交流对话的实时房间。',
-      JA: 'ネイティブと目を合わせて話すライブルームへすぐ移動します。',
-      FR: 'Direction la salle en direct pour parler avec un locuteur natif.',
-      ES: 'Ve directo a la sala en vivo para hablar con un nativo.'
+      KO: '대화하고 싶을 때 티켓 한 장으로 25분 1:1 글로벌 대화를 예약해요.',
+      EN: 'When you want to talk, one ticket books a 25-minute 1:1 global chat.',
+      ZH: '想聊时用一张券预约25分钟1:1全球对话。',
+      JA: '話したいときにチケット1枚で25分の1:1会話を予約。',
+      FR: 'Un ticket réserve 25 minutes de conversation 1:1.',
+      ES: 'Un ticket reserva 25 minutos de charla 1:1.'
     },
     'bookingCta.book': {
-      KO: '📅 대화 예약하기', EN: '📅 Book a Chat', ZH: '📅 预约对话', JA: '📅 会話予約', FR: '📅 Réserver', ES: '📅 Reservar'
+      KO: '📅 대화 세션 예약하기', EN: '📅 Book a talk session', ZH: '📅 预约对话', JA: '📅 会話セッションを予約', FR: '📅 Réserver une session', ES: '📅 Reservar una sesión'
     },
-
     /* ===== Reviews (index.html) ===== */
     'reviews.eyebrow': { KO: 'Real Stories', EN: 'Real Stories', ZH: 'Real Stories', JA: 'Real Stories', FR: 'Real Stories', ES: 'Real Stories' },
     'reviews.title': {
-      KO: 'DayO와 함께 말문이 트인 실제 유저들의 이야기',
-      EN: 'Real stories from people who found their voice with DayO',
-      ZH: '与DayO一起打开话匣子的真实用户故事',
-      JA: 'DayOと一緒に話せるようになったリアルなユーザーの声',
-      FR: 'Les histoires de vrais utilisateurs qui ont trouvé leurs mots avec DayO',
-      ES: 'Historias reales de usuarios que encontraron su voz con DayO'
+      KO: 'DayO에서 나눈 실제 대화 이야기',
+      EN: 'Real conversations people had on DayO',
+      ZH: '在DayO里发生过的真实对话',
+      JA: 'DayOで交わしたリアルな会話の話',
+      FR: 'De vraies conversations vécues sur DayO',
+      ES: 'Conversaciones reales que pasaron en DayO'
     },
     'reviews.card1.text': {
       KO: '"외국계 미팅에서 침묵이 사라졌어요"',
@@ -894,7 +1024,7 @@
       ES: '"¡Logré mi meta con expresiones naturales que no suenan memorizadas!"'
     },
     'reviews.card2.author': {
-      KO: '스피킹 시험 준비생 이OO님', EN: 'Lee, speaking-test prep', ZH: '口语考试备考生李OO', JA: 'スピーキング試験準備中のイさん', FR: 'Lee, préparation d’un test oral', ES: 'Lee, preparando un examen oral'
+      KO: '일상 대화를 좋아하는 이OO님', EN: 'Lee, who loves everyday chats', ZH: '喜欢日常对话的李OO', JA: '日常会話が好きなイさん', FR: 'Lee, qui aime les conversations du quotidien', ES: 'Lee, a quien le gustan las charlas de todos los días'
     },
     'reviews.card3.text': {
       KO: '"현지 식당에서 당황하지 않고 여유롭게 주문했어요"',
@@ -921,7 +1051,7 @@
 
     /* ===== Quiz modal (index.html) ===== */
     'quiz.badge': {
-      KO: '무료 스피킹 감각 테스트', EN: 'Free speaking sense test', ZH: '免费口语感觉测试', JA: '無料スピーキング感覚テスト', FR: 'Test de speaking gratuit', ES: 'Test de speaking gratis'
+      KO: '관심사로 여는 첫 대화', EN: 'A first chat around your interests', ZH: '从兴趣打开的第一次对话', JA: '興味から始まる初めての会話', FR: 'Une première conversation autour de vos envies', ES: 'Una primera charla alrededor de tus intereses'
     },
     'quiz.title': {
       KO: '외국인 앞 어색한 침묵 탈출, 돼요! ☕', EN: 'Break the awkward freeze, you can! ☕', ZH: '打破面对外国人时的尴尬沉默，真的可以！☕', JA: '外国人の前の気まずい沈黙から脱出、できる！☕', FR: 'Fini le silence gênant, ça marche ! ☕', ES: 'Sal del silencio incómodo, ¡se puede! ☕'
@@ -1005,7 +1135,7 @@
       ES: 'Elige idioma y nivel: empiezan 4 preguntas a tu medida.'
     },
     'quiz.startBtn': {
-      KO: '테스트 시작하기', EN: 'Start the test', ZH: '开始测试', JA: 'テストを始める', FR: 'Commencer le test', ES: 'Empezar el test'
+      KO: '대화 주제 보러 가기', EN: 'See talk topics', ZH: '去看话题', JA: '会話テーマを見る', FR: 'Voir les sujets', ES: 'Ver los temas'
     },
     'quiz.resultScore': {
       KO: '{score} / {total} 맞혔어요',
@@ -1323,7 +1453,7 @@
       KO: '세션은 어떻게 진행되나요?', EN: 'How do sessions work?', ZH: '会话是如何进行的？', JA: 'セッションはどのように進みますか？', FR: 'Comment se déroulent les sessions ?', ES: '¿Cómo funcionan las sesiones?'
     },
     'chatbot.a.class': {
-      KO: 'DayO 세션은 1회 총 30분이에요! 25분 동안 원어민 대화 파트너와 1:1 화상 대화를 하고, 이어서 5분 미니 퀴즈/리포트로 마무리해요. AI 코파일럿이 실시간으로 표현도 도와드린답니다.',
+      KO: 'DayO 세션은 1회 25분이에요. 관심사가 맞는 대화 파트너와 1:1로 이야기하고, 말이 막힐 때만 AI 언어 도움이 부드럽게 이어 줘요. 끝나면 오늘의 대화 기록이 남아요.',
       EN: 'Each DayO session is 30 minutes total: 25 minutes of 1:1 video chat with a native partner, plus a 5-minute mini quiz/report. An AI copilot also helps with expressions in real time.',
       ZH: 'DayO每次会话共30分钟：25分钟与母语伙伴1:1视频对话，再加上5分钟小测验/报告。AI副驾也会实时帮助您表达。',
       JA: 'DayOのセッションは1回合計30分です。25分の1:1ビデオ会話のあと、5分のミニクイズ/レポートで締めくくります。AIコパイロットがリアルタイムで表現もサポートします。',
@@ -1353,10 +1483,10 @@
       ES: '¡Claro! Está bien aunque seas principiante total. Explicamos primero en coreano y pasamos poco a poco al inglés.'
     },
     'chatbot.q.free': {
-      KO: '스피킹 테스트는 무료인가요?', EN: 'Is the speaking test free?', ZH: '口语测试是免费的吗？', JA: 'スピーキングテストは無料ですか？', FR: 'Le test de speaking est-il gratuit ?', ES: '¿La prueba de speaking es gratis?'
+      KO: '세션 티켓은 어떻게 쓰나요?', EN: 'How do session tickets work?', ZH: '会话券怎么用？', JA: 'セッションチケットはどう使いますか？', FR: 'Comment marchent les tickets ?', ES: '¿Cómo se usan los tickets?'
     },
     'chatbot.a.free': {
-      KO: '네, 스피킹 감각 테스트는 완전 무료예요! 부담 없이 나의 스피킹 감각을 확인해 보세요.',
+      KO: '세션 티켓은 1회 25분 대화에 쓰는 가벼운 참여권이에요. 정기결제 없이 필요할 때 한 장씩 쓰면 돼요.',
       EN: "Yes, the speaking sense test is completely free! Check your speaking sense with no pressure at all.",
       ZH: '是的，口语感觉测试完全免费！请轻松确认您的口语感觉。',
       JA: 'はい、スピーキング感覚テストは完全無料です！気軽にご自身のスピーキング感覚を確認してください。',
@@ -1477,7 +1607,7 @@
     'book.lang.ru': { KO: '러시아어', EN: 'Russian', ZH: '俄语', JA: 'ロシア語', FR: 'Russe', ES: 'Ruso' },
     'book.lang.ko': { KO: '한국어', EN: 'Korean', ZH: '韩语', JA: '韓国語', FR: 'Coréen', ES: 'Coreano' },
     'book.purpose.travel': { KO: '✈️ 여행/일상', EN: '✈️ Travel/Daily', ZH: '✈️ 旅行/日常', JA: '✈️ 旅行・日常', FR: '✈️ Voyage/Quotidien', ES: '✈️ Viaje/Diario' },
-    'book.purpose.opic': { KO: '🎯 오픽/토스', EN: '🎯 OPIc/TOEIC S', ZH: '🎯 OPIc/口语考试', JA: '🎯 OPIc/スピーキング試験', FR: '🎯 OPIc/Examen oral', ES: '🎯 OPIc/Examen oral' },
+    'book.purpose.opic': { KO: '☕️ 요즘 나의 일상', EN: '☕️ My everyday lately', ZH: '☕️ 最近的日常', JA: '☕️ 最近の日常', FR: '☕️ Mon quotidien', ES: '☕️ Mi día a día' },
     'book.purpose.abroad': { KO: '💼 워홀/유학 준비', EN: '💼 Working Holiday/Study Abroad', ZH: '💼 打工度假/留学准备', JA: '💼 ワーホリ・留学準備', FR: '💼 PVT/Études à l\'étranger', ES: '💼 Working Holiday/Estudios' },
     'book.purpose.casual': { KO: '☕ 자유 수다', EN: '☕ Casual Chat', ZH: '☕ 自由聊天', JA: '☕ 自由なおしゃべり', FR: '☕ Discussion libre', ES: '☕ Charla libre' },
     'book.style.slow': {
@@ -1501,7 +1631,7 @@
       ES: '💡 « ¡DayO eligió las opciones más amables para tu primera charla! (puedes cambiarlas) »'
     },
     'chatPrefs.safetyToast': {
-      KO: '🤖 AI 실시간 코파일럿 & 스피킹 리포트가 함께합니다.',
+      KO: '🤖 AI 언어 도움이 말이 막힐 때만 부드럽게 이어 줘요.',
       EN: '🤖 AI live copiloting & speaking report are with you.',
       ZH: '🤖 AI实时副驾驶与口语报告已就绪。',
       JA: '🤖 AIリアルタイムコパイロット＆スピーキングレポートが一緒です。',
@@ -1613,7 +1743,7 @@
     'room.copilotThinking': { KO: '지금 말하기 좋은 표현을 고르는 중…', EN: 'Picking phrases you can say now…', ZH: '正在挑选适合现在说的表达…', JA: '今言いやすい表現を選んでいます…', FR: 'Je choisis des phrases à dire maintenant…', ES: 'Eligiendo frases para decir ahora…' },
     'room.copilotDemo': { KO: '듣고 있어요', EN: 'Listening', ZH: '正在听', JA: '聞いています', FR: 'J\'écoute', ES: 'Escuchando' },
     'room.copilotPhrasesLabel': { KO: '지금 말하기 좋은 추천 영어 표현', EN: 'English phrases to say right now', ZH: '现在适合说的英语表达', JA: '今言うとよい英語表現', FR: 'Expressions anglaises à dire maintenant', ES: 'Frases en inglés para decir ahora' },
-    'room.copilotGrammarLabel': { KO: '문법 교정 힌트', EN: 'Grammar hint', ZH: '语法提示', JA: '文法ヒント', FR: 'Indice de grammaire', ES: 'Pista gramatical' },
+    'room.copilotGrammarLabel': { KO: '기억하고 싶은 표현', EN: 'Phrases to remember', ZH: '想记住的表达', JA: '覚えておきたい表現', FR: 'Expressions à retenir', ES: 'Expresiones para recordar' },
     'room.copilotIdleGrammar': { KO: '마이크가 켜지면 대화를 듣고 바로 쓸 수 있는 표현을 추천해 줄게요.', EN: 'Turn on the mic and I\'ll suggest phrases you can use right away.', ZH: '打开麦克风后，我会推荐马上能用的表达。', JA: 'マイクをオンにすると、すぐに使える表現をおすすめします。', FR: 'Activez le micro et je vous proposerai des phrases à utiliser tout de suite.', ES: 'Enciende el micrófono y te sugeriré frases para usar al momento.' },
     'room.copilotCopied': { KO: '표현을 복사했어요 ✨', EN: 'Phrase copied ✨', ZH: '已复制表达 ✨', JA: '表現をコピーしました ✨', FR: 'Expression copiée ✨', ES: 'Frase copiada ✨' },
     'room.toastDailyDemo': { KO: '', EN: '', ZH: '', JA: '', FR: '', ES: '' },
@@ -1628,8 +1758,8 @@
       ES: '⏰ Queda 1 minuto. Despídete de tu compañero y cierra la conversación.'
     },
 
-    'page.title.index': { KO: 'DayO 돼요 — AI 회화 코파일럿', EN: 'DayO — AI Conversation Copilot', ZH: 'DayO — AI对话副驾驶', JA: 'DayO — AI会話コパイロット', FR: 'DayO — Copilote de conversation IA', ES: 'DayO — Copiloto de conversación con IA' },
-    'page.title.room': { KO: 'DayO 돼요 — 화상 회화 스튜디오', EN: 'DayO — Video Conversation Studio', ZH: 'DayO — 视频对话工作室', JA: 'DayO — ビデオ会話スタジオ', FR: 'DayO — Studio de conversation vidéo', ES: 'DayO — Estudio de conversación por video' },
+    'page.title.index': { KO: 'DayO 돼요 — 1:1 Global Chat Lounge', EN: 'DayO — 1:1 Global Chat Lounge', ZH: 'DayO — 1:1 Global Chat Lounge', JA: 'DayO — 1:1 Global Chat Lounge', FR: 'DayO — 1:1 Global Chat Lounge', ES: 'DayO — 1:1 Global Chat Lounge' },
+    'page.title.room': { KO: 'DayO 돼요 — 1:1 글로벌 대화 라운지', EN: 'DayO — 1:1 Global Chat Lounge', ZH: 'DayO — 1:1 全球对话会客厅', JA: 'DayO — 1:1 Global Chat Lounge', FR: 'DayO — 1:1 Global Chat Lounge', ES: 'DayO — 1:1 Global Chat Lounge' },
     'page.title.mypage': { KO: 'DayO 마이페이지 — 내 대화 라운지', EN: 'DayO My Page — My Conversation Lounge', ZH: 'DayO 我的页面 — 我的对话休息室', JA: 'DayOマイページ — マイ会話ラウンジ', FR: 'DayO Mon Espace — Mon salon de conversation', ES: 'DayO Mi Página — Mi salón de conversación' },
     'page.title.partner': { KO: 'DayO Partner Lounge — 대화 파트너 라운지', EN: 'DayO Partner Lounge — Conversation Partner Dashboard', ZH: 'DayO Partner Lounge — 对话伙伴休息室', JA: 'DayO Partner Lounge — 会話パートナーラウンジ', FR: 'DayO Partner Lounge — Espace partenaire', ES: 'DayO Partner Lounge — Sala de partners' },
     'nav.mainMenuAria': { KO: '주요 메뉴', EN: 'Main menu', ZH: '主菜单', JA: 'メインメニュー', FR: 'Menu principal', ES: 'Menú principal' },
@@ -1722,7 +1852,7 @@
     /* ===== My Page extras (mypage.html) ===== */
     'mypage.session1.meta': { KO: '목적: ✈️ 여행/일상 · 스타일: 🐢 천천히 들어주는 파트너', EN: 'Purpose: ✈️ Travel/Daily · Style: 🐢 Patient listener', ZH: '目的：✈️ 旅行/日常 · 风格：🐢 耐心倾听的伙伴', JA: '目的：✈️ 旅行・日常 · スタイル：🐢 じっくり聞いてくれるパートナー', FR: 'Objectif : ✈️ Voyage/Quotidien · Style : 🐢 Écoute patiente', ES: 'Propósito: ✈️ Viaje/Diario · Estilo: 🐢 Escucha paciente' },
     'mypage.session1.time': { KO: '오늘 20:00 · 30분', EN: 'Today 20:00 · 30 min', ZH: '今天 20:00 · 30分钟', JA: '今日 20:00 · 30分', FR: "Aujourd'hui 20:00 · 30 min", ES: 'Hoy 20:00 · 30 min' },
-    'mypage.session2.meta': { KO: '목적: 🎯 오픽/토스 · 스타일: 📝 교정을 꼼꼼히 해주는 파트너', EN: 'Purpose: 🎯 OPIc/TOEIC Speaking · Style: 📝 Detailed correction', ZH: '目的：🎯 OPIc/托业口语 · 风格：📝 细致纠错的伙伴', JA: '目的：🎯 OPIc/TOEIC · スタイル：📝 丁寧に直してくれるパートナー', FR: 'Objectif : 🎯 OPIc/TOEIC · Style : 📝 Corrections détaillées', ES: 'Propósito: 🎯 OPIc/TOEIC · Estilo: 📝 Correcciones detalladas' },
+    'mypage.session2.meta': { KO: '주제: ☕️ 요즘 나의 일상 · 스타일: 다정하게 리액션해 주는 파트너', EN: 'Topic: ☕️ Everyday life · Style: a partner with warm reactions', ZH: '主题：☕️ 最近的日常 · 风格：反应温暖的伙伴', JA: 'テーマ：☕️ 最近の日常 · スタイル：あたたかく反応してくれるパートナー', FR: 'Sujet : ☕️ quotidien · Style : réactions chaleureuses', ES: 'Tema: ☕️ día a día · Estilo: reacciones cálidas' },
     'mypage.session2.time': { KO: '8월 6일 (목) 21:00 · 30분', EN: 'Aug 6 (Thu) 21:00 · 30 min', ZH: '8月6日（周四）21:00 · 30分钟', JA: '8月6日（木）21:00 · 30分', FR: '6 août (jeu) 21:00 · 30 min', ES: '6 de agosto (jue) 21:00 · 30 min' },
     'mypage.session3.meta': { KO: '목적: ☕ 자유 수다 · 스타일: ⚡ 자연스러운 실전 티키타카', EN: 'Purpose: ☕ Free Chat · Style: ⚡ Natural rapid-fire chat', ZH: '目的：☕ 自由聊天 · 风格：⚡ 自然快节奏对话', JA: '目的：☕ 自由な会話 · スタイル：⚡ 自然でスピーディなやり取り', FR: 'Objectif : ☕ Discussion libre · Style : ⚡ Échange naturel et rapide', ES: 'Propósito: ☕ Charla libre · Estilo: ⚡ Intercambio natural y rápido' },
     'mypage.session3.time': { KO: '8월 9일 (일) 11:00 · 30분', EN: 'Aug 9 (Sun) 11:00 · 30 min', ZH: '8月9日（周日）11:00 · 30分钟', JA: '8月9日（日）11:00 · 30分', FR: '9 août (dim) 11:00 · 30 min', ES: '9 de agosto (dom) 11:00 · 30 min' },
@@ -1730,12 +1860,12 @@
     'mypage.library.item1.desc': { KO: 'Camille 파트너와의 여행 회화 전에 3분만 읽어보세요.', EN: 'Take 3 minutes to read before your travel chat with partner Camille.', ZH: '在与Camille伙伴进行旅行会话前，花3分钟阅读。', JA: 'Camilleパートナーとの旅行会話の前に3分だけ読んでみてください。', FR: 'Lisez 3 minutes avant votre conversation voyage avec Camille.', ES: 'Lee 3 minutos antes de tu charla de viaje con Camille.' },
     'mypage.library.item2.title': { KO: '추천 표현 리뷰 · 카페와 주문', EN: 'Recommended expressions review · Café & Ordering', ZH: '推荐表达复习 · 咖啡厅与点单', JA: 'おすすめ表現レビュー · カフェと注文', FR: 'Révision des expressions · Café et commande', ES: 'Repaso de expresiones · Café y pedidos' },
     'mypage.library.item2.desc': { KO: '지난 대화에서 자주 막혔던 표현을 모았어요.', EN: 'Expressions you often got stuck on in past chats.', ZH: '收集了以往对话中常卡壳的表达。', JA: '過去の会話でよく詰まった表現を集めました。', FR: 'Les expressions qui vous ont souvent bloqué.', ES: 'Expresiones con las que a menudo te trababas.' },
-    'mypage.library.item3.title': { KO: '오픽 빈출 주제 · 재택근무 이야기', EN: 'Frequent OPIc topic · Working from home', ZH: 'OPIc常见主题 · 居家办公', JA: 'OPIc頻出テーマ · リモートワーク', FR: 'Sujet fréquent OPIc : télétravail', ES: 'Tema frecuente de OPIc: trabajo remoto' },
+    'mypage.library.item3.title': { KO: '요즘 나의 일상 · 재택근무 이야기', EN: 'My everyday lately · Working from home', ZH: '最近的日常 · 居家办公', JA: '最近の日常 · リモートワーク', FR: 'Mon quotidien : télétravail', ES: 'Mi día a día: trabajo remoto' },
     'mypage.library.item3.desc': { KO: 'Kate 파트너와의 세션 전 예습 자료예요.', EN: 'Preview material before your session with partner Kate.', ZH: '与Kate伙伴会话前的预习资料。', JA: 'Kateパートナーとのセッション前の予習資料です。', FR: 'Matériel de préparation avant la session avec Kate.', ES: 'Material de preparación antes de la sesión con Kate.' },
     'mypage.library.item4.title': { KO: '지난 대화 복습 노트', EN: 'Past conversation review notes', ZH: '过往对话复习笔记', JA: '過去の会話の復習ノート', FR: 'Notes de révision des conversations passées', ES: 'Notas de repaso de conversaciones pasadas' },
     'mypage.library.item4.desc': { KO: '파트너가 남긴 피드백 표현을 다시 확인해 보세요.', EN: 'Review the feedback expressions your partner left.', ZH: '重新查看伙伴留下的反馈表达。', JA: 'パートナーが残したフィードバック表現を再確認してみましょう。', FR: 'Revoyez les expressions de retour laissées par votre partenaire.', ES: 'Revisa las expresiones de comentarios que dejó tu compañero.' },
     'mypage.history1.meta': { KO: '2026.08.02 (일) 20:00 · 30분 · 주제 ☕ 여행 회화', EN: '2026.08.02 (Sun) 20:00 · 30 min · Topic ☕ Travel Conversation', ZH: '2026.08.02（周日）20:00 · 30分钟 · 主题 ☕ 旅行会话', JA: '2026.08.02（日）20:00 · 30分 · テーマ ☕ 旅行会話', FR: '02.08.2026 (dim) 20:00 · 30 min · Sujet ☕ Conversation voyage', ES: '02.08.2026 (dom) 20:00 · 30 min · Tema ☕ Conversación de viaje' },
-    'mypage.history2.meta': { KO: '2026.07.29 (수) 21:00 · 30분 · 주제 🎯 오픽/토스 준비', EN: '2026.07.29 (Wed) 21:00 · 30 min · Topic 🎯 OPIc/TOEIC Prep', ZH: '2026.07.29（周三）21:00 · 30分钟 · 主题 🎯 OPIc/托业准备', JA: '2026.07.29（水）21:00 · 30分 · テーマ 🎯 OPIc/TOEIC対策', FR: '29.07.2026 (mer) 21:00 · 30 min · Sujet 🎯 Préparation OPIc/TOEIC', ES: '29.07.2026 (mié) 21:00 · 30 min · Tema 🎯 Preparación OPIc/TOEIC' },
+    'mypage.history2.meta': { KO: '2026.07.29 (수) 21:00 · 25분 · 주제 ☕️ 요즘 나의 일상', EN: '2026.07.29 (Wed) 21:00 · 25 min · Topic ☕️ Everyday life', ZH: '2026.07.29（周三）21:00 · 25分钟 · 主题 ☕️ 最近的日常', JA: '2026.07.29（水）21:00 · 25分 · テーマ ☕️ 最近の日常', FR: '29.07.2026 (mer) 21:00 · 25 min · Sujet ☕️ quotidien', ES: '29.07.2026 (mié) 21:00 · 25 min · Tema ☕️ día a día' },
 
     /* ===== Materials & Report modal content (materials.js) ===== */
     'mat.report.r0802.date': { KO: '2026.08.02 (일)', EN: '2026.08.02 (Sun)', ZH: '2026.08.02（周日）', JA: '2026.08.02（日）', FR: '02.08.2026 (dim)', ES: '02.08.2026 (dom)' },
@@ -1744,7 +1874,7 @@
       KO: 'Camille 파트너: 문장 구성력이 정말 훌륭하세요! 다음엔 주문 표현을 조금 더 연습해 봐요 💖', EN: "Partner Camille: Your sentence structure is excellent! Let's practice ordering expressions a bit more next time 💖", ZH: 'Camille伙伴：你的句子组织能力真的很棒！下次我们多练习一下点餐表达吧 💖', JA: 'Camilleパートナー：文構成力が本当に素晴らしいですね！次回は注文表現をもう少し練習しましょう 💖', FR: 'Partenaire Camille : Votre construction de phrases est excellente ! La prochaine fois, pratiquons un peu plus les expressions de commande 💖', ES: 'Compañera Camille: ¡Tu estructura de oraciones es excelente! La próxima vez practiquemos un poco más las expresiones para pedir 💖'
     },
     'mat.report.r0729.date': { KO: '2026.07.29 (수)', EN: '2026.07.29 (Wed)', ZH: '2026.07.29（周三）', JA: '2026.07.29（水）', FR: '29.07.2026 (mer)', ES: '29.07.2026 (mié)' },
-    'mat.report.r0729.topic': { KO: '🎯 오픽/토스 준비', EN: '🎯 OPIc/TOEIC Prep', ZH: '🎯 OPIc/托业准备', JA: '🎯 OPIc/TOEIC対策', FR: '🎯 Préparation OPIc/TOEIC', ES: '🎯 Preparación OPIc/TOEIC' },
+    'mat.report.r0729.topic': { KO: '☕️ 요즘 나의 일상', EN: '☕️ Everyday life', ZH: '☕️ 最近的日常', JA: '☕️ 最近の日常', FR: '☕️ Quotidien', ES: '☕️ Día a día' },
     'mat.report.r0729.feedback': {
       KO: 'Kate 파트너: 답변을 두 문장으로 늘리는 연습이 잘 되고 있어요! 접속 표현을 조금만 더 써보면 완벽해요 ✨', EN: "Partner Kate: You're doing great extending answers to two sentences! Use a few more connecting expressions and it'll be perfect ✨", ZH: 'Kate伙伴：把回答扩展成两句话的练习做得很好！再多用一些连接表达就完美了 ✨', JA: 'Kateパートナー：答えを2文に伸ばす練習がよくできていますね！接続表現をもう少し使えば完璧です ✨', FR: 'Partenaire Kate : Vous progressez bien en étendant vos réponses à deux phrases ! Utilisez un peu plus de connecteurs et ce sera parfait ✨', ES: 'Compañera Kate: ¡Lo estás haciendo muy bien extendiendo las respuestas a dos oraciones! Usa un poco más de conectores y será perfecto ✨'
     },
@@ -1772,11 +1902,11 @@
       ES: ['Quisiera un café, por favor.', '¿Cuánto cuesta la terraza?', '¿Tiene alguna recomendación?', '¿Podría hablar un poco más despacio?', '¿Cómo se dice esto en francés?']
     },
 
-    'mat.item.enopic.badge': { KO: '🇺🇸 영어 · 오픽/토스', EN: '🇺🇸 English · OPIc/TOEIC', ZH: '🇺🇸 英语 · OPIc/托业', JA: '🇺🇸 英語 · OPIc/TOEIC', FR: '🇺🇸 Anglais · OPIc/TOEIC', ES: '🇺🇸 Inglés · OPIc/TOEIC' },
-    'mat.item.enopic.title': { KO: '오픽 인터뷰 빈출 주제 예습', EN: 'Preview: Frequent OPIc interview topic', ZH: 'OPIc面试常见主题预习', JA: 'OPICインタビュー頻出テーマ予習', FR: "Aperçu : sujet fréquent de l'entretien OPIc", ES: 'Vista previa: tema frecuente de la entrevista OPIc' },
+    'mat.item.enopic.badge': { KO: '🇺🇸 영어 · 요즘 나의 일상', EN: '🇺🇸 English · Everyday life', ZH: '🇺🇸 英语 · 日常', JA: '🇺🇸 英語 · 日常', FR: '🇺🇸 Anglais · quotidien', ES: '🇺🇸 Inglés · día a día' },
+    'mat.item.enopic.title': { KO: '요즘 나의 일상 · 일과 쉬는 날', EN: 'My everyday lately · work and days off', ZH: '最近的日常 · 工作和休息日', JA: '最近の日常 · 仕事と休み', FR: 'Mon quotidien : travail et jours off', ES: 'Mi día a día: trabajo y descanso' },
     'mat.item.enopic.headline': { KO: '재택근무 이후 달라진 사무실 풍경', EN: 'How the office has changed since remote work', ZH: '居家办公之后不同的办公室景象', JA: 'リモートワーク以降変わったオフィスの風景', FR: 'Comment le bureau a changé depuis le télétravail', ES: 'Cómo ha cambiado la oficina desde el trabajo remoto' },
     'mat.item.enopic.source': { KO: 'DayO 큐레이션 · 4분 예습', EN: 'Curated by DayO · 4-min preview', ZH: 'DayO精选 · 4分钟预习', JA: 'DayOキュレーション · 4分予習', FR: 'Sélection DayO · Aperçu de 4 min', ES: 'Curaduría de DayO · Vista previa de 4 min' },
-    'mat.item.enopic.summary': { KO: '오픽에서 자주 나오는 "일과 일상" 주제예요. 내 경험과 연결해서 두세 문장으로 말해보는 연습을 해보세요.', EN: 'A common OPIc "work and daily life" topic. Practice connecting it to your own experience in two or three sentences.', ZH: '这是OPIc中常见的"工作与日常"主题。请练习结合自身经历用两三句话来表达。', JA: 'OPICでよく出る「仕事と日常」テーマです。自分の経験に結びつけて2〜3文で話す練習をしてみましょう。', FR: 'Un sujet fréquent à l\'OPIc : « travail et vie quotidienne ». Entraînez-vous à le relier à votre expérience en deux ou trois phrases.', ES: 'Un tema frecuente de OPIc: "trabajo y vida diaria". Practica conectarlo con tu propia experiencia en dos o tres oraciones.' },
+    'mat.item.enopic.summary': { KO: '"일과 일상" 이야기예요. 내 경험과 연결해서 두세 문장으로 나눠 보세요.', EN: 'A "work and daily life" story. Share it in two or three sentences from your own experience.', ZH: '关于“工作与日常”的故事。结合自己的经历用两三句分享。', JA: '「仕事と日常」の話です。自分の経験を2〜3文で分けてみましょう。', FR: 'Une histoire « travail et quotidien ». Partagez-la en deux ou trois phrases.', ES: 'Una historia de "trabajo y día a día". Compártela en dos o tres frases.' },
     'mat.item.enopic.points': {
       KO: ['많은 회사가 주 2~3일만 출근하는 하이브리드 방식을 유지하고 있습니다.', '집중 업무 공간보다 협업과 회의를 위한 라운지형 공간이 늘어나는 추세입니다.', '통근 시간이 줄면서 아침 시간을 연습이나 운동에 쓰는 사람이 많아졌습니다.'],
       EN: ['Many companies now keep a hybrid model with only 2-3 office days a week.', 'Lounge-style spaces for collaboration and meetings are replacing focused work areas.', 'With shorter commutes, more people spend mornings on learning or exercise.'],

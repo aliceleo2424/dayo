@@ -367,7 +367,7 @@
       'Recent speech (may mix Korean and English):',
       '"""' + blob.slice(-900) + '"""',
       'Return JSON only, no markdown:',
-      '{"phrases":[{"en":"natural English the learner can say NEXT","ko":"짧은 한국어 뜻"},{"en":"...","ko":"..."},{"en":"...","ko":"..."}],"grammar":"방금 말한 내용에 대한 짧은 문법 교정 힌트(한국어). 고칠 게 없으면 잘한 점을 짧게 칭찬."}',
+      '{"phrases":[{"en":"natural English the learner can say NEXT","ko":"짧은 한국어 뜻"},{"en":"...","ko":"..."},{"en":"...","ko":"..."}],"grammar":"방금 나눈 이야기에서 기억하고 싶은 표현을 짧게 골라 주세요. 없으면 잘 이어진 점을 짧게 칭찬."}',
       'Exactly 3 phrases. Keep them spoken, friendly, and A2–B1 level.'
     ].join('\n');
 

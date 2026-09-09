@@ -227,7 +227,7 @@
         '<div class="tk-head">' +
           '<p class="tk-eyebrow">TICKETS</p>' +
           '<h2 class="tk-title" id="tkTitle">DayO 세션 이용권 ☕️</h2>' +
-          '<p class="tk-sub">기준 세션: 총 30분 (25분 화상 대화 + 5분 미니 퀴즈/리포트)</p>' +
+          '<p class="tk-sub">기준 세션: 1회 25분 글로벌 대화 (세션 티켓 1장)</p>' +
         '</div>' +
         '<div class="tk-body">' +
           '<div class="tk-duebar" data-tk-duebar>' +

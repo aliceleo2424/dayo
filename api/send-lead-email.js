@@ -60,7 +60,7 @@ function defaultTemplate(langName) {
     subject: '[DayO] 🎁 신청하신 ' + langName + ' 실전 회화 치트키와 9,900원 체험권이 도착했습니다!',
     intro_text: '신청하신 ' + langName + ' 회화 치트키 자료입니다.',
     coupon_code: COUPON_CODE,
-    extra_notice: '이 메일은 레벨테스트 자료 요청으로 보내드렸어요. DayO 돼요'
+    extra_notice: '이 메일은 DayO 자료 요청으로 보내드렸어요. DayO 돼요'
   };
 }
 

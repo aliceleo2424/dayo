@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
@@ -40,7 +40,7 @@
     })();
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title data-i18n="page.title.room">DayO 돼요 — 화상 회화 스튜디오</title>
+  <title data-i18n="page.title.room">DayO 돼요 — 1:1 글로벌 대화 라운지</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
@@ -1776,6 +1776,57 @@
     #quiz-modal #quiz-done-btn {
       margin-top: 4px;
     }
+    .talk-record-card {
+      max-width: 440px;
+      width: min(440px, calc(100% - 1.5rem));
+    }
+    .talk-record-capture {
+      aspect-ratio: 4 / 5;
+      background: linear-gradient(180deg, #FFF9F2 0%, #FFE8E3 100%);
+      border-radius: 22px;
+      padding: 1.35rem 1.2rem 1.1rem;
+      box-sizing: border-box;
+      text-align: left;
+    }
+    .talk-record-header {
+      font-size: 1.05rem;
+      font-weight: 800;
+      line-height: 1.45;
+      color: #5C4A42;
+      margin-bottom: 1rem;
+      word-break: keep-all;
+    }
+    .talk-record-row {
+      background: #FFFCFA;
+      border: 1.5px solid #EDE4D5;
+      border-radius: 14px;
+      padding: 0.75rem 0.85rem;
+      margin-bottom: 0.65rem;
+    }
+    .talk-record-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: #E76F51;
+      margin-bottom: 4px;
+    }
+    .talk-record-value {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #264653;
+      line-height: 1.5;
+      word-break: keep-all;
+    }
+    .talk-record-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .rq-cta-secondary {
+      background: #FFF8F5 !important;
+      color: #5C4A42 !important;
+      border: 1.5px solid #EDE4D5 !important;
+    }
 
     body.session-ended-user #videoStage,
     body.session-ended-user #videoColumn,
@@ -2467,6 +2518,306 @@
       .bottom-sheet { max-height: 45vh; }
     }
 
+    /* Partner report review popup (same overlay pattern as user star modal) */
+    #partner-report-popup {
+      display: none;
+      position: fixed !important;
+      inset: 0 !important;
+      background: rgba(0, 0, 0, 0.75) !important;
+      z-index: 99999999 !important;
+      justify-content: center !important;
+      align-items: center !important;
+      padding: 20px;
+    }
+    .partner-report-dialog {
+      width: min(960px, 100%);
+      max-width: 960px;
+      height: 85vh;
+      background: #FFFFFF;
+      border-radius: 20px;
+      display: flex;
+      overflow: hidden;
+      box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+    }
+    .partner-report-left {
+      width: 35%;
+      background: #F8FAF9;
+      border-right: 1px solid #E5E7EB;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .partner-report-left h2 {
+      font-size: 15px;
+      font-weight: 800;
+      color: #247552;
+      margin-bottom: 14px;
+      letter-spacing: -0.02em;
+    }
+    #partner-transcript-viewer {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+    .pr-bubble-row {
+      display: flex;
+      flex-direction: column;
+      max-width: 92%;
+    }
+    .pr-bubble-row.is-partner {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+    .pr-bubble-row.is-user {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+    .pr-bubble-who {
+      font-size: 11px;
+      font-weight: 700;
+      color: #6B7280;
+      margin-bottom: 4px;
+    }
+    .pr-bubble {
+      padding: 8px 12px;
+      border-radius: 16px;
+      font-size: 13px;
+      line-height: 1.45;
+      color: #191919;
+      word-break: break-word;
+    }
+    .pr-bubble-row.is-partner .pr-bubble {
+      background: #FEE500;
+      border-bottom-right-radius: 4px;
+    }
+    .pr-bubble-row.is-user .pr-bubble {
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
+      border-bottom-left-radius: 4px;
+    }
+    .pr-transcript-empty {
+      font-size: 13px;
+      color: #6B7280;
+      line-height: 1.5;
+      padding: 12px 0;
+    }
+    .partner-report-right {
+      width: 65%;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-width: 0;
+      background: #FFFFFF;
+    }
+    .partner-report-section h3 {
+      font-size: 14px;
+      font-weight: 800;
+      color: #3E322D;
+      margin-bottom: 10px;
+    }
+    #partner-comment-input {
+      width: 100%;
+      min-height: 72px;
+      resize: vertical;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font: inherit;
+      font-size: 13px;
+      color: #3E322D;
+      background: #FAFBFA;
+    }
+    #partner-comment-input:focus {
+      outline: none;
+      border-color: #91BFA0;
+      box-shadow: 0 0 0 3px rgba(184, 226, 200, 0.45);
+    }
+    #ai-suggested-comments {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    #ai-suggested-comments button {
+      border: 1.5px solid #B8E2C8;
+      background: #EAF8F2;
+      color: #247552;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 7px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      line-height: 1.3;
+    }
+    #ai-suggested-comments button:hover {
+      background: #B8E2C8;
+    }
+    .partner-stamp-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .partner-stamp-chip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1.5px solid #E5E7EB;
+      background: #FFFFFF;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #3E322D;
+      cursor: pointer;
+    }
+    .partner-stamp-chip input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .partner-stamp-chip:has(input:checked),
+    .partner-stamp-chip.is-on {
+      background: #FFF6DC;
+      border-color: #FFEAA7;
+      color: #966914;
+    }
+    .partner-synonym-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .partner-synonym-row input,
+    .partner-report-section input[type="text"] {
+      flex: 1;
+      min-width: 0;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 10px;
+      padding: 9px 11px;
+      font: inherit;
+      font-size: 13px;
+      color: #3E322D;
+    }
+    .partner-synonym-arrow {
+      font-weight: 800;
+      color: #91BFA0;
+      flex: 0 0 auto;
+    }
+    .partner-correction-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #6B7280;
+      margin: 8px 0 4px;
+    }
+    .partner-regen-btn {
+      margin-top: 10px;
+      align-self: flex-start;
+      border: 1.5px dashed #91BFA0;
+      background: #F8FAF9;
+      color: #247552;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .partner-share-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .partner-share-card {
+      position: relative;
+      display: block;
+      cursor: pointer;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #FFFFFF;
+    }
+    .partner-share-card input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .partner-share-card:has(input:checked),
+    .partner-share-card.is-on {
+      border-color: #247552;
+      box-shadow: 0 0 0 2px rgba(184, 226, 200, 0.7);
+    }
+    .partner-share-card-thumb {
+      display: block;
+      min-height: 120px;
+      padding: 14px 12px;
+    }
+    .partner-share-card-thumb--mood {
+      background: linear-gradient(160deg, #EAF8F2 0%, #FFF6DC 100%);
+    }
+    .partner-share-card-thumb--wit {
+      background: linear-gradient(160deg, #FFEAA7 0%, #FFD1DC 100%);
+    }
+    .partner-share-card-thumb small {
+      display: block;
+      font-size: 11px;
+      font-weight: 800;
+      color: #247552;
+      margin-bottom: 8px;
+    }
+    .partner-share-card-thumb--wit small { color: #966914; }
+    .partner-share-card-thumb p {
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 1.45;
+      color: #3E322D;
+    }
+    .partner-report-cta {
+      margin-top: auto;
+      position: sticky;
+      bottom: 0;
+      padding-top: 8px;
+      background: linear-gradient(180deg, rgba(255,255,255,0) 0%, #FFFFFF 28%);
+    }
+    .partner-report-cta-btn {
+      width: 100%;
+      background: #B8E2C8;
+      color: #247552;
+      border: 1.5px solid #247552;
+      font-weight: 800;
+      padding: 14px 16px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    .partner-report-cta-btn:disabled {
+      opacity: 0.65;
+      cursor: progress;
+    }
+    @media (max-width: 760px) {
+      .partner-report-dialog {
+        flex-direction: column;
+        height: 90vh;
+      }
+      .partner-report-left,
+      .partner-report-right {
+        width: 100%;
+      }
+      .partner-report-left {
+        max-height: 34%;
+        border-right: none;
+        border-bottom: 1px solid #E5E7EB;
+      }
+      .partner-share-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
     #insta-card-capture,
     .viral-card {
       overflow: hidden !important;
@@ -2767,21 +3118,29 @@
         <button class="feedback-chip" type="button" data-chip="questions" data-i18n="room.feedbackChip.questions">❓ 질문을 더 자주 해주세요</button>
         <button class="feedback-chip" type="button" data-chip="level-up" data-i18n="room.feedbackChip.levelUp">📈 레벨을 조금 올려주세요</button>
         <button class="feedback-chip" type="button" data-chip="level-down" data-i18n="room.feedbackChip.levelDown">📉 레벨을 조금 내려주세요</button>
-        <button class="feedback-chip" type="button" data-chip="correction" data-i18n="room.feedbackChip.correction">📝 문장 교정을 더 많이 해주세요</button>
+        <button class="feedback-chip" type="button" data-chip="correction" data-i18n="room.feedbackChip.correction">🌿 이야기를 더 천천히 들어 주세요</button>
       </div>
       <button class="feedback-submit" id="feedbackSubmit" type="button" data-i18n="room.feedbackSubmit">소중한 피드백 보내고 세션 종료하기</button>
     </div>
   </div>
 
-    <!-- Instant STT review quiz -->
-  <div class="rq-overlay" id="quiz-modal" data-view="viewQuizSection" hidden>
-    <div class="quiz-modal-card" role="dialog" aria-modal="true" aria-labelledby="quizModalTitle">
+    /* Instant STT talk record */
+  <div class="rq-overlay" id="quiz-modal" data-view="viewTalkRecord" hidden>
+    <div class="quiz-modal-card talk-record-card" role="dialog" aria-modal="true" aria-labelledby="quizModalTitle">
       <header class="quiz-modal-head">
-        <p class="quiz-modal-kicker" id="quizModalTitle">방금 말한 문장 복습 퀴즈</p>
+        <p class="quiz-modal-kicker" id="quizModalTitle">Today's Talk Record</p>
         <button class="rq-close" type="button" id="rqClose" aria-label="닫기">✕</button>
       </header>
-      <div id="quiz-content-box"></div>
-      <button class="rq-cta" type="button" id="quiz-done-btn">확인 / 대화 마치기</button>
+      <div class="insta-card-export-wrap">
+        <div id="insta-card-capture" class="viral-card talk-record-capture">
+          <p class="talk-record-header">🎉 오늘 나눈 대화가 안전하게 기록되었어요!</p>
+          <div id="quiz-content-box"></div>
+        </div>
+        <div class="talk-record-actions">
+          <button type="button" class="rq-cta btn-save-card" id="btn-save-talk-card" onclick="window.saveInstaCard && window.saveInstaCard(event)">📸 오늘의 대화 카드 저장하기</button>
+          <button class="rq-cta rq-cta-secondary" type="button" id="quiz-done-btn">마이페이지로 이동</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -3093,6 +3452,14 @@
         playWrapUpChime();
       }
 
+      function hangUpCallOnly() {
+        try {
+          if (window.DayOLive && typeof window.DayOLive.hangUp === 'function') {
+            window.DayOLive.hangUp();
+          }
+        } catch (e) { /* leave call only */ }
+      }
+
       function endSession() {
         if (sessionEnded) return;
         sessionEnded = true;
@@ -3101,6 +3468,7 @@
         remainingSeconds = 0;
         render();
         el.classList.remove('is-warning');
+        hangUpCallOnly();
         document.dispatchEvent(new CustomEvent('dayo:session-ended'));
       }
 
@@ -3532,16 +3900,6 @@
       return document.getElementById('quiz-modal') || document.getElementById('quizModal') || document.getElementById('reviewQuizModal');
     }
 
-    function hideLiveVideoStage() {
-      document.body.classList.add('session-ended-user');
-      ['videoStage', 'videoColumn', 'shareStage', 'dailyHost'].forEach(function (id) {
-        var el = document.getElementById(id);
-        if (!el) return;
-        el.hidden = true;
-        el.style.setProperty('display', 'none', 'important');
-      });
-    }
-
     function openRatingModal() {
       if (isPartnerEndMode()) return;
       var userRatingModal = getUserRatingModal();
@@ -3594,8 +3952,22 @@
       }
     }
 
+    function isPartnerSessionMode() {
+      return typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode();
+    }
+
+    function hideLiveVideoStage() {
+      document.body.classList.add('session-ended-user');
+      ['videoStage', 'videoColumn', 'shareStage', 'dailyHost'].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.hidden = true;
+        el.style.setProperty('display', 'none', 'important');
+      });
+    }
+
     function revealUserQuizModal() {
-      var quiz = getUserQuizModal();
+      var quiz = document.getElementById('quiz-modal') || document.getElementById('quizModal') || document.getElementById('reviewQuizModal');
       if (!quiz) return;
       quiz.hidden = false;
       quiz.classList.add('is-open');
@@ -3617,7 +3989,7 @@
         goToMypage();
         return;
       }
-      if (isPartnerEndMode() && typeof window.openPartnerReportPopup === 'function') {
+      if (isPartnerSessionMode() && typeof window.openPartnerReportPopup === 'function') {
         window.openPartnerReportPopup();
         return;
       }
@@ -3665,6 +4037,7 @@
       try { stopAllMedia(); } catch (e) { /* ignore */ }
       try { persistTranscript(); } catch (e) { /* ignore */ }
 
+      // 1) 파트너인 경우: 유저용 모달 차단 및 파트너 리포트 검수 팝업만 오픈
       if (isPartner) {
         const userRating = getUserRatingModal();
         if (userRating) {
@@ -3684,6 +4057,7 @@
         return;
       }
 
+      // 2) 유저인 경우: 파트너 팝업 차단 및 유저 별점 평가 모달(#ratingModal) 정상 오픈
       const partnerPopup = document.getElementById('partner-report-popup');
       if (partnerPopup) partnerPopup.style.display = 'none';
 
@@ -3710,6 +4084,14 @@
 
     window.handleSessionEndRouting = handleSessionEndRouting;
 
+    function beginUserSessionEndFlow(result) {
+      handleSessionEndRouting(result);
+    }
+
+    function handleTimedSessionExpiry(result) {
+      handleSessionEndRouting(result);
+    }
+
     window.handleUserQuizComplete = function handleUserQuizComplete() {
       if (window._dayoUserQuizCompleteNavigating) return;
       window._dayoUserQuizCompleteNavigating = true;
@@ -3734,10 +4116,6 @@
     }
 
     window.handleRatingDismiss = handleRatingDismiss;
-
-    function handleTimedSessionExpiry(result) {
-      handleSessionEndRouting(result);
-    }
 
     document.getElementById('endBtn').addEventListener('click', function (e) {
       if (e) { e.preventDefault(); e.stopPropagation(); }
@@ -3928,29 +4306,79 @@
         const quizContainer = document.getElementById('quiz-content-box');
         if (!quizModal || !quizContainer) return;
 
-        const dynamicQuiz = generateDynamicReviewQuiz();
+        function utteranceText(row) {
+          if (!row) return '';
+          if (typeof row === 'string') return row.trim();
+          return String(row.text || row.transcript || row.message || '').trim();
+        }
 
-        quizContainer.innerHTML = dynamicQuiz.map(function (q) {
-          return (
-            '<div style="background: #FFFFFF; border: 1.5px solid #EDE4D5; border-radius: 12px; padding: 12px; margin-bottom: 12px; text-align: left;">' +
-              '<div style="font-size: 11px; font-weight: 800; color: #E76F51; margin-bottom: 4px;">' + escapeQuizHtml(q.question) + '</div>' +
-              '<div style="font-size: 13px; font-weight: 700; color: #264653; line-height: 1.4; margin-bottom: 10px; background: #F8F9FA; padding: 8px 10px; border-radius: 8px; word-break: keep-all;">' +
-                '"' + escapeQuizHtml(q.sentence) + '"' +
-              '</div>' +
-              '<div style="display: flex; flex-direction: column; gap: 6px;">' +
-                q.options.map(function (opt) {
-                  return (
-                    '<button type="button" class="quiz-opt-btn" data-opt="' + escapeQuizHtml(opt) + '" data-answer="' + escapeQuizHtml(q.answer) + '" ' +
-                      'onclick="checkQuizAnswer(this, \'' + escapeQuizJs(opt) + '\', \'' + escapeQuizJs(q.answer) + '\')" ' +
-                      'style="width: 100%; padding: 8px 12px; font-size: 12px; font-weight: 600; text-align: left; border: 1px solid #E5E7EB; border-radius: 8px; background: #FFFFFF; cursor: pointer; transition: all 0.2s;">' +
-                      '⚪ ' + escapeQuizHtml(opt) +
-                    '</button>'
-                  );
-                }).join('') +
-              '</div>' +
-            '</div>'
-          );
-        }).join('');
+        var rows = collectSessionTranscripts();
+        var memorable = rows
+          .map(utteranceText)
+          .filter(function (text) { return text && text.length >= 8; })
+          .sort(function (a, b) { return b.length - a.length; })
+          .filter(function (text, i, arr) { return arr.indexOf(text) === i; })
+          .slice(0, 2);
+        if (!memorable.length) {
+          memorable = ['오늘 나눈 이야기가 여기에 남을 거예요.'];
+        }
+
+        var placeRe = /(망원|한강|성수|홍대|이태원|해운대|광장시장|남산|북촌|연남|합정|공원|카페|맛집|소품숍|시장|골목)/g;
+        var placeHits = [];
+        rows.forEach(function (row) {
+          var text = utteranceText(row);
+          var match;
+          while ((match = placeRe.exec(text))) {
+            if (placeHits.indexOf(match[1]) === -1) placeHits.push(match[1]);
+          }
+        });
+        var places = placeHits.length
+          ? placeHits.slice(0, 3).join(', ')
+          : '망원한강공원, 성수동 소품숍';
+
+        var partnerName = '오늘의 대화 파트너';
+        try {
+          partnerName = localStorage.getItem('dayo_partner_name')
+            || localStorage.getItem('bookedPartnerName')
+            || partnerName;
+        } catch (e) { /* ignore */ }
+        var nameEl = document.getElementById('tutorName')
+          || document.querySelector('.partner-live-name, .tutor-name, [data-partner-name]');
+        if (nameEl && nameEl.textContent && nameEl.textContent.trim()) {
+          partnerName = nameEl.textContent.trim();
+        }
+
+        var topicLabel = '관심사 · 이야기 주제';
+        try {
+          var draftRaw = localStorage.getItem('dayo_booking_draft')
+            || localStorage.getItem('dayo_last_booking')
+            || localStorage.getItem('chatPrefs');
+          if (draftRaw) {
+            var draft = JSON.parse(draftRaw);
+            var purposeMap = {
+              travel: '한국에서 발견한 것들',
+              opic: '요즘 나의 일상',
+              abroad: '우리의 취향 비교',
+              casual: '자유 수다'
+            };
+            var ids = draft.purposes || draft.purpose || [];
+            if (!Array.isArray(ids) && ids) ids = [ids];
+            if (ids.length) {
+              topicLabel = ids.map(function (id) { return purposeMap[id] || id; }).join(' · ');
+            } else if (draft.topic) {
+              topicLabel = String(draft.topic);
+            }
+          }
+        } catch (e) { /* ignore */ }
+
+        quizContainer.innerHTML =
+          '<div class="talk-record-row"><div class="talk-record-label">🗣️ 오늘 함께한 파트너</div><div class="talk-record-value">' + escapeQuizHtml(partnerName) + '</div></div>' +
+          '<div class="talk-record-row"><div class="talk-record-label">💬 우리가 나눈 주제</div><div class="talk-record-value">' + escapeQuizHtml(topicLabel) + '</div></div>' +
+          '<div class="talk-record-row"><div class="talk-record-label">💡 기억하고 싶은 표현</div><div class="talk-record-value">' + memorable.map(function (line) { return '“' + escapeQuizHtml(line) + '”'; }).join('<br>') + '</div></div>' +
+          '<div class="talk-record-row"><div class="talk-record-label">📍 서로 추천한 것</div><div class="talk-record-value">' + escapeQuizHtml(places) + '</div></div>';
+
+        var titleEl = document.getElementById('quizModalTitle');
+        if (titleEl) titleEl.textContent = "Today's Talk Record";
 
         quizModal.hidden = false;
         quizModal.classList.add('is-open');
@@ -4178,62 +4606,6 @@
           });
       };
     })();
-
-(function renderSingleCameraToast() {
-  if (window.__singleToastDone) return;
-  window.__singleToastDone = true;
-
-  // 파트너 모드일 때는 노출 차단
-  const isPartner = typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode();
-  if (isPartner) return;
-
-  // 세션 입장 2초 후 1회 노출
-  setTimeout(() => {
-    // 기존에 혹시 남아있을 수 있는 토스트 강제 제거
-    document.querySelectorAll('[id*="toast"], [class*="toast"]').forEach(el => {
-      if (el.id === 'dayo-final-single-toast' || el.id === 'toast' || el.id === 'toastBanner') return;
-      if (el.id.includes('btn') || el.classList.contains('ms-toast')) return;
-      el.remove();
-    });
-
-    const toast = document.createElement('div');
-    toast.id = 'dayo-final-single-toast';
-    toast.innerText = '카메라를 꺼도 대화할 수 있어요';
-
-    Object.assign(toast.style, {
-      position: 'fixed',
-      bottom: '100px',
-      left: '50%',
-      transform: 'translateX(-50%) translateY(10px)',
-      background: 'rgba(62, 74, 66, 0.92)',
-      color: '#FFFFFF',
-      fontSize: '12.5px',
-      fontWeight: '600',
-      padding: '9px 20px',
-      borderRadius: '24px',
-      zIndex: '99999',
-      boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
-      opacity: '0',
-      transition: 'all 0.35s ease',
-      pointerEvents: 'none'
-    });
-
-    document.body.appendChild(toast);
-
-    // 페이드 인
-    requestAnimationFrame(() => {
-      toast.style.opacity = '1';
-      toast.style.transform = 'translateX(-50%) translateY(0)';
-    });
-
-    // 3초 유지 후 페이드 아웃 및 DOM 완전 삭제
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateX(-50%) translateY(10px)';
-      setTimeout(() => toast.remove(), 400);
-    }, 3000);
-  }, 2000);
-})();
   </script>
   <script src="mobile-nav.js"></script>
   <script src="insta-card-export.js"></script>
@@ -4538,8 +4910,8 @@
 
       console.log('✨ 파트너 리포트 검수 완료 트리거');
       alert(rewarded
-        ? '🎉 세션 리포트가 유저 계정으로 전송되었으며, 6,000P가 정산되었습니다.'
-        : '🎉 세션 리포트가 유저 계정으로 전송되었습니다.');
+        ? '🎉 오늘의 대화 기록이 유저 계정으로 전송되었으며, 6,000P가 정산되었습니다.'
+        : '🎉 오늘의 대화 기록이 유저 계정으로 전송되었습니다.');
       try { localStorage.setItem('dayo_current_mode', 'PARTNER'); } catch (e) {}
       window.location.href = 'index.html?mode=partner';
     };
@@ -4691,9 +5063,65 @@
     } else {
       attachLocalStreamToPip();
     }
+
+(function renderSingleCameraToast() {
+  if (window.__singleToastDone) return;
+  window.__singleToastDone = true;
+
+  // 파트너 모드일 때는 노출 차단
+  const isPartner = typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode();
+  if (isPartner) return;
+
+  // 세션 입장 2초 후 1회 노출
+  setTimeout(() => {
+    // 기존에 혹시 남아있을 수 있는 토스트 강제 제거
+    document.querySelectorAll('[id*="toast"], [class*="toast"]').forEach(el => {
+      if (el.id === 'dayo-final-single-toast' || el.id === 'toast' || el.id === 'toastBanner') return;
+      if (el.id.includes('btn') || el.classList.contains('ms-toast')) return;
+      el.remove();
+    });
+
+    const toast = document.createElement('div');
+    toast.id = 'dayo-final-single-toast';
+    toast.innerText = '카메라를 꺼도 대화할 수 있어요';
+
+    Object.assign(toast.style, {
+      position: 'fixed',
+      bottom: '100px',
+      left: '50%',
+      transform: 'translateX(-50%) translateY(10px)',
+      background: 'rgba(62, 74, 66, 0.92)',
+      color: '#FFFFFF',
+      fontSize: '12.5px',
+      fontWeight: '600',
+      padding: '9px 20px',
+      borderRadius: '24px',
+      zIndex: '99999',
+      boxShadow: '0 4px 14px rgba(0,0,0,0.18)',
+      opacity: '0',
+      transition: 'all 0.35s ease',
+      pointerEvents: 'none'
+    });
+
+    document.body.appendChild(toast);
+
+    // 페이드 인
+    requestAnimationFrame(() => {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateX(-50%) translateY(0)';
+    });
+
+    // 3초 유지 후 페이드 아웃 및 DOM 완전 삭제
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(-50%) translateY(10px)';
+      setTimeout(() => toast.remove(), 400);
+    }, 3000);
+  }, 2000);
+})();
   </script>
   <button type="button" id="dev-test-skip-btn" onclick="handleDevSkipClick(event)" style="position: fixed; top: 58px; left: 12px; z-index: 999999; background: rgba(0,0,0,0.65); color: #FFF; font-size: 10.5px; padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3); opacity: 0.8; cursor: pointer;">
-    ⚡ [종료 테스트]
+    ⚡ [종료 미리보기]
   </button>
 
   <div id="partner-report-popup" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); z-index: 99999999; justify-content: center; align-items: center; padding: 20px;">
@@ -4707,7 +5135,7 @@
       </div>
 
       <div style="width: 65%; padding: 24px 28px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: #FFFFFF;">
-        <div style="font-size: 17px; font-weight: 800; color: #3E4A42;">✨ 파트너 피드백 & AI 리포트 검수</div>
+        <div style="font-size: 17px; font-weight: 800; color: #3E4A42;">✨ 파트너 피드백 & 오늘의 대화 기록</div>
 
         <div>
           <label style="font-size: 12.5px; font-weight: 800; color: #3E4A42; display: block; margin-bottom: 6px;">1. 파트너 다정 코멘트 (직접 입력 또는 AI 추천 칩 탭)</label>
@@ -4735,7 +5163,7 @@
         </div>
 
         <div style="background: #FDFBF7; border: 1.5px solid #EDE4D5; border-radius: 12px; padding: 12px 14px;">
-          <div style="font-size: 12.5px; font-weight: 800; color: #4F7460; margin-bottom: 8px;">3. AI 학습 리포트 검수 (필요 시 직접 수정)</div>
+          <div style="font-size: 12.5px; font-weight: 800; color: #4F7460; margin-bottom: 8px;">3. 오늘의 대화 기록 검수 (필요 시 직접 수정)</div>
           <div style="font-size: 12px; color: #3E4A42; display: flex; flex-direction: column; gap: 0;">
             <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; margin-bottom: 8px;">
               <span style="font-size: 11.5px; font-weight: 700; color: #4F7460; white-space: nowrap; word-break: keep-all;">• 빈출 유의어:</span>
