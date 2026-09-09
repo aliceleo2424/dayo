@@ -25,34 +25,19 @@
     return STYLE_IDS.map(function (id) { return { id: id, label: t('book.style.' + id) }; });
   }
 
-  var TIME_SLOTS = ['10:00', '14:00', '19:30', '21:00', '22:00'];
-  var PARTNER_SLOTS_A = ['10:00', '19:30', '22:00'];
-  var PARTNER_SLOTS_B = ['14:00', '19:30', '21:00'];
-  var AVAILABLE_PARTNERS = [
-    { id: 'layna', language: 'en', name: 'Layna from UK', initial: 'L', rating: '5.0', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
-    { id: 'kate', language: 'en', name: 'Kate from USA', initial: 'K', rating: '4.9', korean: true, styles: ['fast', 'correct'], slots: PARTNER_SLOTS_B },
-    { id: 'olivia', language: 'en', name: 'Olivia from UK', initial: 'O', rating: '4.8', korean: true, styles: ['slow', 'casual'], slots: PARTNER_SLOTS_B },
-    { id: 'sofia', language: 'es', name: 'Sofia from Spain', initial: 'S', rating: '5.0', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
-    { id: 'elena', language: 'es', name: 'Elena from Spain', initial: 'E', rating: '4.9', korean: true, styles: ['fast', 'slow'], slots: PARTNER_SLOTS_B },
-    { id: 'lucia', language: 'es', name: 'Lucía from Mexico', initial: 'L', rating: '4.8', korean: true, styles: ['correct', 'slow'], slots: PARTNER_SLOTS_B },
-    { id: 'emma', language: 'fr', name: 'Emma from Belgium', initial: 'E', rating: '5.0', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
-    { id: 'camille', language: 'fr', name: 'Camille from France', initial: 'C', rating: '4.9', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_B },
-    { id: 'chloe', language: 'fr', name: 'Chloé from Canada', initial: 'C', rating: '4.8', korean: true, styles: ['fast', 'slow'], slots: PARTNER_SLOTS_B },
-    { id: 'yui', language: 'ja', name: 'Yui from Japan', initial: 'Y', rating: '5.0', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
-    { id: 'aoi', language: 'ja', name: 'Aoi from Japan', initial: 'A', rating: '4.9', korean: true, styles: ['fast', 'correct'], slots: PARTNER_SLOTS_B },
-    { id: 'mei', language: 'zh', name: 'Mei from China', initial: 'M', rating: '4.9', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
-    { id: 'lili', language: 'zh', name: 'Lili from Taiwan', initial: 'L', rating: '4.8', korean: true, styles: ['fast', 'slow'], slots: PARTNER_SLOTS_B },
-    { id: 'linh', language: 'vi', name: 'Linh from Vietnam', initial: 'L', rating: '4.9', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
-    { id: 'an', language: 'vi', name: 'An from Vietnam', initial: 'A', rating: '4.8', korean: true, styles: ['fast', 'slow'], slots: PARTNER_SLOTS_B },
-    { id: 'anna', language: 'de', name: 'Anna from Germany', initial: 'A', rating: '4.9', korean: true, styles: ['correct', 'slow'], slots: PARTNER_SLOTS_A },
-    { id: 'lena', language: 'de', name: 'Lena from Germany', initial: 'L', rating: '4.8', korean: true, styles: ['fast', 'slow'], slots: PARTNER_SLOTS_B },
-    { id: 'marco', language: 'it', name: 'Marco from Italy', initial: 'M', rating: '4.9', korean: true, styles: ['fast', 'correct'], slots: PARTNER_SLOTS_A },
-    { id: 'giulia', language: 'it', name: 'Giulia from Italy', initial: 'G', rating: '4.8', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_B },
-    { id: 'sasha', language: 'ru', name: 'Sasha from Russia', initial: 'S', rating: '4.9', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
-    { id: 'mila', language: 'ru', name: 'Mila from Russia', initial: 'M', rating: '4.8', korean: true, styles: ['fast', 'slow'], slots: PARTNER_SLOTS_B },
-    { id: 'jiwoo', language: 'ko', name: 'Jiwoo from Seoul', initial: 'J', rating: '4.9', korean: true, styles: ['slow', 'correct'], slots: PARTNER_SLOTS_A },
-    { id: 'minseo', language: 'ko', name: 'Minseo from Busan', initial: 'M', rating: '4.8', korean: true, styles: ['fast', 'slow'], slots: PARTNER_SLOTS_B }
-  ];
+  var TEST_PARTNER_ID = '00000000-0000-0000-0000-000000000001';
+  var TEST_PARTNER_FALLBACK = {
+    id: TEST_PARTNER_ID,
+    name: 'DayO Test Partner 🤖',
+    avatar_url: 'https://api.dicebear.com/7.x/bottts/svg?seed=dayo-test',
+    bio: '화상 연결 테스트용 상시 파트너',
+    native_lang: '',
+    isTest: true,
+    initial: 'D'
+  };
+  var livePartners = [];
+  var liveSlots = [];
+  var partnersLoaded = false;
   function weekdays() {
     return window.DayOI18n ? window.DayOI18n.weekdayNames() : ['일', '월', '화', '수', '목', '금', '토'];
   }
@@ -120,7 +105,6 @@
     '.bk-slots{margin-top:1.2rem;}',
     '.bk-slots[hidden]{display:none;}',
     '.bk-live-slots{display:flex;flex-wrap:wrap;gap:4px;margin-top:.45rem;min-height:2rem;}',
-    '.bk-slots[hidden]{display:none;}',
     '.bk-partners{display:flex;flex-direction:column;gap:.65rem;}',
     '.bk-partner{width:100%;display:flex;align-items:center;gap:.85rem;padding:.8rem;border:1px solid var(--coral-pale,#FFE8E3);',
     'border-radius:var(--radius,18px);background:var(--cream,#FFF8F5);font-family:inherit;color:inherit;text-align:left;cursor:pointer;',
@@ -131,8 +115,12 @@
     'background:linear-gradient(135deg,var(--pink,#FFD1DC),var(--peach,#FFE5B4));border:2px solid #fff;',
     'font-family:Quicksand,sans-serif;font-size:1rem;font-weight:700;color:var(--coral,#FF6B57);box-shadow:0 4px 10px rgba(92,74,66,.08);}',
     '.bk-partner-copy{min-width:0;flex:1;}.bk-partner-name{display:block;font-size:.88rem;font-weight:700;}',
+    '.bk-partner-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}',
+    '.bk-test-badge{display:inline-block;margin-left:.4rem;padding:.12rem .45rem;border-radius:999px;',
+    'background:#EEF2FF;color:#4338CA;font-size:.64rem;font-weight:800;vertical-align:middle;letter-spacing:-.02em;}',
     '.bk-partner-meta{display:block;margin-top:.2rem;font-size:.72rem;color:var(--text-muted,#9A8580);line-height:1.45;}',
     '.bk-partner-check{font-size:1rem;color:var(--coral,#FF6B57);opacity:0;}.bk-partner.is-on .bk-partner-check{opacity:1;}',
+    '.bk-slot-empty{font-size:.78rem;color:var(--text-muted,#9A8580);padding:.35rem 0;}',
     '.bk-summary{padding:1.1rem 1.25rem;border-radius:var(--radius,18px);',
     'background:linear-gradient(135deg,var(--pink,#FFD1DC),var(--peach,#FFE5B4));}',
     '.bk-row{display:flex;gap:.75rem;padding:.5rem 0;font-size:.86rem;line-height:1.5;}',
@@ -173,6 +161,7 @@
     date: null,
     time: null,
     partner: null,
+    slotId: null,
     viewYear: 0,
     viewMonth: 0
   };
@@ -256,18 +245,16 @@
               '</div>' +
               '<div class="bk-cal-grid" id="bkCalGrid"></div>' +
             '</div>' +
-            '<div class="bk-slots" id="bkSlots" hidden>' +
-              '<p class="bk-label">' + t('book.slotsLabel') + '</p>' +
-              '<div class="bk-chips" id="bkTimes"></div>' +
-              '<p class="bk-label" style="margin-top:12px;">열린 파트너 시간</p>' +
-              '<div id="partner-slots-container" class="bk-live-slots"></div>' +
-            '</div>' +
           '</section>' +
           '<section class="bk-step" data-step="3">' +
             '<div class="bk-group">' +
               '<p class="bk-label">' + t('book.partnerQuestion') + '</p>' +
               '<p class="bk-hint" id="bkPartnerHint"></p>' +
               '<div class="bk-partners" id="bkPartners"></div>' +
+            '</div>' +
+            '<div class="bk-slots" id="bkSlots" hidden>' +
+              '<p class="bk-label">' + t('book.slotsLabel') + '</p>' +
+              '<div id="partner-slots-container" class="bk-live-slots bk-chips"></div>' +
             '</div>' +
           '</section>' +
           '<section class="bk-step" data-step="4">' +
@@ -322,7 +309,7 @@
     el.prevMonth = el.overlay.querySelector('#bkPrevMonth');
     el.nextMonth = el.overlay.querySelector('#bkNextMonth');
     el.slots = el.overlay.querySelector('#bkSlots');
-    el.times = el.overlay.querySelector('#bkTimes');
+    el.slotBox = el.overlay.querySelector('#partner-slots-container');
     el.partners = el.overlay.querySelector('#bkPartners');
     el.partnerHint = el.overlay.querySelector('#bkPartnerHint');
     el.summary = el.overlay.querySelector('#bkSummary');
@@ -330,10 +317,6 @@
     el.chatSpeeds = el.overlay.querySelector('#bkChatSpeeds');
     el.chatStyles = el.overlay.querySelector('#bkChatStyles');
     el.chatRequests = el.overlay.querySelector('#bkChatRequests');
-
-    el.times.innerHTML = TIME_SLOTS.map(function (slot) {
-      return '<button type="button" class="bk-chip" data-group="time" data-id="' + slot + '" aria-pressed="false">' + slot + '</button>';
-    }).join('');
 
     renderComfortChips();
     bindDynamicEvents();
@@ -392,11 +375,12 @@
       var partner = e.target.closest('.bk-partner');
       if (!partner) return;
       state.partner = partner.dataset.id;
-      renderAvailablePartners();
+      state.time = null;
+      state.slotId = null;
+      renderPartnerCards();
+      if (el.slots) el.slots.hidden = false;
+      fetchPartnerSlots(state.partner, state.date);
       updateFooter();
-      if (typeof window.loadAvailableSlots === 'function') {
-        window.loadAvailableSlots(partner.dataset.id);
-      }
     });
 
     el.prevMonth.addEventListener('click', function () { shiftMonth(-1); });
@@ -408,14 +392,10 @@
       if (!ensureLoggedInForBooking()) return;
       state.date = day.dataset.date;
       state.time = null;
-      state.partner = null;
+      state.slotId = null;
       renderCalendar();
-      el.slots.hidden = false;
-      syncChips('time');
       updateFooter();
-      if (typeof window.loadAvailableSlotsForDate === 'function') {
-        window.loadAvailableSlotsForDate(state.date);
-      }
+      if (state.partner) fetchPartnerSlots(state.partner, state.date);
     });
 
     el.prevBtn.addEventListener('click', function () { goTo(state.step - 1); });
@@ -433,7 +413,7 @@
     var wasOpen = el.overlay.classList.contains('is-open');
     renderMarkup();
     ['language', 'purpose', 'style', 'time', 'chatSpeed', 'chatStyle', 'chatRequest'].forEach(syncChips);
-    el.slots.hidden = !state.date;
+    el.slots.hidden = !state.partner;
     renderCalendar();
     Array.prototype.forEach.call(el.steps, function (section, i) {
       section.classList.toggle('is-active', i === state.step);
@@ -456,14 +436,12 @@
       else state.purposes.push(id);
     } else if (group === 'language') {
       state.language = id;
-      state.partner = null;
     } else if (group === 'style') {
       state.style = id;
-      state.partner = null;
-    } else if (group === 'time') {
+    } else if (group === 'time' || group === 'slot') {
       if (!ensureLoggedInForBooking()) return;
       state.time = id;
-      state.partner = null;
+      state.slotId = chip.dataset.slotId || chip.getAttribute('data-slot-id') || null;
     } else if (group === 'chatSpeed' || group === 'chatStyle' || group === 'chatRequest') {
       state[group] = id;
       persistComfortPrefs(true);
@@ -472,6 +450,7 @@
     }
 
     syncChips(group);
+    if (group === 'slot') renderSlotChips();
     updateFooter();
   }
 
@@ -524,7 +503,7 @@
     for (var day = 1; day <= daysInMonth; day++) {
       var date = new Date(state.viewYear, state.viewMonth, day);
       var iso = toISO(date);
-      var selectable = date > today;
+      var selectable = date >= today;
       cells.push(
         '<button type="button" class="bk-day' + (state.date === iso ? ' is-on' : '') + '"' +
         ' data-date="' + iso + '"' + (selectable ? '' : ' disabled') +
@@ -559,45 +538,236 @@
     return '';
   }
 
-  function getPartner(id) {
-    for (var i = 0; i < AVAILABLE_PARTNERS.length; i++) {
-      if (AVAILABLE_PARTNERS[i].id === id) return AVAILABLE_PARTNERS[i];
-    }
-    return null;
-  }
-
-  function getAvailablePartners() {
-    return AVAILABLE_PARTNERS.filter(function (partner) {
-      return partner.language === state.language && partner.slots.indexOf(state.time) > -1;
-    }).sort(function (a, b) {
-      var aStyle = a.styles.indexOf(state.style) > -1 ? 1 : 0;
-      var bStyle = b.styles.indexOf(state.style) > -1 ? 1 : 0;
-      return bStyle - aStyle || Number(b.rating) - Number(a.rating);
+  function escapeHtml(str) {
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
     });
   }
 
-  function renderAvailablePartners() {
-    var available = getAvailablePartners();
+  function dbClient() {
+    if (window.supabaseClient && typeof window.supabaseClient.from === 'function') return window.supabaseClient;
+    if (window.supabase && typeof window.supabase.from === 'function') return window.supabase;
+    return null;
+  }
+
+  function isTestPartnerId(id) {
+    return String(id || '') === TEST_PARTNER_ID;
+  }
+
+  function normalizePartner(row) {
+    if (!row) return null;
+    var id = row.user_id || row.id;
+    if (!id) return null;
+    var name = row.full_name || row.nickname || row.user_name || 'DayO Partner';
+    var initial = String(name).charAt(0).toUpperCase() || 'P';
+    return {
+      id: id,
+      profileId: row.id || id,
+      name: name,
+      avatar_url: row.avatar_url || '',
+      bio: row.bio || '',
+      native_lang: row.native_lang || '',
+      isTest: isTestPartnerId(id) || String(name).indexOf('DayO Test Partner') === 0,
+      initial: initial
+    };
+  }
+
+  function withTestPartnerFallback(list) {
+    var partners = (list || []).filter(Boolean);
+    var hasTest = partners.some(function (p) { return isTestPartnerId(p.id); });
+    if (!hasTest) partners.unshift(TEST_PARTNER_FALLBACK);
+    return partners.sort(function (a, b) {
+      if (isTestPartnerId(a.id)) return -1;
+      if (isTestPartnerId(b.id)) return 1;
+      return 0;
+    });
+  }
+
+  async function loadAvailablePartners() {
+    var supabase = dbClient();
+    var partners = [];
+    if (supabase) {
+      var res = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url, bio, native_lang')
+        .eq('role', 'partner');
+      if (res.error) {
+        res = await supabase
+          .from('profiles')
+          .select('id, user_id, full_name, user_name, nickname, avatar_url, role')
+          .eq('role', 'partner');
+      }
+      if (res.error) {
+        console.error('파트너 로드 실패:', res.error);
+      } else {
+        partners = (res.data || []).map(normalizePartner);
+      }
+    }
+    livePartners = withTestPartnerFallback(partners);
+    partnersLoaded = true;
+    return livePartners;
+  }
+
+  function slotTimeLabel(slotTime) {
+    var raw = String(slotTime || '');
+    if (raw.indexOf('weekly:') === 0) {
+      var weekly = raw.slice(7).split('|');
+      return weekly[1] || raw;
+    }
+    var match = raw.match(/T(\d{2}:\d{2})/) || raw.match(/\s(\d{2}:\d{2})/);
+    return match ? match[1] : raw;
+  }
+
+  function weekdayKey(isoDate) {
+    var parts = String(isoDate || '').split('-');
+    if (parts.length < 3) return '';
+    var date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    return ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][date.getDay()] || '';
+  }
+
+  async function fetchPartnerSlots(partnerId, isoDate) {
+    var container = el.slotBox || document.getElementById('partner-slots-container');
+    if (!container) return [];
+    if (!partnerId || !isoDate) {
+      container.innerHTML = '<div class="bk-slot-empty">날짜와 파트너를 먼저 선택해 주세요.</div>';
+      liveSlots = [];
+      return liveSlots;
+    }
+
+    container.innerHTML = '<div class="bk-slot-empty">가능한 시간을 불러오는 중…</div>';
+    var supabase = dbClient();
+    if (!supabase) {
+      container.innerHTML = '<div class="bk-slot-empty">현재 예약 가능한 시간대가 없습니다.</div>';
+      liveSlots = [];
+      return liveSlots;
+    }
+
+    var startOfSelectedDate = isoDate + ' 00:00:00';
+    var endOfSelectedDate = isoDate + ' 23:59:59';
+    var selectedPartnerId = partnerId;
+    var slots = [];
+
+    try {
+      var res = await supabase
+        .from('availability_slots')
+        .select('id, slot_time, status')
+        .eq('partner_id', selectedPartnerId)
+        .eq('status', 'available')
+        .gte('slot_time', startOfSelectedDate)
+        .lte('slot_time', endOfSelectedDate)
+        .order('slot_time', { ascending: true });
+
+      if (res.error) {
+        console.warn('슬롯 로드 실패, 날짜 접두 재시도:', res.error);
+      } else {
+        slots = res.data || [];
+      }
+
+      if (!slots.length) {
+        var likeRes = await supabase
+          .from('availability_slots')
+          .select('id, slot_time, status')
+          .eq('partner_id', selectedPartnerId)
+          .eq('status', 'available')
+          .like('slot_time', isoDate + '%')
+          .order('slot_time', { ascending: true });
+        if (!likeRes.error) slots = likeRes.data || [];
+      }
+
+      if (!slots.length) {
+        var dayId = weekdayKey(isoDate);
+        if (dayId) {
+          var weeklyRes = await supabase
+            .from('availability_slots')
+            .select('id, slot_time, status')
+            .eq('partner_id', selectedPartnerId)
+            .eq('status', 'available')
+            .like('slot_time', 'weekly:' + dayId + '|%')
+            .order('slot_time', { ascending: true });
+          if (!weeklyRes.error) slots = weeklyRes.data || [];
+        }
+      }
+    } catch (err) {
+      console.error('슬롯 로드 실패:', err);
+      slots = [];
+    }
+
+    liveSlots = slots || [];
+    renderSlotChips();
+    return liveSlots;
+  }
+
+  function renderSlotChips() {
+    var container = el.slotBox || document.getElementById('partner-slots-container');
+    if (!container) return;
+    if (!liveSlots.length) {
+      container.innerHTML = '<div class="bk-slot-empty">현재 예약 가능한 시간대가 없습니다.</div>';
+      updateFooter();
+      return;
+    }
+    container.innerHTML = liveSlots.map(function (slot) {
+      var label = slotTimeLabel(slot.slot_time);
+      var on = state.slotId === slot.id;
+      return '<button type="button" class="bk-chip' + (on ? ' is-on' : '') +
+        '" data-group="slot" data-id="' + label + '" data-slot-id="' + slot.id +
+        '" aria-pressed="' + (on ? 'true' : 'false') + '">' + label + '</button>';
+    }).join('');
+    updateFooter();
+  }
+
+  function getPartner(id) {
+    for (var i = 0; i < livePartners.length; i++) {
+      if (livePartners[i].id === id) return livePartners[i];
+    }
+    if (isTestPartnerId(id)) return TEST_PARTNER_FALLBACK;
+    return null;
+  }
+
+  function renderPartnerCards() {
+    if (!el.partners) return;
     var language = labelOf(LANGUAGES, state.language);
-    el.partnerHint.textContent = t('book.partnerHintFormat', { date: formatDate(state.date), time: state.time, language: language });
-    el.partners.innerHTML = available.map(function (partner) {
-      var styleMatch = state.style === 'korean' ? partner.korean : partner.styles.indexOf(state.style) > -1;
-      var meta = '⭐ ' + partner.rating + t('book.koreanAvailable') + (styleMatch ? t('book.styleMatchSuffix') : '');
-      return '<button type="button" class="bk-partner' + (state.partner === partner.id ? ' is-on' : '') +
-        '" data-id="' + partner.id + '" aria-pressed="' + (state.partner === partner.id ? 'true' : 'false') + '">' +
-          '<span class="bk-partner-avatar" aria-hidden="true">' + partner.initial + '</span>' +
-          '<span class="bk-partner-copy"><span class="bk-partner-name">' + partner.name + '</span>' +
-          '<span class="bk-partner-meta">' + meta + '</span></span>' +
+    var dateLabel = state.date ? formatDate(state.date) : '';
+    el.partnerHint.textContent = dateLabel
+      ? (language ? dateLabel + ' · ' + language : dateLabel)
+      : t('book.partnerQuestion');
+    if (!livePartners.length) {
+      el.partners.innerHTML = '<p class="bk-hint">대화 파트너를 불러오는 중…</p>';
+      return;
+    }
+    el.partners.innerHTML = livePartners.map(function (partner) {
+      var on = state.partner === partner.id;
+      var badge = partner.isTest ? '<span class="bk-test-badge">🧪 상시 테스트 가능</span>' : '';
+      var avatar = partner.avatar_url
+        ? '<img src="' + escapeHtml(partner.avatar_url) + '" alt="">'
+        : escapeHtml(partner.initial || 'P');
+      var meta = partner.isTest
+        ? '화상 연결 테스트 시 언제든 선택할 수 있어요'
+        : (partner.bio || partner.native_lang || '지금 대화 가능한 파트너');
+      return '<button type="button" class="bk-partner' + (on ? ' is-on' : '') +
+        '" data-id="' + partner.id + '" aria-pressed="' + (on ? 'true' : 'false') + '">' +
+          '<span class="bk-partner-avatar" aria-hidden="true">' + avatar + '</span>' +
+          '<span class="bk-partner-copy"><span class="bk-partner-name">' + escapeHtml(partner.name) + badge + '</span>' +
+          '<span class="bk-partner-meta">' + escapeHtml(meta) + '</span></span>' +
           '<span class="bk-partner-check" aria-hidden="true">✓</span>' +
         '</button>';
     }).join('');
   }
 
+  async function renderAvailablePartners() {
+    if (!partnersLoaded || !livePartners.length) {
+      if (el.partners) el.partners.innerHTML = '<p class="bk-hint">대화 파트너를 불러오는 중…</p>';
+      await loadAvailablePartners();
+    }
+    renderPartnerCards();
+    if (el.slots) el.slots.hidden = !state.partner;
+    if (state.partner && state.date) await fetchPartnerSlots(state.partner, state.date);
+  }
+
   function isStepReady(step) {
     if (step === 0) return !!state.language && state.purposes.length > 0;
     if (step === 1) return !!state.style;
-    if (step === 2) return !!state.date && !!state.time;
-    if (step === 3) return !!state.partner;
+    if (step === 2) return !!state.date;
+    if (step === 3) return !!state.partner && !!state.slotId;
     return true;
   }
 
@@ -614,8 +784,8 @@
       row(t('chatPrefs.styleLabel'), api ? api.styleLabel(state.chatStyle) : state.chatStyle) +
       row(t('chatPrefs.requestLabel'), api ? api.requestLabel(state.chatRequest) : state.chatRequest) +
       row(t('book.summaryStyle'), labelOf(STYLES, state.style)) +
-      row(t('book.summaryDatetime'), formatDate(state.date) + ' · ' + state.time) +
-      row(t('book.summaryPartner'), getPartner(state.partner).name);
+      row(t('book.summaryDatetime'), formatDate(state.date) + ' · ' + (state.time || '')) +
+      row(t('book.summaryPartner'), (getPartner(state.partner) || {}).name || '');
   }
 
   function row(term, value) {
@@ -671,16 +841,23 @@
     }
 
     var partner = getPartner(state.partner) || {};
-    var scheduledAt = null;
-    if (state.date && state.time) scheduledAt = String(state.date) + 'T' + String(state.time) + ':00';
+    var selectedSlot = null;
+    for (var i = 0; i < liveSlots.length; i++) {
+      if (liveSlots[i].id === state.slotId) { selectedSlot = liveSlots[i]; break; }
+    }
+    var scheduledAt = (selectedSlot && selectedSlot.slot_time)
+      || (state.date && state.time ? String(state.date) + 'T' + String(state.time) + ':00' : null);
 
     var bookingId = null;
     if (typeof window.createPendingBooking === 'function' && learnerId) {
       bookingId = await window.createPendingBooking({
         learner_id: learnerId,
+        partner_id: state.partner,
+        partner_user_id: state.partner,
         partner_name: partner.name || '',
         language: state.language || '',
-        scheduled_at: scheduledAt
+        scheduled_at: scheduledAt,
+        slot_id: state.slotId
       });
     } else if (typeof crypto !== 'undefined' && crypto.randomUUID) {
       bookingId = crypto.randomUUID();
@@ -688,7 +865,10 @@
 
     var deducted = true;
     if (typeof window.handleConfirmBooking === 'function' && learnerId && bookingId) {
-      deducted = await window.handleConfirmBooking(learnerId, bookingId);
+      deducted = await window.handleConfirmBooking(learnerId, bookingId, {
+        slotId: state.slotId,
+        partnerId: state.partner
+      });
     } else if (typeof window.handleConfirmBooking === 'function') {
       deducted = false;
       alert('예약 처리 중 통신 오류가 발생했습니다.');
@@ -700,12 +880,24 @@
     try {
       if (bookingId) localStorage.setItem('dayo_active_booking_id', bookingId);
       if (learnerId) localStorage.setItem('dayo_session_learner_id', learnerId);
+      localStorage.setItem('dayo_next_session', JSON.stringify({
+        partnerName: partner.name || '',
+        scheduledAt: scheduledAt,
+        timeLabel: state.time || '',
+        date: state.date || '',
+        purposes: state.purposes.slice(),
+        bookingId: bookingId
+      }));
+      localStorage.setItem('dayo_next_session_soon', '1');
     } catch (e) { /* ignore */ }
 
     clearDraft();
     clearFlag(RESUME_KEY);
     close();
     showToast(t('book.confirmToastFormat', { partner: partner.name || '' }));
+    if (typeof window.refreshUrgentSessionBanner === 'function') {
+      window.refreshUrgentSessionBanner();
+    }
   }
 
   function storageGet(key) {
@@ -735,6 +927,7 @@
       date: state.date,
       time: state.time,
       partner: state.partner,
+      slotId: state.slotId,
       step: state.step
     }));
   }
@@ -763,6 +956,7 @@
     state.date = draft.date || null;
     state.time = draft.time || null;
     state.partner = draft.partner || null;
+    state.slotId = draft.slotId || null;
     if (state.date) {
       var parts = String(state.date).split('-');
       if (parts.length === 3) {
@@ -772,7 +966,7 @@
     }
     ['language', 'purpose', 'style', 'time', 'chatSpeed', 'chatStyle', 'chatRequest'].forEach(syncChips);
     updateFirstTip();
-    el.slots.hidden = !state.date;
+    el.slots.hidden = !state.partner;
     renderCalendar();
     goTo(typeof draft.step === 'number' ? draft.step : 0);
   }
@@ -912,6 +1106,7 @@
     state.date = null;
     state.time = null;
     state.partner = null;
+    state.slotId = null;
     state.viewYear = today.getFullYear();
     state.viewMonth = today.getMonth();
     loadComfortIntoState();
@@ -1009,6 +1204,8 @@
       open({ resume: true });
     });
     window.DayOBooking = { open: open, close: close, requestOpen: requestOpen };
+    window.loadAvailablePartners = loadAvailablePartners;
+    window.fetchPartnerSlots = fetchPartnerSlots;
     openFromQuery();
     if (isLoggedIn()) tryOpenPendingBooking();
   }

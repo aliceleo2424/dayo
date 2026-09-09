@@ -242,16 +242,21 @@
       .select('*')
       .eq('status', 'available')
       .order('slot_time', { ascending: true });
+    var dateFilter = window.__dayoSelectedBookingDate || '';
+    var startOfSelectedDate = dateFilter ? dateFilter + ' 00:00:00' : '';
+    var endOfSelectedDate = dateFilter ? dateFilter + ' 23:59:59' : '';
     if (partnerId && /^[0-9a-f-]{36}$/i.test(partnerId)) query = query.eq('partner_id', partnerId);
+    if (startOfSelectedDate && endOfSelectedDate) {
+      query = query.gte('slot_time', startOfSelectedDate).lte('slot_time', endOfSelectedDate);
+    }
 
     const { data: slots, error } = await query;
 
-    var dateFilter = window.__dayoSelectedBookingDate || '';
     var visible = (slots || []).filter(function (s) {
       var raw = String(s.slot_time || '');
       if (raw.indexOf('weekly:') === 0) return false;
       if (dateFilter) return raw.indexOf(dateFilter) === 0;
-      return raw.indexOf('T') > 0;
+      return raw.indexOf('T') > 0 || /\d{4}-\d{2}-\d{2}\s/.test(raw);
     });
 
     if (error || !visible.length) {

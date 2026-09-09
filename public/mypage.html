@@ -1294,11 +1294,11 @@
       </button>
     </div>
 
-    <div id="urgent-session-banner" class="mypage-urgent-row" style="background: linear-gradient(135deg, #FFF4F0 0%, #FFE9E2 100%); border: 1px solid #FFD3C4; border-radius: 20px; padding: 20px 24px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px;" data-demo-soon="1">
+    <div id="urgent-session-banner" class="mypage-urgent-row" hidden style="background: linear-gradient(135deg, #FFF4F0 0%, #FFE9E2 100%); border: 1px solid #FFD3C4; border-radius: 20px; padding: 20px 24px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px;">
       <div>
-        <span style="background: #FF5A36; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 20px;">🚨 30분 후 시작</span>
-        <h3 style="margin: 6px 0 2px; font-size: 16px; color: #222;">Camille 파트너와의 대화 (오늘 20:00)</h3>
-        <p style="margin: 0; font-size: 12px; color: #777;">목적: 여행/일상 · 대화 시작 5분 전부터 라운지 입장이 가능합니다.</p>
+        <span id="urgent-session-badge" style="background: #FF5A36; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 20px;">다가오는 대화</span>
+        <h3 id="urgent-session-title" style="margin: 6px 0 2px; font-size: 16px; color: #222;">예약된 대화가 없습니다</h3>
+        <p id="urgent-session-meta" style="margin: 0; font-size: 12px; color: #777;">대화 시작 5분 전부터 라운지 입장이 가능합니다.</p>
       </div>
       <div style="display: flex; gap: 8px;">
         <button type="button" onclick="enterStudio()" style="background: #FF5A36; color: #fff; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap;">대화 스튜디오 입장</button>

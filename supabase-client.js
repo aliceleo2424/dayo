@@ -223,21 +223,32 @@
     } catch (e) { /* ignore */ }
   }
 
-  window.handleConfirmBooking = async function (learnerId, bookingId) {
+  window.handleConfirmBooking = async function (learnerId, bookingId, extras) {
     var supabase = getRpcClient();
     if (!supabase || typeof supabase.rpc !== 'function') {
       alert('예약 처리 중 통신 오류가 발생했습니다.');
       return false;
     }
+    extras = extras || {};
+    var params = {
+      p_learner_id: learnerId,
+      p_booking_id: bookingId
+    };
+    if (extras.slotId) params.p_slot_id = extras.slotId;
+    if (extras.partnerId) params.p_partner_id = extras.partnerId;
+
     try {
-      const { data, error } = await supabase.rpc('deduct_ticket_and_confirm_booking', {
-        p_learner_id: learnerId,
-        p_booking_id: bookingId
-      });
+      var result = await supabase.rpc('deduct_ticket_and_confirm_booking', params);
+      if (result.error && (params.p_slot_id || params.p_partner_id)) {
+        result = await supabase.rpc('deduct_ticket_and_confirm_booking', {
+          p_learner_id: learnerId,
+          p_booking_id: bookingId
+        });
+      }
 
-      if (error) throw error;
+      if (result.error) throw result.error;
 
-      var payload = normalizeRpcPayload(data);
+      var payload = normalizeRpcPayload(result.data);
       if (!payload.success) {
         if (String(payload.message || '').includes('부족')) {
           alert('보유하신 티켓이 없습니다. 단건 체험권을 충전해 주세요!');

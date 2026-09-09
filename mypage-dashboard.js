@@ -2,6 +2,113 @@
 (function () {
   'use strict';
 
+  function formatSessionWhen(iso) {
+    if (!iso) return '';
+    var raw = String(iso);
+    var timeMatch = raw.match(/T(\d{2}:\d{2})/) || raw.match(/\s(\d{2}:\d{2})/);
+    var dateMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    var timeLabel = timeMatch ? timeMatch[1] : '';
+    if (!dateMatch) return timeLabel;
+    var y = Number(dateMatch[1]);
+    var m = Number(dateMatch[2]);
+    var d = Number(dateMatch[3]);
+    var now = new Date();
+    if (now.getFullYear() === y && now.getMonth() + 1 === m && now.getDate() === d) {
+      return '오늘 ' + timeLabel;
+    }
+    return m + '월 ' + d + '일 ' + timeLabel;
+  }
+
+  function minutesUntil(iso) {
+    if (!iso) return null;
+    var parsed = new Date(iso);
+    if (isNaN(parsed.getTime())) {
+      parsed = new Date(String(iso).replace(' ', 'T'));
+    }
+    if (isNaN(parsed.getTime())) return null;
+    return Math.round((parsed.getTime() - Date.now()) / 60000);
+  }
+
+  function readLocalNextSession() {
+    try {
+      return JSON.parse(window.localStorage.getItem('dayo_next_session') || 'null');
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function purposeLabel(ids) {
+    var map = { travel: '여행/일상', opic: 'OPIc', abroad: '워홀/유학', casual: '자유 수다' };
+    if (!ids || !ids.length) return '';
+    return ids.map(function (id) { return map[id] || id; }).join(', ');
+  }
+
+  async function loadUrgentSessionBanner() {
+    var urgent = document.getElementById('urgent-session-banner');
+    if (!urgent) return;
+    var titleEl = document.getElementById('urgent-session-title');
+    var metaEl = document.getElementById('urgent-session-meta');
+    var badgeEl = document.getElementById('urgent-session-badge');
+
+    var session = readLocalNextSession();
+    var supabase = window.supabaseClient;
+    var userId = (window._dayoAuthUser && window._dayoAuthUser.id) || '';
+    if (supabase) {
+      try {
+        if (!userId) {
+          var authRes = await supabase.auth.getUser();
+          userId = authRes && authRes.data && authRes.data.user && authRes.data.user.id || '';
+        }
+        if (userId) {
+          var q = await supabase
+            .from('bookings')
+            .select('id, partner_name, scheduled_at, status, language')
+            .eq('learner_id', userId)
+            .in('status', ['confirmed', 'pending'])
+            .order('scheduled_at', { ascending: true })
+            .limit(5);
+          var now = Date.now();
+          var upcoming = (q.data || []).filter(function (row) {
+            if (!row.scheduled_at) return true;
+            var at = new Date(row.scheduled_at).getTime();
+            return !isNaN(at) && at + 30 * 60000 >= now;
+          })[0];
+          if (upcoming) {
+            session = {
+              partnerName: upcoming.partner_name,
+              scheduledAt: upcoming.scheduled_at,
+              bookingId: upcoming.id,
+              language: upcoming.language,
+              purposes: session && session.purposes
+            };
+          }
+        }
+      } catch (err) {
+        console.warn('다가오는 예약 로드 실패:', err);
+      }
+    }
+
+    if (!session || !session.partnerName) {
+      urgent.hidden = true;
+      return;
+    }
+
+    var when = session.timeLabel && session.date
+      ? formatSessionWhen(session.date + 'T' + session.timeLabel + ':00')
+      : formatSessionWhen(session.scheduledAt);
+    if (titleEl) titleEl.textContent = session.partnerName + ' 파트너와의 대화 (' + when + ')';
+    var mins = minutesUntil(session.scheduledAt);
+    if (badgeEl) {
+      if (mins != null && mins <= 30 && mins >= 0) badgeEl.textContent = '🚨 30분 후 시작';
+      else badgeEl.textContent = '다가오는 대화';
+    }
+    if (metaEl) {
+      var purpose = purposeLabel(session.purposes);
+      metaEl.textContent = (purpose ? '목적: ' + purpose + ' · ' : '') + '대화 시작 5분 전부터 라운지 입장이 가능합니다.';
+    }
+    urgent.hidden = false;
+  }
+
   function hasActiveBooking() {
     try {
       return !!(window.localStorage.getItem('dayo_active_booking_id'));
@@ -59,10 +166,6 @@
 
   function syncMainAction() {
     var btn = document.getElementById('main-action-btn');
-    var urgent = document.getElementById('urgent-session-banner');
-    var showUrgent = hasSoonSession();
-    if (urgent && urgent.getAttribute('data-demo-soon') !== '0') showUrgent = true;
-    if (urgent) urgent.hidden = !showUrgent;
     if (!btn) return;
     btn.hidden = false;
     if (ticketCount() <= 0) {
@@ -143,9 +246,12 @@
     }
   }
 
+  window.refreshUrgentSessionBanner = loadUrgentSessionBanner;
+
   function init() {
     syncMainAction();
     bindStoryTopics();
+    loadUrgentSessionBanner();
     document.addEventListener('keydown', onKeydown);
   }
 
@@ -155,6 +261,9 @@
     init();
   }
 
-  document.addEventListener('dayo:authchange', syncMainAction);
+  document.addEventListener('dayo:authchange', function () {
+    syncMainAction();
+    loadUrgentSessionBanner();
+  });
   document.addEventListener('dayo:ticketchange', syncMainAction);
 })();
