@@ -6,7 +6,7 @@
   <script src="supabase-env.js"></script>
   <script src="supabase-client.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="description" content="DayO 마이페이지 — 내 대화 현황과 예약 세션, 대화 자료를 한 곳에서 관리하세요.">
+  <meta name="description" content="DayO 마이페이지 — 내 대화 현황과 예약 세션, 대화 기록을 한 곳에서 관리하세요.">
   <title data-i18n="page.title.mypage">DayO 마이페이지 — 내 대화 라운지</title>
   <link rel="stylesheet" href="mobile-nav.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -281,30 +281,89 @@
       line-height: 1.7;
     }
 
-    .dayo-approved-card {
-      margin-bottom: 1.25rem;
-      padding: 1.5rem;
+    .heading-desc {
+      text-align: center;
+      margin: -4px auto 20px;
+      max-width: 520px;
+      color: var(--muted);
     }
 
-    #mypage-card-feed {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
-      gap: 1.15rem;
-      align-items: start;
-      width: 100%;
+    .talk-history-section {
+      margin-top: 8px;
+      margin-bottom: 8px;
     }
-    #mypage-card-feed .insta-card-export-wrap {
+    .talk-cards-grid {
+      display: grid !important;
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 16px !important;
+    }
+    @media (min-width: 900px) {
+      .talk-cards-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+      }
+    }
+    .card-thumb-item:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(255, 90, 54, 0.12);
+    }
+    .talk-album-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 28px 12px;
+      color: #888;
+      font-size: 13px;
+    }
+    #card-detail-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 990;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    #card-detail-modal.is-open,
+    #card-detail-modal[data-open="1"] {
+      display: flex;
+    }
+    .card-detail-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+    }
+    .card-detail-panel {
+      position: relative;
+      z-index: 1;
       width: 100%;
+      max-width: 380px;
+      max-height: 90vh;
+      overflow: auto;
+      background: #fff;
+      border-radius: 20px;
+      padding: 16px 16px 20px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+    }
+    .card-detail-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: #F4F4F4;
+      border-radius: 50%;
+      font-size: 20px;
+      line-height: 1;
+      cursor: pointer;
+      color: #444;
+      z-index: 2;
+    }
+    #card-detail-body {
+      padding-top: 28px;
+    }
+    #card-detail-body .insta-card-export-wrap {
       margin-bottom: 0 !important;
-      align-items: stretch;
-    }
-    #mypage-card-feed .viral-card {
-      width: 100% !important;
-      max-width: none !important;
-    }
-    #mypage-card-feed .dayo-card-comment,
-    #mypage-card-feed .insta-card-export-wrap > div {
-      max-width: none !important;
     }
 
     .dayo-approved-card-mount {
@@ -1056,6 +1115,7 @@
         </button>
       </div>
     </div>
+    <p class="heading-desc" data-i18n="mypage.headingDesc">내 대화 현황과 예약한 세션, 대화 기록을 한 곳에서 확인할 수 있어요.</p>
     <div class="user-summary-bar" style="display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 18px 24px; border-radius: 16px; border: 1px solid #FFEBE4; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.02);">
       <div>
         <h2 id="mypage-greeting" style="font-size: 18px; font-weight: 700; margin: 0 0 6px 0; color: #222;">오늘도 한 잔의 대화, 준비되셨나요? ☕</h2>
@@ -1071,19 +1131,19 @@
       </div>
     </div>
 
-    <div class="mypage-grid">
-    <section class="card dayo-approved-card" id="dayoApprovedCardSection" aria-labelledby="dayoCardTitle">
-      <div class="card-head">
+    <section class="talk-history-section" style="margin-top: 32px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; gap: 12px; flex-wrap: wrap;">
         <div>
-          <h2 class="card-title" id="dayoCardTitle">✨ 오늘의 대화 기록</h2>
-          <p class="card-subtitle">Talk History · 세션에서 남긴 카드를 모아 두었어요.</p>
+          <h3 style="font-size: 18px; font-weight: 700; margin: 0; color: #222;">✨ 나의 대화 기록 앨범</h3>
+          <p style="font-size: 13px; color: #888; margin: 4px 0 0;">파트너와 나눈 이야기 카드를 모아두었어요.</p>
         </div>
+        <span id="talk-album-count" style="font-size: 12px; color: #635BFF; font-weight: 600;">총 0장 보관 중</span>
       </div>
-      <div id="mypage-card-feed"></div>
+      <div id="mypage-card-feed" class="talk-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px;"></div>
     </section>
 
-    <div class="mypage-grid-side">
-      <aside class="dayo-fortune-checkin" aria-label="오늘의 대화 포춘쿠키" style="margin-bottom: 16px;">
+    <div class="mypage-grid">
+      <aside class="dayo-fortune-checkin" aria-label="오늘의 대화 포춘쿠키">
         <p class="dayo-fortune-title">오늘의 대화 포춘쿠키</p>
         <p class="dayo-fortune-sub">매일 1회, 가볍게 열어보는 체크인</p>
         <button type="button" id="dayo-cookie-trigger" class="dayo-fortune-cookie" aria-label="포춘쿠키 열기">
@@ -1125,7 +1185,6 @@
         </div>
         <button class="primary-btn live-partner-book" type="button" data-booking-open>📅 예약 바로가기</button>
       </section>
-    </div>
     </div>
 
     <section class="card coupon-card" aria-labelledby="couponTitle">
@@ -1283,6 +1342,15 @@
       </div>
     </section>
   </main>
+
+  <div id="card-detail-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="card-detail-title">
+    <div class="card-detail-backdrop" onclick="closeCardDetailModal()"></div>
+    <div class="card-detail-panel">
+      <button type="button" class="card-detail-close" onclick="closeCardDetailModal()" aria-label="닫기">×</button>
+      <h2 id="card-detail-title" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">대화 카드 상세</h2>
+      <div id="card-detail-body"></div>
+    </div>
+  </div>
 
   <div id="dayo-fortune-modal" class="dayo-fortune-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="dayo-fortune-dear" hidden>
     <div class="dayo-fortune-modal-card">

@@ -380,6 +380,44 @@
     return raw.replace(/^["“”']+|["“”']+$/g, '');
   }
 
+  function formatAlbumDate(iso) {
+    if (!iso) return '';
+    try {
+      var d = new Date(iso);
+      if (isNaN(d.getTime())) return '';
+      var y = d.getFullYear();
+      var m = String(d.getMonth() + 1);
+      var day = String(d.getDate());
+      if (m.length < 2) m = '0' + m;
+      if (day.length < 2) day = '0' + day;
+      return y + '.' + m + '.' + day;
+    } catch (e) {
+      return '';
+    }
+  }
+
+  function renderTalkThumb(r, idx) {
+    var name = talkQuoteLabel(r);
+    var dateLabel = formatAlbumDate(r.created_at);
+    var keyword = String((r && r.keyword) || 'SmallTalk').replace(/^#/, '');
+    var img = esc((r && r.illust_url) || '');
+    return (
+      '<button type="button" class="card-thumb-item" onclick="openCardDetailModal(' + idx + ')" style="background: #FFF9F5; border-radius: 16px; padding: 14px; border: 1px solid #FFEBE4; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-align: center; font-family: inherit; width: 100%;">' +
+        '<div style="font-size: 11px; color: #999; margin-bottom: 6px; display: flex; justify-content: space-between;">' +
+          '<span>With ' + esc(name) + '</span>' +
+          '<span>' + esc(dateLabel) + '</span>' +
+        '</div>' +
+        '<div style="width: 100%; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: #fff; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: inset 0 0 4px rgba(0,0,0,0.04);">' +
+          (img
+            ? '<img src="' + img + '" alt="오늘의 픽" style="width: 100%; height: 100%; object-fit: cover;">'
+            : '<span style="font-size:40px" aria-hidden="true">☕</span>') +
+        '</div>' +
+        '<div style="font-size: 12px; font-weight: 700; color: #333; margin-bottom: 2px;">#' + esc(keyword) + '</div>' +
+        '<div style="font-size: 11px; color: #FF5A36; font-weight: 600;">카드 열기 ➔</div>' +
+      '</button>'
+    );
+  }
+
   function renderViralReportCard(r, isPrimary) {
     var captureId = isPrimary ? ' id="insta-card-capture"' : '';
     var btnId = isPrimary ? ' id="btn-save-card"' : '';
@@ -418,8 +456,13 @@
     );
   }
 
+  window.renderViralReportCardForModal = function (r) {
+    return renderViralReportCard(r, true);
+  };
+
   window.loadUserReports = async function () {
-    var container = document.getElementById('mypage-card-feed');
+    var album = document.querySelector('.talk-cards-grid');
+    var container = album || document.getElementById('mypage-card-feed');
     if (!container) return;
     var client = window.supabaseClient;
     var user = null;
@@ -447,6 +490,24 @@
     if (!reports.length) {
       var localCard = readLocalApprovedCard();
       if (localCard && localCard.spoken_sentence) reports = [localCard];
+    }
+
+    window.__dayoTalkAlbum = reports;
+
+    var countEl = document.getElementById('talk-album-count');
+    if (countEl) countEl.textContent = '총 ' + reports.length + '장 보관 중';
+
+    if (album) {
+      if (reports.length > 0) {
+        album.innerHTML = reports.map(function (r, idx) {
+          return renderTalkThumb(r, idx);
+        }).join('');
+      } else if (!user) {
+        album.innerHTML = '<div class="talk-album-empty">로그인 후 대화 리포트를 확인해 보세요.</div>';
+      } else {
+        album.innerHTML = '<div class="talk-album-empty">아직 대화 기록이 없습니다.</div>';
+      }
+      return;
     }
 
     if (!user && !reports.length) {

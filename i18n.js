@@ -284,12 +284,12 @@
       KO: '오늘도 한 잔의 대화, 준비되셨나요? ☕', EN: 'Ready for a cozy chat today? ☕', ZH: '今天准备好对话了吗？☕', JA: '今日も会話の一杯、準備できましたか？☕', FR: 'Prêt(e) pour un café-conversation ? ☕', ES: '¿Listo para una charla hoy? ☕'
     },
     'mypage.headingDesc': {
-      KO: '내 대화 현황과 예약한 세션, 예습 자료를 한 곳에서 확인할 수 있어요.',
-      EN: 'View your chat stats, booked sessions, and prep materials in one place.',
-      ZH: '在一处查看对话现状、预约和预习资料。',
-      JA: '会話状況、予約、予習資料を一箇所で確認できます。',
-      FR: 'Consultez vos stats, sessions et matériels de préparation.',
-      ES: 'Consulta tus estadísticas, sesiones y materiales.'
+      KO: '내 대화 현황과 예약한 세션, 대화 기록을 한 곳에서 확인할 수 있어요.',
+      EN: 'View your conversation status, booked sessions, and talk records in one place.',
+      ZH: '在一处查看对话现状、预约和对话记录。',
+      JA: '会話状況、予約、会話記録を一箇所で確認できます。',
+      FR: 'Consultez vos conversations, sessions et souvenirs de discussion.',
+      ES: 'Consulta tu estado, sesiones y registros de conversación.'
     },
     'mypage.speaking.eyebrow': {
       KO: 'MONTHLY SPEAKING REPORT', EN: 'MONTHLY SPEAKING REPORT', ZH: 'MONTHLY SPEAKING REPORT', JA: 'MONTHLY SPEAKING REPORT', FR: 'MONTHLY SPEAKING REPORT', ES: 'MONTHLY SPEAKING REPORT'

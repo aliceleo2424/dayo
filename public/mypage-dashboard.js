@@ -1,4 +1,4 @@
-/* DayO mypage compact header — greeting, ticket, primary action */
+/* DayO mypage compact header + talk-card album modal */
 (function () {
   'use strict';
 
@@ -30,8 +30,41 @@
     };
   }
 
+  window.openCardDetailModal = function (index) {
+    var modal = document.getElementById('card-detail-modal');
+    var body = document.getElementById('card-detail-body');
+    if (!modal) return;
+    var reports = window.__dayoTalkAlbum || [];
+    var idx = (typeof index === 'number' && index >= 0) ? index : 0;
+    var report = reports[idx];
+    if (body) {
+      if (report && typeof window.renderViralReportCardForModal === 'function') {
+        body.innerHTML = window.renderViralReportCardForModal(report);
+      } else if (!report) {
+        body.innerHTML = '<p style="text-align:center;color:#888;font-size:13px;padding:24px 8px;">열어볼 대화 카드가 아직 없어요.</p>';
+      }
+    }
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    var closeBtn = modal.querySelector('.card-detail-close');
+    if (closeBtn && closeBtn.focus) closeBtn.focus();
+  };
+
+  window.closeCardDetailModal = function () {
+    var modal = document.getElementById('card-detail-modal');
+    if (modal) modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  };
+
+  function onKeydown(e) {
+    if (e.key !== 'Escape') return;
+    var modal = document.getElementById('card-detail-modal');
+    if (modal && modal.style.display === 'flex') window.closeCardDetailModal();
+  }
+
   function init() {
     syncMainAction();
+    document.addEventListener('keydown', onKeydown);
   }
 
   if (document.readyState === 'loading') {
