@@ -376,8 +376,29 @@
   function talkQuoteText(r) {
     var raw = String((r && r.partner_comment) || '').replace(/^\s+|\s+$/g, '');
     var banned = /발화량|점수|레벨|훌륭했어요/;
-    if (!raw || banned.test(raw)) return '성수동 서울숲 근처 카페거리를 추천해요!';
+    if (!raw || banned.test(raw)) return '망원한강공원과 성수동 서울숲 카페거리';
     return raw.replace(/^["“”']+|["“”']+$/g, '');
+  }
+
+  function topicLabel(r) {
+    var k = String((r && r.keyword) || '').toLowerCase();
+    if (/korea|한국|korean/.test(k)) return '한국에서 발견한 것들';
+    if (/taste|취향|compare|집순/.test(k)) return '우리의 취향 비교';
+    if (/daily|일상|americano|smalltalk|cafe|pottery|취미/.test(k)) return '요즘 나의 일상';
+    var raw = String((r && r.keyword) || '').replace(/^#/, '').trim();
+    return raw || '요즘 나의 일상';
+  }
+
+  function topicEmoji(r) {
+    var k = String((r && r.keyword) || '').toLowerCase();
+    if (/korea|한국|korean/.test(k)) return '🇰🇷';
+    if (/taste|취향|compare/.test(k)) return '⚖️';
+    return '🌸';
+  }
+
+  function memorablePhrase(r) {
+    var phrase = String((r && r.spoken_sentence) || '').replace(/^\s+|\s+$/g, '');
+    return phrase || "I've been into pottery lately.";
   }
 
   function formatAlbumDate(iso) {
@@ -418,32 +439,58 @@
     );
   }
 
-  function renderViralReportCard(r, isPrimary) {
+  function renderReportArchiveItem(r, idx) {
+    var name = talkQuoteLabel(r);
+    var dateLabel = formatAlbumDate(r.created_at) || '날짜 미정';
+    var topic = topicLabel(r);
+    var img = esc((r && r.illust_url) || '');
+    var icon = img
+      ? '<img src="' + img + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">'
+      : '<span aria-hidden="true">' + topicEmoji(r) + '</span>';
+    return (
+      '<button type="button" class="mypage-report-item" onclick="openReportDetailModal(\'report-' + (idx + 1) + '\')" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 14px 16px; background: #FFF9F5; border: 1px solid #FFEBE4; border-radius: 14px; cursor: pointer; transition: all 0.2s ease; text-align: left; font-family: inherit;">' +
+        '<div style="display: flex; align-items: center; gap: 12px; min-width: 0;">' +
+          '<div style="width: 44px; height: 44px; border-radius: 10px; background: #FFE5DC; display: flex; align-items: center; justify-content: center; font-size: 20px; overflow: hidden; flex: 0 0 auto;">' + icon + '</div>' +
+          '<div style="min-width: 0;">' +
+            '<div style="font-size: 14px; font-weight: 700; color: #333;">' + esc(name) + ' 파트너와의 대화</div>' +
+            '<div style="font-size: 12px; color: #888; margin-top: 2px;">' + esc(dateLabel) + ' · 주제: ' + esc(topic) + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<span style="font-size: 12px; color: #FF5A36; font-weight: 700; white-space: nowrap;">리포트 &amp; 카드 보기 ➔</span>' +
+      '</button>'
+    );
+  }
+
+  function renderViralReportCard(r, isPrimary, opts) {
+    opts = opts || {};
     var captureId = isPrimary ? ' id="insta-card-capture"' : '';
     var btnId = isPrimary ? ' id="btn-save-card"' : '';
     var dateLabel = '';
     try {
       dateLabel = r.created_at ? new Date(r.created_at).toLocaleDateString() : '';
     } catch (e) { dateLabel = ''; }
+    var card =
+      '<div' + captureId + ' class="viral-card" style="width:100%; max-width:320px; aspect-ratio:4/5; background:linear-gradient(135deg,#FFF9ED 0%,#FEE8D6 100%); border:1.5px solid #EDE4D5; border-radius:16px; padding:16px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 10px 24px rgba(113,83,72,0.12);">' +
+        '<div style="display:flex; justify-content:space-between; align-items:center; width:100%;">' +
+          '<span style="font-size:10px; font-weight:800; color:#4F7460; background:#FFFFFF; padding:4px 10px; border-radius:12px; border:1px solid #EDE4D5;">From DayO</span>' +
+          '<span style="font-size:11px; font-weight:800; color:#D97706;">✨ 오늘의 원픽</span>' +
+        '</div>' +
+        '<div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:8px 0; min-height:0;">' +
+          '<img src="' + esc(r.illust_url) + '" alt="" crossorigin="anonymous" referrerpolicy="no-referrer" onerror="this.onerror=null;this.removeAttribute(\'crossorigin\');this.style.display=\'none\';this.insertAdjacentHTML(\'afterend\',\'<span style=&quot;font-size:48px&quot;>✨</span>\')" style="width:56%; max-width:180px; aspect-ratio:1; object-fit:contain; border-radius:16px; filter:drop-shadow(0 4px 10px rgba(0,0,0,0.08));" />' +
+          '<div style="font-size:12px; color:#6E7A72; font-weight:700; margin-top:8px;">#' + esc(r.keyword) + '</div>' +
+        '</div>' +
+        '<div style="background:#FFFFFF; border-radius:12px; padding:12px 14px; text-align:center; border:1px solid #EDE4D5;">' +
+          '<div style="font-size:14px; font-weight:800; color:#3E4A42; line-height:1.4; word-break:keep-all;">"' + esc(r.spoken_sentence) + '"</div>' +
+        '</div>' +
+      '</div>';
+    if (opts.bare) return card;
     return (
       '<div class="insta-card-export-wrap dayo-report-card" style="display:flex; flex-direction:column; align-items:center; margin-bottom:18px;">' +
         '<div style="display:flex; justify-content:space-between; width:100%; max-width:400px; font-size:11px; color:#888; margin-bottom:8px;">' +
           '<span>With <strong>' + esc(r.partner_name) + '</strong></span>' +
           '<span>' + esc(dateLabel) + '</span>' +
         '</div>' +
-        '<div' + captureId + ' class="viral-card" style="width:100%; max-width:320px; aspect-ratio:4/5; background:linear-gradient(135deg,#FFF9ED 0%,#FEE8D6 100%); border:1.5px solid #EDE4D5; border-radius:16px; padding:16px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 10px 24px rgba(113,83,72,0.12);">' +
-          '<div style="display:flex; justify-content:space-between; align-items:center; width:100%;">' +
-            '<span style="font-size:10px; font-weight:800; color:#4F7460; background:#FFFFFF; padding:4px 10px; border-radius:12px; border:1px solid #EDE4D5;">From DayO</span>' +
-            '<span style="font-size:11px; font-weight:800; color:#D97706;">✨ 오늘의 원픽</span>' +
-          '</div>' +
-          '<div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:8px 0; min-height:0;">' +
-            '<img src="' + esc(r.illust_url) + '" alt="" crossorigin="anonymous" referrerpolicy="no-referrer" onerror="this.onerror=null;this.removeAttribute(\'crossorigin\');this.style.display=\'none\';this.insertAdjacentHTML(\'afterend\',\'<span style=&quot;font-size:48px&quot;>✨</span>\')" style="width:56%; max-width:180px; aspect-ratio:1; object-fit:contain; border-radius:16px; filter:drop-shadow(0 4px 10px rgba(0,0,0,0.08));" />' +
-            '<div style="font-size:12px; color:#6E7A72; font-weight:700; margin-top:8px;">#' + esc(r.keyword) + '</div>' +
-          '</div>' +
-          '<div style="background:#FFFFFF; border-radius:12px; padding:12px 14px; text-align:center; border:1px solid #EDE4D5;">' +
-            '<div style="font-size:14px; font-weight:800; color:#3E4A42; line-height:1.4; word-break:keep-all;">"' + esc(r.spoken_sentence) + '"</div>' +
-          '</div>' +
-        '</div>' +
+        card +
         '<div class="talk-quote-box" style="margin-top: 12px; font-size: 13px; color: #444; background: #FFF9F5; padding: 10px 14px; border-radius: 10px; width:100%; max-width:400px; box-sizing:border-box;">' +
           '<span>☕ <strong>' + esc(talkQuoteLabel(r)) + '의 추천:</strong> "' + esc(talkQuoteText(r)) + '"</span>' +
         '</div>' +
@@ -460,9 +507,45 @@
     return renderViralReportCard(r, true);
   };
 
+  window.renderReportDetailHtml = function (r) {
+    var name = talkQuoteLabel(r);
+    var dateLabel = formatAlbumDate(r.created_at);
+    var timeLabel = '';
+    try {
+      var d = r.created_at ? new Date(r.created_at) : null;
+      if (d && !isNaN(d.getTime())) {
+        var hh = String(d.getHours());
+        var mm = String(d.getMinutes());
+        if (hh.length < 2) hh = '0' + hh;
+        if (mm.length < 2) mm = '0' + mm;
+        timeLabel = hh + ':' + mm;
+      }
+    } catch (e) { timeLabel = ''; }
+    var when = [dateLabel, timeLabel].filter(Boolean).join(' ');
+    return (
+      '<div style="padding-top: 8px;">' +
+        '<h3 style="margin: 0 0 4px; font-size: 17px; color: #222;">' + esc(name) + ' 파트너와의 대화</h3>' +
+        '<p style="margin: 0 0 14px; font-size: 12px; color: #888;">' + esc(when || '날짜 미정') + '</p>' +
+        '<div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">' +
+          '<div class="report-meta-row">💡 나눈 주제: ' + esc(topicLabel(r) === '요즘 나의 일상' ? '서울의 숨은 카페와 각자의 주말' : topicLabel(r)) + '</div>' +
+          '<div class="report-meta-row">☕ 파트너 추천: "' + esc(talkQuoteText(r)) + '"</div>' +
+          '<div class="report-meta-row">✨ 기억하고 싶은 표현: "' + esc(memorablePhrase(r)) + '"</div>' +
+        '</div>' +
+        '<div class="insta-card-export-wrap" style="display:flex; flex-direction:column; align-items:center;">' +
+          renderViralReportCard(r, true, { bare: true }) +
+        '</div>' +
+        '<div style="display: flex; gap: 8px; margin-top: 16px;">' +
+          '<button id="btn-save-card" class="btn-save-card" type="button" onclick="saveInstaCard(event)" style="flex: 1; padding: 12px; background: #635BFF; color: #fff; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; font-size: 13px;">📸 카드 이미지 저장하기</button>' +
+          '<button type="button" onclick="closeReportDetailModal()" style="padding: 12px 16px; background: #F1F3F5; color: #444; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; font-size: 13px; font-family: inherit;">닫기</button>' +
+        '</div>' +
+      '</div>'
+    );
+  };
+
   window.loadUserReports = async function () {
+    var reportList = document.querySelector('.mypage-report-list');
     var album = document.querySelector('.talk-cards-grid');
-    var container = album || document.getElementById('mypage-card-feed');
+    var container = reportList || album || document.getElementById('mypage-card-feed');
     if (!container) return;
     var client = window.supabaseClient;
     var user = null;
@@ -495,7 +578,24 @@
     window.__dayoTalkAlbum = reports;
 
     var countEl = document.getElementById('talk-album-count');
-    if (countEl) countEl.textContent = '총 ' + reports.length + '장 보관';
+    if (countEl) {
+      countEl.textContent = reportList
+        ? ('총 ' + reports.length + '개의 대화 기록')
+        : ('총 ' + reports.length + '장 보관');
+    }
+
+    if (reportList) {
+      if (reports.length > 0) {
+        reportList.innerHTML = reports.map(function (r, idx) {
+          return renderReportArchiveItem(r, idx);
+        }).join('');
+      } else if (!user) {
+        reportList.innerHTML = '<div class="talk-album-empty">로그인 후 지난 대화 리포트를 확인해 보세요.</div>';
+      } else {
+        reportList.innerHTML = '<div class="talk-album-empty">아직 지난 대화 기록이 없어요.</div>';
+      }
+      return;
+    }
 
     if (album) {
       if (reports.length > 0) {

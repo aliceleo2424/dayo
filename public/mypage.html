@@ -132,7 +132,7 @@
     }
 
     .page {
-      width: min(1200px, calc(100% - 2rem));
+      width: min(1140px, calc(100% - 2rem));
       margin: 0 auto;
       padding: 2rem 0 4rem;
       max-width: 100%;
@@ -142,8 +142,23 @@
     .mypage-main-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 24px;
+      gap: 32px;
       align-items: start;
+    }
+    .mypage-col-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      min-width: 0;
+    }
+    .mypage-report-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .mypage-report-item:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(255, 90, 54, 0.1);
     }
     @media (max-width: 800px) {
       .mypage-main-grid { grid-template-columns: 1fr !important; }
@@ -397,6 +412,39 @@
       gap: 12px !important;
     }
     #urgent-session-banner[hidden] { display: none !important; }
+    #report-detail-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 990;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    #report-detail-modal.is-open {
+      display: flex;
+    }
+    .report-detail-panel {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 440px;
+      max-height: 90vh;
+      overflow: auto;
+      background: #fff;
+      border-radius: 20px;
+      padding: 22px 20px 20px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.18);
+    }
+    .report-meta-row {
+      padding: 10px 12px;
+      background: #F8F9FA;
+      border-radius: 10px;
+      font-size: 13px;
+      color: #444;
+      line-height: 1.5;
+    }
     .card-thumb-item:hover {
       transform: translateY(-3px);
       box-shadow: 0 8px 20px rgba(255, 90, 54, 0.12);
@@ -457,7 +505,8 @@
     #card-detail-body {
       padding-top: 28px;
     }
-    #card-detail-body .insta-card-export-wrap {
+    #card-detail-body .insta-card-export-wrap,
+    #report-detail-body .insta-card-export-wrap {
       margin-bottom: 0 !important;
     }
 
@@ -1222,9 +1271,9 @@
     </button>
   </nav>
 
-  <main class="page mypage-container" style="max-width: 1200px; margin: 0 auto; padding: 20px 24px; box-sizing: border-box;">
+  <main class="page mypage-container" style="max-width: 1140px; margin: 0 auto; padding: 32px 20px; box-sizing: border-box;">
 
-    <div class="role-switch-wrapper" style="display: flex; justify-content: center; margin-bottom: 24px;">
+    <div class="role-switch-wrapper" style="display: flex; justify-content: center; margin-bottom: 32px;">
       <div class="role-segmented-control" style="position: relative; display: flex; width: 300px; background: #F1F3F5; padding: 4px; border-radius: 999px; cursor: pointer;" role="group" aria-label="역할 전환">
         <div id="segmented-glider" style="position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: #fff; border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); transition: transform 0.25s ease;"></div>
         <button type="button" id="tab-user-mode" onclick="switchRoleView('user')" style="position: relative; z-index: 1; flex: 1; padding: 8px 0; border: none; background: transparent; font-weight: 700; color: #111; cursor: pointer;" aria-pressed="true">🙋‍♂️ 유저 모드</button>
@@ -1232,19 +1281,19 @@
       </div>
     </div>
 
-    <div class="mypage-welcome-row" style="background: #fff; border: 1px solid #FFEBE4; border-radius: 16px; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 16px;">
+    <div class="mypage-welcome-row" style="background: #fff; border: 1px solid #FFEBE4; border-radius: 20px; padding: 22px 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; gap: 16px;">
       <div>
         <h2 id="mypage-greeting" style="font-size: 18px; font-weight: 700; margin: 0 0 6px 0; color: #222;">편안한 저녁이에요, aliceleo2424님! 🌙</h2>
         <div style="font-size: 13px; color: #666;">
           보유 티켓 <strong data-summary-ticket style="color: #FF5A36;">0장</strong> <span style="color: #ccc; margin: 0 8px;">|</span> 결제일로부터 90일 이내 이용 가능
         </div>
       </div>
-      <button id="main-action-btn" type="button" style="background: #FF5A36; color: #fff; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap;">
-        대화 파트너 둘러보기 ➔
+      <button id="main-action-btn" type="button" onclick="openBookingModal()" style="background: #FF5A36; color: #fff; border: none; padding: 12px 22px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(255,90,54,0.2); font-family: inherit; white-space: nowrap;">
+        📅 대화 일정 예약하기
       </button>
     </div>
 
-    <div id="urgent-session-banner" class="mypage-urgent-row" style="background: linear-gradient(135deg, #FFF4F0 0%, #FFE9E2 100%); border: 1px solid #FFD3C4; border-radius: 16px; padding: 18px 24px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px;" data-demo-soon="1">
+    <div id="urgent-session-banner" class="mypage-urgent-row" style="background: linear-gradient(135deg, #FFF4F0 0%, #FFE9E2 100%); border: 1px solid #FFD3C4; border-radius: 20px; padding: 20px 24px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px;" data-demo-soon="1">
       <div>
         <span style="background: #FF5A36; color: #fff; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 20px;">🚨 30분 후 시작</span>
         <h3 style="margin: 6px 0 2px; font-size: 16px; color: #222;">Camille 파트너와의 대화 (오늘 20:00)</h3>
@@ -1256,8 +1305,18 @@
     </div>
 
     <div class="mypage-main-grid">
-      <div style="display: flex; flex-direction: column; gap: 24px;">
-        <aside style="background: #FFFDF0; border: 1px solid #FEEFB3; border-radius: 16px; padding: 20px; text-align: center;" aria-label="오늘의 대화 포춘쿠키">
+      <div class="mypage-col-stack">
+        <section style="background: #fff; border: 1px solid #EFEFEF; border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);" aria-labelledby="talkArchiveTitle">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; gap: 12px;">
+            <h3 id="talkArchiveTitle" style="margin: 0; font-size: 16px; font-weight: 700; color: #222;">📚 지난 대화 리포트 보관함</h3>
+            <span id="talk-album-count" style="font-size: 12px; color: #888;">총 0개의 대화 기록</span>
+          </div>
+          <div id="mypage-card-feed" class="mypage-report-list"></div>
+        </section>
+      </div>
+
+      <div id="right-column" class="mypage-col-stack">
+        <aside style="background: #FFFDF0; border: 1px solid #FEEFB3; border-radius: 20px; padding: 24px; text-align: center;" aria-label="오늘의 대화 포춘쿠키">
           <h4 style="margin: 0 0 4px; font-size: 14px; color: #444;">오늘의 대화 포춘쿠키</h4>
           <p style="margin: 0 0 12px; font-size: 11px; color: #888;">매일 1회, 가볍게 열어보는 체크인</p>
           <button type="button" id="dayo-cookie-trigger" class="dayo-fortune-cookie" aria-label="포춘쿠키 열기" style="margin: 0 auto;">
@@ -1267,17 +1326,7 @@
           </button>
         </aside>
 
-        <section style="background: #fff; border: 1px solid #F1F3F5; border-radius: 16px; padding: 20px;" aria-labelledby="talkAlbumTitle">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-            <h4 id="talkAlbumTitle" style="margin: 0; font-size: 15px; color: #222;">✨ 나의 대화 기록 앨범</h4>
-            <span id="talk-album-count" style="font-size: 12px; color: #635BFF; font-weight: 600;">총 0장 보관</span>
-          </div>
-          <div id="mypage-card-feed" class="talk-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;"></div>
-        </section>
-      </div>
-
-      <div id="right-column" style="display: flex; flex-direction: column; gap: 16px;">
-        <section style="background: #fff; border: 1px solid #F1F3F5; border-radius: 16px; padding: 22px;">
+        <section style="background: #fff; border: 1px solid #F1F3F5; border-radius: 20px; padding: 24px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #222;">💬 이번 세션 이야기 카드</h4>
             <span style="font-size: 11px; color: #888;">자유롭게 선택 가능</span>
@@ -1295,27 +1344,21 @@
             </button>
           </div>
         </section>
-
-        <div style="background: #FFF0EB; border: 1px dashed #FF7A59; border-radius: 16px; padding: 18px 20px; text-align: center;">
-          <p style="margin: 0 0 8px; font-size: 13px; color: #222; font-weight: 600;">새로운 대화 일정을 잡으시겠어요?</p>
-          <button type="button" id="mypage-booking-cta" data-booking-open style="width: 100%; background: #FF5A36; color: #fff; border: none; padding: 12px 0; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; font-family: inherit;">
-            📅 대화 파트너 및 시간 예약하기
-          </button>
-        </div>
       </div>
     </div>
 
-    <div style="margin-top: 24px; padding: 12px 16px; background: #F8F9FA; border-radius: 10px; font-size: 12px; color: #888; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+    <div style="margin-top: 32px; padding: 12px 16px; background: #F8F9FA; border-radius: 10px; font-size: 12px; color: #888; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
       <span data-coupon-bar>🎟️ 보유 중인 쿠폰: 없음</span>
       <span style="color: #aaa;">1회 티켓 충전 시 자동 적용</span>
     </div>
   </main>
-  <div id="card-detail-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="card-detail-title">
-    <div class="card-detail-backdrop" onclick="closeCardDetailModal()"></div>
-    <div class="card-detail-panel">
-      <button type="button" class="card-detail-close" onclick="closeCardDetailModal()" aria-label="닫기">×</button>
-      <h2 id="card-detail-title" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">대화 카드 상세</h2>
-      <div id="card-detail-body"></div>
+
+  <div id="report-detail-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="report-detail-title">
+    <div class="card-detail-backdrop" onclick="closeReportDetailModal()"></div>
+    <div class="report-detail-panel">
+      <button type="button" class="card-detail-close" onclick="closeReportDetailModal()" aria-label="닫기">×</button>
+      <h2 id="report-detail-title" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">지난 대화 리포트</h2>
+      <div id="report-detail-body"></div>
     </div>
   </div>
 

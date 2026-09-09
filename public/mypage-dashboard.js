@@ -1,4 +1,4 @@
-/* DayO mypage compact header + talk-card album modal */
+/* DayO mypage compact header + past-talk report archive */
 (function () {
   'use strict';
 
@@ -19,12 +19,28 @@
     }
   }
 
-  function openBookingSlots() {
+  function ticketCount() {
+    if (window.DayOTicketWallet && typeof window.DayOTicketWallet.getCount === 'function') {
+      return window.DayOTicketWallet.getCount();
+    }
+    return 0;
+  }
+
+  function openBookingModal() {
     if (window.DayOBooking && typeof window.DayOBooking.requestOpen === 'function') {
       window.DayOBooking.requestOpen();
       return;
     }
     window.location.href = 'index.html?booking=open';
+  }
+
+  function openTicketsModal() {
+    if (window.DayOTickets && typeof window.DayOTickets.open === 'function') {
+      window.DayOTickets.open();
+      return;
+    }
+    var trigger = document.querySelector('[data-tickets-open]');
+    if (trigger) trigger.click();
   }
 
   function bindStoryTopics() {
@@ -47,52 +63,84 @@
     var showUrgent = hasSoonSession();
     if (urgent && urgent.getAttribute('data-demo-soon') !== '0') showUrgent = true;
     if (urgent) urgent.hidden = !showUrgent;
-    if (btn) {
-      btn.hidden = false;
-      btn.textContent = '대화 파트너 둘러보기 ➔';
+    if (!btn) return;
+    btn.hidden = false;
+    if (ticketCount() <= 0) {
+      btn.textContent = '🎟️ 세션 티켓 충전하기';
       btn.onclick = function (e) {
         e.preventDefault();
-        openBookingSlots();
+        openTicketsModal();
       };
+      return;
     }
+    btn.textContent = '📅 대화 일정 예약하기';
+    btn.onclick = function (e) {
+      e.preventDefault();
+      openBookingModal();
+    };
+  }
+
+  function resolveReportIndex(key) {
+    if (typeof key === 'number' && key >= 0) return key;
+    var raw = String(key == null ? '' : key);
+    if (raw.indexOf('report-') === 0) {
+      var n = parseInt(raw.slice(7), 10);
+      return Number.isFinite(n) && n > 0 ? n - 1 : 0;
+    }
+    var parsed = parseInt(raw, 10);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+  }
+
+  function openReportDetailModal(key) {
+    var modal = document.getElementById('report-detail-modal');
+    var body = document.getElementById('report-detail-body');
+    if (!modal) return;
+    var reports = window.__dayoTalkAlbum || [];
+    var idx = resolveReportIndex(key);
+    var report = reports[idx];
+    if (body) {
+      if (report && typeof window.renderReportDetailHtml === 'function') {
+        body.innerHTML = window.renderReportDetailHtml(report);
+      } else if (report && typeof window.renderViralReportCardForModal === 'function') {
+        body.innerHTML = window.renderViralReportCardForModal(report);
+      } else {
+        body.innerHTML = '<p style="text-align:center;color:#888;font-size:13px;padding:24px 8px;">열어볼 대화 리포트가 아직 없어요.</p>';
+      }
+    }
+    modal.style.display = 'flex';
+    modal.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+    var closeBtn = modal.querySelector('.card-detail-close');
+    if (closeBtn && closeBtn.focus) closeBtn.focus();
+  }
+
+  function closeReportDetailModal() {
+    var modal = document.getElementById('report-detail-modal');
+    if (modal) {
+      modal.style.display = 'none';
+      modal.classList.remove('is-open');
+    }
+    document.body.style.overflow = 'auto';
   }
 
   window.enterStudio = function () {
     window.location.href = 'room.html?role=user';
   };
 
-  window.openBookingSlots = openBookingSlots;
-
-  window.openCardDetailModal = function (index) {
-    var modal = document.getElementById('card-detail-modal');
-    var body = document.getElementById('card-detail-body');
-    if (!modal) return;
-    var reports = window.__dayoTalkAlbum || [];
-    var idx = (typeof index === 'number' && index >= 0) ? index : 0;
-    var report = reports[idx];
-    if (body) {
-      if (report && typeof window.renderViralReportCardForModal === 'function') {
-        body.innerHTML = window.renderViralReportCardForModal(report);
-      } else if (!report) {
-        body.innerHTML = '<p style="text-align:center;color:#888;font-size:13px;padding:24px 8px;">열어볼 대화 카드가 아직 없어요.</p>';
-      }
-    }
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-    var closeBtn = modal.querySelector('.card-detail-close');
-    if (closeBtn && closeBtn.focus) closeBtn.focus();
-  };
-
-  window.closeCardDetailModal = function () {
-    var modal = document.getElementById('card-detail-modal');
-    if (modal) modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
-  };
+  window.openBookingModal = openBookingModal;
+  window.openBookingSlots = openBookingModal;
+  window.openTicketsModal = openTicketsModal;
+  window.openReportDetailModal = openReportDetailModal;
+  window.closeReportDetailModal = closeReportDetailModal;
+  window.openCardDetailModal = openReportDetailModal;
+  window.closeCardDetailModal = closeReportDetailModal;
 
   function onKeydown(e) {
     if (e.key !== 'Escape') return;
-    var modal = document.getElementById('card-detail-modal');
-    if (modal && modal.style.display === 'flex') window.closeCardDetailModal();
+    var modal = document.getElementById('report-detail-modal');
+    if (modal && (modal.style.display === 'flex' || modal.classList.contains('is-open'))) {
+      closeReportDetailModal();
+    }
   }
 
   function init() {
@@ -108,4 +156,5 @@
   }
 
   document.addEventListener('dayo:authchange', syncMainAction);
+  document.addEventListener('dayo:ticketchange', syncMainAction);
 })();
