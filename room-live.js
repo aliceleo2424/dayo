@@ -318,7 +318,8 @@
         var en = escapeHtml(item.en || item.phrase || item);
         var ko = escapeHtml(item.ko || item.meaning || '');
         return (
-          '<button class="copilot-card" type="button" data-phrase="' + en + '">' +
+          '<button class="copilot-card help-copy-chip" type="button" data-phrase="' + en + '" data-text="' + en +
+            '" onclick="copyHelpText(this.getAttribute(\'data-text\') || this.innerText)">' +
             '<span class="copilot-card__n">' + (i + 1) + '</span>' +
             '<span class="copilot-card__en">' + en + '</span>' +
             (ko ? '<span class="copilot-card__ko">' + ko + '</span>' : '') +
@@ -989,10 +990,10 @@
     wrap.addEventListener('click', function (e) {
       var card = e.target.closest('.copilot-card');
       if (!card) return;
-      var phrase = card.getAttribute('data-phrase') || '';
+      var phrase = card.getAttribute('data-text') || card.getAttribute('data-phrase') || '';
       if (!phrase) return;
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(phrase).catch(function () { /* ignore */ });
+      if (typeof window.copyHelpText === 'function' && !card.getAttribute('onclick')) {
+        window.copyHelpText(phrase);
       }
       var overlay = document.getElementById('sentenceOverlay');
       var overlayText = document.getElementById('sentenceOverlayText');
@@ -1000,7 +1001,9 @@
         overlayText.textContent = phrase;
         overlay.classList.add('show');
       }
-      showToast(t('room.copilotCopied'));
+      if (typeof window.copyHelpText !== 'function') {
+        showToast(t('room.copilotCopied'));
+      }
     });
   }
 

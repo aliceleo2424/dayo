@@ -1,18 +1,20 @@
-/* DayO session-end memory block tap game — no score, no penalty */
+/* DayO session-end memory block tap game — 3-round, no score, no penalty */
 (function () {
   'use strict';
 
-  var currentTargetSentence = '';
-  var correctWords = [];
+  var DEFAULT_SENTENCES = [
+    { en: "I've been into pottery lately", kr: '난 요즘 도예에 푹 빠져 있어' },
+    { en: 'Finding hidden spots is fun', kr: '숨은 동네 명소를 찾는 건 늘 즐거워' },
+    { en: 'A cup of coffee makes my day', kr: '커피 한 잔이 하루를 기분 좋게 만들어' }
+  ];
+
+  var gameSentenceQueue = [];
+  var currentRoundIndex = 0;
   var userPickedWords = [];
+  var currentCorrectWords = [];
   var remainingPool = [];
   var completing = false;
-
-  var fallbackTopics = {
-    daily: { en: "I've been into pottery lately", kr: '난 요즘 도예에 푹 빠져 있어' },
-    korea: { en: 'Finding hidden spots is fun', kr: '숨은 동네 명소를 찾는 건 늘 즐거워' },
-    taste: { en: 'I prefer cozy places over crowded ones', kr: '난 붐비는 곳보다 아늑한 곳이 좋아' }
-  };
+  var roundTimer = null;
 
   function isPartner() {
     try {
@@ -61,7 +63,7 @@
   }
 
   function fallbackForTopic() {
-    return fallbackTopics[topicKey()] || fallbackTopics.daily;
+    return DEFAULT_SENTENCES[0];
   }
 
   function looksEnglish(text) {
@@ -105,28 +107,44 @@
     return role === 'user' || speaker === 'user' || !role;
   }
 
-  function extractSessionSentence() {
+  function extractSessionSentences() {
     var rows = collectTranscriptRows();
-    var candidates = rows
-      .filter(isUserUtterance)
-      .map(utteranceText)
-      .map(normalizeSentence)
-      .filter(function (text) {
-        var words = text.split(' ').filter(Boolean);
-        return looksEnglish(text) && words.length >= 4 && words.length <= 10;
-      });
-    if (candidates.length) return candidates[candidates.length - 1];
-    return '';
+    var partnerRows = rows.filter(function (row) { return !isUserUtterance(row); });
+    var userRows = rows.filter(isUserUtterance);
+    var seen = {};
+    var out = [];
+
+    function pushFrom(list) {
+      var i;
+      var text;
+      var words;
+      for (i = list.length - 1; i >= 0 && out.length < 3; i -= 1) {
+        text = normalizeSentence(utteranceText(list[i]));
+        words = text.split(' ').filter(Boolean);
+        if (!looksEnglish(text) || words.length < 4 || words.length > 10) continue;
+        if (seen[text.toLowerCase()]) continue;
+        seen[text.toLowerCase()] = true;
+        out.push({ en: text, kr: meaningFor(text) });
+      }
+    }
+
+    pushFrom(partnerRows);
+    pushFrom(userRows);
+    return out;
+  }
+
+  function extractSessionSentence() {
+    var list = extractSessionSentences();
+    return list.length ? list[0].en : '';
   }
 
   function meaningFor(en) {
-    var key;
-    var item;
     var target = normalizeSentence(en).toLowerCase();
-    for (key in fallbackTopics) {
-      if (!Object.prototype.hasOwnProperty.call(fallbackTopics, key)) continue;
-      item = fallbackTopics[key];
-      if (normalizeSentence(item.en).toLowerCase() === target) return item.kr;
+    var i;
+    for (i = 0; i < DEFAULT_SENTENCES.length; i += 1) {
+      if (normalizeSentence(DEFAULT_SENTENCES[i].en).toLowerCase() === target) {
+        return DEFAULT_SENTENCES[i].kr;
+      }
     }
     return '오늘 대화에서 나온 표현이에요';
   }
@@ -149,7 +167,7 @@
 
   function showTalkRecord() {
     window.__dayoMemoryGameDone = true;
-    window.__dayoMemorySentence = currentTargetSentence;
+    window.__dayoMemorySentence = (gameSentenceQueue[0] && gameSentenceQueue[0].en) || '';
     hideMemoryModal();
     if (typeof origOpenTalkRecord === 'function') {
       origOpenTalkRecord();
@@ -192,16 +210,35 @@
 
   function checkGameResult() {
     if (completing) return;
-    var isMatch = userPickedWords.join(' ') === correctWords.join(' ');
+    var isMatch = userPickedWords.join(' ') === currentCorrectWords.join(' ');
     var slotContainer = document.getElementById('answer-slot-container');
     if (isMatch) {
       completing = true;
-      if (typeof window.confetti === 'function') {
-        window.confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
-      }
       if (slotContainer) slotContainer.style.borderColor = '#10B981';
-      setTimeout(function () {
-        showTalkRecord();
+      if (currentRoundIndex + 1 < gameSentenceQueue.length) {
+        if (typeof window.confetti === 'function') {
+          window.confetti({ particleCount: 50, spread: 50, origin: { y: 0.6 } });
+        }
+        clearTimeout(roundTimer);
+        roundTimer = setTimeout(function () {
+          currentRoundIndex += 1;
+          loadRound(currentRoundIndex);
+        }, 700);
+        return;
+      }
+      if (typeof window.confetti === 'function') {
+        window.confetti({ particleCount: 120, spread: 80, origin: { y: 0.5 } });
+      }
+      clearTimeout(roundTimer);
+      roundTimer = setTimeout(function () {
+        hideMemoryModal();
+        window.__dayoMemoryGameDone = true;
+        window.__dayoMemorySentence = (gameSentenceQueue[0] && gameSentenceQueue[0].en) || '';
+        if (typeof window.openCardDetailModal === 'function') {
+          window.openCardDetailModal(gameSentenceQueue[0] && gameSentenceQueue[0].en);
+        } else {
+          showTalkRecord();
+        }
       }, 900);
       return;
     }
@@ -212,38 +249,62 @@
         slotContainer.style.borderColor = '#E2E8F0';
       }
       userPickedWords = [];
-      remainingPool = shuffle(correctWords);
+      remainingPool = shuffle(currentCorrectWords);
       renderGameUI(remainingPool);
     }, 400);
   }
 
-  window.startMemoryGame = function (extractedSentence, meaningKr) {
-    if (isPartner()) return;
-    var data = (extractedSentence && meaningKr)
-      ? { en: extractedSentence, kr: meaningKr }
-      : fallbackForTopic();
-    if (extractedSentence && !meaningKr) {
-      data = { en: extractedSentence, kr: meaningFor(extractedSentence) };
-    }
-
-    currentTargetSentence = normalizeSentence(data.en);
-    correctWords = currentTargetSentence.split(' ').filter(Boolean);
-    if (correctWords.length < 3) {
-      data = fallbackForTopic();
-      currentTargetSentence = normalizeSentence(data.en);
-      correctWords = currentTargetSentence.split(' ').filter(Boolean);
-    }
+  function loadRound(index) {
+    var data = gameSentenceQueue[index] || DEFAULT_SENTENCES[0];
+    var cleanEn = normalizeSentence(data.en);
+    currentCorrectWords = cleanEn.split(' ').filter(Boolean);
     userPickedWords = [];
-    remainingPool = shuffle(correctWords);
+    remainingPool = shuffle(currentCorrectWords);
     completing = false;
 
+    var badge = document.getElementById('game-round-badge');
+    if (badge) badge.innerText = '조각 수집 ' + (index + 1) + ' / ' + gameSentenceQueue.length;
     var hint = document.getElementById('game-kr-meaning');
-    if (hint) hint.textContent = '"' + data.kr + '"';
+    if (hint) hint.innerText = '"' + (data.kr || meaningFor(data.en)) + '"';
     var slotContainer = document.getElementById('answer-slot-container');
     if (slotContainer) slotContainer.style.borderColor = '#E2E8F0';
-
     renderGameUI(remainingPool);
+  }
+
+  function normalizeQueue(sentenceList) {
+    var out = [];
+    var seen = {};
+    function add(item) {
+      if (!item || out.length >= 3) return;
+      var en = typeof item === 'string' ? item : (item.en || item.text || '');
+      var kr = typeof item === 'string' ? meaningFor(item) : (item.kr || item.meaning || meaningFor(en));
+      var key = normalizeSentence(en).toLowerCase();
+      if (!key || seen[key]) return;
+      seen[key] = true;
+      out.push({ en: en, kr: kr });
+    }
+    (sentenceList || []).forEach(add);
+    DEFAULT_SENTENCES.forEach(add);
+    return out.slice(0, 3);
+  }
+
+  window.startMultiMemoryGame = function (sentenceList) {
+    if (isPartner()) return;
+    window.__dayoMemoryGameDone = false;
+    gameSentenceQueue = normalizeQueue(sentenceList);
+    currentRoundIndex = 0;
+    loadRound(currentRoundIndex);
     showMemoryModal();
+  };
+
+  window.startMemoryGame = function (extractedSentence, meaningKr) {
+    if (extractedSentence) {
+      window.startMultiMemoryGame([
+        { en: extractedSentence, kr: meaningKr || meaningFor(extractedSentence) }
+      ].concat(DEFAULT_SENTENCES).slice(0, 3));
+      return;
+    }
+    window.startMultiMemoryGame(null);
   };
 
   window.startMemoryGameFromSession = function () {
@@ -252,13 +313,7 @@
       showTalkRecord();
       return;
     }
-    var extracted = extractSessionSentence();
-    if (extracted) {
-      window.startMemoryGame(extracted, meaningFor(extracted));
-      return;
-    }
-    var fallback = fallbackForTopic();
-    window.startMemoryGame(fallback.en, fallback.kr);
+    window.startMultiMemoryGame(extractSessionSentences());
   };
 
   window.pickWordToSlot = function (word, poolIdx) {
@@ -271,7 +326,7 @@
       if (found !== -1) remainingPool.splice(found, 1);
     }
     renderGameUI(remainingPool);
-    if (userPickedWords.length === correctWords.length) checkGameResult();
+    if (userPickedWords.length === currentCorrectWords.length) checkGameResult();
   };
 
   window.removeWordFromSlot = function (slotIdx) {
@@ -287,7 +342,9 @@
   };
 
   window.openCardDetailModal = function (sentence) {
-    if (sentence) currentTargetSentence = normalizeSentence(sentence);
+    if (sentence) {
+      window.__dayoMemorySentence = normalizeSentence(sentence);
+    }
     showTalkRecord();
   };
 
