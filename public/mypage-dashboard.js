@@ -19,6 +19,28 @@
     }
   }
 
+  function openBookingSlots() {
+    if (window.DayOBooking && typeof window.DayOBooking.requestOpen === 'function') {
+      window.DayOBooking.requestOpen();
+      return;
+    }
+    window.location.href = 'index.html?booking=open';
+  }
+
+  function bindStoryTopics() {
+    var cards = document.querySelectorAll('[data-story-topic]');
+    Array.prototype.forEach.call(cards, function (card) {
+      card.addEventListener('click', function () {
+        Array.prototype.forEach.call(cards, function (other) {
+          var on = other === card;
+          other.setAttribute('aria-pressed', on ? 'true' : 'false');
+          other.style.background = on ? '#FFF9F5' : '#F8F9FA';
+          other.style.borderColor = on ? '#FFEBE4' : '#EDEDED';
+        });
+      });
+    });
+  }
+
   function syncMainAction() {
     var btn = document.getElementById('main-action-btn');
     var urgent = document.getElementById('urgent-session-banner');
@@ -30,12 +52,7 @@
       btn.textContent = '대화 파트너 둘러보기 ➔';
       btn.onclick = function (e) {
         e.preventDefault();
-        var target = document.getElementById('partners-list');
-        if (target && typeof target.scrollIntoView === 'function') {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          return;
-        }
-        window.location.hash = 'partners-list';
+        openBookingSlots();
       };
     }
   }
@@ -43,6 +60,8 @@
   window.enterStudio = function () {
     window.location.href = 'room.html?role=user';
   };
+
+  window.openBookingSlots = openBookingSlots;
 
   window.openCardDetailModal = function (index) {
     var modal = document.getElementById('card-detail-modal');
@@ -78,6 +97,7 @@
 
   function init() {
     syncMainAction();
+    bindStoryTopics();
     document.addEventListener('keydown', onKeydown);
   }
 
