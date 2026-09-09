@@ -229,6 +229,27 @@
       padding: 1.5rem;
     }
 
+    #mypage-card-feed {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+      gap: 1.15rem;
+      align-items: start;
+      width: 100%;
+    }
+    #mypage-card-feed .insta-card-export-wrap {
+      width: 100%;
+      margin-bottom: 0 !important;
+      align-items: stretch;
+    }
+    #mypage-card-feed .viral-card {
+      width: 100% !important;
+      max-width: none !important;
+    }
+    #mypage-card-feed .dayo-card-comment,
+    #mypage-card-feed .insta-card-export-wrap > div {
+      max-width: none !important;
+    }
+
     .dayo-approved-card-mount {
       display: flex;
       justify-content: center;
@@ -311,7 +332,7 @@
     }
 
     /* 대화 현황 */
-    .status-card { padding: 1.5rem; }
+    .status-card { margin-bottom: 1.25rem; padding: 1.5rem; }
 
     .status-grid {
       display: grid;
@@ -741,27 +762,6 @@
     .library-desc { margin-top: 0.28rem; color: var(--muted); font-size: 0.74rem; line-height: 1.55; }
     .library-arrow { color: var(--muted); font-size: 1.15rem; }
 
-    .vocab-card { margin-top: 1.25rem; padding: 1.5rem; }
-    .vocab-list {
-      display: grid;
-      gap: 0.65rem;
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-    .vocab-item {
-      display: flex;
-      flex-direction: column;
-      gap: 0.18rem;
-      padding: 0.9rem 1rem;
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      background: var(--cream);
-    }
-    .vocab-item__word { font-size: 0.9rem; font-weight: 800; }
-    .vocab-item__meaning { color: var(--muted); font-size: 0.78rem; font-weight: 700; }
-    .vocab-empty { margin: 0; color: var(--muted); font-size: 0.82rem; line-height: 1.55; }
-
     .coupon-card { margin-top: 1.25rem; padding: 1.5rem; }
     .coupon-list { display: grid; gap: 0.75rem; }
     .coupon-item {
@@ -1022,45 +1022,6 @@
       <p class="heading-desc" data-i18n="mypage.headingDesc">내 대화 현황과 예약한 세션, 예습 자료를 한 곳에서 확인할 수 있어요.</p>
     </div>
 
-    <section class="card speaking-card" aria-labelledby="speakingTitle">
-      <p class="speaking-eyebrow" data-i18n="mypage.speaking.eyebrow">MONTHLY SPEAKING REPORT</p>
-      <h2 class="speaking-title" id="speakingTitle" data-i18n="mypage.speaking.title" data-i18n-html="true">
-        🎉 이번 달 나는 <em>영어 🇺🇸 1시간 20분</em>, <em>프랑스어 🇫🇷 40분</em> 대화했어요!
-      </h2>
-      <p class="speaking-desc" data-i18n="mypage.speaking.desc">총 2시간, 지난달보다 45분 더 이야기했어요. 이 속도라면 다음 달엔 3시간도 문제없어요 💪</p>
-
-      <div class="gauge-list">
-        <div class="gauge">
-          <div class="gauge-top">
-            <span class="gauge-name" data-i18n="mypage.speaking.en">🇺🇸 영어</span>
-            <span class="gauge-value">80분 · 66%</span>
-          </div>
-          <div class="gauge-track">
-            <span class="gauge-fill gauge-fill--en" style="width: 66%"></span>
-          </div>
-        </div>
-        <div class="gauge">
-          <div class="gauge-top">
-            <span class="gauge-name" data-i18n="mypage.speaking.fr">🇫🇷 프랑스어</span>
-            <span class="gauge-value">40분 · 34%</span>
-          </div>
-          <div class="gauge-track">
-            <span class="gauge-fill gauge-fill--fr" style="width: 34%"></span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="card dayo-approved-card" id="dayoApprovedCardSection" aria-labelledby="dayoCardTitle">
-      <div class="card-head">
-        <div>
-          <h2 class="card-title" id="dayoCardTitle">✨ 나의 DayO 리포트</h2>
-          <p class="card-subtitle">파트너가 검수해 보낸 베스트 표현이 계정에 쌓여요.</p>
-        </div>
-      </div>
-      <div id="mypage-card-feed"></div>
-    </section>
-
     <section class="card status-card" aria-labelledby="statusTitle">
       <div class="card-head">
         <div>
@@ -1105,6 +1066,45 @@
           <span class="dayo-fortune-paper-mini" aria-hidden="true">✨ 오늘의 한마디</span>
         </button>
       </aside>
+      </div>
+    </section>
+
+    <section class="card dayo-approved-card" id="dayoApprovedCardSection" aria-labelledby="dayoCardTitle">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title" id="dayoCardTitle">✨ 오늘의 대화 기록</h2>
+          <p class="card-subtitle">Talk History · 세션에서 남긴 카드를 모아 두었어요.</p>
+        </div>
+      </div>
+      <div id="mypage-card-feed"></div>
+    </section>
+
+    <section class="card speaking-card" aria-labelledby="speakingTitle">
+      <p class="speaking-eyebrow" data-i18n="mypage.speaking.eyebrow">MONTHLY SPEAKING REPORT</p>
+      <h2 class="speaking-title" id="speakingTitle" data-i18n="mypage.speaking.title" data-i18n-html="true">
+        🎉 이번 달 나는 <em>영어 🇺🇸 1시간 20분</em>, <em>프랑스어 🇫🇷 40분</em> 대화했어요!
+      </h2>
+      <p class="speaking-desc" data-i18n="mypage.speaking.desc">총 2시간, 지난달보다 45분 더 이야기했어요. 이 속도라면 다음 달엔 3시간도 문제없어요 💪</p>
+
+      <div class="gauge-list">
+        <div class="gauge">
+          <div class="gauge-top">
+            <span class="gauge-name" data-i18n="mypage.speaking.en">🇺🇸 영어</span>
+            <span class="gauge-value">80분 · 66%</span>
+          </div>
+          <div class="gauge-track">
+            <span class="gauge-fill gauge-fill--en" style="width: 66%"></span>
+          </div>
+        </div>
+        <div class="gauge">
+          <div class="gauge-top">
+            <span class="gauge-name" data-i18n="mypage.speaking.fr">🇫🇷 프랑스어</span>
+            <span class="gauge-value">40분 · 34%</span>
+          </div>
+          <div class="gauge-track">
+            <span class="gauge-fill gauge-fill--fr" style="width: 34%"></span>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1227,17 +1227,6 @@
         </div>
       </section>
     </div>
-
-    <section class="card vocab-card" aria-labelledby="vocabTitle">
-      <div class="card-head">
-        <div>
-          <h2 class="card-title" id="vocabTitle">🍓 복습 단어장</h2>
-          <p class="card-subtitle">대화에서 기억하고 싶은 오늘의 표현이에요.</p>
-        </div>
-      </div>
-      <ul class="vocab-list" data-review-vocab hidden></ul>
-      <p class="vocab-empty" data-review-vocab-empty>아직 저장한 단어가 없어요. 대화가 끝나면 오늘의 표현이 여기에 모여요.</p>
-    </section>
 
     <section class="card history-card" aria-labelledby="historyTitle">
       <div class="card-head">

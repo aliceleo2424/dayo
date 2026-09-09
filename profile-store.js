@@ -15,7 +15,6 @@ var SPEED_KEY = 'dayo.chat.speed';
 var STYLE_KEY = 'dayo.chat.style';
 var REQUEST_KEY = 'dayo.chat.request';
 var JAM_KEY = 'dayo.jamCount';
-var VOCAB_KEY = 'dayo.reviewVocab';
 var WELCOME_COUPON_KEY = 'dayo.hasWelcomeCoupon';
 var WELCOME_COUPON_CODE = 'WELCOME_9900';
 var WELCOME_COUPON_CODES = { WELCOME_9900: true, WELCOME9900: true };
@@ -27,7 +26,6 @@ var SPEED_KEY = 'dayo.chat.speed';
 var STYLE_KEY = 'dayo.chat.style';
 var REQUEST_KEY = 'dayo.chat.request';
 var JAM_KEY = 'dayo.jamCount';
-var VOCAB_KEY = 'dayo.reviewVocab';
 
 var supabase = null;
 var profileCache = null;
@@ -156,34 +154,6 @@ function clearAuthLocal() {
   } catch (e) { /* ignore */ }
 }
 
-function parseVocab(raw) {
-  if (Array.isArray(raw)) return raw.filter(function (row) { return row && row.word; });
-  if (typeof raw === 'string' && raw) {
-    try {
-      var parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parseVocab(parsed) : [];
-    } catch (e) {
-      return [];
-    }
-  }
-  return [];
-}
-
-function mergeVocabLists(a, b) {
-  var out = [];
-  parseVocab(a).concat(parseVocab(b)).forEach(function (item) {
-    if (!out.some(function (row) { return row.word === item.word; })) {
-      out.push({
-        word: String(item.word),
-        meaning: item.meaning ? String(item.meaning) : '',
-        kind: item.kind ? String(item.kind) : 'word',
-        savedAt: item.savedAt || new Date().toISOString()
-      });
-    }
-  });
-  return out;
-}
-
 function getJamCount() {
   var remote = profileCache && profileCache.jam_count;
   var remoteN = Number(remote);
@@ -191,11 +161,6 @@ function getJamCount() {
   var local = Number.isFinite(localN) ? localN : 0;
   if (Number.isFinite(remoteN)) return Math.max(remoteN, local);
   return local;
-}
-
-function getVocab() {
-  var remote = profileCache && profileCache.review_vocab;
-  return mergeVocabLists(lsGet(VOCAB_KEY, '[]'), remote);
 }
 
 function defaultsFromLocal() {
@@ -212,7 +177,6 @@ function defaultsFromLocal() {
     preferred_style: lsGet(STYLE_KEY, 'casual') || 'casual',
     preferred_request: lsGet(REQUEST_KEY, 'praise') || 'praise',
     jam_count: getJamCount(),
-    review_vocab: getVocab(),
     has_welcome_coupon: lsGet(WELCOME_COUPON_KEY, '') === '1'
   };
 }
@@ -234,11 +198,6 @@ function applyProfileToLocal(profile) {
     var jam = Math.max(Number(profile.jam_count) || 0, parseInt(lsGet(JAM_KEY, '0'), 10) || 0);
     lsSet(JAM_KEY, jam);
     profile.jam_count = jam;
-  }
-  if (profile.review_vocab != null) {
-    var vocab = mergeVocabLists(lsGet(VOCAB_KEY, '[]'), profile.review_vocab);
-    lsSet(VOCAB_KEY, JSON.stringify(vocab));
-    profile.review_vocab = vocab;
   }
 
   if (window.DayOTicketWallet && typeof window.DayOTicketWallet.syncUI === 'function') {
@@ -319,7 +278,6 @@ function mirrorLocalFields(profile) {
   if (profile.preferred_style) lsSet(STYLE_KEY, profile.preferred_style);
   if (profile.preferred_request) lsSet(REQUEST_KEY, profile.preferred_request);
   if (profile.jam_count != null) lsSet(JAM_KEY, Number(profile.jam_count) || 0);
-  if (profile.review_vocab != null) lsSet(VOCAB_KEY, JSON.stringify(parseVocab(profile.review_vocab)));
 }
 
 async function updateProfile(partial, options) {
@@ -354,8 +312,7 @@ async function updateProfile(partial, options) {
       updated_at: next.updated_at
     };
     var withRewards = Object.assign({}, payload, {
-      jam_count: Number(next.jam_count) || 0,
-      review_vocab: parseVocab(next.review_vocab)
+      jam_count: Number(next.jam_count) || 0
     });
 
     var result = await client
@@ -383,8 +340,7 @@ async function updateProfile(partial, options) {
 
     if (result.error) throw result.error;
     profileCache = Object.assign({}, result.data, {
-      jam_count: withRewards.jam_count,
-      review_vocab: withRewards.review_vocab
+      jam_count: withRewards.jam_count
     });
     return profileCache;
   } catch (err) {
@@ -999,21 +955,6 @@ function syncRewardUI() {
   Array.prototype.forEach.call(document.querySelectorAll('[data-jam-count-text]'), function (el) {
     el.textContent = jam + ' Jam';
   });
-
-  var items = getVocab();
-  Array.prototype.forEach.call(document.querySelectorAll('[data-review-vocab]'), function (list) {
-    list.innerHTML = items.map(function (item) {
-      var meaning = item.meaning ? escapeHtml(item.meaning) : '';
-      return '<li class="vocab-item">' +
-        '<span class="vocab-item__word">' + escapeHtml(item.word) + '</span>' +
-        (meaning ? '<span class="vocab-item__meaning">' + meaning + '</span>' : '') +
-        '</li>';
-    }).join('');
-    list.hidden = items.length === 0;
-  });
-  Array.prototype.forEach.call(document.querySelectorAll('[data-review-vocab-empty]'), function (el) {
-    el.hidden = items.length > 0;
-  });
   syncCouponUI();
 }
 
@@ -1035,18 +976,6 @@ function addJam(amount) {
     }));
     syncRewardUI();
     return { jamCount: next, added: add, profile: profile };
-  });
-}
-
-function mergeVocab(items) {
-  var next = mergeVocabLists(getVocab(), items || []);
-  lsSet(VOCAB_KEY, JSON.stringify(next));
-  return updateProfile({ review_vocab: next }).then(function (profile) {
-    document.dispatchEvent(new CustomEvent('dayo:vocabchange', {
-      detail: { vocab: next }
-    }));
-    syncRewardUI();
-    return next;
   });
 }
 
@@ -1354,9 +1283,7 @@ window.DayOProfileStore = {
   signInWithGoogle: signInWithGoogle,
   signOut: signOutAuth,
   getJamCount: getJamCount,
-  getVocab: getVocab,
   addJam: addJam,
-  mergeVocab: mergeVocab,
   saveSessionLog: saveSessionLog,
   getLastTranscript: getLastTranscript,
   fetchPartnerSessionLogs: fetchPartnerSessionLogs,
