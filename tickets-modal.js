@@ -428,6 +428,9 @@
       plans: PLANS,
       promptPurchase: promptPurchase
     };
+    window.openPaymentModal = function () {
+      open();
+    };
     openFromQuery();
     loadCoupons();
   }

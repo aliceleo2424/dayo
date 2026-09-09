@@ -4790,8 +4790,19 @@
         try { localStorage.setItem('dayo_last_approved_card', JSON.stringify(cardData)); } catch (e) { /* ignore */ }
       }
 
+      var bookingId = '';
+      try { bookingId = localStorage.getItem('dayo_active_booking_id') || ''; } catch (e) { bookingId = ''; }
+      if (!bookingId && typeof crypto !== 'undefined' && crypto.randomUUID) bookingId = crypto.randomUUID();
+
+      var rewarded = false;
+      if (user && user.id && bookingId && typeof window.handleCompleteSession === 'function') {
+        rewarded = await window.handleCompleteSession(bookingId, user.id);
+      }
+
       console.log('✨ 파트너 리포트 검수 완료 트리거');
-      alert('🎉 세션 리포트가 유저 계정으로 전송되었으며, 6,000P가 정산되었습니다.');
+      alert(rewarded
+        ? '🎉 세션 리포트가 유저 계정으로 전송되었으며, 6,000P가 정산되었습니다.'
+        : '🎉 세션 리포트가 유저 계정으로 전송되었습니다.');
       try { localStorage.setItem('dayo_current_mode', 'PARTNER'); } catch (e) {}
       window.location.href = 'index.html?mode=partner';
     };

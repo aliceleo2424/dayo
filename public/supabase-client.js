@@ -187,6 +187,125 @@
     if (result.error) alert(result.error.message);
   };
 
+  window.openPaymentModal = function () {
+    if (window.DayOTickets && typeof window.DayOTickets.open === 'function') {
+      window.DayOTickets.open();
+      return;
+    }
+    var trigger = document.querySelector('[data-tickets-open]');
+    if (trigger) trigger.click();
+  };
+
+  function getRpcClient() {
+    return window.supabaseClient || null;
+  }
+
+  function normalizeRpcPayload(data) {
+    var payload = data;
+    if (typeof payload === 'string') {
+      try { payload = JSON.parse(payload); } catch (e) { payload = { success: false, message: payload }; }
+    }
+    if (Array.isArray(payload) && payload[0]) payload = payload[0];
+    return payload && typeof payload === 'object' ? payload : { success: false, message: '응답이 올바르지 않습니다.' };
+  }
+
+  function syncRemainingTickets(remaining) {
+    if (remaining == null || remaining === '') return;
+    var n = Number(remaining);
+    if (!Number.isFinite(n) || n < 0) return;
+    if (window.DayOTicketWallet && typeof window.DayOTicketWallet.setCount === 'function') {
+      window.DayOTicketWallet.setCount(n);
+      return;
+    }
+    try {
+      localStorage.setItem('ticketCount', String(n));
+      localStorage.setItem('dayo_ticket_count', String(n));
+    } catch (e) { /* ignore */ }
+  }
+
+  window.handleConfirmBooking = async function (learnerId, bookingId) {
+    var supabase = getRpcClient();
+    if (!supabase || typeof supabase.rpc !== 'function') {
+      alert('예약 처리 중 통신 오류가 발생했습니다.');
+      return false;
+    }
+    try {
+      const { data, error } = await supabase.rpc('deduct_ticket_and_confirm_booking', {
+        p_learner_id: learnerId,
+        p_booking_id: bookingId
+      });
+
+      if (error) throw error;
+
+      var payload = normalizeRpcPayload(data);
+      if (!payload.success) {
+        if (String(payload.message || '').includes('부족')) {
+          alert('보유하신 티켓이 없습니다. 단건 체험권을 충전해 주세요!');
+          if (typeof openPaymentModal === 'function') openPaymentModal();
+        } else {
+          alert(payload.message || '예약을 확정할 수 없습니다.');
+        }
+        return false;
+      }
+
+      syncRemainingTickets(payload.remaining_tickets);
+      console.log('✅ 잔여 티켓:', payload.remaining_tickets);
+      return true;
+    } catch (err) {
+      console.error('티켓 차감 실패:', err);
+      alert('예약 처리 중 통신 오류가 발생했습니다.');
+      return false;
+    }
+  };
+
+  window.handleCompleteSession = async function (bookingId, partnerUserId) {
+    var supabase = getRpcClient();
+    if (!supabase || typeof supabase.rpc !== 'function') return false;
+    try {
+      const { data, error } = await supabase.rpc('complete_session_and_reward_partner', {
+        p_booking_id: bookingId,
+        p_partner_user_id: partnerUserId,
+        p_reward_amount: 6000
+      });
+
+      if (error) throw error;
+
+      var payload = normalizeRpcPayload(data);
+      if (payload.success) {
+        if (payload.updated_points != null) {
+          try { localStorage.setItem('dayo_point_balance', String(payload.updated_points)); } catch (e) { /* ignore */ }
+        }
+        console.log('✅ 파트너 정산 완료! 누적 포인트:', payload.updated_points);
+        return true;
+      }
+      console.warn('정산 안내:', payload.message);
+      return false;
+    } catch (err) {
+      console.error('파트너 정산 오류:', err);
+      return false;
+    }
+  };
+
+  window.createPendingBooking = async function (fields) {
+    var supabase = getRpcClient();
+    var row = fields || {};
+    if (!supabase) return null;
+    var insertRes = await supabase.from('bookings').insert([{
+      learner_id: row.learner_id,
+      partner_user_id: row.partner_user_id || null,
+      partner_name: row.partner_name || '',
+      language: row.language || '',
+      scheduled_at: row.scheduled_at || null,
+      status: 'pending'
+    }]).select('id').single();
+    if (insertRes.error) {
+      console.warn('[DayO] booking insert failed', insertRes.error);
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+      return null;
+    }
+    return insertRes.data && insertRes.data.id;
+  };
+
   window.persistSessionReport = async function (cardData) {
     var client = window.supabaseClient;
     var payload = cardData || {};
@@ -220,13 +339,6 @@
         console.warn('[DayO] session_reports insert failed', insertRes.error);
         try { localStorage.setItem('dayo_last_approved_card', JSON.stringify(payload)); } catch (e) { /* ignore */ }
         return { ok: false, error: insertRes.error };
-      }
-      if (user && user.id) {
-        try {
-          var current = await client.from('profiles').select('point_balance').eq('user_id', user.id).maybeSingle();
-          var nextPoints = Number((current.data && current.data.point_balance) || 0) + 6000;
-          await client.from('profiles').update({ point_balance: nextPoints }).eq('user_id', user.id);
-        } catch (e) { /* ignore payout update failure */ }
       }
       return { ok: true, learnerId: learnerId };
     }

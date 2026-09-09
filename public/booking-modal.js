@@ -647,10 +647,55 @@
   function confirmBooking() {
     if (!isStepReady(3)) return;
     persistComfortPrefs(true);
+    settleConfirmedBooking();
+  }
+
+  async function settleConfirmedBooking() {
+    if (el.nextBtn) el.nextBtn.disabled = true;
+    var learnerId = (window._dayoAuthUser && window._dayoAuthUser.id) || '';
+    if (!learnerId && window.supabaseClient) {
+      try {
+        var authRes = await window.supabaseClient.auth.getUser();
+        learnerId = authRes && authRes.data && authRes.data.user && authRes.data.user.id || '';
+      } catch (e) { learnerId = ''; }
+    }
+
+    var partner = getPartner(state.partner) || {};
+    var scheduledAt = null;
+    if (state.date && state.time) scheduledAt = String(state.date) + 'T' + String(state.time) + ':00';
+
+    var bookingId = null;
+    if (typeof window.createPendingBooking === 'function' && learnerId) {
+      bookingId = await window.createPendingBooking({
+        learner_id: learnerId,
+        partner_name: partner.name || '',
+        language: state.language || '',
+        scheduled_at: scheduledAt
+      });
+    } else if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      bookingId = crypto.randomUUID();
+    }
+
+    var deducted = true;
+    if (typeof window.handleConfirmBooking === 'function' && learnerId && bookingId) {
+      deducted = await window.handleConfirmBooking(learnerId, bookingId);
+    } else if (typeof window.handleConfirmBooking === 'function') {
+      deducted = false;
+      alert('예약 처리 중 통신 오류가 발생했습니다.');
+    }
+
+    if (el.nextBtn) el.nextBtn.disabled = !isStepReady(state.step);
+    if (!deducted) return;
+
+    try {
+      if (bookingId) localStorage.setItem('dayo_active_booking_id', bookingId);
+      if (learnerId) localStorage.setItem('dayo_session_learner_id', learnerId);
+    } catch (e) { /* ignore */ }
+
     clearDraft();
     clearFlag(RESUME_KEY);
     close();
-    showToast(t('book.confirmToastFormat', { partner: getPartner(state.partner).name }));
+    showToast(t('book.confirmToastFormat', { partner: partner.name || '' }));
   }
 
   function storageGet(key) {
