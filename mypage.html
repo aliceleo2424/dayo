@@ -114,22 +114,122 @@
     .topbar-right { display: flex; align-items: center; gap: 0.9rem; }
     .topbar-extras { display: flex; align-items: center; gap: 0.9rem; }
 
-    .welcome {
+    .mypage-greeting-line {
       display: flex;
       align-items: center;
-      gap: 0.6rem;
-      color: var(--muted);
-      font-size: 0.88rem;
+      flex-wrap: wrap;
+      gap: 8px 10px;
+      margin-bottom: 6px;
+    }
+    .mypage-greeting-line #mypage-greeting { margin: 0; }
+    .edit-nickname-btn {
+      border: 1px solid #FFE0D4;
+      background: #FFF9F5;
+      color: #C45A3A;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
       font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
     }
-
-    .welcome-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #75B987;
-      box-shadow: 0 0 0 5px rgba(117, 185, 135, 0.13);
+    .speaking-progress-card {
+      background: linear-gradient(180deg, #FFFDF0 0%, #FFFFFF 72%);
+      border: 1px solid #FEEFB3;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
     }
+    .speaking-progress-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .speaking-progress-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .speaking-progress-metric {
+      background: rgba(255,255,255,0.78);
+      border: 1px solid #F3E6B8;
+      border-radius: 14px;
+      padding: 14px 12px;
+      min-width: 0;
+    }
+    .speaking-progress-metric span {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: #8A7A55;
+      margin-bottom: 6px;
+    }
+    .speaking-progress-metric strong {
+      display: block;
+      font-size: 15px;
+      line-height: 1.4;
+      color: #3E4A42;
+    }
+    .speaking-retest-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 14px;
+      background: linear-gradient(135deg, #F6D365 0%, #F8C8A8 100%);
+      color: #3E4A42;
+      font-size: 13px;
+      font-weight: 800;
+      text-decoration: none;
+      white-space: nowrap;
+      box-shadow: 0 3px 0 #E0B84E;
+    }
+    .edit-profile-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 80;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(92, 74, 66, 0.32);
+      backdrop-filter: blur(8px);
+    }
+    .edit-profile-overlay.is-open { display: flex; }
+    .edit-profile-modal {
+      width: min(400px, 100%);
+      background: #FFFCFA;
+      border: 1px solid #FFE8E3;
+      border-radius: 22px;
+      padding: 24px 22px 20px;
+      box-shadow: 0 20px 48px rgba(113, 83, 72, 0.18);
+    }
+    .edit-profile-modal h3 { margin: 0 0 6px; font-size: 18px; color: #222; }
+    .edit-profile-modal p { margin: 0 0 14px; font-size: 13px; color: #777; line-height: 1.5; }
+    .edit-profile-modal input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #FFE0D4;
+      border-radius: 14px;
+      background: #fff;
+      font: inherit;
+      font-size: 15px;
+      margin-bottom: 10px;
+    }
+    .edit-profile-error { min-height: 18px; margin: 0 0 12px; font-size: 12px; color: #E55A45; }
+    .edit-profile-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .edit-profile-actions button {
+      border: none;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .edit-profile-cancel { background: #F4F1ED; color: #5C4A42; }
+    .edit-profile-save { background: #FF5A36; color: #fff; }
 
     .page {
       width: min(1140px, calc(100% - 2rem));
@@ -164,8 +264,11 @@
       .mypage-main-grid { grid-template-columns: 1fr !important; }
       .mypage-welcome-row,
       .mypage-urgent-row { flex-direction: column !important; align-items: stretch !important; }
-      .mypage-welcome-row button,
+      .mypage-welcome-row #main-action-btn,
       .mypage-urgent-row button { width: 100%; }
+      .speaking-progress-head { flex-direction: column; }
+      .speaking-progress-metrics { grid-template-columns: 1fr; }
+      .speaking-retest-btn { width: 100%; }
     }
 
     .page-heading { margin-bottom: 1.5rem; }
@@ -1114,7 +1217,6 @@
       .page { padding-top: 2rem; padding-bottom: 4rem; }
       .topbar-inner { min-height: 64px; padding-top: 0; padding-bottom: 0; }
       .brand-copy small { display: none; }
-      .welcome,
       .topbar-extras { display: none; }
       .status-grid { grid-template-columns: 1fr; }
       .status-fortune-row { grid-template-columns: 1fr; }
@@ -1249,10 +1351,6 @@
           <button type="button" class="ghost-btn" data-tickets-open style="padding:0.45rem 0.8rem;font-size:0.78rem;">
             <span data-ticket-badge-text>☕️ 보유 티켓: 1장</span>
           </button>
-          <div class="welcome">
-            <span class="welcome-dot" aria-hidden="true"></span>
-            <span data-i18n="mypage.welcome">지민 님, 반갑습니다! 🍰</span>
-          </div>
         </div>
         <div data-mode-switch="inline"></div>
         <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
@@ -1284,7 +1382,10 @@
 
     <div class="mypage-welcome-row" style="background: #fff; border: 1px solid #FFEBE4; border-radius: 20px; padding: 22px 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; gap: 16px;">
       <div>
-        <h2 id="mypage-greeting" style="font-size: 18px; font-weight: 700; margin: 0 0 6px 0; color: #222;">편안한 저녁이에요, aliceleo2424님! 🌙</h2>
+        <div class="mypage-greeting-line">
+          <h2 id="mypage-greeting" style="font-size: 18px; font-weight: 700; color: #222;">오늘도 한 잔의 대화, 준비되셨나요? ☕</h2>
+          <button type="button" class="edit-nickname-btn" id="edit-nickname-btn">✏️ 닉네임 변경</button>
+        </div>
         <div style="font-size: 13px; color: #666;">
           보유 티켓 <strong data-summary-ticket style="color: #FF5A36;">0장</strong> <span style="color: #ccc; margin: 0 8px;">|</span> 결제일로부터 90일 이내 이용 가능
         </div>
@@ -1307,13 +1408,27 @@
 
     <div class="mypage-main-grid">
       <div class="mypage-col-stack">
-        <section id="speaking-growth-card" style="background: linear-gradient(180deg, #FFFDF0 0%, #FFFFFF 70%); border: 1px solid #FEEFB3; border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);" aria-labelledby="speakingGrowthTitle">
-          <h3 id="speakingGrowthTitle" style="margin: 0 0 12px; font-size: 16px; font-weight: 700; color: #222;">📈 내 스피킹 감각 성장 기록</h3>
-          <p id="speaking-growth-empty" style="margin: 0; font-size: 13px; color: #777; line-height: 1.6;">아직 테스트 기록이 없어요. 메인에서 스피킹 감각을 알아보면 여기에 쌓여요.</p>
-          <div id="speaking-growth-result" hidden>
-            <p id="speaking-growth-level" style="margin: 0 0 6px; font-size: 18px; font-weight: 800; color: #3E4A42;"></p>
-            <p id="speaking-growth-score" style="margin: 0 0 4px; font-size: 14px; font-weight: 700; color: #FF5A36;"></p>
-            <p id="speaking-growth-date" style="margin: 0; font-size: 12px; color: #888;"></p>
+        <section id="speaking-progress-card" class="speaking-progress-card" aria-labelledby="speakingProgressTitle">
+          <div class="speaking-progress-head">
+            <div>
+              <h3 id="speakingProgressTitle" style="margin: 0 0 4px; font-size: 16px; font-weight: 800; color: #222;">🏆 내 스피킹 성장 레벨</h3>
+              <p style="margin: 0; font-size: 12px; color: #888;">내 성과와 스피킹 감각을 한눈에 확인해요</p>
+            </div>
+            <a href="index.html#quiz" class="speaking-retest-btn" id="speaking-retest-btn">🎯 스피킹 감각 다시 진단하기</a>
+          </div>
+          <div class="speaking-progress-metrics">
+            <div class="speaking-progress-metric">
+              <span>스피킹 감각 페이스</span>
+              <strong id="progress-pace">진단 기록 없음</strong>
+            </div>
+            <div class="speaking-progress-metric">
+              <span>누적 대화 세션</span>
+              <strong id="progress-sessions">1회 완료</strong>
+            </div>
+            <div class="speaking-progress-metric">
+              <span>학습 스트릭</span>
+              <strong id="progress-streak">1일 연속 🔥</strong>
+            </div>
           </div>
         </section>
         <section style="background: #fff; border: 1px solid #EFEFEF; border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);" aria-labelledby="talkArchiveTitle">
@@ -1362,6 +1477,20 @@
       <span style="color: #aaa;">1회 티켓 충전 시 자동 적용</span>
     </div>
   </main>
+
+  <div id="edit-profile-modal" class="edit-profile-overlay" role="dialog" aria-modal="true" aria-labelledby="edit-profile-title" hidden>
+    <div class="edit-profile-modal">
+      <h3 id="edit-profile-title">닉네임 변경</h3>
+      <p>마이페이지와 프로필에 보여질 이름을 정해 주세요.</p>
+      <label for="edit-profile-input" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">닉네임</label>
+      <input id="edit-profile-input" type="text" maxlength="20" placeholder="예: 앨리스" autocomplete="nickname">
+      <p id="edit-profile-error" class="edit-profile-error" role="alert"></p>
+      <div class="edit-profile-actions">
+        <button type="button" class="edit-profile-cancel" id="edit-profile-cancel">취소</button>
+        <button type="button" class="edit-profile-save" id="edit-profile-save">저장하기</button>
+      </div>
+    </div>
+  </div>
 
   <div id="report-detail-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="report-detail-title">
     <div class="card-detail-backdrop" onclick="closeReportDetailModal()"></div>

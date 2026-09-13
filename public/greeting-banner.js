@@ -32,7 +32,13 @@
 
   function getUserName() {
     try {
-      return (window.localStorage.getItem(USER_KEY) || '').trim();
+      var profile = window._dayoAuthProfile || {};
+      var fromProfile = String(profile.user_name || profile.nickname || '').trim();
+      if (fromProfile) return fromProfile;
+      var email = profile.email || (window._dayoAuthUser && window._dayoAuthUser.email) || '';
+      if (!email) email = localStorage.getItem('dayo_user_email') || localStorage.getItem('dayo_userEmail') || '';
+      if (email && email.indexOf('@') > 0) return email.split('@')[0];
+      return (window.localStorage.getItem(USER_KEY) || localStorage.getItem('dayo_user_name') || '').trim();
     } catch (e) {
       return '';
     }
@@ -151,6 +157,9 @@
     document.addEventListener('dayo:authchange', function () {
       renderGreeting();
     });
+    document.addEventListener('dayo:authprofile', function () {
+      renderGreeting();
+    });
 
     var slots = document.querySelectorAll('[data-mode-switch]');
     if (slots.length && typeof MutationObserver !== 'undefined') {
@@ -167,6 +176,10 @@
         renderGreeting();
       }
     });
+    window.DayOGreeting = {
+      refresh: renderGreeting,
+      getDisplayName: getUserName
+    };
   }
 
   if (document.readyState === 'loading') {

@@ -240,6 +240,11 @@
 
   function onKeydown(e) {
     if (e.key !== 'Escape') return;
+    var profileModal = document.getElementById('edit-profile-modal');
+    if (profileModal && profileModal.classList.contains('is-open')) {
+      closeNicknameModal();
+      return;
+    }
     var modal = document.getElementById('report-detail-modal');
     if (modal && (modal.style.display === 'flex' || modal.classList.contains('is-open'))) {
       closeReportDetailModal();
@@ -248,11 +253,54 @@
 
   window.refreshUrgentSessionBanner = loadUrgentSessionBanner;
 
-  function formatTestDate(iso) {
-    if (!iso) return '';
-    var parsed = new Date(iso);
-    if (isNaN(parsed.getTime())) return String(iso);
-    return parsed.getFullYear() + '.' + String(parsed.getMonth() + 1).padStart(2, '0') + '.' + String(parsed.getDate()).padStart(2, '0');
+  function emailPrefix(email) {
+    var raw = String(email || '').trim();
+    if (!raw || raw.indexOf('@') < 1) return '';
+    return raw.split('@')[0];
+  }
+
+  function displayName() {
+    var profile = window._dayoAuthProfile || {};
+    var name = String(profile.user_name || profile.nickname || '').trim();
+    if (name) return name;
+    var email = profile.email
+      || (window._dayoAuthUser && window._dayoAuthUser.email)
+      || '';
+    try {
+      if (!email) email = localStorage.getItem('dayo_user_email') || localStorage.getItem('dayo_userEmail') || '';
+    } catch (e) { /* ignore */ }
+    var fromEmail = emailPrefix(email);
+    if (fromEmail) return fromEmail;
+    try {
+      return (localStorage.getItem('userName') || localStorage.getItem('dayo_user_name') || '').trim() || 'DayO';
+    } catch (e) {
+      return 'DayO';
+    }
+  }
+
+  function applyDisplayName(name) {
+    var next = String(name || '').trim();
+    if (!next) return;
+    window._dayoAuthProfile = Object.assign({}, window._dayoAuthProfile || {}, {
+      user_name: next,
+      nickname: next
+    });
+    try {
+      localStorage.setItem('userName', next);
+      localStorage.setItem('dayo_user_name', next);
+    } catch (e) { /* ignore */ }
+    if (window.DayOProfileStore && typeof window.DayOProfileStore.updateProfile === 'function') {
+      window.DayOProfileStore.updateProfile({ user_name: next }, { skipEvents: true });
+    }
+    if (window.DayOMode && typeof window.DayOMode.refresh === 'function') {
+      window.DayOMode.refresh();
+    }
+    if (window.DayOGreeting && typeof window.DayOGreeting.refresh === 'function') {
+      window.DayOGreeting.refresh();
+    }
+    document.dispatchEvent(new CustomEvent('dayo:authprofile', {
+      detail: { user: window._dayoAuthUser, profile: window._dayoAuthProfile }
+    }));
   }
 
   function latestSpeakingRecord() {
@@ -276,31 +324,161 @@
     return latest;
   }
 
+  function isLoggedInUser() {
+    if (window._dayoAuthUser) return true;
+    if (typeof window.checkUserLoggedIn === 'function') {
+      try { return !!window.checkUserLoggedIn(); } catch (e) { /* ignore */ }
+    }
+    return false;
+  }
+
+  function sessionCount() {
+    var reports = window.__dayoTalkAlbum;
+    if (Array.isArray(reports) && reports.length) return reports.length;
+    var profile = window._dayoAuthProfile || {};
+    if (profile.session_count != null && Number(profile.session_count) > 0) {
+      return Number(profile.session_count);
+    }
+    return isLoggedInUser() ? 1 : 0;
+  }
+
+  function streakCount() {
+    var profile = window._dayoAuthProfile || {};
+    if (profile.streak_count != null && Number(profile.streak_count) > 0) {
+      return Number(profile.streak_count);
+    }
+    try {
+      var n = parseInt(localStorage.getItem('streakCount'), 10);
+      if (Number.isFinite(n) && n > 0) return n;
+    } catch (e) { /* ignore */ }
+    return isLoggedInUser() ? 1 : 0;
+  }
+
   function renderSpeakingGrowth() {
-    var emptyEl = document.getElementById('speaking-growth-empty');
-    var resultEl = document.getElementById('speaking-growth-result');
-    var levelEl = document.getElementById('speaking-growth-level');
-    var scoreEl = document.getElementById('speaking-growth-score');
-    var dateEl = document.getElementById('speaking-growth-date');
-    if (!emptyEl || !resultEl) return;
+    var paceEl = document.getElementById('progress-pace');
+    var sessionEl = document.getElementById('progress-sessions');
+    var streakEl = document.getElementById('progress-streak');
+    if (!paceEl && !sessionEl && !streakEl) return;
     var record = latestSpeakingRecord();
-    if (!record || (!record.speaking_level && record.last_test_score == null)) {
-      emptyEl.hidden = false;
-      resultEl.hidden = true;
+    if (paceEl) {
+      if (!record || (!record.speaking_level && record.last_test_score == null)) {
+        paceEl.textContent = '진단 기록 없음';
+      } else {
+        var level = record.speaking_level || '스피킹 감각';
+        paceEl.textContent = record.last_test_score != null
+          ? (level + ' ' + record.last_test_score + '점')
+          : level;
+      }
+    }
+    if (sessionEl) sessionEl.textContent = sessionCount() + '회 완료';
+    if (streakEl) {
+      var streak = streakCount();
+      streakEl.textContent = streak > 0 ? (streak + '일 연속 🔥') : '아직 시작 전';
+    }
+  }
+
+  function nicknameModalEls() {
+    return {
+      overlay: document.getElementById('edit-profile-modal'),
+      input: document.getElementById('edit-profile-input'),
+      error: document.getElementById('edit-profile-error'),
+      save: document.getElementById('edit-profile-save')
+    };
+  }
+
+  function openNicknameModal() {
+    var els = nicknameModalEls();
+    if (!els.overlay) return;
+    if (els.input) els.input.value = displayName() === 'DayO' ? '' : displayName();
+    if (els.error) els.error.textContent = '';
+    els.overlay.hidden = false;
+    els.overlay.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+    if (els.input && els.input.focus) els.input.focus();
+  }
+
+  function closeNicknameModal() {
+    var els = nicknameModalEls();
+    if (!els.overlay) return;
+    els.overlay.classList.remove('is-open');
+    els.overlay.hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  async function saveNickname() {
+    var els = nicknameModalEls();
+    var next = els.input ? String(els.input.value || '').trim() : '';
+    if (!next) {
+      if (els.error) els.error.textContent = '닉네임을 입력해 주세요.';
       return;
     }
-    emptyEl.hidden = true;
-    resultEl.hidden = false;
-    var level = record.speaking_level || '스피킹 감각';
-    var score = record.last_test_score;
-    if (levelEl) levelEl.textContent = score != null ? (level + ' (' + score + '점)') : level;
-    if (scoreEl) scoreEl.textContent = score != null ? '최근 감각 페이스 · ' + score + '점' : '최근 감각 페이스';
-    if (dateEl) dateEl.textContent = record.last_test_date ? ('진단일 ' + formatTestDate(record.last_test_date)) : '';
+    if (next.length < 2) {
+      if (els.error) els.error.textContent = '닉네임은 2글자 이상이어야 해요.';
+      return;
+    }
+    if (els.save) els.save.disabled = true;
+    if (els.error) els.error.textContent = '';
+    try {
+      var supabase = window.supabaseClient;
+      var user = window._dayoAuthUser;
+      if (supabase && supabase.auth) {
+        if (!user) {
+          var sessionRes = await supabase.auth.getSession();
+          user = sessionRes && sessionRes.data && sessionRes.data.session && sessionRes.data.session.user;
+        }
+      }
+      if (supabase && user) {
+        var payload = { user_name: next, nickname: next };
+        var res = await supabase.from('profiles').update(payload).eq('user_id', user.id).select('user_id');
+        if (res && (res.error || !res.data || !res.data.length)) {
+          res = await supabase.from('profiles').update(payload).eq('id', user.id);
+        }
+        if (res && res.error) throw res.error;
+      }
+      applyDisplayName(next);
+      closeNicknameModal();
+    } catch (err) {
+      console.warn('닉네임 저장 실패', err);
+      if (els.error) els.error.textContent = '저장에 실패했어요. 잠시 후 다시 시도해 주세요.';
+    } finally {
+      if (els.save) els.save.disabled = false;
+    }
+  }
+
+  function bindNicknameEditor() {
+    var openBtn = document.getElementById('edit-nickname-btn');
+    var cancelBtn = document.getElementById('edit-profile-cancel');
+    var saveBtn = document.getElementById('edit-profile-save');
+    var overlay = document.getElementById('edit-profile-modal');
+    var input = document.getElementById('edit-profile-input');
+    var retestBtn = document.getElementById('speaking-retest-btn');
+    if (retestBtn) {
+      retestBtn.addEventListener('click', function () {
+        try { sessionStorage.setItem('dayo_open_quiz', '1'); } catch (e) { /* ignore */ }
+      });
+    }
+    if (openBtn) openBtn.addEventListener('click', openNicknameModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeNicknameModal);
+    if (saveBtn) saveBtn.addEventListener('click', function () { saveNickname(); });
+    if (input) {
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          saveNickname();
+        }
+      });
+    }
+    if (overlay) {
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) closeNicknameModal();
+      });
+    }
   }
 
   function init() {
     syncMainAction();
     bindStoryTopics();
+    bindNicknameEditor();
     loadUrgentSessionBanner();
     renderSpeakingGrowth();
     document.addEventListener('keydown', onKeydown);
@@ -312,11 +490,14 @@
     init();
   }
 
+  window.renderSpeakingGrowth = renderSpeakingGrowth;
+
   document.addEventListener('dayo:authchange', function () {
     syncMainAction();
     loadUrgentSessionBanner();
     renderSpeakingGrowth();
   });
   document.addEventListener('dayo:authprofile', renderSpeakingGrowth);
+  document.addEventListener('dayo:reportsloaded', renderSpeakingGrowth);
   document.addEventListener('dayo:ticketchange', syncMainAction);
 })();

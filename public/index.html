@@ -3325,6 +3325,18 @@
         }
       });
     });
+    function maybeOpenQuizFromUrl() {
+      try {
+        var quizParams = new URLSearchParams(window.location.search);
+        var wantsQuiz = quizParams.get('quiz') === '1' || window.location.hash === '#quiz';
+        try { wantsQuiz = wantsQuiz || sessionStorage.getItem('dayo_open_quiz') === '1'; } catch (err) { /* ignore */ }
+        if (!wantsQuiz) return;
+        try { sessionStorage.removeItem('dayo_open_quiz'); } catch (err) { /* ignore */ }
+        openQuizModal();
+      } catch (e) { /* ignore */ }
+    }
+    maybeOpenQuizFromUrl();
+    window.addEventListener('hashchange', maybeOpenQuizFromUrl);
     if (modalClose) modalClose.addEventListener('click', closeQuizModal);
     if (quizModal) quizModal.addEventListener('click', (e) => { if (e.target === quizModal) closeQuizModal(); });
 

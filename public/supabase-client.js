@@ -76,7 +76,7 @@
   function rememberLocalProfile(profile, email) {
     if (!profile && !email) return;
     try {
-      var name = (profile && (profile.nickname || profile.user_name)) || String(email || '').split('@')[0] || '';
+      var name = (profile && (profile.user_name || profile.nickname)) || String(email || '').split('@')[0] || '';
       if (name) {
         localStorage.setItem('userName', name);
         localStorage.setItem('dayo_user_name', name);
@@ -107,7 +107,7 @@
     if (!user) return null;
     var q = await client
       .from('profiles')
-      .select('nickname, user_name, ticket_count, point_balance, email, role, speaking_level, last_test_score, last_test_date')
+      .select('nickname, user_name, ticket_count, point_balance, email, role, speaking_level, last_test_score, last_test_date, streak_count')
       .eq('user_id', user.id)
       .maybeSingle();
     if (q.error) {
@@ -751,6 +751,7 @@
     }
 
     window.__dayoTalkAlbum = reports;
+    document.dispatchEvent(new CustomEvent('dayo:reportsloaded', { detail: { reports: reports } }));
 
     var countEl = document.getElementById('talk-album-count');
     if (countEl) {
