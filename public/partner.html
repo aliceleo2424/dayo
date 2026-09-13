@@ -10,7 +10,42 @@
   <script src="supabase-env.js"></script>
   <script src="supabase-client.js"></script>
   <script src="scroll-lock.js"></script>
+  <script>
+    document.documentElement.classList.add('partner-guard-pending');
+    (function guardPartnerLounge() {
+      function deny() {
+        alert('파트너 권한이 있는 계정만 접근할 수 있습니다.');
+        window.location.href = '/mypage.html';
+      }
+      function allow() {
+        document.documentElement.classList.remove('partner-guard-pending');
+        if (document.body) document.body.classList.remove('partner-guard-pending');
+      }
+      async function run() {
+        try {
+          var client = window.supabaseClient;
+          if (!client || !client.auth) { deny(); return; }
+          var sessionRes = await client.auth.getSession();
+          var session = sessionRes && sessionRes.data && sessionRes.data.session;
+          if (!session || !session.user) { deny(); return; }
+          var q = await client.from('profiles').select('role').eq('user_id', session.user.id).maybeSingle();
+          if (q.error || !q.data) {
+            q = await client.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
+          }
+          var role = String((q.data && q.data.role) || '').toLowerCase();
+          if (role !== 'partner' && role !== 'admin') { deny(); return; }
+          allow();
+        } catch (err) {
+          console.warn('파트너 라운지 가드 실패', err);
+          deny();
+        }
+      }
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+      else run();
+    })();
+  </script>
   <style>
+    html.partner-guard-pending body { visibility: hidden; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -1429,7 +1464,7 @@
     }
   </style>
 </head>
-<body class="theme-partner partner-page-body" data-dayo-role="partner" data-mode="partner">
+<body class="theme-partner partner-page-body partner-guard-pending" data-dayo-role="partner" data-mode="partner">
   <script>
     (function applyPartnerTheme() {
       var body = document.body;

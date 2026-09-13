@@ -230,6 +230,57 @@
     }
     .edit-profile-cancel { background: #F4F1ED; color: #5C4A42; }
     .edit-profile-save { background: #FF5A36; color: #fff; }
+    .partner-apply-card {
+      width: min(420px, 100%);
+      background: linear-gradient(180deg, #FFFDF4 0%, #FFFCFA 68%);
+      border: 1px solid #FEEFB3;
+      border-radius: 24px;
+      padding: 28px 24px 22px;
+      box-shadow: 0 22px 50px rgba(113, 83, 72, 0.18);
+      text-align: left;
+    }
+    .partner-apply-card h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+      font-weight: 800;
+      color: #3E4A42;
+      letter-spacing: -0.02em;
+    }
+    .partner-apply-card p {
+      margin: 0 0 10px;
+      font-size: 14px;
+      line-height: 1.65;
+      color: #6B5A52;
+    }
+    .partner-apply-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .partner-apply-submit {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #FF6B57;
+      color: #fff;
+      font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 3px 0 #E55A45;
+    }
+    .partner-apply-close {
+      width: 100%;
+      border: none;
+      border-radius: 14px;
+      padding: 11px 14px;
+      background: #FFF4E0;
+      color: #7A5A2E;
+      font-weight: 700;
+      cursor: pointer;
+    }
 
     .page {
       width: min(1140px, calc(100% - 2rem));
@@ -1473,6 +1524,18 @@
     </div>
 
   </main>
+
+  <div id="partner-apply-modal" class="edit-profile-overlay" role="dialog" aria-modal="true" aria-labelledby="partner-apply-title" hidden>
+    <div class="partner-apply-card">
+      <h3 id="partner-apply-title">DayO 글로벌 대화 파트너 모집 ☕</h3>
+      <p>DayO 파트너는 등록 신청 및 온라인 트레이닝을 거친 후 활동하실 수 있습니다.</p>
+      <p>내가 편한 시간대에 라이브 대화를 나누고, 세션당 활동비를 적립하세요.</p>
+      <div class="partner-apply-actions">
+        <a class="partner-apply-submit" href="https://docs.google.com/forms/d/e/1FAIpQLScBTytUfVL4uyxv3R95dFfcs5rV-UBMnvujJ5GsK4ZNzh_1ZQ/viewform" target="_blank" rel="noopener noreferrer">파트너 지원서 작성하기</a>
+        <button type="button" class="partner-apply-close" id="partner-apply-close">닫기</button>
+      </div>
+    </div>
+  </div>
 
   <div id="edit-profile-modal" class="edit-profile-overlay" role="dialog" aria-modal="true" aria-labelledby="edit-profile-title" hidden>
     <div class="edit-profile-modal">
