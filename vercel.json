@@ -1,11 +1,4 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "rewrites": [
-    { "source": "/admin", "destination": "/admin/dashboard.html" },
-    { "source": "/admin/dashboard", "destination": "/admin/dashboard.html" },
-    { "source": "/admin/dashboard/", "destination": "/admin/dashboard.html" }
-  ],
   "headers": [
     {
       "source": "/api/(.*)",
