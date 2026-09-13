@@ -1014,12 +1014,12 @@
       ES: 'Una compañera de EE. UU. a la que le gusta la comida coreana y pasear sin plan. Comparáis gustos y seguís.'
     },
     'partnersTeaser.card3.desc': {
-      KO: '성수·망원을 즐겨 찾는 벨기에 파트너. 서로 추천한 장소 이야기로 금세 친해져요.',
-      EN: 'A Belgian partner who hangs around Seongsu and Mangwon. Place recs make you friends quickly.',
-      ZH: '常去圣水、望远的比利时伙伴，互相推荐的地方让你们很快熟悉。',
-      JA: '聖水・望遠が好きなベルギーのパートナー。おすすめの場所の話ですぐ仲良くなれます。',
-      FR: 'Une partenaire belge qui aime Seongsu et Mangwon. Les lieux recommandés rapprochent vite.',
-      ES: 'Una compañera belga de Seongsu y Mangwon. Los sitios recomendados os hacen amigos rápido.'
+      KO: '부산 여행을 좋아하는 벨기에 파트너, \'찐찐찐찐 찐이야~\' 트로트 부르기를 엄청 좋아해요!',
+      EN: 'A Belgian partner who loves Busan trips — and she really loves singing “찐찐찐찐 찐이야~” trot!',
+      ZH: '喜欢去釜山旅行的比利时伙伴，超爱唱“찐찐찐찐 찐이야~”这种韩国trot！',
+      JA: '釜山旅行が大好きなベルギーのパートナー。『찐찐찐찐 찐이야~』のトロットを歌うのが大好き！',
+      FR: 'Une partenaire belge qui adore voyager à Busan — et elle chante “찐찐찐찐 찐이야~” avec un grand sourire !',
+      ES: 'Una compañera belga que ama viajar a Busan, ¡y le encanta cantar “찐찐찐찐 찐이야~”!'
     },
     /* ===== Booking CTA section (index.html) ===== */
     'bookingCta.eyebrow': { KO: 'Session Ticket', EN: 'Session Ticket', ZH: '会话券', JA: 'セッションチケット', FR: 'Ticket', ES: 'Ticket' },
