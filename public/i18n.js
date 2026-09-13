@@ -1014,12 +1014,12 @@
       ES: 'Una compañera de EE. UU. a la que le gusta la comida coreana y pasear sin plan. Comparáis gustos y seguís.'
     },
     'partnersTeaser.card3.desc': {
-      KO: '성수·망원을 즐겨 찾는 일본 파트너. 서로 추천한 장소 이야기로 금세 친해져요.',
-      EN: 'A Japanese partner who hangs around Seongsu and Mangwon. Place recs make you friends quickly.',
-      ZH: '常去圣水、望远的日本伙伴，互相推荐的地方让你们很快熟悉。',
-      JA: '聖水・望遠が好きな日本のパートナー。おすすめの場所の話ですぐ仲良くなれます。',
-      FR: 'Une partenaire japonaise qui aime Seongsu et Mangwon. Les lieux recommandés rapprochent vite.',
-      ES: 'Una compañera japonesa de Seongsu y Mangwon. Los sitios recomendados os hacen amigos rápido.'
+      KO: '성수·망원을 즐겨 찾는 벨기에 파트너. 서로 추천한 장소 이야기로 금세 친해져요.',
+      EN: 'A Belgian partner who hangs around Seongsu and Mangwon. Place recs make you friends quickly.',
+      ZH: '常去圣水、望远的比利时伙伴，互相推荐的地方让你们很快熟悉。',
+      JA: '聖水・望遠が好きなベルギーのパートナー。おすすめの場所の話ですぐ仲良くなれます。',
+      FR: 'Une partenaire belge qui aime Seongsu et Mangwon. Les lieux recommandés rapprochent vite.',
+      ES: 'Una compañera belga de Seongsu y Mangwon. Los sitios recomendados os hacen amigos rápido.'
     },
     /* ===== Booking CTA section (index.html) ===== */
     'bookingCta.eyebrow': { KO: 'Session Ticket', EN: 'Session Ticket', ZH: '会话券', JA: 'セッションチケット', FR: 'Ticket', ES: 'Ticket' },
