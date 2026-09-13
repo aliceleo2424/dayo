@@ -719,6 +719,38 @@
       font-weight: 700;
       color: var(--text-muted);
     }
+    .auth-report-empty {
+      padding: 18px 16px 16px;
+      border-radius: 16px;
+      background: #FFF9F5;
+      border: 1px solid #FFEBE4;
+      text-align: center;
+    }
+    .auth-report-empty__title {
+      margin: 0 0 8px;
+      font-size: 14px;
+      font-weight: 800;
+      color: #3E4A42;
+    }
+    .auth-report-empty__desc {
+      margin: 0 0 14px;
+      font-size: 12px;
+      line-height: 1.65;
+      color: #7A6A64;
+    }
+    .auth-report-empty__cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: var(--coral);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 3px 0 var(--coral-dark);
+    }
     .auth-lang-chip {
       position: relative;
       display: inline-flex;
@@ -2163,11 +2195,17 @@
           </div>
           <div class="auth-report-feed" style="margin-top:1.1rem; text-align:left;">
             <p style="font-size:13px; font-weight:800; color:#3E4A42; margin-bottom:8px;">✨ 오늘의 대화 기록</p>
-            <div id="mypage-card-feed"></div>
+            <div id="mypage-card-feed">
+              <div class="auth-report-empty">
+                <p class="auth-report-empty__title">아직 도착한 대화 리포트가 없어요 ☕</p>
+                <p class="auth-report-empty__desc">다정한 파트너와 첫 1:1 대화를 나누고 나면, 파트너의 따뜻한 칭찬 카드와 AI 복습 리포트가 여기에 기록돼요!</p>
+                <a href="#auth-partners" class="auth-report-empty__cta">첫 대화 파트너 둘러보기</a>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="auth-live">
+        <div class="auth-live" id="auth-partners">
           <p class="auth-live__title">
             <span aria-hidden="true">🟢</span>
             <span>지금</span>
@@ -2184,8 +2222,7 @@
                 <button type="button" class="auth-lang-chip__opt" role="option" data-live-lang="프랑스어" aria-selected="false">프랑스어</button>
               </div>
             </span>
-            <span>대화 가능한 파트너들이에요</span>
-            <span class="auth-live__online">(12명 온라인)</span>
+            <span>DayO에서 함께할 수 있는 다정한 글로벌 메이트들이에요 🌿</span>
           </p>
           <div class="auth-partner-row" role="list">
             <article class="auth-partner" role="listitem">

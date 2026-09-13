@@ -545,14 +545,63 @@
   }
 
   function talkQuoteLabel(r) {
-    return String((r && r.partner_name) || 'Camille').split(/\s+/)[0] || 'Camille';
+    return String((r && r.partner_name) || '파트너').split(/\s+/)[0] || '파트너';
   }
 
   function talkQuoteText(r) {
     var raw = String((r && r.partner_comment) || '').replace(/^\s+|\s+$/g, '');
-    var banned = /발화량|점수|레벨|훌륭했어요/;
-    if (!raw || banned.test(raw)) return '망원한강공원과 성수동 서울숲 카페거리';
+    var banned = /발화량|점수|레벨|훌륭했어요|망원한강|성수동 서울숲|성수동 소품/;
+    if (!raw || banned.test(raw)) return '';
     return raw.replace(/^["“”']+|["“”']+$/g, '');
+  }
+
+  function isPlaceholderReport(r) {
+    if (!r) return true;
+    var sentence = String(r.spoken_sentence || '').trim();
+    var keyword = String(r.keyword || '').toLowerCase();
+    var partner = String(r.partner_name || '').toLowerCase();
+    if (!sentence) return true;
+    if (/small talk makes a big day/i.test(sentence)) return true;
+    if (keyword === 'small' && partner.indexOf('camille') !== -1) return true;
+    return false;
+  }
+
+  function homeEmptyStateHtml() {
+    return (
+      '<div class="auth-report-empty">' +
+        '<p class="auth-report-empty__title">아직 도착한 대화 리포트가 없어요 ☕</p>' +
+        '<p class="auth-report-empty__desc">다정한 파트너와 첫 1:1 대화를 나누고 나면, 파트너의 따뜻한 칭찬 카드와 AI 복습 리포트가 여기에 기록돼요!</p>' +
+        '<a href="#auth-partners" class="auth-report-empty__cta">첫 대화 파트너 둘러보기</a>' +
+      '</div>'
+    );
+  }
+
+  function utteranceFromLog(row) {
+    var transcript = row && row.transcript;
+    if (!Array.isArray(transcript)) return '';
+    var line = null;
+    for (var i = transcript.length - 1; i >= 0; i -= 1) {
+      var item = transcript[i] || {};
+      var role = String(item.role || item.speaker || '').toLowerCase();
+      var text = String(item.text || item.content || item.message || '').trim();
+      if (text && (role === 'user' || role === 'learner' || role === 'me')) {
+        line = text;
+        break;
+      }
+      if (!line && text) line = text;
+    }
+    return line || '';
+  }
+
+  function reportFromSessionLog(row) {
+    if (!row) return null;
+    return normalizeReportCard({
+      partner_name: row.partner_name || 'DayO Partner',
+      spoken_sentence: utteranceFromLog(row) || '오늘도 따뜻한 대화 한 잔',
+      keyword: row.keyword || 'daily',
+      partner_comment: row.partner_comment || '',
+      created_at: row.ended_at || row.created_at || ''
+    });
   }
 
   function topicLabel(r) {
@@ -666,9 +715,11 @@
           '<span>' + esc(dateLabel) + '</span>' +
         '</div>' +
         card +
-        '<div class="talk-quote-box" style="margin-top: 12px; font-size: 13px; color: #444; background: #FFF9F5; padding: 10px 14px; border-radius: 10px; width:100%; max-width:400px; box-sizing:border-box;">' +
-          '<span>☕ <strong>' + esc(talkQuoteLabel(r)) + '의 추천:</strong> "' + esc(talkQuoteText(r)) + '"</span>' +
-        '</div>' +
+        (talkQuoteText(r)
+          ? ('<div class="talk-quote-box" style="margin-top: 12px; font-size: 13px; color: #444; background: #FFF9F5; padding: 10px 14px; border-radius: 10px; width:100%; max-width:400px; box-sizing:border-box;">' +
+              '<span>☕ <strong>' + esc(talkQuoteLabel(r)) + '의 한마디:</strong> "' + esc(talkQuoteText(r)) + '"</span>' +
+            '</div>')
+          : '') +
         '<div style="display: flex; gap: 8px; margin-top: 14px; width: 100%; max-width: 400px;">' +
           '<button' + btnId + ' class="btn-save-card" type="button" onclick="saveInstaCard(event)" style="flex: 1; padding: 12px; background: #635BFF; color: #fff; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; font-size: 13px;">' +
             '📸 카드 이미지 저장하기' +
@@ -743,12 +794,35 @@
         console.warn('[DayO] loadUserReports failed', query.error);
       }
       reports = (query.data || []).map(normalizeReportCard).filter(Boolean);
+
+      if (!reports.length) {
+        var logQ = await client
+          .from('session_logs')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('ended_at', { ascending: false })
+          .limit(8);
+        if (logQ.error) {
+          logQ = await client
+            .from('session_logs')
+            .select('*')
+            .eq('learner_id', user.id)
+            .order('ended_at', { ascending: false })
+            .limit(8);
+        }
+        if (!logQ.error) {
+          reports = (logQ.data || []).map(reportFromSessionLog).filter(Boolean);
+        }
+      }
     }
 
     if (!reports.length) {
       var localCard = readLocalApprovedCard();
-      if (localCard && localCard.spoken_sentence) reports = [localCard];
+      if (localCard && localCard.spoken_sentence && (localCard.created_at || localCard.approvedAt)) {
+        reports = [localCard];
+      }
     }
+    reports = reports.filter(function (r) { return !isPlaceholderReport(r); });
 
     window.__dayoTalkAlbum = reports;
     document.dispatchEvent(new CustomEvent('dayo:reportsloaded', { detail: { reports: reports } }));
@@ -786,17 +860,12 @@
       return;
     }
 
-    if (!user && !reports.length) {
-      container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">로그인 후 대화 리포트를 확인해 보세요.</div>';
-      return;
-    }
-
     if (reports.length > 0) {
       container.innerHTML = reports.map(function (r, idx) {
         return renderViralReportCard(r, idx === 0);
       }).join('');
     } else {
-      container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">아직 오늘의 대화 기록이 없습니다.</div>';
+      container.innerHTML = homeEmptyStateHtml();
     }
   };
 
