@@ -301,7 +301,7 @@
       }
     }
     await window.fetchAuthProfile();
-    window.location.reload();
+    window.location.href = '/mypage.html';
   };
 
   var AUTH_REDIRECT = 'https://www.dayotalk.com/mypage.html';

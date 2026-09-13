@@ -481,6 +481,17 @@
     });
   }
 
+  function isLandingPage() {
+    var path = String((window.location && window.location.pathname) || '');
+    return path === '/' || path === '' || /\/index\.html?$/.test(path);
+  }
+
+  function afterLoginHref(pending) {
+    var next = String(pending || '').trim();
+    if (next && /(?:^|\/)(?:mypage|room|partner)\.html/i.test(next)) return next;
+    return '/mypage.html';
+  }
+
   function buttonFor(role) {
     var name = getUserName();
     var loggedIn = checkUserLoggedIn();
@@ -489,8 +500,17 @@
       return {
         href: '#',
         icon: '🔑',
-        label: t('login.loungeBtn'),
+        label: isLandingPage() ? '로그인' : t('login.loungeBtn'),
         openLogin: true
+      };
+    }
+
+    if (isLandingPage()) {
+      return {
+        href: '/mypage.html',
+        icon: '👤',
+        label: '마이페이지 바로가기',
+        landingMypage: true
       };
     }
 
@@ -525,6 +545,10 @@
 
     if (config.openLogin) {
       return '<button class="ms-btn" type="button" data-ms-open-login>' + lead + label + '</button>';
+    }
+
+    if (config.landingMypage) {
+      return '<a class="ms-btn header-mypage-cta" href="/mypage.html">' + lead + label + '</a>';
     }
 
     if (config.loggedIn) {
@@ -697,22 +721,14 @@
     render();
     notifyAuthChange();
 
+    var dest = afterLoginHref(next);
     if (options.isNew) {
       markNewUserChatPreset();
       showToast(t('login.signupWelcome'), 4200);
-      clearTimeout(welcomeTimer);
-      welcomeTimer = setTimeout(function () {
-        openWelcome(name);
-      }, 1000);
-      return;
+    } else {
+      showToast(t('login.welcomeToast', { name: name }));
     }
-
-    showToast(t('login.welcomeToast', { name: name }));
-    if (next) {
-      setTimeout(function () {
-        window.location.href = next;
-      }, 450);
-    }
+    window.location.href = dest;
   }
 
   function handleEmailAuth(email, password) {

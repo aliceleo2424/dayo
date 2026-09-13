@@ -457,11 +457,12 @@
     var overlay = document.getElementById('edit-profile-modal');
     var input = document.getElementById('edit-profile-input');
     var retestBtn = document.getElementById('speaking-retest-btn');
-    if (retestBtn) {
-      retestBtn.addEventListener('click', function () {
-        try { sessionStorage.setItem('dayo_open_quiz', '1'); } catch (e) { /* ignore */ }
-      });
+    var speakBtn = document.getElementById('mypage-speak-btn');
+    function markOpenQuiz() {
+      try { sessionStorage.setItem('dayo_open_quiz', '1'); } catch (e) { /* ignore */ }
     }
+    if (retestBtn) retestBtn.addEventListener('click', markOpenQuiz);
+    if (speakBtn) speakBtn.addEventListener('click', markOpenQuiz);
     if (openBtn) openBtn.addEventListener('click', openNicknameModal);
     if (cancelBtn) cancelBtn.addEventListener('click', closeNicknameModal);
     if (saveBtn) saveBtn.addEventListener('click', function () { saveNickname(); });

@@ -42,8 +42,28 @@
     return String(value).trim();
   }
 
+  function fallbackTips() {
+    return [
+      {
+        label: '디저트 팁',
+        title: '카페에서 자연스럽게 이어가는 한 줄',
+        summary: '“This smells amazing — what’s your favorite here?” 향과 취향으로 대화를 열면 부담이 덜해요.'
+      },
+      {
+        label: '실전 꿀팁',
+        title: '말이 막혔을 때 쓰는 여유 문장',
+        summary: '“Give me a second, I’m finding the word.” 한 템포 쉬어도 대화는 이어져요.'
+      },
+      {
+        label: '문화 한 조각',
+        title: '디저트로 알아보는 취향 비교',
+        summary: '티라미수 vs 말차 케이크처럼 가벼운 취향 질문이면 서로 이야기가 금방 늘어요.'
+      }
+    ];
+  }
+
   function renderEmpty(track) {
-    track.innerHTML = '<div class="lounge-empty">준비 중인 아티클입니다.</div>';
+    renderPosts(track, fallbackTips());
   }
 
   function renderPosts(track, posts) {

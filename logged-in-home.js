@@ -1,5 +1,5 @@
-/* DayO 로그인 유저 메인 — 상단 대시보드 카드 + 랜딩 섹션 유지
- * 로그인/로그아웃 시 dayo:authchange 로 is-logged-in 클래스를 토글한다.
+/* DayO 랜딩 GNB 상태 — 로그인 여부로 is-logged-in 만 토글한다.
+ * 랜딩 본문은 로그인과 관계없이 항상 서비스 소개를 보여 준다.
  */
 (function () {
   'use strict';

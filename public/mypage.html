@@ -133,6 +133,104 @@
       cursor: pointer;
       white-space: nowrap;
     }
+    .mypage-welcome-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .mypage-welcome-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 13px;
+      text-decoration: none;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      border: none;
+    }
+    .mypage-welcome-cta--room {
+      background: #FF5A36;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(255,90,54,0.2);
+    }
+    .mypage-welcome-cta--speak {
+      background: #FFF4EC;
+      color: #C45A3A;
+      border: 1px solid #FFD8C6;
+    }
+    .mypage-welcome-cta--book {
+      background: #fff;
+      color: #333;
+      border: 1px solid #E8E8E8;
+    }
+    .mypage-lounge {
+      margin-top: 12px;
+      background: #fff;
+      border: 1px solid #EFEFEF;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+    }
+    .lounge-head { margin-bottom: 16px; }
+    .lounge-head__title {
+      margin: 0 0 4px;
+      font-size: 18px;
+      font-weight: 800;
+      color: #222;
+    }
+    .lounge-head__sub {
+      margin: 0;
+      font-size: 13px;
+      color: #888;
+    }
+    .lounge-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .lounge-card {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-height: 148px;
+      padding: 16px;
+      border-radius: 16px;
+      background: #FFF9F5;
+      border: 1px solid #FFEBE4;
+    }
+    .lounge-card:nth-child(2) { background: #FFFDF0; border-color: #FEEFB3; }
+    .lounge-card:nth-child(3) { background: #F6FBF8; border-color: #D8EBDF; }
+    .lounge-card__label {
+      font-size: 11px;
+      font-weight: 800;
+      color: #C45A3A;
+    }
+    .lounge-card__body {
+      font-size: 14px;
+      font-weight: 800;
+      color: #222;
+      line-height: 1.4;
+    }
+    .lounge-card__summary {
+      font-size: 12px;
+      color: #777;
+      line-height: 1.5;
+    }
+    .lounge-empty {
+      grid-column: 1 / -1;
+      padding: 20px;
+      text-align: center;
+      color: #888;
+      font-size: 13px;
+    }
+    @media (max-width: 800px) {
+      .lounge-grid { grid-template-columns: 1fr; }
+    }
     .speaking-progress-card {
       background: linear-gradient(180deg, #FFFDF0 0%, #FFFFFF 72%);
       border: 1px solid #FEEFB3;
@@ -315,8 +413,10 @@
       .mypage-main-grid { grid-template-columns: 1fr !important; }
       .mypage-welcome-row,
       .mypage-urgent-row { flex-direction: column !important; align-items: stretch !important; }
+      .mypage-welcome-actions,
       .mypage-welcome-row #main-action-btn,
       .mypage-urgent-row button { width: 100%; }
+      .mypage-welcome-cta { width: 100%; }
       .speaking-progress-head { flex-direction: column; }
       .speaking-progress-metrics { grid-template-columns: 1fr; }
       .speaking-retest-btn { width: 100%; }
@@ -1389,7 +1489,7 @@
   </script>
   <header class="topbar">
     <div class="topbar-inner">
-      <a class="brand" href="index.html" data-i18n="nav.homeAria" data-i18n-attr="aria-label" aria-label="DayO 메인으로 이동">
+      <a class="brand" href="/" data-i18n="nav.homeAria" data-i18n-attr="aria-label" aria-label="DayO 메인으로 이동">
         <span class="brand-mark">D</span>
         <span class="brand-copy">
           <span data-i18n="mypage.brand">DayO 마이페이지</span>
@@ -1412,7 +1512,7 @@
   <nav class="nav-drawer" id="mobileNav" aria-label="모바일 메뉴">
     <div class="nav-drawer__head">DayO 메뉴</div>
     <div data-i18n-lang="drawer"></div>
-    <a href="index.html" data-i18n="nav.homeAria">홈으로</a>
+    <a href="/" data-i18n="nav.homeAria">홈으로</a>
     <a href="index.html?booking=open" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
     <a href="partner.html"><span aria-hidden="true">🤝</span> <span data-i18n="nav.partnerStudio">파트너 스튜디오로 이동</span></a>
     <button type="button" class="nav-drawer__link" data-tickets-open>
@@ -1441,9 +1541,13 @@
           보유 티켓 <strong data-summary-ticket style="color: #FF5A36;">0장</strong> <span style="color: #ccc; margin: 0 8px;">|</span> 결제일로부터 90일 이내 이용 가능
         </div>
       </div>
-      <button id="main-action-btn" type="button" onclick="openBookingModal()" style="background: #FF5A36; color: #fff; border: none; padding: 12px 22px; border-radius: 12px; font-weight: 700; cursor: pointer; font-size: 14px; box-shadow: 0 4px 12px rgba(255,90,54,0.2); font-family: inherit; white-space: nowrap;">
-        📅 대화 일정 예약하기
-      </button>
+      <div class="mypage-welcome-actions">
+        <a href="room.html?role=user" class="mypage-welcome-cta mypage-welcome-cta--room" data-ms-guard data-ticket-gate>💬 대화방 입장하기</a>
+        <a href="/index.html#quiz" class="mypage-welcome-cta mypage-welcome-cta--speak" id="mypage-speak-btn">🎯 내 스피킹 감각 알아보기</a>
+        <button id="main-action-btn" type="button" onclick="openBookingModal()" class="mypage-welcome-cta mypage-welcome-cta--book">
+          📅 대화 일정 예약하기
+        </button>
+      </div>
     </div>
 
     <div id="urgent-session-banner" class="mypage-urgent-row" hidden style="background: linear-gradient(135deg, #FFF4F0 0%, #FFE9E2 100%); border: 1px solid #FFD3C4; border-radius: 20px; padding: 20px 24px; margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px;">
@@ -1465,7 +1569,7 @@
               <h3 id="speakingProgressTitle" style="margin: 0 0 4px; font-size: 16px; font-weight: 800; color: #222;">🏆 내 스피킹 성장 레벨</h3>
               <p style="margin: 0; font-size: 12px; color: #888;">내 성과와 스피킹 감각을 한눈에 확인해요</p>
             </div>
-            <a href="index.html#quiz" class="speaking-retest-btn" id="speaking-retest-btn">🎯 스피킹 감각 다시 진단하기</a>
+            <a href="/index.html#quiz" class="speaking-retest-btn" id="speaking-retest-btn">🎯 스피킹 감각 다시 진단하기</a>
           </div>
           <div class="speaking-progress-metrics">
             <div class="speaking-progress-metric">
@@ -1522,6 +1626,14 @@
         </section>
       </div>
     </div>
+
+    <section class="mypage-lounge lounge-carousel" id="loungeCarousel" aria-label="DayO 라운지 매거진">
+      <div class="lounge-head">
+        <h2 class="lounge-head__title">☕ DayO 라운지 매거진</h2>
+        <p class="lounge-head__sub">글로벌 문화 이야기 & 실전 대화 꿀팁</p>
+      </div>
+      <div class="lounge-grid" id="loungeTrack"></div>
+    </section>
 
   </main>
 
@@ -1608,6 +1720,7 @@
   <script src="role-switch.js"></script>
   <script src="greeting-banner.js"></script>
   <script src="mypage-dashboard.js"></script>
+  <script src="lounge-carousel.js"></script>
   <script>
     if (typeof window.loadUserReports === 'function') window.loadUserReports();
   </script>

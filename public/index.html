@@ -1638,40 +1638,18 @@
     }
     .result-toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-    /* Logged-in: dashboard card on top; landing sections stay visible for GNB scroll */
-    body.is-logged-in #authDashboard.auth-dashboard {
-      display: block;
-    }
-    body.is-logged-in .auth-lounge.lounge-carousel,
-    body.is-logged-in #loungeCarousel {
-      display: block;
-      width: 100%;
-    }
-    body.is-logged-in .lounge-grid {
-      display: grid;
-    }
-    @media (max-width: 720px) {
-      body.is-logged-in .lounge-grid {
-        display: flex;
-      }
-    }
-    body.is-logged-in .hero {
-      min-height: 0;
-      padding-top: 2.25rem;
-    }
     .nav-auth-only { display: none; }
+    .nav-guest-only { display: inline-flex; }
     .header-actions > a.nav-auth-only,
-    .nav-drawer a.nav-auth-only {
+    .nav-drawer a.nav-auth-only,
+    .nav-drawer button.nav-guest-only {
       display: none;
     }
-    body.is-logged-in .header-actions > a.nav-auth-only {
-      display: inline-flex;
-    }
-    body.is-logged-in .nav-desktop a.nav-auth-only {
-      display: inline-flex;
-    }
+    .nav-drawer button.nav-guest-only { display: flex; }
+    body.is-logged-in .nav-guest-only { display: none !important; }
+    body.is-logged-in .header-actions > a.nav-auth-only,
     body.is-logged-in .nav-drawer a.nav-auth-only {
-      display: flex;
+      display: inline-flex;
     }
     body.is-logged-in .nav-drawer a.nav-auth-only.header-cta,
     body.is-logged-in .nav-drawer a.nav-auth-only.nav-drawer__cta {
@@ -1679,9 +1657,26 @@
     }
     .nav-drawer > .btn-logout { display: none; }
     body.is-logged-in .nav-drawer > .btn-logout { display: flex; }
+    .header-quiz-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.55rem 0.95rem;
+      border: 1px solid rgba(255, 107, 87, 0.28);
+      border-radius: 999px;
+      background: #fff;
+      color: #E85B48;
+      font-weight: 800;
+      font-size: 0.86rem;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+    .header-mypage-cta {
+      font-weight: 800;
+    }
     #service-intro, #partners, #pricing, #about, #tutors, #booking, #reviews,
-    #topics, #how, #ai-help, #tickets,
-    #authDashboard, .auth-live, #loungeCarousel {
+    #topics, #how, #ai-help, #tickets {
       scroll-margin-top: 5.75rem;
     }
 
@@ -2132,7 +2127,7 @@
 
   <header>
     <div class="header-inner">
-      <a href="index.html" class="logo" data-i18n="nav.homeAria" data-i18n-attr="aria-label" aria-label="DayO 메인으로 이동">
+      <a href="/" class="logo" data-i18n="nav.homeAria" data-i18n-attr="aria-label" aria-label="DayO 메인으로 이동">
         <div class="logo-icon">D</div>
         <div class="logo-stack">
           <div class="logo-text">DayO <span>돼요</span></div>
@@ -2145,14 +2140,13 @@
         <a href="#partners" data-i18n="nav.partners">대화 파트너</a>
         <a href="#how" data-i18n="nav.how">진행 방식</a>
         <a href="#tickets" data-i18n="nav.tickets">세션 티켓</a>
-        <a href="mypage.html" class="nav-auth-only" data-i18n="nav.records">나의 대화 기록</a>
       </nav>
 
       <div class="header-actions">
         <div data-i18n-lang="icon"></div>
         <div class="header-mode user-badge" data-mode-switch="inline"></div>
         <a href="https://dayo-sufk.vercel.app/admin/dashboard" class="admin-dash-link" data-admin-dashboard-link target="_blank" rel="noopener noreferrer" hidden aria-hidden="true">관리자 대시보드</a>
-        <a href="room.html?role=user" class="header-cta nav-auth-only" data-ms-guard data-i18n="nav.startChat" data-ticket-gate>🚀 바로 대화 시작하기</a>
+        <button type="button" class="header-quiz-cta nav-guest-only" id="headerQuizBtn" data-open-quiz>무료 진단하기</button>
         <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
       </div>
     </div>
@@ -2165,100 +2159,15 @@
     <a href="#partners" data-i18n="nav.partners">대화 파트너</a>
     <a href="#how" data-i18n="nav.how">진행 방식</a>
     <a href="#tickets" data-i18n="nav.tickets">세션 티켓</a>
-    <a href="mypage.html" class="nav-auth-only" data-i18n="nav.records">나의 대화 기록</a>
-    <a href="mypage.html" class="nav-auth-only" data-i18n="nav.mypage">마이페이지</a>
+    <button type="button" class="nav-guest-only" data-open-quiz data-nav-close>무료 진단하기</button>
+    <a href="/mypage.html" class="header-cta nav-drawer__cta nav-auth-only" data-nav-close>👤 마이페이지 바로가기</a>
     <a href="https://dayo-sufk.vercel.app/admin/dashboard" class="admin-dash-link" data-admin-dashboard-link target="_blank" rel="noopener noreferrer" hidden aria-hidden="true">관리자 대시보드</a>
-    <a href="room.html?role=user" class="header-cta nav-drawer__cta nav-auth-only" data-ms-guard data-i18n="nav.startChat" data-ticket-gate data-nav-close>🚀 바로 대화 시작하기</a>
     <button type="button" onclick="handleLogout(event)" class="btn-logout" style="cursor: pointer;">로그아웃</button>
   </nav>
 
   <div class="page">
 
-    <!-- ===== Logged-in dashboard only (hidden for guests) ===== -->
-    <section id="authDashboard" class="auth-dashboard" aria-label="로그인 홈 대시보드">
-      <div class="auth-dashboard__inner">
-        <div class="auth-hero">
-          <div class="greeting-banner" id="greetingBanner" hidden aria-live="polite">
-            <p class="auth-greeting" id="greetingBannerText"></p>
-          </div>
-          <p class="auth-sub">다정한 글로벌 파트너, 꼼꼼한 AI 매니저가 늘 대기중이에요!</p>
-          <p class="auth-coupon-note">🎟️ 첫 세션 9,900원 체험권 <code>WELCOME_9900</code> 보유 중이에요</p>
-          <div class="auth-ticket-badge" data-tickets-open role="button" tabindex="0" aria-label="이용권 구매 / 충전">
-            <span data-ticket-badge-text>☕️ 보유 티켓: 1장</span>
-            <span aria-hidden="true"> | </span>
-            <span>💡 1회 25분 글로벌 대화 · 세션 티켓 1장</span>
-            <button type="button" class="auth-ticket-charge" data-tickets-open aria-label="이용권 충전">+ 충전</button>
-          </div>
-          <div class="auth-cta-row">
-            <a href="room.html?role=user" class="header-cta auth-dash-cta" data-ms-guard data-ticket-gate>💬 대화방 입장하기</a>
-            <button type="button" class="auth-speak-cta" id="authSpeakTestBtn">🎯 스피킹 감각 알아보기</button>
-          </div>
-          <div class="auth-report-feed" style="margin-top:1.1rem; text-align:left;">
-            <p style="font-size:13px; font-weight:800; color:#3E4A42; margin-bottom:8px;">✨ 오늘의 대화 기록</p>
-            <div id="mypage-card-feed">
-              <div class="auth-report-empty">
-                <p class="auth-report-empty__title">아직 도착한 대화 리포트가 없어요 ☕</p>
-                <p class="auth-report-empty__desc">다정한 파트너와 첫 1:1 대화를 나누고 나면, 파트너의 따뜻한 칭찬 카드와 AI 복습 리포트가 여기에 기록돼요!</p>
-                <a href="#auth-partners" class="auth-report-empty__cta">첫 대화 파트너 둘러보기</a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="auth-live" id="auth-partners">
-          <p class="auth-live__title">
-            <span aria-hidden="true">🟢</span>
-            <span>지금</span>
-            <span class="auth-lang-chip" id="authLangChip">
-              <button type="button" class="auth-lang-chip__btn" id="authLangChipBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="authLangChipMenu">
-                <span id="authLangChipLabel">영어</span>
-                <span class="auth-lang-chip__caret" aria-hidden="true">▾</span>
-              </button>
-              <div class="auth-lang-chip__menu" id="authLangChipMenu" role="listbox" aria-label="대화 언어 선택">
-                <button type="button" class="auth-lang-chip__opt is-active" role="option" data-live-lang="영어" aria-selected="true">영어</button>
-                <button type="button" class="auth-lang-chip__opt" role="option" data-live-lang="일본어" aria-selected="false">일본어</button>
-                <button type="button" class="auth-lang-chip__opt" role="option" data-live-lang="중국어" aria-selected="false">중국어</button>
-                <button type="button" class="auth-lang-chip__opt" role="option" data-live-lang="스페인어" aria-selected="false">스페인어</button>
-                <button type="button" class="auth-lang-chip__opt" role="option" data-live-lang="프랑스어" aria-selected="false">프랑스어</button>
-              </div>
-            </span>
-            <span>DayO에서 함께할 수 있는 다정한 글로벌 메이트들이에요 🌿</span>
-          </p>
-          <div class="auth-partner-row" role="list">
-            <article class="auth-partner" role="listitem">
-              <p class="auth-partner__bubble">#커피사랑 ☕️</p>
-              <span class="auth-partner__face" aria-hidden="true">👩🏼</span>
-              <span class="auth-partner__name">Elena</span>
-            </article>
-            <article class="auth-partner" role="listitem">
-              <p class="auth-partner__bubble">#부산여행 🌊</p>
-              <span class="auth-partner__face" aria-hidden="true">🧑🏻</span>
-              <span class="auth-partner__name">Sam</span>
-            </article>
-            <article class="auth-partner" role="listitem">
-              <p class="auth-partner__bubble">#강아지집사 🐶</p>
-              <span class="auth-partner__face" aria-hidden="true">👩🏻</span>
-              <span class="auth-partner__name">Kate</span>
-            </article>
-            <article class="auth-partner" role="listitem">
-              <p class="auth-partner__bubble">#캠핑덕후 ⛺️</p>
-              <span class="auth-partner__face" aria-hidden="true">👨🏼</span>
-              <span class="auth-partner__name">Alex</span>
-            </article>
-          </div>
-        </div>
-
-        <div class="lounge-carousel auth-lounge" id="loungeCarousel" aria-label="DayO 라운지">
-          <div class="lounge-head">
-            <h2 class="lounge-head__title">DayO 라운지</h2>
-            <p class="lounge-head__sub">소식 · 이벤트 · 팁을 한눈에</p>
-          </div>
-          <div class="lounge-grid" id="loungeTrack"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===== Guest landing hero (untouched for logged-out) ===== -->
+    <!-- ===== Landing hero (always visible) ===== -->
     <section class="hero home-stage" data-landing-hero>
       <div class="section-inner home-stage-inner">
         <div class="hero-grid">
@@ -3459,9 +3368,7 @@
   <script type="module" src="webinar-apply.js"></script>
   <script src="greeting-banner.js"></script>
   <script src="logged-in-home.js"></script>
-  <script src="lounge-carousel.js"></script>
   <script src="reviews-carousel.js"></script>
-  <script src="live-partners.js"></script>
   <script src="insta-card-export.js"></script>
 
 <!-- DayO 시범 운영 안내 모달 -->
