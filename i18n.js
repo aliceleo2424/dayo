@@ -957,7 +957,7 @@
     'tickets.cta': { KO: '📅 대화 세션 예약하기', EN: '📅 Book a talk session', ZH: '📅 预约对话', JA: '📅 会話セッションを予約', FR: '📅 Réserver une session', ES: '📅 Reservar una sesión' },
     'journey.step1.tag': { KO: 'STEP 01', EN: 'STEP 01', ZH: 'STEP 01', JA: 'STEP 01', FR: 'ÉTAPE 01', ES: 'PASO 01' },
     'journey.step1.title': {
-      KO: '스피킹 감각 테스트', EN: 'Speaking sense test', ZH: '口语感觉测试', JA: 'スピーキング感覚テスト', FR: 'Test de speaking', ES: 'Prueba de speaking'
+      KO: '🍰 내 스피킹 감각 알아보기', EN: '🍰 See how my speaking feels', ZH: '🍰 了解我的口语感觉', JA: '🍰 スピーキング感覚を知る', FR: '🍰 Découvrir mon speaking', ES: '🍰 Conocer mi speaking'
     },
     'journey.step1.desc': {
       KO: '부담 없이 확인하는 내 스피킹 위치',
