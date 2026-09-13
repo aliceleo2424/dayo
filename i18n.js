@@ -816,6 +816,9 @@
     'hero.cta': {
       KO: '어떤 대화를 나누나요? 👇', EN: 'What do we talk about? 👇', ZH: '会聊些什么？👇', JA: 'どんな会話をするの？👇', FR: 'De quoi parle-t-on ? 👇', ES: '¿De qué hablamos? 👇'
     },
+    'hero.quizCta': {
+      KO: '🍰 내 스피킹 감각 무료로 테스트하기 ›', EN: '🍰 Test my speaking sense for free ›', ZH: '🍰 免费测试我的口语感觉 ›', JA: '🍰 スピーキング感覚を無料でテスト ›', FR: '🍰 Tester gratuitement mon niveau ›', ES: '🍰 Probar gratis mi nivel de habla ›'
+    },
     'hero.liveBadge': {
       KO: 'AI 코파일럿 실시간 지원 중', EN: 'AI copilot live support', ZH: 'AI副驾实时支持中', JA: 'AIコパイロットがリアルタイム支援中', FR: 'Copilote IA en direct', ES: 'Copiloto IA en vivo'
     },
@@ -828,7 +831,7 @@
       KO: 'How it works', EN: 'How it works', ZH: 'How it works', JA: 'How it works', FR: 'How it works', ES: 'How it works'
     },
     'journey.title': {
-      KO: '가르치거나 평가하지 않아요', EN: 'We don’t teach or grade you', ZH: '不教学、不评分', JA: '教えたり評価したりしません', FR: 'On n’enseigne pas, on n’évalue pas', ES: 'No enseñamos ni evaluamos'
+      KO: '3단계로 완성하는 나만의 회화 여정', EN: 'Your speaking journey in 3 simple steps', ZH: '3步完成属于我的会话之旅', JA: '3ステップで完成する会話の旅', FR: 'Votre parcours en 3 étapes', ES: 'Tu camino de conversación en 3 pasos'
     },
     'journey.videoLabel': {
       KO: '🎬 DayO 1:1 글로벌 대화 라운지 소개',
@@ -954,39 +957,39 @@
     'tickets.cta': { KO: '📅 대화 세션 예약하기', EN: '📅 Book a talk session', ZH: '📅 预约对话', JA: '📅 会話セッションを予約', FR: '📅 Réserver une session', ES: '📅 Reservar una sesión' },
     'journey.step1.tag': { KO: 'STEP 01', EN: 'STEP 01', ZH: 'STEP 01', JA: 'STEP 01', FR: 'ÉTAPE 01', ES: 'PASO 01' },
     'journey.step1.title': {
-      KO: '이야기 카드', EN: 'Story cards', ZH: '故事卡片', JA: '話のカード', FR: 'Cartes d’histoire', ES: 'Tarjetas de historia'
+      KO: '스피킹 감각 테스트', EN: 'Speaking sense test', ZH: '口语感觉测试', JA: 'スピーキング感覚テスト', FR: 'Test de speaking', ES: 'Prueba de speaking'
     },
     'journey.step1.desc': {
-      KO: '관심사에 맞는 질문으로 대화를 열어요',
-      EN: 'Open the talk with questions that match your interests',
-      ZH: '用贴合兴趣的问题打开对话',
-      JA: '興味に合う質問で会話を開きます',
-      FR: 'Des questions qui collent à vos envies',
-      ES: 'Preguntas que encajan con tus intereses'
+      KO: '부담 없이 확인하는 내 스피킹 위치',
+      EN: 'A pressure-free check of where your speaking stands.',
+      ZH: '轻松确认我的口语水平。',
+      JA: '気軽に確認できるスピーキングの立ち位置。',
+      FR: 'Un test sans pression de votre niveau.',
+      ES: 'Una prueba sin presión de tu nivel de habla.'
     },
     'journey.step2.tag': { KO: 'STEP 02', EN: 'STEP 02', ZH: 'STEP 02', JA: 'STEP 02', FR: 'ÉTAPE 02', ES: 'PASO 02' },
     'journey.step2.title': {
-      KO: 'AI 언어 도움', EN: 'AI language help', ZH: 'AI语言帮助', JA: 'AI言語ヘルプ', FR: 'Aide linguistique IA', ES: 'Ayuda lingüística IA'
+      KO: 'AI 실시간 코칭', EN: 'Real-time AI coaching', ZH: 'AI实时指导', JA: 'AIリアルタイムコーチング', FR: 'Coaching IA en direct', ES: 'Coaching de IA en vivo'
     },
     'journey.step2.desc': {
-      KO: '대화 중 막혀도 AI가 부드럽게 이어 줘요',
-      EN: 'When you get stuck, AI gently continues the talk',
-      ZH: '卡住时AI会温柔接上',
-      JA: '詰まってもAIがやさしくつないでくれます',
-      FR: 'Quand ça bloque, l’IA relance en douceur',
-      ES: 'Si te trabas, la IA continúa con suavidad'
+      KO: '대화 중 막혀도 AI가 실시간으로 단어와 문장 지원',
+      EN: "Stuck mid-chat? AI backs you up with words and sentences instantly.",
+      ZH: '对话中卡壳时，AI实时提供单词和句子支持。',
+      JA: '会話中に詰まってもAIがリアルタイムで単語や文をサポート。',
+      FR: "Bloqué en pleine conversation ? L'IA vous aide en temps réel.",
+      ES: '¿Te trabas? La IA te ayuda con palabras y frases al instante.'
     },
     'journey.step3.tag': { KO: 'STEP 03', EN: 'STEP 03', ZH: 'STEP 03', JA: 'STEP 03', FR: 'ÉTAPE 03', ES: 'PASO 03' },
     'journey.step3.title': {
-      KO: '1:1 글로벌 대화', EN: '1:1 global chat', ZH: '1:1 全球对话', JA: '1:1グローバル会話', FR: 'Conversation 1:1', ES: 'Charla 1:1 global'
+      KO: '1:1 원어민 눈맞춤 대화', EN: '1:1 eye-contact conversation', ZH: '1:1面对面对话', JA: '1:1で目を合わせる会話', FR: 'Conversation 1:1 en face à face', ES: 'Conversación 1:1 cara a cara'
     },
     'journey.step3.desc': {
-      KO: '친구처럼 다정하게 서로의 경험을 나눠요',
-      EN: 'Share experiences, warmly, like friends',
-      ZH: '像朋友一样分享彼此的经历',
-      JA: '友達のように経験を分け合います',
-      FR: 'On partage, comme entre amis',
-      ES: 'Compartimos experiencias, como amigos'
+      KO: '울렁증 없이 친구처럼 다정하게 트이는 실전 회화',
+      EN: 'No jitters — real conversations that open up like chatting with a friend.',
+      ZH: '没有紧张感，像朋友一样自然打开的实战会话。',
+      JA: '緊張なく友達のように話せる実践会話。',
+      FR: 'Sans stress, des conversations qui coulent comme entre amis.',
+      ES: 'Sin nervios, charlas reales como con un amigo.'
     },
 
     /* ===== Partners teaser (index.html) ===== */
@@ -1091,7 +1094,7 @@
 
     /* ===== Quiz modal (index.html) ===== */
     'quiz.badge': {
-      KO: '관심사로 여는 첫 대화', EN: 'A first chat around your interests', ZH: '从兴趣打开的第一次对话', JA: '興味から始まる初めての会話', FR: 'Une première conversation autour de vos envies', ES: 'Una primera charla alrededor de tus intereses'
+      KO: '무료 스피킹 감각 테스트', EN: 'Free speaking sense test', ZH: '免费口语感觉测试', JA: '無料スピーキング感覚テスト', FR: 'Test de speaking gratuit', ES: 'Test de speaking gratis'
     },
     'quiz.title': {
       KO: '외국인 앞 어색한 침묵 탈출, 돼요! ☕', EN: 'Break the awkward freeze, you can! ☕', ZH: '打破面对外国人时的尴尬沉默，真的可以！☕', JA: '外国人の前の気まずい沈黙から脱出、できる！☕', FR: 'Fini le silence gênant, ça marche ! ☕', ES: 'Sal del silencio incómodo, ¡se puede! ☕'

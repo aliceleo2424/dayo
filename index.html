@@ -263,6 +263,30 @@
       white-space: nowrap;
     }
 
+    .admin-dash-link {
+      display: none;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.55rem 0.9rem;
+      border: 1px solid var(--coral);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--coral);
+      text-decoration: none;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+    .admin-dash-link:hover {
+      background: var(--coral-pale);
+    }
+    .nav-drawer .admin-dash-link {
+      justify-content: flex-start;
+      border-radius: 12px;
+    }
+
     .header-cta {
       display: inline-flex; align-items: center; gap: 0.35rem;
       padding: 0.7rem 1.2rem;
@@ -1026,6 +1050,10 @@
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
+    .journey-card[data-open-quiz] {
+      cursor: pointer;
+    }
+
     .journey-card:hover {
       transform: translateY(-4px);
       box-shadow: 0 14px 36px var(--shadow-soft);
@@ -1688,6 +1716,10 @@
         flex-shrink: 0;
       }
 
+      .header-actions .admin-dash-link {
+        display: none !important;
+      }
+
       .header-actions .header-cta {
         display: inline-flex;
         flex-shrink: 0;
@@ -2053,6 +2085,7 @@
       <div class="header-actions">
         <div data-i18n-lang="icon"></div>
         <div class="header-mode user-badge" data-mode-switch="inline"></div>
+        <a href="/admin/dashboard" class="admin-dash-link" data-admin-dashboard-link hidden aria-hidden="true">관리자 대시보드</a>
         <a href="room.html?role=user" class="header-cta nav-auth-only" data-ms-guard data-i18n="nav.startChat" data-ticket-gate>🚀 바로 대화 시작하기</a>
         <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
       </div>
@@ -2068,6 +2101,7 @@
     <a href="#tickets" data-i18n="nav.tickets">세션 티켓</a>
     <a href="mypage.html" class="nav-auth-only" data-i18n="nav.records">나의 대화 기록</a>
     <a href="mypage.html" class="nav-auth-only" data-i18n="nav.mypage">마이페이지</a>
+    <a href="/admin/dashboard" class="admin-dash-link" data-admin-dashboard-link hidden aria-hidden="true">관리자 대시보드</a>
     <a href="room.html?role=user" class="header-cta nav-drawer__cta nav-auth-only" data-ms-guard data-i18n="nav.startChat" data-ticket-gate data-nav-close>🚀 바로 대화 시작하기</a>
     <button type="button" onclick="handleLogout(event)" class="btn-logout" style="cursor: pointer;">로그아웃</button>
   </nav>
@@ -2159,6 +2193,7 @@
             <p class="hero-subtitle" data-i18n="hero.subtitle">관심사가 맞는 사람과 준비된 이야기로 가볍게 만나보세요. 말이 잘 통하지 않는 순간에는 AI가 대화를 도와드려요.</p>
             <div class="cta-wrap">
               <a href="#topics" class="home-cta-btn" id="scrollToTopicsBtn" data-i18n="hero.cta">어떤 대화를 나누나요? 👇</a>
+              <button class="home-quiz-link cta-btn" id="startQuizBtn" type="button" data-i18n="hero.quizCta">🍰 내 스피킹 감각 무료로 테스트하기 ›</button>
             </div>
           </div>
 
@@ -2187,6 +2222,34 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3Step Journey: 스피킹 감각 테스트 -->
+    <section class="journey" id="service-intro" data-landing-only>
+      <div class="section-inner">
+        <p class="section-label reveal" data-i18n="journey.eyebrow">How it works</p>
+        <h2 class="section-title reveal" data-i18n="journey.title">3단계로 완성하는 나만의 회화 여정</h2>
+        <div class="journey-grid">
+          <article class="journey-card reveal reveal-delay-1" data-open-quiz role="button" tabindex="0">
+            <span class="journey-step" data-i18n="journey.step1.tag">STEP 01</span>
+            <span class="journey-icon">🍰</span>
+            <h3 class="journey-title" data-i18n="journey.step1.title">스피킹 감각 테스트</h3>
+            <p class="journey-desc" data-i18n="journey.step1.desc">부담 없이 확인하는 내 스피킹 위치</p>
+          </article>
+          <article class="journey-card reveal reveal-delay-2">
+            <span class="journey-step" data-i18n="journey.step2.tag">STEP 02</span>
+            <span class="journey-icon">🎙️</span>
+            <h3 class="journey-title" data-i18n="journey.step2.title">AI 실시간 코칭</h3>
+            <p class="journey-desc" data-i18n="journey.step2.desc">대화 중 막혀도 AI가 실시간으로 단어와 문장 지원</p>
+          </article>
+          <article class="journey-card reveal reveal-delay-3">
+            <span class="journey-step" data-i18n="journey.step3.tag">STEP 03</span>
+            <span class="journey-icon">💬</span>
+            <h3 class="journey-title" data-i18n="journey.step3.title">1:1 원어민 눈맞춤 대화</h3>
+            <p class="journey-desc" data-i18n="journey.step3.desc">울렁증 없이 친구처럼 다정하게 트이는 실전 회화</p>
+          </article>
         </div>
       </div>
     </section>
@@ -2410,7 +2473,7 @@
     <div class="modal" role="dialog" aria-labelledby="quizTitle" aria-modal="true">
       <button class="modal-close" id="modalClose" data-i18n="quiz.closeAria" data-i18n-attr="aria-label" aria-label="닫기">✕</button>
       <div class="quiz-header">
-        <div class="quiz-badge" data-i18n="quiz.badge">관심사로 여는 첫 대화</div>
+        <div class="quiz-badge" data-i18n="quiz.badge">무료 스피킹 감각 테스트</div>
         <div class="quiz-lang-tabs" role="tablist" aria-label="대화 언어 선택" id="quizLangTabs">
           <button type="button" class="quiz-lang-tab is-on" role="tab" aria-selected="true" data-quiz-lang="en"><span class="quiz-lang-flag" aria-hidden="true">🇺🇸</span><span data-i18n="quiz.lang.en">영어</span></button>
           <button type="button" class="quiz-lang-tab" role="tab" aria-selected="false" data-quiz-lang="fr"><span class="quiz-lang-flag" aria-hidden="true">🇫🇷</span><span data-i18n="quiz.lang.fr">프랑스어</span></button>
@@ -3165,6 +3228,15 @@
     }
 
     if (startBtn) startBtn.addEventListener('click', openQuizModal);
+    document.querySelectorAll('[data-open-quiz]').forEach((el) => {
+      el.addEventListener('click', openQuizModal);
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openQuizModal();
+        }
+      });
+    });
     if (modalClose) modalClose.addEventListener('click', closeQuizModal);
     if (quizModal) quizModal.addEventListener('click', (e) => { if (e.target === quizModal) closeQuizModal(); });
 

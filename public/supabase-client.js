@@ -107,7 +107,7 @@
     if (!user) return null;
     var q = await client
       .from('profiles')
-      .select('nickname, user_name, ticket_count, point_balance, email')
+      .select('nickname, user_name, ticket_count, point_balance, email, role')
       .eq('user_id', user.id)
       .maybeSingle();
     if (q.error) {
@@ -794,15 +794,100 @@
     } catch (e) { /* ignore */ }
   };
 
+  function hideAdminDashboardLinks() {
+    var links = document.querySelectorAll('[data-admin-dashboard-link]');
+    Array.prototype.forEach.call(links, function (el) {
+      el.style.display = 'none';
+      el.setAttribute('hidden', '');
+      el.setAttribute('aria-hidden', 'true');
+    });
+    document.body.classList.remove('is-admin');
+  }
+
+  function showAdminDashboardLinks() {
+    var links = document.querySelectorAll('[data-admin-dashboard-link]');
+    Array.prototype.forEach.call(links, function (el) {
+      var inDrawer = !!(el.closest && el.closest('.nav-drawer'));
+      var inMenu = !!(el.closest && el.closest('.ms-menu'));
+      el.style.display = inDrawer || inMenu ? 'flex' : 'inline-flex';
+      el.removeAttribute('hidden');
+      el.setAttribute('aria-hidden', 'false');
+    });
+    document.body.classList.add('is-admin');
+  }
+
+  async function fetchProfileRole(userId) {
+    var supabase = window.supabaseClient;
+    if (!supabase || !userId) return null;
+    try {
+      var byId = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .single();
+      if (byId.data && byId.data.role) return byId.data.role;
+    } catch (e) { /* fall through to user_id */ }
+    try {
+      var byUserId = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('user_id', userId)
+        .maybeSingle();
+      if (byUserId.data && byUserId.data.role) return byUserId.data.role;
+    } catch (e2) { /* ignore */ }
+    return null;
+  }
+
+  window.syncAdminDashboardLink = async function (session) {
+    try {
+      var supabase = window.supabaseClient;
+      if (!session && supabase && supabase.auth) {
+        var sessionRes = await supabase.auth.getSession();
+        session = sessionRes && sessionRes.data && sessionRes.data.session;
+      }
+      if (!session || !session.user) {
+        hideAdminDashboardLinks();
+        return false;
+      }
+      var role = await fetchProfileRole(session.user.id);
+      if (role === 'admin') {
+        showAdminDashboardLinks();
+        return true;
+      }
+      hideAdminDashboardLinks();
+      return false;
+    } catch (err) {
+      hideAdminDashboardLinks();
+      return false;
+    }
+  };
+
+  function bindAdminDashboardNav() {
+    hideAdminDashboardLinks();
+    var supabase = window.supabaseClient;
+    if (!supabase || !supabase.auth) return;
+    supabase.auth.getSession().then(function (res) {
+      window.syncAdminDashboardLink(res && res.data && res.data.session);
+    });
+    if (window._dayoAdminNavBound) return;
+    window._dayoAdminNavBound = true;
+    supabase.auth.onAuthStateChange(function (event, session) {
+      if (event === 'TOKEN_REFRESHED') return;
+      window.syncAdminDashboardLink(session);
+    });
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
       window.fetchAuthProfile();
       window.bindLearnerSessionId();
+      bindAdminDashboardNav();
       if (document.getElementById('mypage-card-feed')) window.loadUserReports();
     });
   } else {
     window.fetchAuthProfile();
     window.bindLearnerSessionId();
+    bindAdminDashboardNav();
     if (document.getElementById('mypage-card-feed')) window.loadUserReports();
   }
 })();
