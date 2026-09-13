@@ -817,7 +817,7 @@
       KO: '어떤 대화를 나누나요? 👇', EN: 'What do we talk about? 👇', ZH: '会聊些什么？👇', JA: 'どんな会話をするの？👇', FR: 'De quoi parle-t-on ? 👇', ES: '¿De qué hablamos? 👇'
     },
     'hero.quizCta': {
-      KO: '🍰 내 스피킹 감각 무료로 테스트하기 ›', EN: '🍰 Test my speaking sense for free ›', ZH: '🍰 免费测试我的口语感觉 ›', JA: '🍰 スピーキング感覚を無料でテスト ›', FR: '🍰 Tester gratuitement mon niveau ›', ES: '🍰 Probar gratis mi nivel de habla ›'
+      KO: '내 스피킹 감각 알아보기 ›', EN: 'See how my speaking feels ›', ZH: '了解我的口语感觉 ›', JA: 'スピーキング感覚を知る ›', FR: 'Découvrir mon speaking ›', ES: 'Conocer mi speaking ›'
     },
     'hero.liveBadge': {
       KO: 'AI 코파일럿 실시간 지원 중', EN: 'AI copilot live support', ZH: 'AI副驾实时支持中', JA: 'AIコパイロットがリアルタイム支援中', FR: 'Copilote IA en direct', ES: 'Copiloto IA en vivo'
@@ -957,7 +957,7 @@
     'tickets.cta': { KO: '📅 대화 세션 예약하기', EN: '📅 Book a talk session', ZH: '📅 预约对话', JA: '📅 会話セッションを予約', FR: '📅 Réserver une session', ES: '📅 Reservar una sesión' },
     'journey.step1.tag': { KO: 'STEP 01', EN: 'STEP 01', ZH: 'STEP 01', JA: 'STEP 01', FR: 'ÉTAPE 01', ES: 'PASO 01' },
     'journey.step1.title': {
-      KO: '🍰 내 스피킹 감각 알아보기', EN: '🍰 See how my speaking feels', ZH: '🍰 了解我的口语感觉', JA: '🍰 スピーキング感覚を知る', FR: '🍰 Découvrir mon speaking', ES: '🍰 Conocer mi speaking'
+      KO: '내 스피킹 감각 알아보기', EN: 'See how my speaking feels', ZH: '了解我的口语感觉', JA: 'スピーキング感覚を知る', FR: 'Découvrir mon speaking', ES: 'Conocer mi speaking'
     },
     'journey.step1.desc': {
       KO: '부담 없이 확인하는 내 스피킹 위치',
