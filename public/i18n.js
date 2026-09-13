@@ -1545,7 +1545,7 @@
       ES: '¿Cuáles son las reglas de cancelación y cambio?'
     },
     'chatbot.a.policy': {
-      KO: '모든 이용권은 결제 후 90일 내 소진 필수예요. 세션 요일 및 시간 변경/취소는 세션 시작 1시간 전까지 가능하고, 세션 시작 1시간 이내 취소 및 노쇼 발생 시 티켓이 차감되며 ‘토닥토닥 리포트’가 발송돼요.',
+      KO: '📌 유효기간: 모든 이용권은 결제 후 90일 내 소진 필수, 이후 사라지니 꼭 90일 안에 사용해주세요. (메일/ 카카오톡으로 소진 알림을 보내드려요!) 🔄 변경/취소: 세션 요일 및 시간 변경/취소는 세션 시작 1시간 전까지 가능해요. 💌 노쇼: 세션 시작 1시간 이내 취소 및 노쇼 발생 시 티켓이 차감되며 ‘토닥토닥 리포트’가 발송됩니다.',
       EN: 'All passes must be used within 90 days of payment. You can change or cancel the day/time until 1 hour before the session. If you cancel within 1 hour of start or no-show, a ticket is deducted and a “Todaktodak Report” is sent.',
       ZH: '所有次数券须在付款后90天内用完。会话开始1小时前可更改/取消星期和时间。会话开始1小时内取消或未到，将扣除次数并发送“托达克托达克报告”。',
       JA: 'すべての利用券は決済後90日以内に使い切る必要があります。セッションの曜日・時間の変更/キャンセルは開始1時間前まで可能です。開始1時間以内のキャンセルやノーショー時はチケットが消化され、「トダクトダクレポート」が送られます。',

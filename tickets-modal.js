@@ -1,6 +1,6 @@
-/* DayO 세션 이용권 구매 모달 — mypage / index 공용 (결제 연동 전 UI)
+/* DayO 세션 이용권 구매 모달 — mypage / index 공용
  * 트리거: [data-tickets-open] 또는 ?tickets=open
- * 미사용 WELCOME_9900 쿠폰이 있으면 1회 이용권(19,900원)에 자동 적용 → 9,900원
+ * 상단 패키지(11·33) / 하단 단품(체험·1회). 구매 시 amount·orderName·ticketCount 매핑
  */
 (function () {
   'use strict';
@@ -12,47 +12,53 @@
 
   var PLANS = [
     {
+      id: 'pack11',
+      badge: '🔥 BEST! 1회 보너스',
+      title: '가벼운 11 패키지',
+      orderName: '가벼운 11 패키지',
+      price: '179,000원',
+      priceValue: 179000,
+      meta: '10회 + 1회 서비스 (총 11회)',
+      benefit: '회당 약 16,270원 (정가 대비 18% 할인)',
+      copy: '1회 무료 증정 + 부담 없는 꾸준한 회화 루틴',
+      tickets: 11,
+      featured: true
+    },
+    {
+      id: 'pack33',
+      badge: '🎉 최대 할인 패키지',
+      title: '마음껏 33 패키지',
+      orderName: '마음껏 33 패키지',
+      price: '499,000원',
+      priceValue: 499000,
+      meta: '30회 + 3회 서비스 (총 33회)',
+      benefit: '회당 약 15,120원 (정가 대비 24% 할인)',
+      copy: '3회 무료 증정 + 90일간 자유롭게 완성하는 실전 회화',
+      tickets: 33,
+      featured: true
+    },
+    {
       id: 'trial',
-      badge: '첫 가입 전용 ☕️',
+      badge: '첫 가입 전용 ☕',
       title: '첫 세션 체험 할인권',
+      orderName: '첫 세션 체험 할인권',
       price: '9,900원',
       priceValue: 9900,
-      meta: '1회',
-      copy: '첫 가입 전용 체험가',
+      meta: '1회 (첫 가입 전용 체험가)',
+      copy: '부담 없이 시작하는 1:1 라이브 대화',
       tickets: 1,
       featured: false
     },
     {
       id: 'single',
-      badge: '',
+      badge: '기본',
       title: '1회 단품 이용권',
+      orderName: '1회 단품 이용권',
       price: '19,900원',
       priceValue: 19900,
       meta: '1회',
       copy: '필요할 때 한 회씩 가볍게',
       tickets: 1,
-      featured: false
-    },
-    {
-      id: 'pack10',
-      badge: '🔥 BEST! 1회 무료',
-      title: '10회 패키지',
-      price: '199,000원',
-      priceValue: 199000,
-      meta: '10회 결제 + 1회 서비스 (총 11회)',
-      copy: '10회 가격에 1회(19,900원 상당) 무료 증정!',
-      tickets: 11,
-      featured: true
-    },
-    {
-      id: 'pack3m',
-      badge: '🚀 실속 패키지',
-      title: '3개월 속성 패키지',
-      price: '597,000원',
-      priceValue: 597000,
-      meta: '30회 결제 + 4회 서비스 (총 34회)',
-      copy: '30회 가격으로 총 34회 이용! 4회(79,600원 상당) 무료 증정 / 90일 내 자유 예약',
-      tickets: 34,
       featured: false
     }
   ];
@@ -95,6 +101,8 @@
     'box-shadow:0 8px 22px rgba(113,83,72,.06);text-align:left;}',
     '.tk-card--best{border-color:rgba(255,107,87,.55);background:linear-gradient(165deg,#FFF6F2 0%,#FFE8E3 48%,#FFF9F4 100%);',
     'box-shadow:0 12px 28px rgba(255,107,87,.14),0 0 0 1px rgba(255,107,87,.08);}',
+    '.tk-card--deal{border-color:rgba(255,154,80,.5);background:linear-gradient(165deg,#FFF9F1 0%,#FFE9D2 48%,#FFF8F0 100%);',
+    'box-shadow:0 12px 28px rgba(255,154,80,.12);}',
     '.tk-card--coupon{border-color:rgba(255,107,87,.45);background:linear-gradient(165deg,#FFF9F6,#FFEDE8);}',
     '.tk-badge{display:inline-flex;align-self:flex-start;padding:.28rem .65rem;border-radius:999px;',
     'background:rgba(255,249,196,.85);border:1px solid rgba(255,209,220,.7);',
@@ -105,6 +113,7 @@
     '.tk-card__price{font-size:1.35rem;font-weight:800;color:#FF6B57;letter-spacing:-.03em;line-height:1.2;}',
     '.tk-card__price--due{font-size:1.85rem;font-weight:900;}',
     '.tk-card__meta{font-size:.78rem;font-weight:700;color:#9A8580;}',
+    '.tk-card__benefit{font-size:.78rem;font-weight:800;color:#FF6B57;line-height:1.4;}',
     '.tk-card__copy{margin-top:.15rem;font-size:.8rem;font-weight:600;line-height:1.45;color:#5C4A42;}',
     '.tk-coupon{display:flex;align-items:flex-start;gap:.5rem;margin-top:.2rem;padding:.65rem .7rem;',
     'border-radius:16px;border:1px solid rgba(255,107,87,.22);background:rgba(255,255,255,.72);cursor:pointer;}',
@@ -163,44 +172,42 @@
   }
 
   function visiblePlans() {
-    return PLANS.filter(function (plan) {
-      if (plan.id === 'trial' && couponState.unusedWelcome) return false;
-      return true;
-    });
+    return PLANS.slice();
+  }
+
+  function paymentPayload(plan) {
+    var applyCoupon = plan.id === 'single' && isCouponApplied();
+    var amount = applyCoupon ? welcomeDue().due : Number(plan.priceValue);
+    var orderName = applyCoupon ? '첫 세션 체험 할인권' : (plan.orderName || plan.title);
+    return {
+      planId: plan.id,
+      amount: amount,
+      orderName: orderName,
+      ticketCount: Number(plan.tickets) || 1
+    };
   }
 
   function planCard(plan) {
-    var applied = plan.id === 'single' && isCouponApplied();
-    var prices = welcomeDue();
-    var badge = plan.badge
-      ? '<span class="tk-badge">' + plan.badge + '</span>'
-      : (applied ? '<span class="tk-badge">체험 할인권 적용</span>' : '');
-    var priceHtml = applied
-      ? '<p class="tk-card__was">' + formatWon(prices.original) + '</p>' +
-        '<p class="tk-card__price tk-card__price--due">' + formatWon(prices.due) + '</p>'
-      : '<p class="tk-card__price">' + plan.price + '</p>';
-    var couponHtml = '';
-    if (plan.id === 'single' && couponState.unusedWelcome) {
-      couponHtml =
-        '<label class="tk-coupon">' +
-          '<input type="checkbox" data-tk-coupon' + (couponState.applyWelcome ? ' checked' : '') + '>' +
-          '<span>🎉 첫 세션 9,900원 체험 할인권 (19,900원 ➔ 9,900원)</span>' +
-        '</label>';
-    }
+    var payload = paymentPayload(plan);
+    var badge = plan.badge ? '<span class="tk-badge">' + plan.badge + '</span>' : '';
+    var benefit = plan.benefit ? '<p class="tk-card__benefit">' + plan.benefit + '</p>' : '';
     var cls = 'tk-card';
-    if (plan.featured) cls += ' tk-card--best';
-    if (applied) cls += ' tk-card--coupon';
+    if (plan.id === 'pack11') cls += ' tk-card--best';
+    if (plan.id === 'pack33') cls += ' tk-card--deal';
     return '' +
       '<article class="' + cls + '" data-plan="' + plan.id + '">' +
         badge +
         '<h3 class="tk-card__title">' + plan.title + '</h3>' +
-        priceHtml +
+        '<p class="tk-card__price">' + plan.price + '</p>' +
         '<p class="tk-card__meta">' + plan.meta + '</p>' +
-        '<p class="tk-card__copy">' + (applied ? '첫 세션 체험가로 결제돼요' : plan.copy) + '</p>' +
-        couponHtml +
+        benefit +
+        '<p class="tk-card__copy">' + plan.copy + '</p>' +
         '<div class="tk-card__cta">' +
-          '<button type="button" class="tk-buy" data-tk-buy="' + plan.id + '">' +
-            (applied ? formatWon(prices.due) + ' 결제하기' : '구매하기') +
+          '<button type="button" class="tk-buy" data-tk-buy="' + plan.id + '"' +
+            ' data-amount="' + payload.amount + '"' +
+            ' data-order-name="' + payload.orderName + '"' +
+            ' data-ticket-count="' + payload.ticketCount + '">' +
+            '구매하기' +
           '</button>' +
         '</div>' +
       '</article>';
@@ -209,15 +216,7 @@
   function renderPlans() {
     if (!el.grid) return;
     el.grid.innerHTML = visiblePlans().map(planCard).join('');
-    if (el.duebar) {
-      var on = isCouponApplied();
-      el.duebar.classList.toggle('is-on', on);
-      if (on) {
-        var prices = welcomeDue();
-        el.duebar.querySelector('[data-tk-due-was]').textContent = formatWon(prices.original);
-        el.duebar.querySelector('[data-tk-due-now]').textContent = formatWon(prices.due);
-      }
-    }
+    if (el.duebar) el.duebar.classList.remove('is-on');
   }
 
   function buildMarkup() {
@@ -240,9 +239,9 @@
           '<aside class="tk-policy" aria-label="세션 규정 및 이용 안내">' +
             '<p class="tk-policy__title">세션 규정 및 이용 안내</p>' +
             '<ul class="tk-policy__list">' +
-              '<li>📌 <strong>유효기간:</strong> 모든 이용권은 결제 후 90일 내 소진 필수.</li>' +
-              '<li>🔄 <strong>변경/취소:</strong> 세션 요일 및 시간 변경/취소는 세션 시작 1시간 전까지 가능.</li>' +
-              '<li>💌 <strong>노쇼:</strong> 세션 시작 1시간 이내 취소 및 노쇼 발생 시 티켓이 차감되며 \'토닥토닥 리포트\'가 발송됨.</li>' +
+              '<li>📌 <strong>유효기간:</strong> 모든 이용권은 결제 후 90일 내 소진 필수, 이후 사라지니 꼭 90일 안에 사용해주세요. (메일/ 카카오톡으로 소진 알림을 보내드려요!)</li>' +
+              '<li>🔄 <strong>변경/취소:</strong> 세션 요일 및 시간 변경/취소는 세션 시작 1시간 전까지 가능해요.</li>' +
+              '<li>💌 <strong>노쇼:</strong> 세션 시작 1시간 이내 취소 및 노쇼 발생 시 티켓이 차감되며 \'토닥토닥 리포트\'가 발송됩니다.</li>' +
             '</ul>' +
           '</aside>' +
         '</div>' +
@@ -313,25 +312,47 @@
     if (lastFocused && lastFocused.focus) lastFocused.focus();
   }
 
+  async function requestPayment(payload) {
+    if (window.DayOPay && typeof window.DayOPay.request === 'function') {
+      return window.DayOPay.request(payload);
+    }
+    if (window.TossPayments && window.__DAYO_TOSS_CLIENT_KEY__) {
+      var toss = window.TossPayments(window.__DAYO_TOSS_CLIENT_KEY__);
+      return toss.requestPayment('카드', {
+        amount: payload.amount,
+        orderName: payload.orderName,
+        orderId: 'dayo-' + payload.planId + '-' + Date.now(),
+        successUrl: window.location.origin + '/mypage.html?pay=success&tickets=' + payload.ticketCount,
+        failUrl: window.location.origin + '/mypage.html?pay=fail'
+      });
+    }
+    return { skipped: true, payload: payload };
+  }
+
   async function completePurchase(plan) {
     if (buying || !plan) return;
     buying = true;
-    var applyCoupon = plan.id === 'single' && isCouponApplied();
-    var coupon = couponState.unusedWelcome;
+    var payload = paymentPayload(plan);
+    window.DayOTickets = window.DayOTickets || {};
+    window.DayOTickets.lastPayment = payload;
+    var applyWelcome = plan.id === 'trial' && couponState.unusedWelcome;
     try {
-      if (applyCoupon && window.DayOProfileStore && typeof window.DayOProfileStore.markCouponUsed === 'function') {
-        await window.DayOProfileStore.markCouponUsed(coupon);
+      var paid = await requestPayment(payload);
+      if (paid && paid.cancelled) return;
+      if (!(paid && paid.skipped)) return;
+      if (applyWelcome && window.DayOProfileStore && typeof window.DayOProfileStore.markCouponUsed === 'function') {
+        await window.DayOProfileStore.markCouponUsed(couponState.unusedWelcome);
         couponState.unusedWelcome = null;
         couponState.applyWelcome = false;
       }
       var wallet = window.DayOTicketWallet;
-      var added = plan.tickets || 0;
+      var added = payload.ticketCount || 0;
       var result = wallet
         ? wallet.addTickets(added)
         : { ticketCount: added, added: added };
       renderPlans();
-      if (applyCoupon) {
-        showToast('🎉 9,900원 결제가 완료되었습니다! 체험 할인권이 사용되고 이용권 1장이 충전되었습니다.');
+      if (plan.id === 'trial') {
+        showToast('🎉 9,900원 결제가 완료되었습니다! 체험 할인권으로 이용권 1장이 충전되었습니다.');
       } else {
         showToast('🎉 결제가 완료되었습니다! 이용권 ' + result.added + '장이 충전되었습니다.');
       }
@@ -426,6 +447,7 @@
       open: open,
       close: close,
       plans: PLANS,
+      paymentPayload: paymentPayload,
       promptPurchase: promptPurchase
     };
     window.openPaymentModal = function () {
