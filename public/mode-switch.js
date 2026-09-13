@@ -83,13 +83,12 @@
     '.ms-divider::before,.ms-divider::after{content:"";flex:1;height:1px;background:rgba(154,133,128,.28);}',
     '.ms-social{display:grid;gap:.5rem;}',
     '.ms-social-btn{display:flex;align-items:center;justify-content:center;gap:.45rem;width:100%;',
-    'padding:.85rem 1rem;border-radius:14px;border:none;cursor:pointer;font-family:inherit;',
-    'font-size:.84rem;font-weight:800;transition:transform .15s,opacity .15s;}',
+    'padding:.9rem 1rem;border-radius:14px;border:none;cursor:pointer;font-family:inherit;',
+    'font-size:.84rem;font-weight:700;transition:transform .15s,opacity .15s;}',
     '.ms-social-btn:hover{transform:translateY(-1px);opacity:.96;}',
     '.ms-social-btn:disabled{opacity:.6;pointer-events:none;transform:none;}',
-    '.ms-social-btn--kakao{background:#FEE500;color:#191919;}',
-    '.ms-social-btn--naver,.btn-naver{background:#03C75A;color:#fff;}',
-    '.ms-social-btn--google{background:#fff;color:#5C4A42;border:1px solid rgba(154,133,128,.28);}',
+    '.ms-social-btn--kakao{background:#FEE500;color:#191919;font-weight:700;}',
+    '.ms-social-btn--google{background:#FFFFFF;color:#374151;border:1px solid #E2E8F0;font-weight:700;}',
     '.ms-dismiss{margin-top:.9rem;border:none;background:none;cursor:pointer;font-family:inherit;',
     'color:var(--muted,#9A8580);font-size:.78rem;font-weight:700;}',
     '.ms-welcome-overlay{position:fixed;inset:0;z-index:450;display:none;align-items:center;justify-content:center;',
@@ -137,12 +136,6 @@
   var pendingHref = null;
   var authTab = 'login';
 
-  var SOCIAL = {
-    kakao: { name: '카카오 유저', email: 'kakao_test@dayo.app' },
-    naver: { name: '네이버 유저', email: 'naver_test@dayo.app' },
-    google: { name: '구글 유저', email: 'google_test@dayo.app' }
-  };
-
   var LOGIN_I18N = {
     ko: {
       title: '대화 라운지 로그인',
@@ -158,7 +151,7 @@
       passwordPlaceholderSignup: '비밀번호 입력 (6자리 이상)',
       startBtn: '이메일로 시작하기',
       socialDivider: '간편 로그인',
-      social: { kakao: '카카오로 계속하기', naver: '네이버로 계속하기', google: 'Google로 계속하기' },
+      social: { kakao: '카카오로 1초 만에 시작하기', google: 'Google 계정으로 계속하기' },
       dismiss: '다음에 하기'
     },
     en: {
@@ -175,7 +168,7 @@
       passwordPlaceholderSignup: 'Password (6+ characters)',
       startBtn: 'Continue with Email',
       socialDivider: 'Social Login',
-      social: { kakao: 'Continue with Kakao', naver: 'Continue with Naver', google: 'Continue with Google' },
+      social: { kakao: 'Start in 1 second with Kakao', google: 'Continue with Google' },
       dismiss: 'Maybe later'
     },
     fr: {
@@ -192,7 +185,7 @@
       passwordPlaceholderSignup: 'Mot de passe (6 caractères min.)',
       startBtn: "Continuer avec l'e-mail",
       socialDivider: 'Connexion rapide',
-      social: { kakao: 'Continuer avec Kakao', naver: 'Continuer avec Naver', google: 'Continuer avec Google' },
+      social: { kakao: 'Commencer en 1 seconde avec Kakao', google: 'Continuer avec Google' },
       dismiss: 'Plus tard'
     },
     es: {
@@ -209,7 +202,7 @@
       passwordPlaceholderSignup: 'Contraseña (mín. 6 caracteres)',
       startBtn: 'Continuar con el correo',
       socialDivider: 'Acceso rápido',
-      social: { kakao: 'Continuar con Kakao', naver: 'Continuar con Naver', google: 'Continuar con Google' },
+      social: { kakao: 'Empezar en 1 segundo con Kakao', google: 'Continuar con Google' },
       dismiss: 'Más tarde'
     }
   };
@@ -318,6 +311,7 @@
   function setLoginBusy(busy) {
     if (!overlay) return;
     var submit = overlay.querySelector('.ms-login');
+    var kakao = overlay.querySelector('[data-ms-social="kakao"]');
     var google = overlay.querySelector('[data-ms-social="google"]');
     var form = overlay.querySelector('#msLoginForm');
     if (submit) {
@@ -326,6 +320,7 @@
         ? t('login.busy')
         : (authTab === 'signup' ? t('login.signupBtn') : t('login.startBtn'));
     }
+    if (kakao) kakao.disabled = !!busy;
     if (google) google.disabled = !!busy;
     if (form) {
       var inputs = form.querySelectorAll('input');
@@ -780,48 +775,15 @@
     });
   }
 
-  function handleNaverTestLogin() {
-    showToast('네이버 로그인은 준비 중이에요. 이메일로 3초 로그인해 주세요 ☕️');
-  }
-
   function handleSocialAuth(provider) {
-    if (provider === 'kakao') {
-      if (typeof window.handleKakaoLogin === 'function') {
-        window.handleKakaoLogin();
-        return;
-      }
-      showToast(t('login.socialSoon'));
+    if (provider === 'kakao' && typeof window.handleKakaoLogin === 'function') {
+      window.handleKakaoLogin();
       return;
     }
-    if (provider === 'naver') {
-      showToast('네이버 로그인은 준비 중이에요. 이메일로 3초 로그인해 주세요 ☕️');
+    if (provider === 'google' && typeof window.handleGoogleLogin === 'function') {
+      window.handleGoogleLogin();
       return;
     }
-    if (provider !== 'google') {
-      showToast(t('login.socialSoon'));
-      return;
-    }
-    if (typeof window.handleGoogleLogin === 'function') {
-      setLoginBusy(true);
-      Promise.resolve(window.handleGoogleLogin()).catch(function (err) {
-        showToast(authToastMessage(err));
-      }).finally(function () {
-        setLoginBusy(false);
-      });
-      return;
-    }
-    setLoginBusy(true);
-    waitForStore().then(function (store) {
-      if (!store || typeof store.signInWithGoogle !== 'function') {
-        throw new Error('unavailable');
-      }
-      return store.signInWithGoogle();
-    }).then(function () {
-      /* Google OAuth redirects away; keep busy until navigation */
-    }).catch(function (err) {
-      setLoginBusy(false);
-      showToast(authToastMessage(err));
-    });
   }
 
   function syncLoginI18n() {
@@ -834,7 +796,6 @@
     var submit = overlay.querySelector('.ms-login');
     var divider = overlay.querySelector('.ms-divider');
     var kakao = overlay.querySelector('[data-ms-social="kakao"]');
-    var naver = overlay.querySelector('[data-ms-social="naver"], .btn-naver, .ms-social-btn--naver');
     var google = overlay.querySelector('[data-ms-social="google"]');
     var dismiss = overlay.querySelector('[data-ms-close]');
     var tabLogin = overlay.querySelector('[data-ms-tab="login"]');
@@ -846,7 +807,6 @@
     if (submit) submit.textContent = signup ? t('login.signupBtn') : t('login.startBtn');
     if (divider) divider.textContent = t('login.socialDivider');
     if (kakao) kakao.textContent = t('login.social.kakao');
-    if (naver) naver.textContent = t('login.social.naver');
     if (google) google.textContent = t('login.social.google');
     if (dismiss) dismiss.textContent = t('login.dismiss');
     if (tabLogin) tabLogin.textContent = t('login.tabLogin');
@@ -877,8 +837,7 @@
       '  </form>',
       '  <div class="ms-divider">', t('login.socialDivider'), '</div>',
       '  <div class="ms-social">',
-      '    <button class="ms-social-btn ms-social-btn--kakao" type="button" data-ms-social="kakao">', t('login.social.kakao'), '</button>',
-      '    <button type="button" class="ms-social-btn ms-social-btn--naver btn-naver" data-ms-social="naver">', t('login.social.naver'), '</button>',
+      '    <button class="ms-social-btn ms-social-btn--kakao" type="button" data-ms-social="kakao" onclick="handleKakaoLogin()">', t('login.social.kakao'), '</button>',
       '    <button class="ms-social-btn ms-social-btn--google" type="button" data-ms-social="google" onclick="handleGoogleLogin()">', t('login.social.google'), '</button>',
       '  </div>',
       '  <button class="ms-dismiss" type="button" data-ms-close">', t('login.dismiss'), '</button>',
@@ -923,7 +882,7 @@
       }
       var social = e.target.closest('[data-ms-social]');
       if (!social) return;
-      if (social.getAttribute('data-ms-social') === 'google') return;
+      if (social.getAttribute('data-ms-social') === 'google' || social.getAttribute('data-ms-social') === 'kakao') return;
       handleSocialAuth(social.getAttribute('data-ms-social'));
     });
 

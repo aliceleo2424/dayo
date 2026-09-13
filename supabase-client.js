@@ -188,16 +188,6 @@
     window.location.reload();
   };
 
-  window.handleKakaoLogin = async function () {
-    var client = window.supabaseClient;
-    if (!client) return;
-    var result = await client.auth.signInWithOAuth({
-      provider: 'kakao',
-      options: { redirectTo: window.location.href.split('#')[0] }
-    });
-    if (result.error) alert(result.error.message);
-  };
-
   var AUTH_REDIRECT = 'https://www.dayotalk.com/mypage.html';
 
   function getSupabaseAuth() {
@@ -304,6 +294,24 @@
       try { await window.fetchAuthProfile(); } catch (e) { /* ignore */ }
     }
     window.location.href = '/mypage.html';
+  };
+
+  window.handleKakaoLogin = async function () {
+    var supabase = getSupabaseAuth();
+    if (!supabase || !supabase.auth) {
+      alert('카카오 로그인 처리 중 오류가 발생했습니다.');
+      return;
+    }
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'kakao',
+      options: {
+        redirectTo: AUTH_REDIRECT
+      }
+    });
+    if (error) {
+      console.error('카카오 로그인 에러:', error);
+      alert('카카오 로그인 처리 중 오류가 발생했습니다.');
+    }
   };
 
   window.handleGoogleLogin = async function () {

@@ -205,13 +205,20 @@
       ES: 'Acceso rápido'
     },
     'login.social.kakao': {
-      KO: '카카오로 계속하기', EN: 'Continue with Kakao', FR: 'Continuer avec Kakao', ES: 'Continuar con Kakao'
-    },
-    'login.social.naver': {
-      KO: '네이버로 계속하기', EN: 'Continue with Naver', FR: 'Continuer avec Naver', ES: 'Continuar con Naver'
+      KO: '카카오로 1초 만에 시작하기',
+      EN: 'Start in 1 second with Kakao',
+      ZH: '用 Kakao 1秒开始',
+      JA: 'Kakaoで1秒ではじめる',
+      FR: 'Commencer en 1 seconde avec Kakao',
+      ES: 'Empezar en 1 segundo con Kakao'
     },
     'login.social.google': {
-      KO: 'Google로 계속하기', EN: 'Continue with Google', FR: 'Continuer avec Google', ES: 'Continuar con Google'
+      KO: 'Google 계정으로 계속하기',
+      EN: 'Continue with Google',
+      ZH: '使用 Google 账号继续',
+      JA: 'Googleアカウントで続ける',
+      FR: 'Continuer avec Google',
+      ES: 'Continuar con Google'
     },
     'login.passwordMismatch': {
       KO: '비밀번호가 올바르지 않습니다.',
