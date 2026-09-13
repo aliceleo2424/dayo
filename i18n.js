@@ -140,11 +140,57 @@
       FR: 'Échangez naturellement avec des partenaires du monde entier',
       ES: 'Inicia conversaciones casuales con compañeros globales'
     },
+    'login.tabLogin': {
+      KO: '로그인', EN: 'Log in', ZH: '登录', JA: 'ログイン', FR: 'Connexion', ES: 'Iniciar'
+    },
+    'login.tabSignup': {
+      KO: '회원가입', EN: 'Sign up', ZH: '注册', JA: '新規登録', FR: 'Inscription', ES: 'Registrarse'
+    },
+    'login.signupTitle': {
+      KO: 'DayO 라운지 첫 방문을 환영해요! 🎉',
+      EN: 'Welcome to the DayO lounge! 🎉',
+      ZH: '欢迎来到 DayO 会客厅！🎉',
+      JA: 'DayOラウンジへようこそ！🎉',
+      FR: 'Bienvenue au salon DayO ! 🎉',
+      ES: '¡Bienvenido al lounge DayO! 🎉'
+    },
+    'login.signupDesc': {
+      KO: '지금 가입하면 첫 1:1 대화 세션 웰컴 티켓 1장을 드려요.',
+      EN: 'Sign up now and get 1 welcome ticket for your first 1:1 session.',
+      ZH: '现在注册即可获得 1 张欢迎票，用于首次 1:1 会话。',
+      JA: '今登録すると、初回1:1セッションのウェルカムチケットを1枚プレゼント。',
+      FR: 'Inscrivez-vous et recevez 1 ticket de bienvenue pour votre première session 1:1.',
+      ES: 'Regístrate ahora y recibe 1 ticket de bienvenida para tu primera sesión 1:1.'
+    },
+    'login.signupBtn': {
+      KO: '웰컴 티켓 받고 시작하기',
+      EN: 'Get a welcome ticket and start',
+      ZH: '领取欢迎票并开始',
+      JA: 'ウェルカムチケットを受け取って始める',
+      FR: 'Recevoir le ticket et commencer',
+      ES: 'Recibir ticket y empezar'
+    },
+    'login.loungeBtn': {
+      KO: '대화 라운지 로그인',
+      EN: 'Lounge login',
+      ZH: '会客厅登录',
+      JA: 'ラウンジログイン',
+      FR: 'Connexion au salon',
+      ES: 'Iniciar en el lounge'
+    },
     'login.emailPlaceholder': {
       KO: '이메일 주소 입력', EN: 'Enter your email', FR: 'Adresse e-mail', ES: 'Correo electrónico'
     },
     'login.passwordPlaceholder': {
       KO: '비밀번호 입력', EN: 'Enter your password', FR: 'Mot de passe', ES: 'Contraseña'
+    },
+    'login.passwordPlaceholderSignup': {
+      KO: '비밀번호 입력 (6자리 이상)',
+      EN: 'Password (6+ characters)',
+      ZH: '密码（至少 6 位）',
+      JA: 'パスワード（6文字以上）',
+      FR: 'Mot de passe (6 caractères min.)',
+      ES: 'Contraseña (mín. 6 caracteres)'
     },
     'login.nicknamePlaceholder': {
       KO: '닉네임 또는 이메일을 입력해 주세요', EN: 'Enter nickname or email', ZH: '请输入昵称或邮箱', JA: 'ニックネームまたはメールを入力', FR: 'Pseudo ou e-mail', ES: 'Apodo o correo'

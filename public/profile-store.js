@@ -826,7 +826,7 @@ async function signInWithEmail(email, password) {
       password: cleanedPass,
       options: {
         data: { user_name: nameFromEmail(cleanedEmail) },
-        emailRedirectTo: window.location.origin + (window.location.pathname || '/')
+        emailRedirectTo: 'https://www.dayotalk.com/mypage.html'
       }
     });
   } catch (signUpErr) {
@@ -883,10 +883,9 @@ async function signInWithEmail(email, password) {
 async function signInWithGoogle() {
   var client = getClient();
   if (!client) throw new Error('supabase unavailable');
-  var redirectTo = window.location.href.split('#')[0];
   var result = await client.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: redirectTo }
+    options: { redirectTo: 'https://www.dayotalk.com/mypage.html' }
   });
   if (result.error) throw result.error;
   return result.data;

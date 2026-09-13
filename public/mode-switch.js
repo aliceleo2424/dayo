@@ -111,7 +111,22 @@
     'border:1px solid var(--coral-pale,#FFE9E4);background:#FFFCFA;color:var(--text,#594842);',
     'box-shadow:0 12px 34px rgba(113,83,72,.16);font-size:.82rem;font-weight:800;text-align:center;',
     'opacity:0;pointer-events:none;transform:translate(-50%,70px);transition:opacity .3s,transform .38s ease;}',
-    '.ms-toast.is-show{opacity:1;transform:translate(-50%,0);}'
+    '.ms-toast.is-show{opacity:1;transform:translate(-50%,0);}',
+    '.ms-tabs{display:flex;gap:.35rem;margin:0 0 1.05rem;padding:.28rem;border-radius:16px;',
+    'background:rgba(255,232,227,.62);}',
+    '.ms-tab{flex:1;padding:.62rem .4rem;border:none;border-radius:12px;background:transparent;',
+    'color:var(--muted,#9A8580);font-family:inherit;font-size:.84rem;font-weight:800;cursor:pointer;',
+    'transition:background .18s,color .18s,box-shadow .18s;}',
+    '.ms-tab.is-active{background:#fff;color:var(--coral,#FF6B57);box-shadow:0 2px 8px rgba(113,83,72,.1);}',
+    '.ms-auth-in{display:inline-flex;align-items:center;gap:.4rem;max-width:100%;}',
+    '.ms-auth-in .ms-logout-btn{display:inline-flex;align-items:center;padding:.5rem .85rem;',
+    'border:1px solid rgba(154,133,128,.28);border-radius:999px;background:#fff;',
+    'color:var(--muted,#9A8580);font-family:inherit;font-size:.78rem;font-weight:800;cursor:pointer;',
+    'white-space:nowrap;}',
+    '.ms-auth-in .ms-logout-btn:hover{border-color:var(--coral,#FF6B57);color:var(--coral,#FF6B57);',
+    'background:var(--coral-pale,#FFE8E3);}',
+    '[data-mode-switch="block"] .ms-auth-in{display:flex;width:100%;}',
+    '[data-mode-switch="block"] .ms-auth-in .ms-btn,[data-mode-switch="block"] .ms-auth-in .ms-logout-btn{flex:1;justify-content:center;}'
   ].join('');
 
   var overlay;
@@ -120,6 +135,7 @@
   var toastTimer;
   var welcomeTimer;
   var pendingHref = null;
+  var authTab = 'login';
 
   var SOCIAL = {
     kakao: { name: '카카오 유저', email: 'kakao_test@dayo.app' },
@@ -131,8 +147,15 @@
     ko: {
       title: '대화 라운지 로그인',
       desc: '글로벌 파트너와의 가벼운 일상 대화를 시작해 보세요',
+      tabLogin: '로그인',
+      tabSignup: '회원가입',
+      signupTitle: 'DayO 라운지 첫 방문을 환영해요! 🎉',
+      signupDesc: '지금 가입하면 첫 1:1 대화 세션 웰컴 티켓 1장을 드려요.',
+      signupBtn: '웰컴 티켓 받고 시작하기',
+      loungeBtn: '대화 라운지 로그인',
       emailPlaceholder: '이메일 주소 입력',
       passwordPlaceholder: '비밀번호 입력',
+      passwordPlaceholderSignup: '비밀번호 입력 (6자리 이상)',
       startBtn: '이메일로 시작하기',
       socialDivider: '간편 로그인',
       social: { kakao: '카카오로 계속하기', naver: '네이버로 계속하기', google: 'Google로 계속하기' },
@@ -141,8 +164,15 @@
     en: {
       title: 'Welcome to DayO',
       desc: 'Start casual conversations with global partners',
+      tabLogin: 'Log in',
+      tabSignup: 'Sign up',
+      signupTitle: 'Welcome to the DayO lounge! 🎉',
+      signupDesc: 'Sign up now and get 1 welcome ticket for your first 1:1 session.',
+      signupBtn: 'Get a welcome ticket and start',
+      loungeBtn: 'Lounge login',
       emailPlaceholder: 'Enter your email',
       passwordPlaceholder: 'Enter your password',
+      passwordPlaceholderSignup: 'Password (6+ characters)',
       startBtn: 'Continue with Email',
       socialDivider: 'Social Login',
       social: { kakao: 'Continue with Kakao', naver: 'Continue with Naver', google: 'Continue with Google' },
@@ -151,8 +181,15 @@
     fr: {
       title: 'Connexion à DayO',
       desc: 'Échangez naturellement avec des partenaires du monde entier',
+      tabLogin: 'Connexion',
+      tabSignup: 'Inscription',
+      signupTitle: 'Bienvenue au salon DayO ! 🎉',
+      signupDesc: 'Inscrivez-vous et recevez 1 ticket de bienvenue pour votre première session 1:1.',
+      signupBtn: 'Recevoir le ticket et commencer',
+      loungeBtn: 'Connexion au salon',
       emailPlaceholder: 'Adresse e-mail',
       passwordPlaceholder: 'Mot de passe',
+      passwordPlaceholderSignup: 'Mot de passe (6 caractères min.)',
       startBtn: "Continuer avec l'e-mail",
       socialDivider: 'Connexion rapide',
       social: { kakao: 'Continuer avec Kakao', naver: 'Continuer avec Naver', google: 'Continuer avec Google' },
@@ -161,8 +198,15 @@
     es: {
       title: 'Iniciar sesión en DayO',
       desc: 'Inicia conversaciones casuales con compañeros globales',
+      tabLogin: 'Iniciar',
+      tabSignup: 'Registrarse',
+      signupTitle: '¡Bienvenido al lounge DayO! 🎉',
+      signupDesc: 'Regístrate ahora y recibe 1 ticket de bienvenida para tu primera sesión 1:1.',
+      signupBtn: 'Recibir ticket y empezar',
+      loungeBtn: 'Iniciar en el lounge',
       emailPlaceholder: 'Correo electrónico',
       passwordPlaceholder: 'Contraseña',
+      passwordPlaceholderSignup: 'Contraseña (mín. 6 caracteres)',
       startBtn: 'Continuar con el correo',
       socialDivider: 'Acceso rápido',
       social: { kakao: 'Continuar con Kakao', naver: 'Continuar con Naver', google: 'Continuar con Google' },
@@ -278,7 +322,9 @@
     var form = overlay.querySelector('#msLoginForm');
     if (submit) {
       submit.disabled = !!busy;
-      submit.textContent = busy ? t('login.busy') : t('login.startBtn');
+      submit.textContent = busy
+        ? t('login.busy')
+        : (authTab === 'signup' ? t('login.signupBtn') : t('login.startBtn'));
     }
     if (google) google.disabled = !!busy;
     if (form) {
@@ -444,7 +490,7 @@
       return {
         href: '#',
         icon: '🔑',
-        label: '카카오 / 이메일로 3초 로그인',
+        label: t('login.loungeBtn'),
         openLogin: true
       };
     }
@@ -494,18 +540,20 @@
       var ticketLabel = '☕️ 보유 티켓: ' + ticketCount + '장';
 
       return [
-        '<div class="ms-profile">',
-        '  <button class="ms-btn" type="button" data-ms-profile-toggle aria-expanded="false" aria-haspopup="true">',
+        '<div class="ms-auth-in">',
+        '  <div class="ms-profile">',
+        '    <button class="ms-btn" type="button" data-ms-profile-toggle aria-expanded="false" aria-haspopup="true">',
         lead, label,
-        '  <span class="ms-caret" aria-hidden="true">▾</span>',
-        '  </button>',
-        '  <div class="ms-menu" role="menu">',
-        '    <div class="ms-menu-status" role="presentation"><span data-ticket-badge-text>', ticketLabel, '</span></div>',
-        '    <button type="button" role="menuitem" data-tickets-open>🎟️ 이용권 구매 / 충전</button>',
-        '    <div class="ms-menu-sep" aria-hidden="true"></div>',
-        '    <a href="mypage.html" role="menuitem">👤 ', t('nav.mypage'), '</a>',
-        '    <button type="button" onclick="handleLogout(event)" class="btn-logout" data-ms-logout style="cursor: pointer;">로그아웃</button>',
+        '    <span class="ms-caret" aria-hidden="true">▾</span>',
+        '    </button>',
+        '    <div class="ms-menu" role="menu">',
+        '      <div class="ms-menu-status" role="presentation"><span data-ticket-badge-text>', ticketLabel, '</span></div>',
+        '      <button type="button" role="menuitem" data-tickets-open>🎟️ 이용권 구매 / 충전</button>',
+        '      <div class="ms-menu-sep" aria-hidden="true"></div>',
+        '      <a href="mypage.html" role="menuitem">👤 ', t('nav.mypage'), '</a>',
+        '    </div>',
         '  </div>',
+        '  <button type="button" onclick="handleLogout(event)" class="btn-logout ms-logout-btn" data-ms-logout>로그아웃</button>',
         '</div>'
       ].join('');
     }
@@ -589,9 +637,24 @@
     restorePageInteraction();
   }
 
-  function openLogin(href) {
-    pendingHref = href || null;
+  function setAuthTab(tab) {
+    authTab = tab === 'signup' ? 'signup' : 'login';
+    if (!overlay) return;
+    overlay.setAttribute('data-auth-tab', authTab);
+    var tabs = overlay.querySelectorAll('[data-ms-tab]');
+    Array.prototype.forEach.call(tabs, function (btn) {
+      var active = btn.getAttribute('data-ms-tab') === authTab;
+      btn.classList.toggle('is-active', active);
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    var pass = overlay.querySelector('#msPassword');
+    if (pass) pass.setAttribute('autocomplete', authTab === 'signup' ? 'new-password' : 'current-password');
     syncLoginI18n();
+  }
+
+  function openLogin(href, options) {
+    pendingHref = href || null;
+    setAuthTab(options && options.tab === 'signup' ? 'signup' : 'login');
     showAuthLayer(overlay);
     if (window.DayOScrollLock) window.DayOScrollLock.lock();
     else document.body.style.overflow = 'hidden';
@@ -659,6 +722,22 @@
     }
 
     setLoginBusy(true);
+    if (authTab === 'signup' && typeof window.handleEmailSignUp === 'function') {
+      Promise.resolve(window.handleEmailSignUp(cleanedEmail, cleanedPass)).catch(function (err) {
+        showToast((err && err.message) || t('login.authError'));
+      }).finally(function () {
+        setLoginBusy(false);
+      });
+      return;
+    }
+    if (typeof window.handleEmailSignIn === 'function') {
+      Promise.resolve(window.handleEmailSignIn(cleanedEmail, cleanedPass)).catch(function (err) {
+        showToast((err && err.message) || t('login.authError'));
+      }).finally(function () {
+        setLoginBusy(false);
+      });
+      return;
+    }
     if (typeof window.handleAuthLogin === 'function') {
       Promise.resolve(window.handleAuthLogin(cleanedEmail, cleanedPass)).catch(function (err) {
         setLoginBusy(false);
@@ -722,6 +801,15 @@
       showToast(t('login.socialSoon'));
       return;
     }
+    if (typeof window.handleGoogleLogin === 'function') {
+      setLoginBusy(true);
+      Promise.resolve(window.handleGoogleLogin()).catch(function (err) {
+        showToast(authToastMessage(err));
+      }).finally(function () {
+        setLoginBusy(false);
+      });
+      return;
+    }
     setLoginBusy(true);
     waitForStore().then(function (store) {
       if (!store || typeof store.signInWithGoogle !== 'function') {
@@ -738,6 +826,7 @@
 
   function syncLoginI18n() {
     if (!overlay) return;
+    var signup = authTab === 'signup';
     var title = overlay.querySelector('#msLoginTitle');
     var desc = overlay.querySelector('.ms-sub');
     var email = overlay.querySelector('#msEmail');
@@ -748,16 +837,20 @@
     var naver = overlay.querySelector('[data-ms-social="naver"], .btn-naver, .ms-social-btn--naver');
     var google = overlay.querySelector('[data-ms-social="google"]');
     var dismiss = overlay.querySelector('[data-ms-close]');
-    if (title) title.textContent = t('login.title');
-    if (desc) desc.textContent = t('login.desc');
+    var tabLogin = overlay.querySelector('[data-ms-tab="login"]');
+    var tabSignup = overlay.querySelector('[data-ms-tab="signup"]');
+    if (title) title.textContent = signup ? t('login.signupTitle') : t('login.title');
+    if (desc) desc.textContent = signup ? t('login.signupDesc') : t('login.desc');
     if (email) email.placeholder = t('login.emailPlaceholder');
-    if (pass) pass.placeholder = t('login.passwordPlaceholder');
-    if (submit) submit.textContent = t('login.startBtn');
+    if (pass) pass.placeholder = signup ? t('login.passwordPlaceholderSignup') : t('login.passwordPlaceholder');
+    if (submit) submit.textContent = signup ? t('login.signupBtn') : t('login.startBtn');
     if (divider) divider.textContent = t('login.socialDivider');
     if (kakao) kakao.textContent = t('login.social.kakao');
     if (naver) naver.textContent = t('login.social.naver');
     if (google) google.textContent = t('login.social.google');
     if (dismiss) dismiss.textContent = t('login.dismiss');
+    if (tabLogin) tabLogin.textContent = t('login.tabLogin');
+    if (tabSignup) tabSignup.textContent = t('login.tabSignup');
     applyI18n();
   }
 
@@ -767,25 +860,28 @@
     overlay.className = 'ms-overlay login-modal-overlay';
     overlay.innerHTML = [
       '<div class="ms-modal" role="dialog" aria-modal="true" aria-labelledby="msLoginTitle">',
+      '  <div class="ms-tabs" role="tablist" aria-label="로그인 또는 회원가입">',
+      '    <button type="button" class="ms-tab is-active" role="tab" id="msTabLogin" data-ms-tab="login" aria-selected="true">', t('login.tabLogin'), '</button>',
+      '    <button type="button" class="ms-tab" role="tab" id="msTabSignup" data-ms-tab="signup" aria-selected="false">', t('login.tabSignup'), '</button>',
+      '  </div>',
       '  <div class="ms-key" aria-hidden="true">☕️</div>',
-      '  <h2 id="msLoginTitle" data-i18n="login.title">', t('login.title'), '</h2>',
-      '  <p class="ms-sub" data-i18n="login.desc">', t('login.desc'), '</p>',
+      '  <h2 id="msLoginTitle">', t('login.title'), '</h2>',
+      '  <p class="ms-sub">', t('login.desc'), '</p>',
       '  <form class="ms-form" id="msLoginForm">',
       '    <input class="ms-input" type="email" id="msEmail" name="email" autocomplete="email" required',
-      '      data-i18n="login.emailPlaceholder" data-i18n-attr="placeholder"',
       '      placeholder="', t('login.emailPlaceholder'), '">',
       '    <input class="ms-input" type="password" id="msPassword" name="password" autocomplete="current-password" required',
-      '      minlength="6" data-i18n="login.passwordPlaceholder" data-i18n-attr="placeholder"',
+      '      minlength="6"',
       '      placeholder="', t('login.passwordPlaceholder'), '">',
-      '    <button class="ms-login" type="submit" data-i18n="login.startBtn">', t('login.startBtn'), '</button>',
+      '    <button class="ms-login" type="submit">', t('login.startBtn'), '</button>',
       '  </form>',
-      '  <div class="ms-divider" data-i18n="login.socialDivider">', t('login.socialDivider'), '</div>',
+      '  <div class="ms-divider">', t('login.socialDivider'), '</div>',
       '  <div class="ms-social">',
-      '    <button class="ms-social-btn ms-social-btn--kakao" type="button" data-ms-social="kakao" data-i18n="login.social.kakao">', t('login.social.kakao'), '</button>',
-      '    <button type="button" class="ms-social-btn ms-social-btn--naver btn-naver" data-ms-social="naver" data-i18n="login.social.naver">', t('login.social.naver'), '</button>',
-      '    <button class="ms-social-btn ms-social-btn--google" type="button" data-ms-social="google" data-i18n="login.social.google">', t('login.social.google'), '</button>',
+      '    <button class="ms-social-btn ms-social-btn--kakao" type="button" data-ms-social="kakao">', t('login.social.kakao'), '</button>',
+      '    <button type="button" class="ms-social-btn ms-social-btn--naver btn-naver" data-ms-social="naver">', t('login.social.naver'), '</button>',
+      '    <button class="ms-social-btn ms-social-btn--google" type="button" data-ms-social="google" onclick="handleGoogleLogin()">', t('login.social.google'), '</button>',
       '  </div>',
-      '  <button class="ms-dismiss" type="button" data-ms-close data-i18n="login.dismiss">', t('login.dismiss'), '</button>',
+      '  <button class="ms-dismiss" type="button" data-ms-close">', t('login.dismiss'), '</button>',
       '</div>'
     ].join('');
     document.body.appendChild(overlay);
@@ -820,8 +916,14 @@
     });
 
     overlay.addEventListener('click', function (e) {
+      var tabBtn = e.target.closest('[data-ms-tab]');
+      if (tabBtn) {
+        setAuthTab(tabBtn.getAttribute('data-ms-tab'));
+        return;
+      }
       var social = e.target.closest('[data-ms-social]');
       if (!social) return;
+      if (social.getAttribute('data-ms-social') === 'google') return;
       handleSocialAuth(social.getAttribute('data-ms-social'));
     });
 

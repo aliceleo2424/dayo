@@ -127,6 +127,17 @@
     if (profile.point_balance == null) profile.point_balance = 0;
     rememberLocalProfile(profile, user.email);
     window._dayoAuthProfile = profile;
+    var createdAt = user.created_at ? new Date(user.created_at).getTime() : 0;
+    var isNewUser = createdAt && (Date.now() - createdAt < 24 * 60 * 60 * 1000);
+    var wantsWelcome = !!(user.user_metadata && user.user_metadata.welcome_ticket);
+    if ((wantsWelcome || isNewUser) && Number(profile.ticket_count) < 1) {
+      try {
+        await client.from('profiles').update({ ticket_count: 1 }).eq('user_id', user.id);
+        profile.ticket_count = 1;
+        rememberLocalProfile(profile, user.email);
+        window._dayoAuthProfile = profile;
+      } catch (e) { /* ignore */ }
+    }
     document.dispatchEvent(new CustomEvent('dayo:authprofile', { detail: { user: user, profile: profile } }));
     return { user: user, profile: profile };
   };
@@ -185,6 +196,129 @@
       options: { redirectTo: window.location.href.split('#')[0] }
     });
     if (result.error) alert(result.error.message);
+  };
+
+  var AUTH_REDIRECT = 'https://www.dayotalk.com/mypage.html';
+
+  function getSupabaseAuth() {
+    if (window.supabaseClient && window.supabaseClient.auth) return window.supabaseClient;
+    if (window.supabase && window.supabase.auth && typeof window.supabase.auth.signUp === 'function') {
+      return window.supabase;
+    }
+    return null;
+  }
+
+  async function grantWelcomeTicket(client, user, email) {
+    if (!client || !user || !user.id) return;
+    var nickname = (email || user.email || '').split('@')[0] || 'DayO';
+    try {
+      var existing = await client
+        .from('profiles')
+        .select('ticket_count, user_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (existing.data && existing.data.user_id) {
+        if (Number(existing.data.ticket_count) < 1) {
+          await client.from('profiles').update({ ticket_count: 1 }).eq('user_id', user.id);
+        }
+      } else {
+        await client.from('profiles').insert([{
+          user_id: user.id,
+          client_key: 'user:' + user.id,
+          email: email || user.email || '',
+          user_name: nickname,
+          nickname: nickname,
+          ticket_count: 1,
+          has_welcome_coupon: true
+        }]);
+      }
+    } catch (e) { /* trigger may already have created the row */ }
+    if (typeof window.fetchAuthProfile === 'function') {
+      try { await window.fetchAuthProfile(); } catch (err) { /* ignore */ }
+    }
+  }
+
+  window.handleEmailSignUp = async function (email, password) {
+    var supabase = getSupabaseAuth();
+    email = String(email || '').trim().toLowerCase();
+    password = String(password || '');
+    if (!email || !password) return;
+    if (password.length < 6) {
+      alert('비밀번호는 6자리 이상이어야 해요.');
+      return;
+    }
+    if (!supabase || !supabase.auth) {
+      alert('로그인 서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.');
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+      options: {
+        emailRedirectTo: AUTH_REDIRECT,
+        data: { user_name: email.split('@')[0], welcome_ticket: true }
+      }
+    });
+
+    if (error) {
+      alert('회원가입 오류: ' + error.message);
+      return;
+    }
+
+    if (data.session) {
+      await grantWelcomeTicket(supabase, data.user, email);
+      alert('환영합니다! 웰컴 티켓 1장이 지급되었습니다 🎟️');
+      window.location.href = '/mypage.html';
+    } else {
+      alert('인증 메일이 발송되었습니다. 메일함에서 링크를 클릭해 가입을 완료해 주세요!');
+    }
+  };
+
+  window.handleEmailSignIn = async function (email, password) {
+    var supabase = getSupabaseAuth();
+    email = String(email || '').trim().toLowerCase();
+    password = String(password || '');
+    if (!email || !password) return;
+    if (password.length < 6) {
+      alert('비밀번호는 6자리 이상이어야 해요.');
+      return;
+    }
+    if (!supabase || !supabase.auth) {
+      alert('로그인 서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.');
+      return;
+    }
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password
+    });
+
+    if (error) {
+      alert('로그인 실패: ' + error.message);
+      return;
+    }
+    if (data && data.user && data.user.user_metadata && data.user.user_metadata.welcome_ticket) {
+      await grantWelcomeTicket(supabase, data.user, email);
+    } else if (typeof window.fetchAuthProfile === 'function') {
+      try { await window.fetchAuthProfile(); } catch (e) { /* ignore */ }
+    }
+    window.location.href = '/mypage.html';
+  };
+
+  window.handleGoogleLogin = async function () {
+    var supabase = getSupabaseAuth();
+    if (!supabase || !supabase.auth) {
+      alert('로그인 서버에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.');
+      return;
+    }
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: AUTH_REDIRECT
+      }
+    });
+    if (error) alert('구글 로그인 실패: ' + error.message);
   };
 
   window.openPaymentModal = function () {

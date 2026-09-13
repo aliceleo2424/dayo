@@ -130,6 +130,14 @@ body.dayo-scroll-locked {
   color: var(--coral, #FF6B57);
 }
 
+.nav-drawer > .btn-logout {
+  display: none;
+}
+
+body.is-logged-in .nav-drawer > .btn-logout {
+  display: flex;
+}
+
 .nav-drawer .header-cta,
 .nav-drawer .nav-drawer__cta {
   display: inline-flex;

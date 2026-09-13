@@ -1555,6 +1555,8 @@
     body.is-logged-in .nav-drawer a.nav-auth-only.nav-drawer__cta {
       display: inline-flex;
     }
+    .nav-drawer > .btn-logout { display: none; }
+    body.is-logged-in .nav-drawer > .btn-logout { display: flex; }
     #service-intro, #partners, #pricing, #about, #tutors, #booking, #reviews,
     #topics, #how, #ai-help, #tickets,
     #authDashboard, .auth-live, #loungeCarousel {
@@ -1615,16 +1617,22 @@
       .header-mode.user-badge {
         flex: 1;
         min-width: 0;
-        max-width: 140px;
+        max-width: 220px;
         display: flex;
         align-items: center;
         justify-content: center;
       }
 
       .header-mode .ms-profile,
-      .header-mode .ms-btn {
+      .header-mode .ms-btn,
+      .header-mode .ms-auth-in {
         max-width: 100%;
         min-width: 0;
+      }
+
+      .header-mode .ms-logout-btn {
+        padding: 5px 8px;
+        font-size: 11px;
       }
 
       .header-mode .ms-btn {
