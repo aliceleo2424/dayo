@@ -107,7 +107,7 @@
     if (!user) return null;
     var q = await client
       .from('profiles')
-      .select('nickname, user_name, ticket_count, point_balance, email, role')
+      .select('nickname, user_name, ticket_count, point_balance, email, role, speaking_level, last_test_score, last_test_date')
       .eq('user_id', user.id)
       .maybeSingle();
     if (q.error) {
@@ -127,6 +127,28 @@
     if (profile.point_balance == null) profile.point_balance = 0;
     rememberLocalProfile(profile, user.email);
     window._dayoAuthProfile = profile;
+    try {
+      var hist = JSON.parse(localStorage.getItem('dayo_speaking_test_history') || '[]');
+      var latest = Array.isArray(hist) ? hist[0] : null;
+      if (latest && latest.last_test_date) {
+        var remoteDate = profile.last_test_date ? new Date(profile.last_test_date).getTime() : 0;
+        var localDate = new Date(latest.last_test_date).getTime();
+        if (!remoteDate || localDate > remoteDate) {
+          var speakingUpdate = {
+            speaking_level: latest.speaking_level,
+            last_test_score: latest.last_test_score,
+            last_test_date: latest.last_test_date
+          };
+          var synced = await client.from('profiles').update(speakingUpdate).eq('user_id', user.id);
+          if (synced && !synced.error) {
+            profile.speaking_level = latest.speaking_level;
+            profile.last_test_score = latest.last_test_score;
+            profile.last_test_date = latest.last_test_date;
+            window._dayoAuthProfile = profile;
+          }
+        }
+      }
+    } catch (e) { /* ignore pending speaking sync */ }
     var createdAt = user.created_at ? new Date(user.created_at).getTime() : 0;
     var isNewUser = createdAt && (Date.now() - createdAt < 24 * 60 * 60 * 1000);
     var wantsWelcome = !!(user.user_metadata && user.user_metadata.welcome_ticket);

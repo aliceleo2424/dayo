@@ -652,14 +652,48 @@
       color: var(--coral);
       letter-spacing: 0.04em;
     }
+    .auth-cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      margin-top: 0.15rem;
+    }
     .auth-dash-cta {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin-top: 0.15rem;
+      flex: 1 1 200px;
+      margin-top: 0;
       padding: 0.85rem 1.25rem;
       border-radius: 18px;
       text-decoration: none;
+    }
+    .auth-speak-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1 1 200px;
+      padding: 0.85rem 1.25rem;
+      border: none;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #F6D365 0%, #F8C8A8 100%);
+      color: #3E4A42;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 0 #E0B84E, 0 8px 18px rgba(246, 211, 101, 0.32);
+    }
+    .auth-speak-cta:hover {
+      transform: translateY(-1px);
+    }
+    @media (max-width: 640px) {
+      .auth-cta-row { flex-direction: column; }
+      .auth-dash-cta,
+      .auth-speak-cta { width: 100%; flex: 1 1 auto; }
     }
     .auth-live {
       text-align: center;
@@ -2123,7 +2157,10 @@
             <span>💡 1회 25분 글로벌 대화 · 세션 티켓 1장</span>
             <button type="button" class="auth-ticket-charge" data-tickets-open aria-label="이용권 충전">+ 충전</button>
           </div>
-          <a href="room.html?role=user" class="header-cta auth-dash-cta" data-ms-guard data-ticket-gate>🚀 대화방 입장하기</a>
+          <div class="auth-cta-row">
+            <a href="room.html?role=user" class="header-cta auth-dash-cta" data-ms-guard data-ticket-gate>💬 대화방 입장하기</a>
+            <button type="button" class="auth-speak-cta" id="authSpeakTestBtn">🎯 스피킹 감각 알아보기</button>
+          </div>
           <div class="auth-report-feed" style="margin-top:1.1rem; text-align:left;">
             <p style="font-size:13px; font-weight:800; color:#3E4A42; margin-bottom:8px;">✨ 오늘의 대화 기록</p>
             <div id="mypage-card-feed"></div>
@@ -2930,7 +2967,51 @@
       return slide;
     }
 
+    function persistSpeakingTestResult() {
+      const pace = derivePace(quizLevel, quizScore);
+      const total = quizItems.length || 4;
+      const resultScore = Math.round((quizScore / total) * 100);
+      const resultLevel = t('quiz.pace.' + pace + '.name');
+      const payload = {
+        speaking_level: resultLevel,
+        last_test_score: resultScore,
+        last_test_date: new Date().toISOString(),
+        pace: pace,
+        raw_score: quizScore,
+        total: total
+      };
+      try {
+        var hist = [];
+        try { hist = JSON.parse(localStorage.getItem('dayo_speaking_test_history') || '[]'); } catch (e) { hist = []; }
+        if (!Array.isArray(hist)) hist = [];
+        hist.unshift(payload);
+        localStorage.setItem('dayo_speaking_test_history', JSON.stringify(hist.slice(0, 20)));
+      } catch (e) { /* ignore */ }
+
+      (async function () {
+        try {
+          var supabase = window.supabaseClient;
+          if (!supabase || !supabase.auth) return;
+          var sessionRes = await supabase.auth.getSession();
+          var session = sessionRes && sessionRes.data && sessionRes.data.session;
+          if (!session || !session.user) return;
+          var update = {
+            speaking_level: payload.speaking_level,
+            last_test_score: payload.last_test_score,
+            last_test_date: payload.last_test_date
+          };
+          var res = await supabase.from('profiles').update(update).eq('user_id', session.user.id).select('user_id');
+          if (res && (res.error || !res.data || !res.data.length)) {
+            await supabase.from('profiles').update(update).eq('id', session.user.id);
+          }
+        } catch (err) {
+          console.warn('Speaking test save skipped', err);
+        }
+      })();
+    }
+
     function renderResultStep() {
+      persistSpeakingTestResult();
       setQuizProgressVisible(true);
       setQuizProgress(quizItems.length, quizItems.length);
       const pack = currentPack();
@@ -3227,7 +3308,14 @@
       setQuizProgressVisible(false);
     }
 
+    window.openQuizModal = openQuizModal;
     if (startBtn) startBtn.addEventListener('click', openQuizModal);
+    var authSpeakBtn = document.getElementById('authSpeakTestBtn');
+    if (authSpeakBtn) {
+      authSpeakBtn.addEventListener('click', function () {
+        openQuizModal();
+      });
+    }
     document.querySelectorAll('[data-open-quiz]').forEach((el) => {
       el.addEventListener('click', openQuizModal);
       el.addEventListener('keydown', (e) => {

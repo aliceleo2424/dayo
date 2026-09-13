@@ -118,14 +118,12 @@
     'transition:background .18s,color .18s,box-shadow .18s;}',
     '.ms-tab.is-active{background:#fff;color:var(--coral,#FF6B57);box-shadow:0 2px 8px rgba(113,83,72,.1);}',
     '.ms-auth-in{display:inline-flex;align-items:center;gap:.4rem;max-width:100%;}',
-    '.ms-auth-in .ms-logout-btn{display:inline-flex;align-items:center;padding:.5rem .85rem;',
-    'border:1px solid rgba(154,133,128,.28);border-radius:999px;background:#fff;',
-    'color:var(--muted,#9A8580);font-family:inherit;font-size:.78rem;font-weight:800;cursor:pointer;',
-    'white-space:nowrap;}',
-    '.ms-auth-in .ms-logout-btn:hover{border-color:var(--coral,#FF6B57);color:var(--coral,#FF6B57);',
-    'background:var(--coral-pale,#FFE8E3);}',
+    '.ms-menu .ms-logout-btn{width:100%;justify-content:flex-start;border:none;border-radius:0;',
+    'background:transparent;color:var(--text,#5C4A42);font-family:inherit;font-size:.82rem;font-weight:800;',
+    'padding:.7rem .85rem;cursor:pointer;}',
+    '.ms-menu .ms-logout-btn:hover{background:var(--coral-pale,#FFE8E3);color:var(--coral,#FF6B57);}',
     '[data-mode-switch="block"] .ms-auth-in{display:flex;width:100%;}',
-    '[data-mode-switch="block"] .ms-auth-in .ms-btn,[data-mode-switch="block"] .ms-auth-in .ms-logout-btn{flex:1;justify-content:center;}'
+    '[data-mode-switch="block"] .ms-auth-in .ms-btn{flex:1;justify-content:center;}'
   ].join('');
 
   var overlay;
@@ -541,15 +539,15 @@
         lead, label,
         '    <span class="ms-caret" aria-hidden="true">▾</span>',
         '    </button>',
-        '    <div class="ms-menu" role="menu">',
+        '    <div class="ms-menu" id="userDropdown" role="menu">',
         '      <div class="ms-menu-status" role="presentation"><span data-ticket-badge-text>', ticketLabel, '</span></div>',
         '      <button type="button" role="menuitem" data-tickets-open>🎟️ 이용권 구매 / 충전</button>',
         '      <div class="ms-menu-sep" aria-hidden="true"></div>',
         '      <a href="mypage.html" role="menuitem">👤 ', t('nav.mypage'), '</a>',
+        '      <button type="button" role="menuitem" class="btn-logout ms-logout-btn" data-ms-logout>🚪 로그아웃</button>',
         '      <a href="https://dayo-sufk.vercel.app/admin/dashboard" role="menuitem" data-admin-dashboard-link target="_blank" rel="noopener noreferrer" style="display:none" hidden aria-hidden="true">🛠 관리자 대시보드</a>',
         '    </div>',
         '  </div>',
-        '  <button type="button" onclick="handleLogout(event)" class="btn-logout ms-logout-btn" data-ms-logout>로그아웃</button>',
         '</div>'
       ].join('');
     }

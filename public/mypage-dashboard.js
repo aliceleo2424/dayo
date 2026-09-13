@@ -248,10 +248,61 @@
 
   window.refreshUrgentSessionBanner = loadUrgentSessionBanner;
 
+  function formatTestDate(iso) {
+    if (!iso) return '';
+    var parsed = new Date(iso);
+    if (isNaN(parsed.getTime())) return String(iso);
+    return parsed.getFullYear() + '.' + String(parsed.getMonth() + 1).padStart(2, '0') + '.' + String(parsed.getDate()).padStart(2, '0');
+  }
+
+  function latestSpeakingRecord() {
+    var profile = window._dayoAuthProfile || {};
+    var latest = null;
+    try {
+      var hist = JSON.parse(localStorage.getItem('dayo_speaking_test_history') || '[]');
+      if (Array.isArray(hist) && hist[0]) latest = hist[0];
+    } catch (e) { latest = null; }
+    if (profile.last_test_date || profile.speaking_level || profile.last_test_score != null) {
+      var remote = {
+        speaking_level: profile.speaking_level,
+        last_test_score: profile.last_test_score,
+        last_test_date: profile.last_test_date
+      };
+      if (!latest) return remote;
+      var remoteTs = remote.last_test_date ? new Date(remote.last_test_date).getTime() : 0;
+      var localTs = latest.last_test_date ? new Date(latest.last_test_date).getTime() : 0;
+      return remoteTs >= localTs ? remote : latest;
+    }
+    return latest;
+  }
+
+  function renderSpeakingGrowth() {
+    var emptyEl = document.getElementById('speaking-growth-empty');
+    var resultEl = document.getElementById('speaking-growth-result');
+    var levelEl = document.getElementById('speaking-growth-level');
+    var scoreEl = document.getElementById('speaking-growth-score');
+    var dateEl = document.getElementById('speaking-growth-date');
+    if (!emptyEl || !resultEl) return;
+    var record = latestSpeakingRecord();
+    if (!record || (!record.speaking_level && record.last_test_score == null)) {
+      emptyEl.hidden = false;
+      resultEl.hidden = true;
+      return;
+    }
+    emptyEl.hidden = true;
+    resultEl.hidden = false;
+    var level = record.speaking_level || '스피킹 감각';
+    var score = record.last_test_score;
+    if (levelEl) levelEl.textContent = score != null ? (level + ' (' + score + '점)') : level;
+    if (scoreEl) scoreEl.textContent = score != null ? '최근 감각 페이스 · ' + score + '점' : '최근 감각 페이스';
+    if (dateEl) dateEl.textContent = record.last_test_date ? ('진단일 ' + formatTestDate(record.last_test_date)) : '';
+  }
+
   function init() {
     syncMainAction();
     bindStoryTopics();
     loadUrgentSessionBanner();
+    renderSpeakingGrowth();
     document.addEventListener('keydown', onKeydown);
   }
 
@@ -264,6 +315,8 @@
   document.addEventListener('dayo:authchange', function () {
     syncMainAction();
     loadUrgentSessionBanner();
+    renderSpeakingGrowth();
   });
+  document.addEventListener('dayo:authprofile', renderSpeakingGrowth);
   document.addEventListener('dayo:ticketchange', syncMainAction);
 })();
