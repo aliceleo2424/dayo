@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DayO 관리자 대시보드</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/supabase-env.js"></script>
+  <script src="/supabase-client.js"></script>
+  <script>
+    (function guardAdminRoute() {
+      function goHome() {
+        window.location.replace('/');
+      }
+
+      async function fetchRole(supabase, userId) {
+        try {
+          var byId = await supabase.from('profiles').select('role').eq('id', userId).single();
+          if (byId.data && byId.data.role) return byId.data.role;
+        } catch (e) { /* fall through */ }
+        try {
+          var byUserId = await supabase.from('profiles').select('role').eq('user_id', userId).maybeSingle();
+          if (byUserId.data && byUserId.data.role) return byUserId.data.role;
+        } catch (e2) { /* ignore */ }
+        return null;
+      }
+
+      async function enforce(session) {
+        if (!session || !session.user) {
+          goHome();
+          return;
+        }
+        var supabase = window.supabaseClient;
+        var role = await fetchRole(supabase, session.user.id);
+        if (role !== 'admin') {
+          goHome();
+          return;
+        }
+        document.documentElement.setAttribute('data-admin-ready', 'true');
+        var gate = document.getElementById('admin-gate');
+        var app = document.getElementById('admin-app');
+        if (gate) gate.hidden = true;
+        if (app) app.hidden = false;
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        var supabase = window.supabaseClient;
+        if (!supabase || !supabase.auth) {
+          goHome();
+          return;
+        }
+        supabase.auth.getSession().then(function (res) {
+          enforce(res && res.data && res.data.session);
+        });
+        supabase.auth.onAuthStateChange(function (event, session) {
+          if (event === 'TOKEN_REFRESHED') return;
+          enforce(session);
+        });
+      });
+    })();
+  </script>
+  <style>
+    :root {
+      --dayo-coral: #F07A68;
+      --dayo-charcoal: #3E4A42;
+      --dayo-muted: #66756C;
+      --dayo-border: #EDE4D5;
+      --dayo-cream: #FFF9ED;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      font-family: 'Gowun Dodum', 'Apple SD Gothic Neo', sans-serif;
+      background: var(--dayo-cream);
+      color: var(--dayo-charcoal);
+    }
+    .admin-shell { max-width: 720px; margin: 0 auto; padding: 48px 20px; }
+    .admin-card {
+      background: #fff;
+      border: 1px solid var(--dayo-border);
+      border-radius: 20px;
+      box-shadow: 0 16px 36px rgba(62, 74, 66, 0.08);
+      padding: 28px 24px;
+    }
+    .admin-kicker { font-size: 12px; font-weight: 800; letter-spacing: 0.06em; color: var(--dayo-coral); margin-bottom: 8px; }
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    p { color: var(--dayo-muted); line-height: 1.6; margin-bottom: 18px; }
+    .admin-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .admin-actions a {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 10px 14px; border-radius: 999px; text-decoration: none; font-weight: 700; font-size: 14px;
+    }
+    .btn-home { background: var(--dayo-coral); color: #fff; }
+    .btn-ghost { border: 1px solid var(--dayo-border); color: var(--dayo-charcoal); background: #fff; }
+    #admin-gate { min-height: 100vh; display: flex; align-items: center; justify-content: center; color: var(--dayo-muted); }
+  </style>
+</head>
+<body>
+  <div id="admin-gate">관리자 권한을 확인하는 중…</div>
+  <main id="admin-app" class="admin-shell" hidden>
+    <section class="admin-card">
+      <p class="admin-kicker">ADMIN</p>
+      <h1>관리자 대시보드</h1>
+      <p>DayO 백오피스에 연결되었습니다. 권한이 확인된 관리자만 이 페이지를 볼 수 있습니다.</p>
+      <div class="admin-actions">
+        <a class="btn-home" href="/">메인으로 돌아가기</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
