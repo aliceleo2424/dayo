@@ -1,11 +1,100 @@
-/* DayO 라운지 — 로그인 홈 그리드 카드 (캐러셀 슬롯은 선택)
- * 그리드 모드(#loungeDots 없음)에서는 초기화만 스킵합니다.
+/* DayO 라운지 — lounge_posts 실데이터 그리드 (캐러셀 슬롯은 선택)
+ * 그리드 모드(#loungeDots 없음)에서는 슬라이드 초기화만 스킵합니다.
  */
 (function () {
   'use strict';
 
   var INTERVAL_MS = 4000;
   var SWIPE_THRESHOLD = 40;
+
+  function getLoungeClient() {
+    if (window.supabaseClient && typeof window.supabaseClient.from === 'function') {
+      return window.supabaseClient;
+    }
+    if (window.supabase && typeof window.supabase.from === 'function') {
+      return window.supabase;
+    }
+    return null;
+  }
+
+  function esc(str) {
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function (c) {
+      return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
+    });
+  }
+
+  function categoryLabel(post) {
+    return String((post && (post.category || post.label)) || 'DayO 라운지').trim();
+  }
+
+  function postTitle(post) {
+    return String((post && (post.title || post.headline)) || '').trim();
+  }
+
+  function postSummary(post) {
+    return String((post && (post.summary || post.excerpt || post.body)) || '').trim();
+  }
+
+  function readTimeLabel(post) {
+    var value = post && (post.read_time != null ? post.read_time : post.reading_time);
+    if (value == null || value === '') return '';
+    if (typeof value === 'number' && Number.isFinite(value)) return value + '분 읽기';
+    return String(value).trim();
+  }
+
+  function renderEmpty(track) {
+    track.innerHTML = '<div class="lounge-empty">준비 중인 아티클입니다.</div>';
+  }
+
+  function renderPosts(track, posts) {
+    if (!posts || !posts.length) {
+      renderEmpty(track);
+      return;
+    }
+
+    track.innerHTML = posts.map(function (post) {
+      var label = categoryLabel(post);
+      var title = postTitle(post);
+      var summary = postSummary(post);
+      var body = title || summary;
+      var extra = (title && summary && summary !== title)
+        ? '<span class="lounge-card__summary">' + esc(summary) + '</span>'
+        : '';
+      var meta = readTimeLabel(post);
+      var metaHtml = meta ? '<span class="lounge-card__meta">' + esc(meta) + '</span>' : '';
+      return (
+        '<article class="lounge-card" data-lounge-slide>' +
+          (label ? '<span class="lounge-card__label">' + esc(label) + '</span>' : '') +
+          '<span class="lounge-card__body">' + esc(body) + '</span>' +
+          extra +
+          metaHtml +
+        '</article>'
+      );
+    }).join('');
+  }
+
+  async function loadLoungePosts() {
+    var track = document.getElementById('loungeTrack');
+    if (!track) return;
+    var supabase = getLoungeClient();
+    if (!supabase) {
+      renderEmpty(track);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('lounge_posts')
+        .select('*')
+        .eq('is_published', true)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      renderPosts(track, data);
+    } catch (err) {
+      console.warn('[DayO] lounge_posts load failed', err);
+      renderEmpty(track);
+    }
+  }
 
   function initLoungeCarousel() {
     var root = document.getElementById('loungeCarousel');
@@ -119,9 +208,15 @@
     });
   }
 
+  function init() {
+    loadLoungePosts().then(function () {
+      initLoungeCarousel();
+    });
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initLoungeCarousel);
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    initLoungeCarousel();
+    init();
   }
 })();

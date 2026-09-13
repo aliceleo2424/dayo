@@ -477,6 +477,33 @@
       font-weight: 700;
       line-height: 1.5;
     }
+    .lounge-card__summary {
+      font-size: 0.78rem;
+      font-weight: 600;
+      line-height: 1.45;
+      color: var(--text-muted);
+    }
+    .lounge-card__meta {
+      margin-top: auto;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+    .lounge-empty {
+      grid-column: 1 / -1;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.4rem 1rem;
+      border-radius: 20px;
+      border: 1px dashed rgba(255, 209, 220, 0.9);
+      background: #FFFCF9;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-align: center;
+    }
 
     @media (max-width: 720px) {
       .lounge-grid {
@@ -494,6 +521,7 @@
         min-height: 124px;
       }
       .lounge-card:nth-child(5) { grid-column: auto; }
+      .lounge-empty { flex: 1 0 100%; }
     }
 
     /* Auth dashboard — hidden for guests */
@@ -2117,28 +2145,7 @@
             <h2 class="lounge-head__title">DayO 라운지</h2>
             <p class="lounge-head__sub">소식 · 이벤트 · 팁을 한눈에</p>
           </div>
-          <div class="lounge-grid" id="loungeTrack">
-            <article class="lounge-card" data-lounge-slide>
-              <span class="lounge-card__label">📢 DayO 소식</span>
-              <span class="lounge-card__body">영국인 레이나와 함께하는 인스타 촬영 현장 비하인드!</span>
-            </article>
-            <article class="lounge-card" data-lounge-slide>
-              <span class="lounge-card__label">🎉 진행 중인 이벤트</span>
-              <span class="lounge-card__body">[8월 한정] 첫 대화 완주 시 스타벅스 커피 쿠폰!</span>
-            </article>
-            <article class="lounge-card" data-lounge-slide>
-              <span class="lounge-card__label">☕️ 오늘의 1분 팁</span>
-              <span class="lounge-card__body">원어민이 매일 쓰는 "I'm down!" (나도 낄게) 표현</span>
-            </article>
-            <article class="lounge-card" data-lounge-slide>
-              <span class="lounge-card__label">🎙️ DayO 라이브 웨비나</span>
-              <span class="lounge-card__body">"외국인 파트너와 어색함 깨부수는 3가지 꿀팁"</span>
-            </article>
-            <article class="lounge-card" data-lounge-slide>
-              <span class="lounge-card__label">💡 스몰토크 질문집</span>
-              <span class="lounge-card__body">첫 인사 때 물꼬 터주는 질문 모음집</span>
-            </article>
-          </div>
+          <div class="lounge-grid" id="loungeTrack"></div>
         </div>
       </div>
     </section>
