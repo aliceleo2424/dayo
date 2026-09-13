@@ -25,42 +25,56 @@ export function AdminAuthGuard({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false;
 
-    async function enforce(session: { user?: { id: string } } | null) {
-      if (!session?.user) {
-        window.location.replace("/");
-        return;
-      }
+    async function checkAdminAuth() {
       try {
-        const role = await fetchProfileRole(session.user.id);
-        if (cancelled) return;
-        if (role !== "admin") {
-          window.location.replace("/");
+        if (!supabase?.auth?.getSession) {
+          alert("관리자 로그인이 필요한 페이지입니다.");
+          window.location.href = "/";
           return;
         }
-        setAllowed(true);
-      } catch {
-        if (!cancelled) window.location.replace("/");
+
+        const sessionRes = await supabase.auth.getSession();
+        const session = sessionRes?.data?.session ?? null;
+        const sessionError = sessionRes?.error;
+
+        if (sessionError || !session || !session.user) {
+          alert("관리자 로그인이 필요한 페이지입니다.");
+          window.location.href = "/";
+          return;
+        }
+
+        const role = await fetchProfileRole(session.user.id);
+        if (cancelled) return;
+
+        if (role === "admin") {
+          setAllowed(true);
+          return;
+        }
+
+        alert("관리자(Admin) 권한이 없습니다.");
+        window.location.href = "/";
+      } catch (err) {
+        console.error("Admin Auth Error:", err);
+        if (cancelled) return;
+        alert("인증 확인 중 오류가 발생했습니다. 메인 페이지로 이동합니다.");
+        window.location.href = "/";
       }
     }
 
-    supabase.auth.getSession().then(({ data }) => {
-      enforce(data.session);
-    });
-
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      enforce(session);
-    });
+    checkAdminAuth();
 
     return () => {
       cancelled = true;
-      sub.subscription.unsubscribe();
     };
   }, []);
 
   if (!allowed) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-sm text-muted-foreground">
-        관리자 권한을 확인하는 중…
+      <div
+        id="admin-loading"
+        className="admin-loading-screen flex min-h-screen items-center justify-center text-sm text-muted-foreground"
+      >
+        관리자 권한을 확인하는 중...
       </div>
     );
   }

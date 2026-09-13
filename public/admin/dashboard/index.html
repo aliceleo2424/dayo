@@ -8,56 +8,71 @@
   <script src="/supabase-env.js"></script>
   <script src="/supabase-client.js"></script>
   <script>
-    (function guardAdminRoute() {
-      function goHome() {
-        window.location.replace('/');
-      }
-
-      async function fetchRole(supabase, userId) {
-        try {
-          var byId = await supabase.from('profiles').select('role').eq('id', userId).single();
-          if (byId.data && byId.data.role) return byId.data.role;
-        } catch (e) { /* fall through */ }
-        try {
-          var byUserId = await supabase.from('profiles').select('role').eq('user_id', userId).maybeSingle();
-          if (byUserId.data && byUserId.data.role) return byUserId.data.role;
-        } catch (e2) { /* ignore */ }
-        return null;
-      }
-
-      async function enforce(session) {
-        if (!session || !session.user) {
-          goHome();
-          return;
-        }
+    async function checkAdminAuth() {
+      try {
         var supabase = window.supabaseClient;
-        var role = await fetchRole(supabase, session.user.id);
-        if (role !== 'admin') {
-          goHome();
+        if (!supabase || !supabase.auth || typeof supabase.auth.getSession !== 'function') {
+          alert('관리자 로그인이 필요한 페이지입니다.');
+          window.location.href = '/';
           return;
         }
-        document.documentElement.setAttribute('data-admin-ready', 'true');
-        var gate = document.getElementById('admin-gate');
-        var app = document.getElementById('admin-app');
-        if (gate) gate.hidden = true;
-        if (app) app.hidden = false;
-      }
 
-      document.addEventListener('DOMContentLoaded', function () {
-        var supabase = window.supabaseClient;
-        if (!supabase || !supabase.auth) {
-          goHome();
+        var sessionRes = await supabase.auth.getSession();
+        var sessionData = (sessionRes && sessionRes.data) || {};
+        var session = sessionData.session || null;
+        var sessionError = sessionRes && sessionRes.error;
+
+        if (sessionError || !session || !session.user) {
+          alert('관리자 로그인이 필요한 페이지입니다.');
+          window.location.href = '/';
           return;
         }
-        supabase.auth.getSession().then(function (res) {
-          enforce(res && res.data && res.data.session);
-        });
-        supabase.auth.onAuthStateChange(function (event, session) {
-          if (event === 'TOKEN_REFRESHED') return;
-          enforce(session);
-        });
-      });
-    })();
+
+        var profile = null;
+        var profileRes = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', session.user.id)
+          .maybeSingle();
+
+        if (profileRes && !profileRes.error && profileRes.data) {
+          profile = profileRes.data;
+        } else {
+          var fallbackRes = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .maybeSingle();
+          if (fallbackRes && !fallbackRes.error && fallbackRes.data) {
+            profile = fallbackRes.data;
+          }
+        }
+
+        if (profile && profile.role === 'admin') {
+          var loadingEl = document.getElementById('admin-loading') || document.querySelector('.admin-loading-screen');
+          if (loadingEl) loadingEl.style.display = 'none';
+          var dashboardEl = document.getElementById('admin-app') || document.querySelector('.dashboard-layout');
+          if (dashboardEl) {
+            dashboardEl.removeAttribute('hidden');
+            dashboardEl.style.display = 'flex';
+          }
+          return;
+        }
+
+        alert('관리자(Admin) 권한이 없습니다.');
+        window.location.href = '/';
+      } catch (err) {
+        console.error('Admin Auth Error:', err);
+        alert('인증 확인 중 오류가 발생했습니다. 메인 페이지로 이동합니다.');
+        window.location.href = '/';
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', checkAdminAuth);
+    } else {
+      checkAdminAuth();
+    }
   </script>
   <style>
     :root {
@@ -74,7 +89,14 @@
       background: var(--dayo-cream);
       color: var(--dayo-charcoal);
     }
-    .admin-shell { max-width: 720px; margin: 0 auto; padding: 48px 20px; }
+    .admin-shell,
+    .dashboard-layout {
+      display: none;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 20px;
+      flex-direction: column;
+    }
     .admin-card {
       background: #fff;
       border: 1px solid var(--dayo-border);
@@ -91,13 +113,18 @@
       padding: 10px 14px; border-radius: 999px; text-decoration: none; font-weight: 700; font-size: 14px;
     }
     .btn-home { background: var(--dayo-coral); color: #fff; }
-    .btn-ghost { border: 1px solid var(--dayo-border); color: var(--dayo-charcoal); background: #fff; }
-    #admin-gate { min-height: 100vh; display: flex; align-items: center; justify-content: center; color: var(--dayo-muted); }
+    .admin-loading-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--dayo-muted);
+    }
   </style>
 </head>
 <body>
-  <div id="admin-gate">관리자 권한을 확인하는 중…</div>
-  <main id="admin-app" class="admin-shell" hidden>
+  <div id="admin-loading" class="admin-loading-screen">관리자 권한을 확인하는 중...</div>
+  <main id="admin-app" class="admin-shell dashboard-layout">
     <section class="admin-card">
       <p class="admin-kicker">ADMIN</p>
       <h1>관리자 대시보드</h1>
