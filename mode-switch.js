@@ -546,7 +546,7 @@
         '      <button type="button" role="menuitem" data-tickets-open>🎟️ 이용권 구매 / 충전</button>',
         '      <div class="ms-menu-sep" aria-hidden="true"></div>',
         '      <a href="mypage.html" role="menuitem">👤 ', t('nav.mypage'), '</a>',
-        '      <a href="/admin/dashboard" role="menuitem" data-admin-dashboard-link style="display:none" hidden aria-hidden="true">🛠 관리자 대시보드</a>',
+        '      <a href="https://dayo-sufk.vercel.app/admin/dashboard" role="menuitem" data-admin-dashboard-link target="_blank" rel="noopener noreferrer" style="display:none" hidden aria-hidden="true">🛠 관리자 대시보드</a>',
         '    </div>',
         '  </div>',
         '  <button type="button" onclick="handleLogout(event)" class="btn-logout ms-logout-btn" data-ms-logout>로그아웃</button>',
