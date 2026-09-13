@@ -5,6 +5,7 @@ import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 var PROFILE_KEY = 'dayo.profileKey';
 var USER_KEY = 'userName';
+var NICKNAME_KEY = 'dayo_user_nickname';
 var EMAIL_KEY = 'dayo_userEmail';
 var AUTH_ID_KEY = 'dayo.authUserId';
 var MEMBER_KEY = 'dayo.memberSession';
@@ -122,11 +123,38 @@ function nameFromEmail(email) {
   return local.replace(/[._-]+/g, ' ').trim() || 'DayO';
 }
 
+function cachedNickname() {
+  return String(lsGet(NICKNAME_KEY, '') || '').trim();
+}
+
+function rememberNickname(name) {
+  var next = String(name || '').trim();
+  if (!next) return;
+  lsSet(NICKNAME_KEY, next);
+  lsSet(USER_KEY, next);
+  lsSet('dayo_user_name', next);
+}
+
+function resolveDisplayName(profile, user, fallbackName) {
+  var dbNick = String((profile && profile.nickname) || '').trim();
+  var dbUserName = String((profile && profile.user_name) || '').trim();
+  var cached = cachedNickname();
+  var emailName = nameFromEmail((user && user.email) || (profile && profile.email) || '');
+  var fallback = String(fallbackName || '').trim();
+  if (dbNick && !(cached && dbNick === emailName && cached !== emailName)) return dbNick;
+  if (cached) return cached;
+  if (dbUserName && dbUserName !== emailName) return dbUserName;
+  if (fallback && fallback !== emailName) return fallback;
+  return dbUserName || emailName || 'DayO';
+}
+
 function displayNameFromUser(user) {
+  var cached = cachedNickname();
+  if (cached) return cached;
   if (!user) return 'DayO';
   var meta = user.user_metadata || {};
   return String(
-    meta.user_name || meta.full_name || meta.name || nameFromEmail(user.email)
+    meta.nickname || meta.user_name || meta.full_name || meta.name || nameFromEmail(user.email)
   ).trim() || 'DayO';
 }
 
@@ -155,9 +183,11 @@ function clearAuthLocal() {
 function defaultsFromLocal() {
   var ticket = parseInt(lsGet(TICKET_KEY, '0'), 10);
   var streak = parseInt(lsGet(STREAK_KEY, '1'), 10);
+  var localName = cachedNickname() || lsGet(USER_KEY, '');
   return {
     client_key: getClientKey(),
-    user_name: lsGet(USER_KEY, ''),
+    user_name: localName,
+    nickname: localName,
     email: lsGet(EMAIL_KEY, ''),
     ticket_count: Number.isFinite(ticket) && ticket >= 0 ? ticket : 0,
     streak_count: Number.isFinite(streak) && streak > 0 ? streak : 1,
@@ -171,8 +201,12 @@ function defaultsFromLocal() {
 
 function applyProfileToLocal(profile) {
   if (!profile) return;
-  if (profile.user_name) lsSet(USER_KEY, profile.user_name);
-  if (profile.nickname) lsSet(USER_KEY, profile.nickname);
+  var displayName = resolveDisplayName(profile, authUser, profile.nickname || profile.user_name);
+  if (displayName) {
+    rememberNickname(displayName);
+    profile.nickname = displayName;
+    profile.user_name = displayName;
+  }
   if (profile.email) lsSet(EMAIL_KEY, profile.email);
   if (profile.ticket_count != null) lsSet(TICKET_KEY, profile.ticket_count);
   if (profile.point_balance != null) lsSet('dayo_point_balance', profile.point_balance);
@@ -251,7 +285,8 @@ async function fetchOrCreateProfile() {
 
 function mirrorLocalFields(profile) {
   if (!profile) return;
-  if (profile.user_name != null) lsSet(USER_KEY, profile.user_name);
+  var displayName = resolveDisplayName(profile, authUser, profile.nickname || profile.user_name);
+  if (displayName) rememberNickname(displayName);
   if (profile.email != null) lsSet(EMAIL_KEY, profile.email);
   if (profile.ticket_count != null) lsSet(TICKET_KEY, profile.ticket_count);
   if (profile.has_welcome_coupon != null) lsSet(WELCOME_COUPON_KEY, profile.has_welcome_coupon ? '1' : '0');
@@ -282,7 +317,8 @@ async function updateProfile(partial, options) {
     var payload = {
       client_key: next.client_key,
       user_id: next.user_id || getAuthUserId() || null,
-      user_name: next.user_name || '',
+      nickname: next.nickname || cachedNickname() || next.user_name || '',
+      user_name: next.nickname || next.user_name || '',
       email: next.email || '',
       ticket_count: Number(next.ticket_count) || 0,
       has_welcome_coupon: !!next.has_welcome_coupon,
@@ -597,7 +633,8 @@ async function ensureProfileForUser(user) {
   var today = new Date().toISOString().slice(0, 10);
 
   lsSet(AUTH_ID_KEY, userId);
-  lsSet(USER_KEY, name);
+  name = resolveDisplayName(null, user, name);
+  rememberNickname(name);
   lsSet(EMAIL_KEY, email);
   lsSet(MEMBER_KEY, 'active');
   lsSet(PROFILE_KEY, 'user:' + userId);
@@ -618,8 +655,10 @@ async function ensureProfileForUser(user) {
   try {
     var existing = await waitForTriggerProfile(client, userId);
     if (existing) {
+      var existingName = resolveDisplayName(existing, user, name);
       var nextLogin = Object.assign({}, existing, {
-        user_name: existing.user_name || name,
+        nickname: existing.nickname || existingName,
+        user_name: existingName,
         email: existing.email || email,
         last_login_date: existing.last_login_date || today
       });
@@ -715,7 +754,7 @@ function bindAuthListener(client) {
       if (event === 'TOKEN_REFRESHED') return;
       ensureProfileForUser(user).then(function (profile) {
         dispatchAuthChange(true, {
-          userName: (profile && profile.user_name) || displayNameFromUser(user),
+          userName: resolveDisplayName(profile, user, displayNameFromUser(user)),
           userId: user.id,
           email: user.email || '',
           event: event

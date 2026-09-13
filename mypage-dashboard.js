@@ -260,8 +260,12 @@
   }
 
   function displayName() {
+    if (typeof window.getCachedNickname === 'function') {
+      var cached = window.getCachedNickname();
+      if (cached) return cached;
+    }
     var profile = window._dayoAuthProfile || {};
-    var name = String(profile.user_name || profile.nickname || '').trim();
+    var name = String(profile.nickname || profile.user_name || '').trim();
     if (name) return name;
     var email = profile.email
       || (window._dayoAuthUser && window._dayoAuthUser.email)
@@ -272,13 +276,17 @@
     var fromEmail = emailPrefix(email);
     if (fromEmail) return fromEmail;
     try {
-      return (localStorage.getItem('userName') || localStorage.getItem('dayo_user_name') || '').trim() || 'DayO';
+      return (localStorage.getItem('dayo_user_nickname') || localStorage.getItem('userName') || localStorage.getItem('dayo_user_name') || '').trim() || 'DayO';
     } catch (e) {
       return 'DayO';
     }
   }
 
   function applyDisplayName(name) {
+    if (typeof window.updateProfileUI === 'function') {
+      window.updateProfileUI(name);
+      return;
+    }
     var next = String(name || '').trim();
     if (!next) return;
     window._dayoAuthProfile = Object.assign({}, window._dayoAuthProfile || {}, {
@@ -286,21 +294,16 @@
       nickname: next
     });
     try {
+      localStorage.setItem('dayo_user_nickname', next);
       localStorage.setItem('userName', next);
       localStorage.setItem('dayo_user_name', next);
     } catch (e) { /* ignore */ }
-    if (window.DayOProfileStore && typeof window.DayOProfileStore.updateProfile === 'function') {
-      window.DayOProfileStore.updateProfile({ user_name: next }, { skipEvents: true });
-    }
     if (window.DayOMode && typeof window.DayOMode.refresh === 'function') {
       window.DayOMode.refresh();
     }
     if (window.DayOGreeting && typeof window.DayOGreeting.refresh === 'function') {
       window.DayOGreeting.refresh();
     }
-    document.dispatchEvent(new CustomEvent('dayo:authprofile', {
-      detail: { user: window._dayoAuthUser, profile: window._dayoAuthProfile }
-    }));
   }
 
   function latestSpeakingRecord() {
@@ -419,27 +422,29 @@
     if (els.save) els.save.disabled = true;
     if (els.error) els.error.textContent = '';
     try {
-      var supabase = window.supabaseClient;
-      var user = window._dayoAuthUser;
-      if (supabase && supabase.auth) {
-        if (!user) {
-          var sessionRes = await supabase.auth.getSession();
-          user = sessionRes && sessionRes.data && sessionRes.data.session && sessionRes.data.session.user;
-        }
-      }
-      if (supabase && user) {
-        var payload = { user_name: next, nickname: next };
-        var res = await supabase.from('profiles').update(payload).eq('user_id', user.id).select('user_id');
+      if (typeof window.persistNickname === 'function') {
+        await window.persistNickname(next);
+      } else {
+        var supabase = window.supabaseClient;
+        if (!supabase || !supabase.auth) throw new Error('로그인 세션을 찾지 못했어요.');
+        var sessionRes = await supabase.auth.getSession();
+        var session = sessionRes && sessionRes.data && sessionRes.data.session;
+        if (!session || !session.user) throw new Error('로그인이 필요해요.');
+        var payload = { nickname: next, user_name: next };
+        var res = await supabase.from('profiles').update(payload).eq('id', session.user.id).select('nickname');
         if (res && (res.error || !res.data || !res.data.length)) {
-          res = await supabase.from('profiles').update(payload).eq('id', user.id);
+          res = await supabase.from('profiles').update(payload).eq('user_id', session.user.id).select('nickname');
         }
         if (res && res.error) throw res.error;
+        applyDisplayName(next);
       }
-      applyDisplayName(next);
       closeNicknameModal();
+      alert('닉네임이 성공적으로 변경되었습니다! ✨');
     } catch (err) {
-      console.warn('닉네임 저장 실패', err);
-      if (els.error) els.error.textContent = '저장에 실패했어요. 잠시 후 다시 시도해 주세요.';
+      console.error('닉네임 저장 실패:', err);
+      var message = (err && err.message) ? err.message : '잠시 후 다시 시도해 주세요.';
+      if (els.error) els.error.textContent = '닉네임 저장에 실패했습니다: ' + message;
+      alert('닉네임 저장에 실패했습니다: ' + message);
     } finally {
       if (els.save) els.save.disabled = false;
     }

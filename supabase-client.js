@@ -73,13 +73,77 @@
     }
   };
 
+  var NICKNAME_KEY = 'dayo_user_nickname';
+
+  function emailPrefix(email) {
+    var raw = String(email || '').trim();
+    if (!raw || raw.indexOf('@') < 1) return '';
+    return raw.split('@')[0];
+  }
+
+  window.getCachedNickname = function () {
+    try {
+      return String(localStorage.getItem(NICKNAME_KEY) || '').trim();
+    } catch (e) {
+      return '';
+    }
+  };
+
+  window.cacheNickname = function (name) {
+    var next = String(name || '').trim();
+    if (!next) return;
+    try {
+      localStorage.setItem(NICKNAME_KEY, next);
+      localStorage.setItem('userName', next);
+      localStorage.setItem('dayo_user_name', next);
+    } catch (e) { /* ignore */ }
+  };
+
+  window.updateProfileUI = function (name) {
+    var next = String(name || '').trim();
+    if (!next) return;
+    window.cacheNickname(next);
+    window._dayoAuthProfile = Object.assign({}, window._dayoAuthProfile || {}, {
+      nickname: next,
+      user_name: next
+    });
+    if (window.DayOMode && typeof window.DayOMode.refresh === 'function') {
+      window.DayOMode.refresh();
+    }
+    if (window.DayOGreeting && typeof window.DayOGreeting.refresh === 'function') {
+      window.DayOGreeting.refresh();
+    }
+    document.dispatchEvent(new CustomEvent('dayo:authprofile', {
+      detail: { user: window._dayoAuthUser, profile: window._dayoAuthProfile }
+    }));
+  };
+
+  window.persistNickname = async function (newNickname) {
+    var next = String(newNickname || '').trim();
+    var client = window.supabaseClient;
+    if (!next) throw new Error('닉네임을 입력해 주세요.');
+    if (!client || !client.auth) throw new Error('로그인 세션을 찾지 못했어요.');
+    var sessionRes = await client.auth.getSession();
+    var session = sessionRes && sessionRes.data && sessionRes.data.session;
+    if (!session || !session.user) throw new Error('로그인이 필요해요.');
+    var payload = { nickname: next, user_name: next };
+    var res = await client.from('profiles').update(payload).eq('user_id', session.user.id).select('nickname, user_id');
+    if (res.error || !res.data || !res.data.length) {
+      res = await client.from('profiles').update(payload).eq('id', session.user.id).select('nickname');
+    }
+    if (res.error) throw res.error;
+    if (!res.data || !res.data.length) throw new Error('프로필을 찾지 못했어요.');
+    window.updateProfileUI(next);
+    return next;
+  };
+
   function rememberLocalProfile(profile, email) {
     if (!profile && !email) return;
     try {
-      var name = (profile && (profile.user_name || profile.nickname)) || String(email || '').split('@')[0] || '';
+      var cached = window.getCachedNickname();
+      var name = (profile && (profile.nickname || profile.user_name)) || cached || emailPrefix(email);
       if (name) {
-        localStorage.setItem('userName', name);
-        localStorage.setItem('dayo_user_name', name);
+        window.cacheNickname(name);
       }
       if (email || (profile && profile.email)) {
         var em = email || profile.email;
@@ -105,11 +169,19 @@
     var user = sessionRes && sessionRes.data && sessionRes.data.user;
     window._dayoAuthUser = user || null;
     if (!user) return null;
+    var profileCols = 'nickname, role, user_name, ticket_count, point_balance, email, speaking_level, last_test_score, last_test_date, streak_count';
     var q = await client
       .from('profiles')
-      .select('nickname, user_name, ticket_count, point_balance, email, role, speaking_level, last_test_score, last_test_date, streak_count')
+      .select(profileCols)
       .eq('user_id', user.id)
       .maybeSingle();
+    if ((q.error || !q.data) && user.id) {
+      q = await client
+        .from('profiles')
+        .select(profileCols)
+        .eq('id', user.id)
+        .maybeSingle();
+    }
     if (q.error) {
       q = await client
         .from('profiles')
@@ -118,15 +190,37 @@
         .maybeSingle();
     }
     var profile = q.data || {
-      nickname: (user.email || '').split('@')[0],
+      nickname: window.getCachedNickname() || emailPrefix(user.email),
       ticket_count: 0,
       point_balance: 0,
       email: user.email
     };
-    if (!profile.nickname) profile.nickname = profile.user_name || (user.email || '').split('@')[0];
+    var dbNick = String((profile && profile.nickname) || '').trim();
+    var dbUserName = String((profile && profile.user_name) || '').trim();
+    var cachedNickname = window.getCachedNickname();
+    var fallback = emailPrefix(user.email);
+    if (dbNick && !(cachedNickname && dbNick === fallback && cachedNickname !== fallback)) {
+      profile.nickname = dbNick;
+    } else if (cachedNickname) {
+      profile.nickname = cachedNickname;
+    } else if (dbUserName && dbUserName !== fallback) {
+      profile.nickname = dbUserName;
+    } else {
+      profile.nickname = fallback;
+    }
     if (profile.point_balance == null) profile.point_balance = 0;
     rememberLocalProfile(profile, user.email);
     window._dayoAuthProfile = profile;
+    window.updateProfileUI(profile.nickname);
+    if (cachedNickname && profile.nickname === cachedNickname && dbNick !== cachedNickname) {
+      client.from('profiles').update({ nickname: cachedNickname, user_name: cachedNickname }).eq('user_id', user.id)
+        .then(function (heal) {
+          if (heal && (heal.error || !heal.data)) {
+            client.from('profiles').update({ nickname: cachedNickname, user_name: cachedNickname }).eq('id', user.id);
+          }
+        })
+        .catch(function () { /* ignore heal */ });
+    }
     try {
       var hist = JSON.parse(localStorage.getItem('dayo_speaking_test_history') || '[]');
       var latest = Array.isArray(hist) ? hist[0] : null;
@@ -971,12 +1065,16 @@
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
+      var cached = window.getCachedNickname();
+      if (cached) window.updateProfileUI(cached);
       window.fetchAuthProfile();
       window.bindLearnerSessionId();
       bindAdminDashboardNav();
       if (document.getElementById('mypage-card-feed')) window.loadUserReports();
     });
   } else {
+    var cachedNow = window.getCachedNickname();
+    if (cachedNow) window.updateProfileUI(cachedNow);
     window.fetchAuthProfile();
     window.bindLearnerSessionId();
     bindAdminDashboardNav();

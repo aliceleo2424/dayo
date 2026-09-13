@@ -8,6 +8,7 @@
     'dayo_userEmail',
     'dayo_is_logged_in',
     'dayo_user_name',
+    'dayo_user_nickname',
     'dayo_user_email',
     'dayo.authUserId',
     'dayo_users',

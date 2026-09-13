@@ -263,6 +263,10 @@
 
   function getUserName() {
     try {
+      if (typeof window.getCachedNickname === 'function') {
+        var cached = window.getCachedNickname();
+        if (cached) return cached;
+      }
       var profile = window._dayoAuthProfile;
       if (profile && (profile.nickname || profile.user_name)) {
         return String(profile.nickname || profile.user_name).trim();
@@ -276,7 +280,8 @@
         }
       }
       if (!checkUserLoggedIn()) return '';
-      return (window.localStorage.getItem(USER_KEY) || '').trim()
+      return (window.localStorage.getItem('dayo_user_nickname') || '').trim()
+        || (window.localStorage.getItem(USER_KEY) || '').trim()
         || (window.localStorage.getItem('dayo_user_name') || '').trim();
     } catch (e) {
       return '';
@@ -407,6 +412,7 @@
       window.localStorage.removeItem(EMAIL_KEY);
       window.localStorage.removeItem('dayo_is_logged_in');
       window.localStorage.removeItem('dayo_user_name');
+      window.localStorage.removeItem('dayo_user_nickname');
       window.localStorage.removeItem('dayo_user_email');
       window.localStorage.removeItem('dayo_userEmail');
       window.localStorage.removeItem('dayo_point_balance');
