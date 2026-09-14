@@ -30,14 +30,13 @@ export function AdminSidebar() {
       "fixed left-0 top-0 z-40 flex h-screen flex-col border-r bg-navy text-white transition-all duration-300",
       sidebarCollapsed ? "w-[68px]" : "w-64"
     )}>
-      <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
+      <div className="flex h-16 items-center justify-between gap-2 border-b border-white/10 px-3">
         {!sidebarCollapsed && (
-          <Link href="/admin/dashboard" className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-coral text-sm font-bold">D</span>
-            <span className="font-semibold">DayO Admin</span>
+          <Link href="/admin/dashboard" className="flex min-w-0 items-center rounded-lg bg-white/95 px-1 py-0.5">
+            <img src="/images/logo.png" alt="DayO Admin" className="h-10 w-[9.5rem] object-cover object-center" />
           </Link>
         )}
-        <Button variant="ghost" size="icon" onClick={toggleSidebar} className="text-white hover:bg-white/10">
+        <Button variant="ghost" size="icon" onClick={toggleSidebar} className={cn("text-white hover:bg-white/10", sidebarCollapsed && "mx-auto")}>
           {sidebarCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
         </Button>
       </div>

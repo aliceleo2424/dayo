@@ -14,7 +14,10 @@ export function AdminHeader({ title }: { title: string }) {
       "sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60",
       sidebarCollapsed ? "ml-[68px]" : "ml-64"
     )}>
-      <h1 className="text-xl font-semibold text-navy">{title}</h1>
+      <div className="flex items-center gap-3">
+        <img src="/images/logo.png" alt="DayO" className="h-9 w-[8.5rem] object-cover object-center" />
+        <h1 className="text-xl font-semibold text-navy">{title}</h1>
+      </div>
       <div className="flex items-center gap-3">
         <Badge variant="coral">Super Admin</Badge>
         <Button variant="ghost" size="icon" className="relative">

@@ -207,25 +207,13 @@
       padding: 0.85rem clamp(1rem, 3.5vw, 2.25rem);
     }
 
-    .logo { display: flex; align-items: center; gap: 0.65rem; text-decoration: none; color: var(--text); flex-shrink: 0; }
-    .logo-icon {
-      width: 42px; height: 42px;
-      background: linear-gradient(145deg, #FF9A8B, var(--coral));
-      border-radius: 16px;
-      display: flex; align-items: center; justify-content: center;
-      font-family: 'Quicksand', sans-serif; font-size: 1.3rem; font-weight: 700; color: #fff;
-      box-shadow: 0 4px 16px var(--shadow-soft);
-    }
-    .logo-stack { display: flex; flex-direction: column; gap: 0.08rem; line-height: 1.15; }
-    .logo-text { font-family: 'Quicksand', 'Gowun Dodum', sans-serif; font-size: 1.35rem; font-weight: 700; }
-    .logo-text span { color: var(--coral); font-weight: 600; }
-    .logo-tagline {
-      font-family: 'Quicksand', sans-serif;
-      font-size: 0.62rem;
-      font-weight: 600;
-      letter-spacing: 0.03em;
-      color: var(--text-muted);
-      white-space: nowrap;
+    .logo { display: flex; align-items: center; text-decoration: none; color: var(--text); flex-shrink: 0; }
+    .logo-img {
+      display: block;
+      height: 48px;
+      width: 132px;
+      object-fit: cover;
+      object-position: center;
     }
 
     .nav-desktop {
@@ -262,6 +250,10 @@
       display: flex; align-items: center; gap: 0.55rem; flex-shrink: 0;
       justify-self: end;
       white-space: nowrap;
+    }
+    .header-actions > [data-i18n-lang="icon"] {
+      flex-shrink: 0;
+      margin-left: 0.1rem;
     }
 
     .admin-dash-link {
@@ -1780,18 +1772,9 @@
         min-width: 0;
       }
 
-      .logo-icon {
-        width: 28px;
-        height: 28px;
-        font-size: 0.95rem;
-        border-radius: 10px;
-      }
-
-      .logo-text {
-        font-size: 15px;
-      }
-      .logo-tagline {
-        display: none;
+      .logo-img {
+        height: 36px;
+        width: 100px;
       }
 
       .nav-desktop { display: none; }
@@ -2202,11 +2185,7 @@
   <header>
     <div class="header-inner">
       <a href="/" class="logo" data-i18n="nav.homeAria" data-i18n-attr="aria-label" aria-label="DayO 메인으로 이동">
-        <div class="logo-icon">D</div>
-        <div class="logo-stack">
-          <div class="logo-text">DayO <span>돼요</span></div>
-          <span class="logo-tagline">1:1 Global Chat Lounge</span>
-        </div>
+        <img src="/images/logo.png" alt="DayO" class="logo-img">
       </a>
 
       <nav class="nav-desktop" data-i18n="nav.mainMenuAria" data-i18n-attr="aria-label" aria-label="주요 메뉴">
@@ -2217,10 +2196,10 @@
       </nav>
 
       <div class="header-actions">
-        <div data-i18n-lang="icon"></div>
         <div class="header-mode user-badge" data-mode-switch="inline"></div>
         <a href="https://dayo-sufk.vercel.app/admin/dashboard" class="admin-dash-link" data-admin-dashboard-link target="_blank" rel="noopener noreferrer" hidden aria-hidden="true">관리자 대시보드</a>
         <button type="button" class="header-quiz-cta nav-guest-only" id="headerQuizBtn" data-open-quiz>무료 진단하기</button>
+        <div data-i18n-lang="icon"></div>
         <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
       </div>
     </div>
