@@ -13,6 +13,7 @@
   var PLANS = [
     {
       id: 'pack11',
+      payId: 'light11',
       badge: '🔥 BEST! 1회 보너스',
       title: '가벼운 11 패키지',
       orderName: '가벼운 11 패키지',
@@ -26,6 +27,7 @@
     },
     {
       id: 'pack33',
+      payId: 'full33',
       badge: '🎉 최대 할인 패키지',
       title: '마음껏 33 패키지',
       orderName: '마음껏 33 패키지',
@@ -39,6 +41,7 @@
     },
     {
       id: 'trial',
+      payId: 'trial',
       badge: '첫 가입 전용 ☕',
       title: '첫 세션 체험 할인권',
       orderName: '첫 세션 체험 할인권',
@@ -51,6 +54,7 @@
     },
     {
       id: 'single',
+      payId: 'single',
       badge: '기본',
       title: '1회 단품 이용권',
       orderName: '1회 단품 이용권',
@@ -204,6 +208,7 @@
         '<p class="tk-card__copy">' + plan.copy + '</p>' +
         '<div class="tk-card__cta">' +
           '<button type="button" class="tk-buy" data-tk-buy="' + plan.id + '"' +
+            ' onclick="requestPay(\'' + (plan.payId || plan.id) + '\')"' +
             ' data-amount="' + payload.amount + '"' +
             ' data-order-name="' + payload.orderName + '"' +
             ' data-ticket-count="' + payload.ticketCount + '">' +
@@ -332,6 +337,10 @@
 
   async function completePurchase(plan) {
     if (buying || !plan) return;
+    var payId = plan.payId || plan.id;
+    if (typeof window.requestPay === 'function') {
+      return window.requestPay(payId);
+    }
     buying = true;
     var payload = paymentPayload(plan);
     window.DayOTickets = window.DayOTickets || {};
@@ -377,6 +386,7 @@
     el.overlay.addEventListener('click', function (e) {
       var buy = e.target.closest('[data-tk-buy]');
       if (!buy) return;
+      if (typeof window.requestPay === 'function') return;
       completePurchase(findPlan(buy.getAttribute('data-tk-buy')));
     });
 
@@ -405,7 +415,8 @@
 
     var overlay = document.createElement('div');
     overlay.className = 'tk-overlay';
-    overlay.id = 'tkOverlay';
+    overlay.id = 'ticketModal';
+    overlay.setAttribute('data-tk-overlay', '1');
     overlay.innerHTML = buildMarkup();
     document.body.appendChild(overlay);
 
@@ -452,6 +463,7 @@
       promptPurchase: promptPurchase
     };
     window.openTicketModal = open;
+    window.closeTicketModal = close;
     window.openPaymentModal = function () {
       open();
     };
