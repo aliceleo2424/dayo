@@ -15,7 +15,7 @@ export function AdminHeader({ title }: { title: string }) {
       sidebarCollapsed ? "ml-[68px]" : "ml-64"
     )}>
       <div className="flex items-center gap-3">
-        <img src="/images/logo.png" alt="DayO" className="h-9 w-[8.5rem] object-cover object-center" />
+        <img src="/images/logo.png" alt="DayO" className="h-9 w-auto max-w-[10rem] object-contain bg-transparent" />
         <h1 className="text-xl font-semibold text-navy">{title}</h1>
       </div>
       <div className="flex items-center gap-3">

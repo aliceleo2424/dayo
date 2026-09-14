@@ -32,8 +32,8 @@ export function AdminSidebar() {
     )}>
       <div className="flex h-16 items-center justify-between gap-2 border-b border-white/10 px-3">
         {!sidebarCollapsed && (
-          <Link href="/admin/dashboard" className="flex min-w-0 items-center rounded-lg bg-white/95 px-1 py-0.5">
-            <img src="/images/logo.png" alt="DayO Admin" className="h-10 w-[9.5rem] object-cover object-center" />
+          <Link href="/admin/dashboard" className="flex min-w-0 items-center bg-transparent">
+            <img src="/images/logo.png" alt="DayO Admin" className="h-9 w-auto max-w-[10rem] object-contain bg-transparent" />
           </Link>
         )}
         <Button variant="ghost" size="icon" onClick={toggleSidebar} className={cn("text-white hover:bg-white/10", sidebarCollapsed && "mx-auto")}>

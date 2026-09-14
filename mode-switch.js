@@ -65,7 +65,7 @@
     'transition:transform .28s;}',
     '.ms-overlay.is-open .ms-modal{transform:translateY(0);}',
     '.ms-key{display:flex;align-items:center;justify-content:center;margin:0 auto .75rem;background:transparent;}',
-    '.ms-key img{display:block;height:72px;width:196px;object-fit:cover;object-position:center;}',
+    '.ms-key img{display:block;height:56px;width:auto;max-width:180px;object-fit:contain;object-position:center;background:transparent;}',
     '.ms-modal h2{font-size:1.08rem;font-weight:800;letter-spacing:-.03em;line-height:1.45;}',
     '.ms-modal .ms-sub{margin-top:.55rem;color:var(--muted,#9A8580);font-size:.84rem;line-height:1.65;}',
     '.ms-form{display:grid;gap:.55rem;margin-top:1.2rem;text-align:left;}',

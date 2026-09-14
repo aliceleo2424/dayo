@@ -207,13 +207,16 @@
       padding: 0.85rem clamp(1rem, 3.5vw, 2.25rem);
     }
 
-    .logo { display: flex; align-items: center; text-decoration: none; color: var(--text); flex-shrink: 0; }
+    .logo { display: flex; align-items: center; text-decoration: none; color: var(--text); flex-shrink: 0; background: transparent; }
     .logo-img {
       display: block;
-      height: 48px;
-      width: 132px;
-      object-fit: cover;
+      height: 36px;
+      width: auto;
+      max-width: 160px;
+      object-fit: contain;
       object-position: center;
+      background: transparent;
+      background-color: unset;
     }
 
     .nav-desktop {
@@ -1774,7 +1777,8 @@
 
       .logo-img {
         height: 36px;
-        width: 100px;
+        width: auto;
+        max-width: 140px;
       }
 
       .nav-desktop { display: none; }
@@ -2979,7 +2983,7 @@
       if (!img) return;
       const show = () => img.classList.add('is-loaded');
       if (img.complete && img.naturalWidth) show();
-      else       img.addEventListener('load', show, { once: true });
+      else img.addEventListener('load', show, { once: true });
       if (nextQ && (nextQ.imageUrl || nextQ.image)) {
         const pre = new Image();
         pre.src = nextQ.imageUrl || nextQ.image;

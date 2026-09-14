@@ -88,14 +88,18 @@
       font-weight: 800;
       letter-spacing: -0.02em;
       flex-shrink: 0;
+      background: transparent;
     }
 
     .logo-img {
       display: block;
-      height: 48px;
-      width: 132px;
-      object-fit: cover;
+      height: 36px;
+      width: auto;
+      max-width: 160px;
+      object-fit: contain;
       object-position: center;
+      background: transparent;
+      background-color: unset;
     }
 
     .topbar-right { display: flex; align-items: center; gap: 0.9rem; }
@@ -1362,7 +1366,7 @@
       }
       .page { padding-top: 2rem; padding-bottom: 4rem; }
       .topbar-inner { min-height: 64px; padding-top: 0; padding-bottom: 0; }
-      .logo-img { height: 36px; width: 100px; }
+      .logo-img { height: 36px; width: auto; max-width: 140px; }
       .topbar-extras { display: none; }
       .status-grid { grid-template-columns: 1fr; }
       .status-fortune-row { grid-template-columns: 1fr; }
