@@ -504,7 +504,10 @@
       KO: 'PARTNER LOUNGE', EN: 'PARTNER LOUNGE', ZH: 'PARTNER LOUNGE', JA: 'PARTNER LOUNGE', FR: 'PARTNER LOUNGE', ES: 'PARTNER LOUNGE'
     },
     'partner.welcome': {
-      KO: 'Camille 님, 반갑습니다! ☕', EN: 'Welcome, Camille! ☕', ZH: '欢迎，Camille！☕', JA: 'Camilleさん、こんにちは！☕', FR: 'Bonjour Camille ! ☕', ES: '¡Hola Camille! ☕'
+      KO: '{name} 님, 반갑습니다! ☕', EN: 'Welcome, {name}! ☕', ZH: '欢迎，{name}！☕', JA: '{name}さん、こんにちは！☕', FR: 'Bonjour {name} ! ☕', ES: '¡Hola {name}! ☕'
+    },
+    'partner.welcomeFormat': {
+      KO: '{name} 님, 반갑습니다! ☕', EN: 'Welcome, {name}! ☕', ZH: '欢迎，{name}！☕', JA: '{name}さん、こんにちは！☕', FR: 'Bonjour {name} ! ☕', ES: '¡Hola {name}! ☕'
     },
     'partner.eyebrow': {
       KO: 'PARTNER LOUNGE', EN: 'PARTNER LOUNGE', ZH: 'PARTNER LOUNGE', JA: 'PARTNER LOUNGE', FR: 'PARTNER LOUNGE', ES: 'PARTNER LOUNGE'
@@ -617,6 +620,17 @@
     },
     'partner.stats.pendingHint': {
       KO: '대화 1회 × 6,000P (원)', EN: '6,000P (KRW) per conversation', ZH: '每次对话 × 6,000P (韩元)', JA: '会話1回 × 6,000P (円相当)', FR: '6 000P (KRW) par conversation', ES: '6.000P (KRW) por conversación'
+    },
+    'partner.stats.points': {
+      KO: '적립 포인트', EN: 'Earned points', ZH: '累计积分', JA: '保有ポイント', FR: 'Points cumulés', ES: 'Puntos acumulados'
+    },
+    'partner.stats.pointsHint': {
+      KO: '30분 세션(25분 대화) 완료 시 6,000P가 자동 적립되며, 매월 정산일에 100% 현금 출금 가능합니다.',
+      EN: '6,000P is credited automatically after a 30-minute session (25 minutes of conversation), and can be withdrawn in full on the monthly payout date.',
+      ZH: '完成30分钟会话（25分钟对话）后将自动累计6,000P，并在每月结算日可100%兑换现金。',
+      JA: '30分セッション（25分会話）完了時に6,000Pが自動加算され、毎月の精算日に100%現金引き出しできます。',
+      FR: '6 000P sont crédités automatiquement après une session de 30 min (25 min de conversation) et peuvent être retirés à 100 % à la date de paiement mensuelle.',
+      ES: 'Se acreditan 6.000P automáticamente al completar una sesión de 30 min (25 min de conversación) y se pueden retirar al 100% en la fecha de pago mensual.'
     },
     'partner.stats.settled': {
       KO: '누적 정산 완료 금액', EN: 'Settled activity pay', ZH: '累计已结算金额', JA: '累計精算済み金額', FR: 'Montant déjà réglé', ES: 'Importe ya liquidado'
@@ -1867,6 +1881,23 @@
     'partner.toast.photoApplied': { KO: '실제 프로필 사진이 미리보기로 적용되었습니다 📷', EN: 'Your real photo was applied as a preview 📷', ZH: '真实资料照片已应用为预览 📷', JA: '実際のプロフィール写真がプレビューに適用されました 📷', FR: 'Votre vraie photo a été appliquée en aperçu 📷', ES: 'Tu foto real se aplicó como vista previa 📷' },
     'partner.profile.avatarAria': { KO: '환하게 미소 짓는 대화 파트너 파스텔 아바타', EN: 'Brightly smiling pastel avatar of a conversation partner', ZH: '灿烂微笑的对话伙伴粉彩头像', JA: '明るく微笑む会話パートナーのパステルアバター', FR: 'Avatar pastel souriant du partenaire de conversation', ES: 'Avatar pastel sonriente del compañero de conversación' },
     'partner.profile.nicknamePlaceholder': { KO: '이름을 입력해 주세요', EN: 'Please enter a name', ZH: '请输入姓名', JA: '名前を入力してください', FR: 'Veuillez entrer un nom', ES: 'Por favor ingresa un nombre' },
+    'partner.profile.defaultName': { KO: 'DayO 파트너', EN: 'DayO Partner', ZH: 'DayO伙伴', JA: 'DayOパートナー', FR: 'Partenaire DayO', ES: 'Compañero DayO' },
+    'partner.badge.verified': { KO: '✅ 인증 파트너', EN: '✅ Verified partner', ZH: '✅ 认证伙伴', JA: '✅ 認証パートナー', FR: '✅ Partenaire vérifié', ES: '✅ Compañero verificado' },
+    'partner.badge.pending': { KO: '검토 대기중', EN: 'Pending review', ZH: '审核中', JA: '審査待ち', FR: 'En revue', ES: 'En revisión' },
+    'partner.slot.add': { KO: '➕ 가용 시간 등록', EN: '➕ Add availability', ZH: '➕ 登记可用时间', JA: '➕ 空き時間を登録', FR: '➕ Ajouter un créneau', ES: '➕ Añadir horario' },
+    'partner.slot.empty': { KO: '등록된 가용 슬롯이 없습니다. 대화 가능한 시간대를 열어주세요 🌿', EN: 'No availability slots yet. Open a time when you can chat 🌿', ZH: '还没有可用时段。请开放可以对话的时间 🌿', JA: '登録された空き枠がありません。会話できる時間を開いてください 🌿', FR: 'Aucun créneau pour le moment. Ouvrez un horaire de conversation 🌿', ES: 'Aún no hay horarios. Abre un espacio para conversar 🌿' },
+    'partner.slot.modalTitle': { KO: '가용 시간 등록', EN: 'Add availability', ZH: '登记可用时间', JA: '空き時間を登録', FR: 'Ajouter un créneau', ES: 'Añadir horario' },
+    'partner.slot.modalDesc': { KO: '대화 가능한 날짜와 시간을 선택해 슬롯을 열어주세요.', EN: 'Pick a date and time to open a bookable slot.', ZH: '请选择可对话的日期和时间来开放时段。', JA: '会話できる日付と時間を選んで枠を開いてください。', FR: 'Choisissez une date et une heure pour ouvrir un créneau.', ES: 'Elige fecha y hora para abrir un horario.' },
+    'partner.slot.date': { KO: '날짜', EN: 'Date', ZH: '日期', JA: '日付', FR: 'Date', ES: 'Fecha' },
+    'partner.slot.hour': { KO: '시', EN: 'Hour', ZH: '时', JA: '時', FR: 'Heure', ES: 'Hora' },
+    'partner.slot.minute': { KO: '분', EN: 'Minute', ZH: '分', JA: '分', FR: 'Minute', ES: 'Minuto' },
+    'partner.slot.submit': { KO: '등록하기', EN: 'Save slot', ZH: '登记', JA: '登録する', FR: 'Enregistrer', ES: 'Guardar' },
+    'partner.slot.saving': { KO: '등록 중…', EN: 'Saving…', ZH: '登记中…', JA: '登録中…', FR: 'Enregistrement…', ES: 'Guardando…' },
+    'partner.slot.saved': { KO: '가용 시간이 등록되었습니다 🌿', EN: 'Availability slot saved 🌿', ZH: '可用时间已登记 🌿', JA: '空き時間を登録しました 🌿', FR: 'Créneau enregistré 🌿', ES: 'Horario guardado 🌿' },
+    'partner.slot.error': { KO: '슬롯 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.', EN: 'Could not save the slot. Please try again.', ZH: '时段登记失败，请稍后重试。', JA: '枠の登録に失敗しました。しばらくして再試行してください。', FR: 'Impossible d’enregistrer le créneau. Réessayez.', ES: 'No se pudo guardar el horario. Inténtalo de nuevo.' },
+    'partner.slot.invalid': { KO: '날짜와 시간을 모두 선택해 주세요.', EN: 'Please choose both a date and a time.', ZH: '请选择日期和时间。', JA: '日付と時間を選んでください。', FR: 'Choisissez une date et une heure.', ES: 'Elige una fecha y una hora.' },
+    'partner.slot.available': { KO: '예약 가능', EN: 'Available', ZH: '可预约', JA: '予約可能', FR: 'Disponible', ES: 'Disponible' },
+    'partner.slot.booked': { KO: '예약됨', EN: 'Booked', ZH: '已预约', JA: '予約済み', FR: 'Réservé', ES: 'Reservado' },
     'partner.avatar.peach': { KO: '피치', EN: 'Peach', ZH: '桃色', JA: 'ピーチ', FR: 'Pêche', ES: 'Durazno' },
     'partner.avatar.rose': { KO: '로즈', EN: 'Rose', ZH: '玫瑰', JA: 'ローズ', FR: 'Rose', ES: 'Rosa' },
     'partner.avatar.mint': { KO: '민트', EN: 'Mint', ZH: '薄荷', JA: 'ミント', FR: 'Menthe', ES: 'Menta' },
