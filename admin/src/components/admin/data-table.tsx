@@ -21,10 +21,13 @@ interface DataTableProps<T extends Record<string, unknown>> {
   filters?: { key: string; label: string; options: { value: string; label: string }[] }[];
   exportFilename?: string;
   pageSize?: number;
+  emptyMessage?: string;
+  onRowClick?: (row: T) => void;
 }
 
 export function DataTable<T extends Record<string, unknown>>({
   data, columns, searchKeys = [], filters = [], exportFilename = "export.csv", pageSize = 8,
+  emptyMessage = "데이터가 없습니다.", onRowClick,
 }: DataTableProps<T>) {
   const [search, setSearch] = useState("");
   const [filterValues, setFilterValues] = useState<Record<string, string>>({});
@@ -100,7 +103,11 @@ export function DataTable<T extends Record<string, unknown>>({
           </thead>
           <tbody>
             {paged.map((row, i) => (
-              <tr key={i} className="border-b transition-colors hover:bg-muted/30">
+              <tr
+                key={i}
+                className={`border-b transition-colors hover:bg-muted/30${onRowClick ? " cursor-pointer" : ""}`}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+              >
                 {columns.map((col) => (
                   <td key={col.key} className="px-4 py-3">
                     {col.render ? col.render(row) : String(row[col.key] ?? "")}
@@ -109,7 +116,7 @@ export function DataTable<T extends Record<string, unknown>>({
               </tr>
             ))}
             {!paged.length && (
-              <tr><td colSpan={columns.length} className="px-4 py-8 text-center text-muted-foreground">데이터가 없습니다.</td></tr>
+              <tr><td colSpan={columns.length} className="px-4 py-8 text-center text-muted-foreground">{emptyMessage}</td></tr>
             )}
           </tbody>
         </table>

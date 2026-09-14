@@ -1,12 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { fetchPartnerProfiles } from "@/lib/admin-data";
+import { formatDate } from "@/lib/utils";
 import { DataTable, type Column } from "@/components/admin/data-table";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { PartnerDetailModal, partnerName, type PartnerProfile } from "@/components/admin/partner-detail-modal";
+
+const roleLabel: Record<string, string> = {
+  partner: "파트너",
+  admin: "관리자",
+  user: "유저",
+};
 
 export function PartnerPayoutManager() {
   const [rows, setRows] = useState<PartnerProfile[]>([]);
@@ -17,19 +23,7 @@ export function PartnerPayoutManager() {
   const load = useCallback(async () => {
     setLoading(true);
     setError("");
-    const fullSelect = "id, user_id, nickname, user_name, email, role, visa_type, languages, bank_name, bank_account, account_holder, point_balance, created_at";
-    let result = await supabase
-      .from("profiles")
-      .select(fullSelect)
-      .eq("role", "partner")
-      .order("created_at", { ascending: false });
-    if (result.error) {
-      result = await supabase
-        .from("profiles")
-        .select("id, user_id, nickname, user_name, email, role, point_balance, created_at")
-        .eq("role", "partner")
-        .order("created_at", { ascending: false });
-    }
+    const result = await fetchPartnerProfiles();
     if (result.error) {
       setError(result.error.message);
       setRows([]);
@@ -43,38 +37,23 @@ export function PartnerPayoutManager() {
     load();
   }, [load]);
 
-  const pending = rows.reduce((sum, row) => sum + Number(row.point_balance || 0), 0);
-
   const columns: Column<PartnerProfile & Record<string, unknown>>[] = [
     {
       key: "nickname",
-      header: "파트너",
+      header: "닉네임",
       sortable: true,
-      render: (row) => (
-        <button type="button" className="text-left" onClick={() => setSelected(row as PartnerProfile)}>
-          <p className="font-medium text-coral hover:underline">{partnerName(row as PartnerProfile)}</p>
-          <p className="text-xs text-muted-foreground">{String(row.email || "이메일 미등록")}</p>
-        </button>
-      ),
+      render: (row) => <p className="font-medium">{partnerName(row as PartnerProfile)}</p>,
     },
     {
-      key: "languages",
-      header: "담당 언어",
-      render: (row) => String(row.languages || "미등록"),
-    },
-    {
-      key: "visa_type",
-      header: "비자",
-      render: (row) => String(row.visa_type || "미등록"),
+      key: "email",
+      header: "이메일",
+      render: (row) => String(row.email || "미등록"),
     },
     {
       key: "point_balance",
-      header: "대기 정산",
+      header: "보유 포인트",
       sortable: true,
-      render: (row) => {
-        const pts = Number(row.point_balance || 0);
-        return <span className="font-semibold">{formatCurrency(pts)}</span>;
-      },
+      render: (row) => `${Number(row.point_balance || 0)} P`,
     },
     {
       key: "created_at",
@@ -83,49 +62,33 @@ export function PartnerPayoutManager() {
       render: (row) => row.created_at ? formatDate(String(row.created_at)) : "—",
     },
     {
-      key: "actions",
-      header: "",
-      render: (row) => (
-        <button
-          type="button"
-          className="text-sm font-medium text-coral hover:underline"
-          onClick={() => setSelected(row as PartnerProfile)}
-        >
-          상세
-        </button>
-      ),
+      key: "role",
+      header: "권한",
+      render: (row) => {
+        const role = String(row.role || "");
+        return <Badge variant={role === "admin" ? "coral" : "success"}>{roleLabel[role] || role || "—"}</Badge>;
+      },
     },
   ];
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">등록 파트너</CardTitle></CardHeader>
-          <CardContent><p className="text-2xl font-bold">{rows.length}</p></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">지급 대기 합계</CardTitle></CardHeader>
-          <CardContent><p className="text-2xl font-bold text-coral">{formatCurrency(pending)}</p></CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">정산 단위</CardTitle></CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold">1P = 1원</p>
-            <Badge className="mt-2" variant="outline">10일 정산</Badge>
-          </CardContent>
-        </Card>
-      </div>
-
       {error && <p className="text-sm text-red-600">{error}</p>}
       {loading ? (
-        <p className="text-sm text-muted-foreground">파트너 목록을 불러오는 중…</p>
+        <div className="h-40 animate-pulse rounded-xl bg-muted" />
+      ) : !rows.length ? (
+        <Card>
+          <CardContent className="py-16 text-center">
+            <p className="text-lg font-semibold">등록된 파트너가 없습니다. 파트너 등록 지원서를 확인해 주세요.</p>
+          </CardContent>
+        </Card>
       ) : (
         <DataTable
           data={rows as (PartnerProfile & Record<string, unknown>)[]}
           columns={columns}
-          searchKeys={["nickname", "user_name", "email"]}
+          searchKeys={["nickname", "user_name", "email", "role"]}
           exportFilename="partners.csv"
+          onRowClick={(row) => setSelected(row as PartnerProfile)}
         />
       )}
 
@@ -136,6 +99,15 @@ export function PartnerPayoutManager() {
         onSettled={(id, next) => {
           setRows((prev) => prev.map((row) => (row.id === id ? { ...row, point_balance: next } : row)));
           setSelected((cur) => (cur && cur.id === id ? { ...cur, point_balance: next } : cur));
+        }}
+        onUpdated={(next) => {
+          setRows((prev) => {
+            if (next.role !== "partner" && next.role !== "admin") {
+              return prev.filter((row) => row.id !== next.id);
+            }
+            return prev.map((row) => (row.id === next.id ? next : row));
+          });
+          setSelected((cur) => (cur && cur.id === next.id ? next : cur));
         }}
       />
     </div>

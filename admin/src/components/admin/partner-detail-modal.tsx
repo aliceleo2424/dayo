@@ -42,11 +42,13 @@ export function PartnerDetailModal({
   open,
   onOpenChange,
   onSettled,
+  onUpdated,
 }: {
   partner: PartnerProfile | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSettled?: (partnerId: string, nextBalance: number) => void;
+  onUpdated?: (next: PartnerProfile) => void;
 }) {
   const [activity, setActivity] = useState<Activity>({ completed_count: 0, avg_rating: null });
   const [logs, setLogs] = useState<{ id: string; points_settled: number; created_at: string; note: string | null }[]>([]);
@@ -96,6 +98,24 @@ export function PartnerDetailModal({
       cancelled = true;
     };
   }, [open, partner]);
+
+  async function updateRole(nextRole: "user" | "partner") {
+    if (!partner) return;
+    const label = nextRole === "user" ? "일반 유저로 강등" : "파트너 승인 완료";
+    const ok = window.confirm(`${partnerName(partner)} 님을 ${label} 처리할까요?`);
+    if (!ok) return;
+    setBusy(true);
+    setMessage("");
+    const { error } = await supabase.from("profiles").update({ role: nextRole }).eq("id", partner.id);
+    setBusy(false);
+    if (error) {
+      setMessage(error.message || "권한 변경에 실패했습니다.");
+      return;
+    }
+    const next = { ...partner, role: nextRole };
+    onUpdated?.(next);
+    setMessage(nextRole === "user" ? "일반 유저로 강등되었습니다." : "파트너 승인이 완료되었습니다.");
+  }
 
   async function settle() {
     if (!partner) return;
@@ -148,6 +168,7 @@ export function PartnerDetailModal({
               <CardContent className="grid gap-2 text-sm sm:grid-cols-2">
                 <p><span className="text-muted-foreground">닉네임</span><br />{partnerName(partner)}</p>
                 <p><span className="text-muted-foreground">이메일</span><br />{dash(partner.email)}</p>
+                <p><span className="text-muted-foreground">권한 상태</span><br />{dash(partner.role)}</p>
                 <p><span className="text-muted-foreground">담당 언어</span><br />{dash(partner.languages)}</p>
                 <p><span className="text-muted-foreground">비자 유형</span><br />{dash(partner.visa_type)}</p>
                 <p className="sm:col-span-2">
@@ -173,12 +194,12 @@ export function PartnerDetailModal({
             </div>
 
             <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-sm">정산 및 포인트 원장</CardTitle></CardHeader>
+              <CardHeader className="pb-2"><CardTitle className="text-sm">적립 및 정산 현황</CardTitle></CardHeader>
               <CardContent className="space-y-3 text-sm">
                 <div className="grid gap-3 sm:grid-cols-2">
                   <p>
                     <span className="text-muted-foreground">현재 보유 포인트</span><br />
-                    <strong>{points.toLocaleString("ko-KR")}P</strong>
+                    <strong>{`${points || 0} P`}</strong>
                     <span className="text-muted-foreground"> (1P = 1원)</span>
                   </p>
                   <p>
@@ -190,9 +211,17 @@ export function PartnerDetailModal({
                   <span className="text-muted-foreground">정산 계좌</span><br />
                   {bankLine || "미등록"}
                 </p>
-                <Button variant="coral" disabled={busy || points <= 0} onClick={settle}>
-                  💰 10일 정산 입금 완료 처리
-                </Button>
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" disabled={busy || partner.role === "user"} onClick={() => updateRole("user")}>
+                    일반 유저로 강등
+                  </Button>
+                  <Button variant="outline" disabled={busy || partner.role === "partner"} onClick={() => updateRole("partner")}>
+                    파트너 승인 완료
+                  </Button>
+                  <Button variant="coral" disabled={busy || points <= 0} onClick={settle}>
+                    포인트 수동 정산/지급 완료 처리
+                  </Button>
+                </div>
                 {message && <p className="text-sm text-emerald-700">{message}</p>}
                 {logs.length > 0 && (
                   <div className="border-t pt-3">
