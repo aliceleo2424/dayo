@@ -828,7 +828,7 @@
       KO: '🍰 1:1 글로벌 대화 라운지', EN: '🍰 1:1 Global Chat Lounge', ZH: '🍰 1:1 全球对话会客厅', JA: '🍰 1:1 Global Chat Lounge', FR: '🍰 1:1 Global Chat Lounge', ES: '🍰 1:1 Global Chat Lounge'
     },
     'hero.cta': {
-      KO: '세션 티켓 충전하기 💳', EN: 'Charge session tickets 💳', ZH: '充值会话票 💳', JA: 'セッションチケットをチャージ 💳', FR: 'Recharger des tickets de session 💳', ES: 'Recargar tickets de sesión 💳'
+      KO: '어떤 대화를 나누나요? 👆', EN: 'What do we talk about? 👆', ZH: '会聊些什么？👆', JA: 'どんな会話をするの？👆', FR: 'De quoi parle-t-on ? 👆', ES: '¿De qué hablamos? 👆'
     },
     'hero.quizCta': {
       KO: '내 스피킹 감각 알아보기 ›', EN: 'See how my speaking feels ›', ZH: '了解我的口语感觉 ›', JA: 'スピーキング感覚を知る ›', FR: 'Découvrir mon speaking ›', ES: 'Conocer mi speaking ›'
@@ -905,12 +905,12 @@
     },
     'how.step2.title': { KO: '1:1 글로벌 대화', EN: '1:1 global chat', ZH: '1:1 全球对话', JA: '1:1グローバル会話', FR: 'Conversation 1:1', ES: 'Charla 1:1 global' },
     'how.step2.desc': {
-      KO: '한국에 사는 외국인 파트너와 25분 동안 눈 맞추며 이야기해요. 친구처럼 가볍게요.',
-      EN: 'Talk for 25 minutes, eye to eye, with a partner living in Korea. Light, like a friend.',
-      ZH: '和住在韩国的外国伙伴对视交谈25分钟，像朋友一样轻松。',
-      JA: '韓国に住むパートナーと25分、目を合わせて話します。友達のように気軽に。',
-      FR: '25 minutes de conversation, les yeux dans les yeux, avec un partenaire en Corée.',
-      ES: '25 minutos de charla, cara a cara, con un compañero que vive en Corea.'
+      KO: '평가하거나 고쳐 주는 시험관이 아니라, 디저트 카페에서 수다 떨듯 편안한 1:1 글로벌 대화예요. 하고 싶은 말이 떠오르지 않거나 막힐 때만 화면 속 AI 언어 도우미가 끊기지 않게 곁에서 부드럽게 이어줍니다.',
+      EN: 'Not an examiner who grades or corrects you — a comfortable 1:1 global chat, like chatting in a dessert café. Only when the words won’t come does the on-screen AI helper gently continue so the talk doesn’t stop.',
+      ZH: '不是打分纠错的考官，而是像在甜品咖啡店闲聊一样轻松的1:1全球对话。只有在想不起要说的话或卡住时，屏幕里的AI语言助手才会在身边温柔接上，让对话不断。',
+      JA: '評価したり直したりする試験官ではなく、デザートカフェでおしゃべりするような、気軽な1:1グローバル会話です。言いたいことが浮かばないときだけ、画面のAI言語ヘルパーがそばでやさしくつないでくれます。',
+      FR: 'Pas un examinateur qui note ou corrige — une conversation 1:1 confortable, comme au café dessert. Seulement quand les mots manquent, l’aide IA à l’écran relance en douceur.',
+      ES: 'No es un examinador que evalúa o corrige: es una charla 1:1 cómoda, como en una cafetería de postres. Solo cuando no salen las palabras, el asistente de IA en pantalla continúa con suavidad.'
     },
     'how.step3.title': { KO: '1회 세션 티켓', EN: 'One-session ticket', ZH: '单次会话券', JA: '1回セッションチケット', FR: 'Ticket à la séance', ES: 'Ticket por sesión' },
     'how.step3.desc': {
@@ -969,6 +969,7 @@
     'tickets.regular.title': { KO: '세션 티켓 1장', EN: '1 session ticket', ZH: '会话券 1张', JA: 'セッションチケット1枚', FR: '1 ticket de session', ES: '1 ticket de sesión' },
     'tickets.regular.price': { KO: '필요할 때만 충전', EN: 'Top up only when you need it', ZH: '需要时再充', JA: '必要なときだけチャージ', FR: 'Rechargez seulement si besoin', ES: 'Recarga solo cuando lo necesites' },
     'tickets.cta': { KO: '📅 대화 세션 예약하기', EN: '📅 Book a talk session', ZH: '📅 预约对话', JA: '📅 会話セッションを予約', FR: '📅 Réserver une session', ES: '📅 Reservar una sesión' },
+    'tickets.chargeCta': { KO: '세션 티켓 충전하기 💳', EN: 'Charge session tickets 💳', ZH: '充值会话票 💳', JA: 'セッションチケットをチャージ 💳', FR: 'Recharger des tickets de session 💳', ES: 'Recargar tickets de sesión 💳' },
     'tickets.topicsCta': { KO: '어떤 대화를 나누나요? 👇', EN: 'What do we talk about? 👇', ZH: '会聊些什么？👇', JA: 'どんな会話をするの？👇', FR: 'De quoi parle-t-on ? 👇', ES: '¿De qué hablamos? 👇' },
     'journey.step1.tag': { KO: 'STEP 01', EN: 'STEP 01', ZH: 'STEP 01', JA: 'STEP 01', FR: 'ÉTAPE 01', ES: 'PASO 01' },
     'journey.step1.title': {
