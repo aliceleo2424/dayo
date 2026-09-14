@@ -1,5 +1,152 @@
 import { supabase } from "@/lib/supabase";
 
+export type CrmMember = {
+  id: string;
+  user_id: string | null;
+  nickname: string | null;
+  user_name: string | null;
+  email: string | null;
+  role: string | null;
+  ticket_count: number;
+  point_balance: number;
+  last_test_score: number | null;
+  speaking_level: string | null;
+  last_test_date: string | null;
+  created_at: string | null;
+  name: string;
+  paymentStatus: "paid" | "unpaid";
+  totalSpent: number;
+};
+
+type ProfileRecord = {
+  id?: string;
+  user_id?: string | null;
+  nickname?: string | null;
+  user_name?: string | null;
+  email?: string | null;
+  role?: string | null;
+  ticket_count?: number | null;
+  point_balance?: number | null;
+  last_test_score?: number | null;
+  speaking_level?: string | null;
+  last_test_date?: string | null;
+  created_at?: string | null;
+};
+
+export function profileDisplayName(row: {
+  nickname?: string | null;
+  user_name?: string | null;
+  email?: string | null;
+}) {
+  return String(row.nickname || row.user_name || row.email || "미등록").trim() || "미등록";
+}
+
+function mapProfile(row: ProfileRecord, spentByUser: Map<string, number>): CrmMember {
+  const id = String(row.id || "");
+  const userId = row.user_id ? String(row.user_id) : null;
+  const spent = (userId && spentByUser.get(userId)) || spentByUser.get(id) || 0;
+  return {
+    id,
+    user_id: userId,
+    nickname: row.nickname || null,
+    user_name: row.user_name || null,
+    email: row.email || null,
+    role: row.role || "user",
+    ticket_count: Number(row.ticket_count || 0),
+    point_balance: Number(row.point_balance || 0),
+    last_test_score: row.last_test_score == null ? null : Number(row.last_test_score),
+    speaking_level: row.speaking_level || null,
+    last_test_date: row.last_test_date || null,
+    created_at: row.created_at || null,
+    name: profileDisplayName(row),
+    paymentStatus: spent > 0 ? "paid" : "unpaid",
+    totalSpent: spent,
+  };
+}
+
+export async function fetchPaidSpendByUser() {
+  const spent = new Map<string, number>();
+  const orders = await supabase.from("orders").select("user_id, amount, status").eq("status", "paid");
+  if (orders.error) return spent;
+  for (const row of (orders.data || []) as { user_id?: string; amount?: number }[]) {
+    const uid = String(row.user_id || "");
+    if (!uid) continue;
+    spent.set(uid, (spent.get(uid) || 0) + Number(row.amount || 0));
+  }
+  return spent;
+}
+
+export async function fetchCrmMembers(): Promise<{ rows: CrmMember[]; error: string }> {
+  try {
+    const selects = [
+      "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, last_test_score, speaking_level, last_test_date, created_at",
+      "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, created_at",
+      "id, user_id, nickname, user_name, email, role, point_balance, created_at",
+      "id, nickname, user_name, email, role, created_at",
+    ];
+
+    let data: ProfileRecord[] | null = null;
+    let lastError = "";
+    for (const columns of selects) {
+      const result = await supabase.from("profiles").select(columns).order("created_at", { ascending: false });
+      if (!result.error) {
+        data = (result.data || []) as unknown as ProfileRecord[];
+        lastError = "";
+        break;
+      }
+      lastError = result.error.message;
+    }
+
+    if (!data) {
+      return { rows: [], error: lastError || "profiles를 읽을 수 없습니다." };
+    }
+
+    const spent = await fetchPaidSpendByUser();
+    return { rows: data.map((row) => mapProfile(row, spent)), error: "" };
+  } catch (err) {
+    return { rows: [], error: err instanceof Error ? err.message : "회원 목록을 불러오지 못했습니다." };
+  }
+}
+
+export async function fetchCrmMember(id: string): Promise<{ row: CrmMember | null; error: string }> {
+  const selects = [
+    "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, last_test_score, speaking_level, last_test_date, created_at",
+    "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, created_at",
+    "id, user_id, nickname, user_name, email, role, point_balance, created_at",
+  ];
+
+  let record: ProfileRecord | null = null;
+  let lastError = "";
+  for (const columns of selects) {
+    const byPk = await supabase.from("profiles").select(columns).eq("id", id).maybeSingle();
+    if (!byPk.error) {
+      record = (byPk.data || null) as unknown as ProfileRecord | null;
+      lastError = "";
+      break;
+    }
+    lastError = byPk.error.message;
+  }
+
+  if (!record) {
+    for (const columns of selects) {
+      const byAuth = await supabase.from("profiles").select(columns).eq("user_id", id).maybeSingle();
+      if (!byAuth.error) {
+        record = (byAuth.data || null) as unknown as ProfileRecord | null;
+        lastError = "";
+        break;
+      }
+      lastError = byAuth.error.message;
+    }
+  }
+
+  if (!record) {
+    return { row: null, error: lastError };
+  }
+
+  const spent = await fetchPaidSpendByUser();
+  return { row: mapProfile(record, spent), error: "" };
+}
+
 export type DashboardKpis = {
   memberCount: number;
   partnerCount: number;

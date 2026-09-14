@@ -1,45 +1,8 @@
 import type {
   AutomationRule, ClassReport, CmsBanner,
   CmsCopy, Coupon, PromoCode, ReferralRecord,
-  SocialProofReview, SpeakingTestResult, Tutor, User, UserLifecycleEvent,
+  SocialProofReview, Tutor,
 } from "./types";
-import { UTM_LABELS } from "./types";
-
-export const users: User[] = [
-  { id: "u001", name: "김서연", email: "seoyeon.k@email.com", purpose: "opic", language: "english", utmSource: "instagram", utmCampaign: "opic_summer", testScore: 82, testCompleted: true, paymentStatus: "paid", totalSpent: 597000, joinedAt: "2026-07-15", lastActiveAt: "2026-07-28T18:42:00", phone: "010-1234-5678" },
-  { id: "u002", name: "이하늘", email: "haneul.lee@email.com", purpose: "working_holiday", language: "english", utmSource: "youtube", utmCampaign: "wh_2026", testScore: 71, testCompleted: true, paymentStatus: "trial", totalSpent: 0, joinedAt: "2026-07-28", lastActiveAt: "2026-07-28T18:38:00" },
-  { id: "u003", name: "박지민", email: "jimin.park@email.com", purpose: "study_abroad", language: "english", utmSource: "google", testScore: 78, testCompleted: true, paymentStatus: "unpaid", totalSpent: 0, joinedAt: "2026-07-27", lastActiveAt: "2026-07-28T18:35:00" },
-  { id: "u004", name: "최유진", email: "yujin.choi@email.com", purpose: "opic", language: "english", utmSource: "naver", testScore: 88, testCompleted: true, paymentStatus: "paid", totalSpent: 149000, joinedAt: "2026-07-20", lastActiveAt: "2026-07-28T18:30:00" },
-  { id: "u005", name: "정민아", email: "mina.jung@email.com", purpose: "travel", language: "french", utmSource: "youtube", utmCampaign: "travel_france", testScore: 65, testCompleted: true, paymentStatus: "unpaid", totalSpent: 0, joinedAt: "2026-07-28", lastActiveAt: "2026-07-28T18:22:00" },
-  { id: "u006", name: "한소희", email: "sohee.han@email.com", purpose: "working_holiday", language: "english", utmSource: "tiktok", testScore: 65, testCompleted: true, paymentStatus: "unpaid", totalSpent: 0, joinedAt: "2026-07-28", lastActiveAt: "2026-07-28T18:15:00" },
-  { id: "u007", name: "윤채원", email: "chaewon.yoon@email.com", purpose: "study_abroad", language: "japanese", utmSource: "instagram", testScore: 74, testCompleted: true, paymentStatus: "paid", totalSpent: 198000, joinedAt: "2026-07-10", lastActiveAt: "2026-07-28T17:50:00" },
-  { id: "u008", name: "송다은", email: "daeun.song@email.com", purpose: "travel", language: "spanish", utmSource: "referral", testScore: null, testCompleted: false, paymentStatus: "unpaid", totalSpent: 0, joinedAt: "2026-07-28", lastActiveAt: "2026-07-28T17:30:00" },
-  { id: "u009", name: "강예린", email: "yerin.kang@email.com", purpose: "opic", language: "english", utmSource: "direct", testScore: 91, testCompleted: true, paymentStatus: "paid", totalSpent: 445000, joinedAt: "2026-06-28", lastActiveAt: "2026-07-28T16:00:00" },
-  { id: "u010", name: "임수빈", email: "subin.lim@email.com", purpose: "working_holiday", language: "english", utmSource: "instagram", testScore: 58, testCompleted: true, paymentStatus: "refunded", totalSpent: 99000, joinedAt: "2026-07-05", lastActiveAt: "2026-07-27T14:00:00" },
-  { id: "u011", name: "오지우", email: "jiwoo.oh@email.com", purpose: "study_abroad", language: "german", utmSource: "google", testScore: 69, testCompleted: true, paymentStatus: "trial", totalSpent: 0, joinedAt: "2026-07-25", lastActiveAt: "2026-07-28T15:00:00" },
-  { id: "u012", name: "배수아", email: "sua.bae@email.com", purpose: "travel", language: "vietnamese", utmSource: "naver", testScore: 72, testCompleted: true, paymentStatus: "paid", totalSpent: 89000, joinedAt: "2026-07-18", lastActiveAt: "2026-07-28T14:30:00" },
-];
-
-export const speakingTestResults: SpeakingTestResult[] = users
-  .filter((u) => u.testCompleted && u.testScore !== null)
-  .map((u) => ({
-    userId: u.id,
-    overallScore: u.testScore!,
-    fluency: Math.min(100, u.testScore! + Math.floor(Math.random() * 10 - 5)),
-    vocabulary: Math.min(100, u.testScore! - 5 + Math.floor(Math.random() * 8)),
-    pronunciation: Math.min(100, u.testScore! - 3 + Math.floor(Math.random() * 6)),
-    weakPoints: u.testScore! < 70 ? ["유창성", "어휘력"] : u.testScore! < 85 ? ["발음"] : [],
-    recommendedCourse: u.purpose === "opic" ? "오픽 AL 집중 코스" : u.purpose === "working_holiday" ? "워홀 실전 회화 코스" : "1:1 맞춤 회화 코스",
-    completedAt: u.lastActiveAt,
-  }));
-
-export const userLifecycleEvents: UserLifecycleEvent[] = [
-  { id: "e1", userId: "u001", type: "signup", label: "Instagram UTM 유입 가입", timestamp: "2026-07-15T10:00:00" },
-  { id: "e2", userId: "u001", type: "test_complete", label: "스피킹 테스트 완료 (82점)", timestamp: "2026-07-15T10:05:00" },
-  { id: "e3", userId: "u001", type: "coupon_received", label: "웰컴 쿠폰 WELCOME20 수령", timestamp: "2026-07-15T10:06:00" },
-  { id: "e4", userId: "u001", type: "payment", label: "3개월 속성 패키지 결제", timestamp: "2026-07-16T14:00:00" },
-  { id: "e5", userId: "u001", type: "first_class", label: "Emma 대화 파트너와 첫 1:1 대화 완료", timestamp: "2026-07-17T19:00:00" },
-];
 
 export const automationRules: AutomationRule[] = [
   { id: "r1", name: "가입 후 24시간 미결제 → 웰컴 쿠폰", trigger: "가입 후 24시간 내 미결제", action: "WELCOME20 쿠폰 자동 발송", channel: "alimtalk", isActive: true, triggeredCount: 342, lastTriggeredAt: "2026-07-28T17:00:00" },
@@ -96,28 +59,9 @@ export const tutors: Tutor[] = [
 ];
 
 export const classReports: ClassReport[] = [
-  { id: "cr1", tutorId: "t1", tutorName: "Emma Wilson", userName: "김서연", rating: 5, noShow: false, date: "2026-07-28" },
-  { id: "cr2", tutorId: "t2", tutorName: "James Chen", userName: "이하늘", rating: 4, noShow: false, date: "2026-07-28" },
-  { id: "cr3", tutorId: "t4", tutorName: "Carlos Rivera", userName: "박지민", rating: 0, noShow: true, issue: "학생 노쇼 — 연락 두절", date: "2026-07-27" },
-  { id: "cr4", tutorId: "t3", tutorName: "Sakura Tanaka", userName: "윤채원", rating: 5, noShow: false, date: "2026-07-27" },
-  { id: "cr5", tutorId: "t1", tutorName: "Emma Wilson", userName: "최유진", rating: 5, noShow: false, date: "2026-07-26" },
+  { id: "cr1", tutorId: "t1", tutorName: "Emma Wilson", userName: "학습자", rating: 5, noShow: false, date: "2026-07-28" },
+  { id: "cr2", tutorId: "t2", tutorName: "James Chen", userName: "학습자", rating: 4, noShow: false, date: "2026-07-28" },
+  { id: "cr3", tutorId: "t4", tutorName: "Carlos Rivera", userName: "학습자", rating: 0, noShow: true, issue: "학생 노쇼 — 연락 두절", date: "2026-07-27" },
+  { id: "cr4", tutorId: "t3", tutorName: "Sakura Tanaka", userName: "학습자", rating: 5, noShow: false, date: "2026-07-27" },
+  { id: "cr5", tutorId: "t1", tutorName: "Emma Wilson", userName: "학습자", rating: 5, noShow: false, date: "2026-07-26" },
 ];
-
-export function getUserById(id: string) {
-  return users.find((u) => u.id === id);
-}
-
-export function getTestResultByUserId(userId: string) {
-  return speakingTestResults.find((r) => r.userId === userId);
-}
-
-export function getLifecycleByUserId(userId: string) {
-  if (userId === "u001") return userLifecycleEvents;
-  const user = getUserById(userId);
-  if (!user) return [];
-  return [
-    { id: "gen1", userId, type: "signup" as const, label: `${UTM_LABELS[user.utmSource]} 유입 가입`, timestamp: user.joinedAt + "T10:00:00" },
-    ...(user.testCompleted ? [{ id: "gen2", userId, type: "test_complete" as const, label: `스피킹 테스트 완료 (${user.testScore}점)`, timestamp: user.lastActiveAt }] : []),
-    ...(user.paymentStatus === "paid" ? [{ id: "gen3", userId, type: "payment" as const, label: "결제 완료", timestamp: user.lastActiveAt }] : []),
-  ];
-}

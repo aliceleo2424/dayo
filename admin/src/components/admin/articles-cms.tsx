@@ -25,6 +25,18 @@ export type ArticleRow = {
 
 const CATEGORIES = ["꿀팁", "문화", "대화팁", "공지"];
 
+function articlesError(err: { message?: string; code?: string } | null, fallback: string) {
+  const message = String(err?.message || "");
+  const code = String(err?.code || "");
+  if (code === "42P01" || /does not exist|relation .*articles/i.test(message)) {
+    return "articles 테이블이 없습니다. supabase/migrations/018_articles_and_settlement.sql 과 022_articles_admin_rls.sql 을 SQL 에디터에서 실행해 주세요.";
+  }
+  if (code === "42501" || /row-level security|permission denied|RLS/i.test(message)) {
+    return "articles RLS가 쓰기를 막고 있습니다. 마이그레이션 022_articles_admin_rls.sql 을 Supabase SQL 에디터에서 실행해 주세요.";
+  }
+  return message || fallback;
+}
+
 const emptyForm = {
   title: "",
   category: "대화팁",
@@ -43,24 +55,35 @@ export function ArticlesCms() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError("");
+  const load = useCallback(async (opts?: { silent?: boolean }) => {
+    if (!opts?.silent) setLoading(true);
     const { data, error: err } = await supabase
       .from("articles")
       .select("id, title, category, summary, content, thumbnail_url, is_published, created_at")
       .order("created_at", { ascending: false });
     if (err) {
-      setError("articles 테이블을 읽을 수 없습니다. 마이그레이션 018을 Supabase에 적용해 주세요.");
+      setError(articlesError(err, "articles 테이블을 읽을 수 없습니다. 마이그레이션 018·022를 Supabase SQL 에디터에서 실행해 주세요."));
       setRows([]);
     } else {
-      setRows((data || []) as ArticleRow[]);
+      setRows((data || []) as unknown as ArticleRow[]);
     }
     setLoading(false);
   }, []);
 
   useEffect(() => {
-    load();
+    void load();
+  }, [load]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel("articles-cms")
+      .on("postgres_changes", { event: "*", schema: "public", table: "articles" }, () => {
+        void load({ silent: true });
+      })
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
   }, [load]);
 
   function resetForm() {
@@ -97,38 +120,45 @@ export function ArticlesCms() {
       thumbnail_url: form.thumbnail_url.trim() || null,
       is_published: form.is_published,
     };
-    const query = editingId
-      ? supabase.from("articles").update(payload).eq("id", editingId)
-      : supabase.from("articles").insert(payload);
-    const { error: err } = await query;
+    const ARTICLES_COLS = "id, title, category, summary, content, thumbnail_url, is_published, created_at";
+    const result = editingId
+      ? await supabase.from("articles").update(payload).eq("id", editingId).select(ARTICLES_COLS)
+      : await supabase.from("articles").insert(payload).select(ARTICLES_COLS);
     setSaving(false);
-    if (err) {
-      setError(err.message || "발행에 실패했습니다.");
+    if (result.error) {
+      setError(articlesError(result.error, "발행에 실패했습니다. 마이그레이션 022를 적용해 주세요."));
+      await load({ silent: true });
       return;
+    }
+    const saved = ((result.data || [])[0] || null) as ArticleRow | null;
+    if (saved) {
+      setRows((prev) => [saved, ...prev.filter((row) => row.id !== saved.id)]);
     }
     setNotice(editingId ? "아티클이 수정·발행되었습니다." : "새 아티클이 발행되었습니다.");
     resetForm();
-    load();
+    await load({ silent: true });
   }
 
   async function togglePublished(row: ArticleRow, next: boolean) {
     const { error: err } = await supabase.from("articles").update({ is_published: next }).eq("id", row.id);
     if (err) {
-      setError(err.message);
+      setError(articlesError(err, "발행 상태 변경에 실패했습니다."));
       return;
     }
     setRows((prev) => prev.map((r) => (r.id === row.id ? { ...r, is_published: next } : r)));
+    await load({ silent: true });
   }
 
   async function remove(row: ArticleRow) {
     if (!window.confirm(`「${row.title}」 아티클을 삭제할까요?`)) return;
     const { error: err } = await supabase.from("articles").delete().eq("id", row.id);
     if (err) {
-      setError(err.message);
+      setError(articlesError(err, "삭제에 실패했습니다."));
       return;
     }
     if (editingId === row.id) resetForm();
-    load();
+    setRows((prev) => prev.filter((item) => item.id !== row.id));
+    await load({ silent: true });
   }
 
   return (

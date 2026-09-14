@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { AdminHeader } from "@/components/admin/header";
 import { DataTable, type Column } from "@/components/admin/data-table";
@@ -10,14 +10,45 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { users } from "@/lib/mockData";
-import { LANGUAGE_LABELS, PAYMENT_LABELS, PURPOSE_LABELS, UTM_LABELS, type User } from "@/lib/types";
-import { formatDate } from "@/lib/utils";
+import { fetchCrmMembers, type CrmMember } from "@/lib/admin-data";
+import { formatCurrency, formatDate } from "@/lib/utils";
 import { MessageSquare, Ticket } from "lucide-react";
 
+const ROLE_FILTERS = [
+  { value: "user", label: "user" },
+  { value: "partner", label: "partner" },
+  { value: "admin", label: "admin" },
+];
+
+const PAYMENT_FILTERS = [
+  { value: "paid", label: "결제완료" },
+  { value: "unpaid", label: "미결제" },
+];
+
 export default function UsersPage() {
+  const [rows, setRows] = useState<CrmMember[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkModal, setBulkModal] = useState<"alimtalk" | "coupon" | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await fetchCrmMembers();
+      setRows(result.rows);
+      setError(result.error);
+    } catch (err) {
+      setRows([]);
+      setError(err instanceof Error ? err.message : "회원 목록을 불러오지 못했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
@@ -27,35 +58,58 @@ export default function UsersPage() {
     });
   };
 
-  const columns: Column<User & Record<string, unknown>>[] = [
+  const columns: Column<CrmMember & Record<string, unknown>>[] = [
     {
       key: "select", header: "",
-      render: (row) => <Checkbox checked={selected.has(row.id as string)} onCheckedChange={() => toggleSelect(row.id as string)} />,
+      render: (row) => <Checkbox checked={selected.has(row.id)} onCheckedChange={() => toggleSelect(row.id)} />,
     },
     {
       key: "name", header: "회원", sortable: true,
       render: (row) => (
         <div>
-          <Link href={`/admin/users/${row.id}`} className="font-medium text-coral hover:underline">{row.name as string}</Link>
-          <p className="text-xs text-muted-foreground">{row.email as string}</p>
+          <Link href={`/admin/users/${row.id}`} className="font-medium text-coral hover:underline">{row.name}</Link>
+          <p className="text-xs text-muted-foreground">{row.email || "이메일 미등록"}</p>
         </div>
       ),
     },
-    { key: "purpose", header: "목적", sortable: true, render: (row) => PURPOSE_LABELS[row.purpose as keyof typeof PURPOSE_LABELS] },
-    { key: "language", header: "언어", render: (row) => LANGUAGE_LABELS[row.language as keyof typeof LANGUAGE_LABELS] },
-    { key: "utmSource", header: "UTM", render: (row) => UTM_LABELS[row.utmSource as keyof typeof UTM_LABELS] },
     {
-      key: "testScore", header: "테스트", sortable: true,
-      render: (row) => row.testCompleted ? <Badge variant="coral">{row.testScore}점</Badge> : <span className="text-muted-foreground">미완료</span>,
+      key: "role", header: "role", sortable: true,
+      render: (row) => {
+        const role = String(row.role || "user");
+        return <Badge variant={role === "admin" ? "coral" : role === "partner" ? "success" : "default"}>{role}</Badge>;
+      },
+    },
+    {
+      key: "ticket_count", header: "보유 티켓", sortable: true,
+      render: (row) => Number(row.ticket_count || 0),
+    },
+    {
+      key: "point_balance", header: "적립 포인트", sortable: true,
+      render: (row) => `${Number(row.point_balance || 0)} P`,
+    },
+    {
+      key: "last_test_score", header: "테스트", sortable: true,
+      render: (row) => row.last_test_score != null
+        ? <Badge variant="coral">{row.last_test_score}점</Badge>
+        : <span className="text-muted-foreground">미완료</span>,
     },
     {
       key: "paymentStatus", header: "결제", sortable: true,
-      render: (row) => {
-        const s = row.paymentStatus as keyof typeof PAYMENT_LABELS;
-        return <Badge variant={s === "paid" ? "success" : s === "unpaid" ? "warning" : "default"}>{PAYMENT_LABELS[s]}</Badge>;
-      },
+      render: (row) => (
+        <div>
+          <Badge variant={row.paymentStatus === "paid" ? "success" : "warning"}>
+            {row.paymentStatus === "paid" ? "결제완료" : "미결제"}
+          </Badge>
+          {row.totalSpent > 0 && (
+            <p className="mt-1 text-xs text-muted-foreground">{formatCurrency(row.totalSpent)}</p>
+          )}
+        </div>
+      ),
     },
-    { key: "joinedAt", header: "가입일", sortable: true, render: (row) => formatDate(row.joinedAt as string) },
+    {
+      key: "created_at", header: "가입일", sortable: true,
+      render: (row) => row.created_at ? formatDate(row.created_at) : "—",
+    },
     {
       key: "actions", header: "CRM",
       render: (row) => (
@@ -66,12 +120,13 @@ export default function UsersPage() {
     },
   ];
 
-  const tableData = users as (User & Record<string, unknown>)[];
+  const tableData = rows as (CrmMember & Record<string, unknown>)[];
 
   return (
     <>
       <AdminHeader title="회원 & CRM 관리" />
       <main className="space-y-4 p-6">
+        {error && <p className="text-sm text-red-600">{error}</p>}
         {selected.size > 0 && (
           <div className="flex items-center gap-3 rounded-lg border bg-coral/5 px-4 py-3">
             <span className="text-sm font-medium">{selected.size}명 선택됨</span>
@@ -84,17 +139,21 @@ export default function UsersPage() {
           </div>
         )}
 
-        <DataTable
-          data={tableData}
-          columns={columns}
-          searchKeys={["name", "email"]}
-          filters={[
-            { key: "purpose", label: "목적", options: Object.entries(PURPOSE_LABELS).map(([v, l]) => ({ value: v, label: l })) },
-            { key: "language", label: "언어", options: Object.entries(LANGUAGE_LABELS).map(([v, l]) => ({ value: v, label: l })) },
-            { key: "paymentStatus", label: "결제", options: Object.entries(PAYMENT_LABELS).map(([v, l]) => ({ value: v, label: l })) },
-          ]}
-          exportFilename="dayo-users.csv"
-        />
+        {loading ? (
+          <div className="h-64 animate-pulse rounded-xl bg-muted" />
+        ) : (
+          <DataTable
+            data={tableData}
+            columns={columns}
+            searchKeys={["name", "nickname", "user_name", "email"]}
+            filters={[
+              { key: "role", label: "role", options: ROLE_FILTERS },
+              { key: "paymentStatus", label: "결제", options: PAYMENT_FILTERS },
+            ]}
+            exportFilename="dayo-users.csv"
+            emptyMessage="아직 가입한 회원이 없습니다."
+          />
+        )}
       </main>
 
       <Dialog open={!!bulkModal} onOpenChange={() => setBulkModal(null)}>
