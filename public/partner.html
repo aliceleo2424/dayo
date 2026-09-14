@@ -61,6 +61,7 @@
         if (recruit) recruit.hidden = false;
         var cta = document.getElementById('partnerRecruitCta');
         if (cta) cta.setAttribute('href', applyFormUrl());
+        if (window.syncPartnerRecruitCard) window.syncPartnerRecruitCard();
       }
 
       window.showPartnerLounge = showPartnerLounge;
@@ -2758,7 +2759,69 @@
       ]);
     };
   </script>
-  <script src="i18n.js"></script>
+  <script src="i18n.js?v=20260914-recruit"></script>
+  <script>
+    (function lockPartnerRecruitCopy() {
+      var COPY = {
+        sub: {
+          KO: '가르치거나 평가할 필요 없이, 글로벌 친구와 일상 이야기를 나누며 편안하게 수익을 만들어보세요.',
+          EN: 'No teaching or grading — chat about everyday life with global friends and earn comfortably.',
+          FR: 'Pas besoin d’enseigner ni de noter : discutez du quotidien avec des amis du monde entier et gagnez sereinement.',
+          ES: 'Sin enseñar ni evaluar: conversa sobre el día a día con amigos globales y genera ingresos con calma.'
+        },
+        benefit1: {
+          KO: '💡 세션을 진행하고 활동비를 적립하세요.',
+          EN: '💡 Run sessions and earn activity pay.',
+          FR: '💡 Animez des sessions et accumulez vos frais d’activité.',
+          ES: '💡 Realiza sesiones y acumula tu compensación.'
+        },
+        benefit2: {
+          KO: '🕒 내가 가능한 요일/시간에만 자유롭게 슬롯 오픈',
+          EN: '🕒 Open slots only on the days and times that work for you',
+          FR: '🕒 Ouvrez des créneaux seulement quand vous êtes dispo',
+          ES: '🕒 Abre horarios solo cuando te venga bien'
+        }
+      };
+
+      function currentLang() {
+        try {
+          return (window.DayOI18n && window.DayOI18n.getLang && window.DayOI18n.getLang()) || 'KO';
+        } catch (err) {
+          return 'KO';
+        }
+      }
+
+      function pick(map) {
+        var lang = String(currentLang() || 'KO').toUpperCase();
+        return map[lang] || map.KO;
+      }
+
+      function syncPartnerRecruitCard() {
+        var root = document.getElementById('partnerRecruitView');
+        if (!root) return;
+        var sub = root.querySelector('[data-i18n="partner.recruit.sub"], .partner-recruit-sub');
+        if (sub) sub.textContent = pick(COPY.sub);
+        var list = root.querySelector('.partner-recruit-benefits');
+        if (!list) return;
+        list.innerHTML =
+          '<li data-i18n="partner.recruit.benefit1">' + pick(COPY.benefit1) + '</li>' +
+          '<li data-i18n="partner.recruit.benefit2">' + pick(COPY.benefit2) + '</li>';
+      }
+
+      window.syncPartnerRecruitCard = syncPartnerRecruitCard;
+
+      if (window.DayOI18n && typeof window.DayOI18n.apply === 'function') {
+        var origApply = window.DayOI18n.apply.bind(window.DayOI18n);
+        window.DayOI18n.apply = window.DayOI18n.updatePage = function () {
+          origApply();
+          syncPartnerRecruitCard();
+        };
+      }
+
+      document.addEventListener('dayo:langchange', syncPartnerRecruitCard);
+      syncPartnerRecruitCard();
+    })();
+  </script>
   <script src="materials.js"></script>
   <script src="supabase-env.js"></script>
   <script src="availability-slots.js"></script>

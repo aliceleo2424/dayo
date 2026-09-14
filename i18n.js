@@ -2513,6 +2513,19 @@
     return { KO: 'ko', EN: 'en', FR: 'fr', ES: 'es' }[code] || 'ko';
   }
 
+  function prunePartnerRecruitVisaBullet() {
+    delete DICT['partner.recruit.benefit3'];
+    var list = document.querySelector('.partner-recruit-benefits');
+    if (!list) return;
+    Array.prototype.slice.call(list.querySelectorAll('li')).forEach(function (el, idx) {
+      var key = el.getAttribute('data-i18n') || '';
+      var text = el.textContent || '';
+      if (key === 'partner.recruit.benefit3' || idx >= 2 || /D-2/.test(text)) {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      }
+    });
+  }
+
   function apply() {
     var nodes = document.querySelectorAll('[data-i18n]');
     Array.prototype.forEach.call(nodes, function (node) {
@@ -2536,6 +2549,8 @@
       node.classList.add('i18n-flash');
       setTimeout(function () { node.classList.remove('i18n-flash'); }, 120);
     });
+
+    prunePartnerRecruitVisaBullet();
 
     document.documentElement.lang = htmlLang(currentLang);
 
