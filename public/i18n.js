@@ -940,7 +940,7 @@
     },
     'aiHelp.cardTitle': { KO: 'AI 언어 도움', EN: 'AI language help', ZH: 'AI语言帮助', JA: 'AI言語ヘルプ', FR: 'Aide linguistique IA', ES: 'Ayuda lingüística IA' },
     'aiHelp.desc': {
-      KO: '하고 싶은 말이 떠오르지 않거나 막힐 때만 화면 속 AI 언어 도우미가 부드럽게 이어줍니다. 평가하거나 고쳐 주는 선생님이 아니라, 대화가 끊기지 않게 옆에서 받아 주는 도움이에요.',
+      KO: '하고 싶은 말이 떠오르지 않거나 막힐 때만 화면 속 AI 언어 도우미가 부드럽게 이어줍니다. 평가하거나 고쳐 주는 선생님이 아니라, 대화가 끊기지 않게 옆에서 받아 주는 도우미에요.',
       EN: 'Only when you can’t find the words does the on-screen helper continue the talk. Not a teacher who grades you — a sidekick so the conversation doesn’t stop.',
       ZH: '只有在想不起要说的话或卡住时，屏幕里的AI才会温柔接上。不是打分的老师，而是让对话不断的旁边帮手。',
       JA: '言いたいことが浮かばないときだけ、画面のAIがやさしくつないでくれます。評価する先生ではなく、会話が途切れないようにそばで受けるヘルプです。',

@@ -701,7 +701,8 @@
           "theme": "cafe",
           "themeIndex": 1,
           "difficulty": "easy",
-          "imageUrl": "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80",
+          "imageUrl": "images/tests/cn_tea.jpg",
+          "imageFallback": "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80",
           "question": "전통 찻집에서 부탁할 때 자주 쓰는 한 글자는?",
           "options": [
             "走",
@@ -733,7 +734,8 @@
           "theme": "tourist",
           "themeIndex": 3,
           "difficulty": "easy",
-          "imageUrl": "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=600&q=80",
+          "imageUrl": "images/tests/cn_tour.jpg",
+          "imageFallback": "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=600&q=80",
           "question": "관광지에서 길을 물을 때 먼저 건네는 말은?",
           "options": [
             "买单",
@@ -749,7 +751,8 @@
           "theme": "hotel",
           "themeIndex": 4,
           "difficulty": "easy",
-          "imageUrl": "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80",
+          "imageUrl": "images/tests/cn_hotel.jpg",
+          "imageFallback": "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80",
           "question": "여행 중 머무를 '호텔'을 뜻하는 단어는?",
           "options": [
             "酒店 (jiǔdiàn)",
@@ -773,7 +776,8 @@
           "theme": "cafe",
           "themeIndex": 1,
           "difficulty": "medium",
-          "imageUrl": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=600&q=80",
+          "imageUrl": "images/tests/cn_tea.jpg",
+          "imageFallback": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=600&q=80",
           "question": "찻집에서 \"要喝点什么？\"라고 물었어요. 사진 장면에 맞는 자연스러운 주문은?",
           "options": [
             "再见咖啡。",
@@ -805,7 +809,8 @@
           "theme": "street",
           "themeIndex": 3,
           "difficulty": "medium",
-          "imageUrl": "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=600&q=80",
+          "imageUrl": "images/tests/cn_tour.jpg",
+          "imageFallback": "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=600&q=80",
           "question": "거리에서 \"지하철역이 어디예요?\"를 물을 때 가장 자연스러운 표현은?",
           "options": [
             "地铁是我。",
@@ -821,7 +826,8 @@
           "theme": "hotel",
           "themeIndex": 4,
           "difficulty": "medium",
-          "imageUrl": "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80",
+          "imageUrl": "images/tests/cn_hotel.jpg",
+          "imageFallback": "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80",
           "question": "호텔 카운터에서 체크인하러 왔다고 말할 때 알맞은 표현은?",
           "options": [
             "我要一杯咖啡。",
@@ -845,7 +851,8 @@
           "theme": "cafe",
           "themeIndex": 1,
           "difficulty": "hard",
-          "imageUrl": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=600&q=80",
+          "imageUrl": "images/tests/cn_tea.jpg",
+          "imageFallback": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=600&q=80",
           "question": "찻집에서 아직 고르는 중일 때 자연스러운 한 줄은?",
           "options": [
             "全部给我。",
@@ -877,7 +884,8 @@
           "theme": "street",
           "themeIndex": 3,
           "difficulty": "hard",
-          "imageUrl": "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=600&q=80",
+          "imageUrl": "images/tests/cn_tour.jpg",
+          "imageFallback": "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=600&q=80",
           "question": "거리에서 역까지 가는 길을 물을 때 알맞은 것은?",
           "options": [
             "地铁走。",
@@ -893,7 +901,8 @@
           "theme": "hotel",
           "themeIndex": 4,
           "difficulty": "hard",
-          "imageUrl": "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80",
+          "imageUrl": "images/tests/cn_hotel.jpg",
+          "imageFallback": "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80",
           "question": "호텔 리셉션에서 예약을 확인할 때 자연스러운 말은?",
           "options": [
             "给我房间。",

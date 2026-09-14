@@ -1116,6 +1116,17 @@
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
+    #partners .journey-grid { align-items: stretch; }
+    #partners .journey-card {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      height: 100%;
+      min-height: 280px;
+    }
+    #partners .journey-title { min-height: 2.9rem; }
+    #partners .journey-desc { flex: 1; }
+
     .journey-card[data-open-quiz] {
       cursor: pointer;
     }
@@ -1155,9 +1166,12 @@
       background: var(--bg-card);
       border: 1px solid rgba(255,209,220,0.45);
       border-radius: var(--radius-lg);
-      padding: 2rem 1.75rem;
+      padding: 24px;
       box-shadow: 0 8px 28px var(--shadow-warm);
-      max-width: 720px;
+      max-width: 680px;
+      margin: 0 auto;
+      width: 100%;
+      box-sizing: border-box;
     }
     .ticket-price-row {
       display: flex;
@@ -1194,13 +1208,16 @@
     .journey-desc {
       font-size: 0.9rem; color: var(--text-muted); line-height: 1.7;
     }
-    .partner-card-tags {
+    .partner-card-tags,
+    .partner-tags {
       display: flex;
       flex-wrap: wrap;
       gap: 0.35rem;
-      margin-top: 0.7rem;
+      margin-top: auto;
+      padding-top: 0.7rem;
     }
-    .partner-card-tags span {
+    .partner-card-tags span,
+    .partner-tags .tag {
       display: inline-flex;
       align-items: center;
       padding: 0.22rem 0.55rem;
@@ -2384,7 +2401,7 @@
         <div class="ai-help-card reveal">
           <span class="journey-icon">🤖</span>
           <h3 class="journey-title" data-i18n="aiHelp.cardTitle">AI 언어 도움</h3>
-          <p class="journey-desc" data-i18n="aiHelp.desc">하고 싶은 말이 떠오르지 않거나 막힐 때만 화면 속 AI 언어 도우미가 부드럽게 이어줍니다. 평가하거나 고쳐 주는 선생님이 아니라, 대화가 끊기지 않게 옆에서 받아 주는 도움이에요.</p>
+          <p class="journey-desc" data-i18n="aiHelp.desc">하고 싶은 말이 떠오르지 않거나 막힐 때만 화면 속 AI 언어 도우미가 부드럽게 이어줍니다. 평가하거나 고쳐 주는 선생님이 아니라, 대화가 끊기지 않게 옆에서 받아 주는 도우미에요.</p>
         </div>
       </div>
     </section>
@@ -2397,22 +2414,32 @@
         <div class="journey-grid">
           <article class="journey-card reveal reveal-delay-1">
             <span class="journey-icon">🥐</span>
-            <h3 class="journey-title">Clara from France</h3>
+            <h3 class="journey-title">Clara from France 🇫🇷</h3>
             <p class="journey-desc" data-i18n="partnersTeaser.card1.desc">서울 골목 카페와 주말 마켓을 좋아하는 프랑스 파트너. 취미와 일상을 천천히 나눠 줘요.</p>
+            <div class="partner-tags" aria-label="Clara 관심사">
+              <span class="tag">#골목카페 ☕</span>
+              <span class="tag">#주말마켓 🥐</span>
+              <span class="tag">#프랑스 🇫🇷</span>
+            </div>
           </article>
           <article class="journey-card reveal reveal-delay-2">
             <span class="journey-icon">🍵</span>
-            <h3 class="journey-title">Kate from USA</h3>
+            <h3 class="journey-title">Kate from USA 🇺🇸</h3>
             <p class="journey-desc" data-i18n="partnersTeaser.card2.desc">한국 음식과 즉흥 산책을 좋아하는 미국 파트너. 취향을 비교하며 이야기를 이어 가요.</p>
+            <div class="partner-tags" aria-label="Kate 관심사">
+              <span class="tag">#K푸드 🍲</span>
+              <span class="tag">#즉흥산책 🌿</span>
+              <span class="tag">#미국 🇺🇸</span>
+            </div>
           </article>
           <article class="journey-card reveal reveal-delay-3">
             <span class="journey-icon">🧇</span>
             <h3 class="journey-title">Emma from Belgium 🇧🇪</h3>
             <p class="journey-desc" data-i18n="partnersTeaser.card3.desc">부산 여행을 좋아하는 벨기에 파트너, '찐찐찐찐 찐이야~' 트로트 부르기를 엄청 좋아해요!</p>
-            <div class="partner-card-tags" aria-label="Emma 관심사">
-              <span>#부산여행 🌊</span>
-              <span>#K트로트 🎤</span>
-              <span>#벨기에 🇧🇪</span>
+            <div class="partner-tags" aria-label="Emma 관심사">
+              <span class="tag">#부산여행 🌊</span>
+              <span class="tag">#K트로트 🎤</span>
+              <span class="tag">#벨기에 🇧🇪</span>
             </div>
           </article>
         </div>
@@ -2711,10 +2738,43 @@
         hotel: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80'
       }
     };
+    /* Drop files into images/tests/ with these names to override Unsplash. */
+    const QUIZ_LOCAL_TEST_IMAGES = {
+      zh: {
+        cafe: { local: 'images/tests/cn_tea.jpg', remote: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80' },
+        tourist: { local: 'images/tests/cn_tour.jpg', remote: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=600&q=80' },
+        street: { local: 'images/tests/cn_tour.jpg', remote: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=600&q=80' },
+        hotel: { local: 'images/tests/cn_hotel.jpg', remote: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80' }
+      }
+    };
+    function quizLocalTestAsset(lang, theme) {
+      const pack = QUIZ_LOCAL_TEST_IMAGES[lang];
+      return (pack && theme && pack[theme]) || null;
+    }
     function quizThemeImage(lang, theme) {
+      const localAsset = quizLocalTestAsset(lang, theme);
+      if (localAsset) return localAsset.local;
       const pack = QUIZ_THEME_IMAGES[lang] || QUIZ_THEME_IMAGES.en;
       return (theme && pack[theme]) || pack.cafe;
     }
+    function quizThemeRemoteFallback(lang, theme, currentSrc) {
+      const localAsset = quizLocalTestAsset(lang, theme);
+      if (localAsset && localAsset.remote && localAsset.remote !== currentSrc) return localAsset.remote;
+      return '';
+    }
+    function handleQuizImageError(img) {
+      if (!img) return;
+      const wrap = img.closest('.quiz-illustration');
+      const next = img.getAttribute('data-fallback');
+      if (next && img.getAttribute('data-fallback-used') !== '1') {
+        img.setAttribute('data-fallback-used', '1');
+        img.src = next;
+        return;
+      }
+      img.onerror = null;
+      if (wrap) wrap.classList.add('is-fallback');
+    }
+    window.handleQuizImageError = handleQuizImageError;
     const FALLBACK_QUIZ_BY_LANG = {
       en: [
         { theme: 'cafe', themeIndex: 1, question: '브런치 카페에서 직원이 "What can I get for you?"라고 물었어요. 가장 자연스러운 주문은?', options: ['Coffee me.', 'Can I get a latte, please?', 'Give me now.', 'I am coffee.'], answer: 1, imageUrl: quizThemeImage('en', 'cafe') },
@@ -2735,7 +2795,9 @@
 
     function normalizeQuizItem(raw) {
       const theme = raw.theme || null;
-      const imageUrl = raw.imageUrl || raw.image || (theme && quizThemeImage(quizLang, theme)) || null;
+      const asset = quizLocalTestAsset(quizLang, theme);
+      const imageUrl = (asset && asset.local) || raw.imageUrl || raw.image || (theme && quizThemeImage(quizLang, theme)) || null;
+      const imageFallback = raw.imageFallback || (asset && asset.remote) || null;
       return {
         theme,
         themeIndex: raw.themeIndex || null,
@@ -2743,6 +2805,7 @@
         question: raw.question || '',
         image: imageUrl,
         imageUrl,
+        imageFallback,
         options: raw.options || [],
         answerIndex: typeof raw.answer === 'number' ? raw.answer : null,
         explanation: raw.explanation || null
@@ -2944,7 +3007,6 @@
       const show = () => img.classList.add('is-loaded');
       if (img.complete && img.naturalWidth) show();
       else img.addEventListener('load', show, { once: true });
-      img.addEventListener('error', () => { wrap.classList.add('is-fallback'); }, { once: true });
       if (nextQ && (nextQ.imageUrl || nextQ.image)) {
         const pre = new Image();
         pre.src = nextQ.imageUrl || nextQ.image;
@@ -2978,8 +3040,10 @@
       const slide = document.createElement('div');
       slide.className = 'quiz-slide active';
       const src = q.imageUrl || q.image || quizThemeImage(quizLang, q.theme);
+      const fallback = q.imageFallback || quizThemeRemoteFallback(quizLang, q.theme, src);
+      const fallbackAttr = fallback ? ` data-fallback="${escapeHtml(fallback)}"` : '';
       const imageBlock = src
-        ? `<div class="quiz-illustration"><img src="${escapeHtml(src)}" alt="${escapeHtml(t('quiz.theme.' + (q.theme || 'cafe')))}" decoding="async" onerror="this.onerror=null;this.closest('.quiz-illustration').classList.add('is-fallback');"><div class="quiz-illustration-fallback" aria-hidden="true">${quizThemeFallbackEmoji(q.theme)}</div></div>`
+        ? `<div class="quiz-illustration"><img src="${escapeHtml(src)}"${fallbackAttr} alt="${escapeHtml(t('quiz.theme.' + (q.theme || 'cafe')))}" decoding="async" onerror="handleQuizImageError(this)"><div class="quiz-illustration-fallback" aria-hidden="true">${quizThemeFallbackEmoji(q.theme)}</div></div>`
         : '';
       slide.innerHTML = `${imageBlock}<div class="situation-card"><div class="situation-tag">${escapeHtml(situationBadge(q, index, quizItems.length))}</div><p class="situation-text">${escapeHtml(q.question)}</p></div><div class="quiz-options">${q.options.map((o, i) => `<button class="quiz-option" data-index="${i}">${escapeHtml(o)}</button>`).join('')}</div><p class="quiz-feedback" hidden></p><p class="quiz-explanation" hidden></p><button class="quiz-next-btn" type="button" hidden></button>`;
       bindQuizIllustration(slide, q, quizItems[index + 1]);
