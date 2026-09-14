@@ -701,7 +701,7 @@
           "theme": "cafe",
           "themeIndex": 1,
           "difficulty": "easy",
-          "imageUrl": "https://images.unsplash.com/photo-1544787219-7f47ccb76574?auto=format&fit=crop&w=600&q=80",
+          "imageUrl": "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80",
           "question": "전통 찻집에서 부탁할 때 자주 쓰는 한 글자는?",
           "options": [
             "走",
@@ -730,14 +730,14 @@
         },
         {
           "id": "zh-i-street",
-          "theme": "street",
+          "theme": "tourist",
           "themeIndex": 3,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1508804185872-d7badad00f7d?auto=format&fit=crop&w=600&q=80",
-          "question": "밤거리에서 길을 물을 때 먼저 하는 말은?",
+          "question": "관광지에서 길을 물을 때 먼저 건네는 말은?",
           "options": [
             "买单",
-            "请问",
+            "请问 (qǐngwèn - 말씀 좀 여쭙겠습니다)",
             "入住",
             "面包"
           ],
@@ -749,16 +749,16 @@
           "theme": "hotel",
           "themeIndex": 4,
           "difficulty": "easy",
-          "imageUrl": "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=600&q=80",
-          "question": "호텔에서 숙박을 미리 잡아 둔 것을 뜻하는 말은?",
+          "imageUrl": "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=800&q=80",
+          "question": "여행 중 머무를 '호텔'을 뜻하는 단어는?",
           "options": [
-            "点心",
-            "预订",
-            "菜单",
-            "路口"
+            "酒店 (jiǔdiàn)",
+            "机场 (jīchǎng - 공항)",
+            "地铁 (dìtiě - 지하철)",
+            "餐厅 (cāntīng - 식당)"
           ],
-          "answer": 1,
-          "explanation": "프론트의 핵심 단어는 预订예요."
+          "answer": 0,
+          "explanation": "중국에서 규모 있는 호텔이나 숙소는 보통 '酒店 (jiǔdiàn)'이라고 불러요."
         }
       ]
     },

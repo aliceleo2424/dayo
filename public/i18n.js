@@ -1148,6 +1148,9 @@
     'quiz.theme.shop': {
       KO: '편의점/가게에서 계산할 때', EN: 'Paying at a shop or convenience store', ZH: '在便利店/商店结账时', JA: 'コンビニやお店で会計するとき', FR: 'Régler au magasin ou au konbini', ES: 'Pagando en una tienda o convenience store'
     },
+    'quiz.theme.tourist': {
+      KO: '관광지에서 길을 물을 때', EN: 'Asking for directions at a tourist spot', ZH: '在景点问路时', JA: '観光地で道を聞くとき', FR: 'Demander son chemin sur un site', ES: 'Pidiendo indicaciones en un lugar turístico'
+    },
     'quiz.levelHint': {
       KO: '지금 체감 레벨을 골라 주세요. 그에 맞춰 4문항이 나와요!',
       EN: 'Tap how it feels right now — we’ll give you 4 matching questions.',
