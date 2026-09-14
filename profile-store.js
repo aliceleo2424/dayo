@@ -753,6 +753,9 @@ function bindAuthListener(client) {
       lsSet(AUTH_ID_KEY, user.id);
       if (event === 'TOKEN_REFRESHED') return;
       ensureProfileForUser(user).then(function (profile) {
+        if (typeof window.DayOSendWelcomeEmail === 'function') {
+          window.DayOSendWelcomeEmail(user, profile);
+        }
         dispatchAuthChange(true, {
           userName: resolveDisplayName(profile, user, displayNameFromUser(user)),
           userId: user.id,
@@ -898,6 +901,9 @@ async function signInWithEmail(email, password) {
         has_welcome_coupon: true
       });
       try { applyProfileToLocal(created); } catch (e) { /* ignore */ }
+    }
+    if (typeof window.DayOSendWelcomeEmail === 'function') {
+      window.DayOSendWelcomeEmail(signedUp.data.user, created);
     }
     return {
       isNew: true,

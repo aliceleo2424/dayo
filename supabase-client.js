@@ -162,6 +162,82 @@
     } catch (e) { /* ignore */ }
   }
 
+  var welcomeEmailBusy = {};
+
+  function welcomeEmailSentKey(userId) {
+    return 'dayo_welcome_email_sent_' + String(userId || '');
+  }
+
+  function hasSentWelcomeEmail(userId, profile) {
+    if (profile && (profile.welcome_email_sent === true || profile.welcome_email_sent === 'true')) return true;
+    try {
+      return window.localStorage.getItem(welcomeEmailSentKey(userId)) === '1';
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function markWelcomeEmailSent(client, user) {
+    if (!user || !user.id) return;
+    try { window.localStorage.setItem(welcomeEmailSentKey(user.id), '1'); } catch (e) { /* ignore */ }
+    if (client) {
+      client.from('profiles').update({ welcome_email_sent: true }).eq('user_id', user.id).then(function () {}, function () {});
+    }
+  }
+
+  function isRecentSignup(user) {
+    if (!user) return false;
+    if (user.user_metadata && user.user_metadata.welcome_ticket) return true;
+    var createdAt = user.created_at ? new Date(user.created_at).getTime() : 0;
+    if (!createdAt) return false;
+    return (Date.now() - createdAt) < 48 * 60 * 60 * 1000;
+  }
+
+  window.DayOSendWelcomeEmail = function (user, profile) {
+    if (!user || !user.email) return Promise.resolve();
+    if (!isRecentSignup(user)) return Promise.resolve();
+    if (hasSentWelcomeEmail(user.id, profile)) return Promise.resolve();
+    if (welcomeEmailBusy[user.id]) return Promise.resolve();
+    welcomeEmailBusy[user.id] = true;
+
+    var nickname = (profile && (profile.nickname || profile.user_name))
+      || (user.user_metadata && (user.user_metadata.nickname || user.user_metadata.user_name || user.user_metadata.name))
+      || String(user.email).split('@')[0]
+      || '회원';
+    var payload = JSON.stringify({ email: user.email, nickname: nickname });
+    var urls = ['/api/send-welcome'];
+    try {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        urls.push('http://localhost:3000/api/send-welcome');
+      } else {
+        urls.push('https://dayo-sufk.vercel.app/api/send-welcome');
+      }
+    } catch (e) { /* ignore */ }
+
+    return (async function () {
+      var sent = false;
+      for (var i = 0; i < urls.length; i += 1) {
+        try {
+          var res = await fetch(urls[i], {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payload
+          });
+          if (res && res.ok) {
+            sent = true;
+            break;
+          }
+        } catch (err) { /* try next endpoint */ }
+      }
+      if (sent) markWelcomeEmailSent(window.supabaseClient, user);
+      else console.error('웰컴 이메일 전송 실패: no endpoint accepted the request');
+    })().catch(function (err) {
+      console.error('웰컴 이메일 전송 실패:', err);
+    }).then(function () {
+      welcomeEmailBusy[user.id] = false;
+    });
+  };
+
   window.fetchAuthProfile = async function () {
     var client = window.supabaseClient;
     if (!client) return null;
@@ -169,7 +245,7 @@
     var user = sessionRes && sessionRes.data && sessionRes.data.user;
     window._dayoAuthUser = user || null;
     if (!user) return null;
-    var profileCols = 'nickname, role, user_name, ticket_count, point_balance, email, speaking_level, last_test_score, last_test_date, streak_count';
+    var profileCols = 'nickname, role, user_name, ticket_count, point_balance, email, speaking_level, last_test_score, last_test_date, streak_count, welcome_email_sent';
     var q = await client
       .from('profiles')
       .select(profileCols)
@@ -254,6 +330,7 @@
         window._dayoAuthProfile = profile;
       } catch (e) { /* ignore */ }
     }
+    window.DayOSendWelcomeEmail(user, profile);
     document.dispatchEvent(new CustomEvent('dayo:authprofile', { detail: { user: user, profile: profile } }));
     return { user: user, profile: profile };
   };
@@ -299,6 +376,11 @@
         alert('가입 확인 메일을 보냈어요. 메일함에서 인증 후 다시 로그인해 주세요.');
         return;
       }
+      window.DayOSendWelcomeEmail(newUser, {
+        nickname: email.split('@')[0],
+        user_name: email.split('@')[0],
+        welcome_email_sent: false
+      });
     }
     await window.fetchAuthProfile();
     window.location.href = '/mypage.html';
@@ -374,6 +456,11 @@
 
     if (data.session) {
       await grantWelcomeTicket(supabase, data.user, email);
+      window.DayOSendWelcomeEmail(data.user, {
+        nickname: email.split('@')[0],
+        user_name: email.split('@')[0],
+        welcome_email_sent: false
+      });
       alert('환영합니다! 웰컴 티켓 1장이 지급되었습니다 🎟️');
       window.location.href = '/mypage.html';
     } else {
