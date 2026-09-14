@@ -59,11 +59,12 @@ export function PartnerDetailModal({
 
   useEffect(() => {
     if (!open || !partner) return;
+    const current = partner;
     let cancelled = false;
     setMessage("");
 
     async function load() {
-      const uid = partner.user_id || partner.id;
+      const uid = current.user_id || current.id;
       const rpc = await supabase.rpc("admin_partner_activity", { p_partner_user_id: uid });
       if (!cancelled && !rpc.error && rpc.data) {
         const data = rpc.data as Activity;
@@ -87,7 +88,7 @@ export function PartnerDetailModal({
       const { data: ledger } = await supabase
         .from("settlement_logs")
         .select("id, points_settled, created_at, note")
-        .or(`partner_user_id.eq.${uid},partner_profile_id.eq.${partner.id}`)
+        .or(`partner_user_id.eq.${uid},partner_profile_id.eq.${current.id}`)
         .order("created_at", { ascending: false })
         .limit(8);
       if (!cancelled) setLogs((ledger || []) as typeof logs);

@@ -1,42 +1,9 @@
 import type {
-  ActivityFeedItem, AutomationRule, ChannelMetric, ClassReport, CmsBanner,
-  CmsCopy, Coupon, DashboardKpi, PromoCode, PurposeMetric, ReferralRecord,
+  AutomationRule, ClassReport, CmsBanner,
+  CmsCopy, Coupon, PromoCode, ReferralRecord,
   SocialProofReview, SpeakingTestResult, Tutor, User, UserLifecycleEvent,
 } from "./types";
 import { UTM_LABELS } from "./types";
-
-export const dashboardKpis: DashboardKpi[] = [
-  { label: "실시간 매출", value: "₩12,840,000", change: 8.4, changeLabel: "전일 대비" },
-  { label: "신규 가입자", value: "127", change: 12.1, changeLabel: "전주 대비" },
-  { label: "스피킹 테스트 완료", value: "342", change: 5.7, changeLabel: "전일 대비" },
-  { label: "CVR (전환율)", value: "18.6%", change: -1.2, changeLabel: "전주 대비" },
-];
-
-export const channelMetrics: ChannelMetric[] = [
-  { source: "Instagram", visitors: 4200, conversions: 312, roas: 3.8 },
-  { source: "YouTube", visitors: 2800, conversions: 198, roas: 4.2 },
-  { source: "Google", visitors: 1900, conversions: 145, roas: 2.9 },
-  { source: "Naver", visitors: 1500, conversions: 89, roas: 2.1 },
-  { source: "TikTok", visitors: 980, conversions: 67, roas: 3.5 },
-  { source: "Referral", visitors: 640, conversions: 112, roas: 5.1 },
-];
-
-export const purposeMetrics: PurposeMetric[] = [
-  { purpose: "오픽", count: 420, fill: "#FF6B57" },
-  { purpose: "워홀", count: 380, fill: "#64748B" },
-  { purpose: "유학", count: 290, fill: "#94A3B8" },
-  { purpose: "여행", count: 210, fill: "#CBD5E1" },
-  { purpose: "비즈니스", count: 95, fill: "#E2E8F0" },
-];
-
-export const activityFeed: ActivityFeedItem[] = [
-  { id: "a1", type: "payment", userName: "김서연", detail: "3개월 속성 패키지 결제", amount: 597000, timestamp: "2026-07-28T18:42:00" },
-  { id: "a2", type: "signup", userName: "이하늘", detail: "Instagram UTM 유입 가입", timestamp: "2026-07-28T18:38:00" },
-  { id: "a3", type: "test", userName: "박지민", detail: "스피킹 테스트 완료 (점수 78)", timestamp: "2026-07-28T18:35:00" },
-  { id: "a4", type: "payment", userName: "최유진", detail: "오픽 집중 코스 결제", amount: 149000, timestamp: "2026-07-28T18:30:00" },
-  { id: "a5", type: "signup", userName: "정민아", detail: "YouTube 인플루언서 코드 가입", timestamp: "2026-07-28T18:22:00" },
-  { id: "a6", type: "test", userName: "한소희", detail: "스피킹 테스트 완료 (점수 65)", timestamp: "2026-07-28T18:15:00" },
-];
 
 export const users: User[] = [
   { id: "u001", name: "김서연", email: "seoyeon.k@email.com", purpose: "opic", language: "english", utmSource: "instagram", utmCampaign: "opic_summer", testScore: 82, testCompleted: true, paymentStatus: "paid", totalSpent: 597000, joinedAt: "2026-07-15", lastActiveAt: "2026-07-28T18:42:00", phone: "010-1234-5678" },

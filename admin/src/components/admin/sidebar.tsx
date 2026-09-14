@@ -79,7 +79,7 @@ export function AdminSidebar() {
       </nav>
       {!sidebarCollapsed && (
         <div className="border-t border-white/10 p-4 text-xs text-slate-400">
-          DayO Marketing Admin v0.1
+          DayO 운영 어드민
         </div>
       )}
     </aside>

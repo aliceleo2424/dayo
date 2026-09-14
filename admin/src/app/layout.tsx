@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "DayO Admin — Marketing & CRM",
-  description: "DayO backend admin system for marketing, CRM, and CMS",
+  title: "DayO Admin — 운영 대시보드",
+  description: "DayO 실시간 운영 어드민",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

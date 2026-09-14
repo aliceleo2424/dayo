@@ -47,21 +47,19 @@ export async function fetchDashboardKpis(): Promise<DashboardKpis> {
 
 export async function fetchPartnerProfiles() {
   const fullSelect = "id, user_id, nickname, user_name, email, role, visa_type, languages, bank_name, bank_account, account_holder, point_balance, created_at";
-  let result = await supabase
+  const first = await supabase
     .from("profiles")
     .select(fullSelect)
     .in("role", ["partner", "admin"])
     .order("created_at", { ascending: false });
 
-  if (result.error) {
-    result = await supabase
-      .from("profiles")
-      .select("id, user_id, nickname, user_name, email, role, point_balance, created_at")
-      .in("role", ["partner", "admin"])
-      .order("created_at", { ascending: false });
-  }
+  if (!first.error) return first;
 
-  return result;
+  return supabase
+    .from("profiles")
+    .select("id, user_id, nickname, user_name, email, role, point_balance, created_at")
+    .in("role", ["partner", "admin"])
+    .order("created_at", { ascending: false });
 }
 
 type BookingRecord = {
@@ -89,7 +87,7 @@ export async function fetchBookings(): Promise<{ rows: BookingRow[]; error: stri
     const ordered = columns === "*"
       ? await query.order("created_at", { ascending: false })
       : await query.order("scheduled_at", { ascending: true });
-    result = ordered as typeof result;
+    result = ordered as unknown as typeof result;
     if (!result.error) break;
   }
 
