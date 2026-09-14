@@ -1127,8 +1127,8 @@
         hideAdminDashboardLinks();
         return false;
       }
-      var role = await fetchProfileRole(session.user.id);
-      if (role === 'admin') {
+      var role = String((await fetchProfileRole(session.user.id)) || '').trim().toLowerCase().replace(/[\s-]+/g, '_');
+      if (role === 'admin' || role === 'super_admin' || role === 'superadmin') {
         showAdminDashboardLinks();
         return true;
       }

@@ -7,6 +7,6 @@
     NEXT_PUBLIC_SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1taGFwc2ltY25nbXRlZnFmcmNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYzNDIwMTgsImV4cCI6MjEwMTkxODAxOH0.aXN0zgjWNqlxxLtygfuTdLlKIf52Ks_oyx2GTd7T0Oo',
     NEXT_PUBLIC_DAILY_DOMAIN: 'dayo-live.daily.co',
     NEXT_PUBLIC_GEMINI_API_KEY: '',
-    PORTONE_IMP_CODE: '[여기에_고객사_식별코드_입력]'
+    PARTNER_APPLY_FORM_URL: 'https://docs.google.com/forms/d/e/1FAIpQLScBTytUfVL4uyxv3R95dFfcs5rV-UBMnvujJ5GsK4ZNzh_1ZQ/viewform',
   };
 })();

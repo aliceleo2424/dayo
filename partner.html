@@ -12,34 +12,126 @@
   <script src="scroll-lock.js"></script>
   <script>
     document.documentElement.classList.add('partner-guard-pending');
-    (function guardPartnerLounge() {
-      function deny() {
-        alert('파트너 권한이 있는 계정만 접근할 수 있습니다.');
-        window.location.href = '/mypage.html';
+    (function partnerAccessGuard() {
+      var FALLBACK_FORM = 'https://docs.google.com/forms/d/e/1FAIpQLScBTytUfVL4uyxv3R95dFfcs5rV-UBMnvujJ5GsK4ZNzh_1ZQ/viewform';
+
+      function applyFormUrl() {
+        var env = window.__DAYO_ENV__ || {};
+        return env.PARTNER_APPLY_FORM_URL || env.NEXT_PUBLIC_PARTNER_APPLY_FORM_URL || FALLBACK_FORM;
       }
-      function allow() {
+
+      function normalizeRole(role) {
+        return String(role || '').trim().toLowerCase().replace(/[\s-]+/g, '_');
+      }
+
+      function isPartnerRole(role) {
+        return role === 'partner';
+      }
+
+      function isAdminRole(role) {
+        return role === 'admin' || role === 'super_admin' || role === 'superadmin';
+      }
+
+      function revealPage() {
         document.documentElement.classList.remove('partner-guard-pending');
         if (document.body) document.body.classList.remove('partner-guard-pending');
       }
+
+      function showPartnerLounge() {
+        revealPage();
+        if (document.body) {
+          document.body.classList.add('is-partner-lounge');
+          document.body.classList.remove('is-partner-recruit');
+        }
+        var lounge = document.getElementById('viewPartnerHome');
+        var recruit = document.getElementById('partnerRecruitView');
+        if (lounge) lounge.hidden = false;
+        if (recruit) recruit.hidden = true;
+      }
+
+      function showPartnerRecruitView() {
+        revealPage();
+        if (document.body) {
+          document.body.classList.add('is-partner-recruit');
+          document.body.classList.remove('is-partner-lounge');
+        }
+        var lounge = document.getElementById('viewPartnerHome');
+        var recruit = document.getElementById('partnerRecruitView');
+        if (lounge) lounge.hidden = true;
+        if (recruit) recruit.hidden = false;
+        var cta = document.getElementById('partnerRecruitCta');
+        if (cta) cta.setAttribute('href', applyFormUrl());
+      }
+
+      window.showPartnerLounge = showPartnerLounge;
+      window.showPartnerRecruitView = showPartnerRecruitView;
+
+      function waitForClient(tries) {
+        return new Promise(function (resolve) {
+          var left = tries || 25;
+          (function tick() {
+            if (window.supabaseClient && window.supabaseClient.auth) {
+              resolve(window.supabaseClient);
+              return;
+            }
+            if (left <= 0) {
+              resolve(window.supabaseClient || null);
+              return;
+            }
+            left -= 1;
+            setTimeout(tick, 50);
+          })();
+        });
+      }
+
+      async function fetchRole(client, userId) {
+        var cached = window._dayoAuthProfile && window._dayoAuthProfile.role;
+        if (!client || !userId) return normalizeRole(cached);
+        var role = '';
+        try {
+          var byId = await client.from('profiles').select('role').eq('id', userId).maybeSingle();
+          if (byId && byId.data && byId.data.role) role = byId.data.role;
+        } catch (e) { /* fall through */ }
+        if (!role) {
+          try {
+            var byUser = await client.from('profiles').select('role').eq('user_id', userId).maybeSingle();
+            if (byUser && byUser.data && byUser.data.role) role = byUser.data.role;
+          } catch (e2) { /* ignore */ }
+        }
+        return normalizeRole(role || cached);
+      }
+
       async function run() {
         try {
-          var client = window.supabaseClient;
-          if (!client || !client.auth) { deny(); return; }
-          var sessionRes = await client.auth.getSession();
-          var session = sessionRes && sessionRes.data && sessionRes.data.session;
-          if (!session || !session.user) { deny(); return; }
-          var q = await client.from('profiles').select('role').eq('user_id', session.user.id).maybeSingle();
-          if (q.error || !q.data) {
-            q = await client.from('profiles').select('role').eq('id', session.user.id).maybeSingle();
+          var client = await waitForClient(25);
+          var session = null;
+          if (client && client.auth) {
+            var sessionRes = await Promise.race([
+              client.auth.getSession(),
+              new Promise(function (resolve) {
+                setTimeout(function () { resolve({ data: { session: null } }); }, 2500);
+              })
+            ]);
+            session = sessionRes && sessionRes.data && sessionRes.data.session;
           }
-          var role = String((q.data && q.data.role) || '').toLowerCase();
-          if (role !== 'partner' && role !== 'admin') { deny(); return; }
-          allow();
+          var user = session && session.user;
+          var role = user ? await fetchRole(client, user.id) : '';
+          var isPartner = isPartnerRole(role);
+          var isAdmin = isAdminRole(role);
+          if (isAdmin || isPartner) showPartnerLounge();
+          else showPartnerRecruitView();
         } catch (err) {
           console.warn('파트너 라운지 가드 실패', err);
-          deny();
+          showPartnerRecruitView();
         }
       }
+
+      setTimeout(function () {
+        if (document.documentElement.classList.contains('partner-guard-pending')) {
+          showPartnerRecruitView();
+        }
+      }, 3000);
+
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
       else run();
     })();
@@ -1560,6 +1652,102 @@
       background: var(--partner-mint-deep) !important;
       box-shadow: 0 0 0 5px rgba(184, 226, 200, 0.35) !important;
     }
+
+    body.is-partner-recruit .partner-mode-badge,
+    body.is-partner-recruit .welcome {
+      display: none !important;
+    }
+
+    .partner-recruit {
+      width: min(640px, calc(100% - 2rem));
+      min-height: calc(100vh - 96px);
+      margin: 0 auto;
+      padding: 48px 0 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .partner-recruit-card {
+      width: 100%;
+      background: linear-gradient(180deg, #FFFDF6 0%, #F7FBF8 100%);
+      border: 1px solid rgba(184, 226, 200, 0.7);
+      border-radius: 28px;
+      padding: 36px 32px 28px;
+      box-shadow: 0 22px 50px rgba(113, 83, 72, 0.12);
+      text-align: left;
+    }
+
+    .partner-recruit-kicker {
+      display: inline-flex;
+      margin: 0 0 12px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #EAF8F2;
+      color: #247552;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+
+    .partner-recruit-card h1 {
+      margin: 0 0 12px;
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.4;
+      color: #3E4A42;
+    }
+
+    .partner-recruit-sub {
+      margin: 0 0 22px;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: #6A7A72;
+    }
+
+    .partner-recruit-benefits {
+      list-style: none;
+      display: grid;
+      gap: 10px;
+      margin: 0 0 24px;
+      padding: 0;
+    }
+
+    .partner-recruit-benefits li {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(184, 226, 200, 0.55);
+      font-size: 0.92rem;
+      font-weight: 700;
+      line-height: 1.55;
+      color: #3E4A42;
+    }
+
+    .partner-recruit-cta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 16px;
+      background: #FF6B57;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 0.95rem;
+      box-shadow: 0 8px 18px rgba(255, 107, 87, 0.25);
+    }
+
+    .partner-recruit-cta:hover { filter: brightness(1.03); }
+
+    .partner-recruit-status {
+      margin: 16px 0 0;
+      font-size: 0.82rem;
+      line-height: 1.65;
+      color: #7A8A82;
+    }
   </style>
 </head>
 <body class="theme-partner partner-page-body partner-guard-pending" data-dayo-role="partner" data-mode="partner">
@@ -1619,6 +1807,21 @@
     <a href="mypage.html"><span aria-hidden="true">👤</span> <span data-i18n="nav.learnerMypage">마이페이지로 이동</span></a>
     <button type="button" onclick="handleLogout(event)" class="btn-logout" style="cursor: pointer;" data-i18n="login.logout">로그아웃</button>
   </nav>
+
+  <section id="partnerRecruitView" class="partner-recruit" hidden>
+    <div class="partner-recruit-card">
+      <p class="partner-recruit-kicker">PARTNER RECRUIT</p>
+      <h1 data-i18n="partner.recruit.title">DayO와 함께할 글로벌 대화 파트너를 모십니다 ☕</h1>
+      <p class="partner-recruit-sub" data-i18n="partner.recruit.sub">가르치거나 평가할 필요 없이, 한국인 친구와 일상 이야기를 나누며 편안하게 수익을 만들어보세요.</p>
+      <ul class="partner-recruit-benefits">
+        <li data-i18n="partner.recruit.benefit1">💡 세션 1회(25분)당 6,000P (현금 정산)</li>
+        <li data-i18n="partner.recruit.benefit2">🕒 내가 가능한 요일/시간에만 자유롭게 슬롯 오픈</li>
+        <li data-i18n="partner.recruit.benefit3">🌍 D-2 유학생 / 외국인 누구나 지원 가능</li>
+      </ul>
+      <a id="partnerRecruitCta" class="partner-recruit-cta" href="https://docs.google.com/forms/d/e/1FAIpQLScBTytUfVL4uyxv3R95dFfcs5rV-UBMnvujJ5GsK4ZNzh_1ZQ/viewform" target="_blank" rel="noopener noreferrer" data-i18n="partner.recruit.cta">글로벌 파트너 지원서 작성하기 (1분 소요) 📝</a>
+      <p class="partner-recruit-status" data-i18n="partner.recruit.status">이미 지원서를 제출하셨나요? 운영팀 검수 후 승인이 완료되면 본 페이지에서 즉시 활동하실 수 있습니다.</p>
+    </div>
+  </section>
 
   <main class="page partner-container partner-dashboard-wrap" id="viewPartnerHome">
     <div class="role-switch-wrapper" style="display: flex; justify-content: center; margin: 20px auto 28px; width: 100%; max-width: 320px;">

@@ -771,6 +771,48 @@
       FR: 'Consultez l’activité du mois, puis gérez profil et disponibilités.',
       ES: 'Revisa la actividad del mes y gestiona tu perfil y horarios.'
     },
+    'partner.recruit.title': {
+      KO: 'DayO와 함께할 글로벌 대화 파트너를 모십니다 ☕',
+      EN: 'Join DayO as a global conversation partner ☕',
+      FR: 'Devenez partenaire de conversation DayO ☕',
+      ES: 'Únete a DayO como compañero de conversación ☕'
+    },
+    'partner.recruit.sub': {
+      KO: '가르치거나 평가할 필요 없이, 한국인 친구와 일상 이야기를 나누며 편안하게 수익을 만들어보세요.',
+      EN: 'No teaching or grading — chat about everyday life with Korean friends and earn comfortably.',
+      FR: 'Pas besoin d’enseigner ni de noter : discutez du quotidien et gagnez sereinement.',
+      ES: 'Sin enseñar ni evaluar: conversa sobre el día a día y genera ingresos con calma.'
+    },
+    'partner.recruit.benefit1': {
+      KO: '💡 세션 1회(25분)당 6,000P (현금 정산)',
+      EN: '💡 6,000P per 25-min session (cash payout)',
+      FR: '💡 6 000P par session de 25 min (versement cash)',
+      ES: '💡 6.000P por sesión de 25 min (pago en efectivo)'
+    },
+    'partner.recruit.benefit2': {
+      KO: '🕒 내가 가능한 요일/시간에만 자유롭게 슬롯 오픈',
+      EN: '🕒 Open slots only on the days and times that work for you',
+      FR: '🕒 Ouvrez des créneaux seulement quand vous êtes dispo',
+      ES: '🕒 Abre horarios solo cuando te venga bien'
+    },
+    'partner.recruit.benefit3': {
+      KO: '🌍 D-2 유학생 / 외국인 누구나 지원 가능',
+      EN: '🌍 D-2 students and internationals are all welcome to apply',
+      FR: '🌍 Étudiants D-2 et internationaux : tout le monde peut postuler',
+      ES: '🌍 Estudiantes D-2 y extranjeros: cualquiera puede postularse'
+    },
+    'partner.recruit.cta': {
+      KO: '글로벌 파트너 지원서 작성하기 (1분 소요) 📝',
+      EN: 'Fill out the global partner form (1 min) 📝',
+      FR: 'Remplir la candidature partenaire (1 min) 📝',
+      ES: 'Completar la solicitud de partner (1 min) 📝'
+    },
+    'partner.recruit.status': {
+      KO: '이미 지원서를 제출하셨나요? 운영팀 검수 후 승인이 완료되면 본 페이지에서 즉시 활동하실 수 있습니다.',
+      EN: 'Already applied? Once the team approves you, you can start on this page right away.',
+      FR: 'Déjà candidaté ? Dès validation par l’équipe, vous pourrez commencer ici.',
+      ES: '¿Ya postulaste? Cuando el equipo te apruebe, podrás empezar en esta página.'
+    },
     'partner.profile.title': {
       KO: '대화 파트너 프로필', EN: 'Partner Profile', ZH: '对话伙伴资料', JA: 'パートナープロフィール', FR: 'Profil partenaire', ES: 'Perfil de compañero'
     },

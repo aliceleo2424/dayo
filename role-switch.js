@@ -97,7 +97,8 @@
   }
 
   function canEnterPartnerLounge(role) {
-    return role === 'partner' || role === 'admin';
+    var normalized = String(role || '').trim().toLowerCase().replace(/[\s-]+/g, '_');
+    return normalized === 'partner' || normalized === 'admin' || normalized === 'super_admin' || normalized === 'superadmin';
   }
 
   window.openPartnerApplyModal = openPartnerApplyModal;
@@ -110,29 +111,7 @@
     if (switchBusy) return;
 
     if (goingPartner) {
-      if (!isLoggedIn()) {
-        setUserModeUi();
-        alert('로그인이 필요한 서비스입니다.');
-        openLoginModal();
-        return;
-      }
-      switchBusy = true;
-      setPartnerModeUi();
-      try {
-        var role = await fetchCurrentRole();
-        if (canEnterPartnerLounge(role)) {
-          window.location.href = '/partner.html';
-          return;
-        }
-        setUserModeUi();
-        openPartnerApplyModal();
-      } catch (err) {
-        console.warn('파트너 권한 확인 실패', err);
-        setUserModeUi();
-        openPartnerApplyModal();
-      } finally {
-        switchBusy = false;
-      }
+      window.location.href = '/partner.html';
       return;
     }
 
