@@ -1,6 +1,7 @@
 /* DayO 세션 이용권 구매 모달 — mypage / index 공용
  * 트리거: [data-tickets-open] 또는 ?tickets=open
- * 상단 패키지(11·33) / 하단 단품(체험·1회). 구매 시 amount·orderName·ticketCount 매핑
+ * 3단 위계: 신규 체험 배너 / 정규 패키지 3종 / 1회 단품
+ * 구매 시 amount·orderName·ticketCount 매핑
  */
 (function () {
   'use strict';
@@ -12,58 +13,77 @@
 
   var PLANS = [
     {
+      id: 'trial',
+      payId: 'trial',
+      tier: 'banner',
+      badge: '☕ 신규 회원 전용',
+      title: '첫 세션 9,900원 체험 할인권',
+      orderName: '첫 세션 체험 할인권',
+      price: '9,900원',
+      priceValue: 9900,
+      meta: '1회 30분 세션',
+      copy: '외국인 울렁증 없이 가볍게 시작하는 1:1 첫 대화 (AI 매니저 + 5분 터치 퀴즈 포함)',
+      tickets: 1,
+      cta: '체험권 구매하기'
+    },
+    {
+      id: 'pack3',
+      payId: 'starter3',
+      tier: 'pack',
+      badge: '🌱 첫 대화 후 추천',
+      title: '3회 스타터 팩',
+      orderName: '3회 스타터 팩',
+      price: '54,900원',
+      priceValue: 54900,
+      meta: '3회 이용권',
+      benefit: '회당 약 18,300원 / 정가 대비 약 8% 할인',
+      copy: '부담 없는 5만 원대로 가볍게 이어가는 3주 대화 루틴',
+      tickets: 3,
+      cta: '구매하기'
+    },
+    {
       id: 'pack11',
       payId: 'light11',
+      tier: 'pack',
       badge: '🔥 BEST! 1회 보너스',
       title: '가벼운 11 패키지',
       orderName: '가벼운 11 패키지',
       price: '179,000원',
       priceValue: 179000,
-      meta: '10회 + 1회 서비스 (총 11회)',
-      benefit: '회당 약 16,270원 (정가 대비 18% 할인)',
-      copy: '1회 무료 증정 + 부담 없는 꾸준한 회화 루틴',
+      meta: '10회 + 1회 무료 증정 (총 11회)',
+      benefit: '회당 약 16,270원 / 정가 대비 18% 할인',
+      copy: '1회 무료 증정! 가장 인기 있는 꾸준한 대화 루틴',
       tickets: 11,
-      featured: true
+      featured: true,
+      cta: '구매하기'
     },
     {
       id: 'pack33',
       payId: 'full33',
-      badge: '🎉 최대 할인 패키지',
+      tier: 'pack',
+      badge: '🎉 최대 24% 할인',
       title: '마음껏 33 패키지',
       orderName: '마음껏 33 패키지',
       price: '499,000원',
       priceValue: 499000,
-      meta: '30회 + 3회 서비스 (총 33회)',
-      benefit: '회당 약 15,120원 (정가 대비 24% 할인)',
-      copy: '3회 무료 증정 + 90일간 자유롭게 완성하는 실전 회화',
+      meta: '30회 + 3회 무료 증정 (총 33회)',
+      benefit: '회당 약 15,120원 / 정가 대비 24% 할인',
+      copy: '3회 무료 증정! 90일간 자유롭게 완성하는 실전 회화 감각',
       tickets: 33,
-      featured: true
-    },
-    {
-      id: 'trial',
-      payId: 'trial',
-      badge: '첫 가입 전용 ☕',
-      title: '첫 세션 체험 할인권',
-      orderName: '첫 세션 체험 할인권',
-      price: '9,900원',
-      priceValue: 9900,
-      meta: '1회 (첫 가입 전용 체험가)',
-      copy: '부담 없이 시작하는 1:1 라이브 대화',
-      tickets: 1,
-      featured: false
+      cta: '구매하기'
     },
     {
       id: 'single',
       payId: 'single',
-      badge: '기본',
+      tier: 'single',
       title: '1회 단품 이용권',
       orderName: '1회 단품 이용권',
       price: '19,900원',
       priceValue: 19900,
       meta: '1회',
-      copy: '필요할 때 한 회씩 가볍게',
+      copy: '약정 없이 필요할 때 딱 한 번만 만나고 싶다면?',
       tickets: 1,
-      featured: false
+      cta: '1회권 구매하기'
     }
   ];
 
@@ -73,7 +93,7 @@
     'width:100%;max-width:100%;overflow-x:hidden;box-sizing:border-box;',
     'opacity:0;visibility:hidden;pointer-events:none;transition:opacity .28s ease,visibility .28s ease;}',
     '.tk-overlay.is-open{opacity:1;visibility:visible;pointer-events:auto;}',
-    '.tk-modal{position:relative;width:100%;max-width:720px;max-height:min(90vh,90dvh);',
+    '.tk-modal{position:relative;width:100%;max-width:960px;max-height:min(92vh,92dvh);',
     'display:flex;flex-direction:column;overflow:hidden;',
     'border-radius:28px;border:1px solid rgba(255,209,220,.75);background:#FFFCFA;',
     'box-shadow:0 28px 64px rgba(113,83,72,.2);color:#5C4A42;font-family:inherit;',
@@ -83,47 +103,43 @@
     'border:none;border-radius:50%;background:rgba(255,255,255,.8);color:#FF6B57;',
     'font-size:1rem;cursor:pointer;line-height:1;}',
     '.tk-close:hover{background:#FF6B57;color:#fff;}',
-    '.tk-head{padding:1.55rem 1.55rem 1.15rem;background:linear-gradient(135deg,#FFD1DC,#FFE5B4 55%,#FFF1D8);',
+    '.tk-head{padding:1.45rem 1.55rem 1.05rem;background:linear-gradient(135deg,#FFD1DC,#FFE5B4 55%,#FFF1D8);',
     'text-align:center;}',
     '.tk-eyebrow{font-size:.72rem;font-weight:800;letter-spacing:.06em;color:#FF6B57;text-transform:uppercase;}',
     '.tk-title{margin-top:.35rem;font-family:Quicksand,Gowun Dodum,sans-serif;font-size:clamp(1.25rem,3.2vw,1.55rem);',
     'font-weight:800;letter-spacing:-.03em;line-height:1.35;}',
-    '.tk-sub{margin:.55rem auto 0;max-width:28rem;font-size:.88rem;line-height:1.6;color:#9A8580;font-weight:600;}',
-    '.tk-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.2rem 1.25rem 1.4rem;}',
-    '.tk-duebar{display:none;margin:0 0 1rem;padding:1.05rem 1.1rem 1.15rem;border-radius:22px;text-align:center;',
-    'border:1px solid rgba(255,107,87,.28);background:linear-gradient(165deg,#FFF6F2,#FFE8E3 50%,#FFF9F4);',
-    'box-shadow:0 10px 24px rgba(255,107,87,.12);}',
-    '.tk-duebar.is-on{display:block;}',
-    '.tk-duebar__label{font-size:.78rem;font-weight:800;color:#FF6B57;letter-spacing:.02em;}',
-    '.tk-duebar__was{margin-top:.35rem;font-size:.95rem;font-weight:700;color:#9A8580;text-decoration:line-through;}',
-    '.tk-duebar__now{margin-top:.1rem;font-size:clamp(1.85rem,5vw,2.35rem);font-weight:900;color:#FF6B57;',
-    'letter-spacing:-.04em;line-height:1.15;}',
-    '.tk-duebar__hint{margin-top:.35rem;font-size:.78rem;font-weight:700;color:#5C4A42;}',
-    '.tk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.85rem;}',
-    '.tk-card{position:relative;display:flex;flex-direction:column;gap:.45rem;padding:1.1rem 1rem 1.05rem;',
+    '.tk-sub{margin:.55rem auto 0;max-width:32rem;font-size:.88rem;line-height:1.6;color:#9A8580;font-weight:600;}',
+    '.tk-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.15rem 1.25rem 1.35rem;}',
+    '.tk-banner{display:flex;flex-wrap:wrap;align-items:center;gap:.85rem 1.15rem;margin:0 0 1rem;',
+    'padding:1.05rem 1.15rem;border-radius:22px;text-align:left;',
+    'border:1.5px solid rgba(255,107,87,.4);background:linear-gradient(120deg,#FFF8F5,#FFE8E3 42%,#FFF6EE);',
+    'box-shadow:0 10px 26px rgba(255,107,87,.12);}',
+    '.tk-banner__copy{flex:1 1 16rem;min-width:0;}',
+    '.tk-banner .tk-badge{margin-bottom:.4rem;}',
+    '.tk-banner .tk-card__title{margin:0;font-size:1.08rem;}',
+    '.tk-banner .tk-card__price{margin:.2rem 0 0;font-size:1.55rem;}',
+    '.tk-banner .tk-card__meta,.tk-banner .tk-card__copy{margin:.2rem 0 0;}',
+    '.tk-banner .tk-card__cta{flex:0 0 auto;min-width:9.5rem;}',
+    '.tk-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.85rem;}',
+    '.tk-card{position:relative;display:flex;flex-direction:column;gap:.4rem;padding:1.05rem .95rem 1rem;',
     'border-radius:22px;border:1px solid rgba(255,209,220,.7);background:linear-gradient(180deg,#FFFCFA,#FFF8F5);',
     'box-shadow:0 8px 22px rgba(113,83,72,.06);text-align:left;}',
-    '.tk-card--best{border-color:rgba(255,107,87,.55);background:linear-gradient(165deg,#FFF6F2 0%,#FFE8E3 48%,#FFF9F4 100%);',
-    'box-shadow:0 12px 28px rgba(255,107,87,.14),0 0 0 1px rgba(255,107,87,.08);}',
+    '.tk-card--starter{border-color:rgba(122,184,140,.45);background:linear-gradient(165deg,#F7FBF6 0%,#EEF7F0 48%,#FFFDF8 100%);}',
+    '.tk-card--best{border:2px solid rgba(255,107,87,.72);background:linear-gradient(165deg,#FFF6F2 0%,#FFE8E3 48%,#FFF9F4 100%);',
+    'box-shadow:0 12px 28px rgba(255,107,87,.16),0 0 0 3px rgba(255,107,87,.08);transform:translateY(-2px);}',
     '.tk-card--deal{border-color:rgba(255,154,80,.5);background:linear-gradient(165deg,#FFF9F1 0%,#FFE9D2 48%,#FFF8F0 100%);',
     'box-shadow:0 12px 28px rgba(255,154,80,.12);}',
-    '.tk-card--coupon{border-color:rgba(255,107,87,.45);background:linear-gradient(165deg,#FFF9F6,#FFEDE8);}',
     '.tk-badge{display:inline-flex;align-self:flex-start;padding:.28rem .65rem;border-radius:999px;',
     'background:rgba(255,249,196,.85);border:1px solid rgba(255,209,220,.7);',
     'color:#5C4A42;font-size:.72rem;font-weight:800;line-height:1.2;}',
-    '.tk-card--best .tk-badge,.tk-card--coupon .tk-badge{background:linear-gradient(135deg,#FF7A68,#FF6B57);color:#fff;border-color:transparent;}',
+    '.tk-card--best .tk-badge,.tk-banner .tk-badge{background:linear-gradient(135deg,#FF7A68,#FF6B57);color:#fff;border-color:transparent;}',
+    '.tk-card--starter .tk-badge{background:rgba(214,237,218,.95);border-color:rgba(122,184,140,.35);}',
     '.tk-card__title{font-family:Quicksand,Gowun Dodum,sans-serif;font-size:1.02rem;font-weight:800;letter-spacing:-.02em;}',
-    '.tk-card__was{margin:0;font-size:.88rem;font-weight:700;color:#9A8580;text-decoration:line-through;}',
-    '.tk-card__price{font-size:1.35rem;font-weight:800;color:#FF6B57;letter-spacing:-.03em;line-height:1.2;}',
-    '.tk-card__price--due{font-size:1.85rem;font-weight:900;}',
+    '.tk-card__price{font-size:1.28rem;font-weight:800;color:#FF6B57;letter-spacing:-.03em;line-height:1.2;}',
     '.tk-card__meta{font-size:.78rem;font-weight:700;color:#9A8580;}',
-    '.tk-card__benefit{font-size:.78rem;font-weight:800;color:#FF6B57;line-height:1.4;}',
-    '.tk-card__copy{margin-top:.15rem;font-size:.8rem;font-weight:600;line-height:1.45;color:#5C4A42;}',
-    '.tk-coupon{display:flex;align-items:flex-start;gap:.5rem;margin-top:.2rem;padding:.65rem .7rem;',
-    'border-radius:16px;border:1px solid rgba(255,107,87,.22);background:rgba(255,255,255,.72);cursor:pointer;}',
-    '.tk-coupon input{margin-top:.15rem;accent-color:#FF6B57;width:1rem;height:1rem;flex:0 0 auto;}',
-    '.tk-coupon span{font-size:.78rem;font-weight:800;line-height:1.45;color:#5C4A42;}',
-    '.tk-card__cta{margin-top:auto;padding-top:.65rem;}',
+    '.tk-card__benefit{font-size:.76rem;font-weight:800;color:#FF6B57;line-height:1.4;}',
+    '.tk-card__copy{margin-top:.1rem;font-size:.78rem;font-weight:600;line-height:1.5;color:#5C4A42;}',
+    '.tk-card__cta{margin-top:auto;padding-top:.6rem;}',
     '.tk-buy{width:100%;padding:.7rem .9rem;border:none;border-radius:999px;cursor:pointer;',
     'font-family:inherit;font-size:.86rem;font-weight:800;color:#fff;',
     'background:linear-gradient(135deg,#FF7A68,#FF6B57 55%,#FF8A4C);',
@@ -132,7 +148,14 @@
     '.tk-buy:hover{transform:translateY(-1px);box-shadow:0 5px 0 #E55A45,0 10px 20px rgba(255,107,87,.26);}',
     '.tk-buy:active{transform:translateY(2px);box-shadow:0 2px 0 #E55A45,0 4px 10px rgba(255,107,87,.18);}',
     '.tk-card--best .tk-buy{background:linear-gradient(135deg,#FF6B57,#FF8A4C);}',
-    '.tk-policy{margin-top:1.15rem;padding:1rem 1.05rem;border-radius:20px;',
+    '.tk-buy--slim{width:auto;min-width:8.8rem;padding:.55rem 1.05rem;font-size:.82rem;',
+    'box-shadow:0 3px 0 #E55A45,0 6px 14px rgba(255,107,87,.18);}',
+    '.tk-single{margin-top:1rem;padding:.95rem 1.05rem;border-radius:20px;text-align:left;',
+    'border:1px dashed rgba(154,133,128,.45);background:rgba(255,255,255,.72);}',
+    '.tk-single__ask{margin:0 0 .55rem;font-size:.84rem;font-weight:700;line-height:1.5;color:#9A8580;}',
+    '.tk-single__row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.65rem;}',
+    '.tk-single__name{margin:0;font-size:.95rem;font-weight:800;color:#5C4A42;}',
+    '.tk-policy{margin-top:1.1rem;padding:1rem 1.05rem;border-radius:20px;',
     'border:1px solid rgba(255,209,220,.65);background:linear-gradient(160deg,rgba(255,246,242,.95),rgba(255,249,230,.9));}',
     '.tk-policy__title{margin:0 0 .7rem;font-size:.88rem;font-weight:800;}',
     '.tk-policy__list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.55rem;}',
@@ -143,10 +166,15 @@
     'background:#FFFCFA;box-shadow:0 12px 28px rgba(113,83,72,.16);font-size:.86rem;font-weight:700;',
     'opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;text-align:center;}',
     '.tk-toast.is-on{opacity:1;transform:translateX(-50%) translateY(0);}',
-    '@media (max-width:640px){',
+    '@media (max-width:860px){',
     '.tk-grid{grid-template-columns:1fr;}',
-    '.tk-head{padding:1.35rem 1.15rem 1rem;}',
+    '.tk-card--best{transform:none;}',
+    '.tk-banner{flex-direction:column;align-items:stretch;}',
+    '.tk-banner .tk-card__cta{width:100%;}',
+    '.tk-head{padding:1.3rem 1.15rem .95rem;}',
     '.tk-body{padding:1rem .95rem 1.2rem;}',
+    '.tk-single__row{flex-direction:column;align-items:stretch;}',
+    '.tk-buy--slim{width:100%;}',
     '}'
   ].join('');
 
@@ -175,10 +203,6 @@
     return !!(couponState.applyWelcome && couponState.unusedWelcome);
   }
 
-  function visiblePlans() {
-    return PLANS.slice();
-  }
-
   function paymentPayload(plan) {
     var applyCoupon = plan.id === 'single' && isCouponApplied();
     var amount = applyCoupon ? welcomeDue().due : Number(plan.priceValue);
@@ -191,11 +215,24 @@
     };
   }
 
-  function planCard(plan) {
+  function buyButton(plan) {
     var payload = paymentPayload(plan);
+    return '' +
+      '<button type="button" class="tk-buy' + (plan.tier === 'single' ? ' tk-buy--slim' : '') + '" data-tk-buy="' + plan.id + '"' +
+        ' onclick="requestPay(\'' + (plan.payId || plan.id) + '\')"' +
+        ' data-amount="' + payload.amount + '"' +
+        ' data-order-name="' + payload.orderName + '"' +
+        ' data-ticket-count="' + payload.ticketCount + '">' +
+        (plan.cta || '구매하기') +
+      '</button>';
+  }
+
+  function planCard(plan) {
+    if (!plan) return '';
     var badge = plan.badge ? '<span class="tk-badge">' + plan.badge + '</span>' : '';
     var benefit = plan.benefit ? '<p class="tk-card__benefit">' + plan.benefit + '</p>' : '';
     var cls = 'tk-card';
+    if (plan.id === 'pack3') cls += ' tk-card--starter';
     if (plan.id === 'pack11') cls += ' tk-card--best';
     if (plan.id === 'pack33') cls += ' tk-card--deal';
     return '' +
@@ -206,22 +243,42 @@
         '<p class="tk-card__meta">' + plan.meta + '</p>' +
         benefit +
         '<p class="tk-card__copy">' + plan.copy + '</p>' +
-        '<div class="tk-card__cta">' +
-          '<button type="button" class="tk-buy" data-tk-buy="' + plan.id + '"' +
-            ' onclick="requestPay(\'' + (plan.payId || plan.id) + '\')"' +
-            ' data-amount="' + payload.amount + '"' +
-            ' data-order-name="' + payload.orderName + '"' +
-            ' data-ticket-count="' + payload.ticketCount + '">' +
-            '구매하기' +
-          '</button>' +
-        '</div>' +
+        '<div class="tk-card__cta">' + buyButton(plan) + '</div>' +
       '</article>';
   }
 
+  function bannerCard(plan) {
+    if (!plan) return '';
+    var badge = plan.badge ? '<span class="tk-badge">' + plan.badge + '</span>' : '';
+    return '' +
+      '<article class="tk-banner" data-plan="' + plan.id + '">' +
+        '<div class="tk-banner__copy">' +
+          badge +
+          '<h3 class="tk-card__title">' + plan.title + '</h3>' +
+          '<p class="tk-card__price">' + plan.price + '</p>' +
+          '<p class="tk-card__meta">' + plan.meta + '</p>' +
+          '<p class="tk-card__copy">' + plan.copy + '</p>' +
+        '</div>' +
+        '<div class="tk-card__cta">' + buyButton(plan) + '</div>' +
+      '</article>';
+  }
+
+  function singleRow(plan) {
+    if (!plan) return '';
+    return '' +
+      '<p class="tk-single__ask">' + plan.copy + '</p>' +
+      '<div class="tk-single__row">' +
+        '<p class="tk-single__name">' + plan.title + ' | ' + plan.price + '</p>' +
+        buyButton(plan) +
+      '</div>';
+  }
+
   function renderPlans() {
-    if (!el.grid) return;
-    el.grid.innerHTML = visiblePlans().map(planCard).join('');
-    if (el.duebar) el.duebar.classList.remove('is-on');
+    if (el.banner) el.banner.innerHTML = bannerCard(findPlan('trial'));
+    if (el.grid) {
+      el.grid.innerHTML = [findPlan('pack3'), findPlan('pack11'), findPlan('pack33')].map(planCard).join('');
+    }
+    if (el.single) el.single.innerHTML = singleRow(findPlan('single'));
   }
 
   function buildMarkup() {
@@ -231,23 +288,18 @@
         '<div class="tk-head">' +
           '<p class="tk-eyebrow">TICKETS</p>' +
           '<h2 class="tk-title" id="tkTitle">DayO 세션 이용권 ☕️</h2>' +
-          '<p class="tk-sub">기준 세션: 1회 25분 글로벌 대화 (세션 티켓 1장)</p>' +
+          '<p class="tk-sub">1회 30분 세션 (25분 대화 + 5분 퀴즈) · 약정 없이 필요할 만큼만</p>' +
         '</div>' +
         '<div class="tk-body">' +
-          '<div class="tk-duebar" data-tk-duebar>' +
-            '<p class="tk-duebar__label">🎉 첫 세션 체험 할인권 자동 적용</p>' +
-            '<p class="tk-duebar__was" data-tk-due-was>19,900원</p>' +
-            '<p class="tk-duebar__now" data-tk-due-now>9,900원</p>' +
-            '<p class="tk-duebar__hint">1회 이용권 결제 예정 금액</p>' +
-          '</div>' +
+          '<div data-tk-banner></div>' +
           '<div class="tk-grid" data-tk-grid></div>' +
+          '<div class="tk-single" data-tk-single></div>' +
           '<aside class="tk-policy" aria-label="세션 규정 및 이용 안내">' +
             '<p class="tk-policy__title">세션 규정 및 이용 안내</p>' +
             '<ul class="tk-policy__list">' +
-              '<li>📌 <strong>유효기간:</strong> 모든 이용권은 결제 후 90일 내 소진 필수, 이후 사라지니 꼭 90일 안에 사용해주세요. (메일/ 카카오톡으로 소진 알림을 보내드려요!)</li>' +
+              '<li>📌 <strong>유효기간:</strong> 모든 이용권은 결제 후 90일 내 소진 필수, 이후 사라지니 꼭 90일 안에 사용해주세요. (메일/카카오톡으로 소진 알림을 보내드려요!)</li>' +
               '<li>🔄 <strong>변경/취소:</strong> 세션 요일 및 시간 변경/취소는 세션 시작 1시간 전까지 가능해요.</li>' +
               '<li>💌 <strong>노쇼:</strong> 세션 시작 1시간 이내 취소 및 노쇼 발생 시 티켓이 차감되며 \'토닥토닥 리포트\'가 발송됩니다.</li>' +
-              '<li>💳 <strong>환불:</strong> 첫 세션 예약 전 및 결제 후 7일 이내 미사용 티켓은 100% 전액 환불 가능해요. (1회 이상 세션 진행 후에는 환불이 불가합니다.)</li>' +
             '</ul>' +
           '</aside>' +
         '</div>' +
@@ -266,7 +318,7 @@
 
   function findPlan(id) {
     for (var i = 0; i < PLANS.length; i++) {
-      if (PLANS[i].id === id) return PLANS[i];
+      if (PLANS[i].id === id || PLANS[i].payId === id) return PLANS[i];
     }
     return null;
   }
@@ -428,8 +480,9 @@
 
     el.overlay = overlay;
     el.toast = toast;
+    el.banner = overlay.querySelector('[data-tk-banner]');
     el.grid = overlay.querySelector('[data-tk-grid]');
-    el.duebar = overlay.querySelector('[data-tk-duebar]');
+    el.single = overlay.querySelector('[data-tk-single]');
     bindEvents();
     renderPlans();
   }
