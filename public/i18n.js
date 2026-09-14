@@ -1874,6 +1874,12 @@
       ES: '¡Hola! Soy el asistente DayO. Elige una pregunta y te responderé.'
     },
     'chatbot.faqLabel': { KO: '자주 묻는 질문', EN: 'Frequently Asked', ZH: '常见问题', JA: 'よくある質問', FR: 'Questions fréquentes', ES: 'Preguntas frecuentes' },
+    'chatbot.kakaoChat': {
+      KO: '카카오톡으로 1:1 문의하기 💬',
+      EN: 'Chat 1:1 on KakaoTalk 💬',
+      FR: 'Discuter 1:1 sur KakaoTalk 💬',
+      ES: 'Consulta 1:1 por KakaoTalk 💬'
+    },
     'chatbot.typing': { KO: '입력 중...', EN: 'Typing...', ZH: '输入中...', JA: '入力中...', FR: 'En train d\'écrire...', ES: 'Escribiendo...' },
     'chatbot.q.class': {
       KO: '세션은 어떻게 진행되나요?', EN: 'How do sessions work?', ZH: '会话是如何进行的？', JA: 'セッションはどのように進みますか？', FR: 'Comment se déroulent les sessions ?', ES: '¿Cómo funcionan las sesiones?'

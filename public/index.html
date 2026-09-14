@@ -1697,6 +1697,24 @@
     .chat-faq-label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); }
     .faq-chip { padding: 0.6rem 0.85rem; background: var(--cream); border: 1px solid var(--coral-pale); border-radius: var(--radius); font-family: inherit; font-size: 0.8rem; cursor: pointer; text-align: left; }
     .faq-chip:hover { background: var(--coral-pale); border-color: var(--coral); }
+    .kakao-chat-btn {
+      margin-top: 12px;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.82rem 0.95rem;
+      border: none;
+      border-radius: 12px;
+      background: #FEE500;
+      color: #191919;
+      font-family: inherit;
+      font-size: 0.86rem;
+      font-weight: 800;
+      line-height: 1.35;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #E6CF00, 0 8px 16px rgba(254, 229, 0, 0.35);
+    }
+    .kakao-chat-btn:hover { filter: brightness(0.98); }
+    .kakao-chat-btn:active { transform: translateY(1px); box-shadow: 0 2px 0 #E6CF00; }
 
     .result-toast {
       position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(80px);
@@ -2177,7 +2195,7 @@
       } catch (e) {}
     })();
   </script>
-  <script src="i18n.js?v=20260914-starter3"></script>
+  <script src="i18n.js?v=20260915-kakaochat"></script>
 
   <div class="mesh-bg" aria-hidden="true">
     <div class="mesh-bg__layer mesh-bg__layer--1"></div>
@@ -2559,6 +2577,7 @@
       <button class="faq-chip" data-faq="beginner" data-i18n="chatbot.q.beginner">영어를 아예 못해도 참여할 수 있나요?</button>
       <button class="faq-chip" data-faq="free" data-i18n="chatbot.q.free">세션 티켓은 어떻게 쓰나요?</button>
       <button class="faq-chip" data-faq="policy" data-i18n="chatbot.q.policy">취소·일정 변경 규정은 어떻게 되나요?</button>
+      <button type="button" class="kakao-chat-btn" id="kakaoChatBtn" data-i18n="chatbot.kakaoChat">카카오톡으로 1:1 문의하기 💬</button>
     </div>
   </div>
 
@@ -3474,6 +3493,22 @@
         typeBotReply(t('chatbot.a.' + chip.dataset.faq));
       });
     });
+
+    (function bindKakaoChat() {
+      var KAKAO_CHANNEL_ID = '_hpxkJX';
+      var chatUrl = 'https://pf.kakao.com/' + KAKAO_CHANNEL_ID + '/chat';
+      var btn = document.getElementById('kakaoChatBtn');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        try {
+          if (window.Kakao && window.Kakao.Channel) {
+            window.Kakao.Channel.chat({ channelPublicId: KAKAO_CHANNEL_ID });
+            return;
+          }
+        } catch (err) { /* fall through to direct URL */ }
+        window.open(chatUrl, '_blank', 'noopener,noreferrer');
+      });
+    })();
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
