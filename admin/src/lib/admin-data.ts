@@ -51,7 +51,7 @@ function mapProfile(row: ProfileRecord, spentByUser: Map<string, number>): CrmMe
     nickname: row.nickname || null,
     user_name: row.user_name || null,
     email: row.email || null,
-    role: row.role || "user",
+    role: normalizeCrmRole(row.role),
     ticket_count: Number(row.ticket_count || 0),
     point_balance: Number(row.point_balance || 0),
     last_test_score: row.last_test_score == null ? null : Number(row.last_test_score),
@@ -282,4 +282,32 @@ export async function fetchBookings(): Promise<{ rows: BookingRow[]; error: stri
       room_url: roomUrl(row.id),
     })),
   };
+}
+
+export function normalizeCrmRole(role: string | null | undefined) {
+  return String(role || "user").trim().toLowerCase().replace(/[\s-]+/g, "_");
+}
+
+export async function updateProfileRole(
+  row: { id: string; user_id?: string | null },
+  nextRole: "partner" | "user"
+) {
+  const first = await supabase
+    .from("profiles")
+    .update({ role: nextRole })
+    .eq("id", row.id)
+    .select("id");
+  if (!first.error && first.data && first.data.length) return;
+
+  const uid = row.user_id || row.id;
+  const second = await supabase
+    .from("profiles")
+    .update({ role: nextRole })
+    .eq("user_id", uid)
+    .select("id");
+  if (second.error) throw new Error(second.error.message);
+  if (first.error && !(second.data && second.data.length)) throw new Error(first.error.message);
+  if (!(second.data && second.data.length)) {
+    throw new Error("프로필을 찾지 못해 권한을 변경하지 못했습니다.");
+  }
 }

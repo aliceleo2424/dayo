@@ -5,9 +5,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { CalendarCheck, GraduationCap, Users, Wallet } from "lucide-react";
 import { AdminHeader } from "@/components/admin/header";
+import { RoleActions } from "@/components/admin/role-actions";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { updateProfileRole } from "@/lib/admin-data";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 
@@ -149,20 +150,26 @@ export default function DashboardPage() {
   }, [load]);
 
   async function setRole(row: MemberRow, nextRole: "partner" | "user") {
-    const ok = window.confirm(nextRole === "partner" ? "파트너로 승인할까요?" : "파트너 권한을 해제할까요?");
+    const label = String(row.nickname || row.email || "회원").trim() || "회원";
+    const ok = window.confirm(
+      nextRole === "partner"
+        ? `${label}님을 대화 파트너로 승인하시겠습니까?`
+        : `${label}님을 일반 유저로 강등하시겠습니까?`
+    );
     if (!ok) return;
+    const prevRole = row.role;
     setBusyId(row.id);
+    setMembers((prev) => prev.map((item) => (item.id === row.id ? { ...item, role: nextRole } : item)));
     try {
-      const { error } = await supabase.from("profiles").update({ role: nextRole }).eq("id", row.id);
-      if (error) {
-        setNotice(error.message);
-        return;
-      }
-      setMembers((prev) => prev.map((item) => (item.id === row.id ? { ...item, role: nextRole } : item)));
-      await load();
+      await updateProfileRole(row, nextRole);
+      setNotice(
+        nextRole === "partner"
+          ? "성공적으로 파트너 권한이 부여되었습니다."
+          : "일반 유저로 변경되었습니다."
+      );
     } catch (err) {
-      console.error("[DayO Admin] role update", err);
-      setNotice("권한 변경에 실패했습니다.");
+      setMembers((prev) => prev.map((item) => (item.id === row.id ? { ...item, role: prevRole } : item)));
+      setNotice(err instanceof Error ? err.message : "권한 변경에 실패했습니다.");
     } finally {
       setBusyId("");
     }
@@ -236,14 +243,12 @@ export default function DashboardPage() {
                             <td className="px-3 py-3">{Number(row.ticket_count || 0)}</td>
                             <td className="px-3 py-3">{`${Number(row.point_balance || 0)} P`}</td>
                             <td className="px-3 py-3">
-                              <div className="flex flex-wrap gap-2">
-                                <Button size="sm" variant="coral" disabled={busyId === row.id || role === "partner"} onClick={() => void setRole(row, "partner")}>
-                                  파트너 승인
-                                </Button>
-                                <Button size="sm" variant="outline" disabled={busyId === row.id || role === "user"} onClick={() => void setRole(row, "user")}>
-                                  파트너 해제
-                                </Button>
-                              </div>
+                              <RoleActions
+                                role={row.role}
+                                busy={busyId === row.id}
+                                onApprove={() => void setRole(row, "partner")}
+                                onDemote={() => void setRole(row, "user")}
+                              />
                             </td>
                           </tr>
                         );

@@ -10,10 +10,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { fetchCrmMember, type CrmMember } from "@/lib/admin-data";
+import { fetchCrmMember, updateProfileRole, type CrmMember } from "@/lib/admin-data";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
 import { ArrowLeft, Send } from "lucide-react";
+import { RoleActions } from "@/components/admin/role-actions";
 
 type OrderRow = {
   id: string;
@@ -37,6 +38,13 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
   const [bookings, setBookings] = useState<BookingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [toast, setToast] = useState<{ type: "ok" | "error"; message: string } | null>(null);
+
+  function showToast(type: "ok" | "error", message: string) {
+    setToast({ type, message });
+    window.setTimeout(() => setToast(null), 3200);
+  }
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -81,6 +89,34 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
     void load();
   }, [load]);
 
+  async function toggleRole(nextRole: "partner" | "user") {
+    if (!user) return;
+    const label = String(user.nickname || user.email || "회원").trim() || "회원";
+    const ok = window.confirm(
+      nextRole === "partner"
+        ? `${label}님을 대화 파트너로 승인하시겠습니까?`
+        : `${label}님을 일반 유저로 강등하시겠습니까?`
+    );
+    if (!ok) return;
+    const prevRole = user.role;
+    setBusy(true);
+    setUser({ ...user, role: nextRole });
+    try {
+      await updateProfileRole(user, nextRole);
+      showToast(
+        "ok",
+        nextRole === "partner"
+          ? "성공적으로 파트너 권한이 부여되었습니다."
+          : "일반 유저로 변경되었습니다."
+      );
+    } catch (err) {
+      setUser({ ...user, role: prevRole });
+      showToast("error", err instanceof Error ? err.message : "권한 변경에 실패했습니다.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const title = user ? `회원 상세 — ${user.name}` : "회원 상세";
 
   return (
@@ -107,12 +143,15 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
                 <div><span className="text-muted-foreground">닉네임</span><p className="font-medium">{user.name}</p></div>
                 <div><span className="text-muted-foreground">이메일</span><p>{user.email || "미등록"}</p></div>
                 <div>
-                  <span className="text-muted-foreground">role</span>
-                  <p>
-                    <Badge variant={user.role === "admin" ? "coral" : user.role === "partner" ? "success" : "default"}>
-                      {user.role || "user"}
-                    </Badge>
-                  </p>
+                  <span className="text-muted-foreground">권한 관리</span>
+                  <div className="mt-2">
+                    <RoleActions
+                      role={user.role}
+                      busy={busy}
+                      onApprove={() => void toggleRole("partner")}
+                      onDemote={() => void toggleRole("user")}
+                    />
+                  </div>
                 </div>
                 <div><span className="text-muted-foreground">보유 티켓</span><p>{user.ticket_count}</p></div>
                 <div><span className="text-muted-foreground">적립 포인트</span><p>{user.point_balance} P</p></div>
@@ -241,6 +280,16 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
           </div>
         )}
       </main>
+      {toast && (
+        <div
+          role="status"
+          className={`fixed bottom-6 right-6 z-50 max-w-sm rounded-xl px-4 py-3 text-sm font-medium shadow-lg ${
+            toast.type === "error" ? "bg-red-600 text-white" : "bg-navy text-white"
+          }`}
+        >
+          {toast.message}
+        </div>
+      )}
     </>
   );
 }

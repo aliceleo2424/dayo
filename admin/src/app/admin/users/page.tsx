@@ -4,13 +4,14 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { AdminHeader } from "@/components/admin/header";
 import { DataTable, type Column } from "@/components/admin/data-table";
+import { RoleActions } from "@/components/admin/role-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { fetchCrmMembers, type CrmMember } from "@/lib/admin-data";
+import { fetchCrmMembers, normalizeCrmRole, updateProfileRole, type CrmMember } from "@/lib/admin-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { MessageSquare, Ticket } from "lucide-react";
 
@@ -31,6 +32,17 @@ export default function UsersPage() {
   const [error, setError] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkModal, setBulkModal] = useState<"alimtalk" | "coupon" | null>(null);
+  const [busyId, setBusyId] = useState("");
+  const [toast, setToast] = useState<{ type: "ok" | "error"; message: string } | null>(null);
+
+  function showToast(type: "ok" | "error", message: string) {
+    setToast({ type, message });
+    window.setTimeout(() => setToast(null), 3200);
+  }
+
+  function memberLabel(row: CrmMember) {
+    return String(row.nickname || row.email || "회원").trim() || "회원";
+  }
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -49,6 +61,34 @@ export default function UsersPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  async function toggleRole(row: CrmMember, nextRole: "partner" | "user") {
+    const label = memberLabel(row);
+    const ok = window.confirm(
+      nextRole === "partner"
+        ? `${label}님을 대화 파트너로 승인하시겠습니까?`
+        : `${label}님을 일반 유저로 강등하시겠습니까?`
+    );
+    if (!ok) return;
+
+    const prevRole = row.role;
+    setBusyId(row.id);
+    setRows((cur) => cur.map((item) => (item.id === row.id ? { ...item, role: nextRole } : item)));
+    try {
+      await updateProfileRole(row, nextRole);
+      showToast(
+        "ok",
+        nextRole === "partner"
+          ? "성공적으로 파트너 권한이 부여되었습니다."
+          : "일반 유저로 변경되었습니다."
+      );
+    } catch (err) {
+      setRows((cur) => cur.map((item) => (item.id === row.id ? { ...item, role: prevRole } : item)));
+      showToast("error", err instanceof Error ? err.message : "권한 변경에 실패했습니다.");
+    } finally {
+      setBusyId("");
+    }
+  }
 
   const toggleSelect = (id: string) => {
     setSelected((prev) => {
@@ -73,10 +113,16 @@ export default function UsersPage() {
       ),
     },
     {
-      key: "role", header: "role", sortable: true,
+      key: "role", header: "권한", sortable: true,
       render: (row) => {
-        const role = String(row.role || "user");
-        return <Badge variant={role === "admin" ? "coral" : role === "partner" ? "success" : "default"}>{role}</Badge>;
+        const role = normalizeCrmRole(row.role);
+        if (role === "admin" || role === "super_admin" || role === "superadmin") {
+          return <Badge variant="admin">관리자</Badge>;
+        }
+        if (role === "partner") {
+          return <Badge variant="success">파트너 활동중</Badge>;
+        }
+        return <Badge variant="default">user</Badge>;
       },
     },
     {
@@ -111,11 +157,19 @@ export default function UsersPage() {
       render: (row) => row.created_at ? formatDate(row.created_at) : "—",
     },
     {
-      key: "actions", header: "CRM",
+      key: "actions", header: "CRM / 권한 관리",
       render: (row) => (
-        <Link href={`/admin/users/${row.id}`}>
-          <Button variant="outline" size="sm">상세</Button>
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <RoleActions
+            role={row.role}
+            busy={busyId === row.id}
+            onApprove={() => void toggleRole(row, "partner")}
+            onDemote={() => void toggleRole(row, "user")}
+          />
+          <Link href={`/admin/users/${row.id}`}>
+            <Button variant="outline" size="sm">상세</Button>
+          </Link>
+        </div>
       ),
     },
   ];
@@ -171,6 +225,16 @@ export default function UsersPage() {
           </div>
         </DialogContent>
       </Dialog>
+      {toast && (
+        <div
+          role="status"
+          className={`fixed bottom-6 right-6 z-50 max-w-sm rounded-xl px-4 py-3 text-sm font-medium shadow-lg ${
+            toast.type === "error" ? "bg-red-600 text-white" : "bg-navy text-white"
+          }`}
+        >
+          {toast.message}
+        </div>
+      )}
     </>
   );
 }
