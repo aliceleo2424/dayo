@@ -1410,6 +1410,38 @@
     .quiz-result-host-name { font-size: 0.98rem; font-weight: 700; }
     .quiz-result-host-meta { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.12rem; }
     .quiz-result-host-bio { font-size: 0.84rem; color: var(--text-muted); line-height: 1.5; margin-top: 0.2rem; }
+    .quiz-result-topics-sub { font-size: 0.84rem; color: var(--text-muted); line-height: 1.55; margin: 0 0 0.75rem; }
+    .quiz-topic-grid { display: grid; gap: 0.7rem; }
+    .quiz-topic-card {
+      background: #fff;
+      border: 1px solid var(--coral-pale);
+      border-radius: 16px;
+      padding: 0.95rem 1rem 1rem;
+    }
+    .quiz-topic-card-title {
+      font-size: 0.92rem;
+      font-weight: 800;
+      line-height: 1.5;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+    }
+    .quiz-topic-cta {
+      display: block;
+      width: 100%;
+      padding: 0.78rem 0.85rem;
+      border: none;
+      border-radius: 12px;
+      background: var(--coral);
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-align: center;
+      text-decoration: none;
+      box-sizing: border-box;
+      cursor: pointer;
+    }
+    .quiz-topic-cta:hover { background: #ff5741; }
     .quiz-result-cta {
       display: block; width: 100%; margin-top: 0.35rem; padding: 0.95rem 1.1rem;
       background: var(--coral); color: #fff; border: none; border-radius: var(--radius);
@@ -2191,7 +2223,7 @@
         <div class="hero-grid">
           <div class="hero-copy">
             <h1 class="hero-title" data-i18n="hero.title">외국인과 이야기해보고 싶지만, 어디서 어떻게 시작할지 몰랐다면</h1>
-            <p class="hero-subtitle" data-i18n="hero.subtitle">관심사가 맞는 사람과 준비된 이야기로 가볍게 만나보세요. 말이 잘 통하지 않는 순간에는 AI가 대화를 도와드려요.</p>
+            <p class="hero-subtitle" data-i18n="hero.subtitle">관심사가 맞는 사람과 준비된 이야기로 가볍게 만나보세요. 단어가 생각나지 않을 때에는 AI 매니저가 함께해요.</p>
             <div class="cta-wrap">
               <a href="#topics" class="home-cta-btn" id="scrollToTopicsBtn" data-i18n="hero.cta">어떤 대화를 나누나요? 👇</a>
               <button class="home-quiz-link cta-btn" id="startQuizBtn" type="button" data-i18n="hero.quizCta">내 스피킹 감각 알아보기 ›</button>
@@ -2653,6 +2685,9 @@
       ja: {
         cafe: 'https://images.unsplash.com/photo-1582293041079-7814c2f12063?auto=format&fit=crop&w=600&q=80',
         restaurant: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80',
+        staff: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80',
+        taste: 'https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&w=600&q=80',
+        shop: 'https://images.unsplash.com/photo-1583258295728-5698600ed855?auto=format&fit=crop&w=600&q=80',
         street: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80',
         hotel: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=600&q=80'
       },
@@ -2920,6 +2955,21 @@
       return t('quiz.themeBadge', { n: String(index + 1), total: String(total), label });
     }
 
+    function quizThemeFallbackEmoji(theme) {
+      if (theme === 'hotel') return '🏨';
+      if (theme === 'street') return '🗺️';
+      if (theme === 'restaurant' || theme === 'staff') return '🍽️';
+      if (theme === 'taste') return '😋';
+      if (theme === 'shop') return '🏪';
+      return '☕';
+    }
+
+    function quizTopicCardsForLang(lang) {
+      if (lang === 'ja') return [t('quiz.topic.ja.1'), t('quiz.topic.ja.2')];
+      if (lang === 'en') return [t('quiz.topic.en.1'), t('quiz.topic.en.2')];
+      return [t('quiz.topic.default.1'), t('quiz.topic.default.2')];
+    }
+
     function renderQuestion(index) {
       const q = quizItems[index];
       setQuizProgressVisible(true);
@@ -2928,7 +2978,7 @@
       slide.className = 'quiz-slide active';
       const src = q.imageUrl || q.image || quizThemeImage(quizLang, q.theme);
       const imageBlock = src
-        ? `<div class="quiz-illustration"><img src="${escapeHtml(src)}" alt="${escapeHtml(t('quiz.theme.' + (q.theme || 'cafe')))}" decoding="async" onerror="this.onerror=null;this.closest('.quiz-illustration').classList.add('is-fallback');"><div class="quiz-illustration-fallback" aria-hidden="true">${q.theme === 'hotel' ? '🏨' : q.theme === 'street' ? '🗺️' : q.theme === 'restaurant' ? '🍽️' : '☕'}</div></div>`
+        ? `<div class="quiz-illustration"><img src="${escapeHtml(src)}" alt="${escapeHtml(t('quiz.theme.' + (q.theme || 'cafe')))}" decoding="async" onerror="this.onerror=null;this.closest('.quiz-illustration').classList.add('is-fallback');"><div class="quiz-illustration-fallback" aria-hidden="true">${quizThemeFallbackEmoji(q.theme)}</div></div>`
         : '';
       slide.innerHTML = `${imageBlock}<div class="situation-card"><div class="situation-tag">${escapeHtml(situationBadge(q, index, quizItems.length))}</div><p class="situation-text">${escapeHtml(q.question)}</p></div><div class="quiz-options">${q.options.map((o, i) => `<button class="quiz-option" data-index="${i}">${escapeHtml(o)}</button>`).join('')}</div><p class="quiz-feedback" hidden></p><p class="quiz-explanation" hidden></p><button class="quiz-next-btn" type="button" hidden></button>`;
       bindQuizIllustration(slide, q, quizItems[index + 1]);
@@ -2983,12 +3033,18 @@
       persistSpeakingTestResult();
       setQuizProgressVisible(true);
       setQuizProgress(quizItems.length, quizItems.length);
-      const pack = currentPack();
-      const host = pack.host || QUIZ_HOSTS[quizLang];
       const pace = derivePace(quizLevel, quizScore);
       const course = (currentLevelBlock() && currentLevelBlock().course) || { name: '', desc: '' };
       const levelLabel = t('quiz.level.' + quizLevel + '.name');
       const leadTitle = t('quiz.lead.title.' + quizLang, { level: levelLabel });
+      const topicCards = quizTopicCardsForLang(quizLang).map((title, idx) => (
+        '<article class="quiz-topic-card">' +
+          '<p class="quiz-topic-card-title">' + escapeHtml(title) + '</p>' +
+          '<a class="quiz-topic-cta" href="room.html?role=user" data-ms-guard data-ticket-gate data-quiz-start-cta data-quiz-topic="' + idx + '">' +
+            escapeHtml(t('quiz.resultTopicCta')) +
+          '</a>' +
+        '</article>'
+      )).join('');
       const slide = document.createElement('div');
       slide.className = 'quiz-slide active';
       slide.innerHTML = `<div class="quiz-result">
@@ -3005,15 +3061,9 @@
           <p class="quiz-result-course-desc">${escapeHtml(course.desc)}</p>
         </div>
         <div class="quiz-result-block">
-          <p class="quiz-result-label">${escapeHtml(t('quiz.resultHostLabel'))}</p>
-          <div class="quiz-result-host">
-            <span class="quiz-result-host-face" aria-hidden="true">${escapeHtml(host.initial || host.name.charAt(0))}</span>
-            <div>
-              <p class="quiz-result-host-name">${escapeHtml(host.flag || '')} ${escapeHtml(host.name)}</p>
-              <p class="quiz-result-host-meta">${escapeHtml(host.country || '')}</p>
-              <p class="quiz-result-host-bio">${escapeHtml(host.bio || '')}</p>
-            </div>
-          </div>
+          <p class="quiz-result-label">${escapeHtml(t('quiz.resultTopicsTitle'))}</p>
+          <p class="quiz-result-topics-sub">${escapeHtml(t('quiz.resultTopicsSub'))}</p>
+          <div class="quiz-topic-grid">${topicCards}</div>
         </div>
         <div class="quiz-lead-card" id="quizLeadCard">
           <p class="quiz-lead-title">${escapeHtml(leadTitle)}</p>
@@ -3045,6 +3095,13 @@
         <button class="quiz-result-retry" type="button">${escapeHtml(t('quiz.resultRetry'))}</button>
       </div>`;
       bindQuizLeadForm(slide);
+      slide.querySelectorAll('[data-quiz-topic]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const topics = quizTopicCardsForLang(quizLang);
+          const idx = Number(btn.getAttribute('data-quiz-topic'));
+          try { window.localStorage.setItem('dayo_quiz_topic', topics[idx] || ''); } catch (e) { /* ignore */ }
+        });
+      });
       slide.querySelector('.quiz-result-retry').addEventListener('click', goToLevelSelect);
       return slide;
     }

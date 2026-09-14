@@ -817,12 +817,12 @@
       KO: '돼요!', EN: "it's possible!", ZH: '都行！', JA: 'できる！', FR: "c'est possible !", ES: '¡es posible!'
     },
     'hero.subtitle': {
-      KO: '관심사가 맞는 사람과 준비된 이야기로 가볍게 만나보세요. 말이 잘 통하지 않는 순간에는 AI가 대화를 도와드려요.',
-      EN: 'Meet someone who shares your interests, with a story already prepared. When words get stuck, AI gently helps the conversation continue.',
-      ZH: '和兴趣相投的人，用准备好的话题轻松见面。说不下去的时候，AI会温柔地帮你接上。',
-      JA: '興味が近い人と、用意された話で気軽に会いましょう。言葉に詰まったときはAIが会話を助けます。',
-      FR: 'Retrouvez quelqu’un qui partage vos envies, avec une histoire déjà prête. Quand les mots manquent, l’IA relance en douceur.',
-      ES: 'Conoce a alguien con tus mismos intereses, con una historia lista. Cuando se trabe la conversación, la IA te ayuda con suavidad.'
+      KO: '관심사가 맞는 사람과 준비된 이야기로 가볍게 만나보세요. 단어가 생각나지 않을 때에는 AI 매니저가 함께해요.',
+      EN: 'Meet someone who shares your interests, with a story already prepared. When a word won’t come, the AI manager is right there with you.',
+      ZH: '和兴趣相投的人，用准备好的话题轻松见面。想不起单词的时候，AI经理会陪着你。',
+      JA: '興味が近い人と、用意された話で気軽に会いましょう。言葉が出てこないときはAIマネージャーが一緒です。',
+      FR: 'Retrouvez quelqu’un qui partage vos envies, avec une histoire déjà prête. Quand le mot manque, le manager IA est avec vous.',
+      ES: 'Conoce a alguien con tus mismos intereses, con una historia lista. Cuando no sale la palabra, el manager de IA te acompaña.'
     },
     'hero.badge': {
       KO: '🍰 1:1 글로벌 대화 라운지', EN: '🍰 1:1 Global Chat Lounge', ZH: '🍰 1:1 全球对话会客厅', JA: '🍰 1:1 Global Chat Lounge', FR: '🍰 1:1 Global Chat Lounge', ES: '🍰 1:1 Global Chat Lounge'
@@ -1139,6 +1139,15 @@
     'quiz.theme.hotel': {
       KO: '호텔에서 체크인할 때', EN: 'Checking in at a hotel', ZH: '在酒店办理入住时', JA: 'ホテルでチェックインするとき', FR: 'S’enregistrer à l’hôtel', ES: 'Haciendo el check-in en el hotel'
     },
+    'quiz.theme.staff': {
+      KO: '식당에서 점원을 부를 때', EN: 'Calling a server at a restaurant', ZH: '在餐厅叫服务员时', JA: 'お店の人を呼ぶとき', FR: 'Appeler le serveur', ES: 'Llamando al camarero'
+    },
+    'quiz.theme.taste': {
+      KO: '음식이 맛있을 때', EN: 'When the food tastes great', ZH: '觉得食物好吃时', JA: '食べ物がおいしいとき', FR: 'Quand le plat est délicieux', ES: 'Cuando la comida está rica'
+    },
+    'quiz.theme.shop': {
+      KO: '편의점/가게에서 계산할 때', EN: 'Paying at a shop or convenience store', ZH: '在便利店/商店结账时', JA: 'コンビニやお店で会計するとき', FR: 'Régler au magasin ou au konbini', ES: 'Pagando en una tienda o convenience store'
+    },
     'quiz.levelHint': {
       KO: '지금 체감 레벨을 골라 주세요. 그에 맞춰 4문항이 나와요!',
       EN: 'Tap how it feels right now — we’ll give you 4 matching questions.',
@@ -1214,7 +1223,74 @@
       KO: '추천 페이스', EN: 'Recommended pace', ZH: '推荐节奏', JA: 'おすすめペース', FR: 'Rythme recommandé', ES: 'Ritmo recomendado'
     },
     'quiz.resultHostLabel': {
-      KO: '추천 파트너', EN: 'Recommended partner', ZH: '推荐伙伴', JA: 'おすすめパートナー', FR: 'Partenaire recommandé', ES: 'Compañero recomendado'
+      KO: '이런 주제로 가볍게 대화해볼까요? ☕', EN: 'Want to try a light topic? ☕', ZH: '要不要用这个话题轻松聊聊？☕', JA: 'こんなテーマで気軽に話してみませんか？☕', FR: 'On essaie un sujet léger ? ☕', ES: '¿Probamos un tema ligero? ☕'
+    },
+    'quiz.resultTopicsTitle': {
+      KO: '이런 주제로 가볍게 대화해볼까요? ☕', EN: 'Want to try a light topic? ☕', ZH: '要不要用这个话题轻松聊聊？☕', JA: 'こんなテーマで気軽に話してみませんか？☕', FR: 'On essaie un sujet léger ? ☕', ES: '¿Probamos un tema ligero? ☕'
+    },
+    'quiz.resultTopicsSub': {
+      KO: '어려운 문법 없이, 좋아하는 이야기부터 편안하게 시작해 보세요!',
+      EN: 'Skip the hard grammar — start with a story you already like.',
+      ZH: '不用难语法，从喜欢的故事轻松开始吧！',
+      JA: '難しい文法なしで、好きな話から気軽に始めましょう！',
+      FR: 'Sans grammaire difficile : commencez par une histoire que vous aimez.',
+      ES: 'Sin gramática difícil: empieza por una historia que ya te gusta.'
+    },
+    'quiz.resultTopicCta': {
+      KO: '이 주제로 첫 1:1 대화 시작하기 (9,900원)',
+      EN: 'Start a 1:1 chat on this topic (₩9,900)',
+      ZH: '用这个话题开始第一次1:1对话（9,900韩元）',
+      JA: 'このテーマで初回1:1会話を始める（9,900ウォン）',
+      FR: 'Commencer un 1:1 sur ce sujet (9 900 ₩)',
+      ES: 'Empezar un 1:1 con este tema (₩9,900)'
+    },
+    'quiz.topic.ja.1': {
+      KO: '🍮 일본 편의점(로손/세븐) 털기: 현지인이 인정하는 최애 푸딩 & 빵 꿀조합',
+      EN: '🍮 Lawson/7-Eleven haul: local-approved pudding and bread combos',
+      ZH: '🍮 扫荡日本便利店（罗森/7-11）：当地人认证的布丁和面包绝配',
+      JA: '🍮 ローソン／セブン攻略：現地が認めるプリン＆パンの黄金コンビ',
+      FR: '🍮 Lawson/7-Eleven : puddings et pains validés par les locaux',
+      ES: '🍮 Lawson/7-Eleven: pudin y pan que sí aprueban los locales'
+    },
+    'quiz.topic.ja.2': {
+      KO: '🍜 도쿄 vs 오사카 골목 여행: 나만 알고 싶은 로컬 라멘/이자카야 맛집',
+      EN: '🍜 Tokyo vs Osaka alleys: ramen and izakaya you’d rather keep secret',
+      ZH: '🍜 东京 vs 大阪巷弄：只想自己知道的当地拉面/居酒屋',
+      JA: '🍜 東京 vs 大阪の路地：自分だけが知っていたいラーメン／居酒屋',
+      FR: '🍜 Tokyo vs Osaka : ramen et izakaya que vous garderiez secrets',
+      ES: '🍜 Tokio vs Osaka: ramen e izakaya que preferirías no compartir'
+    },
+    'quiz.topic.en.1': {
+      KO: '☕ 미국/영국 카페 감성: 현지 친구에게 추천받는 최애 브런치 & 커피 취향',
+      EN: '☕ US/UK cafe vibes: brunch and coffee picks from a local friend',
+      ZH: '☕ 美/英咖啡馆气质：当地朋友推荐的最爱早午餐和咖啡口味',
+      JA: '☕ アメリカ／イギリスのカフェ感：現地の友だちが推すブランチ＆コーヒー',
+      FR: '☕ Cafés US/UK : brunch et café recommandés par un ami local',
+      ES: '☕ Cafeterías de EE.UU./UK: brunch y café que recomienda un amigo local'
+    },
+    'quiz.topic.en.2': {
+      KO: '✈️ 랜선 도시 산책: 요즘 현지 2030 사이에서 가장 핫한 동네와 주말 루틴',
+      EN: '✈️ City walk on a call: the hottest 20s–30s neighborhoods and weekend routines',
+      ZH: '✈️ 云逛街：当地20–30岁最近最火的街区和周末节奏',
+      JA: '✈️ オンライン街歩き：今現地の20–30代で一番アツい街と週末ルーティン',
+      FR: '✈️ Balade en visio : quartiers et weekends préférés des 20-30 ans',
+      ES: '✈️ Paseo por llamada: barrios y fines de semana que pisan los 20-30'
+    },
+    'quiz.topic.default.1': {
+      KO: '🥐 현지 마트 털기: 여행 가면 꼭 사 와야 할 국민 간식 토크',
+      EN: '🥐 Local supermarket haul: the snacks you have to bring home',
+      ZH: '🥐 扫荡当地超市：旅行必买的国民零食聊天',
+      JA: '🥐 現地スーパー攻略：旅先で絶対買って帰りたい国民おやつトーク',
+      FR: '🥐 Supermarché local : les snacks à ramener absolument',
+      ES: '🥐 Super local: snacks que sí o sí hay que traerse'
+    },
+    'quiz.topic.default.2': {
+      KO: '🎧 요즘 현지에서 매일 듣는 플레이리스트 & 넷플릭스 추천',
+      EN: '🎧 The playlist and Netflix picks locals play every day',
+      ZH: '🎧 当地人每天在听的歌单和Netflix推荐',
+      JA: '🎧 現地で毎日聴いているプレイリスト＆Netflixのおすすめ',
+      FR: '🎧 Playlists et Netflix que les locaux écoutent tous les jours',
+      ES: '🎧 Playlist y Netflix que los locales ponen todos los días'
     },
     'quiz.paceLabel': {
       KO: 'DayO 레벨', EN: 'DayO level', ZH: 'DayO等级', JA: 'DayOレベル', FR: 'Niveau DayO', ES: 'Nivel DayO'
@@ -1255,12 +1331,12 @@
       ES: '🎉 Empezar con el cupón de 9.900 ₩'
     },
     'quiz.resultCouponHint': {
-      KO: '추천 파트너와 첫 세션에 체험 할인권이 자동 적용돼요.',
-      EN: 'The trial coupon applies automatically to your first session with this partner.',
-      ZH: '与推荐伙伴的首次会话将自动套用体验优惠券。',
-      JA: 'おすすめパートナーとの初回セッションに体験クーポンが自動適用されます。',
-      FR: 'Le coupon d’essai s’applique automatiquement à la première session.',
-      ES: 'El cupón de prueba se aplica solo a la primera sesión con este compañero/a.'
+      KO: '고른 주제로 첫 세션에 체험 할인권이 자동 적용돼요.',
+      EN: 'The trial coupon applies automatically to your first session on this topic.',
+      ZH: '用所选话题的首次会话将自动套用体验优惠券。',
+      JA: '選んだテーマの初回セッションに体験クーポンが自動適用されます。',
+      FR: 'Le coupon d’essai s’applique automatiquement à la première session sur ce sujet.',
+      ES: 'El cupón de prueba se aplica solo a la primera sesión con este tema.'
     },
     'quiz.resultRetry': {
       KO: '레벨 다시 고르기', EN: 'Pick another level', ZH: '重新选择级别', JA: 'レベルを選び直す', FR: 'Choisir un autre niveau', ES: 'Elegir otro nivel'

@@ -37,15 +37,15 @@
           "themeIndex": 2,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80",
-          "question": "식당에서 자리를 잡을 때 직원이 제일 먼저 듣는 단어는?",
+          "question": "식당에 들어가서 '두 명 자리 부탁해요'라고 할 때 빈칸에 알맞은 단어는? ➔ A table for [   ], please.",
           "options": [
-            "Menu",
-            "Street",
-            "Table",
-            "Key"
+            "two",
+            "menu",
+            "street",
+            "key"
           ],
-          "answer": 2,
-          "explanation": "자리 장면의 핵심 단어는 Table이에요."
+          "answer": 0,
+          "explanation": "인원수를 말할 때는 'A table for two, please' 또는 가볍게 'Two, please!'라고 하시면 돼요."
         },
         {
           "id": "en-i-street",
@@ -466,7 +466,7 @@
     "intro": {
       "course": {
         "name": "새싹 페이스",
-        "desc": "카페·식당·길찾기·호텔, 단어부터 천천히 여는 입문 세션"
+        "desc": "카페·식당·맛집·편의점, 바로 쓰는 한마디로 여는 입문 세션"
       },
       "questions": [
         {
@@ -475,63 +475,63 @@
           "themeIndex": 1,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1582293041079-7814c2f12063?auto=format&fit=crop&w=600&q=80",
-          "question": "킷사텐에서 말차 디저트를 주문할 때, 문장 끝에 붙이는 말은?",
+          "question": "카페에서 말차 라떼를 가리키며 '이거 주세요!'라고 할 때 알맞은 말은?",
           "options": [
-            "さようなら",
-            "ください",
-            "予約",
-            "駅"
+            "これ、ください (고레, 구다사이)",
+            "さようなら (사요나라)",
+            "ありがとう (아리가토)",
+            "おはよう (오하요)"
           ],
-          "answer": 1,
-          "explanation": "카페 주문은 ~をください예요."
+          "answer": 0,
+          "explanation": "'이거 주세요'는 메뉴판을 손가락으로 짚으며 '고레, 구다사이!'만 외치면 끝이에요."
         },
         {
           "id": "ja-i-restaurant",
-          "theme": "restaurant",
+          "theme": "staff",
           "themeIndex": 2,
           "difficulty": "easy",
           "imageUrl": "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80",
-          "question": "라멘 가게에서 앉는 곳을 뜻하는 단어는?",
+          "question": "라멘 가게에서 주문이나 물이 필요할 때 점원을 부르는 '저기요!'는?",
           "options": [
-            "コーヒー",
-            "席",
-            "鍵",
-            "地図"
+            "すみません (스미마센)",
+            "ごめん (고멘)",
+            "はい (하이)",
+            "いいえ (이이에)"
           ],
-          "answer": 1,
-          "explanation": "식당 테이블 = 席예요."
+          "answer": 0,
+          "explanation": "일본 식당에서 점원을 부르거나 사과할 때 만능으로 쓰이는 표현은 '스미마센'이에요."
         },
         {
-          "id": "ja-i-street",
-          "theme": "street",
+          "id": "ja-i-taste",
+          "theme": "taste",
           "themeIndex": 3,
           "difficulty": "easy",
-          "imageUrl": "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80",
-          "question": "교토 거리에서 길을 물을 때 먼저 하는 말은?",
+          "imageUrl": "https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&w=600&q=80",
+          "question": "현지 맛집에서 음식을 한 입 먹고 '맛있어요!'라고 감탄할 때 쓰는 표현은?",
           "options": [
-            "いただきます",
-            "すみません",
-            "チェックイン",
-            "メニュー"
+            "おいしい！ (오이시이!)",
+            "かわいい！ (카와이!)",
+            "うれしい！ (우레시이!)",
+            "たのしい！ (타노시이!)"
           ],
-          "answer": 1,
-          "explanation": "처음 말을 걸 때는 すみません이에요."
+          "answer": 0,
+          "explanation": "음식이 맛있을 땐 눈을 마주치며 '오이시이!'라고 말해보세요."
         },
         {
-          "id": "ja-i-hotel",
-          "theme": "hotel",
+          "id": "ja-i-shop",
+          "theme": "shop",
           "themeIndex": 4,
           "difficulty": "easy",
-          "imageUrl": "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=600&q=80",
-          "question": "료칸에서 숙박을 미리 잡아 둔 것을 뜻하는 말은?",
+          "imageUrl": "https://images.unsplash.com/photo-1583258295728-5698600ed855?auto=format&fit=crop&w=600&q=80",
+          "question": "계산대에서 '얼마예요?'라고 가격을 물어볼 때 쓰는 말은?",
           "options": [
-            "パン",
-            "予約",
-            "ラーメン",
-            "交差点"
+            "いくらですか？ (이쿠라데스카?)",
+            "だれですか？ (다레데스카?)",
+            "どこですか？ (도코데스카?)",
+            "なんじですか？ (난지데스카?)"
           ],
-          "answer": 1,
-          "explanation": "프론트의 핵심 단어는 予約예요."
+          "answer": 0,
+          "explanation": "가격을 물어볼 때는 '이쿠라데스카?'를 기억해 두세요."
         }
       ]
     },
