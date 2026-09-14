@@ -828,7 +828,7 @@
       KO: '🍰 1:1 글로벌 대화 라운지', EN: '🍰 1:1 Global Chat Lounge', ZH: '🍰 1:1 全球对话会客厅', JA: '🍰 1:1 Global Chat Lounge', FR: '🍰 1:1 Global Chat Lounge', ES: '🍰 1:1 Global Chat Lounge'
     },
     'hero.cta': {
-      KO: '어떤 대화를 나누나요? 👇', EN: 'What do we talk about? 👇', ZH: '会聊些什么？👇', JA: 'どんな会話をするの？👇', FR: 'De quoi parle-t-on ? 👇', ES: '¿De qué hablamos? 👇'
+      KO: '세션 티켓 충전하기 💳', EN: 'Charge session tickets 💳', ZH: '充值会话票 💳', JA: 'セッションチケットをチャージ 💳', FR: 'Recharger des tickets de session 💳', ES: 'Recargar tickets de sesión 💳'
     },
     'hero.quizCta': {
       KO: '내 스피킹 감각 알아보기 ›', EN: 'See how my speaking feels ›', ZH: '了解我的口语感觉 ›', JA: 'スピーキング感覚を知る ›', FR: 'Découvrir mon speaking ›', ES: 'Conocer mi speaking ›'
@@ -969,6 +969,7 @@
     'tickets.regular.title': { KO: '세션 티켓 1장', EN: '1 session ticket', ZH: '会话券 1张', JA: 'セッションチケット1枚', FR: '1 ticket de session', ES: '1 ticket de sesión' },
     'tickets.regular.price': { KO: '필요할 때만 충전', EN: 'Top up only when you need it', ZH: '需要时再充', JA: '必要なときだけチャージ', FR: 'Rechargez seulement si besoin', ES: 'Recarga solo cuando lo necesites' },
     'tickets.cta': { KO: '📅 대화 세션 예약하기', EN: '📅 Book a talk session', ZH: '📅 预约对话', JA: '📅 会話セッションを予約', FR: '📅 Réserver une session', ES: '📅 Reservar una sesión' },
+    'tickets.topicsCta': { KO: '어떤 대화를 나누나요? 👇', EN: 'What do we talk about? 👇', ZH: '会聊些什么？👇', JA: 'どんな会話をするの？👇', FR: 'De quoi parle-t-on ? 👇', ES: '¿De qué hablamos? 👇' },
     'journey.step1.tag': { KO: 'STEP 01', EN: 'STEP 01', ZH: 'STEP 01', JA: 'STEP 01', FR: 'ÉTAPE 01', ES: 'PASO 01' },
     'journey.step1.title': {
       KO: '내 스피킹 감각 알아보기', EN: 'See how my speaking feels', ZH: '了解我的口语感觉', JA: 'スピーキング感覚を知る', FR: 'Découvrir mon speaking', ES: 'Conocer mi speaking'

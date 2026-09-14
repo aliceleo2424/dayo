@@ -242,6 +242,7 @@
               '<li>📌 <strong>유효기간:</strong> 모든 이용권은 결제 후 90일 내 소진 필수, 이후 사라지니 꼭 90일 안에 사용해주세요. (메일/ 카카오톡으로 소진 알림을 보내드려요!)</li>' +
               '<li>🔄 <strong>변경/취소:</strong> 세션 요일 및 시간 변경/취소는 세션 시작 1시간 전까지 가능해요.</li>' +
               '<li>💌 <strong>노쇼:</strong> 세션 시작 1시간 이내 취소 및 노쇼 발생 시 티켓이 차감되며 \'토닥토닥 리포트\'가 발송됩니다.</li>' +
+              '<li>💳 <strong>환불:</strong> 첫 세션 예약 전 및 결제 후 7일 이내 미사용 티켓은 100% 전액 환불 가능해요. (1회 이상 세션 진행 후에는 환불이 불가합니다.)</li>' +
             '</ul>' +
           '</aside>' +
         '</div>' +
@@ -450,6 +451,7 @@
       paymentPayload: paymentPayload,
       promptPurchase: promptPurchase
     };
+    window.openTicketModal = open;
     window.openPaymentModal = function () {
       open();
     };
