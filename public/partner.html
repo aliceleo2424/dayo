@@ -138,29 +138,15 @@
       text-decoration: none;
       font-weight: 800;
       letter-spacing: -0.02em;
+      flex-shrink: 0;
     }
 
-    .brand-mark {
-      width: 42px;
-      height: 42px;
-      display: grid;
-      place-items: center;
-      border: 3px solid rgba(255,255,255,0.9);
-      border-radius: 50%;
-      color: var(--coral);
-      background: linear-gradient(135deg, var(--pink), var(--peach));
-      box-shadow: 0 6px 16px rgba(255, 107, 87, 0.15);
-      font-family: Georgia, serif;
-      font-size: 1.25rem;
-    }
-
-    .brand-copy small {
+    .logo-img {
       display: block;
-      margin-top: 0.1rem;
-      color: var(--muted);
-      font-size: 0.67rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
+      height: 48px;
+      width: 132px;
+      object-fit: cover;
+      object-position: center;
     }
 
     .topbar-right {
@@ -168,6 +154,7 @@
       align-items: center;
       gap: 0.9rem;
     }
+    .topbar-right > [data-i18n-lang="icon"] { flex-shrink: 0; }
 
     .topbar-extras {
       display: flex;
@@ -1349,19 +1336,10 @@
         min-width: 0;
       }
 
-      .brand-mark {
-        width: 28px;
-        height: 28px;
-        font-size: 0.95rem;
-        border-width: 2px;
+      .logo-img {
+        height: 36px;
+        width: 100px;
       }
-
-      .brand-copy {
-        font-size: 14px;
-        line-height: 1.15;
-      }
-
-      .brand-copy small { display: none; }
 
       .welcome,
       .topbar-extras { display: none; }
@@ -1612,43 +1590,39 @@
   <header class="topbar">
     <div class="topbar-inner">
       <a class="brand" href="/" data-i18n="nav.homeAria" data-i18n-attr="aria-label" aria-label="DayO 메인으로 이동">
-        <span class="brand-mark">D</span>
-        <span class="brand-copy">
-          <span data-i18n="partner.brand">DayO Partner Lounge</span>
-          <small data-i18n="partner.brandSub">PARTNER LOUNGE</small>
-        </span>
+        <img src="/images/logo.png" alt="DayO" class="logo-img">
       </a>
       <div class="topbar-right">
         <div class="topbar-extras">
-          <div data-i18n-lang="inline"></div>
           <div class="welcome">
             <span class="welcome-dot" aria-hidden="true"></span>
             <span id="partnerWelcome">DayO 파트너 님, 반갑습니다! ☕</span>
           </div>
         </div>
-        <span class="partner-mode-badge badge-partner partner-badge">☕ 호스트 모드</span>
+        <span class="partner-mode-badge badge-partner partner-badge" data-i18n="partner.hostMode">☕ 호스트 모드</span>
         <div data-mode-switch="inline"></div>
+        <div data-i18n-lang="icon"></div>
         <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
       </div>
     </div>
   </header>
   <div class="nav-drawer-backdrop" id="mobileNavBackdrop"></div>
   <nav class="nav-drawer" id="mobileNav" aria-label="모바일 메뉴">
-    <div class="nav-drawer__head">DayO 메뉴</div>
+    <div class="nav-drawer__head" data-i18n="nav.menuTitle">DayO 메뉴</div>
     <div data-i18n-lang="drawer"></div>
-    <a href="/">홈으로</a>
+    <a href="/" data-i18n="nav.home">홈으로</a>
     <a href="mypage.html"><span aria-hidden="true">👤</span> <span data-i18n="nav.learnerMypage">마이페이지로 이동</span></a>
-    <button type="button" onclick="handleLogout(event)" class="btn-logout" style="cursor: pointer;">로그아웃</button>
+    <button type="button" onclick="handleLogout(event)" class="btn-logout" style="cursor: pointer;" data-i18n="login.logout">로그아웃</button>
   </nav>
 
   <main class="page partner-container partner-dashboard-wrap" id="viewPartnerHome">
     <div class="role-switch-wrapper" style="display: flex; justify-content: center; margin: 20px auto 28px; width: 100%; max-width: 320px;">
-      <div class="role-segmented-control" style="position: relative; display: flex; width: 100%; background: #F1F3F5; padding: 4px; border-radius: 999px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.06); cursor: pointer;" role="group" aria-label="역할 전환">
+      <div class="role-segmented-control" style="position: relative; display: flex; width: 100%; background: #F1F3F5; padding: 4px; border-radius: 999px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.06); cursor: pointer;" role="group" data-i18n="role.switchAria" data-i18n-attr="aria-label" aria-label="역할 전환">
         <div id="segmented-glider" style="position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: #FFFFFF; border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,0.12); transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);"></div>
-        <button type="button" id="tab-user-mode" onclick="switchRoleView('user')" style="position: relative; z-index: 1; flex: 1; padding: 8px 0; border: none; background: transparent; font-size: 13px; font-weight: 700; color: #888; cursor: pointer; text-align: center; transition: color 0.2s;" aria-pressed="false">
+        <button type="button" id="tab-user-mode" onclick="switchRoleView('user')" style="position: relative; z-index: 1; flex: 1; padding: 8px 0; border: none; background: transparent; font-size: 13px; font-weight: 700; color: #888; cursor: pointer; text-align: center; transition: color 0.2s;" aria-pressed="false" data-i18n="role.userMode">
           🙋‍♂️ 유저 모드
         </button>
-        <button type="button" id="tab-partner-mode" onclick="switchRoleView('partner')" style="position: relative; z-index: 1; flex: 1; padding: 8px 0; border: none; background: transparent; font-size: 13px; font-weight: 700; color: #111; cursor: pointer; text-align: center; transition: color 0.2s;" aria-pressed="true">
+        <button type="button" id="tab-partner-mode" onclick="switchRoleView('partner')" style="position: relative; z-index: 1; flex: 1; padding: 8px 0; border: none; background: transparent; font-size: 13px; font-weight: 700; color: #111; cursor: pointer; text-align: center; transition: color 0.2s;" aria-pressed="true" data-i18n="role.partnerLounge">
           🎙️ 파트너 라운지
         </button>
       </div>
@@ -1677,19 +1651,19 @@
     </div>
 
     <section class="lounge-stats" aria-labelledby="loungeStatsTitle">
-      <h2 class="visually-hidden" id="loungeStatsTitle">활동비 현황</h2>
+      <h2 class="visually-hidden" id="loungeStatsTitle" data-i18n="partner.stats.section">활동비 현황</h2>
       <article class="stat-box partner-stat-card">
         <p class="stat-label" data-i18n="partner.stats.monthCount">이번 달 완료한 대화</p>
-        <p class="stat-value partner-stat-val" id="statMonthCount">불러오는 중…</p>
+        <p class="stat-value partner-stat-val" id="statMonthCount" data-i18n="partner.stats.loading">불러오는 중…</p>
       </article>
       <article class="stat-box partner-stat-card partner-point-box">
         <p class="stat-label" data-i18n="partner.stats.points">적립 포인트</p>
-        <p class="stat-value partner-stat-val partner-point-val" id="statPointBalance">불러오는 중…</p>
+        <p class="stat-value partner-stat-val partner-point-val" id="statPointBalance" data-i18n="partner.stats.loading">불러오는 중…</p>
         <p class="stat-hint" data-i18n="partner.stats.pointsHint">30분 세션(25분 대화) 완료 시 6,000P가 자동 적립되며, 매월 정산일에 100% 현금 출금 가능합니다.</p>
       </article>
       <article class="stat-box partner-stat-card partner-point-box">
         <p class="stat-label" data-i18n="partner.stats.settled">누적 정산 완료 금액</p>
-        <p class="stat-value partner-stat-val partner-point-val" id="statSettledWon">불러오는 중…</p>
+        <p class="stat-value partner-stat-val partner-point-val" id="statSettledWon" data-i18n="partner.stats.loading">불러오는 중…</p>
         <p class="stat-hint" data-i18n="partner.stats.settledHint">지난달까지 완료된 세션</p>
       </article>
     </section>
@@ -1724,7 +1698,7 @@
               <label class="field-label" for="nickname" data-i18n="partner.profile.nickname">닉네임</label>
               <button class="mini-btn" type="button" id="historyBtn" data-i18n="partner.profile.history">📜 변경 이력</button>
             </div>
-            <input class="input" id="nickname" name="nickname" value="" placeholder="DayO 파트너" autocomplete="nickname">
+            <input class="input" id="nickname" name="nickname" value="" placeholder="DayO 파트너" autocomplete="nickname" data-i18n="partner.profile.nicknamePlaceholder">
           </div>
           <div class="field">
             <label class="field-label" for="origin" data-i18n="partner.profile.origin">대표 출신 국가 (Passport Origin)</label>
@@ -1760,7 +1734,7 @@
           <div class="field field--wide">
             <label class="field-label" for="intro" data-i18n="partner.profile.intro">한 줄 소개</label>
             <textarea class="textarea" id="intro" name="intro" rows="2"
-              placeholder="예약 화면에 보일 한 줄 소개를 적어 주세요."></textarea>
+              placeholder="예약 화면에 보일 한 줄 소개를 적어 주세요." data-i18n="partner.profile.introPlaceholder"></textarea>
           </div>
         </form>
       </div>
@@ -1779,7 +1753,7 @@
           <button class="save-button btn-partner-mint slot-add-btn" type="button" id="add-slot-btn" data-i18n="partner.slot.add">➕ 가용 시간 등록</button>
         </div>
         <div class="partner-slot-list" id="partner-slot-list" aria-live="polite"></div>
-        <p class="partner-slot-empty" id="partner-slot-empty" hidden>등록된 가용 슬롯이 없습니다. 대화 가능한 시간대를 열어주세요 🌿</p>
+        <p class="partner-slot-empty" id="partner-slot-empty" hidden data-i18n="partner.slot.empty">등록된 가용 슬롯이 없습니다. 대화 가능한 시간대를 열어주세요 🌿</p>
 
         <button class="gcal-card" type="button" id="gcalSync">
           <span class="gcal-badge" aria-hidden="true">G</span>

@@ -10,6 +10,13 @@
   var LAST_LOGIN_KEY = 'lastLoginDate';
   var STREAK_KEY = 'streakCount';
 
+  function i18n(key, vars) {
+    if (window.DayOI18n && typeof window.DayOI18n.tf === 'function') {
+      return window.DayOI18n.tf(key, vars);
+    }
+    return key;
+  }
+
   function pad(n) {
     return n < 10 ? '0' + n : String(n);
   }
@@ -108,16 +115,11 @@
   /** 시간대 인사말 — 메인 타이틀 1줄만 노출 */
   function buildGreeting(userName) {
     var hour = localHour();
-    if (hour >= 5 && hour < 12) {
-      return '👋 좋은 아침이에요, ' + userName + '님! ☕';
-    }
-    if (hour >= 12 && hour < 18) {
-      return '👋 활기찬 오후예요, ' + userName + '님! 🌤️';
-    }
-    if (hour >= 18 && hour < 22) {
-      return '👋 편안한 저녁이에요, ' + userName + '님! 🌙';
-    }
-    return '👋 오늘 하루도 고생 많았어요, ' + userName + '님! ✨';
+    var key = 'mypage.greet.night';
+    if (hour >= 5 && hour < 12) key = 'mypage.greet.morning';
+    else if (hour >= 12 && hour < 18) key = 'mypage.greet.afternoon';
+    else if (hour >= 18 && hour < 22) key = 'mypage.greet.evening';
+    return i18n(key, { name: userName });
   }
 
     function renderGreeting() {
@@ -125,7 +127,7 @@
     if (userName) updateStreakIfNeeded();
     var text = userName
       ? buildGreeting(userName).replace(/^👋\s*/, '')
-      : '오늘도 한 잔의 대화, 준비되셨나요? ☕';
+      : i18n('mypage.heading');
 
     var mypageEl = document.getElementById('mypage-greeting');
     if (mypageEl) mypageEl.textContent = text;
@@ -166,6 +168,9 @@
       renderGreeting();
     });
     document.addEventListener('dayo:authprofile', function () {
+      renderGreeting();
+    });
+    document.addEventListener('dayo:langchange', function () {
       renderGreeting();
     });
 

@@ -2,6 +2,13 @@
 (function () {
   'use strict';
 
+  function i18n(key, vars) {
+    if (window.DayOI18n && typeof window.DayOI18n.tf === 'function') {
+      return window.DayOI18n.tf(key, vars);
+    }
+    return key;
+  }
+
   function formatSessionWhen(iso) {
     if (!iso) return '';
     var raw = String(iso);
@@ -14,9 +21,9 @@
     var d = Number(dateMatch[3]);
     var now = new Date();
     if (now.getFullYear() === y && now.getMonth() + 1 === m && now.getDate() === d) {
-      return '오늘 ' + timeLabel;
+      return i18n('mypage.session.todayTime', { time: timeLabel });
     }
-    return m + '월 ' + d + '일 ' + timeLabel;
+    return i18n('mypage.session.mdTime', { m: m, d: d, time: timeLabel });
   }
 
   function minutesUntil(iso) {
@@ -38,9 +45,10 @@
   }
 
   function purposeLabel(ids) {
-    var map = { travel: '여행/일상', opic: 'OPIc', abroad: '워홀/유학', casual: '자유 수다' };
     if (!ids || !ids.length) return '';
-    return ids.map(function (id) { return map[id] || id; }).join(', ');
+    return ids.map(function (id) {
+      return i18n('mypage.purpose.' + id);
+    }).join(', ');
   }
 
   async function loadUrgentSessionBanner() {
@@ -89,6 +97,9 @@
     }
 
     if (!session || !session.partnerName) {
+      if (titleEl) titleEl.textContent = i18n('mypage.urgent.empty');
+      if (badgeEl) badgeEl.textContent = i18n('mypage.urgent.badge');
+      if (metaEl) metaEl.textContent = i18n('mypage.urgent.meta');
       urgent.hidden = true;
       return;
     }
@@ -96,15 +107,15 @@
     var when = session.timeLabel && session.date
       ? formatSessionWhen(session.date + 'T' + session.timeLabel + ':00')
       : formatSessionWhen(session.scheduledAt);
-    if (titleEl) titleEl.textContent = session.partnerName + ' 파트너와의 대화 (' + when + ')';
+    if (titleEl) titleEl.textContent = i18n('mypage.urgent.titleFormat', { name: session.partnerName, when: when });
     var mins = minutesUntil(session.scheduledAt);
     if (badgeEl) {
-      if (mins != null && mins <= 30 && mins >= 0) badgeEl.textContent = '🚨 30분 후 시작';
-      else badgeEl.textContent = '다가오는 대화';
+      if (mins != null && mins <= 30 && mins >= 0) badgeEl.textContent = i18n('mypage.urgent.soon');
+      else badgeEl.textContent = i18n('mypage.urgent.badge');
     }
     if (metaEl) {
       var purpose = purposeLabel(session.purposes);
-      metaEl.textContent = (purpose ? '목적: ' + purpose + ' · ' : '') + '대화 시작 5분 전부터 라운지 입장이 가능합니다.';
+      metaEl.textContent = (purpose ? i18n('mypage.urgent.purposePrefix', { purpose: purpose }) : '') + i18n('mypage.urgent.meta');
     }
     urgent.hidden = false;
   }
@@ -169,14 +180,14 @@
     if (!btn) return;
     btn.hidden = false;
     if (ticketCount() <= 0) {
-      btn.textContent = '🎟️ 세션 티켓 충전하기';
+      btn.textContent = i18n('mypage.cta.charge');
       btn.onclick = function (e) {
         e.preventDefault();
         openTicketsModal();
       };
       return;
     }
-    btn.textContent = '📅 대화 일정 예약하기';
+    btn.textContent = i18n('mypage.cta.book');
     btn.onclick = function (e) {
       e.preventDefault();
       openBookingModal();
@@ -207,7 +218,7 @@
       } else if (report && typeof window.renderViralReportCardForModal === 'function') {
         body.innerHTML = window.renderViralReportCardForModal(report);
       } else {
-        body.innerHTML = '<p style="text-align:center;color:#888;font-size:13px;padding:24px 8px;">열어볼 대화 리포트가 아직 없어요.</p>';
+        body.innerHTML = '<p style="text-align:center;color:#888;font-size:13px;padding:24px 8px;">' + i18n('mypage.archive.empty') + '</p>';
       }
     }
     modal.style.display = 'flex';
@@ -365,18 +376,20 @@
     var record = latestSpeakingRecord();
     if (paceEl) {
       if (!record || (!record.speaking_level && record.last_test_score == null)) {
-        paceEl.textContent = '진단 기록 없음';
+        paceEl.textContent = i18n('mypage.progress.noRecord');
       } else {
-        var level = record.speaking_level || '스피킹 감각';
+        var level = record.speaking_level || i18n('mypage.progress.levelFallback');
         paceEl.textContent = record.last_test_score != null
-          ? (level + ' ' + record.last_test_score + '점')
+          ? i18n('mypage.progress.scoreFormat', { level: level, score: record.last_test_score })
           : level;
       }
     }
-    if (sessionEl) sessionEl.textContent = sessionCount() + '회 완료';
+    if (sessionEl) sessionEl.textContent = i18n('mypage.progress.sessionsDone', { n: sessionCount() });
     if (streakEl) {
       var streak = streakCount();
-      streakEl.textContent = streak > 0 ? (streak + '일 연속 🔥') : '아직 시작 전';
+      streakEl.textContent = streak > 0
+        ? i18n('mypage.progress.streakDays', { n: streak })
+        : i18n('mypage.progress.streakNone');
     }
   }
 
@@ -412,11 +425,11 @@
     var els = nicknameModalEls();
     var next = els.input ? String(els.input.value || '').trim() : '';
     if (!next) {
-      if (els.error) els.error.textContent = '닉네임을 입력해 주세요.';
+      if (els.error) els.error.textContent = i18n('mypage.nick.empty');
       return;
     }
     if (next.length < 2) {
-      if (els.error) els.error.textContent = '닉네임은 2글자 이상이어야 해요.';
+      if (els.error) els.error.textContent = i18n('mypage.nick.tooShort');
       return;
     }
     if (els.save) els.save.disabled = true;
@@ -426,10 +439,10 @@
         await window.persistNickname(next);
       } else {
         var supabase = window.supabaseClient;
-        if (!supabase || !supabase.auth) throw new Error('로그인 세션을 찾지 못했어요.');
+        if (!supabase || !supabase.auth) throw new Error(i18n('mypage.nick.needSession'));
         var sessionRes = await supabase.auth.getSession();
         var session = sessionRes && sessionRes.data && sessionRes.data.session;
-        if (!session || !session.user) throw new Error('로그인이 필요해요.');
+        if (!session || !session.user) throw new Error(i18n('mypage.nick.needLogin'));
         var payload = { nickname: next, user_name: next };
         var res = await supabase.from('profiles').update(payload).eq('id', session.user.id).select('nickname');
         if (res && (res.error || !res.data || !res.data.length)) {
@@ -439,12 +452,12 @@
         applyDisplayName(next);
       }
       closeNicknameModal();
-      alert('닉네임이 성공적으로 변경되었습니다! ✨');
+      alert(i18n('mypage.nick.saved'));
     } catch (err) {
       console.error('닉네임 저장 실패:', err);
-      var message = (err && err.message) ? err.message : '잠시 후 다시 시도해 주세요.';
-      if (els.error) els.error.textContent = '닉네임 저장에 실패했습니다: ' + message;
-      alert('닉네임 저장에 실패했습니다: ' + message);
+      var message = (err && err.message) ? err.message : i18n('mypage.nick.needSession');
+      if (els.error) els.error.textContent = i18n('mypage.nick.saveFail', { message: message });
+      alert(i18n('mypage.nick.saveFail', { message: message }));
     } finally {
       if (els.save) els.save.disabled = false;
     }
@@ -506,4 +519,9 @@
   document.addEventListener('dayo:authprofile', renderSpeakingGrowth);
   document.addEventListener('dayo:reportsloaded', renderSpeakingGrowth);
   document.addEventListener('dayo:ticketchange', syncMainAction);
+  document.addEventListener('dayo:langchange', function () {
+    syncMainAction();
+    loadUrgentSessionBanner();
+    renderSpeakingGrowth();
+  });
 })();

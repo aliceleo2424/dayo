@@ -87,32 +87,19 @@
       text-decoration: none;
       font-weight: 800;
       letter-spacing: -0.02em;
+      flex-shrink: 0;
     }
 
-    .brand-mark {
-      width: 42px;
-      height: 42px;
-      display: grid;
-      place-items: center;
-      border: 3px solid rgba(255, 255, 255, 0.9);
-      border-radius: 50%;
-      color: var(--coral);
-      background: linear-gradient(135deg, var(--pink), var(--peach));
-      box-shadow: 0 6px 16px rgba(255, 107, 87, 0.15);
-      font-family: Georgia, serif;
-      font-size: 1.25rem;
-    }
-
-    .brand-copy small {
+    .logo-img {
       display: block;
-      margin-top: 0.1rem;
-      color: var(--muted);
-      font-size: 0.67rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
+      height: 48px;
+      width: 132px;
+      object-fit: cover;
+      object-position: center;
     }
 
     .topbar-right { display: flex; align-items: center; gap: 0.9rem; }
+    .topbar-right > [data-i18n-lang="icon"] { flex-shrink: 0; }
     .topbar-extras { display: flex; align-items: center; gap: 0.9rem; }
 
     .mypage-greeting-line {
@@ -1375,7 +1362,7 @@
       }
       .page { padding-top: 2rem; padding-bottom: 4rem; }
       .topbar-inner { min-height: 64px; padding-top: 0; padding-bottom: 0; }
-      .brand-copy small { display: none; }
+      .logo-img { height: 36px; width: 100px; }
       .topbar-extras { display: none; }
       .status-grid { grid-template-columns: 1fr; }
       .status-fortune-row { grid-template-columns: 1fr; }
@@ -1498,44 +1485,40 @@
   <header class="topbar">
     <div class="topbar-inner">
       <a class="brand" href="/" data-i18n="nav.homeAria" data-i18n-attr="aria-label" aria-label="DayO 메인으로 이동">
-        <span class="brand-mark">D</span>
-        <span class="brand-copy">
-          <span data-i18n="mypage.brand">DayO 마이페이지</span>
-          <small data-i18n="mypage.brandSub">MY CONVERSATION LOUNGE</small>
-        </span>
+        <img src="/images/logo.png" alt="DayO" class="logo-img">
       </a>
       <div class="topbar-right">
         <div class="topbar-extras">
-          <div data-i18n-lang="inline"></div>
           <button type="button" class="ghost-btn" data-tickets-open style="padding:0.45rem 0.8rem;font-size:0.78rem;">
             <span data-ticket-badge-text>☕️ 보유 티켓: 1장</span>
           </button>
         </div>
         <div data-mode-switch="inline"></div>
+        <div data-i18n-lang="icon"></div>
         <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
       </div>
     </div>
   </header>
   <div class="nav-drawer-backdrop" id="mobileNavBackdrop"></div>
   <nav class="nav-drawer" id="mobileNav" aria-label="모바일 메뉴">
-    <div class="nav-drawer__head">DayO 메뉴</div>
+    <div class="nav-drawer__head" data-i18n="nav.menuTitle">DayO 메뉴</div>
     <div data-i18n-lang="drawer"></div>
-    <a href="/" data-i18n="nav.homeAria">홈으로</a>
+    <a href="/" data-i18n="nav.home">홈으로</a>
     <a href="index.html?booking=open" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
     <a href="partner.html"><span aria-hidden="true">🤝</span> <span data-i18n="nav.partnerStudio">파트너 스튜디오로 이동</span></a>
     <button type="button" class="nav-drawer__link" data-tickets-open>
       <span data-ticket-badge-text>☕️ 보유 티켓: 1장</span>
     </button>
-    <button type="button" onclick="handleLogout(event)" class="btn-logout" style="cursor: pointer;">로그아웃</button>
+    <button type="button" onclick="handleLogout(event)" class="btn-logout" style="cursor: pointer;" data-i18n="login.logout">로그아웃</button>
   </nav>
 
   <main class="page mypage-container" style="max-width: 1140px; margin: 0 auto; padding: 32px 20px; box-sizing: border-box;">
 
     <div class="role-switch-wrapper" style="display: flex; justify-content: center; margin-bottom: 32px;">
-      <div class="role-segmented-control" style="position: relative; display: flex; width: 300px; background: #F1F3F5; padding: 4px; border-radius: 999px; cursor: pointer;" role="group" aria-label="역할 전환">
+      <div class="role-segmented-control" style="position: relative; display: flex; width: 300px; background: #F1F3F5; padding: 4px; border-radius: 999px; cursor: pointer;" role="group" data-i18n="role.switchAria" data-i18n-attr="aria-label" aria-label="역할 전환">
         <div id="segmented-glider" style="position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: #fff; border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); transition: transform 0.25s ease;"></div>
-        <button type="button" id="tab-user-mode" onclick="switchRoleView('user')" style="position: relative; z-index: 1; flex: 1; padding: 8px 0; border: none; background: transparent; font-weight: 700; color: #111; cursor: pointer;" aria-pressed="true">🙋‍♂️ 유저 모드</button>
-        <button type="button" id="tab-partner-mode" onclick="switchRoleView('partner')" style="position: relative; z-index: 1; flex: 1; padding: 8px 0; border: none; background: transparent; font-weight: 700; color: #888; cursor: pointer;" aria-pressed="false">🎙️ 파트너 라운지</button>
+        <button type="button" id="tab-user-mode" onclick="switchRoleView('user')" style="position: relative; z-index: 1; flex: 1; padding: 8px 0; border: none; background: transparent; font-weight: 700; color: #111; cursor: pointer;" aria-pressed="true" data-i18n="role.userMode">🙋‍♂️ 유저 모드</button>
+        <button type="button" id="tab-partner-mode" onclick="switchRoleView('partner')" style="position: relative; z-index: 1; flex: 1; padding: 8px 0; border: none; background: transparent; font-weight: 700; color: #888; cursor: pointer;" aria-pressed="false" data-i18n="role.partnerLounge">🎙️ 파트너 라운지</button>
       </div>
     </div>
 
@@ -1543,15 +1526,15 @@
       <div>
         <div class="mypage-greeting-line">
           <h2 id="mypage-greeting" style="font-size: 18px; font-weight: 700; color: #222;">오늘도 한 잔의 대화, 준비되셨나요? ☕</h2>
-          <button type="button" class="edit-nickname-btn" id="edit-nickname-btn">✏️ 닉네임 변경</button>
+          <button type="button" class="edit-nickname-btn" id="edit-nickname-btn" data-i18n="mypage.nick.edit">✏️ 닉네임 변경</button>
         </div>
         <div style="font-size: 13px; color: #666;">
-          보유 티켓 <strong data-summary-ticket style="color: #FF5A36;">0장</strong> <span style="color: #ccc; margin: 0 8px;">|</span> 결제일로부터 90일 이내 이용 가능
+          <span data-i18n="mypage.ticket.held">보유 티켓</span> <strong data-summary-ticket style="color: #FF5A36;">0장</strong> <span style="color: #ccc; margin: 0 8px;">|</span> <span data-i18n="mypage.ticket.validity">결제일로부터 90일 이내 이용 가능</span>
         </div>
       </div>
       <div class="mypage-welcome-actions">
-        <a href="room.html?role=user" class="mypage-welcome-cta mypage-welcome-cta--room" data-ms-guard data-ticket-gate>💬 대화방 입장하기</a>
-        <a href="/index.html#quiz" class="mypage-welcome-cta mypage-welcome-cta--speak" id="mypage-speak-btn">🎯 내 스피킹 감각 알아보기</a>
+        <a href="room.html?role=user" class="mypage-welcome-cta mypage-welcome-cta--room" data-ms-guard data-ticket-gate data-i18n="mypage.cta.room">💬 대화방 입장하기</a>
+        <a href="/index.html#quiz" class="mypage-welcome-cta mypage-welcome-cta--speak" id="mypage-speak-btn" data-i18n="mypage.cta.speak">🎯 내 스피킹 감각 알아보기</a>
         <button id="main-action-btn" type="button" onclick="openBookingModal()" class="mypage-welcome-cta mypage-welcome-cta--book">
           📅 대화 일정 예약하기
         </button>
@@ -1565,7 +1548,7 @@
         <p id="urgent-session-meta" style="margin: 0; font-size: 12px; color: #777;">대화 시작 5분 전부터 라운지 입장이 가능합니다.</p>
       </div>
       <div style="display: flex; gap: 8px;">
-        <button type="button" onclick="enterStudio()" style="background: #FF5A36; color: #fff; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap;">대화 스튜디오 입장</button>
+        <button type="button" onclick="enterStudio()" style="background: #FF5A36; color: #fff; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap;" data-i18n="mypage.urgent.enter">대화 스튜디오 입장</button>
       </div>
     </div>
 
@@ -1574,29 +1557,29 @@
         <section id="speaking-progress-card" class="speaking-progress-card" aria-labelledby="speakingProgressTitle">
           <div class="speaking-progress-head">
             <div>
-              <h3 id="speakingProgressTitle" style="margin: 0 0 4px; font-size: 16px; font-weight: 800; color: #222;">🏆 내 스피킹 성장 레벨</h3>
-              <p style="margin: 0; font-size: 12px; color: #888;">내 성과와 스피킹 감각을 한눈에 확인해요</p>
+              <h3 id="speakingProgressTitle" style="margin: 0 0 4px; font-size: 16px; font-weight: 800; color: #222;" data-i18n="mypage.progress.title">🏆 내 스피킹 성장 레벨</h3>
+              <p style="margin: 0; font-size: 12px; color: #888;" data-i18n="mypage.progress.sub">내 성과와 스피킹 감각을 한눈에 확인해요</p>
             </div>
-            <a href="/index.html#quiz" class="speaking-retest-btn" id="speaking-retest-btn">🎯 스피킹 감각 다시 진단하기</a>
+            <a href="/index.html#quiz" class="speaking-retest-btn" id="speaking-retest-btn" data-i18n="mypage.progress.retest">🎯 스피킹 감각 다시 진단하기</a>
           </div>
           <div class="speaking-progress-metrics">
             <div class="speaking-progress-metric">
-              <span>스피킹 감각 페이스</span>
+              <span data-i18n="mypage.progress.paceLabel">스피킹 감각 페이스</span>
               <strong id="progress-pace">진단 기록 없음</strong>
             </div>
             <div class="speaking-progress-metric">
-              <span>누적 대화 세션</span>
+              <span data-i18n="mypage.progress.sessionsLabel">누적 대화 세션</span>
               <strong id="progress-sessions">1회 완료</strong>
             </div>
             <div class="speaking-progress-metric">
-              <span>학습 스트릭</span>
+              <span data-i18n="mypage.progress.streakLabel">학습 스트릭</span>
               <strong id="progress-streak">1일 연속 🔥</strong>
             </div>
           </div>
         </section>
         <section style="background: #fff; border: 1px solid #EFEFEF; border-radius: 20px; padding: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);" aria-labelledby="talkArchiveTitle">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; gap: 12px;">
-            <h3 id="talkArchiveTitle" style="margin: 0; font-size: 16px; font-weight: 700; color: #222;">📚 지난 대화 리포트 보관함</h3>
+            <h3 id="talkArchiveTitle" style="margin: 0; font-size: 16px; font-weight: 700; color: #222;" data-i18n="mypage.archive.title">📚 지난 대화 리포트 보관함</h3>
             <span id="talk-album-count" style="font-size: 12px; color: #888;">총 0개의 대화 기록</span>
           </div>
           <div id="mypage-card-feed" class="mypage-report-list"></div>
@@ -1604,30 +1587,30 @@
       </div>
 
       <div id="right-column" class="mypage-col-stack">
-        <aside style="background: #FFFDF0; border: 1px solid #FEEFB3; border-radius: 20px; padding: 24px; text-align: center;" aria-label="오늘의 대화 포춘쿠키">
-          <h4 style="margin: 0 0 4px; font-size: 14px; color: #444;">오늘의 대화 포춘쿠키</h4>
-          <p style="margin: 0 0 12px; font-size: 11px; color: #888;">매일 1회, 가볍게 열어보는 체크인</p>
-          <button type="button" id="dayo-cookie-trigger" class="dayo-fortune-cookie" aria-label="포춘쿠키 열기" style="margin: 0 auto;">
+        <aside style="background: #FFFDF0; border: 1px solid #FEEFB3; border-radius: 20px; padding: 24px; text-align: center;" data-i18n="mypage.fortune.title" data-i18n-attr="aria-label" aria-label="오늘의 대화 포춘쿠키">
+          <h4 style="margin: 0 0 4px; font-size: 14px; color: #444;" data-i18n="mypage.fortune.title">오늘의 대화 포춘쿠키</h4>
+          <p style="margin: 0 0 12px; font-size: 11px; color: #888;" data-i18n="mypage.fortune.sub">매일 1회, 가볍게 열어보는 체크인</p>
+          <button type="button" id="dayo-cookie-trigger" class="dayo-fortune-cookie" data-i18n="mypage.fortune.openAria" data-i18n-attr="aria-label" aria-label="포춘쿠키 열기" style="margin: 0 auto;">
             <span class="dayo-fortune-piece dayo-fortune-piece--left" aria-hidden="true">🥠</span>
             <span class="dayo-fortune-piece dayo-fortune-piece--right" aria-hidden="true">🥠</span>
-            <span class="dayo-fortune-paper-mini" aria-hidden="true">✨ 오늘의 한마디</span>
+            <span class="dayo-fortune-paper-mini" aria-hidden="true" data-i18n="mypage.fortune.todayLine">✨ 오늘의 한마디</span>
           </button>
         </aside>
 
         <section style="background: #fff; border: 1px solid #F1F3F5; border-radius: 20px; padding: 24px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #222;">💬 이번 세션 이야기 카드</h4>
-            <span style="font-size: 11px; color: #888;">자유롭게 선택 가능</span>
+            <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #222;" data-i18n="mypage.story.title">💬 이번 세션 이야기 카드</h4>
+            <span style="font-size: 11px; color: #888;" data-i18n="mypage.story.free">자유롭게 선택 가능</span>
           </div>
-          <p style="margin: 0 0 14px; font-size: 12px; color: #777;">대화 전 나눌 주제를 가볍게 둘러보세요.</p>
-          <div style="display: flex; flex-direction: column; gap: 8px;" role="listbox" aria-label="이번 세션 이야기 카드">
-            <button type="button" data-story-topic="daily" aria-pressed="true" style="padding: 12px 14px; background: #FFF9F5; border: 1px solid #FFEBE4; border-radius: 10px; font-size: 13px; color: #333; font-weight: 600; text-align: left; cursor: pointer; font-family: inherit;">
+          <p style="margin: 0 0 14px; font-size: 12px; color: #777;" data-i18n="mypage.story.hint">대화 전 나눌 주제를 가볍게 둘러보세요.</p>
+          <div style="display: flex; flex-direction: column; gap: 8px;" role="listbox" data-i18n="mypage.story.aria" data-i18n-attr="aria-label" aria-label="이번 세션 이야기 카드">
+            <button type="button" data-story-topic="daily" aria-pressed="true" style="padding: 12px 14px; background: #FFF9F5; border: 1px solid #FFEBE4; border-radius: 10px; font-size: 13px; color: #333; font-weight: 600; text-align: left; cursor: pointer; font-family: inherit;" data-i18n="mypage.story.daily">
               ☕ 1. 요즘 나의 일상 (취미·휴일·동네 맛집)
             </button>
-            <button type="button" data-story-topic="korea" aria-pressed="false" style="padding: 12px 14px; background: #F8F9FA; border: 1px solid #EDEDED; border-radius: 10px; font-size: 13px; color: #333; font-weight: 600; text-align: left; cursor: pointer; font-family: inherit;">
+            <button type="button" data-story-topic="korea" aria-pressed="false" style="padding: 12px 14px; background: #F8F9FA; border: 1px solid #EDEDED; border-radius: 10px; font-size: 13px; color: #333; font-weight: 600; text-align: left; cursor: pointer; font-family: inherit;" data-i18n="mypage.story.korea">
               🇰🇷 2. 한국에서 발견한 것들 (문화·음식·추천 장소)
             </button>
-            <button type="button" data-story-topic="taste" aria-pressed="false" style="padding: 12px 14px; background: #F8F9FA; border: 1px solid #EDEDED; border-radius: 10px; font-size: 13px; color: #333; font-weight: 600; text-align: left; cursor: pointer; font-family: inherit;">
+            <button type="button" data-story-topic="taste" aria-pressed="false" style="padding: 12px 14px; background: #F8F9FA; border: 1px solid #EDEDED; border-radius: 10px; font-size: 13px; color: #333; font-weight: 600; text-align: left; cursor: pointer; font-family: inherit;" data-i18n="mypage.story.taste">
               ⚖️ 3. 우리의 취향 비교 (집순이 vs 밖순이)
             </button>
           </div>
@@ -1635,10 +1618,10 @@
       </div>
     </div>
 
-    <section class="mypage-lounge lounge-carousel" id="loungeCarousel" aria-label="DayO 라운지 매거진">
+    <section class="mypage-lounge lounge-carousel" id="loungeCarousel" data-i18n="mypage.lounge.aria" data-i18n-attr="aria-label" aria-label="DayO 라운지 매거진">
       <div class="lounge-head">
-        <h2 class="lounge-head__title">☕ DayO 라운지 매거진</h2>
-        <p class="lounge-head__sub">글로벌 문화 이야기 & 실전 대화 꿀팁</p>
+        <h2 class="lounge-head__title" data-i18n="mypage.lounge.title">☕ DayO 라운지 매거진</h2>
+        <p class="lounge-head__sub" data-i18n="mypage.lounge.sub">글로벌 문화 이야기 & 실전 대화 꿀팁</p>
       </div>
       <div class="lounge-grid" id="loungeTrack"></div>
     </section>
@@ -1647,26 +1630,26 @@
 
   <div id="partner-apply-modal" class="edit-profile-overlay" role="dialog" aria-modal="true" aria-labelledby="partner-apply-title" hidden>
     <div class="partner-apply-card">
-      <h3 id="partner-apply-title">DayO 글로벌 대화 파트너 모집 ☕</h3>
-      <p>DayO 파트너는 등록 신청 및 온라인 트레이닝을 거친 후 활동하실 수 있습니다.</p>
-      <p>내가 편한 시간대에 라이브 대화를 나누고, 세션당 활동비를 적립하세요.</p>
+      <h3 id="partner-apply-title" data-i18n="mypage.apply.title">DayO 글로벌 대화 파트너 모집 ☕</h3>
+      <p data-i18n="mypage.apply.p1">DayO 파트너는 등록 신청 및 온라인 트레이닝을 거친 후 활동하실 수 있습니다.</p>
+      <p data-i18n="mypage.apply.p2">내가 편한 시간대에 라이브 대화를 나누고, 세션당 활동비를 적립하세요.</p>
       <div class="partner-apply-actions">
-        <a class="partner-apply-submit" href="https://docs.google.com/forms/d/e/1FAIpQLScBTytUfVL4uyxv3R95dFfcs5rV-UBMnvujJ5GsK4ZNzh_1ZQ/viewform" target="_blank" rel="noopener noreferrer">파트너 지원서 작성하기</a>
-        <button type="button" class="partner-apply-close" id="partner-apply-close">닫기</button>
+        <a class="partner-apply-submit" href="https://docs.google.com/forms/d/e/1FAIpQLScBTytUfVL4uyxv3R95dFfcs5rV-UBMnvujJ5GsK4ZNzh_1ZQ/viewform" target="_blank" rel="noopener noreferrer" data-i18n="mypage.apply.submit">파트너 지원서 작성하기</a>
+        <button type="button" class="partner-apply-close" id="partner-apply-close" data-i18n="common.close">닫기</button>
       </div>
     </div>
   </div>
 
   <div id="edit-profile-modal" class="edit-profile-overlay" role="dialog" aria-modal="true" aria-labelledby="edit-profile-title" hidden>
     <div class="edit-profile-modal">
-      <h3 id="edit-profile-title">닉네임 변경</h3>
-      <p>마이페이지와 프로필에 보여질 이름을 정해 주세요.</p>
-      <label for="edit-profile-input" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">닉네임</label>
-      <input id="edit-profile-input" type="text" maxlength="20" placeholder="예: 앨리스" autocomplete="nickname">
+      <h3 id="edit-profile-title" data-i18n="mypage.nick.modalTitle">닉네임 변경</h3>
+      <p data-i18n="mypage.nick.modalDesc">마이페이지와 프로필에 보여질 이름을 정해 주세요.</p>
+      <label for="edit-profile-input" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);" data-i18n="mypage.nick.label">닉네임</label>
+      <input id="edit-profile-input" type="text" maxlength="20" placeholder="예: 앨리스" autocomplete="nickname" data-i18n="mypage.nick.placeholder">
       <p id="edit-profile-error" class="edit-profile-error" role="alert"></p>
       <div class="edit-profile-actions">
-        <button type="button" class="edit-profile-cancel" id="edit-profile-cancel">취소</button>
-        <button type="button" class="edit-profile-save" id="edit-profile-save">저장하기</button>
+        <button type="button" class="edit-profile-cancel" id="edit-profile-cancel" data-i18n="mypage.nick.cancel">취소</button>
+        <button type="button" class="edit-profile-save" id="edit-profile-save" data-i18n="mypage.nick.save">저장하기</button>
       </div>
     </div>
   </div>
@@ -1674,8 +1657,8 @@
   <div id="report-detail-modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="report-detail-title">
     <div class="card-detail-backdrop" onclick="closeReportDetailModal()"></div>
     <div class="report-detail-panel">
-      <button type="button" class="card-detail-close" onclick="closeReportDetailModal()" aria-label="닫기">×</button>
-      <h2 id="report-detail-title" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">지난 대화 리포트</h2>
+      <button type="button" class="card-detail-close" onclick="closeReportDetailModal()" data-i18n="common.close" data-i18n-attr="aria-label" aria-label="닫기">×</button>
+      <h2 id="report-detail-title" class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);" data-i18n="mypage.report.detailTitle">지난 대화 리포트</h2>
       <div id="report-detail-body"></div>
     </div>
   </div>
@@ -1692,21 +1675,21 @@
           <span class="dayo-fortune-modal-original" data-fortune-original>Your fortune is waiting to be opened.</span>
         </p>
         <p class="dayo-fortune-modal-block">
-          <span class="dayo-fortune-modal-label">한국어</span>
+          <span class="dayo-fortune-modal-label" data-i18n="mypage.fortune.koLabel">한국어</span>
           <span class="dayo-fortune-modal-ko" data-fortune-ko>오늘의 카드가 곧 열릴 거예요.</span>
         </p>
         <p class="dayo-fortune-modal-block">
-          <span class="dayo-fortune-modal-label">DayO의 응원</span>
+          <span class="dayo-fortune-modal-label" data-i18n="mypage.fortune.cheerLabel">DayO의 응원</span>
           <span class="dayo-fortune-modal-cheer" data-fortune-cheer>한 걸음씩, 오늘도 말문이 트일 거예요.</span>
         </p>
       </div>
       <div class="dayo-fortune-save-banner" data-fortune-guest-only>
-        <p class="dayo-fortune-save-banner__text">✨ 로그인하시고, 내 닉네임을 넣은 나만의 카드를 받아보세요!</p>
-        <button type="button" class="dayo-fortune-login-btn" data-fortune-login>3초 만에 로그인</button>
+        <p class="dayo-fortune-save-banner__text" data-i18n="mypage.fortune.saveBanner">✨ 로그인하시고, 내 닉네임을 넣은 나만의 카드를 받아보세요!</p>
+        <button type="button" class="dayo-fortune-login-btn" data-fortune-login data-i18n="mypage.fortune.login">3초 만에 로그인</button>
       </div>
       <div class="dayo-fortune-modal-actions">
-        <button type="button" class="dayo-fortune-btn dayo-fortune-btn-close" data-fortune-close>닫기</button>
-        <button type="button" class="dayo-fortune-btn dayo-fortune-btn-copy" data-fortune-copy>📋 문장 복사</button>
+        <button type="button" class="dayo-fortune-btn dayo-fortune-btn-close" data-fortune-close data-i18n="common.close">닫기</button>
+        <button type="button" class="dayo-fortune-btn dayo-fortune-btn-copy" data-fortune-copy data-i18n="mypage.fortune.copy">📋 문장 복사</button>
       </div>
     </div>
   </div>

@@ -5,6 +5,13 @@
   var TICKET_KEY = 'ticketCount';
   var DEFAULT_COUNT = 0;
 
+  function i18n(key, vars) {
+    if (window.DayOI18n && typeof window.DayOI18n.tf === 'function') {
+      return window.DayOI18n.tf(key, vars);
+    }
+    return key;
+  }
+
   function readCount() {
     try {
       var dayoRaw = window.localStorage.getItem('dayo_ticket_count');
@@ -69,14 +76,14 @@
     });
 
     Array.prototype.forEach.call(document.querySelectorAll('[data-ticket-badge-text]'), function (el) {
-      el.textContent = '☕️ 보유 티켓: ' + n + '장';
+      el.textContent = i18n('mypage.ticket.badge', { n: n });
     });
 
     Array.prototype.forEach.call(document.querySelectorAll('[data-ticket-remaining-text]'), function (el) {
-      el.textContent = n + '장';
+      el.textContent = i18n('mypage.ticket.count', { n: n });
     });
     Array.prototype.forEach.call(document.querySelectorAll('[data-summary-ticket]'), function (el) {
-      el.textContent = n + '장';
+      el.textContent = i18n('mypage.ticket.count', { n: n });
     });
   }
 
@@ -102,6 +109,9 @@
     document.addEventListener('dayo:ticketchange', function (e) {
       syncUI(e.detail && e.detail.ticketCount);
     });
+    document.addEventListener('dayo:langchange', function () {
+      syncUI();
+    });
     document.addEventListener('dayo:authchange', function () {
       syncUI();
     });
@@ -119,7 +129,7 @@
         window.DayOBooking.requestOpen();
         return;
       }
-      var msg = '티켓이 부족해요! 이용권을 충전하고 바로 대화를 시작해 보세요 ☕️';
+      var msg = i18n('mypage.ticket.needMore');
       if (window.DayOTickets && typeof window.DayOTickets.promptPurchase === 'function') {
         window.DayOTickets.promptPurchase(msg);
       } else if (window.DayOTickets && typeof window.DayOTickets.open === 'function') {

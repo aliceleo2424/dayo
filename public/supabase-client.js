@@ -34,6 +34,13 @@
     });
   }
 
+  function i18n(key, vars) {
+    if (window.DayOI18n && typeof window.DayOI18n.tf === 'function') {
+      return window.DayOI18n.tf(key, vars);
+    }
+    return key;
+  }
+
   function hasStoredSession() {
     try {
       var keys = Object.keys(localStorage);
@@ -1010,9 +1017,7 @@
 
     var countEl = document.getElementById('talk-album-count');
     if (countEl) {
-      countEl.textContent = reportList
-        ? ('총 ' + reports.length + '개의 대화 기록')
-        : ('총 ' + reports.length + '장 보관');
+      countEl.textContent = i18n(reportList ? 'mypage.archive.count' : 'mypage.archive.countCards', { n: reports.length });
     }
 
     if (reportList) {
@@ -1021,9 +1026,9 @@
           return renderReportArchiveItem(r, idx);
         }).join('');
       } else if (!user) {
-        reportList.innerHTML = '<div class="talk-album-empty">로그인 후 지난 대화 리포트를 확인해 보세요.</div>';
+        reportList.innerHTML = '<div class="talk-album-empty" data-empty-kind="guest">' + i18n('mypage.archive.emptyGuest') + '</div>';
       } else {
-        reportList.innerHTML = '<div class="talk-album-empty">아직 지난 대화 기록이 없어요.</div>';
+        reportList.innerHTML = '<div class="talk-album-empty" data-empty-kind="user">' + i18n('mypage.archive.emptyLoggedIn') + '</div>';
       }
       return;
     }
@@ -1034,9 +1039,9 @@
           return renderTalkThumb(r, idx);
         }).join('');
       } else if (!user) {
-        album.innerHTML = '<div class="talk-album-empty">로그인 후 대화 리포트를 확인해 보세요.</div>';
+        album.innerHTML = '<div class="talk-album-empty" data-empty-kind="guest">' + i18n('mypage.archive.emptyGuest') + '</div>';
       } else {
-        album.innerHTML = '<div class="talk-album-empty">아직 대화 기록이 없습니다.</div>';
+        album.innerHTML = '<div class="talk-album-empty" data-empty-kind="user">' + i18n('mypage.archive.emptyLoggedIn') + '</div>';
       }
       return;
     }
@@ -1167,4 +1172,18 @@
     bindAdminDashboardNav();
     if (document.getElementById('mypage-card-feed')) window.loadUserReports();
   }
+
+  document.addEventListener('dayo:langchange', function () {
+    var reports = window.__dayoTalkAlbum;
+    var countEl = document.getElementById('talk-album-count');
+    if (countEl && reports) {
+      var reportList = document.querySelector('.mypage-report-list');
+      countEl.textContent = i18n(reportList ? 'mypage.archive.count' : 'mypage.archive.countCards', { n: reports.length });
+    }
+    Array.prototype.forEach.call(document.querySelectorAll('.talk-album-empty'), function (el) {
+      var kind = el.getAttribute('data-empty-kind');
+      if (kind === 'guest') el.textContent = i18n('mypage.archive.emptyGuest');
+      else if (kind === 'user') el.textContent = i18n('mypage.archive.emptyLoggedIn');
+    });
+  });
 })();

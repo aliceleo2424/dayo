@@ -107,6 +107,21 @@
     'nav.learnerMypage': {
       KO: '마이페이지로 이동', EN: 'Go to My Page', ZH: '前往我的页面', JA: 'マイページへ', FR: 'Aller à Mon espace', ES: 'Ir a Mi página'
     },
+    'nav.home': {
+      KO: '홈으로', EN: 'Home', ZH: '首页', JA: 'ホームへ', FR: 'Accueil', ES: 'Inicio'
+    },
+    'nav.menuTitle': {
+      KO: 'DayO 메뉴', EN: 'DayO menu', ZH: 'DayO菜单', JA: 'DayOメニュー', FR: 'Menu DayO', ES: 'Menú DayO'
+    },
+    'role.switchAria': {
+      KO: '역할 전환', EN: 'Switch role', ZH: '切换角色', JA: 'ロール切替', FR: 'Changer de rôle', ES: 'Cambiar de rol'
+    },
+    'role.userMode': {
+      KO: '🙋‍♂️ 유저 모드', EN: '🙋‍♂️ User mode', ZH: '🙋‍♂️ 用户模式', JA: '🙋‍♂️ ユーザーモード', FR: '🙋‍♂️ Mode utilisateur', ES: '🙋‍♂️ Modo usuario'
+    },
+    'role.partnerLounge': {
+      KO: '🎙️ 파트너 라운지', EN: '🎙️ Partner lounge', ZH: '🎙️ 伙伴休息室', JA: '🎙️ パートナーラウンジ', FR: '🎙️ Lounge partenaire', ES: '🎙️ Lounge de partner'
+    },
     'nav.partnerSpace': {
       KO: '파트너 공간', EN: 'Partner Space', ZH: '伙伴空间', JA: 'パートナー空間', FR: 'Espace partenaire', ES: 'Espacio partner'
     },
@@ -343,6 +358,239 @@
       JA: '会話状況、予約、会話記録を一箇所で確認できます。',
       FR: 'Consultez vos conversations, sessions et souvenirs de discussion.',
       ES: 'Consulta tu estado, sesiones y registros de conversación.'
+    },
+    'mypage.greet.morning': {
+      KO: '👋 좋은 아침이에요, {name}님! ☕', EN: '👋 Good morning, {name}! ☕', ZH: '👋 早上好，{name}！☕', JA: '👋 おはよう、{name}さん！☕', FR: '👋 Bonjour, {name} ! ☕', ES: '👋 ¡Buenos días, {name}! ☕'
+    },
+    'mypage.greet.afternoon': {
+      KO: '👋 활기찬 오후예요, {name}님! 🌤️', EN: '👋 Good afternoon, {name}! 🌤️', ZH: '👋 下午好，{name}！🌤️', JA: '👋 こんにちは、{name}さん！🌤️', FR: '👋 Bon après-midi, {name} ! 🌤️', ES: '👋 ¡Buenas tardes, {name}! 🌤️'
+    },
+    'mypage.greet.evening': {
+      KO: '👋 편안한 저녁이에요, {name}님! 🌙', EN: '👋 Good evening, {name}! 🌙', ZH: '👋 晚上好，{name}！🌙', JA: '👋 こんばんは、{name}さん！🌙', FR: '👋 Bonsoir, {name} ! 🌙', ES: '👋 ¡Buenas noches, {name}! 🌙'
+    },
+    'mypage.greet.night': {
+      KO: '👋 오늘 하루도 고생 많았어요, {name}님! ✨', EN: '👋 You did great today, {name}! ✨', ZH: '👋 今天辛苦了，{name}！✨', JA: '👋 今日もお疲れさま、{name}さん！✨', FR: '👋 Belle journée, {name} ! ✨', ES: '👋 ¡Gran día, {name}! ✨'
+    },
+    'mypage.nick.edit': {
+      KO: '✏️ 닉네임 변경', EN: '✏️ Edit nickname', ZH: '✏️ 修改昵称', JA: '✏️ ニックネーム変更', FR: '✏️ Modifier le pseudo', ES: '✏️ Cambiar apodo'
+    },
+    'mypage.ticket.held': {
+      KO: '보유 티켓', EN: 'Tickets', ZH: '持有券', JA: '所持チケット', FR: 'Tickets', ES: 'Tickets'
+    },
+    'mypage.ticket.validity': {
+      KO: '결제일로부터 90일 이내 이용 가능', EN: 'Valid for 90 days from purchase', ZH: '购买后90天内可用', JA: '購入日から90日以内に利用可能', FR: 'Valable 90 jours après l’achat', ES: 'Válido 90 días desde la compra'
+    },
+    'mypage.ticket.badge': {
+      KO: '☕️ 보유 티켓: {n}장', EN: '☕️ Tickets: {n}', ZH: '☕️ 持有券：{n}张', JA: '☕️ 所持チケット: {n}枚', FR: '☕️ Tickets : {n}', ES: '☕️ Tickets: {n}'
+    },
+    'mypage.ticket.count': {
+      KO: '{n}장', EN: '{n}', ZH: '{n}张', JA: '{n}枚', FR: '{n}', ES: '{n}'
+    },
+    'mypage.ticket.needMore': {
+      KO: '티켓이 부족해요! 이용권을 충전하고 바로 대화를 시작해 보세요 ☕️',
+      EN: 'You’re out of tickets! Top up and start chatting ☕️',
+      ZH: '券不够了！充值后马上开始对话吧 ☕️',
+      JA: 'チケットが足りません！チャージして会話を始めましょう ☕️',
+      FR: 'Plus de tickets ! Rechargez pour commencer ☕️',
+      ES: '¡No te quedan tickets! Recarga y empieza ☕️'
+    },
+    'mypage.cta.room': {
+      KO: '💬 대화방 입장하기', EN: '💬 Enter the chat room', ZH: '💬 进入对话室', JA: '💬 会話ルームに入る', FR: '💬 Entrer dans le salon', ES: '💬 Entrar a la sala'
+    },
+    'mypage.cta.speak': {
+      KO: '🎯 내 스피킹 감각 알아보기', EN: '🎯 Check my speaking sense', ZH: '🎯 了解我的口语感觉', JA: '🎯 スピーキング感覚を知る', FR: '🎯 Découvrir mon aisance orale', ES: '🎯 Descubrir mi sensación oral'
+    },
+    'mypage.cta.book': {
+      KO: '📅 대화 일정 예약하기', EN: '📅 Book a conversation', ZH: '📅 预约对话', JA: '📅 会話を予約する', FR: '📅 Réserver une conversation', ES: '📅 Reservar una conversación'
+    },
+    'mypage.cta.charge': {
+      KO: '🎟️ 세션 티켓 충전하기', EN: '🎟️ Buy session tickets', ZH: '🎟️ 充值会话券', JA: '🎟️ セッションチケットを買う', FR: '🎟️ Acheter des tickets', ES: '🎟️ Comprar tickets'
+    },
+    'mypage.urgent.badge': {
+      KO: '다가오는 대화', EN: 'Upcoming chat', ZH: '即将到来的对话', JA: 'まもなくの会話', FR: 'Conversation à venir', ES: 'Próxima conversación'
+    },
+    'mypage.urgent.soon': {
+      KO: '🚨 30분 후 시작', EN: '🚨 Starts in 30 min', ZH: '🚨 30分钟后开始', JA: '🚨 30分後に開始', FR: '🚨 Débute dans 30 min', ES: '🚨 Empieza en 30 min'
+    },
+    'mypage.urgent.empty': {
+      KO: '예약된 대화가 없습니다', EN: 'No booked conversation yet', ZH: '暂无预约对话', JA: '予約された会話はありません', FR: 'Aucune conversation réservée', ES: 'Aún no hay conversación reservada'
+    },
+    'mypage.urgent.meta': {
+      KO: '대화 시작 5분 전부터 라운지 입장이 가능합니다.', EN: 'You can enter the lounge from 5 minutes before start.', ZH: '对话开始前5分钟即可进入休息室。', JA: '会話開始5分前からラウンジに入れます。', FR: 'Entrée possible 5 minutes avant le début.', ES: 'Puedes entrar al lounge 5 minutos antes.'
+    },
+    'mypage.urgent.enter': {
+      KO: '대화 스튜디오 입장', EN: 'Enter conversation studio', ZH: '进入对话工作室', JA: '会話スタジオに入る', FR: 'Entrer dans le studio', ES: 'Entrar al estudio'
+    },
+    'mypage.urgent.titleFormat': {
+      KO: '{name} 파트너와의 대화 ({when})', EN: 'Chat with {name} ({when})', ZH: '与{name}伙伴的对话（{when}）', JA: '{name}パートナーとの会話（{when}）', FR: 'Conversation avec {name} ({when})', ES: 'Conversación con {name} ({when})'
+    },
+    'mypage.urgent.purposePrefix': {
+      KO: '목적: {purpose} · ', EN: 'Purpose: {purpose} · ', ZH: '目的：{purpose} · ', JA: '目的: {purpose} · ', FR: 'Objectif : {purpose} · ', ES: 'Propósito: {purpose} · '
+    },
+    'mypage.session.todayTime': {
+      KO: '오늘 {time}', EN: 'Today {time}', ZH: '今天 {time}', JA: '今日 {time}', FR: 'Aujourd’hui {time}', ES: 'Hoy {time}'
+    },
+    'mypage.session.mdTime': {
+      KO: '{m}월 {d}일 {time}', EN: '{m}/{d} {time}', ZH: '{m}月{d}日 {time}', JA: '{m}月{d}日 {time}', FR: '{d}/{m} {time}', ES: '{d}/{m} {time}'
+    },
+    'mypage.purpose.travel': { KO: '여행/일상', EN: 'Travel/Daily', ZH: '旅行/日常', JA: '旅行・日常', FR: 'Voyage/Quotidien', ES: 'Viaje/Diario' },
+    'mypage.purpose.opic': { KO: 'OPIc', EN: 'OPIc', ZH: 'OPIc', JA: 'OPIc', FR: 'OPIc', ES: 'OPIc' },
+    'mypage.purpose.abroad': { KO: '워홀/유학', EN: 'Working holiday/Study abroad', ZH: '打工度假/留学', JA: 'ワーホリ・留学', FR: 'PVT/Études', ES: 'Working holiday/Estudios' },
+    'mypage.purpose.casual': { KO: '자유 수다', EN: 'Casual chat', ZH: '自由聊天', JA: '自由なおしゃべり', FR: 'Discussion libre', ES: 'Charla libre' },
+    'mypage.progress.title': {
+      KO: '🏆 내 스피킹 성장 레벨', EN: '🏆 My speaking growth', ZH: '🏆 我的口语成长等级', JA: '🏆 スピーキング成長レベル', FR: '🏆 Mon niveau d’aisance orale', ES: '🏆 Mi nivel de expresión oral'
+    },
+    'mypage.progress.sub': {
+      KO: '내 성과와 스피킹 감각을 한눈에 확인해요', EN: 'See your progress and speaking sense at a glance', ZH: '一眼查看成果与口语感觉', JA: '成果とスピーキング感覚を一目で', FR: 'Vos progrès et votre aisance, d’un coup d’œil', ES: 'Tu progreso y sensación oral de un vistazo'
+    },
+    'mypage.progress.retest': {
+      KO: '🎯 스피킹 감각 다시 진단하기', EN: '🎯 Retake speaking diagnosis', ZH: '🎯 再次诊断口语感觉', JA: '🎯 スピーキング感覚を再診断', FR: '🎯 Refaire le diagnostic oral', ES: '🎯 Volver a diagnosticar la oralidad'
+    },
+    'mypage.progress.paceLabel': {
+      KO: '스피킹 감각 페이스', EN: 'Speaking pace', ZH: '口语感觉节奏', JA: 'スピーキング感覚ペース', FR: 'Rythme d’aisance orale', ES: 'Ritmo de expresión oral'
+    },
+    'mypage.progress.sessionsLabel': {
+      KO: '누적 대화 세션', EN: 'Total conversations', ZH: '累计对话场次', JA: '累計会話セッション', FR: 'Conversations cumulées', ES: 'Conversaciones totales'
+    },
+    'mypage.progress.streakLabel': {
+      KO: '학습 스트릭', EN: 'Learning streak', ZH: '学习连续天数', JA: '学習ストリーク', FR: 'Série d’apprentissage', ES: 'Racha de aprendizaje'
+    },
+    'mypage.progress.noRecord': {
+      KO: '진단 기록 없음', EN: 'No diagnosis yet', ZH: '暂无诊断记录', JA: '診断記録なし', FR: 'Pas encore de diagnostic', ES: 'Sin diagnóstico aún'
+    },
+    'mypage.progress.levelFallback': {
+      KO: '스피킹 감각', EN: 'Speaking sense', ZH: '口语感觉', JA: 'スピーキング感覚', FR: 'Aisance orale', ES: 'Sensación oral'
+    },
+    'mypage.progress.scoreFormat': {
+      KO: '{level} {score}점', EN: '{level} {score} pts', ZH: '{level} {score}分', JA: '{level} {score}点', FR: '{level} {score} pts', ES: '{level} {score} pts'
+    },
+    'mypage.progress.sessionsDone': {
+      KO: '{n}회 완료', EN: '{n} completed', ZH: '{n}次完成', JA: '{n}回完了', FR: '{n} terminées', ES: '{n} completadas'
+    },
+    'mypage.progress.streakDays': {
+      KO: '{n}일 연속 🔥', EN: '{n}-day streak 🔥', ZH: '连续{n}天 🔥', JA: '{n}日連続 🔥', FR: '{n} jours d’affilée 🔥', ES: '{n} días seguidos 🔥'
+    },
+    'mypage.progress.streakNone': {
+      KO: '아직 시작 전', EN: 'Not started yet', ZH: '尚未开始', JA: 'まだこれから', FR: 'Pas encore commencé', ES: 'Aún no empieza'
+    },
+    'mypage.archive.title': {
+      KO: '📚 지난 대화 리포트 보관함', EN: '📚 Past conversation reports', ZH: '📚 过往对话报告存档', JA: '📚 過去の会話レポート', FR: '📚 Rapports de conversations passées', ES: '📚 Informes de conversaciones pasadas'
+    },
+    'mypage.archive.count': {
+      KO: '총 {n}개의 대화 기록', EN: '{n} conversation records', ZH: '共{n}条对话记录', JA: '会話記録 {n}件', FR: '{n} souvenirs de conversation', ES: '{n} registros de conversación'
+    },
+    'mypage.archive.countCards': {
+      KO: '총 {n}장 보관', EN: '{n} cards saved', ZH: '共收藏{n}张', JA: '{n}枚保管', FR: '{n} cartes enregistrées', ES: '{n} tarjetas guardadas'
+    },
+    'mypage.archive.empty': {
+      KO: '열어볼 대화 리포트가 아직 없어요.', EN: 'No conversation reports to open yet.', ZH: '还没有可打开的对话报告。', JA: 'まだ開ける会話レポートがありません。', FR: 'Pas encore de rapport à ouvrir.', ES: 'Aún no hay informes para abrir.'
+    },
+    'mypage.archive.emptyGuest': {
+      KO: '로그인 후 지난 대화 리포트를 확인해 보세요.', EN: 'Sign in to see your past conversation reports.', ZH: '登录后查看过往对话报告。', JA: 'ログインして過去の会話レポートを確認しましょう。', FR: 'Connectez-vous pour voir vos rapports.', ES: 'Inicia sesión para ver tus informes.'
+    },
+    'mypage.archive.emptyLoggedIn': {
+      KO: '아직 지난 대화 기록이 없어요.', EN: 'No past conversations yet.', ZH: '还没有过往对话记录。', JA: 'まだ過去の会話記録がありません。', FR: 'Pas encore de conversations passées.', ES: 'Aún no hay conversaciones pasadas.'
+    },
+    'mypage.fortune.title': {
+      KO: '오늘의 대화 포춘쿠키', EN: 'Today’s conversation fortune cookie', ZH: '今日的对话幸运饼干', JA: '今日の会話フォーチュンクッキー', FR: 'Cookie fortune du jour', ES: 'Galleta de la fortuna de hoy'
+    },
+    'mypage.fortune.sub': {
+      KO: '매일 1회, 가볍게 열어보는 체크인', EN: 'Once a day — a light check-in', ZH: '每天一次，轻松打开的打卡', JA: '1日1回、気軽に開くチェックイン', FR: 'Une fois par jour, un check-in léger', ES: 'Una vez al día, un check-in ligero'
+    },
+    'mypage.fortune.openAria': {
+      KO: '포춘쿠키 열기', EN: 'Open fortune cookie', ZH: '打开幸运饼干', JA: 'フォーチュンクッキーを開く', FR: 'Ouvrir le cookie fortune', ES: 'Abrir la galleta de la fortuna'
+    },
+    'mypage.fortune.todayLine': {
+      KO: '✨ 오늘의 한마디', EN: '✨ Today’s line', ZH: '✨ 今日一句', JA: '✨ 今日のひとこと', FR: '✨ La phrase du jour', ES: '✨ La frase de hoy'
+    },
+    'mypage.story.title': {
+      KO: '💬 이번 세션 이야기 카드', EN: '💬 Story cards for this session', ZH: '💬 本次会话话题卡', JA: '💬 今セッションの話題カード', FR: '💬 Cartes de sujet de session', ES: '💬 Tarjetas de tema de esta sesión'
+    },
+    'mypage.story.free': {
+      KO: '자유롭게 선택 가능', EN: 'Pick freely', ZH: '可自由选择', JA: '自由に選べます', FR: 'Choix libre', ES: 'Elige libremente'
+    },
+    'mypage.story.hint': {
+      KO: '대화 전 나눌 주제를 가볍게 둘러보세요.', EN: 'Browse a light topic before you chat.', ZH: '对话前轻松看看要聊的主题。', JA: '会話前に話すテーマを軽く見てみましょう。', FR: 'Parcourez un sujet avant de parler.', ES: 'Mira un tema ligero antes de conversar.'
+    },
+    'mypage.story.aria': {
+      KO: '이번 세션 이야기 카드', EN: 'Story cards for this session', ZH: '本次会话话题卡', JA: '今セッションの話題カード', FR: 'Cartes de sujet de session', ES: 'Tarjetas de tema de esta sesión'
+    },
+    'mypage.story.daily': {
+      KO: '☕ 1. 요즘 나의 일상 (취미·휴일·동네 맛집)', EN: '☕ 1. My everyday lately (hobbies, days off, local eats)', ZH: '☕ 1. 最近的日常（爱好、休息日、街区美食）', JA: '☕ 1. 最近の日常（趣味・休日・近所グルメ）', FR: '☕ 1. Mon quotidien (loisirs, jours off, adresses du quartier)', ES: '☕ 1. Mi día a día (hobbies, días libres, sitios del barrio)'
+    },
+    'mypage.story.korea': {
+      KO: '🇰🇷 2. 한국에서 발견한 것들 (문화·음식·추천 장소)', EN: '🇰🇷 2. Things I found in Korea (culture, food, places)', ZH: '🇰🇷 2. 在韩国发现的事物（文化、食物、推荐地点）', JA: '🇰🇷 2. 韓国で見つけたこと（文化・食べ物・おすすめ）', FR: '🇰🇷 2. Découvertes en Corée (culture, nourriture, lieux)', ES: '🇰🇷 2. Hallazgos en Corea (cultura, comida, lugares)'
+    },
+    'mypage.story.taste': {
+      KO: '⚖️ 3. 우리의 취향 비교 (집순이 vs 밖순이)', EN: '⚖️ 3. Comparing our tastes (homebody vs. go-out)', ZH: '⚖️ 3. 比较我们的口味（宅家 vs 出门）', JA: '⚖️ 3. 好み比べ（インドア vs アウトドア）', FR: '⚖️ 3. Comparer nos goûts (casanier vs sorties)', ES: '⚖️ 3. Comparar gustos (casa vs salir)'
+    },
+    'mypage.lounge.title': {
+      KO: '☕ DayO 라운지 매거진', EN: '☕ DayO lounge magazine', ZH: '☕ DayO休息室杂志', JA: '☕ DayOラウンジマガジン', FR: '☕ Magazine du lounge DayO', ES: '☕ Revista del lounge DayO'
+    },
+    'mypage.lounge.sub': {
+      KO: '글로벌 문화 이야기 & 실전 대화 꿀팁', EN: 'Global culture stories & live conversation tips', ZH: '全球文化故事与实战对话技巧', JA: 'グローバル文化の話＆実践会話ヒント', FR: 'Récits culturels & astuces de conversation', ES: 'Historias culturales y tips de conversación'
+    },
+    'mypage.lounge.aria': {
+      KO: 'DayO 라운지 매거진', EN: 'DayO lounge magazine', ZH: 'DayO休息室杂志', JA: 'DayOラウンジマガジン', FR: 'Magazine du lounge DayO', ES: 'Revista del lounge DayO'
+    },
+    'mypage.apply.title': {
+      KO: 'DayO 글로벌 대화 파트너 모집 ☕', EN: 'Join DayO as a global conversation partner ☕', ZH: 'DayO全球对话伙伴招募 ☕', JA: 'DayOグローバル会話パートナー募集 ☕', FR: 'Devenez partenaire de conversation DayO ☕', ES: 'Únete como compañero de conversación DayO ☕'
+    },
+    'mypage.apply.p1': {
+      KO: 'DayO 파트너는 등록 신청 및 온라인 트레이닝을 거친 후 활동하실 수 있습니다.', EN: 'Partners can start after applying and completing online training.', ZH: 'DayO伙伴需完成报名申请和在线培训后即可活动。', JA: 'DayOパートナーは応募とオンライン研修のあと活動できます。', FR: 'Les partenaires commencent après candidature et formation en ligne.', ES: 'Los partners empiezan tras postularse y completar la formación online.'
+    },
+    'mypage.apply.p2': {
+      KO: '내가 편한 시간대에 라이브 대화를 나누고, 세션당 활동비를 적립하세요.', EN: 'Host live chats in your available hours and earn activity pay per session.', ZH: '在方便的时段进行实时对话，并按场次累积活动费。', JA: '都合のよい時間にライブ会話をし、セッションごとに活動費を貯めましょう。', FR: 'Animez des conversations à vos horaires et gagnez par session.', ES: 'Habla en vivo en tus horarios y acumula honorarios por sesión.'
+    },
+    'mypage.apply.submit': {
+      KO: '파트너 지원서 작성하기', EN: 'Fill out the partner application', ZH: '填写伙伴申请表', JA: 'パートナー応募書を書く', FR: 'Remplir la candidature partenaire', ES: 'Completar la solicitud de partner'
+    },
+    'mypage.nick.modalTitle': {
+      KO: '닉네임 변경', EN: 'Change nickname', ZH: '修改昵称', JA: 'ニックネーム変更', FR: 'Modifier le pseudo', ES: 'Cambiar apodo'
+    },
+    'mypage.nick.modalDesc': {
+      KO: '마이페이지와 프로필에 보여질 이름을 정해 주세요.', EN: 'Choose the name shown on My Page and your profile.', ZH: '请设定我的页面和资料中显示的名字。', JA: 'マイページとプロフィールに表示される名前を決めてください。', FR: 'Choisissez le nom affiché sur Mon espace et votre profil.', ES: 'Elige el nombre que se verá en Mi página y tu perfil.'
+    },
+    'mypage.nick.label': { KO: '닉네임', EN: 'Nickname', ZH: '昵称', JA: 'ニックネーム', FR: 'Pseudo', ES: 'Apodo' },
+    'mypage.nick.placeholder': { KO: '예: 앨리스', EN: 'e.g. Alice', ZH: '例：爱丽丝', JA: '例: アリス', FR: 'ex. Alice', ES: 'ej. Alicia' },
+    'mypage.nick.cancel': { KO: '취소', EN: 'Cancel', ZH: '取消', JA: 'キャンセル', FR: 'Annuler', ES: 'Cancelar' },
+    'mypage.nick.save': { KO: '저장하기', EN: 'Save', ZH: '保存', JA: '保存する', FR: 'Enregistrer', ES: 'Guardar' },
+    'mypage.nick.empty': { KO: '닉네임을 입력해 주세요.', EN: 'Please enter a nickname.', ZH: '请输入昵称。', JA: 'ニックネームを入力してください。', FR: 'Veuillez entrer un pseudo.', ES: 'Por favor ingresa un apodo.' },
+    'mypage.nick.tooShort': { KO: '닉네임은 2글자 이상이어야 해요.', EN: 'Nickname must be at least 2 characters.', ZH: '昵称至少需要2个字。', JA: 'ニックネームは2文字以上にしてください。', FR: 'Le pseudo doit faire au moins 2 caractères.', ES: 'El apodo debe tener al menos 2 caracteres.' },
+    'mypage.nick.saved': { KO: '닉네임이 성공적으로 변경되었습니다! ✨', EN: 'Nickname updated! ✨', ZH: '昵称已成功更改！✨', JA: 'ニックネームを変更しました！✨', FR: 'Pseudo mis à jour ! ✨', ES: '¡Apodo actualizado! ✨' },
+    'mypage.nick.needSession': { KO: '로그인 세션을 찾지 못했어요.', EN: 'Could not find a login session.', ZH: '找不到登录会话。', JA: 'ログインセッションが見つかりません。', FR: 'Session introuvable.', ES: 'No se encontró la sesión.' },
+    'mypage.nick.needLogin': { KO: '로그인이 필요해요.', EN: 'Please sign in.', ZH: '需要登录。', JA: 'ログインが必要です。', FR: 'Connexion requise.', ES: 'Inicia sesión.' },
+    'mypage.nick.saveFail': { KO: '닉네임 저장에 실패했습니다: {message}', EN: 'Could not save nickname: {message}', ZH: '昵称保存失败：{message}', JA: 'ニックネームの保存に失敗しました: {message}', FR: 'Impossible d’enregistrer le pseudo : {message}', ES: 'No se pudo guardar el apodo: {message}' },
+    'mypage.report.detailTitle': { KO: '지난 대화 리포트', EN: 'Past conversation report', ZH: '过往对话报告', JA: '過去の会話レポート', FR: 'Rapport de conversation', ES: 'Informe de conversación' },
+    'common.close': { KO: '닫기', EN: 'Close', ZH: '关闭', JA: '閉じる', FR: 'Fermer', ES: 'Cerrar' },
+    'mypage.fortune.koLabel': { KO: '한국어', EN: 'Korean', ZH: '韩语', JA: '韓国語', FR: 'Coréen', ES: 'Coreano' },
+    'mypage.fortune.cheerLabel': { KO: 'DayO의 응원', EN: 'A cheer from DayO', ZH: 'DayO的加油', JA: 'DayOの応援', FR: 'Un encouragement de DayO', ES: 'Un ánimo de DayO' },
+    'mypage.fortune.saveBanner': {
+      KO: '✨ 로그인하시고, 내 닉네임을 넣은 나만의 카드를 받아보세요!',
+      EN: '✨ Sign in to get a card with your nickname on it!',
+      ZH: '✨ 登录后领取带有你昵称的专属卡片！',
+      JA: '✨ ログインして、ニックネーム入りのカードを受け取ろう！',
+      FR: '✨ Connectez-vous pour une carte avec votre pseudo !',
+      ES: '✨ Inicia sesión para recibir una tarjeta con tu apodo.'
+    },
+    'mypage.fortune.login': { KO: '3초 만에 로그인', EN: 'Sign in in 3 seconds', ZH: '3秒登录', JA: '3秒でログイン', FR: 'Connexion en 3 secondes', ES: 'Inicia sesión en 3 segundos' },
+    'mypage.fortune.copy': { KO: '📋 문장 복사', EN: '📋 Copy sentence', ZH: '📋 复制句子', JA: '📋 文をコピー', FR: '📋 Copier la phrase', ES: '📋 Copiar la frase' },
+    'partner.hostMode': {
+      KO: '☕ 호스트 모드', EN: '☕ Host mode', ZH: '☕ 主持模式', JA: '☕ ホストモード', FR: '☕ Mode hôte', ES: '☕ Modo anfitrión'
+    },
+    'partner.stats.section': {
+      KO: '활동비 현황', EN: 'Activity pay', ZH: '活动费概况', JA: '活動費の状況', FR: 'Rémunération', ES: 'Honorarios'
+    },
+    'partner.profile.introPlaceholder': {
+      KO: '예약 화면에 보일 한 줄 소개를 적어 주세요.',
+      EN: 'Write a one-line intro for the booking screen.',
+      ZH: '请填写预约页面显示的一句话介绍。',
+      JA: '予約画面に表示する一言紹介を書いてください。',
+      FR: 'Écrivez une intro d’une ligne pour la réservation.',
+      ES: 'Escribe una intro de una línea para reservas.'
+    },
+    'partner.intro.empty': {
+      KO: '한 줄 소개를 입력해 주세요 ☕', EN: 'Add a one-line intro ☕', ZH: '请输入一句话介绍 ☕', JA: '一言紹介を入力してください ☕', FR: 'Ajoutez une intro ☕', ES: 'Añade una intro ☕'
     },
     'mypage.speaking.eyebrow': {
       KO: 'MONTHLY SPEAKING REPORT', EN: 'MONTHLY SPEAKING REPORT', ZH: 'MONTHLY SPEAKING REPORT', JA: 'MONTHLY SPEAKING REPORT', FR: 'MONTHLY SPEAKING REPORT', ES: 'MONTHLY SPEAKING REPORT'
@@ -2122,7 +2370,7 @@
     'padding:.35rem;border:1px solid rgba(255,214,223,.75);border-radius:16px;background:#FFFCFA;',
     'box-shadow:0 14px 36px rgba(113,83,72,.16);opacity:0;visibility:hidden;transform:translateY(-6px);',
     'transition:opacity .15s,transform .15s,visibility .15s;}',
-    '.i18n-btn--icon + .i18n-menu,.header-actions .i18n-menu,.topbar-extras .i18n-menu{left:auto;right:0;width:max-content;}',
+    '.i18n-btn--icon + .i18n-menu,.header-actions .i18n-menu,.topbar-extras .i18n-menu,.topbar-right .i18n-menu{left:auto;right:0;width:max-content;}',
     '.i18n-wrap.is-open .i18n-menu{opacity:1;visibility:visible;transform:translateY(0);}',
     '.i18n-opt{display:flex;align-items:center;gap:.55rem;width:100%;padding:.55rem .65rem;',
     'border:none;border-radius:12px;background:transparent;color:var(--text,#594842);',
@@ -2142,7 +2390,7 @@
     'transition:max-height .28s ease,padding .2s ease;}',
     '.nav-drawer .i18n-wrap.is-open .i18n-menu,.i18n-wrap--accordion.is-open .i18n-menu{max-height:50vh;overflow-y:auto;padding:.25rem 0 .1rem;}',
     '@media (max-width:767px){',
-    '.header-actions>[data-i18n-lang],.topbar-extras [data-i18n-lang]{display:none!important;}',
+    '.header-actions>[data-i18n-lang],.topbar-extras [data-i18n-lang],.topbar-right>[data-i18n-lang]{display:none!important;}',
     '}'
   ].join('');
 
