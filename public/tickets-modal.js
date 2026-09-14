@@ -166,8 +166,21 @@
     'background:#FFFCFA;box-shadow:0 12px 28px rgba(113,83,72,.16);font-size:.86rem;font-weight:700;',
     'opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;text-align:center;}',
     '.tk-toast.is-on{opacity:1;transform:translateX(-50%) translateY(0);}',
+    '.tk-toast.is-long{white-space:pre-line;max-width:min(420px,calc(100% - 2rem));text-align:left;line-height:1.55;}',
+    '[data-tk-banner]:empty,.tk-rest:empty{display:none;}',
+    '.tk-grid.is-duo{grid-template-columns:repeat(2,minmax(0,1fr));}',
+    '.tk-rest{margin-top:.85rem;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.85rem;}',
+    '.tk-notice{position:fixed;inset:0;z-index:960;display:flex;align-items:center;justify-content:center;',
+    'padding:1.1rem;background:rgba(62,74,66,.45);backdrop-filter:blur(6px);',
+    'opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease,visibility .22s ease;}',
+    '.tk-notice.is-open{opacity:1;visibility:visible;pointer-events:auto;}',
+    '.tk-notice__card{width:min(420px,100%);padding:1.45rem 1.35rem 1.25rem;border-radius:24px;text-align:center;',
+    'background:#FFFCFA;border:1px solid rgba(255,209,220,.75);box-shadow:0 22px 48px rgba(113,83,72,.18);}',
+    '.tk-notice__kicker{margin:0 0 .7rem;font-size:.72rem;font-weight:800;letter-spacing:.08em;color:#FF6B57;}',
+    '.tk-notice__body{margin:0 0 1.1rem;font-size:.92rem;font-weight:700;line-height:1.7;color:#5C4A42;white-space:pre-line;}',
     '@media (max-width:860px){',
     '.tk-grid{grid-template-columns:1fr;}',
+    '.tk-grid.is-duo,.tk-rest{grid-template-columns:1fr;}',
     '.tk-card--best{transform:none;}',
     '.tk-banner{flex-direction:column;align-items:stretch;}',
     '.tk-banner .tk-card__cta{width:100%;}',
@@ -184,7 +197,8 @@
   var buying = false;
   var couponState = {
     unusedWelcome: null,
-    applyWelcome: true
+    applyWelcome: true,
+    trialUsed: false
   };
 
   function formatWon(n) {
@@ -274,9 +288,20 @@
   }
 
   function renderPlans() {
-    if (el.banner) el.banner.innerHTML = bannerCard(findPlan('trial'));
+    var returning = !!couponState.trialUsed;
+    if (el.banner) {
+      el.banner.hidden = returning;
+      el.banner.innerHTML = returning ? '' : bannerCard(findPlan('trial'));
+    }
     if (el.grid) {
-      el.grid.innerHTML = [findPlan('pack3'), findPlan('pack11'), findPlan('pack33')].map(planCard).join('');
+      el.grid.classList.toggle('is-duo', returning);
+      el.grid.innerHTML = returning
+        ? [findPlan('pack3'), findPlan('pack11')].map(planCard).join('')
+        : [findPlan('pack3'), findPlan('pack11'), findPlan('pack33')].map(planCard).join('');
+    }
+    if (el.rest) {
+      el.rest.hidden = !returning;
+      el.rest.innerHTML = returning ? planCard(findPlan('pack33')) : '';
     }
     if (el.single) el.single.innerHTML = singleRow(findPlan('single'));
   }
@@ -293,6 +318,7 @@
         '<div class="tk-body">' +
           '<div data-tk-banner></div>' +
           '<div class="tk-grid" data-tk-grid></div>' +
+          '<div class="tk-rest" data-tk-rest hidden></div>' +
           '<div class="tk-single" data-tk-single></div>' +
           '<aside class="tk-policy" aria-label="세션 규정 및 이용 안내">' +
             '<p class="tk-policy__title">세션 규정 및 이용 안내</p>' +
@@ -306,14 +332,132 @@
       '</div>';
   }
 
-  function showToast(message) {
+  function showToast(message, opts) {
     if (!el.toast) return;
     el.toast.textContent = message;
+    el.toast.classList.toggle('is-long', !!(opts && opts.long) || /[\n\r]/.test(String(message || '')));
     el.toast.classList.add('is-on');
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () {
       el.toast.classList.remove('is-on');
-    }, 2800);
+    }, (opts && opts.ms) || 4200);
+  }
+
+  function hideNotice() {
+    if (!el.notice) return;
+    el.notice.classList.remove('is-open');
+    el.notice.hidden = true;
+  }
+
+  function showNotice(message) {
+    if (!el.notice || !el.noticeBody) {
+      showToast(message, { long: true, ms: 7000 });
+      return;
+    }
+    el.noticeBody.textContent = message;
+    el.notice.hidden = false;
+    el.notice.classList.add('is-open');
+  }
+
+  function truthyFlag(value) {
+    return value === true || value === 'true' || value === 1 || value === '1';
+  }
+
+  function isWelcomeCouponRow(row) {
+    var code = String((row && row.code) || '').toUpperCase().replace(/[\s_-]/g, '');
+    var title = String((row && (row.title || row.product_name)) || '');
+    return code === 'WELCOME9900' || /체험/.test(title);
+  }
+
+  function isTrialOrderRow(row) {
+    var name = String((row && (row.product_name || row.name || row.title)) || '');
+    var amount = Number(row && row.amount);
+    return amount === 9900 || /체험/.test(name) || /trial/i.test(name);
+  }
+
+  function getAuthUserId() {
+    var store = window.DayOProfileStore;
+    if (store && typeof store.getUserId === 'function') {
+      try { return store.getUserId(); } catch (e) { /* ignore */ }
+    }
+    var sessionUser = window._dayoAuthProfile && (window._dayoAuthProfile.user_id || window._dayoAuthProfile.id);
+    return sessionUser || null;
+  }
+
+  function getSupabase() {
+    if (window.supabaseClient && window.supabaseClient.auth) return window.supabaseClient;
+    if (window.DayOProfileStore && typeof window.DayOProfileStore.getClient === 'function') {
+      return window.DayOProfileStore.getClient();
+    }
+    return null;
+  }
+
+  async function detectTrialUsed(couponRows) {
+    var rows = couponRows || [];
+    var unusedWelcome = window.DayOProfileStore && typeof window.DayOProfileStore.getUnusedWelcomeCoupon === 'function'
+      ? window.DayOProfileStore.getUnusedWelcomeCoupon(rows)
+      : null;
+    var usedWelcomeCoupon = rows.some(function (row) {
+      return isWelcomeCouponRow(row) && row.is_used === true;
+    });
+
+    var profile = window._dayoAuthProfile || null;
+    if (window.DayOProfileStore && typeof window.DayOProfileStore.getCachedProfile === 'function') {
+      profile = window.DayOProfileStore.getCachedProfile() || profile;
+    }
+    var flagged = !!(profile && (
+      truthyFlag(profile.has_used_welcome_ticket) ||
+      truthyFlag(profile.has_used_trial)
+    ));
+
+    var trialOrder = false;
+    var anyPaidOrder = false;
+    var anyBooking = false;
+    var client = getSupabase();
+    var userId = getAuthUserId();
+    if (client && userId) {
+      try {
+        var profileRes = await client
+          .from('profiles')
+          .select('has_used_welcome_ticket')
+          .eq('user_id', userId)
+          .maybeSingle();
+        if (profileRes.error) {
+          profileRes = await client
+            .from('profiles')
+            .select('has_used_welcome_ticket')
+            .eq('id', userId)
+            .maybeSingle();
+        }
+        if (profileRes && profileRes.data && truthyFlag(profileRes.data.has_used_welcome_ticket)) {
+          flagged = true;
+        }
+      } catch (e) { /* column may not exist yet */ }
+
+      try {
+        var orderRes = await client.from('orders').select('product_name, amount, status').eq('user_id', userId);
+        var orders = (orderRes && orderRes.data) || [];
+        anyPaidOrder = orders.some(function (row) {
+          var status = String(row.status || 'paid').toLowerCase();
+          return status === 'paid' || status === 'complete' || status === 'completed';
+        });
+        trialOrder = orders.some(isTrialOrderRow);
+      } catch (e) { /* orders table may be missing */ }
+
+      try {
+        var bookingRes = await client.from('bookings').select('id, status').eq('learner_id', userId).limit(20);
+        if (bookingRes.error) {
+          bookingRes = await client.from('bookings').select('id, status').eq('user_id', userId).limit(20);
+        }
+        var bookings = (bookingRes && bookingRes.data) || [];
+        anyBooking = bookings.length > 0;
+      } catch (e) { /* ignore */ }
+    }
+
+    if (flagged || usedWelcomeCoupon || trialOrder) return true;
+    if (unusedWelcome) return false;
+    if (anyPaidOrder || anyBooking) return true;
+    return false;
   }
 
   function findPlan(id) {
@@ -338,6 +482,13 @@
       : null;
     couponState.unusedWelcome = welcome || null;
     couponState.applyWelcome = !!couponState.unusedWelcome;
+    try {
+      couponState.trialUsed = await detectTrialUsed(rows);
+    } catch (err) {
+      couponState.trialUsed = rows.some(function (row) {
+        return isWelcomeCouponRow(row) && row.is_used === true;
+      });
+    }
     renderPlans();
     return couponState.unusedWelcome;
   }
@@ -389,6 +540,7 @@
 
   async function completePurchase(plan) {
     if (buying || !plan) return;
+    if (plan.id === 'trial' && couponState.trialUsed) return;
     var payId = plan.payId || plan.id;
     if (typeof window.requestPay === 'function') {
       return window.requestPay(payId);
@@ -425,6 +577,10 @@
 
   function bindEvents() {
     el.overlay.addEventListener('click', function (e) {
+      if (e.target.closest('[data-tk-notice-close]')) {
+        hideNotice();
+        return;
+      }
       if (e.target === el.overlay || e.target.closest('[data-tk-close]')) close();
     });
 
@@ -443,7 +599,12 @@
     });
 
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape' && el.overlay.classList.contains('is-open')) close();
+      if (e.key !== 'Escape') return;
+      if (el.notice && el.notice.classList.contains('is-open')) {
+        hideNotice();
+        return;
+      }
+      if (el.overlay.classList.contains('is-open')) close();
     });
 
     document.addEventListener('dayo:couponchange', function () {
@@ -482,7 +643,26 @@
     el.toast = toast;
     el.banner = overlay.querySelector('[data-tk-banner]');
     el.grid = overlay.querySelector('[data-tk-grid]');
+    el.rest = overlay.querySelector('[data-tk-rest]');
     el.single = overlay.querySelector('[data-tk-single]');
+
+    var notice = document.createElement('div');
+    notice.className = 'tk-notice';
+    notice.setAttribute('data-tk-notice', '1');
+    notice.hidden = true;
+    notice.innerHTML =
+      '<div class="tk-notice__card" role="dialog" aria-modal="true" aria-labelledby="tkNoticeBody">' +
+        '<p class="tk-notice__kicker">PRE-OPEN</p>' +
+        '<p class="tk-notice__body" id="tkNoticeBody" data-tk-notice-body></p>' +
+        '<button type="button" class="tk-buy" data-tk-notice-close>확인</button>' +
+      '</div>';
+    document.body.appendChild(notice);
+    el.notice = notice;
+    el.noticeBody = notice.querySelector('[data-tk-notice-body]');
+    notice.addEventListener('click', function (e) {
+      if (e.target === notice || e.target.closest('[data-tk-notice-close]')) hideNotice();
+    });
+
     bindEvents();
     renderPlans();
   }
@@ -513,7 +693,10 @@
       close: close,
       plans: PLANS,
       paymentPayload: paymentPayload,
-      promptPurchase: promptPurchase
+      promptPurchase: promptPurchase,
+      showNotice: showNotice,
+      toast: showToast,
+      isTrialUsed: function () { return !!couponState.trialUsed; }
     };
     window.openTicketModal = open;
     window.closeTicketModal = close;

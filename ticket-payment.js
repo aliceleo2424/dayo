@@ -80,15 +80,46 @@
     return product;
   }
 
+  function notify(message) {
+    if (window.DayOTickets && typeof window.DayOTickets.showNotice === 'function') {
+      window.DayOTickets.showNotice(message);
+      return;
+    }
+    if (window.DayOTickets && typeof window.DayOTickets.toast === 'function') {
+      window.DayOTickets.toast(message, { long: true, ms: 7000 });
+      return;
+    }
+    var toast = document.querySelector('.tk-toast');
+    if (toast) {
+      toast.textContent = message;
+      toast.classList.add('is-on', 'is-long');
+      return;
+    }
+    console.warn('[DayO]', message);
+  }
+
+  var PREOPEN_PAY_NOTICE =
+    '현재 DayO 프리오픈 시범 운영 기간으로 결제 시스템 점검 중입니다 ☕\n' +
+    '정식 오픈 시 등록하신 이메일로 가장 먼저 안내해 드릴게요!\n' +
+    '(문의: hello@dayotalk.com)';
+
+  function isPortoneConfigured(code) {
+    var value = String(code || '').trim();
+    if (!value) return false;
+    if (value === '[여기에_고객사_식별코드_입력]') return false;
+    if (/demo|placeholder|example|test[_-]?code/i.test(value)) return false;
+    return true;
+  }
+
   function ensureImp() {
     var IMP = window.IMP;
     if (!IMP || typeof IMP.init !== 'function' || typeof IMP.request_pay !== 'function') {
-      alert('결제 모듈을 불러오지 못했습니다. 페이지를 새로고침한 뒤 다시 시도해주세요.');
+      notify(PREOPEN_PAY_NOTICE);
       return null;
     }
     var code = String(PORTONE_IMP_CODE || '').trim();
-    if (!code || code === '[여기에_고객사_식별코드_입력]') {
-      alert('포트원 고객사 식별코드가 아직 설정되지 않았습니다. supabase-env.js의 PORTONE_IMP_CODE를 입력해주세요.');
+    if (!isPortoneConfigured(code)) {
+      notify(PREOPEN_PAY_NOTICE);
       return null;
     }
     if (!impReady) {
@@ -180,13 +211,39 @@
     return charged;
   }
 
+  async function markWelcomeTicketUsed(session) {
+    var supabase = getSupabase();
+    var userId = session && session.user && session.user.id;
+    if (supabase && userId) {
+      try {
+        var upd = await supabase.from('profiles').update({ has_used_welcome_ticket: true }).eq('user_id', userId);
+        if (upd && upd.error) {
+          await supabase.from('profiles').update({ has_used_welcome_ticket: true }).eq('id', userId);
+        }
+      } catch (e) { /* column may not exist yet */ }
+    }
+    if (window.DayOProfileStore && typeof window.DayOProfileStore.markCouponUsed === 'function') {
+      try {
+        var rows = await window.DayOProfileStore.fetchCoupons();
+        var welcome = window.DayOProfileStore.getUnusedWelcomeCoupon(rows);
+        if (welcome) await window.DayOProfileStore.markCouponUsed(welcome);
+      } catch (e) { /* ignore */ }
+    }
+  }
+
   async function requestPay(planId) {
     if (paying) return;
     paying = true;
     try {
       var selectedProduct = resolveProduct(planId);
       if (!selectedProduct) {
-        alert('상품 정보를 찾을 수 없습니다.');
+        notify('상품 정보를 찾을 수 없습니다.');
+        paying = false;
+        return;
+      }
+      if ((selectedProduct.id === 'trial' || planId === 'trial') &&
+          window.DayOTickets && typeof window.DayOTickets.isTrialUsed === 'function' &&
+          window.DayOTickets.isTrialUsed()) {
         paying = false;
         return;
       }
@@ -218,6 +275,7 @@
           if (rsp && rsp.success) {
             try {
               await persistOrderAndTickets(session, selectedProduct, rsp);
+              if (selectedProduct.id === 'trial') await markWelcomeTicketUsed(session);
               alert('🎉 결제가 완료되었습니다! 세션 티켓 ' + selectedProduct.tickets + '장이 충전되었습니다.');
               closeTicketModal();
               window.location.reload();

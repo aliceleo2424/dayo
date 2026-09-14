@@ -1280,6 +1280,7 @@ window.DayOProfileStore = {
   getClientKey: getClientKey,
   getUser: getUser,
   getUserId: getUserId,
+  getCachedProfile: function () { return profileCache; },
   isSignedIn: isSignedIn,
   signInWithEmail: signInWithEmail,
   signInWithGoogle: signInWithGoogle,
