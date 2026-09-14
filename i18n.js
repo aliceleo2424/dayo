@@ -778,28 +778,22 @@
       ES: 'Únete a DayO como compañero de conversación ☕'
     },
     'partner.recruit.sub': {
-      KO: '가르치거나 평가할 필요 없이, 한국인 친구와 일상 이야기를 나누며 편안하게 수익을 만들어보세요.',
-      EN: 'No teaching or grading — chat about everyday life with Korean friends and earn comfortably.',
-      FR: 'Pas besoin d’enseigner ni de noter : discutez du quotidien et gagnez sereinement.',
-      ES: 'Sin enseñar ni evaluar: conversa sobre el día a día y genera ingresos con calma.'
+      KO: '가르치거나 평가할 필요 없이, 글로벌 친구와 일상 이야기를 나누며 편안하게 수익을 만들어보세요.',
+      EN: 'No teaching or grading — chat about everyday life with global friends and earn comfortably.',
+      FR: 'Pas besoin d’enseigner ni de noter : discutez du quotidien avec des amis du monde entier et gagnez sereinement.',
+      ES: 'Sin enseñar ni evaluar: conversa sobre el día a día con amigos globales y genera ingresos con calma.'
     },
     'partner.recruit.benefit1': {
-      KO: '💡 세션 1회(25분)당 6,000P (현금 정산)',
-      EN: '💡 6,000P per 25-min session (cash payout)',
-      FR: '💡 6 000P par session de 25 min (versement cash)',
-      ES: '💡 6.000P por sesión de 25 min (pago en efectivo)'
+      KO: '💡 세션을 진행하고 활동비를 적립하세요.',
+      EN: '💡 Run sessions and earn activity pay.',
+      FR: '💡 Animez des sessions et accumulez vos frais d’activité.',
+      ES: '💡 Realiza sesiones y acumula tu compensación.'
     },
     'partner.recruit.benefit2': {
       KO: '🕒 내가 가능한 요일/시간에만 자유롭게 슬롯 오픈',
       EN: '🕒 Open slots only on the days and times that work for you',
       FR: '🕒 Ouvrez des créneaux seulement quand vous êtes dispo',
       ES: '🕒 Abre horarios solo cuando te venga bien'
-    },
-    'partner.recruit.benefit3': {
-      KO: '🌍 D-2 유학생 / 외국인 누구나 지원 가능',
-      EN: '🌍 D-2 students and internationals are all welcome to apply',
-      FR: '🌍 Étudiants D-2 et internationaux : tout le monde peut postuler',
-      ES: '🌍 Estudiantes D-2 y extranjeros: cualquiera puede postularse'
     },
     'partner.recruit.cta': {
       KO: '글로벌 파트너 지원서 작성하기 (1분 소요) 📝',
