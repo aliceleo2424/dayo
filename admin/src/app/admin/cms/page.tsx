@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cmsBanners, cmsCopies, socialProofReviews } from "@/lib/mockData";
+import { ArticlesCms } from "@/components/admin/articles-cms";
 import { PURPOSE_LABELS } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import { Plus, GripVertical } from "lucide-react";
@@ -21,6 +22,7 @@ export default function CmsPage() {
         <Tabs defaultValue="banners">
           <TabsList>
             <TabsTrigger value="banners">배너/팝업</TabsTrigger>
+            <TabsTrigger value="magazine">라운지 매거진</TabsTrigger>
             <TabsTrigger value="copy">카피 에디터</TabsTrigger>
             <TabsTrigger value="reviews">후기 관리</TabsTrigger>
           </TabsList>
@@ -42,6 +44,10 @@ export default function CmsPage() {
                 </CardContent>
               </Card>
             ))}
+          </TabsContent>
+
+          <TabsContent value="magazine" className="mt-6">
+            <ArticlesCms />
           </TabsContent>
 
           <TabsContent value="copy" className="mt-6 space-y-4">

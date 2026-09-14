@@ -1,4 +1,4 @@
-/* DayO 라운지 — lounge_posts 실데이터 그리드 (캐러셀 슬롯은 선택)
+/* DayO 라운지 — articles 발행글 그리드 (없으면 lounge_posts fallback)
  * 그리드 모드(#loungeDots 없음)에서는 슬라이드 초기화만 스킵합니다.
  */
 (function () {
@@ -32,7 +32,11 @@
   }
 
   function postSummary(post) {
-    return String((post && (post.summary || post.excerpt || post.body)) || '').trim();
+    return String((post && (post.summary || post.excerpt || post.body || post.content)) || '').trim();
+  }
+
+  function thumbUrl(post) {
+    return String((post && (post.thumbnail_url || post.thumbnail || post.image_url)) || '').trim();
   }
 
   function readTimeLabel(post) {
@@ -76,14 +80,19 @@
       var label = categoryLabel(post);
       var title = postTitle(post);
       var summary = postSummary(post);
+      var thumb = thumbUrl(post);
       var body = title || summary;
       var extra = (title && summary && summary !== title)
         ? '<span class="lounge-card__summary">' + esc(summary) + '</span>'
         : '';
       var meta = readTimeLabel(post);
       var metaHtml = meta ? '<span class="lounge-card__meta">' + esc(meta) + '</span>' : '';
+      var thumbHtml = thumb
+        ? '<img class="lounge-card__thumb" src="' + esc(thumb) + '" alt="" loading="lazy" onerror="this.remove()">'
+        : '';
       return (
         '<article class="lounge-card" data-lounge-slide>' +
+          thumbHtml +
           (label ? '<span class="lounge-card__label">' + esc(label) + '</span>' : '') +
           '<span class="lounge-card__body">' + esc(body) + '</span>' +
           extra +
@@ -103,15 +112,22 @@
     }
 
     try {
-      const { data, error } = await supabase
-        .from('lounge_posts')
+      var query = await supabase
+        .from('articles')
         .select('*')
         .eq('is_published', true)
         .order('created_at', { ascending: false });
-      if (error) throw error;
-      renderPosts(track, data);
+      if (query.error) {
+        query = await supabase
+          .from('lounge_posts')
+          .select('*')
+          .eq('is_published', true)
+          .order('created_at', { ascending: false });
+      }
+      if (query.error) throw query.error;
+      renderPosts(track, query.data);
     } catch (err) {
-      console.warn('[DayO] lounge_posts load failed', err);
+      console.warn('[DayO] lounge articles load failed', err);
       renderEmpty(track);
     }
   }

@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { tutors, classReports } from "@/lib/mockData";
+import { PartnerPayoutManager } from "@/app/admin/partners/partner-payout-manager";
 import type { Tutor, ClassReport } from "@/lib/types";
 import { LANGUAGE_LABELS } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
@@ -55,11 +56,16 @@ export default function TutorsPage() {
         <Tabs defaultValue="tutors">
           <TabsList>
             <TabsTrigger value="tutors">대화 파트너 프로필</TabsTrigger>
+            <TabsTrigger value="payouts">정산 · 포인트</TabsTrigger>
             <TabsTrigger value="reports">세션 리포트</TabsTrigger>
           </TabsList>
 
           <TabsContent value="tutors" className="mt-6">
             <DataTable data={tutors as (Tutor & Record<string, unknown>)[]} columns={tutorColumns} searchKeys={["name", "nationality"]} exportFilename="tutors.csv" />
+          </TabsContent>
+
+          <TabsContent value="payouts" className="mt-6">
+            <PartnerPayoutManager />
           </TabsContent>
 
           <TabsContent value="reports" className="mt-6">
