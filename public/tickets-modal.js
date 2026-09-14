@@ -24,7 +24,7 @@
       meta: '1회 30분 세션',
       copy: '외국인 울렁증 없이 가볍게 시작하는 1:1 첫 대화 (AI 매니저 + 5분 터치 퀴즈 포함)',
       tickets: 1,
-      cta: '체험권 구매하기'
+      cta: '9,900원에 시작하기'
     },
     {
       id: 'pack3',
@@ -112,15 +112,15 @@
     '.tk-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.15rem 1.25rem 1.35rem;}',
     '.tk-banner{display:flex;flex-wrap:wrap;align-items:center;gap:.85rem 1.15rem;margin:0 0 1rem;',
     'padding:1.05rem 1.15rem;border-radius:22px;text-align:left;',
-    'border:1.5px solid rgba(255,107,87,.4);background:linear-gradient(120deg,#FFF8F5,#FFE8E3 42%,#FFF6EE);',
-    'box-shadow:0 10px 26px rgba(255,107,87,.12);}',
+    'border:1.5px solid rgba(255,107,87,.55);background:linear-gradient(120deg,#FFF4EE,#FFE0D6 42%,#FFF1E4);',
+    'box-shadow:0 10px 26px rgba(255,107,87,.16);}',
     '.tk-banner__copy{flex:1 1 16rem;min-width:0;}',
     '.tk-banner .tk-badge{margin-bottom:.4rem;}',
     '.tk-banner .tk-card__title{margin:0;font-size:1.08rem;}',
     '.tk-banner .tk-card__price{margin:.2rem 0 0;font-size:1.55rem;}',
     '.tk-banner .tk-card__meta,.tk-banner .tk-card__copy{margin:.2rem 0 0;}',
     '.tk-banner .tk-card__cta{flex:0 0 auto;min-width:9.5rem;}',
-    '.tk-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.85rem;}',
+    '.tk-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;}',
     '.tk-card{position:relative;display:flex;flex-direction:column;gap:.4rem;padding:1.05rem .95rem 1rem;',
     'border-radius:22px;border:1px solid rgba(255,209,220,.7);background:linear-gradient(180deg,#FFFCFA,#FFF8F5);',
     'box-shadow:0 8px 22px rgba(113,83,72,.06);text-align:left;}',
@@ -167,9 +167,17 @@
     'opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;text-align:center;}',
     '.tk-toast.is-on{opacity:1;transform:translateX(-50%) translateY(0);}',
     '.tk-toast.is-long{white-space:pre-line;max-width:min(420px,calc(100% - 2rem));text-align:left;line-height:1.55;}',
-    '[data-tk-banner]:empty,.tk-rest:empty{display:none;}',
-    '.tk-grid.is-duo{grid-template-columns:repeat(2,minmax(0,1fr));}',
-    '.tk-rest{margin-top:.85rem;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.85rem;}',
+    '.tk-buy:disabled,.tk-buy.is-disabled{cursor:not-allowed;background:#CBD5E1;color:#64748B;',
+    'box-shadow:none;transform:none;opacity:.9;}',
+    '.tk-buy:disabled:hover,.tk-buy.is-disabled:hover{transform:none;box-shadow:none;}',
+    '.tk-used{margin-top:1rem;display:flex;flex-wrap:wrap;align-items:center;gap:.75rem 1rem;',
+    'padding:1rem 1.05rem;border-radius:20px;text-align:left;opacity:.75;',
+    'background:#F8FAFC;border:1px solid #E2E8F0;color:#94A3B8;}',
+    '.tk-used .tk-badge{background:#E2E8F0;border-color:#CBD5E1;color:#64748B;}',
+    '.tk-used .tk-card__title,.tk-used .tk-card__price,.tk-used .tk-card__meta,.tk-used .tk-card__copy{color:#94A3B8;}',
+    '.tk-used .tk-card__price{font-size:1.15rem;}',
+    '.tk-used .tk-card__cta{flex:1 1 100%;}',
+    '[data-tk-banner]:empty,[data-tk-used]:empty{display:none;}',
     '.tk-notice{position:fixed;inset:0;z-index:960;display:flex;align-items:center;justify-content:center;',
     'padding:1.1rem;background:rgba(62,74,66,.45);backdrop-filter:blur(6px);',
     'opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease,visibility .22s ease;}',
@@ -180,7 +188,6 @@
     '.tk-notice__body{margin:0 0 1.1rem;font-size:.92rem;font-weight:700;line-height:1.7;color:#5C4A42;white-space:pre-line;}',
     '@media (max-width:860px){',
     '.tk-grid{grid-template-columns:1fr;}',
-    '.tk-grid.is-duo,.tk-rest{grid-template-columns:1fr;}',
     '.tk-card--best{transform:none;}',
     '.tk-banner{flex-direction:column;align-items:stretch;}',
     '.tk-banner .tk-card__cta{width:100%;}',
@@ -229,15 +236,19 @@
     };
   }
 
-  function buyButton(plan) {
+  function buyButton(plan, opts) {
     var payload = paymentPayload(plan);
+    var disabled = !!(opts && opts.disabled);
+    var label = (opts && opts.cta) || plan.cta || '구매하기';
     return '' +
-      '<button type="button" class="tk-buy' + (plan.tier === 'single' ? ' tk-buy--slim' : '') + '" data-tk-buy="' + plan.id + '"' +
-        ' onclick="requestPay(\'' + (plan.payId || plan.id) + '\')"' +
+      '<button type="button" class="tk-buy' + (plan.tier === 'single' ? ' tk-buy--slim' : '') + (disabled ? ' is-disabled' : '') + '"' +
+        (disabled ? ' disabled aria-disabled="true"' : '') +
+        ' data-tk-buy="' + plan.id + '"' +
+        (disabled ? '' : ' onclick="requestPay(\'' + (plan.payId || plan.id) + '\')"') +
         ' data-amount="' + payload.amount + '"' +
         ' data-order-name="' + payload.orderName + '"' +
         ' data-ticket-count="' + payload.ticketCount + '">' +
-        (plan.cta || '구매하기') +
+        label +
       '</button>';
   }
 
@@ -287,23 +298,36 @@
       '</div>';
   }
 
+  function usedTrialCard(plan) {
+    if (!plan) return '';
+    return '' +
+      '<article class="tk-used" data-plan="trial-used">' +
+        '<div class="tk-banner__copy">' +
+          '<span class="tk-badge">🔒 1회 혜택 사용 완료</span>' +
+          '<h3 class="tk-card__title">' + plan.title + '</h3>' +
+          '<p class="tk-card__price">' + plan.price + '</p>' +
+          '<p class="tk-card__meta">' + plan.meta + '</p>' +
+        '</div>' +
+        '<div class="tk-card__cta">' +
+          buyButton(plan, { disabled: true, cta: '이미 1회 한정 특별 혜택을 이용하셨습니다 ☕' }) +
+        '</div>' +
+      '</article>';
+  }
+
   function renderPlans() {
-    var returning = !!couponState.trialUsed;
+    var used = !!couponState.trialUsed;
     if (el.banner) {
-      el.banner.hidden = returning;
-      el.banner.innerHTML = returning ? '' : bannerCard(findPlan('trial'));
+      el.banner.hidden = used;
+      el.banner.innerHTML = used ? '' : bannerCard(findPlan('trial'));
     }
     if (el.grid) {
-      el.grid.classList.toggle('is-duo', returning);
-      el.grid.innerHTML = returning
-        ? [findPlan('pack3'), findPlan('pack11')].map(planCard).join('')
-        : [findPlan('pack3'), findPlan('pack11'), findPlan('pack33')].map(planCard).join('');
-    }
-    if (el.rest) {
-      el.rest.hidden = !returning;
-      el.rest.innerHTML = returning ? planCard(findPlan('pack33')) : '';
+      el.grid.innerHTML = [findPlan('pack3'), findPlan('pack11'), findPlan('pack33')].map(planCard).join('');
     }
     if (el.single) el.single.innerHTML = singleRow(findPlan('single'));
+    if (el.used) {
+      el.used.hidden = !used;
+      el.used.innerHTML = used ? usedTrialCard(findPlan('trial')) : '';
+    }
   }
 
   function buildMarkup() {
@@ -318,8 +342,8 @@
         '<div class="tk-body">' +
           '<div data-tk-banner></div>' +
           '<div class="tk-grid" data-tk-grid></div>' +
-          '<div class="tk-rest" data-tk-rest hidden></div>' +
           '<div class="tk-single" data-tk-single></div>' +
+          '<div data-tk-used></div>' +
           '<aside class="tk-policy" aria-label="세션 규정 및 이용 안내">' +
             '<p class="tk-policy__title">세션 규정 및 이용 안내</p>' +
             '<ul class="tk-policy__list">' +
@@ -593,7 +617,7 @@
 
     el.overlay.addEventListener('click', function (e) {
       var buy = e.target.closest('[data-tk-buy]');
-      if (!buy) return;
+      if (!buy || buy.disabled || buy.classList.contains('is-disabled')) return;
       if (typeof window.requestPay === 'function') return;
       completePurchase(findPlan(buy.getAttribute('data-tk-buy')));
     });
@@ -643,8 +667,8 @@
     el.toast = toast;
     el.banner = overlay.querySelector('[data-tk-banner]');
     el.grid = overlay.querySelector('[data-tk-grid]');
-    el.rest = overlay.querySelector('[data-tk-rest]');
     el.single = overlay.querySelector('[data-tk-single]');
+    el.used = overlay.querySelector('[data-tk-used]');
 
     var notice = document.createElement('div');
     notice.className = 'tk-notice';
