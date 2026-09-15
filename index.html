@@ -207,7 +207,7 @@
       padding: 0.85rem clamp(1rem, 3.5vw, 2.25rem);
     }
 
-    .logo { display: flex; align-items: center; text-decoration: none; color: var(--text); flex-shrink: 0; background: transparent; }
+    .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text); flex-shrink: 0; background: transparent; }
     .logo-img {
       display: block;
       height: 36px;
@@ -217,6 +217,20 @@
       object-position: center;
       background: transparent;
       background-color: unset;
+    }
+    .logo-sub-slogan {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #8C827A;
+      letter-spacing: -0.3px;
+      line-height: 1.15;
+      margin-left: 4px;
+      padding-left: 8px;
+      border-left: 1px solid #EDE4D5;
+      white-space: nowrap;
+    }
+    @media (max-width: 480px) {
+      .logo-sub-slogan { font-size: 10.5px; letter-spacing: -0.4px; }
     }
 
     .nav-desktop {
@@ -1789,7 +1803,7 @@
 
       .logo {
         flex-shrink: 0;
-        gap: 0.4rem;
+        gap: 8px;
         min-width: 0;
       }
 
@@ -1797,6 +1811,11 @@
         height: 36px;
         width: auto;
         max-width: 140px;
+      }
+
+      .logo-sub-slogan {
+        font-size: 10.5px;
+        letter-spacing: -0.4px;
       }
 
       .nav-desktop { display: none; }
@@ -2208,6 +2227,7 @@
     <div class="header-inner">
       <a href="/" class="logo" data-i18n="nav.homeAria" data-i18n-attr="aria-label" aria-label="DayO 메인으로 이동">
         <img src="/images/logo.png" alt="DayO" class="logo-img">
+        <span class="logo-sub-slogan">1:1 Global Communication Lounge</span>
       </a>
 
       <nav class="nav-desktop" data-i18n="nav.mainMenuAria" data-i18n-attr="aria-label" aria-label="주요 메뉴">
