@@ -348,24 +348,28 @@
 
   function sessionCount() {
     var reports = window.__dayoTalkAlbum;
-    if (Array.isArray(reports) && reports.length) return reports.length;
-    var profile = window._dayoAuthProfile || {};
-    if (profile.session_count != null && Number(profile.session_count) > 0) {
-      return Number(profile.session_count);
+    if (Array.isArray(reports)) return reports.length;
+    if (window.__dayoCompletedSessionCount != null) {
+      var n = Number(window.__dayoCompletedSessionCount);
+      if (Number.isFinite(n) && n >= 0) return n;
     }
-    return isLoggedInUser() ? 1 : 0;
+    var profile = window._dayoAuthProfile || {};
+    if (profile.session_count != null && Number.isFinite(Number(profile.session_count))) {
+      return Math.max(0, Number(profile.session_count));
+    }
+    return 0;
   }
 
   function streakCount() {
     var profile = window._dayoAuthProfile || {};
-    if (profile.streak_count != null && Number(profile.streak_count) > 0) {
-      return Number(profile.streak_count);
+    if (profile.streak_count != null && Number.isFinite(Number(profile.streak_count))) {
+      return Math.max(0, Number(profile.streak_count));
     }
     try {
       var n = parseInt(localStorage.getItem('streakCount'), 10);
-      if (Number.isFinite(n) && n > 0) return n;
+      if (Number.isFinite(n) && n >= 0) return n;
     } catch (e) { /* ignore */ }
-    return isLoggedInUser() ? 1 : 0;
+    return 0;
   }
 
   function renderSpeakingGrowth() {
@@ -374,9 +378,10 @@
     var streakEl = document.getElementById('progress-streak');
     if (!paceEl && !sessionEl && !streakEl) return;
     var record = latestSpeakingRecord();
+    var sessions = sessionCount();
     if (paceEl) {
       if (!record || (!record.speaking_level && record.last_test_score == null)) {
-        paceEl.textContent = i18n('mypage.progress.noRecord');
+        paceEl.textContent = i18n('mypage.progress.beforeDiagnosis');
       } else {
         var level = record.speaking_level || i18n('mypage.progress.levelFallback');
         paceEl.textContent = record.last_test_score != null
@@ -384,7 +389,11 @@
           : level;
       }
     }
-    if (sessionEl) sessionEl.textContent = i18n('mypage.progress.sessionsDone', { n: sessionCount() });
+    if (sessionEl) {
+      sessionEl.textContent = sessions > 0
+        ? i18n('mypage.progress.sessionsDone', { n: sessions })
+        : i18n('mypage.progress.sessionsNone');
+    }
     if (streakEl) {
       var streak = streakCount();
       streakEl.textContent = streak > 0

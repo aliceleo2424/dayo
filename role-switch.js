@@ -57,10 +57,11 @@
 
   function openPartnerApplyModal() {
     var overlay = document.getElementById('partner-apply-modal');
-    if (!overlay) return;
+    if (!overlay) return false;
     overlay.hidden = false;
     overlay.classList.add('is-open');
     document.body.style.overflow = 'hidden';
+    return true;
   }
 
   function closePartnerApplyModal() {
@@ -79,26 +80,45 @@
     return false;
   }
 
-  async function fetchCurrentRole() {
-    var cached = window._dayoAuthProfile && window._dayoAuthProfile.role;
+  function normalizeRole(role) {
+    return String(role || '').trim().toLowerCase().replace(/[\s-]+/g, '_');
+  }
+
+  /* Live DB only — never trust localStorage / user_metadata / _dayoAuthProfile cache */
+  async function fetchLiveRoleFromProfiles() {
     var client = window.supabaseClient;
-    if (!client || !client.auth) return String(cached || '').toLowerCase();
-    var sessionRes = await client.auth.getSession();
-    var session = sessionRes && sessionRes.data && sessionRes.data.session;
-    var user = (session && session.user) || window._dayoAuthUser;
-    if (!user) return String(cached || '').toLowerCase();
-    var q = await client.from('profiles').select('role').eq('user_id', user.id).maybeSingle();
-    if (q.error || !q.data) {
-      q = await client.from('profiles').select('role').eq('id', user.id).maybeSingle();
+    if (!client || !client.auth) return '';
+
+    var user = null;
+    try {
+      var userRes = await client.auth.getUser();
+      user = userRes && userRes.data && userRes.data.user;
+    } catch (e) { user = null; }
+    if (!user) {
+      try {
+        var sessionRes = await client.auth.getSession();
+        user = sessionRes && sessionRes.data && sessionRes.data.session && sessionRes.data.session.user;
+      } catch (e2) { user = null; }
     }
-    var role = String((q.data && q.data.role) || cached || '').toLowerCase();
-    if (role && window._dayoAuthProfile) window._dayoAuthProfile.role = role;
-    return role;
+    if (!user || !user.id) return '';
+
+    try {
+      var byId = await client.from('profiles').select('role').eq('id', user.id).single();
+      if (byId && byId.data && byId.data.role) return normalizeRole(byId.data.role);
+    } catch (e3) { /* fall through */ }
+    try {
+      var byUser = await client.from('profiles').select('role').eq('user_id', user.id).maybeSingle();
+      if (byUser && byUser.data && byUser.data.role) return normalizeRole(byUser.data.role);
+    } catch (e4) { /* ignore */ }
+    return '';
   }
 
   function canEnterPartnerLounge(role) {
-    var normalized = String(role || '').trim().toLowerCase().replace(/[\s-]+/g, '_');
-    return normalized === 'partner' || normalized === 'admin' || normalized === 'super_admin' || normalized === 'superadmin';
+    var normalized = normalizeRole(role);
+    return normalized === 'partner'
+      || normalized === 'admin'
+      || normalized === 'super_admin'
+      || normalized === 'superadmin';
   }
 
   window.openPartnerApplyModal = openPartnerApplyModal;
@@ -111,13 +131,37 @@
     if (switchBusy) return;
 
     if (goingPartner) {
-      window.location.href = '/partner.html';
+      if (!isLoggedIn()) {
+        openLoginModal();
+        return;
+      }
+      switchBusy = true;
+      try {
+        var role = await fetchLiveRoleFromProfiles();
+        if (canEnterPartnerLounge(role)) {
+          setPartnerModeUi();
+          window.location.href = 'partner.html';
+          return;
+        }
+        setUserModeUi();
+        if (!openPartnerApplyModal()) {
+          window.location.href = 'partner.html';
+        }
+      } catch (err) {
+        console.warn('[DayO] partner lounge role check failed', err);
+        setUserModeUi();
+        if (!openPartnerApplyModal()) {
+          window.location.href = 'partner.html';
+        }
+      } finally {
+        switchBusy = false;
+      }
       return;
     }
 
     setUserModeUi();
     setTimeout(function () {
-      window.location.href = '/mypage.html';
+      window.location.href = 'mypage.html';
     }, 180);
   };
 

@@ -745,6 +745,7 @@
 
   function isPlaceholderReport(r) {
     if (!r) return true;
+    if (r.from_booking || r.from_transcript) return false;
     var sentence = String(r.spoken_sentence || '').trim();
     var keyword = String(r.keyword || '').toLowerCase();
     var partner = String(r.partner_name || '').toLowerCase();
@@ -752,6 +753,31 @@
     if (/small talk makes a big day/i.test(sentence)) return true;
     if (keyword === 'small' && partner.indexOf('camille') !== -1) return true;
     return false;
+  }
+
+  function reportFromCompletedBooking(row) {
+    if (!row) return null;
+    return {
+      partner_name: row.partner_name || row.partner_nickname || 'DayO 파트너',
+      created_at: row.scheduled_at || row.completed_at || row.ended_at || row.created_at,
+      spoken_sentence: '세션 완료',
+      keyword: 'session',
+      topic: row.language || row.topic || '대화',
+      from_booking: true,
+      booking_id: row.id
+    };
+  }
+
+  function archiveEmptyLoggedInHtml() {
+    return (
+      '<div class="talk-album-empty talk-album-empty--rich" data-empty-kind="user">' +
+        '<p class="talk-album-empty__title">' + i18n('mypage.archive.emptyLoggedInTitle') + '</p>' +
+        '<p class="talk-album-empty__desc">' + i18n('mypage.archive.emptyLoggedInDesc') + '</p>' +
+        '<button type="button" class="talk-album-empty__cta" onclick="openBookingModal()">' +
+          i18n('mypage.archive.emptyCta') +
+        '</button>' +
+      '</div>'
+    );
   }
 
   function homeEmptyStateHtml() {
@@ -1002,9 +1028,69 @@
           reports = (logQ.data || []).map(reportFromSessionLog).filter(Boolean);
         }
       }
+
+      if (!reports.length) {
+        try {
+          var txQ = await client
+            .from('session_transcripts')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(12);
+          if (txQ.error) {
+            txQ = await client
+              .from('session_transcripts')
+              .select('*')
+              .eq('learner_id', user.id)
+              .order('created_at', { ascending: false })
+              .limit(12);
+          }
+          if (!txQ.error && txQ.data && txQ.data.length) {
+            reports = txQ.data.map(function (row) {
+              return {
+                partner_name: row.partner_name || row.partner_nickname || 'DayO 파트너',
+                created_at: row.ended_at || row.created_at || row.started_at,
+                spoken_sentence: row.summary || row.spoken_sentence || '세션 완료',
+                keyword: row.keyword || 'session',
+                topic: row.topic || row.language || '대화',
+                from_transcript: true
+              };
+            }).filter(Boolean);
+          }
+        } catch (txErr) { /* table may not exist */ }
+      }
+
+      if (!reports.length) {
+        try {
+          var bookingQ = await client
+            .from('bookings')
+            .select('id, partner_name, scheduled_at, status, created_at, completed_at, language')
+            .eq('learner_id', user.id)
+            .in('status', ['completed', 'done', 'finished'])
+            .order('scheduled_at', { ascending: false })
+            .limit(20);
+          if (bookingQ.error || !bookingQ.data) {
+            bookingQ = await client
+              .from('bookings')
+              .select('id, partner_name, scheduled_at, status, created_at, completed_at, language')
+              .eq('user_id', user.id)
+              .in('status', ['completed', 'done', 'finished'])
+              .order('scheduled_at', { ascending: false })
+              .limit(20);
+          }
+          if (!bookingQ.error) {
+            reports = (bookingQ.data || []).map(reportFromCompletedBooking).filter(Boolean);
+          }
+        } catch (bErr) { /* ignore */ }
+      }
+
+      window.__dayoCompletedSessionCount = reports.length;
+    } else {
+      window.__dayoCompletedSessionCount = 0;
     }
 
-    if (!reports.length) {
+    /* Do not inject hardcoded demo cards for logged-in users with empty history */
+    if (!reports.length && !user) {
       var localCard = readLocalApprovedCard();
       if (localCard && localCard.spoken_sentence && (localCard.created_at || localCard.approvedAt)) {
         reports = [localCard];
@@ -1028,7 +1114,7 @@
       } else if (!user) {
         reportList.innerHTML = '<div class="talk-album-empty" data-empty-kind="guest">' + i18n('mypage.archive.emptyGuest') + '</div>';
       } else {
-        reportList.innerHTML = '<div class="talk-album-empty" data-empty-kind="user">' + i18n('mypage.archive.emptyLoggedIn') + '</div>';
+        reportList.innerHTML = archiveEmptyLoggedInHtml();
       }
       return;
     }
@@ -1041,7 +1127,7 @@
       } else if (!user) {
         album.innerHTML = '<div class="talk-album-empty" data-empty-kind="guest">' + i18n('mypage.archive.emptyGuest') + '</div>';
       } else {
-        album.innerHTML = '<div class="talk-album-empty" data-empty-kind="user">' + i18n('mypage.archive.emptyLoggedIn') + '</div>';
+        album.innerHTML = archiveEmptyLoggedInHtml();
       }
       return;
     }
@@ -1182,8 +1268,20 @@
     }
     Array.prototype.forEach.call(document.querySelectorAll('.talk-album-empty'), function (el) {
       var kind = el.getAttribute('data-empty-kind');
-      if (kind === 'guest') el.textContent = i18n('mypage.archive.emptyGuest');
-      else if (kind === 'user') el.textContent = i18n('mypage.archive.emptyLoggedIn');
+      if (kind === 'guest') {
+        el.textContent = i18n('mypage.archive.emptyGuest');
+      } else if (kind === 'user') {
+        if (el.classList.contains('talk-album-empty--rich')) {
+          el.innerHTML =
+            '<p class="talk-album-empty__title">' + i18n('mypage.archive.emptyLoggedInTitle') + '</p>' +
+            '<p class="talk-album-empty__desc">' + i18n('mypage.archive.emptyLoggedInDesc') + '</p>' +
+            '<button type="button" class="talk-album-empty__cta" onclick="openBookingModal()">' +
+              i18n('mypage.archive.emptyCta') +
+            '</button>';
+        } else {
+          el.textContent = i18n('mypage.archive.emptyLoggedIn');
+        }
+      }
     });
   });
 })();

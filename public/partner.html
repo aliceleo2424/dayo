@@ -94,7 +94,7 @@
             .select('role')
             .eq('id', userId)
             .single();
-          if (byId && byId.data && byId.data.role) {
+          if (byId && !byId.error && byId.data && byId.data.role) {
             return normalizeRole(byId.data.role);
           }
         } catch (e) { /* fall through to user_id column */ }
@@ -104,30 +104,48 @@
             .select('role')
             .eq('user_id', userId)
             .maybeSingle();
-          if (byUser && byUser.data && byUser.data.role) {
+          if (byUser && !byUser.error && byUser.data && byUser.data.role) {
             return normalizeRole(byUser.data.role);
           }
         } catch (e2) { /* ignore */ }
         return '';
       }
 
-      async function run() {
+      async function resolveAuthUser(client) {
+        if (!client || !client.auth) return null;
         try {
-          var client = await waitForClient(40);
-          if (!client || !client.auth) {
-            showPartnerRecruitView();
-            return;
-          }
-
           var userRes = await Promise.race([
             client.auth.getUser(),
             new Promise(function (resolve) {
-              setTimeout(function () { resolve({ data: { user: null } }); }, 4000);
+              setTimeout(function () { resolve({ data: { user: null } }); }, 5000);
             })
           ]);
-          var user = userRes && userRes.data && userRes.data.user;
+          if (userRes && userRes.data && userRes.data.user) return userRes.data.user;
+        } catch (e) { /* fall through */ }
+        try {
+          var sessionRes = await client.auth.getSession();
+          return sessionRes && sessionRes.data && sessionRes.data.session && sessionRes.data.session.user;
+        } catch (e2) {
+          return null;
+        }
+      }
+
+      var guardSettled = false;
+      var guardFallbackTimer = 0;
+
+      async function run() {
+        try {
+          var client = await waitForClient(50);
+          if (!client || !client.auth) {
+            showPartnerRecruitView();
+            guardSettled = true;
+            return;
+          }
+
+          var user = await resolveAuthUser(client);
           if (!user) {
             showPartnerRecruitView();
+            guardSettled = true;
             return;
           }
 
@@ -140,17 +158,21 @@
           } else {
             showPartnerRecruitView();
           }
+          guardSettled = true;
         } catch (err) {
           console.warn('파트너 라운지 가드 실패', err);
           showPartnerRecruitView();
+          guardSettled = true;
+        } finally {
+          if (guardFallbackTimer) clearTimeout(guardFallbackTimer);
         }
       }
 
-      setTimeout(function () {
-        if (document.documentElement.classList.contains('partner-guard-pending')) {
+      guardFallbackTimer = setTimeout(function () {
+        if (!guardSettled && document.documentElement.classList.contains('partner-guard-pending')) {
           showPartnerRecruitView();
         }
-      }, 5000);
+      }, 8000);
 
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
       else run();

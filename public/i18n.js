@@ -458,6 +458,9 @@
     'mypage.progress.noRecord': {
       KO: '진단 기록 없음', EN: 'No diagnosis yet', ZH: '暂无诊断记录', JA: '診断記録なし', FR: 'Pas encore de diagnostic', ES: 'Sin diagnóstico aún'
     },
+    'mypage.progress.beforeDiagnosis': {
+      KO: '진단 전', EN: 'Not diagnosed yet', ZH: '诊断前', JA: '診断前', FR: 'Avant diagnostic', ES: 'Sin diagnosticar'
+    },
     'mypage.progress.levelFallback': {
       KO: '스피킹 감각', EN: 'Speaking sense', ZH: '口语感觉', JA: 'スピーキング感覚', FR: 'Aisance orale', ES: 'Sensación oral'
     },
@@ -466,6 +469,9 @@
     },
     'mypage.progress.sessionsDone': {
       KO: '{n}회 완료', EN: '{n} completed', ZH: '{n}次完成', JA: '{n}回完了', FR: '{n} terminées', ES: '{n} completadas'
+    },
+    'mypage.progress.sessionsNone': {
+      KO: '0회 완료', EN: '0 completed', ZH: '0次完成', JA: '0回完了', FR: '0 terminée', ES: '0 completadas'
     },
     'mypage.progress.streakDays': {
       KO: '{n}일 연속 🔥', EN: '{n}-day streak 🔥', ZH: '连续{n}天 🔥', JA: '{n}日連続 🔥', FR: '{n} jours d’affilée 🔥', ES: '{n} días seguidos 🔥'
@@ -489,7 +495,16 @@
       KO: '로그인 후 지난 대화 리포트를 확인해 보세요.', EN: 'Sign in to see your past conversation reports.', ZH: '登录后查看过往对话报告。', JA: 'ログインして過去の会話レポートを確認しましょう。', FR: 'Connectez-vous pour voir vos rapports.', ES: 'Inicia sesión para ver tus informes.'
     },
     'mypage.archive.emptyLoggedIn': {
-      KO: '아직 지난 대화 기록이 없어요.', EN: 'No past conversations yet.', ZH: '还没有过往对话记录。', JA: 'まだ過去の会話記録がありません。', FR: 'Pas encore de conversations passées.', ES: 'Aún no hay conversaciones pasadas.'
+      KO: '아직 참여한 대화 세션이 없어요 ☕', EN: 'No conversation sessions yet ☕', ZH: '还没有参加过对话场次 ☕', JA: 'まだ会話セッションがありません ☕', FR: 'Pas encore de session ☕', ES: 'Aún no hay sesiones ☕'
+    },
+    'mypage.archive.emptyLoggedInTitle': {
+      KO: '아직 참여한 대화 세션이 없어요 ☕', EN: 'No conversation sessions yet ☕', ZH: '还没有参加过对话场次 ☕', JA: 'まだ会話セッションがありません ☕', FR: 'Pas encore de session ☕', ES: 'Aún no hay sesiones ☕'
+    },
+    'mypage.archive.emptyLoggedInDesc': {
+      KO: '첫 세션을 예약하고 나만의 AI 대화 리포트를 받아보세요!', EN: 'Book your first session and get your own AI conversation report!', ZH: '预约第一场会话，领取专属 AI 对话报告！', JA: '最初のセッションを予約して、自分だけのAI会話レポートを受け取りましょう！', FR: 'Réservez votre première session et recevez votre rapport IA !', ES: '¡Reserva tu primera sesión y recibe tu informe de IA!'
+    },
+    'mypage.archive.emptyCta': {
+      KO: '📅 대화 일정 예약하기', EN: '📅 Book a conversation', ZH: '📅 预约对话', JA: '📅 会話スケジュールを予約', FR: '📅 Réserver une conversation', ES: '📅 Reservar una conversación'
     },
     'mypage.fortune.title': {
       KO: '오늘의 대화 포춘쿠키', EN: 'Today’s conversation fortune cookie', ZH: '今日的对话幸运饼干', JA: '今日の会話フォーチュンクッキー', FR: 'Cookie fortune du jour', ES: 'Galleta de la fortuna de hoy'
@@ -534,16 +549,16 @@
       KO: 'DayO 라운지 매거진', EN: 'DayO lounge magazine', ZH: 'DayO休息室杂志', JA: 'DayOラウンジマガジン', FR: 'Magazine du lounge DayO', ES: 'Revista del lounge DayO'
     },
     'mypage.apply.title': {
-      KO: 'DayO 글로벌 대화 파트너 모집 ☕', EN: 'Join DayO as a global conversation partner ☕', ZH: 'DayO全球对话伙伴招募 ☕', JA: 'DayOグローバル会話パートナー募集 ☕', FR: 'Devenez partenaire de conversation DayO ☕', ES: 'Únete como compañero de conversación DayO ☕'
+      KO: '파트너 신청이 검수 중이거나 승인이 필요합니다 ☕', EN: 'Partner application is under review or needs approval ☕', ZH: '伙伴申请正在审核或需要批准 ☕', JA: 'パートナー申請の審査中、または承認が必要です ☕', FR: 'Candidature partenaire en revue ou en attente d’approbation ☕', ES: 'La solicitud de partner está en revisión o necesita aprobación ☕'
     },
     'mypage.apply.p1': {
-      KO: 'DayO 파트너는 등록 신청 및 온라인 트레이닝을 거친 후 활동하실 수 있습니다.', EN: 'Partners can start after applying and completing online training.', ZH: 'DayO伙伴需完成报名申请和在线培训后即可活动。', JA: 'DayOパートナーは応募とオンライン研修のあと活動できます。', FR: 'Les partenaires commencent après candidature et formation en ligne.', ES: 'Los partners empiezan tras postularse y completar la formación online.'
+      KO: '구글폼으로 지원하시면 운영팀 검수 후 파트너 라운지를 이용할 수 있어요.', EN: 'Apply via Google Form — after review you can use the Partner Lounge.', ZH: '通过谷歌表单申请，运营审核通过后即可使用伙伴休息室。', JA: 'Googleフォームで応募すると、運営審査後にパートナーラウンジを利用できます。', FR: 'Candidatez via Google Form — après validation, le lounge partenaire s’ouvre.', ES: 'Postúlate con Google Form: tras la revisión podrás usar el lounge de partners.'
     },
     'mypage.apply.p2': {
-      KO: '내가 편한 시간대에 라이브 대화를 나누고, 세션당 활동비를 적립하세요.', EN: 'Host live chats in your available hours and earn activity pay per session.', ZH: '在方便的时段进行实时对话，并按场次累积活动费。', JA: '都合のよい時間にライブ会話をし、セッションごとに活動費を貯めましょう。', FR: 'Animez des conversations à vos horaires et gagnez par session.', ES: 'Habla en vivo en tus horarios y acumula honorarios por sesión.'
+      KO: '승인 완료 전에는 이 화면에서 지원 안내만 확인하실 수 있습니다.', EN: 'Until approval, you can only view partner application guidance here.', ZH: '批准前只能在此查看申请指引。', JA: '承認前はこの画面で応募案内のみ確認できます。', FR: 'Avant validation, seule la candidature est accessible ici.', ES: 'Hasta la aprobación, solo verás la guía de solicitud aquí.'
     },
     'mypage.apply.submit': {
-      KO: '파트너 지원서 작성하기', EN: 'Fill out the partner application', ZH: '填写伙伴申请表', JA: 'パートナー応募書を書く', FR: 'Remplir la candidature partenaire', ES: 'Completar la solicitud de partner'
+      KO: '구글폼으로 지원하기', EN: 'Apply via Google Form', ZH: '用谷歌表单申请', JA: 'Googleフォームで応募する', FR: 'Postuler via Google Form', ES: 'Postularse con Google Form'
     },
     'mypage.nick.modalTitle': {
       KO: '닉네임 변경', EN: 'Change nickname', ZH: '修改昵称', JA: 'ニックネーム変更', FR: 'Modifier le pseudo', ES: 'Cambiar apodo'

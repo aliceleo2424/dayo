@@ -705,10 +705,48 @@
     .talk-album-empty {
       grid-column: 1 / -1;
       text-align: center;
-      padding: 28px 12px;
+      padding: 28px 16px;
       color: #888;
       font-size: 13px;
+      line-height: 1.6;
+      background: #FFF9F5;
+      border: 1px dashed #FFE0D4;
+      border-radius: 16px;
     }
+    .talk-album-empty--rich {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 32px 20px;
+    }
+    .talk-album-empty__title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 800;
+      color: #333;
+      white-space: pre-line;
+    }
+    .talk-album-empty__desc {
+      margin: 0;
+      font-size: 13px;
+      color: #777;
+      max-width: 320px;
+      white-space: pre-line;
+    }
+    .talk-album-empty__cta {
+      margin-top: 10px;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      background: #FF5A36;
+      color: #fff;
+      font-weight: 800;
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .talk-album-empty__cta:hover { filter: brightness(1.03); }
     #card-detail-modal {
       position: fixed;
       inset: 0;
@@ -1494,7 +1532,7 @@
       <div class="topbar-right">
         <div class="topbar-extras">
           <button type="button" class="ghost-btn" data-tickets-open style="padding:0.45rem 0.8rem;font-size:0.78rem;">
-            <span data-ticket-badge-text>☕️ 보유 티켓: 1장</span>
+            <span data-ticket-badge-text>☕️ 보유 티켓: 0장</span>
           </button>
         </div>
         <div data-mode-switch="inline"></div>
@@ -1511,7 +1549,7 @@
     <a href="index.html?booking=open" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
     <a href="partner.html"><span aria-hidden="true">🤝</span> <span data-i18n="nav.partnerStudio">파트너 스튜디오로 이동</span></a>
     <button type="button" class="nav-drawer__link" data-tickets-open>
-      <span data-ticket-badge-text>☕️ 보유 티켓: 1장</span>
+      <span data-ticket-badge-text>☕️ 보유 티켓: 0장</span>
     </button>
     <button type="button" onclick="handleLogout(event)" class="btn-logout" style="cursor: pointer;" data-i18n="login.logout">로그아웃</button>
   </nav>
@@ -1569,15 +1607,15 @@
           <div class="speaking-progress-metrics">
             <div class="speaking-progress-metric">
               <span data-i18n="mypage.progress.paceLabel">스피킹 감각 페이스</span>
-              <strong id="progress-pace">진단 기록 없음</strong>
+              <strong id="progress-pace">진단 전</strong>
             </div>
             <div class="speaking-progress-metric">
               <span data-i18n="mypage.progress.sessionsLabel">누적 대화 세션</span>
-              <strong id="progress-sessions">1회 완료</strong>
+              <strong id="progress-sessions">0회 완료</strong>
             </div>
             <div class="speaking-progress-metric">
               <span data-i18n="mypage.progress.streakLabel">학습 스트릭</span>
-              <strong id="progress-streak">1일 연속 🔥</strong>
+              <strong id="progress-streak">아직 시작 전</strong>
             </div>
           </div>
         </section>
@@ -1634,11 +1672,11 @@
 
   <div id="partner-apply-modal" class="edit-profile-overlay" role="dialog" aria-modal="true" aria-labelledby="partner-apply-title" hidden>
     <div class="partner-apply-card">
-      <h3 id="partner-apply-title" data-i18n="mypage.apply.title">DayO 글로벌 대화 파트너 모집 ☕</h3>
-      <p data-i18n="mypage.apply.p1">DayO 파트너는 등록 신청 및 온라인 트레이닝을 거친 후 활동하실 수 있습니다.</p>
-      <p data-i18n="mypage.apply.p2">내가 편한 시간대에 라이브 대화를 나누고, 세션당 활동비를 적립하세요.</p>
+      <h3 id="partner-apply-title" data-i18n="mypage.apply.title">파트너 신청이 검수 중이거나 승인이 필요합니다 ☕</h3>
+      <p data-i18n="mypage.apply.p1">구글폼으로 지원하시면 운영팀 검수 후 파트너 라운지를 이용할 수 있어요.</p>
+      <p data-i18n="mypage.apply.p2">승인 완료 전에는 이 화면에서 지원 안내만 확인하실 수 있습니다.</p>
       <div class="partner-apply-actions">
-        <a class="partner-apply-submit" href="https://docs.google.com/forms/d/e/1FAIpQLScBTytUfVL4uyxv3R95dFfcs5rV-UBMnvujJ5GsK4ZNzh_1ZQ/viewform" target="_blank" rel="noopener noreferrer" data-i18n="mypage.apply.submit">파트너 지원서 작성하기</a>
+        <a class="partner-apply-submit" href="https://docs.google.com/forms/d/e/1FAIpQLScBTytUfVL4uyxv3R95dFfcs5rV-UBMnvujJ5GsK4ZNzh_1ZQ/viewform" target="_blank" rel="noopener noreferrer" data-i18n="mypage.apply.submit">구글폼으로 지원하기</a>
         <button type="button" class="partner-apply-close" id="partner-apply-close" data-i18n="common.close">닫기</button>
       </div>
     </div>
