@@ -1,17 +1,34 @@
 "use client";
 
 import { AdminHeader } from "@/components/admin/header";
-import { PartnerPayoutManager } from "./partner-payout-manager";
+import { BookingMonitor } from "@/components/admin/booking-monitor";
+import { PartnerPayoutManager } from "@/app/admin/partners/partner-payout-manager";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function PartnersPage() {
   return (
     <>
-      <AdminHeader title="파트너 정산" />
+      <AdminHeader title="대화 파트너 & 클래스 관리" />
       <main className="p-6">
-        <p className="mb-6 text-sm text-muted-foreground">
-          파트너 행을 클릭하면 권한 변경과 포인트 정산을 할 수 있습니다.
-        </p>
-        <PartnerPayoutManager />
+        <Tabs defaultValue="partners">
+          <TabsList>
+            <TabsTrigger value="partners">파트너 관리</TabsTrigger>
+            <TabsTrigger value="bookings">세션 예약 모니터링</TabsTrigger>
+            <TabsTrigger value="payouts">정산 · 포인트</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="partners" className="mt-6">
+            <PartnerPayoutManager />
+          </TabsContent>
+
+          <TabsContent value="bookings" className="mt-6">
+            <BookingMonitor />
+          </TabsContent>
+
+          <TabsContent value="payouts" className="mt-6">
+            <PartnerPayoutManager />
+          </TabsContent>
+        </Tabs>
       </main>
     </>
   );

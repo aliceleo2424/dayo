@@ -347,6 +347,122 @@ export function normalizeCrmRole(role: string | null | undefined) {
   return String(role || "user").trim().toLowerCase().replace(/[\s-]+/g, "_");
 }
 
+export type DrawerMember = {
+  id: string;
+  user_id?: string | null;
+  nickname?: string | null;
+  user_name?: string | null;
+  email?: string | null;
+  role?: string | null;
+  ticket_count?: number | null;
+  provider?: string | null;
+  avatar_url?: string | null;
+  client_key?: string | null;
+  learning_languages?: string | null;
+};
+
+export type MemberBookingSession = {
+  id: string;
+  scheduled_at: string | null;
+  status: string | null;
+  partner_name: string | null;
+  rating: number | null;
+  review: string | null;
+};
+
+export function bookingStatusLabel(status: string | null | undefined) {
+  const raw = String(status || "").trim().toLowerCase();
+  if (!raw || raw === "pending" || raw === "confirmed" || raw === "booked" || raw === "reserved") {
+    return { label: "예약완료", variant: "default" as const };
+  }
+  if (raw === "in_progress" || raw === "ongoing" || raw === "live" || raw === "started") {
+    return { label: "진행중", variant: "coral" as const };
+  }
+  if (raw === "completed" || raw === "done" || raw === "finished") {
+    return { label: "정상완료", variant: "success" as const };
+  }
+  if (raw === "cancelled" || raw === "canceled") {
+    return { label: "취소", variant: "warning" as const };
+  }
+  if (raw === "no_show" || raw === "noshow" || raw === "no-show") {
+    return { label: "노쇼", variant: "warning" as const };
+  }
+  return { label: String(status || "예약완료"), variant: "default" as const };
+}
+
+export function formatSessionDateTime(value: string | null | undefined) {
+  if (!value) return "일시 미정";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "일시 미정";
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${y}.${m}.${day} ${hh}:${mm}`;
+}
+
+export async function adjustProfileTickets(
+  row: { id: string; user_id?: string | null },
+  nextCount: number
+) {
+  const safe = Math.max(0, Math.floor(Number(nextCount) || 0));
+  const payload = { ticket_count: safe, updated_at: new Date().toISOString() };
+
+  const first = await supabase
+    .from("profiles")
+    .update(payload)
+    .eq("id", row.id)
+    .select("id, ticket_count");
+  if (!first.error && first.data && first.data.length) {
+    return Number((first.data[0] as { ticket_count?: number }).ticket_count ?? safe);
+  }
+
+  const uid = row.user_id || row.id;
+  const second = await supabase
+    .from("profiles")
+    .update(payload)
+    .eq("user_id", uid)
+    .select("id, ticket_count");
+  if (second.error) throw new Error(second.error.message || first.error?.message || "티켓 업데이트 실패");
+  if (!(second.data && second.data.length)) {
+    throw new Error(first.error?.message || "프로필을 찾지 못해 티켓을 변경하지 못했습니다.");
+  }
+  return Number((second.data[0] as { ticket_count?: number }).ticket_count ?? safe);
+}
+
+export async function fetchMemberBookings(learnerId: string): Promise<MemberBookingSession[]> {
+  if (!learnerId) return [];
+  const selects = [
+    "id, scheduled_at, status, partner_name, rating, review",
+    "id, scheduled_at, status, partner_name, rating, feedback",
+    "id, scheduled_at, status, partner_name, rating, comment",
+    "id, scheduled_at, status, partner_name, rating",
+    "id, scheduled_at, status, partner_name",
+    "*",
+  ];
+
+  for (const columns of selects) {
+    const result = await supabase
+      .from("bookings")
+      .select(columns)
+      .eq("learner_id", learnerId)
+      .order("scheduled_at", { ascending: false });
+    if (result.error) continue;
+
+    const rows = (result.data || []) as unknown as Record<string, unknown>[];
+    return rows.map((row) => ({
+      id: String(row.id || ""),
+      scheduled_at: (row.scheduled_at as string | null) || null,
+      status: (row.status as string | null) || null,
+      partner_name: (row.partner_name as string | null) || null,
+      rating: row.rating == null || row.rating === "" ? null : Number(row.rating),
+      review: String(row.review || row.feedback || row.comment || row.review_text || "").trim() || null,
+    }));
+  }
+  return [];
+}
+
 export async function updateProfileRole(
   row: { id: string; user_id?: string | null },
   nextRole: "partner" | "user"

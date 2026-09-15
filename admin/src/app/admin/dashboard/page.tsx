@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { updateProfileRole, detectMemberProvider, profileDisplayName } from "@/lib/admin-data";
 import { ProviderBadge, KakaoPrivateEmailHint, LearningLanguageTag } from "@/components/admin/provider-badge";
+import { UserDetailDrawer } from "@/components/admin/UserDetailDrawer";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 
@@ -22,6 +23,7 @@ type KpiState = {
 
 type MemberRow = {
   id: string;
+  user_id?: string | null;
   nickname: string | null;
   user_name: string | null;
   email: string | null;
@@ -61,6 +63,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState("");
   const [notice, setNotice] = useState("");
+  const [drawerUser, setDrawerUser] = useState<MemberRow | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -73,7 +76,7 @@ export default function DashboardPage() {
         supabase.from("orders").select("amount").eq("status", "paid"),
         supabase
           .from("profiles")
-          .select("id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url, client_key, learning_languages")
+          .select("id, user_id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url, client_key, learning_languages")
           .order("created_at", { ascending: false }),
       ]);
 
@@ -82,8 +85,8 @@ export default function DashboardPage() {
         list = memberRows.data as unknown as MemberRow[];
       } else {
         const fallbackSelects = [
-          "id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url, client_key, learning_languages",
-          "id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url, learning_languages",
+          "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url, client_key, learning_languages",
+          "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url, learning_languages",
           "id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url",
           "id, nickname, user_name, email, role, ticket_count, point_balance",
           "id, nickname, user_name, email, role, point_balance",
@@ -198,6 +201,11 @@ export default function DashboardPage() {
     }
   }
 
+  function handleTicketChange(userId: string, nextCount: number) {
+    setMembers((prev) => prev.map((item) => (item.id === userId ? { ...item, ticket_count: nextCount } : item)));
+    setDrawerUser((cur) => (cur && cur.id === userId ? { ...cur, ticket_count: nextCount } : cur));
+  }
+
   const cards = [
     { label: "총 가입 회원", value: kpi.members.toLocaleString("ko-KR"), icon: Users },
     { label: "등록된 파트너", value: kpi.partners.toLocaleString("ko-KR"), icon: GraduationCap },
@@ -259,16 +267,20 @@ export default function DashboardPage() {
                         const role = String(row.role || "user");
                         const provider = detectMemberProvider(row);
                         return (
-                          <tr key={row.id} className="border-b last:border-0">
+                          <tr
+                            key={row.id}
+                            className="cursor-pointer border-b last:border-0 hover:bg-muted/40"
+                            onClick={() => setDrawerUser(row)}
+                          >
                             <td className="px-3 py-3"><ProviderBadge provider={provider} /></td>
-                            <td className="px-3 py-3 font-medium">{nameOf(row)}</td>
+                            <td className="px-3 py-3 font-medium text-coral hover:underline">{nameOf(row)}</td>
                             <td className="px-3 py-3">{emailCell(row)}</td>
                             <td className="px-3 py-3"><LearningLanguageTag value={row.learning_languages} /></td>
                             <td className="px-3 py-3">
                               <Badge variant={role === "admin" ? "coral" : role === "partner" ? "success" : "default"}>{role}</Badge>
                             </td>
                             <td className="px-3 py-3">{Number(row.ticket_count || 0)}</td>
-                            <td className="px-3 py-3">
+                            <td className="px-3 py-3" onClick={(e) => e.stopPropagation()}>
                               <RoleActions
                                 role={row.role}
                                 busy={busyId === row.id}
@@ -327,6 +339,13 @@ export default function DashboardPage() {
           )}
         </section>
       </main>
+
+      <UserDetailDrawer
+        open={!!drawerUser}
+        user={drawerUser}
+        onClose={() => setDrawerUser(null)}
+        onTicketChange={handleTicketChange}
+      />
     </>
   );
 }

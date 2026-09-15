@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import { AdminHeader } from "@/components/admin/header";
 import { DataTable, type Column } from "@/components/admin/data-table";
 import { RoleActions } from "@/components/admin/role-actions";
+import { UserDetailDrawer } from "@/components/admin/UserDetailDrawer";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -35,6 +35,7 @@ export default function UsersPage() {
   const [bulkModal, setBulkModal] = useState<"alimtalk" | "coupon" | null>(null);
   const [busyId, setBusyId] = useState("");
   const [toast, setToast] = useState<{ type: "ok" | "error"; message: string } | null>(null);
+  const [drawerUser, setDrawerUser] = useState<CrmMember | null>(null);
 
   function showToast(type: "ok" | "error", message: string) {
     setToast({ type, message });
@@ -99,10 +100,23 @@ export default function UsersPage() {
     });
   };
 
+  function openDrawer(row: CrmMember) {
+    setDrawerUser(row);
+  }
+
+  function handleTicketChange(userId: string, nextCount: number) {
+    setRows((cur) => cur.map((item) => (item.id === userId ? { ...item, ticket_count: nextCount } : item)));
+    setDrawerUser((cur) => (cur && cur.id === userId ? { ...cur, ticket_count: nextCount } : cur));
+  }
+
   const columns: Column<CrmMember & Record<string, unknown>>[] = [
     {
       key: "select", header: "",
-      render: (row) => <Checkbox checked={selected.has(row.id)} onCheckedChange={() => toggleSelect(row.id)} />,
+      render: (row) => (
+        <span onClick={(e) => e.stopPropagation()}>
+          <Checkbox checked={selected.has(row.id)} onCheckedChange={() => toggleSelect(row.id)} />
+        </span>
+      ),
     },
     {
       key: "provider", header: "가입 채널", sortable: true,
@@ -111,7 +125,13 @@ export default function UsersPage() {
     {
       key: "name", header: "닉네임", sortable: true,
       render: (row) => (
-        <Link href={`/admin/users/${row.id}`} className="font-medium text-coral hover:underline">{row.name}</Link>
+        <button
+          type="button"
+          className="font-medium text-coral hover:underline"
+          onClick={() => openDrawer(row)}
+        >
+          {row.name}
+        </button>
       ),
     },
     {
@@ -169,16 +189,14 @@ export default function UsersPage() {
     {
       key: "actions", header: "권한 관리",
       render: (row) => (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2" onClick={(e) => e.stopPropagation()}>
           <RoleActions
             role={row.role}
             busy={busyId === row.id}
             onApprove={() => void toggleRole(row, "partner")}
             onDemote={() => void toggleRole(row, "user")}
           />
-          <Link href={`/admin/users/${row.id}`}>
-            <Button variant="outline" size="sm">상세</Button>
-          </Link>
+          <Button variant="outline" size="sm" onClick={() => openDrawer(row)}>상세</Button>
         </div>
       ),
     },
@@ -219,6 +237,13 @@ export default function UsersPage() {
           />
         )}
       </main>
+
+      <UserDetailDrawer
+        open={!!drawerUser}
+        user={drawerUser}
+        onClose={() => setDrawerUser(null)}
+        onTicketChange={handleTicketChange}
+      />
 
       <Dialog open={!!bulkModal} onOpenChange={() => setBulkModal(null)}>
         <DialogContent>

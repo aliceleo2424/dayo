@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard, Users, Ticket, Palette, GraduationCap,
-  ChevronLeft, ChevronRight, Zap, Newspaper, Wallet,
+  ChevronLeft, ChevronRight, Zap, Newspaper,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAdminStore } from "@/store/admin-store";
@@ -17,8 +17,7 @@ const navItems = [
   { href: "/admin/promotions", label: "프로모션", icon: Ticket },
   { href: "/admin/cms", label: "프론트 CMS", icon: Palette },
   { href: "/admin/articles", label: "라운지 매거진", icon: Newspaper, sub: true },
-  { href: "/admin/tutors", label: "대화 파트너 & 클래스", icon: GraduationCap },
-  { href: "/admin/partners", label: "파트너 정산", icon: Wallet, sub: true },
+  { href: "/admin/partners", label: "대화 파트너 & 클래스", icon: GraduationCap },
 ];
 
 export function AdminSidebar() {
@@ -52,9 +51,7 @@ export function AdminSidebar() {
           } else if (href === "/admin/cms") {
             active = pathname === href;
           } else if (href === "/admin/partners") {
-            active = pathname === href;
-          } else if (href === "/admin/tutors") {
-            active = pathname === href;
+            active = pathname === href || pathname.startsWith("/admin/partners/") || pathname.startsWith("/admin/tutors");
           } else {
             active = pathname === href || (href !== "/admin/dashboard" && pathname.startsWith(href + "/"));
           }
