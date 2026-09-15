@@ -264,6 +264,31 @@
 
   window.refreshUrgentSessionBanner = loadUrgentSessionBanner;
 
+  function formatLearningLanguageLabel(raw) {
+    var text = String(raw || '').trim().replace(/^\[|\]$/g, '').replace(/^"|"$/g, '').trim();
+    if (!text) return '';
+    var lower = text.toLowerCase();
+    if (/\b(us|en|english|영어)\b/i.test(text) || lower === 'en' || lower === 'us') return '🇺🇸 영어';
+    if (/\b(es|spanish|스페인어)\b/i.test(text) || lower === 'es') return '🇪🇸 스페인어';
+    if (/\b(fr|french|프랑스어)\b/i.test(text) || lower === 'fr') return '🇫🇷 프랑스어';
+    if (/\b(kr|ko|korean|한국어)\b/i.test(text) || lower === 'kr' || lower === 'ko') return '🇰🇷 한국어';
+    return text;
+  }
+
+  function renderLearningLanguageBadge() {
+    var el = document.getElementById('mypage-learning-lang');
+    if (!el) return;
+    var profile = window._dayoAuthProfile || {};
+    var label = formatLearningLanguageLabel(profile.learning_languages);
+    if (!label) {
+      el.hidden = true;
+      el.textContent = '';
+      return;
+    }
+    el.hidden = false;
+    el.innerHTML = '관심 언어: <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;background:#F5F5F4;color:#44403C;font-size:11.5px;font-weight:700;">' + label + '</span>';
+  }
+
   function emailPrefix(email) {
     var raw = String(email || '').trim();
     if (!raw || raw.indexOf('@') < 1) return '';
@@ -523,6 +548,7 @@
     bindNicknameEditor();
     loadUrgentSessionBanner();
     renderSpeakingGrowth();
+    renderLearningLanguageBadge();
     document.addEventListener('keydown', onKeydown);
     maybeOpenBookingFromQuery();
   }
@@ -534,18 +560,24 @@
   }
 
   window.renderSpeakingGrowth = renderSpeakingGrowth;
+  window.renderLearningLanguageBadge = renderLearningLanguageBadge;
 
   document.addEventListener('dayo:authchange', function () {
     syncMainAction();
     loadUrgentSessionBanner();
     renderSpeakingGrowth();
+    renderLearningLanguageBadge();
   });
-  document.addEventListener('dayo:authprofile', renderSpeakingGrowth);
+  document.addEventListener('dayo:authprofile', function () {
+    renderSpeakingGrowth();
+    renderLearningLanguageBadge();
+  });
   document.addEventListener('dayo:reportsloaded', renderSpeakingGrowth);
   document.addEventListener('dayo:ticketchange', syncMainAction);
   document.addEventListener('dayo:langchange', function () {
     syncMainAction();
     loadUrgentSessionBanner();
     renderSpeakingGrowth();
+    renderLearningLanguageBadge();
   });
 })();

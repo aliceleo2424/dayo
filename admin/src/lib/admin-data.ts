@@ -75,6 +75,23 @@ export function profileDisplayName(row: MemberIdentity) {
   return String(row.email || "미등록").trim() || "미등록";
 }
 
+/** Normalize profiles.learning_languages into a display tag like "🇺🇸 영어". */
+export function formatLearningLanguageLabel(raw: string | null | undefined): string {
+  const text = String(raw || "")
+    .trim()
+    .replace(/^\[|\]$/g, "")
+    .replace(/^"|"$/g, "")
+    .trim();
+  if (!text) return "";
+
+  const lower = text.toLowerCase();
+  if (/\b(us|en|english|영어)\b/i.test(text) || lower === "en" || lower === "us") return "🇺🇸 영어";
+  if (/\b(es|spanish|스페인어)\b/i.test(text) || lower === "es") return "🇪🇸 스페인어";
+  if (/\b(fr|french|프랑스어)\b/i.test(text) || lower === "fr") return "🇫🇷 프랑스어";
+  if (/\b(kr|ko|korean|한국어)\b/i.test(text) || lower === "kr" || lower === "ko") return "🇰🇷 한국어";
+  return text;
+}
+
 function mapProfile(row: ProfileRecord, spentByUser: Map<string, number>): CrmMember {
   const id = String(row.id || "");
   const userId = row.user_id ? String(row.user_id) : null;

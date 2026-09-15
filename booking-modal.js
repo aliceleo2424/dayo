@@ -432,9 +432,12 @@
     el.prevBtn.addEventListener('click', function () { goTo(state.step - 1); });
     el.nextBtn.addEventListener('click', function () {
       if (state.step === 4) { confirmBooking(); return; }
-      if (state.step === 0 && isStepReady(0) && needsTicketTopup()) {
-        routeToTicketTopup();
-        return;
+      if (state.step === 0 && isStepReady(0)) {
+        persistLearningLanguage(state.language);
+        if (needsTicketTopup()) {
+          routeToTicketTopup();
+          return;
+        }
       }
       goTo(state.step + 1);
     });
@@ -574,6 +577,39 @@
     return String(str == null ? '' : str).replace(/[&<>"']/g, function (c) {
       return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c];
     });
+  }
+
+  function learningLanguageValue(langId) {
+    var id = String(langId || '').toLowerCase();
+    if (id === 'en') return 'US 영어';
+    if (id === 'es') return 'ES 스페인어';
+    if (id === 'fr') return 'FR 프랑스어';
+    if (id === 'ko') return 'KR 한국어';
+    return '';
+  }
+
+  function persistLearningLanguage(langId) {
+    var value = learningLanguageValue(langId);
+    if (!value) return;
+    var client = dbClient();
+    if (!client || !client.auth) return;
+
+    // Fire-and-forget — never block booking next-step UX
+    Promise.resolve()
+      .then(function () { return client.auth.getSession(); })
+      .then(function (res) {
+        var session = res && res.data && res.data.session;
+        var user = session && session.user;
+        if (!user || !user.id) return null;
+        var payload = { learning_languages: value, updated_at: new Date().toISOString() };
+        return client.from('profiles').update(payload).eq('id', user.id).select('id').then(function (byId) {
+          if (byId && byId.data && byId.data.length) return byId;
+          return client.from('profiles').update(payload).eq('user_id', user.id).select('id');
+        });
+      })
+      .catch(function (err) {
+        console.warn('[DayO] learning_languages sync failed', err);
+      });
   }
 
   function dbClient() {

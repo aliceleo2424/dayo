@@ -9,7 +9,7 @@ import { RoleActions } from "@/components/admin/role-actions";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { updateProfileRole, detectMemberProvider, profileDisplayName } from "@/lib/admin-data";
-import { ProviderBadge, KakaoPrivateEmailHint } from "@/components/admin/provider-badge";
+import { ProviderBadge, KakaoPrivateEmailHint, LearningLanguageTag } from "@/components/admin/provider-badge";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 
@@ -31,6 +31,7 @@ type MemberRow = {
   provider?: string | null;
   avatar_url?: string | null;
   client_key?: string | null;
+  learning_languages?: string | null;
 };
 
 type SessionRow = {
@@ -72,7 +73,7 @@ export default function DashboardPage() {
         supabase.from("orders").select("amount").eq("status", "paid"),
         supabase
           .from("profiles")
-          .select("id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url, client_key")
+          .select("id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url, client_key, learning_languages")
           .order("created_at", { ascending: false }),
       ]);
 
@@ -81,6 +82,8 @@ export default function DashboardPage() {
         list = memberRows.data as unknown as MemberRow[];
       } else {
         const fallbackSelects = [
+          "id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url, client_key, learning_languages",
+          "id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url, learning_languages",
           "id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url",
           "id, nickname, user_name, email, role, ticket_count, point_balance",
           "id, nickname, user_name, email, role, point_balance",
@@ -245,9 +248,9 @@ export default function DashboardPage() {
                         <th className="px-3 py-3 font-medium">가입 채널</th>
                         <th className="px-3 py-3 font-medium">닉네임</th>
                         <th className="px-3 py-3 font-medium">이메일 / 식별 정보</th>
+                        <th className="px-3 py-3 font-medium">관심 언어</th>
                         <th className="px-3 py-3 font-medium">role</th>
                         <th className="px-3 py-3 font-medium">보유 티켓</th>
-                        <th className="px-3 py-3 font-medium">적립 포인트</th>
                         <th className="px-3 py-3 font-medium">권한 관리</th>
                       </tr>
                     </thead>
@@ -260,11 +263,11 @@ export default function DashboardPage() {
                             <td className="px-3 py-3"><ProviderBadge provider={provider} /></td>
                             <td className="px-3 py-3 font-medium">{nameOf(row)}</td>
                             <td className="px-3 py-3">{emailCell(row)}</td>
+                            <td className="px-3 py-3"><LearningLanguageTag value={row.learning_languages} /></td>
                             <td className="px-3 py-3">
                               <Badge variant={role === "admin" ? "coral" : role === "partner" ? "success" : "default"}>{role}</Badge>
                             </td>
                             <td className="px-3 py-3">{Number(row.ticket_count || 0)}</td>
-                            <td className="px-3 py-3">{`${Number(row.point_balance || 0)} P`}</td>
                             <td className="px-3 py-3">
                               <RoleActions
                                 role={row.role}
