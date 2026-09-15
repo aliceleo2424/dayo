@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { fetchCrmMember, updateProfileRole, type CrmMember } from "@/lib/admin-data";
+import { ProviderBadge, KakaoPrivateEmailHint } from "@/components/admin/provider-badge";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
 import { ArrowLeft, Send } from "lucide-react";
@@ -140,8 +141,15 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
             <Card className="lg:col-span-1">
               <CardHeader><CardTitle>기본 정보</CardTitle></CardHeader>
               <CardContent className="space-y-3 text-sm">
+                <div>
+                  <span className="text-muted-foreground">가입 채널</span>
+                  <p className="mt-1"><ProviderBadge provider={user.provider} /></p>
+                </div>
                 <div><span className="text-muted-foreground">닉네임</span><p className="font-medium">{user.name}</p></div>
-                <div><span className="text-muted-foreground">이메일</span><p>{user.email || "미등록"}</p></div>
+                <div>
+                  <span className="text-muted-foreground">이메일 / 식별 정보</span>
+                  <p>{user.email || (user.provider === "kakao" ? <KakaoPrivateEmailHint /> : "미등록")}</p>
+                </div>
                 <div>
                   <span className="text-muted-foreground">권한 관리</span>
                   <div className="mt-2">

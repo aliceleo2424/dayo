@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { fetchCrmMembers, normalizeCrmRole, updateProfileRole, type CrmMember } from "@/lib/admin-data";
+import { ProviderBadge, KakaoPrivateEmailHint } from "@/components/admin/provider-badge";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { MessageSquare, Ticket } from "lucide-react";
 
@@ -104,16 +105,25 @@ export default function UsersPage() {
       render: (row) => <Checkbox checked={selected.has(row.id)} onCheckedChange={() => toggleSelect(row.id)} />,
     },
     {
-      key: "name", header: "회원", sortable: true,
+      key: "provider", header: "가입 채널", sortable: true,
+      render: (row) => <ProviderBadge provider={row.provider} />,
+    },
+    {
+      key: "name", header: "닉네임", sortable: true,
       render: (row) => (
-        <div>
-          <Link href={`/admin/users/${row.id}`} className="font-medium text-coral hover:underline">{row.name}</Link>
-          <p className="text-xs text-muted-foreground">{row.email || "이메일 미등록"}</p>
-        </div>
+        <Link href={`/admin/users/${row.id}`} className="font-medium text-coral hover:underline">{row.name}</Link>
       ),
     },
     {
-      key: "role", header: "권한", sortable: true,
+      key: "email", header: "이메일 / 식별 정보", sortable: true,
+      render: (row) => {
+        if (row.email) return <span className="text-sm">{row.email}</span>;
+        if (row.provider === "kakao") return <KakaoPrivateEmailHint />;
+        return <span className="text-xs text-muted-foreground">이메일 미등록</span>;
+      },
+    },
+    {
+      key: "role", header: "role", sortable: true,
       render: (row) => {
         const role = normalizeCrmRole(row.role);
         if (role === "admin" || role === "super_admin" || role === "superadmin") {
@@ -157,7 +167,7 @@ export default function UsersPage() {
       render: (row) => row.created_at ? formatDate(row.created_at) : "—",
     },
     {
-      key: "actions", header: "CRM / 권한 관리",
+      key: "actions", header: "권한 관리",
       render: (row) => (
         <div className="flex flex-wrap items-center gap-2">
           <RoleActions

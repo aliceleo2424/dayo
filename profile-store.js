@@ -154,8 +154,38 @@ function displayNameFromUser(user) {
   if (!user) return 'DayO';
   var meta = user.user_metadata || {};
   return String(
-    meta.nickname || meta.user_name || meta.full_name || meta.name || nameFromEmail(user.email)
+    meta.nickname || meta.name || meta.full_name || meta.user_name || nameFromEmail(user.email)
   ).trim() || 'DayO';
+}
+
+function detectAuthProvider(user) {
+  var identities = (user && user.identities) || [];
+  for (var i = 0; i < identities.length; i += 1) {
+    var p = String(identities[i].provider || '').toLowerCase();
+    if (p === 'kakao') return 'kakao';
+    if (p === 'google') return 'google';
+  }
+  var meta = (user && user.user_metadata) || {};
+  var raw = String(meta.provider || meta.iss || '').toLowerCase();
+  if (raw.indexOf('kakao') >= 0) return 'kakao';
+  if (raw.indexOf('google') >= 0) return 'google';
+  var email = String((user && user.email) || '').toLowerCase();
+  var avatar = String(meta.avatar_url || meta.picture || meta.profile_image || '').toLowerCase();
+  if (email.indexOf('kakao') >= 0 || avatar.indexOf('kakao') >= 0) return 'kakao';
+  if (email.indexOf('@gmail.com') >= 0 || email.indexOf('@googlemail.com') >= 0) return 'google';
+  return 'email';
+}
+
+function socialFieldsFromUser(user) {
+  var meta = (user && user.user_metadata) || {};
+  var provider = detectAuthProvider(user);
+  var nickname = String(
+    meta.nickname || meta.name || meta.full_name || meta.user_name || ''
+  ).trim();
+  var avatar = String(
+    meta.profile_image || meta.avatar_url || meta.picture || ''
+  ).trim();
+  return { provider: provider, nickname: nickname, avatar: avatar };
 }
 
 function dispatchAuthChange(loggedIn, extra) {
@@ -616,11 +646,61 @@ async function insertProfileFallback(client, payload) {
       } catch (retryErr) {
         return { data: null, error: retryErr };
       }
+      if (inserted && inserted.error) {
+        var stripped = Object.assign({}, retryPayload);
+        delete stripped.provider;
+        delete stripped.avatar_url;
+        delete stripped.nickname;
+        try {
+          inserted = await client.from('profiles').insert(stripped).select('*').single();
+        } catch (stripErr) {
+          return { data: null, error: stripErr };
+        }
+      }
     }
     return inserted || { data: null, error: null };
   } catch (err) {
     return { data: null, error: err };
   }
+}
+
+async function syncSocialProfileFields(client, existing, user, name) {
+  if (!client || !existing || !user) return existing;
+  var social = socialFieldsFromUser(user);
+  var patch = {};
+  var nextName = social.nickname || name || '';
+
+  if (!String(existing.nickname || '').trim() && nextName) patch.nickname = nextName;
+  if (!String(existing.user_name || '').trim() && nextName) patch.user_name = nextName;
+  if (!String(existing.avatar_url || '').trim() && social.avatar) patch.avatar_url = social.avatar;
+  if (social.provider === 'kakao' && String(existing.provider || '').toLowerCase() !== 'kakao') {
+    patch.provider = 'kakao';
+  } else if (social.provider === 'google' && String(existing.provider || '').toLowerCase() !== 'google') {
+    patch.provider = 'google';
+  } else if (!String(existing.provider || '').trim() && social.provider) {
+    patch.provider = social.provider;
+  }
+
+  var keys = Object.keys(patch);
+  if (!keys.length) return existing;
+
+  patch.updated_at = new Date().toISOString();
+  try {
+    var updated = await client.from('profiles').update(patch).eq('id', existing.id).select('*').single();
+    if (updated && updated.data) return updated.data;
+    if (updated && updated.error && (patch.provider || patch.avatar_url || patch.nickname)) {
+      var slim = Object.assign({}, patch);
+      delete slim.provider;
+      delete slim.avatar_url;
+      delete slim.nickname;
+      if (Object.keys(slim).length <= 1) return Object.assign({}, existing, patch);
+      var retry = await client.from('profiles').update(slim).eq('id', existing.id).select('*').single();
+      if (retry && retry.data) return retry.data;
+    }
+  } catch (e) {
+    console.warn('[DayO] syncSocialProfileFields failed', e);
+  }
+  return Object.assign({}, existing, patch);
 }
 
 async function ensureProfileForUser(user) {
@@ -629,11 +709,12 @@ async function ensureProfileForUser(user) {
   authUser = user;
   var userId = user.id;
   var email = String(user.email || '').trim().toLowerCase();
+  var social = socialFieldsFromUser(user);
   var name = displayNameFromUser(user);
   var today = new Date().toISOString().slice(0, 10);
 
   lsSet(AUTH_ID_KEY, userId);
-  name = resolveDisplayName(null, user, name);
+  name = resolveDisplayName(null, user, social.nickname || name);
   rememberNickname(name);
   lsSet(EMAIL_KEY, email);
   lsSet(MEMBER_KEY, 'active');
@@ -644,7 +725,10 @@ async function ensureProfileForUser(user) {
   if (!client) {
     profileCache = localProfileForUser(user, {
       user_name: name,
+      nickname: name,
       email: email,
+      provider: social.provider,
+      avatar_url: social.avatar || '',
       has_welcome_coupon: true
     });
     applyProfileToLocal(profileCache);
@@ -655,10 +739,11 @@ async function ensureProfileForUser(user) {
   try {
     var existing = await waitForTriggerProfile(client, userId);
     if (existing) {
+      existing = await syncSocialProfileFields(client, existing, user, name);
       var existingName = resolveDisplayName(existing, user, name);
       var nextLogin = Object.assign({}, existing, {
         nickname: existing.nickname || existingName,
-        user_name: existingName,
+        user_name: existing.user_name || existingName,
         email: existing.email || email,
         last_login_date: existing.last_login_date || today
       });
@@ -682,13 +767,17 @@ async function ensureProfileForUser(user) {
       try {
         var byEmail = await client.from('profiles').select('*').eq('email', email).maybeSingle();
         if (byEmail.data) {
-          var patched = await client.from('profiles').update({
+          var emailPatch = {
             user_id: userId,
             client_key: 'user:' + userId,
             user_name: byEmail.data.user_name || name,
             last_login_date: today,
             updated_at: new Date().toISOString()
-          }).eq('id', byEmail.data.id).select('*').single();
+          };
+          if (!byEmail.data.nickname && name) emailPatch.nickname = name;
+          if (!byEmail.data.avatar_url && social.avatar) emailPatch.avatar_url = social.avatar;
+          if (!byEmail.data.provider && social.provider) emailPatch.provider = social.provider;
+          var patched = await client.from('profiles').update(emailPatch).eq('id', byEmail.data.id).select('*').single();
           profileCache = patched.data || Object.assign({}, byEmail.data, { user_id: userId });
           applyProfileToLocal(profileCache);
           return profileCache;
@@ -702,7 +791,10 @@ async function ensureProfileForUser(user) {
       user_id: userId,
       client_key: 'user:' + userId,
       user_name: name,
+      nickname: name,
       email: email,
+      provider: social.provider || 'email',
+      avatar_url: social.avatar || null,
       ticket_count: 0,
       has_welcome_coupon: true,
       streak_count: 1,
@@ -722,6 +814,7 @@ async function ensureProfileForUser(user) {
 
     var again = await waitForTriggerProfile(client, userId);
     if (again) {
+      again = await syncSocialProfileFields(client, again, user, name);
       profileCache = again;
       applyProfileToLocal(profileCache);
       return profileCache;
@@ -736,7 +829,10 @@ async function ensureProfileForUser(user) {
 
   profileCache = localProfileForUser(user, {
     user_name: name,
+    nickname: name,
     email: email,
+    provider: social.provider,
+    avatar_url: social.avatar || '',
     has_welcome_coupon: true
   });
   applyProfileToLocal(profileCache);

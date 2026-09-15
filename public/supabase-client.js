@@ -544,16 +544,19 @@
       alert('카카오 로그인 처리 중 오류가 발생했습니다.');
       return;
     }
+    // OAuth redirect → profile-store ensureProfileForUser syncs nickname/avatar/provider='kakao' on auth change
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'kakao',
       options: {
-        redirectTo: AUTH_REDIRECT
+        redirectTo: AUTH_REDIRECT,
+        scopes: 'profile_nickname profile_image account_email'
       }
     });
     if (error) {
       console.error('카카오 로그인 에러:', error);
       alert('카카오 로그인 처리 중 오류가 발생했습니다.');
     }
+    return data;
   };
 
   window.handleGoogleLogin = async function () {

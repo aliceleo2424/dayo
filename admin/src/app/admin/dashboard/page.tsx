@@ -8,7 +8,8 @@ import { AdminHeader } from "@/components/admin/header";
 import { RoleActions } from "@/components/admin/role-actions";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { updateProfileRole } from "@/lib/admin-data";
+import { updateProfileRole, detectMemberProvider, profileDisplayName } from "@/lib/admin-data";
+import { ProviderBadge, KakaoPrivateEmailHint } from "@/components/admin/provider-badge";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 
@@ -27,6 +28,9 @@ type MemberRow = {
   role: string | null;
   ticket_count: number | null;
   point_balance: number | null;
+  provider?: string | null;
+  avatar_url?: string | null;
+  client_key?: string | null;
 };
 
 type SessionRow = {
@@ -40,7 +44,13 @@ type SessionRow = {
 const ZERO_KPI: KpiState = { members: 0, partners: 0, sessions: 0, paid: 0 };
 
 function nameOf(row: MemberRow) {
-  return String(row.nickname || row.user_name || row.email || "미등록").trim() || "미등록";
+  return profileDisplayName(row);
+}
+
+function emailCell(row: MemberRow) {
+  if (row.email) return row.email;
+  if (detectMemberProvider(row) === "kakao") return <KakaoPrivateEmailHint />;
+  return "미등록";
 }
 
 export default function DashboardPage() {
@@ -62,7 +72,7 @@ export default function DashboardPage() {
         supabase.from("orders").select("amount").eq("status", "paid"),
         supabase
           .from("profiles")
-          .select("id, nickname, user_name, email, role, ticket_count, point_balance")
+          .select("id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url, client_key")
           .order("created_at", { ascending: false }),
       ]);
 
@@ -70,11 +80,21 @@ export default function DashboardPage() {
       if (!memberRows.error && memberRows.data) {
         list = memberRows.data as unknown as MemberRow[];
       } else {
-        const fallback = await supabase
-          .from("profiles")
-          .select("id, nickname, user_name, email, role, point_balance")
-          .order("created_at", { ascending: false });
-        list = (fallback.data || []) as unknown as MemberRow[];
+        const fallbackSelects = [
+          "id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url",
+          "id, nickname, user_name, email, role, ticket_count, point_balance",
+          "id, nickname, user_name, email, role, point_balance",
+        ];
+        for (const columns of fallbackSelects) {
+          const fallback = await supabase
+            .from("profiles")
+            .select(columns)
+            .order("created_at", { ascending: false });
+          if (!fallback.error && fallback.data) {
+            list = fallback.data as unknown as MemberRow[];
+            break;
+          }
+        }
       }
 
       const paid = paidRows.error
@@ -222,21 +242,24 @@ export default function DashboardPage() {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b bg-muted/50 text-left text-muted-foreground">
+                        <th className="px-3 py-3 font-medium">가입 채널</th>
                         <th className="px-3 py-3 font-medium">닉네임</th>
-                        <th className="px-3 py-3 font-medium">이메일</th>
+                        <th className="px-3 py-3 font-medium">이메일 / 식별 정보</th>
                         <th className="px-3 py-3 font-medium">role</th>
                         <th className="px-3 py-3 font-medium">보유 티켓</th>
                         <th className="px-3 py-3 font-medium">적립 포인트</th>
-                        <th className="px-3 py-3 font-medium">권한</th>
+                        <th className="px-3 py-3 font-medium">권한 관리</th>
                       </tr>
                     </thead>
                     <tbody>
                       {members.map((row) => {
                         const role = String(row.role || "user");
+                        const provider = detectMemberProvider(row);
                         return (
                           <tr key={row.id} className="border-b last:border-0">
+                            <td className="px-3 py-3"><ProviderBadge provider={provider} /></td>
                             <td className="px-3 py-3 font-medium">{nameOf(row)}</td>
-                            <td className="px-3 py-3">{row.email || "미등록"}</td>
+                            <td className="px-3 py-3">{emailCell(row)}</td>
                             <td className="px-3 py-3">
                               <Badge variant={role === "admin" ? "coral" : role === "partner" ? "success" : "default"}>{role}</Badge>
                             </td>

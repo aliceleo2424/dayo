@@ -1,5 +1,7 @@
 import { supabase } from "@/lib/supabase";
 
+export type AuthProvider = "kakao" | "google" | "email";
+
 export type CrmMember = {
   id: string;
   user_id: string | null;
@@ -13,6 +15,9 @@ export type CrmMember = {
   speaking_level: string | null;
   last_test_date: string | null;
   created_at: string | null;
+  provider: AuthProvider;
+  avatar_url: string | null;
+  client_key: string | null;
   name: string;
   paymentStatus: "paid" | "unpaid";
   totalSpent: number;
@@ -31,20 +36,50 @@ type ProfileRecord = {
   speaking_level?: string | null;
   last_test_date?: string | null;
   created_at?: string | null;
+  provider?: string | null;
+  avatar_url?: string | null;
+  client_key?: string | null;
 };
 
-export function profileDisplayName(row: {
+export type MemberIdentity = {
+  id?: string | null;
   nickname?: string | null;
   user_name?: string | null;
   email?: string | null;
-}) {
-  return String(row.nickname || row.user_name || row.email || "미등록").trim() || "미등록";
+  provider?: string | null;
+  avatar_url?: string | null;
+  client_key?: string | null;
+};
+
+export function detectMemberProvider(row: MemberIdentity): AuthProvider {
+  const provider = String(row.provider || "").trim().toLowerCase();
+  if (provider.includes("kakao")) return "kakao";
+  if (provider.includes("google")) return "google";
+
+  const email = String(row.email || "").trim().toLowerCase();
+  const avatar = String(row.avatar_url || "").trim().toLowerCase();
+  const clientKey = String(row.client_key || "").trim().toLowerCase();
+
+  if (email.includes("kakao") || avatar.includes("kakao") || clientKey.includes("kakao")) return "kakao";
+  if (email.endsWith("@gmail.com") || email.includes("googlemail") || avatar.includes("google")) return "google";
+  return "email";
+}
+
+export function profileDisplayName(row: MemberIdentity) {
+  const nick = String(row.nickname || row.user_name || "").trim();
+  if (nick) return nick;
+  if (detectMemberProvider(row) === "kakao") {
+    const shortId = String(row.id || "").slice(0, 5) || "?????";
+    return `카카오 회원 (${shortId})`;
+  }
+  return String(row.email || "미등록").trim() || "미등록";
 }
 
 function mapProfile(row: ProfileRecord, spentByUser: Map<string, number>): CrmMember {
   const id = String(row.id || "");
   const userId = row.user_id ? String(row.user_id) : null;
   const spent = (userId && spentByUser.get(userId)) || spentByUser.get(id) || 0;
+  const provider = detectMemberProvider(row);
   return {
     id,
     user_id: userId,
@@ -58,7 +93,10 @@ function mapProfile(row: ProfileRecord, spentByUser: Map<string, number>): CrmMe
     speaking_level: row.speaking_level || null,
     last_test_date: row.last_test_date || null,
     created_at: row.created_at || null,
-    name: profileDisplayName(row),
+    provider,
+    avatar_url: row.avatar_url || null,
+    client_key: row.client_key || null,
+    name: profileDisplayName({ ...row, id }),
     paymentStatus: spent > 0 ? "paid" : "unpaid",
     totalSpent: spent,
   };
@@ -79,7 +117,9 @@ export async function fetchPaidSpendByUser() {
 export async function fetchCrmMembers(): Promise<{ rows: CrmMember[]; error: string }> {
   try {
     const selects = [
-      "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, last_test_score, speaking_level, last_test_date, created_at",
+      "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, last_test_score, speaking_level, last_test_date, created_at, provider, avatar_url, client_key",
+      "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, last_test_score, speaking_level, last_test_date, created_at, provider, avatar_url",
+      "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, created_at, provider, avatar_url",
       "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, created_at",
       "id, user_id, nickname, user_name, email, role, point_balance, created_at",
       "id, nickname, user_name, email, role, created_at",
@@ -110,7 +150,9 @@ export async function fetchCrmMembers(): Promise<{ rows: CrmMember[]; error: str
 
 export async function fetchCrmMember(id: string): Promise<{ row: CrmMember | null; error: string }> {
   const selects = [
-    "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, last_test_score, speaking_level, last_test_date, created_at",
+    "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, last_test_score, speaking_level, last_test_date, created_at, provider, avatar_url, client_key",
+    "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, last_test_score, speaking_level, last_test_date, created_at, provider, avatar_url",
+    "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, created_at, provider, avatar_url",
     "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, created_at",
     "id, user_id, nickname, user_name, email, role, point_balance, created_at",
   ];
