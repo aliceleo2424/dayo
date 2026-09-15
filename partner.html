@@ -85,42 +85,61 @@
         });
       }
 
-      async function fetchRole(client, userId) {
-        var cached = window._dayoAuthProfile && window._dayoAuthProfile.role;
-        if (!client || !userId) return normalizeRole(cached);
-        var role = '';
+      /* Never trust localStorage / user_metadata / in-memory auth cache for gatekeeping */
+      async function fetchLiveRoleFromProfiles(client, userId) {
+        if (!client || !userId) return '';
         try {
-          var byId = await client.from('profiles').select('role').eq('id', userId).maybeSingle();
-          if (byId && byId.data && byId.data.role) role = byId.data.role;
-        } catch (e) { /* fall through */ }
-        if (!role) {
-          try {
-            var byUser = await client.from('profiles').select('role').eq('user_id', userId).maybeSingle();
-            if (byUser && byUser.data && byUser.data.role) role = byUser.data.role;
-          } catch (e2) { /* ignore */ }
-        }
-        return normalizeRole(role || cached);
+          var byId = await client
+            .from('profiles')
+            .select('role')
+            .eq('id', userId)
+            .single();
+          if (byId && byId.data && byId.data.role) {
+            return normalizeRole(byId.data.role);
+          }
+        } catch (e) { /* fall through to user_id column */ }
+        try {
+          var byUser = await client
+            .from('profiles')
+            .select('role')
+            .eq('user_id', userId)
+            .maybeSingle();
+          if (byUser && byUser.data && byUser.data.role) {
+            return normalizeRole(byUser.data.role);
+          }
+        } catch (e2) { /* ignore */ }
+        return '';
       }
 
       async function run() {
         try {
-          var client = await waitForClient(25);
-          var session = null;
-          if (client && client.auth) {
-            var sessionRes = await Promise.race([
-              client.auth.getSession(),
-              new Promise(function (resolve) {
-                setTimeout(function () { resolve({ data: { session: null } }); }, 2500);
-              })
-            ]);
-            session = sessionRes && sessionRes.data && sessionRes.data.session;
+          var client = await waitForClient(40);
+          if (!client || !client.auth) {
+            showPartnerRecruitView();
+            return;
           }
-          var user = session && session.user;
-          var role = user ? await fetchRole(client, user.id) : '';
-          var isPartner = isPartnerRole(role);
-          var isAdmin = isAdminRole(role);
-          if (isAdmin || isPartner) showPartnerLounge();
-          else showPartnerRecruitView();
+
+          var userRes = await Promise.race([
+            client.auth.getUser(),
+            new Promise(function (resolve) {
+              setTimeout(function () { resolve({ data: { user: null } }); }, 4000);
+            })
+          ]);
+          var user = userRes && userRes.data && userRes.data.user;
+          if (!user) {
+            showPartnerRecruitView();
+            return;
+          }
+
+          var currentRole = await fetchLiveRoleFromProfiles(client, user.id);
+          var isPartner = isPartnerRole(currentRole);
+          var isAdmin = isAdminRole(currentRole);
+
+          if (isAdmin || isPartner) {
+            showPartnerLounge();
+          } else {
+            showPartnerRecruitView();
+          }
         } catch (err) {
           console.warn('파트너 라운지 가드 실패', err);
           showPartnerRecruitView();
@@ -131,7 +150,7 @@
         if (document.documentElement.classList.contains('partner-guard-pending')) {
           showPartnerRecruitView();
         }
-      }, 3000);
+      }, 5000);
 
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
       else run();
