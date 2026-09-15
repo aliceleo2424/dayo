@@ -8,12 +8,22 @@
   }
 
   var LANG_IDS = ['en', 'es', 'fr', 'ja', 'zh', 'vi', 'de', 'it', 'ru', 'ko'];
+  var ACTIVE_LANG_IDS = ['en', 'es', 'fr', 'ko'];
   var PURPOSE_IDS = ['travel', 'opic', 'abroad', 'casual'];
   var STYLE_IDS = ['slow', 'fast', 'correct', 'korean'];
 
+  function isActiveBookingLang(id) {
+    return ACTIVE_LANG_IDS.indexOf(String(id || '').toLowerCase()) !== -1;
+  }
+
   function LANGUAGES() {
     return LANG_IDS.map(function (id) {
-      return { id: id, label: t('book.lang.' + id), flag: window.DayOI18n ? window.DayOI18n.langFlag(id) : '' };
+      return {
+        id: id,
+        label: t('book.lang.' + id),
+        flag: window.DayOI18n ? window.DayOI18n.langFlag(id) : '',
+        disabled: !isActiveBookingLang(id)
+      };
     });
   }
 
@@ -82,6 +92,12 @@
     'text-align:left;transition:background .2s,border-color .2s,transform .2s;}',
     '.bk-chip:hover{border-color:var(--coral,#FF6B57);transform:translateY(-1px);}',
     '.bk-chip.is-on{background:var(--coral,#FF6B57);border-color:var(--coral,#FF6B57);color:#fff;font-weight:700;}',
+    '.bk-chip.is-disabled,.bk-chip:disabled{background:#F5F5F4 !important;color:#A8A29E !important;',
+    'border:1px solid #E7E5E4 !important;opacity:0.55;cursor:not-allowed !important;pointer-events:none;',
+    'transform:none !important;box-shadow:none !important;}',
+    '.bk-chip.is-disabled:hover,.bk-chip:disabled:hover{border-color:#E7E5E4 !important;transform:none !important;}',
+    '.bk-chip__soon{display:inline-block;margin-left:.35rem;padding:.08rem .35rem;border-radius:999px;',
+    'background:#E7E5E4;color:#78716C;font-size:.62rem;font-weight:800;letter-spacing:-.01em;vertical-align:middle;}',
     '.bk-chips--stack .bk-chip{border-radius:var(--radius,18px);line-height:1.5;}',
     '.bk-first-tip{margin:0 0 1rem;padding:.75rem .9rem;border-radius:16px;border:1px solid rgba(255,209,220,.75);',
     'background:linear-gradient(135deg,rgba(255,246,242,.95),rgba(255,241,216,.9));font-size:.8rem;font-weight:700;line-height:1.55;color:var(--text,#5C4A42);}',
@@ -184,6 +200,12 @@
   function chipsMarkup(items, group) {
     return items.map(function (item) {
       var label = item.flag ? item.flag + ' ' + item.label : item.label;
+      var disabled = group === 'language' && (item.disabled || !isActiveBookingLang(item.id));
+      if (disabled) {
+        return '<button type="button" class="bk-chip is-disabled" data-group="' + group + '" data-id="' + item.id +
+          '" aria-pressed="false" aria-disabled="true" disabled tabindex="-1">' + label +
+          '<span class="bk-chip__soon">준비중</span></button>';
+      }
       return '<button type="button" class="bk-chip" data-group="' + group + '" data-id="' + item.id +
         '" aria-pressed="false">' + label + '</button>';
     }).join('');
@@ -368,6 +390,15 @@
     el.overlay.addEventListener('click', function (e) {
       var chip = e.target.closest('.bk-chip');
       if (!chip) return;
+      if (chip.disabled || chip.getAttribute('aria-disabled') === 'true' || chip.classList.contains('is-disabled')) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      if (chip.dataset.group === 'language' && !isActiveBookingLang(chip.dataset.id)) {
+        e.preventDefault();
+        return;
+      }
       selectChip(chip);
     });
 
@@ -435,6 +466,7 @@
       if (at > -1) state.purposes.splice(at, 1);
       else state.purposes.push(id);
     } else if (group === 'language') {
+      if (!isActiveBookingLang(id)) return;
       state.language = id;
     } else if (group === 'style') {
       state.style = id;
@@ -764,7 +796,7 @@
   }
 
   function isStepReady(step) {
-    if (step === 0) return !!state.language && state.purposes.length > 0;
+    if (step === 0) return isActiveBookingLang(state.language) && state.purposes.length > 0;
     if (step === 1) return !!state.style;
     if (step === 2) return !!state.date;
     if (step === 3) return !!state.partner && !!state.slotId;
@@ -947,7 +979,7 @@
 
   function applyDraft(draft) {
     if (!draft) return;
-    state.language = draft.language || null;
+    state.language = isActiveBookingLang(draft.language) ? draft.language : null;
     state.purposes = Array.isArray(draft.purposes) ? draft.purposes.slice() : [];
     state.style = draft.style || null;
     if (draft.chatSpeed) state.chatSpeed = draft.chatSpeed;
