@@ -266,7 +266,6 @@
     body.theme-observer #camBtn,
     body.theme-observer #chatToggle,
     body.theme-observer .ctrl-divider,
-    body.theme-observer #shareBtn,
     body.theme-observer #copilotBar,
     body.theme-observer #chatPanel,
     body.theme-observer #partner-control-bar,
@@ -817,12 +816,7 @@
       overflow: hidden;
     }
 
-    .video-column.sharing {
-      gap: 0.35rem;
-    }
-
-    .video-stage,
-    .share-stage {
+    .video-stage {
       position: relative;
       width: 100%;
       min-height: 0;
@@ -834,17 +828,6 @@
       background: linear-gradient(160deg, #F7D6DE 0%, #FFE2C8 50%, #FFF1C9 100%);
       box-shadow: 0 8px 28px var(--shadow-warm);
       border: 1px solid rgba(255, 209, 220, 0.5);
-    }
-
-    .video-column.sharing .share-stage {
-      flex: 0 1 42%;
-      min-height: 0;
-      max-height: 42%;
-    }
-
-    .video-column.sharing .video-stage {
-      flex: 1 1 58%;
-      min-height: 0;
     }
 
     .daily-host {
@@ -886,35 +869,6 @@
     .video-stage.is-daily .self-pip {
       display: block;
       z-index: 6;
-    }
-
-    .share-stage {
-      display: none;
-      background: #2A2422;
-    }
-
-    .video-column.sharing .share-stage {
-      display: block;
-    }
-
-    .share-stage video {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      background: #1E1A19;
-    }
-
-    .share-label {
-      position: absolute;
-      left: 0.65rem;
-      top: 0.55rem;
-      z-index: 2;
-      padding: 0.25rem 0.65rem;
-      background: rgba(255, 252, 250, 0.9);
-      color: var(--text);
-      border-radius: 999px;
-      font-size: 0.72rem;
-      font-weight: 700;
     }
 
     .tutor-video {
@@ -1993,7 +1947,6 @@
 
     body.session-ended-user #videoStage,
     body.session-ended-user #videoColumn,
-    body.session-ended-user #shareStage,
     body.session-ended-user #dailyHost {
       display: none !important;
     }
@@ -2549,8 +2502,7 @@
         justify-content: flex-start;
       }
 
-      .video-column,
-      .video-column.sharing {
+      .video-column {
         display: flex;
         flex-direction: column;
         flex: 1 1 auto;
@@ -2561,24 +2513,13 @@
         grid-template-rows: none;
       }
 
-      .video-stage,
-      .share-stage,
-      .video-column.sharing .share-stage {
+      .video-stage {
         width: 100%;
         flex: 1 1 auto;
         min-height: 0;
         max-height: none;
         aspect-ratio: unset;
         height: auto;
-      }
-
-      .video-column.sharing .share-stage {
-        flex: 0 1 38%;
-        max-height: 38%;
-      }
-
-      .video-column.sharing .video-stage {
-        flex: 1 1 62%;
       }
 
       .chat-panel {
@@ -3150,18 +3091,12 @@
         <div class="tutor-status header-partner-sub partner-badge-sub" data-i18n="room.partnerStatus" hidden aria-hidden="true">Live · 프랑스어 대화 파트너</div>
       </div>
       <div class="top-right" id="roomHeaderActions">
-        <button class="top-btn" id="shareBtn" type="button" data-i18n="room.share">🖥️ 화면 공유</button>
         <button class="top-btn top-btn--end btn-end-session" id="endBtn" type="button" data-i18n="room.end">🚪 세션 종료</button>
       </div>
     </header>
 
     <main class="main-stage chat-collapsed" id="mainStage">
       <div class="video-column" id="videoColumn">
-        <div class="share-stage" id="shareStage">
-          <span class="share-label" data-i18n="room.shareLabel">🖥️ 화면 공유 중</span>
-          <video id="shareVideo" playsinline muted></video>
-        </div>
-
         <div class="video-stage" id="videoStage">
           <div class="daily-host" id="dailyHost"></div>
           <div class="tutor-video" id="tutorVideoBox">
@@ -3237,10 +3172,6 @@
         <span class="ctrl-btn__icon" aria-hidden="true">📹</span>
         <span class="ctrl-btn__text label">카메라 켜짐</span>
       </button>
-      <button class="ctrl-btn" id="chatToggle" type="button">
-        <span class="ctrl-btn__icon" aria-hidden="true">💬</span>
-        <span class="ctrl-btn__text label" data-i18n="room.chatLabel">채팅</span>
-      </button>
       <div class="ctrl-divider" aria-hidden="true"></div>
       <button class="ctrl-btn ctrl-btn--ai" id="wordHelpBtn" type="button">
         <span class="ctrl-btn__icon" aria-hidden="true">💡</span>
@@ -3249,6 +3180,10 @@
       <button class="ctrl-btn ctrl-btn--ai" id="sentenceHelpBtn" type="button">
         <span class="ctrl-btn__icon" aria-hidden="true">📝</span>
         <span class="ctrl-btn__text label">문장도움</span>
+      </button>
+      <button class="ctrl-btn" id="chatToggle" type="button">
+        <span class="ctrl-btn__icon" aria-hidden="true">💬</span>
+        <span class="ctrl-btn__text label" data-i18n="room.chatLabel">대화카드</span>
       </button>
     </footer>
   </div>
@@ -4067,16 +4002,6 @@
       renderCamLabel();
     });
 
-    document.getElementById('shareBtn').addEventListener('click', async () => {
-      if (!live) return;
-      try {
-        const sharing = await live.toggleShare();
-        showToast(sharing ? t('room.toastShareStart') : t('room.toastShareStop'));
-      } catch (_) {
-        showToast(t('room.toastShareCancel'));
-      }
-    });
-
     renderMicLabel();
     renderCamLabel();
     renderHelpBtnLabels();
@@ -4383,7 +4308,7 @@
 
     function hideLiveVideoStage() {
       document.body.classList.add('session-ended-user');
-      ['videoStage', 'videoColumn', 'shareStage', 'dailyHost'].forEach(function (id) {
+      ['videoStage', 'videoColumn', 'dailyHost'].forEach(function (id) {
         var el = document.getElementById(id);
         if (!el) return;
         el.hidden = true;

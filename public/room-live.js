@@ -16,7 +16,6 @@
 
   var micOn = true;
   var camOn = true;
-  var sharing = false;
   var hungUp = false;
   var demoMode = true;
   var geminiOk = false;
@@ -24,7 +23,6 @@
 
   var callFrame = null;
   var localStream = null;
-  var shareStream = null;
   var recognition = null;
   var wantListen = true;
   var geminiBusy = false;
@@ -267,7 +265,6 @@
       column: document.getElementById('videoColumn'),
       selfVideo: document.getElementById('selfVideo'),
       selfPip: document.getElementById('selfPip'),
-      shareVideo: document.getElementById('shareVideo'),
       phrases: document.getElementById('copilotPhrases'),
       grammar: document.getElementById('copilotGrammarText'),
       status: document.getElementById('copilotStatus')
@@ -688,17 +685,6 @@
     notifyMedia();
   }
 
-  function stopShareDemo() {
-    if (shareStream) {
-      shareStream.getTracks().forEach(function (track) { track.stop(); });
-      shareStream = null;
-    }
-    var nodes = els();
-    if (nodes.shareVideo) nodes.shareVideo.srcObject = null;
-    if (nodes.column) nodes.column.classList.remove('sharing');
-    sharing = false;
-  }
-
   function startDemoMedia() {
     if (isObserverRoomMode()) return Promise.resolve();
     if (window.__dayoUsePeerJS) return Promise.resolve();
@@ -947,39 +933,6 @@
     return camOn;
   }
 
-  function toggleShare() {
-    if (callFrame) {
-      var action = sharing
-        ? callFrame.stopScreenShare()
-        : callFrame.startScreenShare();
-      return Promise.resolve(action).then(function () {
-        sharing = !sharing;
-        return sharing;
-      });
-    }
-
-    if (sharing) {
-      stopShareDemo();
-      return Promise.resolve(false);
-    }
-
-    return navigator.mediaDevices.getDisplayMedia({ video: true }).then(function (stream) {
-      shareStream = stream;
-      sharing = true;
-      var nodes = els();
-      if (nodes.shareVideo) nodes.shareVideo.srcObject = stream;
-      if (nodes.column) nodes.column.classList.add('sharing');
-      var track = stream.getVideoTracks()[0];
-      if (track) {
-        track.addEventListener('ended', function () {
-          stopShareDemo();
-          showToast(t('room.toastShareStop'));
-        });
-      }
-      return true;
-    });
-  }
-
   function hangUp() {
     hungUp = true;
     window.dayoSessionEnded = true;
@@ -990,7 +943,6 @@
       try { window.DayOPeerVideo.destroy(); } catch (e) { /* ignore */ }
     }
     destroyDaily();
-    stopShareDemo();
     if (localStream) {
       localStream.getTracks().forEach(function (track) { track.stop(); });
       localStream = null;
@@ -1089,7 +1041,6 @@
     isDemo: function () { return demoMode; },
     toggleMic: toggleMic,
     toggleCam: toggleCam,
-    toggleShare: toggleShare,
     hangUp: hangUp,
     startSpeech: function () {
       wantListen = true;
