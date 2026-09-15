@@ -15,6 +15,7 @@
       var FALLBACK_FORM = 'https://docs.google.com/forms/d/e/1FAIpQLScBTytUfVL4uyxv3R95dFfcs5rV-UBMnvujJ5GsK4ZNzh_1ZQ/viewform';
       var lastAuthKey = '';
       var authRunId = 0;
+      var modalWatch = null;
 
       function applyFormUrl() {
         var env = window.__DAYO_ENV__ || {};
@@ -39,13 +40,119 @@
         if (on) {
           node.hidden = false;
           node.style.display = '';
+          if (node.id === 'partner-dashboard-section' || node.getAttribute('data-partner-home')) {
+            node.style.setProperty('display', 'block', 'important');
+          }
         } else {
           node.hidden = true;
           node.style.display = 'none';
         }
       }
 
+      function hasSbAuthToken() {
+        try {
+          var keys = Object.keys(localStorage);
+          for (var i = 0; i < keys.length; i++) {
+            if (keys[i].indexOf('sb-') !== 0 || keys[i].indexOf('-auth-token') < 0) continue;
+            var raw = localStorage.getItem(keys[i]);
+            if (!raw) continue;
+            var parsed = JSON.parse(raw);
+            if (parsed && (parsed.access_token || (parsed.currentSession && parsed.currentSession.access_token))) {
+              return true;
+            }
+          }
+        } catch (e) { /* ignore */ }
+        return false;
+      }
+
+      function peekLocalSessionEmail() {
+        try {
+          var keys = Object.keys(localStorage);
+          for (var i = 0; i < keys.length; i++) {
+            if (keys[i].indexOf('sb-') !== 0 || keys[i].indexOf('-auth-token') < 0) continue;
+            var raw = localStorage.getItem(keys[i]);
+            if (!raw) continue;
+            var parsed = JSON.parse(raw);
+            var session = parsed && (parsed.currentSession || parsed);
+            var user = session && (session.user || (session.currentSession && session.currentSession.user));
+            if (user && user.email) return String(user.email).toLowerCase();
+          }
+        } catch (e2) { /* ignore */ }
+        try {
+          return String(localStorage.getItem('dayo_user_email') || localStorage.getItem('dayo_userEmail') || '').toLowerCase();
+        } catch (e3) {
+          return '';
+        }
+      }
+
+      function forceHideAuthModals() {
+        var nodes = document.querySelectorAll(
+          '#login-modal, #authModal, #loginModal, #signup-modal, .login-modal-overlay, .ms-overlay, .ms-welcome-overlay'
+        );
+        Array.prototype.forEach.call(nodes, function (el) {
+          el.classList.remove('is-open');
+          el.setAttribute('aria-hidden', 'true');
+          el.style.setProperty('display', 'none', 'important');
+          el.style.setProperty('opacity', '0', 'important');
+          el.style.setProperty('visibility', 'hidden', 'important');
+          el.style.setProperty('pointer-events', 'none', 'important');
+        });
+        if (window.DayOScrollLock && typeof window.DayOScrollLock.unlockAll === 'function') {
+          try { window.DayOScrollLock.unlockAll(); } catch (e) { /* ignore */ }
+        }
+        if (document.body) {
+          document.body.style.overflow = '';
+          document.body.style.pointerEvents = '';
+        }
+      }
+
+      function installAuthModalKillSwitch() {
+        window.__dayoPartnerLoungeLocked = true;
+        forceHideAuthModals();
+
+        function blockedOpen(e) {
+          if (e && typeof e.preventDefault === 'function') e.preventDefault();
+          forceHideAuthModals();
+          return false;
+        }
+
+        if (window.DayOMode && typeof window.DayOMode === 'object') {
+          window.DayOMode.openLogin = blockedOpen;
+          window.DayOMode.closeLogin = forceHideAuthModals;
+          window.DayOMode.closeAuthModal = forceHideAuthModals;
+        }
+
+        window.openLoginModal = blockedOpen;
+        window.handleNaverFastLogin = blockedOpen;
+
+        if (modalWatch) return;
+        modalWatch = new MutationObserver(function (mutations) {
+          if (!window.__dayoPartnerLoungeLocked) return;
+          for (var i = 0; i < mutations.length; i++) {
+            var target = mutations[i].target;
+            if (!target || !target.classList) continue;
+            var isAuthOverlay = target.id === 'login-modal'
+              || target.id === 'authModal'
+              || target.id === 'loginModal'
+              || target.classList.contains('ms-overlay')
+              || target.classList.contains('login-modal-overlay')
+              || target.classList.contains('ms-welcome-overlay');
+            if (!isAuthOverlay) continue;
+            if (target.classList.contains('is-open') || target.style.display === 'flex') {
+              forceHideAuthModals();
+              return;
+            }
+          }
+        });
+        modalWatch.observe(document.documentElement, {
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['class', 'style']
+        });
+      }
+
       function showAuthSection() {
+        window.__dayoPartnerLoungeLocked = false;
         var nodes = els();
         if (document.body) {
           document.body.classList.add('is-partner-auth');
@@ -65,9 +172,11 @@
         setDisplay(nodes.auth, false);
         setDisplay(nodes.dash, true);
         setDisplay(nodes.recruit, false);
+        installAuthModalKillSwitch();
       }
 
       function showPartnerRecruitView() {
+        window.__dayoPartnerLoungeLocked = false;
         var nodes = els();
         if (document.body) {
           document.body.classList.add('is-partner-recruit');
@@ -84,6 +193,7 @@
 
       window.showPartnerLounge = showPartnerLounge;
       window.showPartnerRecruitView = showPartnerRecruitView;
+      window.forceHidePartnerAuthModals = forceHideAuthModals;
 
       function waitForClient(tries) {
         return new Promise(function (resolve) {
@@ -146,7 +256,11 @@
         var isPartner = role === 'partner'
           || (profile && (profile.is_partner === true || profile.is_partner === 'true' || profile.is_partner === 1));
         var isAdmin = role === 'admin' || role === 'super_admin' || role === 'superadmin';
-        var emailHint = String(userEmail || '').toLowerCase().indexOf('partner') !== -1;
+        var email = String(userEmail || '').toLowerCase();
+        var emailHint = email.indexOf('partner') !== -1
+          || email.indexOf('aliceleo2424-partner') !== -1
+          || email === 'aliceleo2424-partner@gmail.com'
+          || /aliceleo2424.*partner/i.test(email);
         return !!(isPartner || isAdmin || emailHint);
       }
 
@@ -171,8 +285,13 @@
           console.log('Auth event:', event, 'Session user:', session && session.user && session.user.email);
 
           if (!session || !session.user) {
-            /* Ignore transient null before INITIAL_SESSION / SIGNED_IN */
-            if (event === 'INITIAL_SESSION' || event === 'SIGNED_OUT') {
+            /* Never reopen auth UI on flaky INITIAL_SESSION null while a token still exists */
+            if (event === 'SIGNED_OUT') {
+              showAuthSection();
+              lastAuthKey = 'anon';
+              return;
+            }
+            if (event === 'INITIAL_SESSION' && !hasSbAuthToken() && !window.__dayoPartnerLoungeLocked) {
               showAuthSection();
               lastAuthKey = 'anon';
             }
@@ -181,6 +300,7 @@
 
           var authKey = String(session.user.id || '') + ':' + String(session.user.email || '');
           if (authKey === lastAuthKey && document.body && document.body.classList.contains('is-partner-lounge')) {
+            installAuthModalKillSwitch();
             return;
           }
 
@@ -199,7 +319,7 @@
         } catch (err) {
           if (myRun !== authRunId) return;
           console.warn('파트너 라운지 가드 실패', err);
-          if (session && session.user && String(session.user.email || '').toLowerCase().indexOf('partner') !== -1) {
+          if (session && session.user && isAuthorized(null, session.user.email)) {
             initPartnerDashboard(session.user, null);
             return;
           }
@@ -211,9 +331,15 @@
         document.documentElement.classList.remove('partner-guard-pending');
         if (document.body) document.body.classList.remove('partner-guard-pending');
 
+        /* Optimistic: known partner session token → show lounge immediately, kill login modals */
+        var emailHint = peekLocalSessionEmail();
+        if (hasSbAuthToken() && isAuthorized(null, emailHint)) {
+          showPartnerLounge();
+        }
+
         var client = await waitForClient(60);
         if (!client || !client.auth) {
-          showAuthSection();
+          if (!window.__dayoPartnerLoungeLocked) showAuthSection();
           return;
         }
 
@@ -221,12 +347,13 @@
           handleAuthState(event, session);
         });
 
-        /* Safety: also read current session after listener is attached */
         try {
           var now = await client.auth.getSession();
           var session = now && now.data && now.data.session;
           if (session && session.user) {
             handleAuthState('GET_SESSION', session);
+          } else if (!hasSbAuthToken() && !window.__dayoPartnerLoungeLocked) {
+            showAuthSection();
           }
         } catch (e) { /* onAuthStateChange will settle */ }
       }
@@ -3018,6 +3145,7 @@
       setTimeout(waitForPartnerStore, 40);
     })();
   </script>
+  <script src="terms-mini-modal.js"></script>
   <script src="mobile-nav.js"></script>
   <script src="auth.js"></script>
   <script src="mode-switch.js"></script>
@@ -3026,18 +3154,44 @@
   <script>
     (function bindPartnerAuthLogin() {
       var btn = document.getElementById('partner-auth-login-btn');
-      if (!btn) return;
-      btn.addEventListener('click', function () {
-        if (window.DayOMode && typeof window.DayOMode.openLogin === 'function') {
-          window.DayOMode.openLogin();
-          return;
+      if (btn) {
+        btn.addEventListener('click', function () {
+          if (window.__dayoPartnerLoungeLocked) {
+            if (window.forceHidePartnerAuthModals) window.forceHidePartnerAuthModals();
+            return;
+          }
+          if (window.DayOMode && typeof window.DayOMode.openLogin === 'function') {
+            window.DayOMode.openLogin();
+            return;
+          }
+          if (typeof window.openLoginModal === 'function') {
+            window.openLoginModal();
+            return;
+          }
+          window.location.href = '/';
+        });
+      }
+
+      /* mode-switch mounts late — re-seal openLogin after it loads */
+      function resealPartnerAuthModals() {
+        if (!window.__dayoPartnerLoungeLocked) return;
+        if (window.forceHidePartnerAuthModals) window.forceHidePartnerAuthModals();
+        if (window.DayOMode && typeof window.DayOMode === 'object') {
+          window.DayOMode.openLogin = function () {
+            if (window.forceHidePartnerAuthModals) window.forceHidePartnerAuthModals();
+            return false;
+          };
         }
-        if (typeof window.openLoginModal === 'function') {
-          window.openLoginModal();
-          return;
-        }
-        window.location.href = '/';
-      });
+        window.openLoginModal = function () {
+          if (window.forceHidePartnerAuthModals) window.forceHidePartnerAuthModals();
+          return false;
+        };
+      }
+      resealPartnerAuthModals();
+      setTimeout(resealPartnerAuthModals, 0);
+      setTimeout(resealPartnerAuthModals, 120);
+      setTimeout(resealPartnerAuthModals, 600);
+      document.addEventListener('dayo:partner-authorized', resealPartnerAuthModals);
     })();
   </script>
 </body>

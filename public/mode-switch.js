@@ -84,7 +84,8 @@
     '.ms-consent label{display:flex;align-items:flex-start;gap:.45rem;margin:0;color:#5C4A42;',
     'font-size:.74rem;font-weight:650;line-height:1.45;cursor:pointer;}',
     '.ms-consent input{margin-top:.15rem;flex:0 0 auto;accent-color:#FF6B57;}',
-    '.ms-consent a{color:#E85B48;font-weight:800;text-decoration:underline;text-underline-offset:2px;}',
+    '.ms-consent a,.ms-consent [data-terms-mini]{color:#E85B48;font-weight:800;text-decoration:underline;text-underline-offset:2px;}',
+    '.ms-consent [data-terms-mini]{border:none;background:none;padding:0;margin:0 0 0 .15rem;font:inherit;cursor:pointer;}',
     '.ms-consent__hint{margin:0;color:#C07868;font-size:.7rem;font-weight:700;min-height:1em;}',
     '.ms-divider{display:flex;align-items:center;gap:.55rem;margin:1.15rem 0 .85rem;color:var(--muted,#9A8580);',
     'font-size:.72rem;font-weight:700;letter-spacing:-.01em;}',
@@ -725,6 +726,11 @@
   }
 
   function openLogin(href, options) {
+    if (window.__dayoPartnerLoungeLocked || (document.body && document.body.classList.contains('is-partner-lounge'))) {
+      hideAuthLayer(overlay);
+      hideAuthLayer(welcomeOverlay);
+      return;
+    }
     pendingHref = href || null;
     setAuthTab(options && options.tab === 'signup' ? 'signup' : 'login');
     showAuthLayer(overlay);
@@ -910,8 +916,8 @@
       '      placeholder="', t('login.passwordPlaceholder'), '">',
       '    <div class="ms-consent" id="msSignupConsent" aria-label="회원가입 필수 동의">',
       '      <label><input type="checkbox" id="msAgreeAge" data-ms-required-consent> [필수] 만 14세 이상입니다.</label>',
-      '      <label><input type="checkbox" id="msAgreeTerms" data-ms-required-consent> [필수] DayO 이용약관 동의 <a href="/terms" target="_blank" rel="noopener noreferrer">보기</a></label>',
-      '      <label><input type="checkbox" id="msAgreePrivacy" data-ms-required-consent> [필수] 개인정보 수집 및 이용 동의 <a href="/privacy" target="_blank" rel="noopener noreferrer">보기</a></label>',
+      '      <label><input type="checkbox" id="msAgreeTerms" data-ms-required-consent> [필수] DayO 이용약관 동의 <button type="button" data-terms-mini="terms" data-terms-check="#msAgreeTerms">보기</button></label>',
+      '      <label><input type="checkbox" id="msAgreePrivacy" data-ms-required-consent> [필수] 개인정보 수집 및 이용 동의 <button type="button" data-terms-mini="privacy" data-terms-check="#msAgreePrivacy">보기</button></label>',
       '      <label><input type="checkbox" id="msAgreeMarketing"> [선택] 세션 알림 및 이벤트 혜택 수신 동의</label>',
       '      <p class="ms-consent__hint" id="msConsentHint" role="status"></p>',
       '    </div>',
