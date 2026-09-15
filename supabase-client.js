@@ -159,9 +159,19 @@
       }
       localStorage.setItem('dayo_is_logged_in', 'true');
       localStorage.setItem('dayo.memberSession', 'active');
-      if (profile && profile.ticket_count != null) {
-        localStorage.setItem('ticketCount', String(profile.ticket_count));
-        localStorage.setItem('dayo_ticket_count', String(profile.ticket_count));
+      var ticketBalance = null;
+      if (profile) {
+        if (profile.ticket_count != null && profile.ticket_count !== '') {
+          ticketBalance = Number(profile.ticket_count);
+        } else if (profile.tickets != null && profile.tickets !== '') {
+          ticketBalance = Number(profile.tickets);
+        }
+      }
+      /* Only persist confirmed balances. Skip writing 0 here so new-user welcome
+         grant cannot flash 1→0→1 via localStorage before authprofile hydrates UI. */
+      if (ticketBalance != null && Number.isFinite(ticketBalance) && ticketBalance > 0) {
+        localStorage.setItem('ticketCount', String(ticketBalance));
+        localStorage.setItem('dayo_ticket_count', String(ticketBalance));
       }
       if (profile && profile.point_balance != null) {
         localStorage.setItem('dayo_point_balance', String(profile.point_balance));
@@ -252,16 +262,24 @@
     var user = sessionRes && sessionRes.data && sessionRes.data.user;
     window._dayoAuthUser = user || null;
     if (!user) return null;
-    var profileCols = 'nickname, role, user_name, ticket_count, point_balance, email, speaking_level, last_test_score, last_test_date, streak_count, welcome_email_sent';
+    var profileCols = 'nickname, role, user_name, ticket_count, tickets, point_balance, email, speaking_level, last_test_score, last_test_date, streak_count, welcome_email_sent, created_at';
+    var profileColsSafe = 'nickname, role, user_name, ticket_count, point_balance, email, speaking_level, last_test_score, last_test_date, streak_count, welcome_email_sent, created_at';
     var q = await client
       .from('profiles')
       .select(profileCols)
       .eq('user_id', user.id)
       .maybeSingle();
+    if (q.error) {
+      q = await client
+        .from('profiles')
+        .select(profileColsSafe)
+        .eq('user_id', user.id)
+        .maybeSingle();
+    }
     if ((q.error || !q.data) && user.id) {
       q = await client
         .from('profiles')
-        .select(profileCols)
+        .select(profileColsSafe)
         .eq('id', user.id)
         .maybeSingle();
     }
@@ -274,10 +292,20 @@
     }
     var profile = q.data || {
       nickname: window.getCachedNickname() || emailPrefix(user.email),
-      ticket_count: 0,
+      ticket_count: null,
+      tickets: null,
       point_balance: 0,
       email: user.email
     };
+    var ticketBalance = null;
+    if (profile.ticket_count != null && profile.ticket_count !== '') {
+      ticketBalance = Number(profile.ticket_count);
+    } else if (profile.tickets != null && profile.tickets !== '') {
+      ticketBalance = Number(profile.tickets);
+    }
+    if (ticketBalance != null && Number.isFinite(ticketBalance)) {
+      profile.ticket_count = ticketBalance;
+    }
     var dbNick = String((profile && profile.nickname) || '').trim();
     var dbUserName = String((profile && profile.user_name) || '').trim();
     var cachedNickname = window.getCachedNickname();
@@ -329,12 +357,16 @@
     var createdAt = user.created_at ? new Date(user.created_at).getTime() : 0;
     var isNewUser = createdAt && (Date.now() - createdAt < 24 * 60 * 60 * 1000);
     var wantsWelcome = !!(user.user_metadata && user.user_metadata.welcome_ticket);
-    if ((wantsWelcome || isNewUser) && Number(profile.ticket_count) < 1) {
+    var currentTickets = profile.ticket_count != null ? Number(profile.ticket_count) : 0;
+    if ((wantsWelcome || isNewUser) && (!Number.isFinite(currentTickets) || currentTickets < 1)) {
       try {
         await client.from('profiles').update({ ticket_count: 1 }).eq('user_id', user.id);
         profile.ticket_count = 1;
         rememberLocalProfile(profile, user.email);
         window._dayoAuthProfile = profile;
+        if (window.DayOTicketWallet && typeof window.DayOTicketWallet.setCount === 'function') {
+          window.DayOTicketWallet.setCount(1);
+        }
       } catch (e) { /* ignore */ }
     }
     window.DayOSendWelcomeEmail(user, profile);

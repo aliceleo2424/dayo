@@ -1532,7 +1532,7 @@
       <div class="topbar-right">
         <div class="topbar-extras">
           <button type="button" class="ghost-btn" data-tickets-open style="padding:0.45rem 0.8rem;font-size:0.78rem;">
-            <span data-ticket-badge-text>☕️ 보유 티켓: 0장</span>
+            <span data-ticket-badge-text>☕️ 보유 티켓: -장</span>
           </button>
         </div>
         <div data-mode-switch="inline"></div>
@@ -1549,7 +1549,7 @@
     <a href="index.html?booking=open" data-booking-open data-i18n="nav.booking">대화 예약하기</a>
     <a href="partner.html"><span aria-hidden="true">🤝</span> <span data-i18n="nav.partnerStudio">파트너 스튜디오로 이동</span></a>
     <button type="button" class="nav-drawer__link" data-tickets-open>
-      <span data-ticket-badge-text>☕️ 보유 티켓: 0장</span>
+      <span data-ticket-badge-text>☕️ 보유 티켓: -장</span>
     </button>
     <button type="button" onclick="handleLogout(event)" class="btn-logout" style="cursor: pointer;" data-i18n="login.logout">로그아웃</button>
   </nav>
@@ -1571,7 +1571,7 @@
           <button type="button" class="edit-nickname-btn" id="edit-nickname-btn" data-i18n="mypage.nick.edit">✏️ 닉네임 변경</button>
         </div>
         <div style="font-size: 13px; color: #666;">
-          <span data-i18n="mypage.ticket.held">보유 티켓</span> <strong data-summary-ticket style="color: #FF5A36;">0장</strong> <span style="color: #ccc; margin: 0 8px;">|</span> <span data-i18n="mypage.ticket.validity">결제일로부터 90일 이내 이용 가능</span>
+          <span data-i18n="mypage.ticket.held">보유 티켓</span> <strong style="color: #FF5A36;"><span id="user-ticket-count" class="ticket-count-display" data-ticket-count>-</span>장</strong> <span style="color: #ccc; margin: 0 8px;">|</span> <span data-i18n="mypage.ticket.validity">결제일로부터 90일 이내 이용 가능</span>
         </div>
       </div>
       <div class="mypage-welcome-actions">

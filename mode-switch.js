@@ -564,15 +564,22 @@
     }
 
     if (config.loggedIn) {
-      var ticketCount = 0;
+      var ticketCount = null;
       try {
-        if (window._dayoAuthProfile && window._dayoAuthProfile.ticket_count != null) {
-          ticketCount = Number(window._dayoAuthProfile.ticket_count) || 0;
-        } else if (window.DayOTicketWallet && typeof window.DayOTicketWallet.getCount === 'function') {
+        if (window.DayOTicketWallet && typeof window.DayOTicketWallet.isHydrated === 'function' && !window.DayOTicketWallet.isHydrated()) {
+          ticketCount = null;
+        } else if (window._dayoAuthProfile) {
+          var p = window._dayoAuthProfile;
+          if (p.ticket_count != null) ticketCount = Number(p.ticket_count);
+          else if (p.tickets != null) ticketCount = Number(p.tickets);
+        }
+        if (ticketCount == null && window.DayOTicketWallet && typeof window.DayOTicketWallet.isHydrated === 'function' && window.DayOTicketWallet.isHydrated()) {
           ticketCount = window.DayOTicketWallet.getCount();
         }
-      } catch (e) { /* ignore */ }
-      var ticketLabel = '☕️ 보유 티켓: ' + ticketCount + '장';
+      } catch (e) { ticketCount = null; }
+      var ticketLabel = ticketCount == null
+        ? '☕️ 보유 티켓: -장'
+        : ('☕️ 보유 티켓: ' + ticketCount + '장');
 
       return [
         '<div class="ms-auth-in">',
