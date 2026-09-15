@@ -1,43 +1,64 @@
-/* DayO in-app terms mini modal — no target=_blank, auto-check on confirm */
+/* DayO in-app terms/refund mini modals — no target=_blank, auto-check on confirm */
 (function () {
   'use strict';
 
   var CONTENTS = {
     terms: {
-      title: '이용약관 요약',
+      title: '📋 이용약관 안내',
       checkbox: 'msAgreeTerms',
       body: [
-        '<p><strong>서비스 목적</strong></p>',
-        '<p>DayO는 학습자와 글로벌 대화 파트너가 1:1 화상으로 일상 대화를 나누는 플랫폼입니다.</p>',
-        '<p><strong>에스크로 결제</strong></p>',
-        '<p>이용권 결제 대금은 세션 완료 전까지 안전하게 보관되며, 세션 완료 후 파트너 활동비 정산에 사용됩니다.</p>',
-        '<p><strong>부정행위 제재</strong></p>',
-        '<p>허위 예약, 무단 노쇼 반복, 욕설·괴롭힘, 결제 부정 이용 시 이용 제한·환불 거부·계정 정지 조치가 가능합니다.</p>',
-        '<p>전문은 사이트 하단 이용약관에서 확인할 수 있습니다.</p>'
+        '<p class="terms-mini-section">[서비스 목적]</p>',
+        '<ul>',
+        '<li>DayO는 학습자와 글로벌 대화 파트너가 1:1 화상으로 일상 대화를 나누는 플랫폼입니다.</li>',
+        '</ul>',
+        '<p class="terms-mini-section">[에스크로 결제]</p>',
+        '<ul>',
+        '<li>이용권 결제 대금은 세션 완료 전까지 안전하게 보관되며, 세션 완료 후 파트너 활동비 정산에 사용됩니다.</li>',
+        '</ul>',
+        '<p class="terms-mini-section">[부정행위 제재]</p>',
+        '<ul>',
+        '<li>허위 예약, 무단 노쇼 반복, 욕설·괴롭힘, 결제 부정 이용 시 이용 제한·환불 거부·계정 정지 조치가 가능합니다.</li>',
+        '</ul>'
       ].join('')
     },
     privacy: {
-      title: '개인정보 수집·이용 요약',
+      title: '📋 개인정보 수집·이용 안내',
       checkbox: 'msAgreePrivacy',
       body: [
-        '<p><strong>수집 항목</strong></p>',
-        '<p>이메일, 닉네임, 로그인 식별자, 결제·환불 기록, 세션 이용 기록, 서비스 이용 로그.</p>',
-        '<p><strong>이용 목적</strong></p>',
-        '<p>회원 관리, 예약·화상 세션 제공, 결제/정산, 고객 문의 대응, 서비스 개선.</p>',
-        '<p><strong>보유 기간</strong></p>',
-        '<p>회원 탈퇴 시 지체 없이 파기. 단, 관련 법령에 따른 결제·거래 기록 등은 법정 기간 동안 보관합니다.</p>',
-        '<p>전문은 사이트 하단 개인정보처리방침에서 확인할 수 있습니다.</p>'
+        '<p class="terms-mini-section">[수집 항목]</p>',
+        '<ul>',
+        '<li>이메일, 닉네임, 로그인 식별자, 결제·환불 기록, 세션 이용 기록, 서비스 이용 로그</li>',
+        '</ul>',
+        '<p class="terms-mini-section">[이용 목적]</p>',
+        '<ul>',
+        '<li>회원 관리, 예약·화상 세션 제공, 결제/정산, 고객 문의 대응, 서비스 개선</li>',
+        '</ul>',
+        '<p class="terms-mini-section">[보유 기간]</p>',
+        '<ul>',
+        '<li>회원 탈퇴 시 지체 없이 파기. 단, 관련 법령에 따른 결제·거래 기록 등은 법정 기간 동안 보관합니다.</li>',
+        '</ul>'
       ].join('')
     },
     refund: {
-      title: '취소 및 환불규정 요약',
+      title: '📋 취소 및 환불 규정 안내',
       checkbox: 'tkRefundAgree',
       body: [
-        '<p><strong>세션 시작 24시간 전 취소</strong> — 결제 금액 100% 환불</p>',
-        '<p><strong>세션 시작 24시간 이내 ~ 1시간 전 취소</strong> — 결제 금액 50% 환불</p>',
-        '<p><strong>세션 시작 1시간 이내 취소 또는 노쇼</strong> — 환불 불가 (티켓 차감)</p>',
-        '<p>파트너 귀책(지각·미입장 등) 또는 DayO 서버 장애 시에는 100% 환불/보상 티켓이 적용됩니다.</p>',
-        '<p>전문은 사이트 하단 취소 및 환불규정에서 확인할 수 있습니다.</p>'
+        '<p class="terms-mini-section">[세션 취소/환불 기준]</p>',
+        '<ul>',
+        '<li>세션 시작 <strong>24시간 전</strong>: 결제 금액 <strong>100% 전액 환불</strong></li>',
+        '<li><strong>24시간 이내 ~ 1시간 전</strong>: 결제 금액 <strong>50% 환불</strong> (파트너 스케줄 보전)</li>',
+        '<li><strong>1시간 이내 취소</strong> 또는 당일 노쇼(No-Show): <strong>환불 불가</strong> (티켓 1회 차감)</li>',
+        '</ul>',
+        '<p class="terms-mini-section">[플랫폼 / 파트너 귀책사유]</p>',
+        '<ul>',
+        '<li>파트너 노쇼 또는 10분 이상 지각: <strong>100% 전액 환불</strong> 및 세션 무료 보상 티켓 지급</li>',
+        '<li>시스템 서버 장애로 진행 불가 시: 세션 <strong>100% 재부여</strong></li>',
+        '</ul>',
+        '<p class="terms-mini-section">[유효기간 및 기타]</p>',
+        '<ul>',
+        '<li>결제일로부터 <strong>90일 내</strong> 사용 권장</li>',
+        '<li>디지털 콘텐츠(PDF 등) 다운로드 완료 후 청약철회 불가</li>',
+        '</ul>'
       ].join('')
     }
   };
@@ -53,66 +74,78 @@
     var style = document.createElement('style');
     style.id = 'dayo-terms-mini-style';
     style.textContent = [
-      '#terms-mini-modal{position:fixed;inset:0;z-index:12000;display:none;align-items:center;justify-content:center;',
-      'padding:1.1rem;background:rgba(62,50,45,.42);backdrop-filter:blur(6px);box-sizing:border-box;}',
-      '#terms-mini-modal.is-open{display:flex !important;}',
-      '.terms-mini-card{width:min(420px,100%);max-height:min(78vh,560px);overflow:auto;background:#FFFCFA;',
-      'border:1px solid #EDE4D5;border-radius:20px;box-shadow:0 22px 48px rgba(113,83,72,.22);padding:1.15rem 1.1rem 1rem;}',
-      '.terms-mini-card h3{margin:0 0 .7rem;font-size:1.02rem;font-weight:800;color:#3E322D;letter-spacing:-.02em;}',
-      '.terms-mini-body{font-size:.82rem;line-height:1.55;color:#5C4A42;}',
-      '.terms-mini-body p{margin:0 0 .55rem;}',
+      '#terms-mini-modal,#refund-mini-modal{position:fixed;inset:0;z-index:1000002;display:none;',
+      'align-items:center;justify-content:center;padding:1.1rem;background:rgba(62,50,45,.45);',
+      'backdrop-filter:blur(6px);box-sizing:border-box;}',
+      '#terms-mini-modal.is-open,#refund-mini-modal.is-open{display:flex !important;}',
+      '.terms-mini-card{width:min(420px,100%);max-height:min(78vh,560px);display:flex;flex-direction:column;',
+      'background:#FFFFFF;border:1px solid #EDE4D5;border-radius:20px;',
+      'box-shadow:0 22px 48px rgba(113,83,72,.24);padding:20px;box-sizing:border-box;}',
+      '.terms-mini-head{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;margin-bottom:.75rem;flex-shrink:0;}',
+      '.terms-mini-head h3{margin:0;font-size:1.02rem;font-weight:800;color:#3E322D;letter-spacing:-.02em;line-height:1.35;}',
+      '.terms-mini-x{width:30px;height:30px;border:none;border-radius:50%;background:#F4F1ED;color:#5C4A42;',
+      'font-size:.9rem;line-height:1;cursor:pointer;flex:0 0 auto;}',
+      '.terms-mini-body{flex:1 1 auto;min-height:0;overflow-y:auto;font-size:12.5px;line-height:1.55;color:#5C4A42;}',
+      '.terms-mini-body p{margin:0 0 .45rem;}',
+      '.terms-mini-section{margin:0.85rem 0 0.35rem !important;font-weight:800;color:#3E322D;}',
+      '.terms-mini-section:first-child{margin-top:0 !important;}',
+      '.terms-mini-body ul{margin:0 0 .55rem;padding-left:1.1rem;}',
+      '.terms-mini-body li{margin:0 0 .28rem;}',
       '.terms-mini-body strong{color:#3E322D;}',
-      '.terms-mini-actions{display:grid;gap:.45rem;margin-top:.95rem;}',
-      '.terms-mini-confirm{border:none;border-radius:12px;padding:.85rem 1rem;background:#FF6B57;color:#fff;',
+      '.terms-mini-actions{display:grid;gap:.45rem;margin-top:1rem;flex-shrink:0;}',
+      '.terms-mini-confirm{border:none;border-radius:12px;padding:12px 1rem;background:#FF6B57;color:#fff;',
       'font-family:inherit;font-size:.88rem;font-weight:800;cursor:pointer;}',
-      '.terms-mini-cancel{border:none;border-radius:12px;padding:.7rem 1rem;background:#F4F1ED;color:#5C4A42;',
-      'font-family:inherit;font-size:.8rem;font-weight:700;cursor:pointer;}',
-      '[data-terms-mini]{border:none;background:none;padding:0;margin:0 0 0 .2rem;color:#E85B48;font:inherit;',
-      'font-weight:800;text-decoration:underline;text-underline-offset:2px;cursor:pointer;}'
+      '.terms-mini-confirm:hover{background:#E85B48;}',
+      '[data-terms-mini],[data-refund-mini]{border:none;background:none;padding:0;margin:0 0 0 .2rem;color:#E85B48;',
+      'font:inherit;font-weight:800;text-decoration:underline;text-underline-offset:2px;cursor:pointer;}'
     ].join('');
     document.head.appendChild(style);
   }
 
-  function ensureModal() {
+  function modalIdFor(type) {
+    return type === 'refund' ? 'refund-mini-modal' : 'terms-mini-modal';
+  }
+
+  function ensureModal(type) {
     injectStyle();
-    if (modal && document.body.contains(modal)) return modal;
-    modal = document.getElementById('terms-mini-modal');
-    if (!modal) {
-      modal = document.createElement('div');
-      modal.id = 'terms-mini-modal';
-      modal.setAttribute('role', 'dialog');
-      modal.setAttribute('aria-modal', 'true');
-      modal.setAttribute('aria-labelledby', 'terms-mini-title');
-      modal.innerHTML = [
-        '<div class="terms-mini-card">',
-        '  <h3 id="terms-mini-title"></h3>',
-        '  <div class="terms-mini-body" id="terms-mini-body"></div>',
-        '  <div class="terms-mini-actions">',
-        '    <button type="button" class="terms-mini-confirm" id="terms-mini-confirm">확인 및 동의</button>',
-        '    <button type="button" class="terms-mini-cancel" id="terms-mini-cancel">닫기</button>',
-        '  </div>',
-        '</div>'
-      ].join('');
-      document.body.appendChild(modal);
+    var id = modalIdFor(type || 'terms');
+    var existing = document.getElementById(id);
+    if (existing) {
+      modal = existing;
+      return modal;
     }
-    if (!modal._dayoBound) {
-      modal._dayoBound = true;
-      modal.addEventListener('click', function (e) {
-        if (e.target === modal) close();
-      });
-      var confirmBtn = modal.querySelector('#terms-mini-confirm');
-      var cancelBtn = modal.querySelector('#terms-mini-cancel');
-      if (confirmBtn) confirmBtn.addEventListener('click', confirmAndAgree);
-      if (cancelBtn) cancelBtn.addEventListener('click', close);
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && modal && modal.classList.contains('is-open')) close();
-      });
-    }
+    modal = document.createElement('div');
+    modal.id = id;
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
+    modal.setAttribute('aria-labelledby', id + '-title');
+    modal.innerHTML = [
+      '<div class="terms-mini-card">',
+      '  <div class="terms-mini-head">',
+      '    <h3 id="' + id + '-title"></h3>',
+      '    <button type="button" class="terms-mini-x" data-terms-mini-close aria-label="닫기">✕</button>',
+      '  </div>',
+      '  <div class="terms-mini-body" data-terms-mini-body></div>',
+      '  <div class="terms-mini-actions">',
+      '    <button type="button" class="terms-mini-confirm" data-terms-mini-confirm>확인 및 동의</button>',
+      '  </div>',
+      '</div>'
+    ].join('');
+    document.body.appendChild(modal);
+
+    modal.addEventListener('click', function (e) {
+      if (e.target === modal || e.target.closest('[data-terms-mini-close]')) {
+        close();
+      }
+    });
+    var confirmBtn = modal.querySelector('[data-terms-mini-confirm]');
+    if (confirmBtn) confirmBtn.addEventListener('click', confirmAndAgree);
     return modal;
   }
 
   function resolveCheckbox(type, explicitSelector) {
     if (explicitSelector) {
+      if (explicitSelector.nodeType === 1) return explicitSelector;
       var bySel = document.querySelector(explicitSelector);
       if (bySel) return bySel;
     }
@@ -124,27 +157,28 @@
   function open(type, checkboxOrSelector) {
     var conf = CONTENTS[type];
     if (!conf) return;
-    var root = ensureModal();
+    var root = ensureModal(type);
     activeType = type;
-    if (checkboxOrSelector && checkboxOrSelector.nodeType === 1) {
-      activeCheckbox = checkboxOrSelector;
-    } else {
-      activeCheckbox = resolveCheckbox(type, checkboxOrSelector);
-    }
-    var title = root.querySelector('#terms-mini-title');
-    var body = root.querySelector('#terms-mini-body');
+    activeCheckbox = resolveCheckbox(type, checkboxOrSelector);
+    var title = root.querySelector('h3');
+    var body = root.querySelector('[data-terms-mini-body]');
     if (title) title.textContent = conf.title;
     if (body) body.innerHTML = conf.body;
     root.classList.add('is-open');
     root.style.display = 'flex';
     root.setAttribute('aria-hidden', 'false');
+    /* Keep above tickets / auth overlays even if CSS load order changes */
+    root.style.zIndex = '1000002';
   }
 
   function close() {
-    if (!modal) return;
-    modal.classList.remove('is-open');
-    modal.style.display = 'none';
-    modal.setAttribute('aria-hidden', 'true');
+    ['terms-mini-modal', 'refund-mini-modal'].forEach(function (id) {
+      var node = document.getElementById(id);
+      if (!node) return;
+      node.classList.remove('is-open');
+      node.style.display = 'none';
+      node.setAttribute('aria-hidden', 'true');
+    });
     activeType = null;
     activeCheckbox = null;
   }
@@ -156,39 +190,97 @@
       try {
         box.dispatchEvent(new Event('change', { bubbles: true }));
         box.dispatchEvent(new Event('input', { bubbles: true }));
-      } catch (e) { /* ignore */ }
+      } catch (e) {
+        try {
+          var evt = document.createEvent('HTMLEvents');
+          evt.initEvent('change', true, false);
+          box.dispatchEvent(evt);
+        } catch (e2) { /* ignore */ }
+      }
     }
     close();
+  }
+
+  function openRefundMiniModal(checkboxOrSelector) {
+    open('refund', checkboxOrSelector || '#tkRefundAgree');
   }
 
   function bindDelegatedClicks(root) {
     var scope = root || document;
     scope.addEventListener('click', function (e) {
+      var refundBtn = e.target.closest && e.target.closest('[data-refund-mini], [data-open-refund-mini]');
+      if (refundBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        openRefundMiniModal(refundBtn.getAttribute('data-terms-check') || '#tkRefundAgree');
+        return;
+      }
+
       var btn = e.target.closest && e.target.closest('[data-terms-mini]');
-      if (!btn) return;
-      e.preventDefault();
-      e.stopPropagation();
-      var type = btn.getAttribute('data-terms-mini');
-      var checkSel = btn.getAttribute('data-terms-check');
-      open(type, checkSel);
+      if (btn) {
+        e.preventDefault();
+        e.stopPropagation();
+        var type = btn.getAttribute('data-terms-mini');
+        var checkSel = btn.getAttribute('data-terms-check');
+        if (type === 'refund') openRefundMiniModal(checkSel || '#tkRefundAgree');
+        else open(type, checkSel);
+        return;
+      }
+
+      /* Catch any leftover external refund/terms/privacy links inside auth/tickets modals */
+      var link = e.target.closest && e.target.closest('a[href]');
+      if (!link) return;
+      var href = String(link.getAttribute('href') || '');
+      var inAuthOrTickets = !!(link.closest('.tk-overlay, .ms-overlay, .tk-consent, .ms-consent'));
+      if (!inAuthOrTickets) return;
+      if (/\/refund\/?(\?|#|$)/i.test(href)) {
+        e.preventDefault();
+        e.stopPropagation();
+        openRefundMiniModal('#tkRefundAgree');
+        return;
+      }
+      if (/\/terms\/?(\?|#|$)/i.test(href)) {
+        e.preventDefault();
+        e.stopPropagation();
+        open('terms', '#msAgreeTerms');
+        return;
+      }
+      if (/\/privacy\/?(\?|#|$)/i.test(href)) {
+        e.preventDefault();
+        e.stopPropagation();
+        open('privacy', '#msAgreePrivacy');
+      }
     }, true);
   }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    var openMini = document.querySelector('#terms-mini-modal.is-open, #refund-mini-modal.is-open');
+    if (openMini) {
+      e.stopPropagation();
+      close();
+    }
+  }, true);
 
   window.DayOTermsMini = {
     open: open,
     close: close,
     confirmAndAgree: confirmAndAgree,
     ensure: ensureModal,
-    bind: bindDelegatedClicks
+    bind: bindDelegatedClicks,
+    openRefund: openRefundMiniModal
   };
+  window.openRefundMiniModal = openRefundMiniModal;
+  window.openTermsMiniModal = function () { open('terms', '#msAgreeTerms'); };
+  window.openPrivacyMiniModal = function () { open('privacy', '#msAgreePrivacy'); };
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
-      ensureModal();
+      injectStyle();
       bindDelegatedClicks(document);
     });
   } else {
-    ensureModal();
+    injectStyle();
     bindDelegatedClicks(document);
   }
 })();

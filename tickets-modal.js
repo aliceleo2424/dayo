@@ -173,8 +173,8 @@
     '.tk-consent{margin:1rem 0 .2rem;padding:.9rem 1rem;border:1px solid #EDE4D5;border-radius:14px;background:#FFFCFA;text-align:left;}',
     '.tk-consent label{display:flex;align-items:flex-start;gap:.5rem;margin:0;color:#5C4A42;font-size:.8rem;font-weight:700;line-height:1.45;cursor:pointer;}',
     '.tk-consent input{margin-top:.12rem;accent-color:#FF6B57;flex:0 0 auto;}',
-    '.tk-consent a,.tk-consent [data-terms-mini]{color:#E85B48;font-weight:800;text-decoration:underline;text-underline-offset:2px;}',
-    '.tk-consent [data-terms-mini]{border:none;background:none;padding:0;margin:0 0 0 .15rem;font:inherit;cursor:pointer;}',
+    '.tk-consent a,.tk-consent [data-terms-mini],.tk-consent [data-refund-mini]{color:#E85B48;font-weight:800;text-decoration:underline;text-underline-offset:2px;}',
+    '.tk-consent [data-terms-mini],.tk-consent [data-refund-mini]{border:none;background:none;padding:0;margin:0 0 0 .15rem;font:inherit;cursor:pointer;}',
     '.tk-used{margin-top:1rem;display:flex;flex-wrap:wrap;align-items:center;gap:.75rem 1rem;',
     'padding:1rem 1.05rem;border-radius:20px;text-align:left;opacity:.75;',
     'background:#F8FAFC;border:1px solid #E2E8F0;color:#94A3B8;}',
@@ -352,7 +352,7 @@
             '<label for="tkRefundAgree">' +
               '<input type="checkbox" id="tkRefundAgree" name="tkRefundAgree">' +
               '<span>[필수] 취소 및 환불 규정을 확인하였으며 이에 동의합니다. ' +
-                '<button type="button" data-terms-mini="refund" data-terms-check="#tkRefundAgree">보기</button>' +
+                '<button type="button" data-refund-mini data-terms-check="#tkRefundAgree" onclick="event.preventDefault();event.stopPropagation();if(window.openRefundMiniModal){window.openRefundMiniModal(\'#tkRefundAgree\');}return false;">보기</button>' +
               '</span>' +
             '</label>' +
           '</div>' +
@@ -644,6 +644,24 @@
     });
 
     el.overlay.addEventListener('click', function (e) {
+      var refundView = e.target.closest('[data-refund-mini], [data-open-refund-mini]');
+      if (refundView) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof window.openRefundMiniModal === 'function') {
+          window.openRefundMiniModal('#tkRefundAgree');
+        } else if (window.DayOTermsMini && typeof window.DayOTermsMini.openRefund === 'function') {
+          window.DayOTermsMini.openRefund('#tkRefundAgree');
+        }
+        return;
+      }
+      var legacyRefund = e.target.closest('a[href="/refund"], a[href="/refund.html"], a[href*="/refund"]');
+      if (legacyRefund && legacyRefund.closest('.tk-consent, .tk-modal')) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (typeof window.openRefundMiniModal === 'function') window.openRefundMiniModal('#tkRefundAgree');
+        return;
+      }
       var buy = e.target.closest('[data-tk-buy]');
       if (!buy || buy.disabled || buy.classList.contains('is-disabled')) return;
       e.preventDefault();
