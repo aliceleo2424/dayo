@@ -78,6 +78,17 @@
     return false;
   }
 
+  function isObserverRoomMode() {
+    if (typeof window.isObserverRoomMode === 'function') {
+      return window.isObserverRoomMode();
+    }
+    try {
+      return String(new URLSearchParams(location.search).get('role') || '').toLowerCase() === 'observer';
+    } catch (e) {
+      return false;
+    }
+  }
+
   function escapeHtml(str) {
     return String(str == null ? '' : str).replace(/[&<>"']/g, function (ch) {
       return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
@@ -689,6 +700,7 @@
   }
 
   function startDemoMedia() {
+    if (isObserverRoomMode()) return Promise.resolve();
     if (window.__dayoUsePeerJS) return Promise.resolve();
     demoMode = true;
     var nodes = els();
@@ -804,6 +816,7 @@
   }
 
   function startSpeech() {
+    if (isObserverRoomMode()) return;
     var Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!Ctor) {
       console.warn('이 브라우저는 Web Speech API를 지원하지 않습니다 (사파리/크롬 권장).');
@@ -1030,6 +1043,13 @@
       setStatus(t('room.copilotListening'), false);
       bindCopilotClicks();
       bindChatToCopilot();
+
+      if (isObserverRoomMode()) {
+        demoMode = false;
+        if (typeof window.updateRoomRoleText === 'function') window.updateRoomRoleText();
+        document.dispatchEvent(new CustomEvent('dayo:room-ready'));
+        return;
+      }
 
       var boot;
       if (window.__dayoUsePeerJS) {

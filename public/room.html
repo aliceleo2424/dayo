@@ -255,6 +255,83 @@
       display: none !important;
     }
 
+    /* Ghost observer (OBS) — isolated monitoring view; never affects user/partner tiles */
+    body.theme-observer {
+      background: linear-gradient(180deg, #111827 0%, #1f2937 100%) !important;
+    }
+    body.theme-observer .self-pip,
+    body.theme-observer #wordHelpBtn,
+    body.theme-observer #sentenceHelpBtn,
+    body.theme-observer #micBtn,
+    body.theme-observer #camBtn,
+    body.theme-observer #chatToggle,
+    body.theme-observer .ctrl-divider,
+    body.theme-observer #shareBtn,
+    body.theme-observer #copilotBar,
+    body.theme-observer #chatPanel,
+    body.theme-observer #partner-control-bar,
+    body.theme-observer #wordSheetOverlay,
+    body.theme-observer #sentenceSheetOverlay,
+    body.theme-observer #quiz-modal,
+    body.theme-observer #quizModal,
+    body.theme-observer #memory-game-modal,
+    body.theme-observer #partner-report-popup,
+    body.theme-observer #ratingModal,
+    body.theme-observer #exitConfirmOverlay,
+    body.theme-observer #dailyHost,
+    body.theme-observer .tutor-video,
+    body.theme-observer .bottom-bar {
+      display: none !important;
+    }
+    body.theme-observer .observer-stage {
+      display: grid !important;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    body.theme-observer .video-stage {
+      background: #0f172a;
+      border-color: #334155;
+    }
+    .observer-stage {
+      display: none;
+    }
+    .observer-tile {
+      position: relative;
+      min-height: 0;
+      border-radius: 18px;
+      overflow: hidden;
+      background: #1e293b;
+      border: 1px solid #334155;
+    }
+    .observer-tile video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      background: #0f172a;
+    }
+    .observer-tile__label {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      z-index: 2;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.72);
+      color: #f8fafc;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    @media (max-width: 800px) {
+      body.theme-observer .observer-stage {
+        grid-template-columns: 1fr;
+      }
+    }
+
     #partner-control-bar {
       display: flex;
       gap: 10px;
@@ -2914,10 +2991,19 @@
 <body class="is-room theme-learner">
   <script>
     (function applyPartnerTheme() {
+      window.isObserverRoomMode = function () {
+        try {
+          return String(new URLSearchParams(window.location.search).get('role') || '').toLowerCase() === 'observer';
+        } catch (e) {
+          return false;
+        }
+      };
+
       window.isPartnerRoomMode = function() {
         try {
           var urlParams = new URLSearchParams(window.location.search);
           var roleParam = String(urlParams.get('role') || '').toLowerCase();
+          if (roleParam === 'observer') return false;
           if (roleParam === 'partner') return true;
           if (roleParam === 'user' || roleParam === 'learner') return false;
           return localStorage.getItem('dayo_current_mode') === 'PARTNER';
@@ -3001,7 +3087,7 @@
 
       function enterPartner() {
         document.body.classList.add('is-room', 'theme-partner');
-        document.body.classList.remove('theme-learner');
+        document.body.classList.remove('theme-learner', 'theme-observer');
         document.body.style.background = 'linear-gradient(180deg, #F0F9F5 0%, #E6F4EE 100%)';
         document.body.setAttribute('data-mode', 'partner');
         document.body.setAttribute('data-dayo-role', 'partner');
@@ -3010,11 +3096,20 @@
       }
       function enterLearner() {
         document.body.classList.add('is-room', 'theme-learner');
-        document.body.classList.remove('theme-partner');
+        document.body.classList.remove('theme-partner', 'theme-observer');
         document.body.style.background = 'linear-gradient(180deg, #FFF9F2 0%, #FFF0ED 100%)';
         document.body.removeAttribute('data-mode');
         document.body.setAttribute('data-dayo-role', 'learner');
         try { localStorage.setItem('dayo_current_mode', 'LEARNER'); } catch (e) {}
+      }
+      function enterObserver() {
+        document.body.classList.add('is-room', 'theme-observer');
+        document.body.classList.remove('theme-partner', 'theme-learner');
+        document.body.style.background = 'linear-gradient(180deg, #111827 0%, #1f2937 100%)';
+        document.body.setAttribute('data-mode', 'observer');
+        document.body.setAttribute('data-dayo-role', 'observer');
+        var stage = document.getElementById('observerStage');
+        if (stage) stage.hidden = false;
       }
       window.goToView = function(viewId) {
         var id = String(viewId || '');
@@ -3032,7 +3127,8 @@
       };
 
       try {
-        if (window.isPartnerRoomMode()) enterPartner();
+        if (window.isObserverRoomMode && window.isObserverRoomMode()) enterObserver();
+        else if (window.isPartnerRoomMode()) enterPartner();
         else enterLearner();
       } catch (e) {}
     })();
@@ -3083,6 +3179,17 @@
             <div class="self-placeholder pip-avatar">
               <div class="self-placeholder-icon">👤</div>
               <span data-i18n="room.selfPlaceholderLabel">내 화면</span>
+            </div>
+          </div>
+
+          <div class="observer-stage" id="observerStage" hidden aria-label="OBS ghost observer stage">
+            <div class="observer-tile">
+              <video id="observerPartnerVideo" playsinline webkit-playsinline autoplay></video>
+              <span class="observer-tile__label">Partner</span>
+            </div>
+            <div class="observer-tile">
+              <video id="observerUserVideo" playsinline webkit-playsinline autoplay></video>
+              <span class="observer-tile__label">User</span>
             </div>
           </div>
         </div>
@@ -3264,10 +3371,12 @@
   <script>window.__dayoUsePeerJS = true;</script>
   <script src="room-live.js"></script>
   <script>
-    /* 1:1 WebRTC (PeerJS) — Partner = host/receiver, User = guest/caller */
+    /* 1:1 WebRTC (PeerJS) — Partner = host/receiver, User = guest/caller
+     * Observer = receive-only ghost (empty outbound stream); never replaces activeCall */
     (function initDayOPeerVideo() {
       const urlParams = new URLSearchParams(window.location.search);
       const currentRole = (urlParams.get('role') || 'user').toLowerCase();
+      const isObserver = (currentRole === 'observer');
       const currentRoomId = String(
         urlParams.get('roomId') || urlParams.get('room') || urlParams.get('session') || 'dayo_room_1'
       ).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40) || 'dayo_room_1';
@@ -3278,6 +3387,8 @@
       const remoteVideo = document.getElementById('remote-video')
         || document.getElementById('tutorVideo')
         || document.querySelector('.remote-stream-video');
+      const observerPartnerVideo = document.getElementById('observerPartnerVideo');
+      const observerUserVideo = document.getElementById('observerUserVideo');
 
       let localStream = null;
       let peer = null;
@@ -3285,8 +3396,15 @@
       let hostCallTimer = 0;
       let hostCallAttempts = 0;
       let destroyed = false;
+      let observerGuestCall = null;
+      let observerHostCall = null;
+      let observerProbeTimer = 0;
       const HOST_ID = currentRoomId + '_host';
       const MAX_HOST_CALL_ATTEMPTS = 12;
+
+      function isObserverPeerId(peerId) {
+        return /_observer/i.test(String(peerId || ''));
+      }
 
       function setupVideoElement(videoEl, isMuted) {
         if (!videoEl) return;
@@ -3307,8 +3425,11 @@
 
       setupVideoElement(localVideo, true);
       setupVideoElement(remoteVideo, false);
+      setupVideoElement(observerPartnerVideo, false);
+      setupVideoElement(observerUserVideo, false);
 
       function bindLocalPip() {
+        if (isObserver) return;
         var pipBox = document.getElementById('selfPip') || document.querySelector('.self-pip');
         if (!pipBox || !localVideo || !localStream) return;
         pipBox.classList.add('has-stream');
@@ -3356,8 +3477,31 @@
         });
       }
 
+      function attachObserverStream(videoEl, stream) {
+        if (!videoEl || !stream) return;
+        setupVideoElement(videoEl, false);
+        videoEl.srcObject = stream;
+        videoEl.muted = false;
+        videoEl.removeAttribute('muted');
+        var play = videoEl.play();
+        if (play && typeof play.catch === 'function') {
+          play.catch(function () {
+            videoEl.muted = true;
+            videoEl.play().catch(function () { /* ignore */ });
+            var unlock = function () {
+              videoEl.muted = false;
+              videoEl.play().catch(function () { /* ignore */ });
+              document.removeEventListener('click', unlock);
+              document.removeEventListener('touchstart', unlock);
+            };
+            document.addEventListener('click', unlock);
+            document.addEventListener('touchstart', unlock, { passive: true });
+          });
+        }
+      }
+
       function callHostPeer(hostPeerId) {
-        if (destroyed || !peer || !localStream || currentRole === 'partner') return;
+        if (destroyed || !peer || !localStream || currentRole === 'partner' || isObserver) return;
         if (activeCall) {
           try { activeCall.close(); } catch (e) { /* ignore */ }
           activeCall = null;
@@ -3379,15 +3523,146 @@
       }
 
       function scheduleHostCall() {
-        if (destroyed || currentRole === 'partner') return;
+        if (destroyed || currentRole === 'partner' || isObserver) return;
         clearTimeout(hostCallTimer);
         hostCallTimer = setTimeout(function () {
           callHostPeer(HOST_ID);
         }, hostCallAttempts === 0 ? 1500 : 1500);
       }
 
+      function bindSessionPeerHelpers() {
+        if (!peer) return;
+        peer.on('connection', function (conn) {
+          conn.on('data', function (msg) {
+            if (!msg || msg.type !== 'observer-hello') return;
+            try {
+              conn.send({
+                type: 'session-peers',
+                hostId: HOST_ID,
+                guestId: window.__dayoGuestPeerId || (currentRole !== 'partner' && currentRole !== 'observer' ? peer.id : null)
+              });
+            } catch (e) { /* ignore */ }
+          });
+        });
+      }
+
+      function watchPeer(peerId, videoEl, slot) {
+        if (destroyed || !peer || !peerId || !localStream) return null;
+        try {
+          var call = peer.call(peerId, localStream);
+          if (!call) return null;
+          call.on('stream', function (incomingStream) {
+            attachObserverStream(videoEl, incomingStream);
+          });
+          call.on('error', function (err) {
+            console.warn('[DayO Observer] watch error', slot, err && err.type ? err.type : err);
+          });
+          return call;
+        } catch (e) {
+          console.warn('[DayO Observer] watch failed', slot, e);
+          return null;
+        }
+      }
+
+      function probeGuestPeer(guestId) {
+        if (!guestId || destroyed) return;
+        if (observerGuestCall) {
+          try { observerGuestCall.close(); } catch (e) { /* ignore */ }
+          observerGuestCall = null;
+        }
+        observerGuestCall = watchPeer(guestId, observerUserVideo, 'user');
+      }
+
+      function askHostForGuestId() {
+        if (destroyed || !peer) return;
+        try {
+          var conn = peer.connect(HOST_ID, { reliable: true });
+          conn.on('open', function () {
+            try { conn.send({ type: 'observer-hello' }); } catch (e) { /* ignore */ }
+          });
+          conn.on('data', function (msg) {
+            if (!msg || msg.type !== 'session-peers') return;
+            if (msg.guestId) probeGuestPeer(msg.guestId);
+          });
+        } catch (e) { /* ignore */ }
+      }
+
+      function startObserverWatch() {
+        if (observerHostCall) {
+          try { observerHostCall.close(); } catch (e) { /* ignore */ }
+        }
+        observerHostCall = watchPeer(HOST_ID, observerPartnerVideo, 'partner');
+        askHostForGuestId();
+        clearInterval(observerProbeTimer);
+        observerProbeTimer = setInterval(function () {
+          if (destroyed) return;
+          askHostForGuestId();
+          if (!observerHostCall) {
+            observerHostCall = watchPeer(HOST_ID, observerPartnerVideo, 'partner');
+          }
+        }, 4000);
+      }
+
+      async function initObserverWebRTC() {
+        if (destroyed) return;
+        try {
+          if (typeof Peer === 'undefined') {
+            console.error('PeerJS library missing');
+            window.__dayoUsePeerJS = false;
+            return;
+          }
+
+          /* Empty outbound stream: never request camera/mic for ghost observer */
+          localStream = new MediaStream();
+          window.__localCamBound = true;
+          window.__localCamStream = null;
+          window.localMediaStream = localStream;
+
+          var stage = document.getElementById('observerStage');
+          if (stage) stage.hidden = false;
+
+          var myPeerId = currentRoomId + '_observer_' + Math.floor(Math.random() * 10000);
+          peer = new Peer(myPeerId, {
+            debug: 1,
+            config: {
+              iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+              ]
+            }
+          });
+
+          peer.on('open', function (id) {
+            console.log('👻 Observer Peer ID:', id);
+            startObserverWatch();
+            document.dispatchEvent(new CustomEvent('dayo:room-ready'));
+          });
+
+          peer.on('error', function (err) {
+            var type = err && err.type;
+            console.warn('Observer PeerJS Status:', type || err);
+            if (type === 'peer-unavailable' || type === 'network') {
+              setTimeout(startObserverWatch, 2000);
+            }
+            if (type === 'disconnected' && peer && typeof peer.reconnect === 'function') {
+              peer.reconnect();
+            }
+          });
+
+          peer.on('disconnected', function () {
+            if (destroyed || !peer) return;
+            try { peer.reconnect(); } catch (e) { /* ignore */ }
+          });
+        } catch (err) {
+          console.error('[DayO Observer] init failed:', err);
+        }
+      }
+
       async function initWebRTC() {
         if (destroyed) return;
+        if (isObserver) {
+          return initObserverWebRTC();
+        }
         try {
           if (typeof Peer === 'undefined') {
             console.error('PeerJS library missing');
@@ -3418,8 +3693,13 @@
             }
           });
 
+          bindSessionPeerHelpers();
+
           peer.on('open', function (id) {
             console.log('✅ My Peer ID:', id);
+            if (currentRole !== 'partner') {
+              window.__dayoGuestPeerId = id;
+            }
             if (currentRole === 'user' || currentRole === 'learner') {
               scheduleHostCall();
             }
@@ -3427,6 +3707,15 @@
 
           peer.on('call', function (call) {
             if (!localStream) return;
+            /* Ghost observer: answer so they receive our A/V, but never replace the live 1:1 call UI */
+            if (isObserverPeerId(call.peer)) {
+              call.answer(localStream);
+              call.on('stream', function () { /* ignore empty observer outbound */ });
+              return;
+            }
+            if (currentRole === 'partner') {
+              window.__dayoGuestPeerId = call.peer;
+            }
             activeCall = call;
             call.answer(localStream);
             call.on('stream', function (incomingStream) {
@@ -3461,21 +3750,27 @@
       function destroy() {
         destroyed = true;
         clearTimeout(hostCallTimer);
+        clearInterval(observerProbeTimer);
         try { if (activeCall) activeCall.close(); } catch (e) { /* ignore */ }
+        try { if (observerHostCall) observerHostCall.close(); } catch (e) { /* ignore */ }
+        try { if (observerGuestCall) observerGuestCall.close(); } catch (e) { /* ignore */ }
         activeCall = null;
+        observerHostCall = null;
+        observerGuestCall = null;
         try { if (peer) peer.destroy(); } catch (e) { /* ignore */ }
         peer = null;
-        if (localStream) {
+        if (localStream && !isObserver) {
           try { localStream.getTracks().forEach(function (track) { track.stop(); }); } catch (e) { /* ignore */ }
-          localStream = null;
         }
+        localStream = null;
       }
 
       window.DayOPeerVideo = {
         init: initWebRTC,
         destroy: destroy,
         getLocalStream: function () { return localStream; },
-        getPeerId: function () { return peer && peer.id; }
+        getPeerId: function () { return peer && peer.id; },
+        isObserver: function () { return isObserver; }
       };
 
       if (document.readyState === 'loading') {
@@ -4115,6 +4410,7 @@
     window.goToMypage = goToMypage;
 
     function openReviewFromTranscript(result, options) {
+      if (window.isObserverRoomMode && window.isObserverRoomMode()) return;
       if (window.isEarlyExit) {
         goToMypage();
         return;
@@ -4163,8 +4459,20 @@
       window.dayoSessionEnded = true;
 
       const isPartner = typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode();
+      const isObserver = typeof window.isObserverRoomMode === 'function' && window.isObserverRoomMode();
 
       try { stopAllMedia(); } catch (e) { /* ignore */ }
+
+      /* Ghost observer: hang up quietly — no quiz / rating / partner settlement */
+      if (isObserver) {
+        try {
+          if (window.DayOPeerVideo && typeof window.DayOPeerVideo.destroy === 'function') {
+            window.DayOPeerVideo.destroy();
+          }
+        } catch (e) { /* ignore */ }
+        return;
+      }
+
       try { persistTranscript(); } catch (e) { /* ignore */ }
 
       // 1) 파트너인 경우: 유저용 모달 차단 및 파트너 리포트 검수 팝업만 오픈
@@ -5059,6 +5367,17 @@
     window.submitPartnerReportAndLeave = window.executePartnerPayoutAndExit;
 
     window.handleHeaderExitClick = function () {
+      if (typeof window.isObserverRoomMode === 'function' && window.isObserverRoomMode()) {
+        try {
+          if (window.DayOLive && typeof window.DayOLive.hangUp === 'function') window.DayOLive.hangUp();
+          if (window.DayOPeerVideo && typeof window.DayOPeerVideo.destroy === 'function') {
+            window.DayOPeerVideo.destroy();
+          }
+        } catch (e) { /* ignore */ }
+        window.location.href = 'index.html';
+        return;
+      }
+
       const isPartner = typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode();
 
       if (isPartner) {
@@ -5150,6 +5469,7 @@
     }
 
     async function attachLocalStreamToPip() {
+      if (window.isObserverRoomMode && window.isObserverRoomMode()) return;
       if (window.__dayoUsePeerJS) return;
       if (window.__localCamBound) return;
       try {
@@ -5208,7 +5528,8 @@
   if (window.__singleToastDone) return;
   window.__singleToastDone = true;
 
-  // 파트너 모드일 때는 노출 차단
+  // 옵저버/파트너 모드일 때는 노출 차단
+  if (window.isObserverRoomMode && window.isObserverRoomMode()) return;
   const isPartner = typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode();
   if (isPartner) return;
 
