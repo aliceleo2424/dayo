@@ -184,6 +184,14 @@
         }
         setDisplay(nodes.auth, false);
         setDisplay(nodes.dash, false);
+        if (nodes.recruit) {
+          nodes.recruit.hidden = false;
+          nodes.recruit.style.removeProperty('display');
+          nodes.recruit.setAttribute('aria-hidden', 'false');
+        }
+        if (nodes.recruitCard) {
+          nodes.recruitCard.style.removeProperty('display');
+        }
         setDisplay(nodes.recruit, true);
         if (nodes.recruitCard) nodes.recruitCard.style.display = 'block';
         var cta = document.getElementById('partnerRecruitCta');
@@ -333,13 +341,16 @@
 
         /* Optimistic: known partner session token → show lounge immediately, kill login modals */
         var emailHint = peekLocalSessionEmail();
-        if (hasSbAuthToken() && isAuthorized(null, emailHint)) {
-          showPartnerLounge();
+        if (hasSbAuthToken()) {
+          if (isAuthorized(null, emailHint)) {
+            showPartnerLounge();
+          }
+          /* Keep recruit/auth hidden until profile resolves — prevents FOUC */
         }
 
         var client = await waitForClient(60);
         if (!client || !client.auth) {
-          if (!window.__dayoPartnerLoungeLocked) showAuthSection();
+          if (!window.__dayoPartnerLoungeLocked && !hasSbAuthToken()) showAuthSection();
           return;
         }
 
@@ -1293,21 +1304,121 @@
       gap: 0.35rem;
     }
 
-    .partner-verify-badge {
+    .partner-verify-badge,
+    #partner-status-toggle {
       display: inline-flex;
       align-items: center;
-      padding: 0.22rem 0.58rem;
+      justify-content: center;
+      gap: 0.25rem;
+      padding: 0.35rem 0.7rem;
       border-radius: 999px;
       background: var(--partner-mint-soft);
       color: var(--partner-mint-deep);
-      font-size: 0.7rem;
+      border: 1.5px solid var(--partner-mint);
+      font-size: 0.72rem;
       font-weight: 800;
       letter-spacing: -0.02em;
+      cursor: pointer;
+      font-family: inherit;
     }
 
-    .partner-verify-badge.is-pending {
-      background: var(--partner-butter-soft);
-      color: var(--partner-butter-deep);
+    #partner-status-toggle.is-resting {
+      background: #F4F1ED;
+      color: #78716C;
+      border-color: #E7E5E4;
+    }
+
+    .partner-stat-card.is-clickable {
+      cursor: pointer;
+      transition: transform 0.18s, box-shadow 0.18s;
+    }
+
+    .partner-stat-card.is-clickable:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 22px rgba(113, 83, 72, 0.12);
+    }
+
+    .partner-profile-save {
+      margin-top: 0.85rem;
+      width: 100%;
+      padding: 0.8rem 1rem;
+      border: none;
+      border-radius: 14px;
+      background: #FF6B57;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .partner-profile-save:hover { filter: brightness(1.03); }
+
+    .photo-save-btn {
+      width: 100%;
+      margin-top: 1rem;
+      padding: 12px 16px;
+      border: none;
+      border-radius: 14px;
+      background: #FF6B57;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .settlement-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+
+    .settlement-summary__item {
+      padding: 0.85rem 0.9rem;
+      border-radius: 14px;
+      background: #FFF9F2;
+      border: 1px solid #EDE4D5;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #5C4A42;
+      line-height: 1.45;
+    }
+
+    .settlement-summary__item strong {
+      display: block;
+      margin-top: 0.2rem;
+      font-size: 1rem;
+      color: #3E322D;
+    }
+
+    .settlement-list {
+      display: grid;
+      gap: 0.55rem;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+
+    .settlement-item {
+      padding: 0.8rem 0.9rem;
+      border-radius: 12px;
+      background: #FFFCFA;
+      border: 1px solid #EDE4D5;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: #5C4A42;
+    }
+
+    .settlement-note {
+      margin-top: 0.85rem;
+      padding: 0.75rem 0.85rem;
+      border-radius: 12px;
+      background: #EAF8F2;
+      color: #247552;
+      font-size: 0.78rem;
+      font-weight: 700;
+      line-height: 1.5;
     }
 
     .slot-toolbar {
@@ -1637,12 +1748,45 @@
     }
 
     .session-actions {
-      display: grid;
-      gap: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
       margin-top: 0.9rem;
+      box-sizing: border-box;
     }
 
-    .session-actions .studio-link { margin-top: 0; }
+    .session-actions .studio-link,
+    .session-actions a[data-enter-studio] {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin: 0;
+      padding: 12px;
+      border-radius: 10px;
+      background: #4F7460 !important;
+      color: #fff !important;
+      border: none !important;
+      font-weight: 700;
+      font-size: 0.84rem;
+      text-align: center;
+      text-decoration: none;
+      box-sizing: border-box;
+      box-shadow: 0 4px 12px rgba(79, 116, 96, 0.28) !important;
+    }
+
+    .session-actions .material-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin: 0;
+      padding: 12px;
+      border-radius: 10px;
+      box-sizing: border-box;
+      text-align: center;
+    }
 
     .material-link {
       width: 100%;
@@ -1975,12 +2119,34 @@
       display: none !important;
     }
 
+    #partnerRecruitView,
+    #partner-recruit-card {
+      display: none !important;
+    }
+
+    body.is-partner-recruit #partnerRecruitView {
+      display: flex !important;
+    }
+
+    body.is-partner-recruit #partner-recruit-card {
+      display: block !important;
+    }
+
+    #partner-dashboard-section[hidden],
+    #partner-auth-section[hidden],
+    #partnerRecruitView[hidden] {
+      display: none !important;
+    }
+
+    body.is-partner-lounge #partner-dashboard-section {
+      display: block !important;
+    }
+
     .partner-recruit {
       width: min(640px, calc(100% - 2rem));
       min-height: calc(100vh - 96px);
       margin: 0 auto;
       padding: 48px 0 72px;
-      display: flex;
       align-items: center;
       justify-content: center;
     }
@@ -2137,8 +2303,8 @@
     </div>
   </section>
 
-  <section id="partnerRecruitView" class="partner-recruit" hidden>
-    <div class="partner-recruit-card" id="partner-recruit-card">
+  <section id="partnerRecruitView" class="partner-recruit" hidden style="display:none !important" aria-hidden="true">
+    <div class="partner-recruit-card" id="partner-recruit-card" style="display:none !important">
       <p class="partner-recruit-kicker">PARTNER RECRUIT</p>
       <h1 data-i18n="partner.recruit.title">DayO와 함께할 글로벌 대화 파트너를 모십니다 ☕</h1>
       <p class="partner-recruit-sub" data-i18n="partner.recruit.sub">가르치거나 평가할 필요 없이, 글로벌 친구와 일상 이야기를 나누며 편안하게 수익을 만들어보세요.</p>
@@ -2195,12 +2361,12 @@
         <p class="stat-label" data-i18n="partner.stats.monthCount">이번 달 완료한 대화</p>
         <p class="stat-value partner-stat-val" id="statMonthCount" data-i18n="partner.stats.loading">불러오는 중…</p>
       </article>
-      <article class="stat-box partner-stat-card partner-point-box">
+      <article class="stat-box partner-stat-card partner-point-box is-clickable" id="stat-points-card" role="button" tabindex="0" aria-label="적립 포인트 상세 내역 보기">
         <p class="stat-label" data-i18n="partner.stats.points">적립 포인트</p>
         <p class="stat-value partner-stat-val partner-point-val" id="statPointBalance" data-i18n="partner.stats.loading">불러오는 중…</p>
         <p class="stat-hint" data-i18n="partner.stats.pointsHint">30분 세션(25분 대화) 완료 시 6,000P가 자동 적립되며, 매월 정산일에 100% 현금 출금 가능합니다.</p>
       </article>
-      <article class="stat-box partner-stat-card partner-point-box">
+      <article class="stat-box partner-stat-card partner-point-box is-clickable" id="stat-settled-card" role="button" tabindex="0" aria-label="누적 정산 금액 상세 내역 보기">
         <p class="stat-label" data-i18n="partner.stats.settled">누적 정산 완료 금액</p>
         <p class="stat-value partner-stat-val partner-point-val" id="statSettledWon" data-i18n="partner.stats.loading">불러오는 중…</p>
         <p class="stat-hint" data-i18n="partner.stats.settledHint">지난달까지 완료된 세션</p>
@@ -2217,9 +2383,9 @@
         </div>
         <div class="avatar-meta">
           <p class="avatar-name" id="miniName">DayO 파트너</p>
-          <p class="partner-verify-badge is-pending" id="partnerVerifyBadge">검토 대기중</p>
+          <button type="button" class="partner-verify-badge" id="partner-status-toggle" aria-pressed="true">🟢 활동중</button>
         </div>
-        <p class="avatar-intro" id="miniIntro"></p>
+        <p class="avatar-intro" id="partner-bio-preview"></p>
         <button class="photo-btn" type="button" id="photoBtn" data-i18n="partner.profile.photoChange">📷 사진 변경</button>
       </div>
 
@@ -2271,9 +2437,10 @@
             </div>
           </div>
           <div class="field field--wide">
-            <label class="field-label" for="intro" data-i18n="partner.profile.intro">한 줄 소개</label>
-            <textarea class="textarea" id="intro" name="intro" rows="2"
+            <label class="field-label" for="partner-bio-input" data-i18n="partner.profile.intro">한 줄 소개</label>
+            <textarea class="textarea" id="partner-bio-input" name="intro" rows="3"
               placeholder="예약 화면에 보일 한 줄 소개를 적어 주세요." data-i18n="partner.profile.introPlaceholder"></textarea>
+            <button class="partner-profile-save" type="button" id="partner-profile-save-btn">💾 프로필 저장</button>
           </div>
         </form>
       </div>
@@ -2327,7 +2494,7 @@
             <p class="session-purpose" data-i18n="partner.session1.purpose">목적: ✈️ 프랑스 여행 회화</p>
             <p class="session-time" data-i18n="partner.session1.time">오늘 20:00</p>
             <div class="session-actions">
-              <a class="studio-link btn-partner-mint" href="room.html?role=partner" data-enter-studio data-i18n="partner.sessions.enter">☕ 스튜디오 입장</a>
+              <a class="studio-link btn-partner-mint" href="room.html?role=partner" data-enter-studio>🟢 스튜디오 입장</a>
               <button class="material-link" type="button" data-material="fr-travel" data-i18n="partner.sessions.materials">📚 대화 자료 보기</button>
             </div>
           </article>
@@ -2426,6 +2593,27 @@
         <div class="avatar-options" id="avatarOptions"></div>
         <p class="upload-hint" data-i18n="partner.photoModal.avatarHint">사진 대신 파스텔 캐릭터 아바타로 프로필을 꾸밀 수 있어요.</p>
       </div>
+      <button type="button" class="photo-save-btn" id="photo-save-btn">✔ 이 사진으로 저장하기</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="settlement-history-modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settlementHistoryTitle">
+      <div class="modal-head">
+        <div>
+          <h2 class="card-title" id="settlementHistoryTitle">💰 포인트 적립 및 정산 내역</h2>
+          <p class="card-subtitle">세션 적립과 출금 내역을 한눈에 확인하세요.</p>
+        </div>
+        <button class="modal-close" type="button" data-close-modal aria-label="닫기">✕</button>
+      </div>
+      <div class="settlement-summary">
+        <div class="settlement-summary__item">이번 달 출금 대기<strong id="settlement-pending-points">0 P</strong></div>
+        <div class="settlement-summary__item">누적 정산 완료<strong id="settlement-settled-won">0 원</strong></div>
+      </div>
+      <div class="settlement-list" id="settlement-history-list">
+        <div class="settlement-item">2026.09.15 | 1:1 대화 세션 완료 (20대 K님) | +6,000 P (적립)</div>
+      </div>
+      <p class="settlement-note">매월 10일 파트너 등록 계좌로 100% 자동 정산 입금됩니다 ☕</p>
     </div>
   </div>
 
@@ -2592,24 +2780,131 @@
 
     /* 프로필 미니 카드 실시간 반영 */
     const nicknameInput = document.getElementById('nickname');
-    const introInput = document.getElementById('intro');
+    const introInput = document.getElementById('partner-bio-input') || document.getElementById('intro');
     const miniName = document.getElementById('miniName');
-    const miniIntro = document.getElementById('miniIntro');
+    const miniIntro = document.getElementById('partner-bio-preview') || document.getElementById('miniIntro');
+    const profileSaveBtn = document.getElementById('partner-profile-save-btn');
+    const statusToggleBtn = document.getElementById('partner-status-toggle');
 
-    let savedNickname = nicknameInput.value.trim();
+    let savedNickname = nicknameInput ? nicknameInput.value.trim() : '';
+    let partnerActive = true;
+    let pendingAvatarUrl = '';
 
     const syncName = () => {
-      miniName.textContent = nicknameInput.value.trim() || t('partner.profile.nicknamePlaceholder');
+      if (miniName && nicknameInput) {
+        miniName.textContent = nicknameInput.value.trim() || t('partner.profile.nicknamePlaceholder');
+      }
     };
 
     const syncIntro = () => {
-      miniIntro.textContent = introInput.value.trim();
+      if (miniIntro && introInput) {
+        miniIntro.textContent = introInput.value.trim();
+      }
     };
 
-    nicknameInput.addEventListener('input', syncName);
-    introInput.addEventListener('input', syncIntro);
+    if (nicknameInput) nicknameInput.addEventListener('input', syncName);
+    if (introInput) introInput.addEventListener('input', syncIntro);
     syncName();
     syncIntro();
+
+    function paintStatusToggle() {
+      if (!statusToggleBtn) return;
+      if (partnerActive) {
+        statusToggleBtn.textContent = '🟢 활동중';
+        statusToggleBtn.classList.remove('is-resting');
+        statusToggleBtn.setAttribute('aria-pressed', 'true');
+        statusToggleBtn.title = '대화 예약 가능';
+      } else {
+        statusToggleBtn.textContent = '☕ 휴식중';
+        statusToggleBtn.classList.add('is-resting');
+        statusToggleBtn.setAttribute('aria-pressed', 'false');
+        statusToggleBtn.title = '예약 일시 중단';
+      }
+    }
+
+    async function persistPartnerStatus(nextActive) {
+      var client = supabaseClient();
+      if (!client) return false;
+      var sessionRes = await client.auth.getSession();
+      var user = sessionRes && sessionRes.data && sessionRes.data.session && sessionRes.data.session.user;
+      if (!user) return false;
+      var payload = {
+        is_available: !!nextActive,
+        partner_status: nextActive ? 'active' : 'resting'
+      };
+      var res = await client.from('profiles').update(payload).eq('id', user.id);
+      if (res.error) {
+        res = await client.from('profiles').update(payload).eq('user_id', user.id);
+      }
+      if (res.error) {
+        /* Column may not exist yet — keep UI state locally */
+        console.warn('[DayO] partner status sync skipped', res.error);
+        try { localStorage.setItem('dayo_partner_active_' + user.id, nextActive ? '1' : '0'); } catch (e) { /* ignore */ }
+        return true;
+      }
+      return true;
+    }
+
+    if (statusToggleBtn) {
+      paintStatusToggle();
+      statusToggleBtn.addEventListener('click', async function () {
+        var next = !partnerActive;
+        statusToggleBtn.disabled = true;
+        try {
+          await persistPartnerStatus(next);
+          partnerActive = next;
+          paintStatusToggle();
+          showToast(partnerActive ? '🟢 활동중으로 전환되었습니다. 예약이 가능해요!' : '☕ 휴식중으로 전환되었습니다. 예약이 일시 중단돼요.');
+        } finally {
+          statusToggleBtn.disabled = false;
+        }
+      });
+    }
+
+    async function savePartnerProfile() {
+      var client = supabaseClient();
+      if (!client) {
+        showToast('저장 서버에 연결할 수 없습니다.');
+        return;
+      }
+      var sessionRes = await client.auth.getSession();
+      var user = sessionRes && sessionRes.data && sessionRes.data.session && sessionRes.data.session.user;
+      if (!user) {
+        showToast('로그인이 필요합니다.');
+        return;
+      }
+      var nickname = nicknameInput ? nicknameInput.value.trim() : '';
+      var bio = introInput ? introInput.value.trim() : '';
+      var payload = {
+        nickname: nickname || defaultPartnerName(),
+        bio: bio,
+        user_name: nickname || defaultPartnerName()
+      };
+      var res = await client.from('profiles').update(payload).eq('id', user.id);
+      if (res.error) {
+        res = await client.from('profiles').update(payload).eq('user_id', user.id);
+      }
+      if (res.error) throw res.error;
+      if (window.__dayoPartnerProfile) {
+        window.__dayoPartnerProfile.nickname = payload.nickname;
+        window.__dayoPartnerProfile.bio = payload.bio;
+      }
+      showToast('프로필이 성공적으로 저장되었습니다 ✨');
+    }
+
+    if (profileSaveBtn) {
+      profileSaveBtn.addEventListener('click', async function () {
+        profileSaveBtn.disabled = true;
+        try {
+          await savePartnerProfile();
+        } catch (err) {
+          console.warn('[DayO] profile save failed', err);
+          showToast('프로필 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+        } finally {
+          profileSaveBtn.disabled = false;
+        }
+      });
+    }
 
     /* 닉네임 변경 이력 */
     const nicknameHistory = [];
@@ -2673,6 +2968,7 @@
       const theme = AVATARS.find((item) => item.id === id);
       if (!theme) return;
       selectedAvatar = id;
+      pendingAvatarUrl = 'https://api.dicebear.com/7.x/lorelei/svg?seed=dayo-' + id;
       profileAvatar.classList.remove('has-photo');
       profileAvatar.style.backgroundImage = '';
       profileAvatar.style.setProperty('--av-bg', theme.bg);
@@ -2707,7 +3003,6 @@
       const option = event.target.closest('[data-avatar]');
       if (!option) return;
       applyAvatar(option.dataset.avatar);
-      showToast(t('partner.toast.avatarApplied'));
     });
 
     document.getElementById('uploadBtn').addEventListener('click', () => photoInput.click());
@@ -2717,25 +3012,70 @@
       if (!file) return;
       const reader = new FileReader();
       reader.onload = () => {
+        pendingAvatarUrl = String(reader.result || '');
+        selectedAvatar = '';
         profileAvatar.classList.add('has-photo');
         profileAvatar.style.backgroundImage = `url(${reader.result})`;
         photoPreview.classList.add('has-photo');
         photoPreview.style.backgroundImage = `url(${reader.result})`;
         removePhotoBtn.hidden = false;
-        selectedAvatar = '';
         renderAvatarOptions();
-        showToast(t('partner.toast.photoApplied'));
       };
       reader.readAsDataURL(file);
       photoInput.value = '';
     });
 
+    async function savePartnerAvatar() {
+      var client = supabaseClient();
+      if (!client) throw new Error('no client');
+      var sessionRes = await client.auth.getSession();
+      var user = sessionRes && sessionRes.data && sessionRes.data.session && sessionRes.data.session.user;
+      if (!user) throw new Error('no session');
+      if (!pendingAvatarUrl) {
+        pendingAvatarUrl = selectedAvatar
+          ? ('https://api.dicebear.com/7.x/lorelei/svg?seed=dayo-' + selectedAvatar)
+          : '';
+      }
+      if (!pendingAvatarUrl) throw new Error('no avatar');
+      var payload = { avatar_url: pendingAvatarUrl };
+      var res = await client.from('profiles').update(payload).eq('id', user.id);
+      if (res.error) {
+        res = await client.from('profiles').update(payload).eq('user_id', user.id);
+      }
+      if (res.error) throw res.error;
+      if (window.__dayoPartnerProfile) window.__dayoPartnerProfile.avatar_url = pendingAvatarUrl;
+      if (pendingAvatarUrl.indexOf('data:') === 0 || pendingAvatarUrl.indexOf('http') === 0) {
+        profileAvatar.classList.add('has-photo');
+        profileAvatar.style.backgroundImage = 'url(' + pendingAvatarUrl + ')';
+      }
+      showToast('프로필 사진이 변경되었습니다 📸');
+      return true;
+    }
+
+    var photoSaveBtn = document.getElementById('photo-save-btn');
+    if (photoSaveBtn) {
+      photoSaveBtn.addEventListener('click', async function () {
+        photoSaveBtn.disabled = true;
+        try {
+          await savePartnerAvatar();
+          closeModal(document.getElementById('photoModal'));
+        } catch (err) {
+          console.warn('[DayO] avatar save failed', err);
+          showToast('사진 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+        } finally {
+          photoSaveBtn.disabled = false;
+        }
+      });
+    }
+
     /* 모달 열고 닫기 */
     const photoModal = document.getElementById('photoModal');
     const historyModal = document.getElementById('historyModal');
     const addSlotModal = document.getElementById('add-slot-modal');
+    const settlementModal = document.getElementById('settlement-history-modal');
 
     function openModal(modal) {
+      if (!modal) return;
       modal.classList.add('is-open');
       if (window.DayOScrollLock) window.DayOScrollLock.lock();
       else document.body.style.overflow = 'hidden';
@@ -2744,7 +3084,7 @@
     }
 
     function closeModal(modal) {
-      if (!modal.classList.contains('is-open')) return;
+      if (!modal || !modal.classList.contains('is-open')) return;
       modal.classList.remove('is-open');
       if (window.DayOScrollLock) window.DayOScrollLock.unlock();
       else document.body.style.overflow = '';
@@ -2756,7 +3096,45 @@
       openModal(historyModal);
     });
 
-    [photoModal, historyModal, addSlotModal].forEach((modal) => {
+    function paintSettlementModal() {
+      var points = Number(window.__dayoPartnerPoints || 0);
+      var stats = window.__dayoPartnerEarnings || { pendingWon: 0, settledWon: 0, monthCount: 0 };
+      var pendingEl = document.getElementById('settlement-pending-points');
+      var settledEl = document.getElementById('settlement-settled-won');
+      var listEl = document.getElementById('settlement-history-list');
+      if (pendingEl) pendingEl.textContent = points.toLocaleString('ko-KR') + ' P';
+      if (settledEl) settledEl.textContent = Number(stats.settledWon || 0).toLocaleString('ko-KR') + ' 원';
+      if (listEl) {
+        var demo = [
+          '2026.09.15 | 1:1 대화 세션 완료 (20대 K님) | +6,000 P (적립)'
+        ];
+        if (stats.monthCount > 0) {
+          demo.unshift('이번 달 완료 세션 ' + stats.monthCount + '회 | 누적 적립 반영');
+        }
+        listEl.innerHTML = demo.map(function (line) {
+          return '<div class="settlement-item">' + line + '</div>';
+        }).join('');
+      }
+    }
+
+    function openSettlementModal() {
+      paintSettlementModal();
+      openModal(settlementModal);
+    }
+
+    ['stat-points-card', 'stat-settled-card'].forEach(function (id) {
+      var card = document.getElementById(id);
+      if (!card) return;
+      card.addEventListener('click', openSettlementModal);
+      card.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openSettlementModal();
+        }
+      });
+    });
+
+    [photoModal, historyModal, addSlotModal, settlementModal].forEach((modal) => {
       if (!modal) return;
       modal.addEventListener('click', (event) => {
         if (event.target === modal || event.target.closest('[data-close-modal]')) closeModal(modal);
@@ -2765,7 +3143,7 @@
 
     document.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape') return;
-      [photoModal, historyModal, addSlotModal].forEach((modal) => {
+      [photoModal, historyModal, addSlotModal, settlementModal].forEach((modal) => {
         if (modal && modal.classList.contains('is-open')) closeModal(modal);
       });
     });
@@ -2794,18 +3172,27 @@
 
     function paintPartnerProfile(profile) {
       var nickname = String((profile && profile.nickname) || '').trim() || defaultPartnerName();
-      var role = String((profile && profile.role) || '').toLowerCase();
+      var bio = String((profile && (profile.bio || profile.intro)) || '').trim();
       var welcomeEl = document.getElementById('partnerWelcome');
-      var badgeEl = document.getElementById('partnerVerifyBadge');
       if (welcomeEl) welcomeEl.textContent = t('partner.welcomeFormat', { name: nickname });
       if (nicknameInput && !nicknameInput.value.trim()) nicknameInput.value = nickname;
       if (miniName) miniName.textContent = nicknameInput && nicknameInput.value.trim() ? nicknameInput.value.trim() : nickname;
       savedNickname = (nicknameInput && nicknameInput.value.trim()) || nickname;
-      if (badgeEl) {
-        var verified = role === 'partner';
-        badgeEl.textContent = verified ? t('partner.badge.verified') : t('partner.badge.pending');
-        badgeEl.classList.toggle('is-pending', !verified);
+      if (introInput && bio && !introInput.value.trim()) {
+        introInput.value = bio;
+        syncIntro();
       }
+      if (profile && profile.avatar_url) {
+        pendingAvatarUrl = String(profile.avatar_url);
+        profileAvatar.classList.add('has-photo');
+        profileAvatar.style.backgroundImage = 'url(' + pendingAvatarUrl + ')';
+      }
+      if (profile && (profile.is_available === false || profile.partner_status === 'resting')) {
+        partnerActive = false;
+      } else if (profile && (profile.is_available === true || profile.partner_status === 'active')) {
+        partnerActive = true;
+      }
+      paintStatusToggle();
       if (!nicknameHistory.length && savedNickname) {
         nicknameHistory.unshift({ name: savedNickname, date: formatToday() });
         renderHistory();
@@ -2815,15 +3202,23 @@
     async function fetchPartnerProfile(session) {
       var client = supabaseClient();
       if (!client || !session || !session.user) return null;
+      var cols = 'point_balance, nickname, role, bio, avatar_url, is_available, partner_status';
       var q = await client
         .from('profiles')
-        .select('point_balance, nickname, role')
+        .select(cols)
         .eq('id', session.user.id)
         .maybeSingle();
+      if (q.error) {
+        q = await client
+          .from('profiles')
+          .select('point_balance, nickname, role, bio, avatar_url')
+          .eq('id', session.user.id)
+          .maybeSingle();
+      }
       if (q.error || !q.data) {
         q = await client
           .from('profiles')
-          .select('point_balance, nickname, role')
+          .select('point_balance, nickname, role, bio, avatar_url')
           .eq('user_id', session.user.id)
           .maybeSingle();
       }
