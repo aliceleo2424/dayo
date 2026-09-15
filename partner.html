@@ -11,49 +11,72 @@
   <script src="supabase-client.js"></script>
   <script src="scroll-lock.js"></script>
   <script>
-    document.documentElement.classList.add('partner-guard-pending');
     (function partnerAccessGuard() {
       var FALLBACK_FORM = 'https://docs.google.com/forms/d/e/1FAIpQLScBTytUfVL4uyxv3R95dFfcs5rV-UBMnvujJ5GsK4ZNzh_1ZQ/viewform';
-      var APPLY_FORM = FALLBACK_FORM;
+      var lastAuthKey = '';
+      var authRunId = 0;
 
       function applyFormUrl() {
         var env = window.__DAYO_ENV__ || {};
-        APPLY_FORM = env.PARTNER_APPLY_FORM_URL || env.NEXT_PUBLIC_PARTNER_APPLY_FORM_URL || FALLBACK_FORM;
-        return APPLY_FORM;
+        return env.PARTNER_APPLY_FORM_URL || env.NEXT_PUBLIC_PARTNER_APPLY_FORM_URL || FALLBACK_FORM;
       }
 
       function normalizeRole(role) {
         return String(role || '').trim().toLowerCase().replace(/[\s-]+/g, '_');
       }
 
-      function revealPage() {
-        document.documentElement.classList.remove('partner-guard-pending');
-        if (document.body) document.body.classList.remove('partner-guard-pending');
+      function els() {
+        return {
+          auth: document.getElementById('partner-auth-section'),
+          dash: document.getElementById('partner-dashboard-section') || document.getElementById('viewPartnerHome'),
+          recruit: document.getElementById('partnerRecruitView'),
+          recruitCard: document.getElementById('partner-recruit-card')
+        };
+      }
+
+      function setDisplay(node, on) {
+        if (!node) return;
+        if (on) {
+          node.hidden = false;
+          node.style.display = '';
+        } else {
+          node.hidden = true;
+          node.style.display = 'none';
+        }
+      }
+
+      function showAuthSection() {
+        var nodes = els();
+        if (document.body) {
+          document.body.classList.add('is-partner-auth');
+          document.body.classList.remove('is-partner-lounge', 'is-partner-recruit');
+        }
+        setDisplay(nodes.auth, true);
+        setDisplay(nodes.dash, false);
+        setDisplay(nodes.recruit, false);
       }
 
       function showPartnerLounge() {
-        revealPage();
+        var nodes = els();
         if (document.body) {
           document.body.classList.add('is-partner-lounge');
-          document.body.classList.remove('is-partner-recruit');
+          document.body.classList.remove('is-partner-recruit', 'is-partner-auth');
         }
-        var lounge = document.getElementById('viewPartnerHome');
-        var recruit = document.getElementById('partnerRecruitView');
-        if (lounge) lounge.hidden = false;
-        if (recruit) recruit.hidden = true;
-        hideDayONoticeModal();
+        setDisplay(nodes.auth, false);
+        setDisplay(nodes.dash, true);
+        setDisplay(nodes.recruit, false);
       }
 
       function showPartnerRecruitView() {
-        revealPage();
+        var nodes = els();
         if (document.body) {
           document.body.classList.add('is-partner-recruit');
-          document.body.classList.remove('is-partner-lounge');
+          document.body.classList.remove('is-partner-lounge', 'is-partner-auth');
         }
-        var lounge = document.getElementById('viewPartnerHome');
-        var recruit = document.getElementById('partnerRecruitView');
-        if (lounge) lounge.hidden = true;
-        if (recruit) recruit.hidden = false;
+        setDisplay(nodes.auth, false);
+        setDisplay(nodes.dash, false);
+        setDisplay(nodes.recruit, true);
+        if (nodes.recruitCard) nodes.recruitCard.style.display = 'block';
         var cta = document.getElementById('partnerRecruitCta');
         if (cta) cta.setAttribute('href', applyFormUrl());
         if (window.syncPartnerRecruitCard) window.syncPartnerRecruitCard();
@@ -64,14 +87,14 @@
 
       function waitForClient(tries) {
         return new Promise(function (resolve) {
-          var left = tries || 40;
+          var left = tries || 60;
           (function tick() {
             if (window.supabaseClient && window.supabaseClient.auth) {
               resolve(window.supabaseClient);
               return;
             }
             if (left <= 0) {
-              resolve(window.supabaseClient || null);
+              resolve(null);
               return;
             }
             left -= 1;
@@ -84,157 +107,21 @@
         return String(value || '').replace(/[,()]/g, '');
       }
 
-      function isAuthorizedProfile(profile) {
-        if (!profile) return false;
-        var role = normalizeRole(profile.role);
-        if (role === 'partner' || role === 'admin' || role === 'super_admin' || role === 'superadmin') {
-          return true;
-        }
-        return profile.is_partner === true || profile.is_partner === 'true' || profile.is_partner === 1;
-      }
-
-      function readLocalSupabaseSession() {
+      async function fetchProfile(client, user) {
+        if (!client || !user) return null;
+        var uid = escapeOrValue(user.id);
         try {
-          var keys = Object.keys(window.localStorage || {});
-          var sbKey = keys.find(function (k) {
-            return k.indexOf('sb-') === 0 && k.indexOf('-auth-token') !== -1;
-          });
-          if (!sbKey) return null;
-          var raw = JSON.parse(window.localStorage.getItem(sbKey) || 'null');
-          if (!raw) return null;
-          if (raw.user && raw.user.id) {
-            return { user: raw.user, access_token: raw.access_token || null };
-          }
-          if (raw.currentSession && raw.currentSession.user) {
-            return raw.currentSession;
-          }
-          if (raw.session && raw.session.user) {
-            return raw.session;
-          }
-        } catch (e) { /* ignore */ }
-        return null;
-      }
+          var byId = await client
+            .from('profiles')
+            .select('role, is_partner')
+            .eq('id', uid)
+            .maybeSingle();
+          if (!byId.error && byId.data) return byId.data;
+        } catch (e) { /* fall through */ }
 
-      function sleep(ms) {
-        return new Promise(function (resolve) { setTimeout(resolve, ms); });
-      }
-
-      async function resolveSession(client) {
-        var session = null;
-        try {
-          var sessionRes = await client.auth.getSession();
-          session = sessionRes && sessionRes.data && sessionRes.data.session;
-        } catch (e) { session = null; }
-
-        if (session && session.user) return session;
-
-        var local = readLocalSupabaseSession();
-        if (local && local.user) return local;
-
-        /* Hydration race: brief retry before declaring logged-out */
-        await sleep(180);
-        try {
-          var retry = await client.auth.getSession();
-          session = retry && retry.data && retry.data.session;
-          if (session && session.user) return session;
-        } catch (e2) { /* ignore */ }
-
-        local = readLocalSupabaseSession();
-        if (local && local.user) return local;
-        return null;
-      }
-
-      function ensureNoticeModal() {
-        var modal = document.getElementById('partner-notice-modal');
-        if (modal) return modal;
-
-        modal = document.createElement('div');
-        modal.id = 'partner-notice-modal';
-        modal.className = 'partner-notice-overlay';
-        modal.setAttribute('role', 'dialog');
-        modal.setAttribute('aria-modal', 'true');
-        modal.setAttribute('aria-labelledby', 'partner-notice-title');
-        modal.hidden = true;
-        modal.innerHTML =
-          '<div class="partner-notice-card">' +
-            '<p class="partner-notice-kicker">DayO Partner Lounge</p>' +
-            '<h2 id="partner-notice-title" class="partner-notice-title"></h2>' +
-            '<p id="partner-notice-desc" class="partner-notice-desc"></p>' +
-            '<div id="partner-notice-actions" class="partner-notice-actions"></div>' +
-          '</div>';
-        document.body.appendChild(modal);
-        modal.addEventListener('click', function (e) {
-          if (e.target === modal) {
-            /* keep modal until user chooses an action */
-          }
-        });
-        return modal;
-      }
-
-      function hideDayONoticeModal() {
-        var modal = document.getElementById('partner-notice-modal');
-        if (!modal) return;
-        modal.hidden = true;
-        modal.classList.remove('is-open');
-      }
-
-      function showDayONoticeModal(kind) {
-        applyFormUrl();
-        revealPage();
-        var lounge = document.getElementById('viewPartnerHome');
-        var recruit = document.getElementById('partnerRecruitView');
-        if (lounge) lounge.hidden = true;
-        if (recruit) recruit.hidden = true;
-
-        var modal = ensureNoticeModal();
-        var title = document.getElementById('partner-notice-title');
-        var desc = document.getElementById('partner-notice-desc');
-        var actions = document.getElementById('partner-notice-actions');
-        if (!title || !desc || !actions) return;
-
-        if (kind === 'LOGIN_REQUIRED') {
-          title.textContent = '로그인이 필요한 라운지예요 ☕';
-          desc.textContent = 'DayO 파트너 라운지는 계정 확인 후 입장하실 수 있습니다.';
-          actions.innerHTML =
-            '<button type="button" class="partner-notice-btn partner-notice-btn--primary" data-partner-notice="login">로그인하러 가기</button>';
-        } else {
-          title.textContent = 'DayO 글로벌 파트너 전용 공간입니다 ☕';
-          desc.textContent = '파트너 신청서를 검수 중이거나 아직 승인되지 않은 계정이에요.\n활동을 원하시면 아래 지원서를 작성해 주세요!';
-          actions.innerHTML =
-            '<a class="partner-notice-btn partner-notice-btn--primary" href="' + APPLY_FORM + '" target="_blank" rel="noopener noreferrer">파트너 지원하기 (구글 폼) 📝</a>' +
-            '<button type="button" class="partner-notice-btn partner-notice-btn--ghost" data-partner-notice="mypage">마이페이지로 돌아가기</button>';
-        }
-
-        modal.hidden = false;
-        modal.classList.add('is-open');
-
-        actions.onclick = function (e) {
-          var btn = e.target.closest('[data-partner-notice]');
-          if (!btn) return;
-          var action = btn.getAttribute('data-partner-notice');
-          if (action === 'login') {
-            if (window.DayOMode && typeof window.DayOMode.openLogin === 'function') {
-              window.DayOMode.openLogin();
-              return;
-            }
-            window.location.href = '/';
-            return;
-          }
-          if (action === 'mypage') {
-            window.location.href = '/mypage.html';
-          }
-        };
-      }
-
-      window.showDayONoticeModal = showDayONoticeModal;
-
-      async function fetchAuthorizedProfile(client, sessionUser) {
-        if (!client || !sessionUser) return null;
-        var uid = escapeOrValue(sessionUser.id);
-        var email = escapeOrValue(sessionUser.email || '');
+        var email = escapeOrValue(user.email || '');
         var orFilter = 'id.eq.' + uid + ',user_id.eq.' + uid;
         if (email) orFilter += ',email.eq.' + email;
-
         try {
           var res = await client
             .from('profiles')
@@ -250,92 +137,129 @@
               .limit(1);
             if (!fallback.error && fallback.data && fallback.data[0]) return fallback.data[0];
           }
-        } catch (e) { /* ignore */ }
+        } catch (e2) { /* ignore */ }
         return null;
       }
 
-      function renderPartnerDashboard(user, profile) {
+      function isAuthorized(profile, userEmail) {
+        var role = normalizeRole(profile && profile.role);
+        var isPartner = role === 'partner'
+          || (profile && (profile.is_partner === true || profile.is_partner === 'true' || profile.is_partner === 1));
+        var isAdmin = role === 'admin' || role === 'super_admin' || role === 'superadmin';
+        var emailHint = String(userEmail || '').toLowerCase().indexOf('partner') !== -1;
+        return !!(isPartner || isAdmin || emailHint);
+      }
+
+      function initPartnerDashboard(user, profile) {
         window.__dayoPartnerAuthUser = user || null;
         window.__dayoPartnerProfileGate = profile || null;
         showPartnerLounge();
+        if (typeof window.loadLoungeStats === 'function') {
+          try { window.loadLoungeStats(); } catch (e) { /* ignore */ }
+        }
         document.dispatchEvent(new CustomEvent('dayo:partner-authorized', {
           detail: { user: user, profile: profile }
         }));
       }
 
-      async function verifyPartnerAccess() {
+      window.initPartnerDashboard = initPartnerDashboard;
+
+      async function handleAuthState(event, session) {
+        if (event === 'TOKEN_REFRESHED') return;
+        var myRun = ++authRunId;
         try {
-          var client = await waitForClient(40);
-          if (!client || !client.auth) {
-            showDayONoticeModal('LOGIN_REQUIRED');
-            return;
-          }
+          console.log('Auth event:', event, 'Session user:', session && session.user && session.user.email);
 
-          var session = await resolveSession(client);
           if (!session || !session.user) {
-            showDayONoticeModal('LOGIN_REQUIRED');
+            /* Ignore transient null before INITIAL_SESSION / SIGNED_IN */
+            if (event === 'INITIAL_SESSION' || event === 'SIGNED_OUT') {
+              showAuthSection();
+              lastAuthKey = 'anon';
+            }
             return;
           }
 
-          var userProfile = await fetchAuthorizedProfile(client, session.user);
-          if (isAuthorizedProfile(userProfile)) {
-            renderPartnerDashboard(session.user, userProfile);
+          var authKey = String(session.user.id || '') + ':' + String(session.user.email || '');
+          if (authKey === lastAuthKey && document.body && document.body.classList.contains('is-partner-lounge')) {
             return;
           }
 
-          showDayONoticeModal('PARTNER_RECRUIT');
+          var client = window.supabaseClient;
+          var profile = await fetchProfile(client, session.user);
+          if (myRun !== authRunId) return;
+
+          if (isAuthorized(profile, session.user.email)) {
+            lastAuthKey = authKey;
+            initPartnerDashboard(session.user, profile);
+            return;
+          }
+
+          lastAuthKey = authKey + ':recruit';
+          showPartnerRecruitView();
         } catch (err) {
+          if (myRun !== authRunId) return;
           console.warn('파트너 라운지 가드 실패', err);
-          showDayONoticeModal('PARTNER_RECRUIT');
+          if (session && session.user && String(session.user.email || '').toLowerCase().indexOf('partner') !== -1) {
+            initPartnerDashboard(session.user, null);
+            return;
+          }
+          showPartnerRecruitView();
         }
       }
 
-      window.verifyPartnerAccess = verifyPartnerAccess;
+      async function boot() {
+        document.documentElement.classList.remove('partner-guard-pending');
+        if (document.body) document.body.classList.remove('partner-guard-pending');
+
+        var client = await waitForClient(60);
+        if (!client || !client.auth) {
+          showAuthSection();
+          return;
+        }
+
+        client.auth.onAuthStateChange(function (event, session) {
+          handleAuthState(event, session);
+        });
+
+        /* Safety: also read current session after listener is attached */
+        try {
+          var now = await client.auth.getSession();
+          var session = now && now.data && now.data.session;
+          if (session && session.user) {
+            handleAuthState('GET_SESSION', session);
+          }
+        } catch (e) { /* onAuthStateChange will settle */ }
+      }
 
       if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', verifyPartnerAccess);
+        document.addEventListener('DOMContentLoaded', boot);
       } else {
-        verifyPartnerAccess();
+        boot();
       }
     })();
   </script>
   <style>
-    html.partner-guard-pending body { visibility: hidden; }
-    html.partner-guard-pending #partner-notice-modal,
-    html.partner-guard-pending #partner-notice-modal * {
-      visibility: visible !important;
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    .topbar {
+      position: relative;
+      z-index: 50;
+      pointer-events: auto;
     }
 
-    .partner-notice-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 99999;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      box-sizing: border-box;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(4px);
-    }
-    .partner-notice-overlay.is-open,
-    .partner-notice-overlay:not([hidden]) {
-      display: flex;
-    }
-    .partner-notice-overlay[hidden] {
-      display: none !important;
-    }
-    .partner-notice-card {
-      width: min(420px, 100%);
-      padding: 28px 24px 22px;
+    #partner-auth-section {
+      width: min(520px, calc(100% - 2rem));
+      margin: 48px auto 72px;
+      padding: 36px 28px;
       border-radius: 24px;
       background: #FFFFFF;
       border: 1px solid #EDE4D5;
-      box-shadow: 0 24px 56px rgba(41, 37, 36, 0.22);
+      box-shadow: 0 16px 40px rgba(113, 83, 72, 0.1);
       text-align: center;
-      color: #44403C;
     }
-    .partner-notice-kicker {
+    #partner-auth-section[hidden] { display: none !important; }
+    .partner-auth-kicker {
       margin: 0 0 8px;
       font-size: 11px;
       font-weight: 800;
@@ -343,26 +267,24 @@
       color: #247552;
       text-transform: uppercase;
     }
-    .partner-notice-title {
+    .partner-auth-title {
       margin: 0 0 10px;
-      font-size: 1.15rem;
+      font-size: 1.2rem;
       font-weight: 800;
-      letter-spacing: -0.02em;
-      line-height: 1.4;
       color: #292524;
+      letter-spacing: -0.02em;
     }
-    .partner-notice-desc {
+    .partner-auth-desc {
       margin: 0 0 20px;
-      font-size: 0.9rem;
+      font-size: 0.92rem;
       line-height: 1.7;
       color: #78716C;
-      white-space: pre-line;
     }
-    .partner-notice-actions {
+    .partner-auth-actions {
       display: grid;
       gap: 10px;
     }
-    .partner-notice-btn {
+    .partner-auth-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -377,17 +299,15 @@
       cursor: pointer;
       box-sizing: border-box;
     }
-    .partner-notice-btn--primary {
+    .partner-auth-btn--primary {
       background: linear-gradient(135deg, #B8E2C8, #7BC9A0);
       color: #1F5A3D;
     }
-    .partner-notice-btn--ghost {
+    .partner-auth-btn--ghost {
       background: #FAF8F5;
       color: #57534E;
       border: 1px solid #EDE4D5;
     }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
       --cream: #FFF8F3;
@@ -1797,6 +1717,7 @@
     body.theme-partner,
     body[data-mode="partner"],
     .partner-page-body,
+    #partner-dashboard-section,
     #viewPartnerHome {
       background: linear-gradient(180deg, #F0F9F5 0%, #E6F4EE 100%) !important;
       min-height: 100vh;
@@ -1999,15 +1920,7 @@
     }
   </style>
 </head>
-<body class="theme-partner partner-page-body partner-guard-pending" data-dayo-role="partner" data-mode="partner">
-  <div id="partner-notice-modal" class="partner-notice-overlay" role="dialog" aria-modal="true" aria-labelledby="partner-notice-title" hidden>
-    <div class="partner-notice-card">
-      <p class="partner-notice-kicker">DayO Partner Lounge</p>
-      <h2 id="partner-notice-title" class="partner-notice-title"></h2>
-      <p id="partner-notice-desc" class="partner-notice-desc"></p>
-      <div id="partner-notice-actions" class="partner-notice-actions"></div>
-    </div>
-  </div>
+<body class="theme-partner partner-page-body" data-dayo-role="partner" data-mode="partner">
   <script>
     (function applyPartnerTheme() {
       var body = document.body;
@@ -2022,6 +1935,7 @@
           body.classList.add('theme-partner', 'partner-page-body');
           body.classList.remove('theme-learner');
           body.setAttribute('data-mode', 'partner');
+          if (typeof window.showPartnerLounge === 'function') window.showPartnerLounge();
           return;
         }
         if (id === 'viewLearnerHome' || id === 'learner') {
@@ -2065,8 +1979,18 @@
     <button type="button" onclick="handleLogout(event)" class="btn-logout" style="cursor: pointer;" data-i18n="login.logout">로그아웃</button>
   </nav>
 
+  <section id="partner-auth-section" hidden>
+    <p class="partner-auth-kicker">DayO Partner Lounge</p>
+    <h2 class="partner-auth-title">로그인이 필요한 라운지예요 ☕</h2>
+    <p class="partner-auth-desc">DayO 파트너 라운지는 계정 확인 후 입장하실 수 있습니다. 상단 메뉴나 아래 버튼으로 로그인해 주세요.</p>
+    <div class="partner-auth-actions">
+      <button type="button" class="partner-auth-btn partner-auth-btn--primary" id="partner-auth-login-btn">로그인하러 가기</button>
+      <a class="partner-auth-btn partner-auth-btn--ghost" href="/mypage.html">마이페이지로 이동</a>
+    </div>
+  </section>
+
   <section id="partnerRecruitView" class="partner-recruit" hidden>
-    <div class="partner-recruit-card">
+    <div class="partner-recruit-card" id="partner-recruit-card">
       <p class="partner-recruit-kicker">PARTNER RECRUIT</p>
       <h1 data-i18n="partner.recruit.title">DayO와 함께할 글로벌 대화 파트너를 모십니다 ☕</h1>
       <p class="partner-recruit-sub" data-i18n="partner.recruit.sub">가르치거나 평가할 필요 없이, 글로벌 친구와 일상 이야기를 나누며 편안하게 수익을 만들어보세요.</p>
@@ -2076,10 +2000,13 @@
       </ul>
       <a id="partnerRecruitCta" class="partner-recruit-cta" href="https://docs.google.com/forms/d/e/1FAIpQLScBTytUfVL4uyxv3R95dFfcs5rV-UBMnvujJ5GsK4ZNzh_1ZQ/viewform" target="_blank" rel="noopener noreferrer" data-i18n="partner.recruit.cta">글로벌 파트너 지원서 작성하기 (1분 소요) 📝</a>
       <p class="partner-recruit-status" data-i18n="partner.recruit.status">이미 지원서를 제출하셨나요? 운영팀 검수 후 승인이 완료되면 본 페이지에서 즉시 활동하실 수 있습니다.</p>
+      <p style="margin: 16px 0 0; text-align: center;">
+        <a href="/mypage.html" style="color:#247552;font-weight:800;text-decoration:underline;">마이페이지로 돌아가기</a>
+      </p>
     </div>
   </section>
 
-  <main class="page partner-container partner-dashboard-wrap" id="viewPartnerHome">
+  <main class="page partner-container partner-dashboard-wrap" id="partner-dashboard-section" data-partner-home="viewPartnerHome" hidden>
     <div class="role-switch-wrapper" style="display: flex; justify-content: center; margin: 20px auto 28px; width: 100%; max-width: 320px;">
       <div class="role-segmented-control" style="position: relative; display: flex; width: 100%; background: #F1F3F5; padding: 4px; border-radius: 999px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.06); cursor: pointer;" role="group" data-i18n="role.switchAria" data-i18n-attr="aria-label" aria-label="역할 전환">
         <div id="segmented-glider" style="position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: #FFFFFF; border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,0.12); transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);"></div>
@@ -3096,5 +3023,22 @@
   <script src="mode-switch.js"></script>
   <script src="role-switch.js"></script>
   <script src="legal-footer.js"></script>
+  <script>
+    (function bindPartnerAuthLogin() {
+      var btn = document.getElementById('partner-auth-login-btn');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        if (window.DayOMode && typeof window.DayOMode.openLogin === 'function') {
+          window.DayOMode.openLogin();
+          return;
+        }
+        if (typeof window.openLoginModal === 'function') {
+          window.openLoginModal();
+          return;
+        }
+        window.location.href = '/';
+      });
+    })();
+  </script>
 </body>
 </html>
