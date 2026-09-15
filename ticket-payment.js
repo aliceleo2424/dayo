@@ -233,6 +233,15 @@
 
   async function requestPay(planId) {
     if (paying) return;
+    if (window.DayOTickets && typeof window.DayOTickets.ensureRefundConsent === 'function') {
+      if (!window.DayOTickets.ensureRefundConsent()) return;
+    } else {
+      var agree = document.getElementById('tkRefundAgree');
+      if (agree && !agree.checked) {
+        alert('취소 및 환불 규정에 동의해 주세요.');
+        return;
+      }
+    }
     paying = true;
     try {
       var selectedProduct = resolveProduct(planId);

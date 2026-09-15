@@ -170,6 +170,10 @@
     '.tk-buy:disabled,.tk-buy.is-disabled{cursor:not-allowed;background:#CBD5E1;color:#64748B;',
     'box-shadow:none;transform:none;opacity:.9;}',
     '.tk-buy:disabled:hover,.tk-buy.is-disabled:hover{transform:none;box-shadow:none;}',
+    '.tk-consent{margin:1rem 0 .2rem;padding:.9rem 1rem;border:1px solid #EDE4D5;border-radius:14px;background:#FFFCFA;text-align:left;}',
+    '.tk-consent label{display:flex;align-items:flex-start;gap:.5rem;margin:0;color:#5C4A42;font-size:.8rem;font-weight:700;line-height:1.45;cursor:pointer;}',
+    '.tk-consent input{margin-top:.12rem;accent-color:#FF6B57;flex:0 0 auto;}',
+    '.tk-consent a{color:#E85B48;font-weight:800;text-decoration:underline;text-underline-offset:2px;}',
     '.tk-used{margin-top:1rem;display:flex;flex-wrap:wrap;align-items:center;gap:.75rem 1rem;',
     'padding:1rem 1.05rem;border-radius:20px;text-align:left;opacity:.75;',
     'background:#F8FAFC;border:1px solid #E2E8F0;color:#94A3B8;}',
@@ -244,7 +248,6 @@
       '<button type="button" class="tk-buy' + (plan.tier === 'single' ? ' tk-buy--slim' : '') + (disabled ? ' is-disabled' : '') + '"' +
         (disabled ? ' disabled aria-disabled="true"' : '') +
         ' data-tk-buy="' + plan.id + '"' +
-        (disabled ? '' : ' onclick="requestPay(\'' + (plan.payId || plan.id) + '\')"') +
         ' data-amount="' + payload.amount + '"' +
         ' data-order-name="' + payload.orderName + '"' +
         ' data-ticket-count="' + payload.ticketCount + '">' +
@@ -344,6 +347,14 @@
           '<div class="tk-grid" data-tk-grid></div>' +
           '<div class="tk-single" data-tk-single></div>' +
           '<div data-tk-used></div>' +
+          '<div class="tk-consent">' +
+            '<label for="tkRefundAgree">' +
+              '<input type="checkbox" id="tkRefundAgree" name="tkRefundAgree">' +
+              '<span>[필수] 취소 및 환불 규정을 확인하였으며 이에 동의합니다. ' +
+                '<a href="/refund" target="_blank" rel="noopener noreferrer">보기</a>' +
+              '</span>' +
+            '</label>' +
+          '</div>' +
           '<aside class="tk-policy" aria-label="세션 규정 및 이용 안내">' +
             '<p class="tk-policy__title">세션 규정 및 이용 안내</p>' +
             '<ul class="tk-policy__list">' +
@@ -562,9 +573,25 @@
     return { skipped: true, payload: payload };
   }
 
+  function hasRefundConsent() {
+    var box = document.getElementById('tkRefundAgree');
+    return !!(box && box.checked);
+  }
+
+  function ensureRefundConsent() {
+    if (hasRefundConsent()) return true;
+    showToast('취소 및 환불 규정에 동의해 주세요.');
+    var box = document.getElementById('tkRefundAgree');
+    if (box && box.focus) {
+      try { box.focus(); } catch (e) { /* ignore */ }
+    }
+    return false;
+  }
+
   async function completePurchase(plan) {
     if (buying || !plan) return;
     if (plan.id === 'trial' && couponState.trialUsed) return;
+    if (!ensureRefundConsent()) return;
     var payId = plan.payId || plan.id;
     if (typeof window.requestPay === 'function') {
       return window.requestPay(payId);
@@ -618,7 +645,7 @@
     el.overlay.addEventListener('click', function (e) {
       var buy = e.target.closest('[data-tk-buy]');
       if (!buy || buy.disabled || buy.classList.contains('is-disabled')) return;
-      if (typeof window.requestPay === 'function') return;
+      e.preventDefault();
       completePurchase(findPlan(buy.getAttribute('data-tk-buy')));
     });
 
@@ -720,6 +747,8 @@
       promptPurchase: promptPurchase,
       showNotice: showNotice,
       toast: showToast,
+      ensureRefundConsent: ensureRefundConsent,
+      hasRefundConsent: hasRefundConsent,
       isTrialUsed: function () { return !!couponState.trialUsed; }
     };
     window.openTicketModal = open;

@@ -78,6 +78,14 @@
     'box-shadow:0 4px 0 var(--coral-dark,#E55A45);}',
     '.ms-login:active{transform:translateY(2px);box-shadow:0 2px 0 var(--coral-dark,#E55A45);}',
     '.ms-login:disabled{opacity:.62;pointer-events:none;transform:none;box-shadow:none;}',
+    '.ms-consent{display:none;gap:.45rem;margin:.15rem 0 .35rem;padding:.75rem .85rem;',
+    'border:1px solid #EDE4D5;border-radius:14px;background:#FFFCFA;text-align:left;}',
+    '.ms-overlay[data-auth-tab="signup"] .ms-consent{display:grid;}',
+    '.ms-consent label{display:flex;align-items:flex-start;gap:.45rem;margin:0;color:#5C4A42;',
+    'font-size:.74rem;font-weight:650;line-height:1.45;cursor:pointer;}',
+    '.ms-consent input{margin-top:.15rem;flex:0 0 auto;accent-color:#FF6B57;}',
+    '.ms-consent a{color:#E85B48;font-weight:800;text-decoration:underline;text-underline-offset:2px;}',
+    '.ms-consent__hint{margin:0;color:#C07868;font-size:.7rem;font-weight:700;min-height:1em;}',
     '.ms-divider{display:flex;align-items:center;gap:.55rem;margin:1.15rem 0 .85rem;color:var(--muted,#9A8580);',
     'font-size:.72rem;font-weight:700;letter-spacing:-.01em;}',
     '.ms-divider::before,.ms-divider::after{content:"";flex:1;height:1px;background:rgba(154,133,128,.28);}',
@@ -313,21 +321,25 @@
 
   function setLoginBusy(busy) {
     if (!overlay) return;
-    var submit = overlay.querySelector('.ms-login');
+    var submit = overlay.querySelector('#msAuthSubmit') || overlay.querySelector('.ms-login');
     var kakao = overlay.querySelector('[data-ms-social="kakao"]');
     var google = overlay.querySelector('[data-ms-social="google"]');
     var form = overlay.querySelector('#msLoginForm');
     if (submit) {
-      submit.disabled = !!busy;
-      submit.textContent = busy
-        ? t('login.busy')
-        : (authTab === 'signup' ? t('login.signupBtn') : t('login.startBtn'));
+      if (busy) {
+        submit.disabled = true;
+        submit.textContent = t('login.busy');
+      } else {
+        submit.textContent = authTab === 'signup' ? t('login.signupBtn') : t('login.startBtn');
+        syncSignupConsentState();
+      }
     }
     if (kakao) kakao.disabled = !!busy;
     if (google) google.disabled = !!busy;
     if (form) {
       var inputs = form.querySelectorAll('input');
       Array.prototype.forEach.call(inputs, function (input) {
+        if (input.matches('[data-ms-required-consent], #msAgreeMarketing')) return;
         input.disabled = !!busy;
       });
     }
@@ -677,6 +689,32 @@
     var pass = overlay.querySelector('#msPassword');
     if (pass) pass.setAttribute('autocomplete', authTab === 'signup' ? 'new-password' : 'current-password');
     syncLoginI18n();
+    syncSignupConsentState();
+  }
+
+  function requiredConsentsChecked() {
+    if (!overlay) return true;
+    var boxes = overlay.querySelectorAll('[data-ms-required-consent]');
+    for (var i = 0; i < boxes.length; i += 1) {
+      if (!boxes[i].checked) return false;
+    }
+    return true;
+  }
+
+  function syncSignupConsentState() {
+    if (!overlay) return;
+    var submit = overlay.querySelector('#msAuthSubmit') || overlay.querySelector('.ms-login');
+    var hint = overlay.querySelector('#msConsentHint');
+    if (authTab !== 'signup') {
+      if (submit) submit.disabled = false;
+      if (hint) hint.textContent = '';
+      return;
+    }
+    var ok = requiredConsentsChecked();
+    if (submit) submit.disabled = !ok;
+    if (hint) {
+      hint.textContent = ok ? '' : '필수 동의 항목을 모두 체크해 주세요.';
+    }
   }
 
   function openLogin(href, options) {
@@ -737,6 +775,11 @@
     if (!cleanedEmail || !cleanedPass) return;
     if (cleanedPass.length < 6) {
       showToast(t('login.passwordTooShort'));
+      return;
+    }
+    if (authTab === 'signup' && !requiredConsentsChecked()) {
+      syncSignupConsentState();
+      showToast('필수 동의 항목을 모두 체크해 주세요.');
       return;
     }
 
@@ -817,7 +860,7 @@
     var desc = overlay.querySelector('.ms-sub');
     var email = overlay.querySelector('#msEmail');
     var pass = overlay.querySelector('#msPassword');
-    var submit = overlay.querySelector('.ms-login');
+    var submit = overlay.querySelector('#msAuthSubmit') || overlay.querySelector('.ms-login');
     var divider = overlay.querySelector('.ms-divider');
     var kakao = overlay.querySelector('[data-ms-social="kakao"]');
     var google = overlay.querySelector('[data-ms-social="google"]');
@@ -836,6 +879,7 @@
     if (tabLogin) tabLogin.textContent = t('login.tabLogin');
     if (tabSignup) tabSignup.textContent = t('login.tabSignup');
     applyI18n();
+    syncSignupConsentState();
   }
 
   function mountLogin() {
@@ -857,7 +901,14 @@
       '    <input class="ms-input" type="password" id="msPassword" name="password" autocomplete="current-password" required',
       '      minlength="6"',
       '      placeholder="', t('login.passwordPlaceholder'), '">',
-      '    <button class="ms-login" type="submit">', t('login.startBtn'), '</button>',
+      '    <div class="ms-consent" id="msSignupConsent" aria-label="회원가입 필수 동의">',
+      '      <label><input type="checkbox" id="msAgreeAge" data-ms-required-consent> [필수] 만 14세 이상입니다.</label>',
+      '      <label><input type="checkbox" id="msAgreeTerms" data-ms-required-consent> [필수] DayO 이용약관 동의 <a href="/terms" target="_blank" rel="noopener noreferrer">보기</a></label>',
+      '      <label><input type="checkbox" id="msAgreePrivacy" data-ms-required-consent> [필수] 개인정보 수집 및 이용 동의 <a href="/privacy" target="_blank" rel="noopener noreferrer">보기</a></label>',
+      '      <label><input type="checkbox" id="msAgreeMarketing"> [선택] 세션 알림 및 이벤트 혜택 수신 동의</label>',
+      '      <p class="ms-consent__hint" id="msConsentHint" role="status"></p>',
+      '    </div>',
+      '    <button class="ms-login" type="submit" id="msAuthSubmit">', t('login.startBtn'), '</button>',
       '  </form>',
       '  <div class="ms-divider">', t('login.socialDivider'), '</div>',
       '  <div class="ms-social">',
@@ -897,6 +948,14 @@
         overlay.querySelector('#msPassword').value
       );
     });
+
+    overlay.addEventListener('change', function (e) {
+      if (e.target && (e.target.matches('[data-ms-required-consent]') || e.target.id === 'msAgreeMarketing')) {
+        syncSignupConsentState();
+      }
+    });
+
+    syncSignupConsentState();
 
     overlay.addEventListener('click', function (e) {
       var tabBtn = e.target.closest('[data-ms-tab]');
