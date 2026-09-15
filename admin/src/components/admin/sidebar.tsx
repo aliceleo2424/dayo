@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Users, Ticket, Palette, GraduationCap,
   ChevronLeft, ChevronRight, Zap, Newspaper,
@@ -10,19 +10,37 @@ import { cn } from "@/lib/utils";
 import { useAdminStore } from "@/store/admin-store";
 import { Button } from "@/components/ui/button";
 
-const navItems = [
+const PARTNERS_HREF = "/admin/partners";
+
+const navItems: {
+  href: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  sub?: boolean;
+}[] = [
   { href: "/admin/dashboard", label: "대시보드", icon: LayoutDashboard },
   { href: "/admin/users", label: "회원 & CRM", icon: Users },
   { href: "/admin/users/automation", label: "CRM 자동화", icon: Zap, sub: true },
   { href: "/admin/promotions", label: "프로모션", icon: Ticket },
   { href: "/admin/cms", label: "프론트 CMS", icon: Palette },
   { href: "/admin/articles", label: "라운지 매거진", icon: Newspaper, sub: true },
-  { href: "/admin/partners", label: "대화 파트너 & 클래스", icon: GraduationCap },
+  { href: PARTNERS_HREF, label: "대화 파트너 & 클래스", icon: GraduationCap },
 ];
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { sidebarCollapsed, toggleSidebar } = useAdminStore();
+
+  function go(href: string, e: React.MouseEvent<HTMLAnchorElement>) {
+    if (href !== PARTNERS_HREF) return;
+    e.preventDefault();
+    if (pathname === PARTNERS_HREF) {
+      router.refresh();
+      return;
+    }
+    router.push(PARTNERS_HREF);
+  }
 
   return (
     <aside className={cn(
@@ -50,15 +68,17 @@ export function AdminSidebar() {
             active = pathname === href;
           } else if (href === "/admin/cms") {
             active = pathname === href;
-          } else if (href === "/admin/partners") {
-            active = pathname === href || pathname.startsWith("/admin/partners/") || pathname.startsWith("/admin/tutors");
+          } else if (href === PARTNERS_HREF) {
+            active = pathname === PARTNERS_HREF || pathname.startsWith(`${PARTNERS_HREF}/`);
           } else {
-            active = pathname === href || (href !== "/admin/dashboard" && pathname.startsWith(href + "/"));
+            active = pathname === href || (href !== "/admin/dashboard" && pathname.startsWith(`${href}/`));
           }
           return (
             <Link
               key={href}
               href={href}
+              prefetch
+              onClick={(e) => go(href, e)}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 sub && "ml-3 py-2",
@@ -81,3 +101,5 @@ export function AdminSidebar() {
     </aside>
   );
 }
+
+export default AdminSidebar;

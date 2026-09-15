@@ -18,6 +18,8 @@ export type CrmMember = {
   provider: AuthProvider;
   avatar_url: string | null;
   client_key: string | null;
+  admin_memo: string | null;
+  kakao_id: string | null;
   name: string;
   paymentStatus: "paid" | "unpaid";
   totalSpent: number;
@@ -39,6 +41,8 @@ type ProfileRecord = {
   provider?: string | null;
   avatar_url?: string | null;
   client_key?: string | null;
+  admin_memo?: string | null;
+  kakao_id?: string | null;
 };
 
 export type MemberIdentity = {
@@ -113,6 +117,8 @@ function mapProfile(row: ProfileRecord, spentByUser: Map<string, number>): CrmMe
     provider,
     avatar_url: row.avatar_url || null,
     client_key: row.client_key || null,
+    admin_memo: row.admin_memo || null,
+    kakao_id: row.kakao_id || null,
     name: profileDisplayName({ ...row, id }),
     paymentStatus: spent > 0 ? "paid" : "unpaid",
     totalSpent: spent,
@@ -134,6 +140,7 @@ export async function fetchPaidSpendByUser() {
 export async function fetchCrmMembers(): Promise<{ rows: CrmMember[]; error: string }> {
   try {
     const selects = [
+      "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, last_test_score, speaking_level, last_test_date, created_at, provider, avatar_url, client_key, admin_memo, kakao_id",
       "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, last_test_score, speaking_level, last_test_date, created_at, provider, avatar_url, client_key",
       "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, last_test_score, speaking_level, last_test_date, created_at, provider, avatar_url",
       "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, created_at, provider, avatar_url",
@@ -167,6 +174,7 @@ export async function fetchCrmMembers(): Promise<{ rows: CrmMember[]; error: str
 
 export async function fetchCrmMember(id: string): Promise<{ row: CrmMember | null; error: string }> {
   const selects = [
+    "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, last_test_score, speaking_level, last_test_date, created_at, provider, avatar_url, client_key, admin_memo, kakao_id",
     "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, last_test_score, speaking_level, last_test_date, created_at, provider, avatar_url, client_key",
     "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, last_test_score, speaking_level, last_test_date, created_at, provider, avatar_url",
     "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, created_at, provider, avatar_url",
@@ -359,6 +367,9 @@ export type DrawerMember = {
   avatar_url?: string | null;
   client_key?: string | null;
   learning_languages?: string | null;
+  created_at?: string | null;
+  admin_memo?: string | null;
+  kakao_id?: string | null;
 };
 
 export type MemberBookingSession = {
@@ -368,6 +379,27 @@ export type MemberBookingSession = {
   partner_name: string | null;
   rating: number | null;
   review: string | null;
+};
+
+export type MemberOrder = {
+  id: string;
+  created_at: string | null;
+  product_name: string | null;
+  amount: number;
+  ticket_count: number | null;
+  status: string | null;
+  payment_method: string | null;
+  refund_status: string | null;
+  merchant_uid: string | null;
+};
+
+export type CreditLedgerRow = {
+  id: string;
+  created_at: string | null;
+  delta: number;
+  reason: string | null;
+  source: string | null;
+  balance_after: number | null;
 };
 
 export function bookingStatusLabel(status: string | null | undefined) {
@@ -390,6 +422,31 @@ export function bookingStatusLabel(status: string | null | undefined) {
   return { label: String(status || "예약완료"), variant: "default" as const };
 }
 
+export function orderStatusBadge(order: {
+  status?: string | null;
+  refund_status?: string | null;
+}) {
+  const refund = String(order.refund_status || "").toLowerCase();
+  const status = String(order.status || "").toLowerCase();
+  if (refund.includes("partial") || status.includes("partial")) {
+    return { label: "부분환불", className: "bg-orange-100 text-orange-800 border-transparent" };
+  }
+  if (refund.includes("full") || refund === "refunded" || status === "refunded" || status === "full_refund") {
+    return { label: "전액환불", className: "bg-red-100 text-red-700 border-transparent" };
+  }
+  if (status === "cancelled" || status === "canceled" || status === "failed") {
+    return { label: "결제취소", className: "bg-slate-100 text-slate-700 border-transparent" };
+  }
+  if (status === "paid" || status === "completed" || status === "done" || !status) {
+    return { label: "결제완료", className: "bg-emerald-50 text-emerald-700 border-transparent" };
+  }
+  return { label: String(order.status || "결제완료"), className: "bg-slate-100 text-slate-700 border-transparent" };
+}
+
+export function formatWon(amount: number | null | undefined) {
+  return `${Number(amount || 0).toLocaleString("ko-KR")}원`;
+}
+
 export function formatSessionDateTime(value: string | null | undefined) {
   if (!value) return "일시 미정";
   const d = new Date(value);
@@ -400,6 +457,46 @@ export function formatSessionDateTime(value: string | null | undefined) {
   const hh = String(d.getHours()).padStart(2, "0");
   const mm = String(d.getMinutes()).padStart(2, "0");
   return `${y}.${m}.${day} ${hh}:${mm}`;
+}
+
+export function nearestTicketExpiry(orders: MemberOrder[]) {
+  const paid = orders.filter((row) => {
+    const status = String(row.status || "").toLowerCase();
+    const refund = String(row.refund_status || "").toLowerCase();
+    if (refund.includes("full") || status === "refunded" || status === "cancelled" || status === "canceled") {
+      return false;
+    }
+    return !!row.created_at && (status === "paid" || status === "completed" || status === "done" || !status);
+  });
+  if (!paid.length) return null;
+
+  const expiries = paid
+    .map((row) => {
+      const start = new Date(String(row.created_at));
+      if (Number.isNaN(start.getTime())) return null;
+      return new Date(start.getTime() + 90 * 24 * 60 * 60 * 1000);
+    })
+    .filter((d): d is Date => !!d)
+    .sort((a, b) => a.getTime() - b.getTime());
+
+  if (!expiries.length) return null;
+  const now = Date.now();
+  const upcoming = expiries.find((d) => d.getTime() >= now) || expiries[expiries.length - 1];
+  const daysLeft = Math.ceil((upcoming.getTime() - now) / (24 * 60 * 60 * 1000));
+  return {
+    dateLabel: formatSessionDateTime(upcoming.toISOString()).split(" ")[0],
+    daysLeft,
+  };
+}
+
+export function paymentMethodLabel(raw: string | null | undefined) {
+  const text = String(raw || "").trim();
+  if (!text) return "결제수단 미기록";
+  const lower = text.toLowerCase();
+  if (lower.includes("kakao")) return "카카오페이";
+  if (lower.includes("toss")) return "토스페이";
+  if (lower.includes("card") || lower.includes("credit") || lower.includes("check")) return "신용/체크카드";
+  return text;
 }
 
 export async function adjustProfileTickets(
@@ -429,6 +526,115 @@ export async function adjustProfileTickets(
     throw new Error(first.error?.message || "프로필을 찾지 못해 티켓을 변경하지 못했습니다.");
   }
   return Number((second.data[0] as { ticket_count?: number }).ticket_count ?? safe);
+}
+
+export async function adjustProfileTicketsWithLedger(
+  row: { id: string; user_id?: string | null },
+  nextCount: number,
+  delta: number,
+  reason: string
+) {
+  const saved = await adjustProfileTickets(row, nextCount);
+  const uid = row.user_id || row.id;
+  try {
+    await supabase.from("credit_ledgers").insert({
+      user_id: uid,
+      profile_id: row.id,
+      delta,
+      balance_after: saved,
+      reason: String(reason || "").trim() || (delta > 0 ? "관리자 CS 보상 지급" : "관리자 수동 차감"),
+      source: "admin_cs",
+      created_at: new Date().toISOString(),
+    });
+  } catch {
+    /* ledger table may be missing — ticket update still succeeds */
+  }
+  return saved;
+}
+
+export async function fetchMemberOrders(userId: string): Promise<MemberOrder[]> {
+  if (!userId) return [];
+  const selects = [
+    "id, created_at, product_name, amount, ticket_count, status, payment_method, refund_status, merchant_uid",
+    "id, created_at, product_name, amount, ticket_count, status, merchant_uid",
+    "id, created_at, product_name, amount, status",
+    "*",
+  ];
+  for (const columns of selects) {
+    const result = await supabase
+      .from("orders")
+      .select(columns)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+    if (result.error) continue;
+    const rows = (result.data || []) as unknown as Record<string, unknown>[];
+    return rows.map((row) => ({
+      id: String(row.id || ""),
+      created_at: (row.created_at as string | null) || null,
+      product_name: (row.product_name as string | null) || null,
+      amount: Number(row.amount || 0),
+      ticket_count: row.ticket_count == null ? null : Number(row.ticket_count),
+      status: (row.status as string | null) || null,
+      payment_method: (row.payment_method as string | null) || null,
+      refund_status: (row.refund_status as string | null) || null,
+      merchant_uid: (row.merchant_uid as string | null) || null,
+    }));
+  }
+  return [];
+}
+
+export async function fetchCreditLedgers(userId: string, profileId?: string | null): Promise<CreditLedgerRow[]> {
+  if (!userId && !profileId) return [];
+  const selects = [
+    "id, created_at, delta, reason, source, balance_after",
+    "id, created_at, delta, reason, source",
+    "*",
+  ];
+  for (const columns of selects) {
+    let result = await supabase
+      .from("credit_ledgers")
+      .select(columns)
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (result.error && profileId) {
+      result = await supabase
+        .from("credit_ledgers")
+        .select(columns)
+        .eq("profile_id", profileId)
+        .order("created_at", { ascending: false })
+        .limit(50);
+    }
+    if (result.error) continue;
+    const rows = (result.data || []) as unknown as Record<string, unknown>[];
+    return rows.map((row) => ({
+      id: String(row.id || crypto.randomUUID()),
+      created_at: (row.created_at as string | null) || null,
+      delta: Number(row.delta || 0),
+      reason: (row.reason as string | null) || null,
+      source: (row.source as string | null) || null,
+      balance_after: row.balance_after == null ? null : Number(row.balance_after),
+    }));
+  }
+  return [];
+}
+
+export async function saveAdminMemo(
+  row: { id: string; user_id?: string | null },
+  memo: string
+) {
+  const payload = { admin_memo: memo, updated_at: new Date().toISOString() };
+  const first = await supabase.from("profiles").update(payload).eq("id", row.id).select("id");
+  if (!first.error && first.data && first.data.length) return;
+
+  const uid = row.user_id || row.id;
+  const second = await supabase.from("profiles").update(payload).eq("user_id", uid).select("id");
+  if (second.error) {
+    // fallback column name
+    const altPayload = { cs_memo: memo, updated_at: new Date().toISOString() };
+    const third = await supabase.from("profiles").update(altPayload).eq("id", row.id).select("id");
+    if (third.error) throw new Error(second.error.message || third.error.message || "메모 저장 실패");
+  }
 }
 
 export async function fetchMemberBookings(learnerId: string): Promise<MemberBookingSession[]> {

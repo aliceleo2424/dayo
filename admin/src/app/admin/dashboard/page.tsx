@@ -34,6 +34,9 @@ type MemberRow = {
   avatar_url?: string | null;
   client_key?: string | null;
   learning_languages?: string | null;
+  created_at?: string | null;
+  admin_memo?: string | null;
+  kakao_id?: string | null;
 };
 
 type SessionRow = {
@@ -76,7 +79,7 @@ export default function DashboardPage() {
         supabase.from("orders").select("amount").eq("status", "paid"),
         supabase
           .from("profiles")
-          .select("id, user_id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url, client_key, learning_languages")
+          .select("id, user_id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url, client_key, learning_languages, created_at, admin_memo, kakao_id")
           .order("created_at", { ascending: false }),
       ]);
 
@@ -85,7 +88,8 @@ export default function DashboardPage() {
         list = memberRows.data as unknown as MemberRow[];
       } else {
         const fallbackSelects = [
-          "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url, client_key, learning_languages",
+          "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url, client_key, learning_languages, created_at, admin_memo, kakao_id",
+          "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url, client_key, learning_languages, created_at",
           "id, user_id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url, learning_languages",
           "id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url",
           "id, nickname, user_name, email, role, ticket_count, point_balance",

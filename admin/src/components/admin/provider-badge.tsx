@@ -39,7 +39,7 @@ const STYLES: Record<AuthProvider, CSSProperties> = {
 };
 
 const LABELS: Record<AuthProvider, string> = {
-  kakao: "💬 카카오",
+  kakao: "🟡 카카오",
   google: "🌐 구글",
   email: "✉️ 이메일",
 };
