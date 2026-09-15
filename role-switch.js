@@ -2,8 +2,6 @@
 (function () {
   'use strict';
 
-  var switchBusy = false;
-
   function isPartnerPage() {
     var path = String(window.location.pathname || '');
     return path.indexOf('partner') !== -1;
@@ -72,97 +70,23 @@
     document.body.style.overflow = '';
   }
 
-  function isLoggedIn() {
-    if (window._dayoAuthUser) return true;
-    if (typeof window.checkUserLoggedIn === 'function') {
-      try { return !!window.checkUserLoggedIn(); } catch (e) { /* ignore */ }
-    }
-    return false;
-  }
-
-  function normalizeRole(role) {
-    return String(role || '').trim().toLowerCase().replace(/[\s-]+/g, '_');
-  }
-
-  /* Live DB only — never trust localStorage / user_metadata / _dayoAuthProfile cache */
-  async function fetchLiveRoleFromProfiles() {
-    var client = window.supabaseClient;
-    if (!client || !client.auth) return '';
-
-    var user = null;
-    try {
-      var userRes = await client.auth.getUser();
-      user = userRes && userRes.data && userRes.data.user;
-    } catch (e) { user = null; }
-    if (!user) {
-      try {
-        var sessionRes = await client.auth.getSession();
-        user = sessionRes && sessionRes.data && sessionRes.data.session && sessionRes.data.session.user;
-      } catch (e2) { user = null; }
-    }
-    if (!user || !user.id) return '';
-
-    try {
-      var byId = await client.from('profiles').select('role').eq('id', user.id).single();
-      if (byId && byId.data && byId.data.role) return normalizeRole(byId.data.role);
-    } catch (e3) { /* fall through */ }
-    try {
-      var byUser = await client.from('profiles').select('role').eq('user_id', user.id).maybeSingle();
-      if (byUser && byUser.data && byUser.data.role) return normalizeRole(byUser.data.role);
-    } catch (e4) { /* ignore */ }
-    return '';
-  }
-
-  function canEnterPartnerLounge(role) {
-    var normalized = normalizeRole(role);
-    return normalized === 'partner'
-      || normalized === 'admin'
-      || normalized === 'super_admin'
-      || normalized === 'superadmin';
-  }
-
   window.openPartnerApplyModal = openPartnerApplyModal;
   window.closePartnerApplyModal = closePartnerApplyModal;
   window.openLoginModal = openLoginModal;
 
-  window.switchRoleView = async function (targetRole) {
+  /* Partner lounge gate runs on partner.html — navigate immediately from mypage toggle */
+  window.switchRoleView = function (targetRole) {
     var goingPartner = targetRole === 'partner';
     if (goingPartner === isPartnerPage()) return;
-    if (switchBusy) return;
 
     if (goingPartner) {
-      if (!isLoggedIn()) {
-        openLoginModal();
-        return;
-      }
-      switchBusy = true;
-      try {
-        var role = await fetchLiveRoleFromProfiles();
-        if (canEnterPartnerLounge(role)) {
-          setPartnerModeUi();
-          window.location.href = 'partner.html';
-          return;
-        }
-        setUserModeUi();
-        if (!openPartnerApplyModal()) {
-          window.location.href = 'partner.html';
-        }
-      } catch (err) {
-        console.warn('[DayO] partner lounge role check failed', err);
-        setUserModeUi();
-        if (!openPartnerApplyModal()) {
-          window.location.href = 'partner.html';
-        }
-      } finally {
-        switchBusy = false;
-      }
+      setPartnerModeUi();
+      window.location.href = 'partner.html';
       return;
     }
 
     setUserModeUi();
-    setTimeout(function () {
-      window.location.href = 'mypage.html';
-    }, 180);
+    window.location.href = 'mypage.html';
   };
 
   function bindPartnerApplyModal() {

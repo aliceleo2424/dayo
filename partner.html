@@ -24,14 +24,6 @@
         return String(role || '').trim().toLowerCase().replace(/[\s-]+/g, '_');
       }
 
-      function isPartnerRole(role) {
-        return role === 'partner';
-      }
-
-      function isAdminRole(role) {
-        return role === 'admin' || role === 'super_admin' || role === 'superadmin';
-      }
-
       function revealPage() {
         document.documentElement.classList.remove('partner-guard-pending');
         if (document.body) document.body.classList.remove('partner-guard-pending');
@@ -69,7 +61,7 @@
 
       function waitForClient(tries) {
         return new Promise(function (resolve) {
-          var left = tries || 25;
+          var left = tries || 20;
           (function tick() {
             if (window.supabaseClient && window.supabaseClient.auth) {
               resolve(window.supabaseClient);
@@ -80,99 +72,88 @@
               return;
             }
             left -= 1;
-            setTimeout(tick, 50);
+            setTimeout(tick, 20);
           })();
         });
       }
 
-      /* Never trust localStorage / user_metadata / in-memory auth cache for gatekeeping */
-      async function fetchLiveRoleFromProfiles(client, userId) {
-        if (!client || !userId) return '';
-        try {
-          var byId = await client
-            .from('profiles')
-            .select('role')
-            .eq('id', userId)
-            .single();
-          if (byId && !byId.error && byId.data && byId.data.role) {
-            return normalizeRole(byId.data.role);
-          }
-        } catch (e) { /* fall through to user_id column */ }
-        try {
-          var byUser = await client
-            .from('profiles')
-            .select('role')
-            .eq('user_id', userId)
-            .maybeSingle();
-          if (byUser && !byUser.error && byUser.data && byUser.data.role) {
-            return normalizeRole(byUser.data.role);
-          }
-        } catch (e2) { /* ignore */ }
-        return '';
+      function escapeOrValue(value) {
+        return String(value || '').replace(/[,()]/g, '');
       }
 
-      async function resolveAuthUser(client) {
-        if (!client || !client.auth) return null;
-        try {
-          var userRes = await Promise.race([
-            client.auth.getUser(),
-            new Promise(function (resolve) {
-              setTimeout(function () { resolve({ data: { user: null } }); }, 5000);
-            })
-          ]);
-          if (userRes && userRes.data && userRes.data.user) return userRes.data.user;
-        } catch (e) { /* fall through */ }
-        try {
-          var sessionRes = await client.auth.getSession();
-          return sessionRes && sessionRes.data && sessionRes.data.session && sessionRes.data.session.user;
-        } catch (e2) {
-          return null;
+      function isAuthorizedProfile(profile) {
+        if (!profile) return false;
+        var role = normalizeRole(profile.role);
+        if (role === 'partner' || role === 'admin' || role === 'super_admin' || role === 'superadmin') {
+          return true;
         }
+        return profile.is_partner === true || profile.is_partner === 'true' || profile.is_partner === 1;
       }
 
-      var guardSettled = false;
-      var guardFallbackTimer = 0;
+      function denyUnauthorized() {
+        alert('DayO 글로벌 파트너 전용 공간입니다 ☕\n(신청서 검수 중이거나 파트너 승인이 필요합니다)');
+        window.location.href = '/mypage.html';
+      }
+
+      function denyLoginRequired() {
+        alert('로그인이 필요한 페이지입니다 ☕');
+        window.location.href = '/';
+      }
+
+      async function fetchAuthorizedProfile(client, sessionUser) {
+        if (!client || !sessionUser) return null;
+        var uid = escapeOrValue(sessionUser.id);
+        var email = escapeOrValue(sessionUser.email || '');
+        var orFilter = 'id.eq.' + uid + ',user_id.eq.' + uid;
+        if (email) orFilter += ',email.eq.' + email;
+
+        try {
+          var res = await client
+            .from('profiles')
+            .select('role, is_partner')
+            .or(orFilter)
+            .limit(1);
+          if (!res.error && res.data && res.data[0]) return res.data[0];
+          /* is_partner column may be missing — retry role-only */
+          if (res.error) {
+            var fallback = await client
+              .from('profiles')
+              .select('role')
+              .or(orFilter)
+              .limit(1);
+            if (!fallback.error && fallback.data && fallback.data[0]) return fallback.data[0];
+          }
+        } catch (e) { /* ignore */ }
+        return null;
+      }
 
       async function run() {
         try {
-          var client = await waitForClient(50);
+          var client = await waitForClient(20);
           if (!client || !client.auth) {
-            showPartnerRecruitView();
-            guardSettled = true;
+            denyLoginRequired();
             return;
           }
 
-          var user = await resolveAuthUser(client);
-          if (!user) {
-            showPartnerRecruitView();
-            guardSettled = true;
+          var sessionRes = await client.auth.getSession();
+          var session = sessionRes && sessionRes.data && sessionRes.data.session;
+          if (!session || !session.user) {
+            denyLoginRequired();
             return;
           }
 
-          var currentRole = await fetchLiveRoleFromProfiles(client, user.id);
-          var isPartner = isPartnerRole(currentRole);
-          var isAdmin = isAdminRole(currentRole);
-
-          if (isAdmin || isPartner) {
+          var userProfile = await fetchAuthorizedProfile(client, session.user);
+          if (isAuthorizedProfile(userProfile)) {
             showPartnerLounge();
-          } else {
-            showPartnerRecruitView();
+            return;
           }
-          guardSettled = true;
+
+          denyUnauthorized();
         } catch (err) {
           console.warn('파트너 라운지 가드 실패', err);
-          showPartnerRecruitView();
-          guardSettled = true;
-        } finally {
-          if (guardFallbackTimer) clearTimeout(guardFallbackTimer);
+          denyUnauthorized();
         }
       }
-
-      guardFallbackTimer = setTimeout(function () {
-        if (!guardSettled && document.documentElement.classList.contains('partner-guard-pending')) {
-          showPartnerRecruitView();
-        }
-      }, 8000);
 
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
       else run();
