@@ -250,7 +250,6 @@
     }
 
     body.theme-partner #wordHelpBtn,
-    body.theme-partner #sentenceHelpBtn,
     body.theme-partner .ctrl-divider {
       display: none !important;
     }
@@ -261,13 +260,15 @@
     }
     body.theme-observer .self-pip,
     body.theme-observer #wordHelpBtn,
-    body.theme-observer #sentenceHelpBtn,
+    body.theme-observer #btn-talk-cards,
     body.theme-observer #micBtn,
     body.theme-observer #camBtn,
     body.theme-observer #chatToggle,
     body.theme-observer .ctrl-divider,
     body.theme-observer #copilotBar,
     body.theme-observer #chatPanel,
+    body.theme-observer #talk-card-panel,
+    body.theme-observer #sideDrawer,
     body.theme-observer #partner-control-bar,
     body.theme-observer #wordSheetOverlay,
     body.theme-observer #sentenceSheetOverlay,
@@ -1157,6 +1158,24 @@
       margin-right: 0.3rem;
     }
 
+    /* Side drawer (chat + talk cards) — grid sibling, never covers WebRTC */
+    .side-drawer {
+      width: 100%;
+      min-width: 0;
+      min-height: 0;
+      max-height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 25;
+    }
+
+    .main-stage.chat-collapsed .side-drawer {
+      opacity: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
     /* Chat — grid sibling, never covered */
     .chat-panel {
       width: 100%;
@@ -1173,6 +1192,7 @@
       z-index: 25;
       opacity: 1;
       transition: opacity 0.25s ease;
+      flex: 1 1 auto;
     }
 
     .main-stage.chat-collapsed .chat-panel {
@@ -1181,6 +1201,98 @@
       border: none;
       box-shadow: none;
       overflow: hidden;
+    }
+
+    #talk-card-panel {
+      display: none;
+    }
+
+    .main-stage.talk-open #chatPanel {
+      display: none !important;
+    }
+
+    .main-stage.talk-open #talk-card-panel {
+      display: flex;
+    }
+
+    .main-stage.chat-collapsed #talk-card-panel {
+      display: none !important;
+    }
+
+    .talk-card-tabs {
+      display: flex;
+      gap: 0.35rem;
+      padding: 0.55rem 0.7rem 0.2rem;
+      flex-shrink: 0;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .talk-card-tab {
+      flex: 0 0 auto;
+      border: 1px solid var(--coral-pale);
+      background: #fff;
+      color: var(--text, #5C4A42);
+      border-radius: 999px;
+      padding: 0.4rem 0.7rem;
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .talk-card-tab.is-active {
+      background: var(--coral-pale);
+      border-color: var(--coral);
+      color: var(--coral);
+    }
+
+    .talk-card-body {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 0.75rem 0.85rem 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    .talk-card-question {
+      background: linear-gradient(160deg, #FFF7F2 0%, #FFEFE6 100%);
+      border: 1px solid var(--coral-pale);
+      border-radius: 16px;
+      padding: 1rem 0.95rem;
+      font-size: 0.92rem;
+      font-weight: 700;
+      line-height: 1.55;
+      color: var(--text, #5C4A42);
+      min-height: 5.5rem;
+    }
+
+    .talk-card-actions {
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .talk-card-btn {
+      border: none;
+      border-radius: 12px;
+      padding: 0.72rem 0.85rem;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .talk-card-btn--next {
+      background: #FFF1C9;
+      color: #8A6A1F;
+    }
+
+    .talk-card-btn--send {
+      background: var(--coral);
+      color: #fff;
     }
 
     .chat-header {
@@ -2522,14 +2634,16 @@
         height: auto;
       }
 
-      .chat-panel {
+      .chat-panel,
+      .side-drawer {
         width: 100%;
-        max-height: min(38vh, 280px);
+        max-height: min(50vh, 340px);
         flex: none;
         order: 2;
       }
 
-      .main-stage.chat-collapsed .chat-panel {
+      .main-stage.chat-collapsed .chat-panel,
+      .main-stage.chat-collapsed .side-drawer {
         display: none;
         max-height: 0;
         padding: 0;
@@ -3147,20 +3261,38 @@
         </section>
       </div>
 
+      <div class="side-drawer" id="sideDrawer">
       <aside class="chat-panel" id="chatPanel" data-i18n="room.chatPanelAria" data-i18n-attr="aria-label" aria-label="라이브 채팅">
         <div class="chat-header">
           <span data-i18n="room.chatHeaderTitle">💬 라이브 채팅</span>
           <button class="chat-close" id="chatClose" type="button" data-i18n="room.chatCloseAria" data-i18n-attr="aria-label" aria-label="채팅 닫기">✕</button>
         </div>
-        <div class="chat-messages" id="chatMessages">
-          <div class="bubble bubble--tutor">Bonjour! Ready to practice today? ☕</div>
-          <div class="bubble bubble--me">Hi Camille! Let's start 🍰</div>
-        </div>
+        <div class="chat-messages" id="chatMessages"></div>
         <form class="chat-input-row" id="chatForm">
-          <input class="chat-input" id="chatInput" type="text" placeholder="메시지를 입력하세요" data-i18n="room.chatInputPlaceholder" autocomplete="off">
+          <input class="chat-input chat-input-box" id="chatInput" type="text" placeholder="메시지를 입력하세요" data-i18n="room.chatInputPlaceholder" autocomplete="off">
           <button class="chat-send" type="submit" data-i18n="room.chatSend">전송</button>
         </form>
       </aside>
+
+      <aside class="chat-panel talk-card-panel" id="talk-card-panel" aria-label="DayO 대화카드">
+        <div class="chat-header">
+          <span>🎴 DayO 대화카드</span>
+          <button class="chat-close" id="talkCardClose" type="button" aria-label="대화카드 닫기">✕</button>
+        </div>
+        <div class="talk-card-tabs" role="tablist" aria-label="대화카드 카테고리">
+          <button type="button" class="talk-card-tab is-active" data-talk-cat="daily" role="tab" aria-selected="true">☕ 일상·취향</button>
+          <button type="button" class="talk-card-tab" data-talk-cat="travel" role="tab" aria-selected="false">✈️ 여행·문화</button>
+          <button type="button" class="talk-card-tab" data-talk-cat="food" role="tab" aria-selected="false">🥐 디저트·음식</button>
+        </div>
+        <div class="talk-card-body">
+          <div class="talk-card-question" id="talkCardQuestion"></div>
+          <div class="talk-card-actions">
+            <button type="button" class="talk-card-btn talk-card-btn--next" id="talkCardNextBtn">다음 질문 보기 🎲</button>
+            <button type="button" class="talk-card-btn talk-card-btn--send" id="talkCardSendBtn">이 질문 채팅으로 전송 💬</button>
+          </div>
+        </div>
+      </aside>
+      </div>
     </main>
 
     <footer class="bottom-bar">
@@ -3177,13 +3309,13 @@
         <span class="ctrl-btn__icon" aria-hidden="true">💡</span>
         <span class="ctrl-btn__text label">단어도움</span>
       </button>
-      <button class="ctrl-btn ctrl-btn--ai" id="sentenceHelpBtn" type="button">
-        <span class="ctrl-btn__icon" aria-hidden="true">📝</span>
-        <span class="ctrl-btn__text label">문장도움</span>
+      <button class="ctrl-btn ctrl-btn--ai" id="btn-talk-cards" type="button">
+        <span class="ctrl-btn__icon" aria-hidden="true">🎴</span>
+        <span class="ctrl-btn__text label">대화카드</span>
       </button>
       <button class="ctrl-btn" id="chatToggle" type="button">
         <span class="ctrl-btn__icon" aria-hidden="true">💬</span>
-        <span class="ctrl-btn__text label" data-i18n="room.chatLabel">대화카드</span>
+        <span class="ctrl-btn__text label" data-i18n="room.chatLabel">채팅</span>
       </button>
     </footer>
   </div>
@@ -3905,7 +4037,14 @@
 
     function renderHelpBtnLabels() {
       setCtrlBtnContent(document.getElementById('wordHelpBtn'), '💡', 'room.wordHelp');
-      setCtrlBtnContent(document.getElementById('sentenceHelpBtn'), '📝', 'room.sentenceHelp');
+      var talkBtn = document.getElementById('btn-talk-cards');
+      if (talkBtn) {
+        talkBtn.innerHTML =
+          '<span class="ctrl-btn__icon" aria-hidden="true">🎴</span>' +
+          '<span class="ctrl-btn__text label">대화카드</span>';
+      }
+      var chatBtn = document.getElementById('chatToggle');
+      if (chatBtn) setCtrlBtnContent(chatBtn, '💬', 'room.chatLabel');
     }
 
     function renderMicLabel() {
@@ -4006,41 +4145,271 @@
     renderCamLabel();
     renderHelpBtnLabels();
 
-    /* Chat */
+    /* Chat + Talk Cards (surgical — does not touch WebRTC / timer / observer) */
     const mainStage = document.getElementById('mainStage');
     const chatPanel = document.getElementById('chatPanel');
     const chatToggle = document.getElementById('chatToggle');
     const chatClose = document.getElementById('chatClose');
     const chatForm = document.getElementById('chatForm');
-    const chatInput = document.getElementById('chatInput');
+    const chatInput = document.getElementById('chatInput')
+      || document.getElementById('chat-input')
+      || document.querySelector('.chat-input-box');
     const chatMessages = document.getElementById('chatMessages');
+    const talkCardPanel = document.getElementById('talk-card-panel');
+    const talkCardClose = document.getElementById('talkCardClose');
+    const talkCardsBtn = document.getElementById('btn-talk-cards');
 
-    function openChat() { mainStage.classList.remove('chat-collapsed'); }
-    function closeChat() { mainStage.classList.add('chat-collapsed'); }
+    var chatChannel = null;
+    var chatClientId = 'c_' + Math.random().toString(36).slice(2, 10);
+    try {
+      if (window._dayoAuthUser && window._dayoAuthUser.id) chatClientId = String(window._dayoAuthUser.id);
+    } catch (e) { /* ignore */ }
 
-    chatToggle.addEventListener('click', () => {
-      mainStage.classList.contains('chat-collapsed') ? openChat() : closeChat();
-    });
-    chatClose.addEventListener('click', closeChat);
+    function resolveRoomChatId() {
+      try {
+        var p = new URLSearchParams(window.location.search);
+        return String(p.get('roomId') || p.get('room') || p.get('session') || 'dayo_room_1')
+          .replace(/[^a-zA-Z0-9_-]/g, '')
+          .slice(0, 40) || 'dayo_room_1';
+      } catch (e2) {
+        return 'dayo_room_1';
+      }
+    }
 
-    chatForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const text = chatInput.value.trim();
-      if (!text) return;
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble bubble--me';
-      bubble.textContent = text;
+    function resolveCurrentRole() {
+      try {
+        var role = (new URLSearchParams(window.location.search).get('role') || 'user').toLowerCase();
+        if (role === 'host') return 'partner';
+        return role || 'user';
+      } catch (e3) {
+        return 'user';
+      }
+    }
+
+    function appendMessageToChatUI(senderRole, senderName, message, isMine) {
+      if (!chatMessages || !message) return;
+      var bubble = document.createElement('div');
+      bubble.className = 'bubble ' + (isMine ? 'bubble--me' : 'bubble--tutor');
+      bubble.textContent = String(message);
+      if (!isMine && senderName) {
+        bubble.setAttribute('data-sender', String(senderName));
+        bubble.title = String(senderName);
+      }
       chatMessages.appendChild(bubble);
       chatMessages.scrollTop = chatMessages.scrollHeight;
-      chatInput.value = '';
-      setTimeout(() => {
-        const reply = document.createElement('div');
-        reply.className = 'bubble bubble--tutor';
-        reply.textContent = 'Nice! Tell me more ☕';
-        chatMessages.appendChild(reply);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }, 700);
+    }
+
+    function ensureChatChannel() {
+      var supabase = window.supabaseClient;
+      if (!supabase || typeof supabase.channel !== 'function') return null;
+      if (chatChannel) return chatChannel;
+      var currentRoomId = resolveRoomChatId();
+      chatChannel = supabase.channel('chat_room_' + currentRoomId);
+      chatChannel.on('broadcast', { event: 'new_message' }, function (event) {
+        var payload = (event && event.payload) || {};
+        if (payload.clientId && payload.clientId === chatClientId) return;
+        appendMessageToChatUI(
+          payload.senderRole,
+          payload.senderName,
+          payload.message,
+          false
+        );
+      }).subscribe();
+      return chatChannel;
+    }
+
+    function openChat() {
+      if (!mainStage) return;
+      mainStage.classList.remove('talk-open');
+      mainStage.classList.remove('chat-collapsed');
+      ensureChatChannel();
+    }
+
+    function closeChat() {
+      if (!mainStage) return;
+      if (!mainStage.classList.contains('talk-open')) {
+        mainStage.classList.add('chat-collapsed');
+      } else {
+        mainStage.classList.remove('talk-open');
+        mainStage.classList.add('chat-collapsed');
+      }
+    }
+
+    function closeTalkCardPanel() {
+      if (!mainStage) return;
+      mainStage.classList.remove('talk-open');
+      mainStage.classList.add('chat-collapsed');
+    }
+
+    function openTalkCardPanel() {
+      if (!mainStage) return;
+      mainStage.classList.remove('chat-collapsed');
+      mainStage.classList.add('talk-open');
+      renderTalkCardQuestion(false);
+    }
+
+    window.toggleTalkCardPanel = function () {
+      if (!mainStage) return;
+      if (mainStage.classList.contains('talk-open') && !mainStage.classList.contains('chat-collapsed')) {
+        closeTalkCardPanel();
+        return;
+      }
+      openTalkCardPanel();
+    };
+
+    window.toggleChatPanel = function () {
+      if (!mainStage) return;
+      var chatOpen = !mainStage.classList.contains('chat-collapsed') && !mainStage.classList.contains('talk-open');
+      if (chatOpen) closeChat();
+      else openChat();
+    };
+
+    if (chatToggle) {
+      chatToggle.addEventListener('click', function () {
+        window.toggleChatPanel();
+      });
+    }
+    if (chatClose) chatClose.addEventListener('click', closeChat);
+    if (talkCardsBtn) {
+      talkCardsBtn.addEventListener('click', function () {
+        window.toggleTalkCardPanel();
+      });
+    }
+    if (talkCardClose) talkCardClose.addEventListener('click', closeTalkCardPanel);
+
+    function handleSendMessage() {
+      var input = document.getElementById('chatInput')
+        || document.getElementById('chat-input')
+        || document.querySelector('.chat-input-box');
+      if (!input) return;
+      var text = String(input.value || '').trim();
+      if (!text) return;
+
+      var currentRole = resolveCurrentRole();
+      appendMessageToChatUI(currentRole, '나', text, true);
+
+      var channel = ensureChatChannel();
+      if (channel && typeof channel.send === 'function') {
+        try {
+          Promise.resolve(channel.send({
+            type: 'broadcast',
+            event: 'new_message',
+            payload: {
+              clientId: chatClientId,
+              senderRole: currentRole,
+              senderName: currentRole === 'partner' ? 'Partner' : 'User',
+              message: text,
+              timestamp: new Date().toISOString()
+            }
+          })).catch(function () { /* ignore broadcast errors */ });
+        } catch (sendErr) { /* ignore */ }
+      }
+
+      input.value = '';
+    }
+
+    window.handleSendMessage = handleSendMessage;
+    window.appendMessageToChatUI = appendMessageToChatUI;
+
+    if (chatForm) {
+      chatForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        handleSendMessage();
+      });
+    }
+
+    /* Talk cards data + UI */
+    var TALK_CARD_POOL = {
+      daily: [
+        '스트레스를 받을 때 나만의 힐링 방법이 있다면?',
+        '최근에 본 영화나 유튜브 영상 중 가장 인상 깊었던 것은?',
+        '주말에 가장 좋아하는 나만의 루틴이 있나요?',
+        '친구에게 나를 한 문장으로 소개한다면 뭐라고 할까요?',
+        '요즘 가장 빠져 있는 취미나 관심사는 무엇인가요?',
+        '하루 중 가장 좋아하는 시간대는 언제인가요?'
+      ],
+      travel: [
+        '다른 나라에 살 수 있다면 어느 도시에서 살아보고 싶나요?',
+        '지금까지 여행 중 가장 기억에 남는 음식은 무엇이었나요?',
+        '다음에 꼭 가보고 싶은 여행지는 어디인가요?',
+        '여행할 때 계획형인가요, 즉흥형인가요?',
+        '현지에서만 할 수 있는 경험 중 해보고 싶은 것은?',
+        '여행 사진을 찍을 때 꼭 담는 순간이 있나요?'
+      ],
+      food: [
+        '한국에서 가장 좋아하는 길거리 음식이나 디저트는 무엇인가요?',
+        '커피와 디저트 중 하나를 고른다면 어떤 조합이 최고인가요?',
+        '집에서도 자주 해 먹는 간단한 요리가 있나요?',
+        '다른 나라 음식 중 처음 먹어보고 싶은 메뉴는?',
+        '매운 음식 vs 달콤한 음식, 오늘 기분은 어느 쪽인가요?',
+        '카페에서 항상 시키는 시그니처 메뉴가 있나요?'
+      ]
+    };
+    var talkCardState = { category: 'daily', index: 0 };
+
+    function pickNextTalkIndex(list, currentIndex) {
+      if (!list || !list.length) return 0;
+      if (list.length === 1) return 0;
+      var next = Math.floor(Math.random() * list.length);
+      var guard = 0;
+      while (next === currentIndex && guard < 8) {
+        next = Math.floor(Math.random() * list.length);
+        guard += 1;
+      }
+      return next;
+    }
+
+    function renderTalkCardQuestion(advance) {
+      var list = TALK_CARD_POOL[talkCardState.category] || TALK_CARD_POOL.daily;
+      if (advance) talkCardState.index = pickNextTalkIndex(list, talkCardState.index);
+      if (talkCardState.index < 0 || talkCardState.index >= list.length) talkCardState.index = 0;
+      var el = document.getElementById('talkCardQuestion');
+      if (el) el.textContent = list[talkCardState.index];
+    }
+
+    function setTalkCategory(cat) {
+      if (!TALK_CARD_POOL[cat]) return;
+      talkCardState.category = cat;
+      talkCardState.index = Math.floor(Math.random() * TALK_CARD_POOL[cat].length);
+      document.querySelectorAll('[data-talk-cat]').forEach(function (btn) {
+        var on = btn.getAttribute('data-talk-cat') === cat;
+        btn.classList.toggle('is-active', on);
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+      renderTalkCardQuestion(false);
+    }
+
+    document.querySelectorAll('[data-talk-cat]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        setTalkCategory(btn.getAttribute('data-talk-cat'));
+      });
     });
+
+    var talkCardNextBtn = document.getElementById('talkCardNextBtn');
+    var talkCardSendBtn = document.getElementById('talkCardSendBtn');
+    if (talkCardNextBtn) {
+      talkCardNextBtn.addEventListener('click', function () {
+        renderTalkCardQuestion(true);
+      });
+    }
+    if (talkCardSendBtn) {
+      talkCardSendBtn.addEventListener('click', function () {
+        var qEl = document.getElementById('talkCardQuestion');
+        var text = qEl ? String(qEl.textContent || '').trim() : '';
+        if (!text) return;
+        openChat();
+        var input = document.getElementById('chatInput')
+          || document.getElementById('chat-input')
+          || document.querySelector('.chat-input-box');
+        if (input) {
+          input.value = text;
+          handleSendMessage();
+        }
+      });
+    }
+
+    renderTalkCardQuestion(false);
+    ensureChatChannel();
 
     /* Bottom sheets */
     function openSheet(name) {
@@ -4224,9 +4593,7 @@
     };
 
     var wordHelpBtn = document.getElementById('wordHelpBtn');
-    var sentenceHelpBtn = document.getElementById('sentenceHelpBtn');
     if (wordHelpBtn) wordHelpBtn.onclick = window.openWordHelp;
-    if (sentenceHelpBtn) sentenceHelpBtn.onclick = window.openSentenceHelp;
 
     /* Feedback / rating modal on end */
     const feedbackModal = document.getElementById('ratingModal') || document.getElementById('feedbackModal') || document.querySelector('.rating-modal');
