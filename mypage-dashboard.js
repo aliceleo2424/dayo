@@ -503,6 +503,20 @@
     }
   }
 
+  function maybeOpenBookingFromQuery() {
+    try {
+      var params = new URLSearchParams(window.location.search || '');
+      if (params.get('openBooking') !== 'true' && params.get('booking') !== 'open') return;
+      params.delete('openBooking');
+      params.delete('booking');
+      var next = window.location.pathname + (params.toString() ? ('?' + params.toString()) : '') + (window.location.hash || '');
+      window.history.replaceState({}, '', next);
+      setTimeout(function () {
+        openBookingModal();
+      }, 120);
+    } catch (e) { /* ignore */ }
+  }
+
   function init() {
     syncMainAction();
     bindStoryTopics();
@@ -510,6 +524,7 @@
     loadUrgentSessionBanner();
     renderSpeakingGrowth();
     document.addEventListener('keydown', onKeydown);
+    maybeOpenBookingFromQuery();
   }
 
   if (document.readyState === 'loading') {
