@@ -377,8 +377,50 @@ export type MemberBookingSession = {
   scheduled_at: string | null;
   status: string | null;
   partner_name: string | null;
+  learner_id?: string | null;
   rating: number | null;
   review: string | null;
+};
+
+export type SessionUtterance = {
+  id: string;
+  speaker: "learner" | "partner" | "unknown";
+  text: string;
+  timestamp: string | null;
+};
+
+export type SessionCorrection = {
+  original: string;
+  corrected: string;
+};
+
+export type SessionCsReport = {
+  rating: number | null;
+  review: string | null;
+  wordHelpCount: number;
+  wordHelpVocab: string[];
+  corrections: SessionCorrection[];
+  partnerStamp: string | null;
+  partnerComment: string | null;
+  hasReport: boolean;
+};
+
+export type SessionTranscriptContext = {
+  id: string;
+  scheduled_at?: string | null;
+  status?: string | null;
+  learnerName?: string;
+  partnerName?: string;
+  learnerId?: string | null;
+  rating?: number | null;
+  review?: string | null;
+};
+
+export type SessionTranscriptBundle = {
+  utterances: SessionUtterance[];
+  report: SessionCsReport;
+  startedAt: string | null;
+  endedAt: string | null;
 };
 
 export type MemberOrder = {
@@ -640,10 +682,10 @@ export async function saveAdminMemo(
 export async function fetchMemberBookings(learnerId: string): Promise<MemberBookingSession[]> {
   if (!learnerId) return [];
   const selects = [
-    "id, scheduled_at, status, partner_name, rating, review",
-    "id, scheduled_at, status, partner_name, rating, feedback",
-    "id, scheduled_at, status, partner_name, rating, comment",
-    "id, scheduled_at, status, partner_name, rating",
+    "id, scheduled_at, status, partner_name, learner_id, rating, review",
+    "id, scheduled_at, status, partner_name, learner_id, rating, feedback",
+    "id, scheduled_at, status, partner_name, learner_id, rating",
+    "id, scheduled_at, status, partner_name, learner_id",
     "id, scheduled_at, status, partner_name",
     "*",
   ];
@@ -662,11 +704,234 @@ export async function fetchMemberBookings(learnerId: string): Promise<MemberBook
       scheduled_at: (row.scheduled_at as string | null) || null,
       status: (row.status as string | null) || null,
       partner_name: (row.partner_name as string | null) || null,
+      learner_id: (row.learner_id as string | null) || learnerId,
       rating: row.rating == null || row.rating === "" ? null : Number(row.rating),
       review: String(row.review || row.feedback || row.comment || row.review_text || "").trim() || null,
     }));
   }
   return [];
+}
+
+function parseUtterances(raw: unknown): SessionUtterance[] {
+  let rows: unknown[] = [];
+  if (Array.isArray(raw)) rows = raw;
+  else if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) rows = parsed;
+    } catch {
+      rows = [];
+    }
+  } else if (raw && typeof raw === "object" && Array.isArray((raw as { messages?: unknown[] }).messages)) {
+    rows = (raw as { messages: unknown[] }).messages;
+  }
+
+  return rows
+    .map((item, index) => {
+      const row = (item || {}) as Record<string, unknown>;
+      const speakerRaw = String(row.speaker || row.role || row.from || "user").toLowerCase();
+      const isPartner = /partner|tutor|teacher|host|assistant/.test(speakerRaw);
+      const isLearner = /user|learner|student|me|member/.test(speakerRaw) || speakerRaw === "user";
+      const text = String(row.text || row.content || row.message || "").trim();
+      if (!text) return null;
+      const ts = row.timestamp || row.created_at || row.time || null;
+      return {
+        id: String(row.id || `u-${index}`),
+        speaker: isPartner ? "partner" as const : isLearner ? "learner" as const : "unknown" as const,
+        text,
+        timestamp: ts ? String(ts) : null,
+      };
+    })
+    .filter((row): row is SessionUtterance => !!row)
+    .sort((a, b) => {
+      const ta = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+      const tb = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+      return ta - tb;
+    });
+}
+
+function parseCorrections(raw: unknown, spokenSentence?: string | null): SessionCorrection[] {
+  const out: SessionCorrection[] = [];
+  if (Array.isArray(raw)) {
+    for (const item of raw) {
+      const row = (item || {}) as Record<string, unknown>;
+      const original = String(row.original || row.before || row.source || row.spoken || "").trim();
+      const corrected = String(row.corrected || row.after || row.target || row.suggestion || "").trim();
+      if (original || corrected) out.push({ original: original || "—", corrected: corrected || "—" });
+    }
+  }
+  if (!out.length && spokenSentence) {
+    out.push({ original: spokenSentence, corrected: spokenSentence });
+  }
+  return out;
+}
+
+function parseVocab(raw: unknown): string[] {
+  if (Array.isArray(raw)) {
+    return raw.map((item) => String(item || "").trim()).filter(Boolean);
+  }
+  if (typeof raw === "string" && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.map((item) => String(item || "").trim()).filter(Boolean);
+    } catch {
+      return raw.split(/[,|/]/).map((s) => s.trim()).filter(Boolean);
+    }
+  }
+  return [];
+}
+
+export async function fetchSessionTranscriptBundle(
+  session: SessionTranscriptContext
+): Promise<SessionTranscriptBundle> {
+  const emptyReport: SessionCsReport = {
+    rating: session.rating ?? null,
+    review: session.review ?? null,
+    wordHelpCount: 0,
+    wordHelpVocab: [],
+    corrections: [],
+    partnerStamp: null,
+    partnerComment: null,
+    hasReport: false,
+  };
+
+  if (!session?.id) {
+    return { utterances: [], report: emptyReport, startedAt: null, endedAt: null };
+  }
+
+  let utterances: SessionUtterance[] = [];
+  let startedAt: string | null = session.scheduled_at || null;
+  let endedAt: string | null = null;
+
+  const logSelects = ["*", "id, transcript, started_at, ended_at, user_id, room_name, booking_id"];
+  const logCandidates: Record<string, unknown>[] = [];
+
+  for (const columns of logSelects) {
+    const byBooking = await supabase.from("session_logs").select(columns).eq("booking_id", session.id).limit(5);
+    if (!byBooking.error && byBooking.data?.length) {
+      logCandidates.push(...(byBooking.data as unknown as Record<string, unknown>[]));
+      break;
+    }
+  }
+
+  if (!logCandidates.length) {
+    for (const columns of logSelects) {
+      const byRoom = await supabase
+        .from("session_logs")
+        .select(columns)
+        .ilike("room_name", `%${String(session.id).replace(/-/g, "").slice(0, 12)}%`)
+        .limit(5);
+      if (!byRoom.error && byRoom.data?.length) {
+        logCandidates.push(...(byRoom.data as unknown as Record<string, unknown>[]));
+        break;
+      }
+    }
+  }
+
+  if (!logCandidates.length && session.learnerId) {
+    for (const columns of logSelects) {
+      let byUser = await supabase
+        .from("session_logs")
+        .select(columns)
+        .eq("user_id", session.learnerId)
+        .order("ended_at", { ascending: false })
+        .limit(8);
+      if (byUser.error) {
+        byUser = await supabase
+          .from("session_logs")
+          .select(columns)
+          .eq("learner_id", session.learnerId)
+          .order("ended_at", { ascending: false })
+          .limit(8);
+      }
+      if (!byUser.error && byUser.data?.length) {
+        logCandidates.push(...(byUser.data as unknown as Record<string, unknown>[]));
+        break;
+      }
+    }
+  }
+
+  if (!logCandidates.length) {
+    const txSelects = ["*", "id, transcript, messages, created_at, booking_id, user_id"];
+    for (const columns of txSelects) {
+      let tx = await supabase.from("session_transcripts").select(columns).eq("booking_id", session.id).limit(5);
+      if (tx.error && session.learnerId) {
+        tx = await supabase
+          .from("session_transcripts")
+          .select(columns)
+          .eq("user_id", session.learnerId)
+          .order("created_at", { ascending: false })
+          .limit(5);
+      }
+      if (!tx.error && tx.data?.length) {
+        logCandidates.push(...(tx.data as unknown as Record<string, unknown>[]));
+        break;
+      }
+    }
+  }
+
+  if (logCandidates.length) {
+    const best = logCandidates[0];
+    utterances = parseUtterances(best.transcript || best.messages || best.utterances || best.logs);
+    startedAt = (best.started_at as string | null) || startedAt;
+    endedAt = (best.ended_at as string | null) || (best.created_at as string | null) || null;
+  }
+
+  let report = { ...emptyReport };
+  const reportSelects = [
+    "id, learner_id, partner_name, spoken_sentence, keyword, partner_comment, stamp, rating, booking_id, word_help_count, word_help_vocab, corrections, review, created_at",
+    "id, learner_id, partner_name, spoken_sentence, keyword, partner_comment, stamp, rating, booking_id, created_at",
+    "id, learner_id, partner_name, spoken_sentence, keyword, partner_comment, stamp, rating, created_at",
+    "*",
+  ];
+
+  let reportRow: Record<string, unknown> | null = null;
+  for (const columns of reportSelects) {
+    let byBooking = await supabase.from("session_reports").select(columns).eq("booking_id", session.id).limit(1).maybeSingle();
+    if (!byBooking.error && byBooking.data) {
+      reportRow = byBooking.data as unknown as Record<string, unknown>;
+      break;
+    }
+    if (session.learnerId) {
+      const byLearner = await supabase
+        .from("session_reports")
+        .select(columns)
+        .eq("learner_id", session.learnerId)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (!byLearner.error && byLearner.data?.length) {
+        const rows = byLearner.data as unknown as Record<string, unknown>[];
+        const partnerHint = String(session.partnerName || "").toLowerCase();
+        reportRow =
+          rows.find((row) => String(row.partner_name || "").toLowerCase().includes(partnerHint.split(/\s+/)[0] || "")) ||
+          rows[0];
+        break;
+      }
+    }
+  }
+
+  if (reportRow) {
+    const vocab = parseVocab(reportRow.word_help_vocab || reportRow.vocab_chips || reportRow.keyword);
+    report = {
+      rating: reportRow.rating == null ? session.rating ?? null : Number(reportRow.rating),
+      review: String(reportRow.review || reportRow.user_review || session.review || "").trim() || null,
+      wordHelpCount: Number(reportRow.word_help_count || reportRow.help_count || vocab.length || 0),
+      wordHelpVocab: vocab,
+      corrections: parseCorrections(reportRow.corrections || reportRow.ai_corrections, String(reportRow.spoken_sentence || "") || null),
+      partnerStamp: String(reportRow.stamp || "").trim() || null,
+      partnerComment: String(reportRow.partner_comment || "").trim() || null,
+      hasReport: true,
+    };
+  } else if (session.rating != null || session.review) {
+    report = {
+      ...emptyReport,
+      rating: session.rating ?? null,
+      review: session.review ?? null,
+      hasReport: true,
+    };
+  }
+
+  return { utterances, report, startedAt, endedAt };
 }
 
 export async function updateProfileRole(

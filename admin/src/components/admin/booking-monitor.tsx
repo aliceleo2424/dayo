@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchBookings, type BookingRow } from "@/lib/admin-data";
+import { FileText } from "lucide-react";
+import { fetchBookings, type BookingRow, type SessionTranscriptContext } from "@/lib/admin-data";
 import { formatDateTime } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DataTable, type Column } from "@/components/admin/data-table";
+import { SessionTranscriptModal } from "@/components/admin/SessionTranscriptModal";
 
 const statusLabel: Record<string, string> = {
   pending: "대기",
@@ -18,6 +21,7 @@ export function BookingMonitor() {
   const [rows, setRows] = useState<BookingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedSession, setSelectedSession] = useState<SessionTranscriptContext | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -34,6 +38,17 @@ export function BookingMonitor() {
       cancelled = true;
     };
   }, []);
+
+  function openTranscript(row: BookingRow) {
+    setSelectedSession({
+      id: row.id,
+      scheduled_at: row.scheduled_at,
+      status: row.status,
+      learnerName: row.learner_nickname || "학습자",
+      partnerName: row.partner_nickname || row.partner_name || "파트너",
+      learnerId: row.learner_id,
+    });
+  }
 
   const columns: Column<BookingRow & Record<string, unknown>>[] = [
     {
@@ -61,6 +76,16 @@ export function BookingMonitor() {
         </a>
       ),
     },
+    {
+      key: "actions",
+      header: "대화록",
+      render: (row) => (
+        <Button variant="outline" size="sm" onClick={() => openTranscript(row)}>
+          <FileText className="mr-1 h-3.5 w-3.5" />
+          대화록 열람
+        </Button>
+      ),
+    },
   ];
 
   if (loading) {
@@ -83,11 +108,18 @@ export function BookingMonitor() {
   }
 
   return (
-    <DataTable
-      data={rows as (BookingRow & Record<string, unknown>)[]}
-      columns={columns}
-      searchKeys={["learner_nickname", "partner_nickname", "status"]}
-      exportFilename="bookings.csv"
-    />
+    <>
+      <DataTable
+        data={rows as (BookingRow & Record<string, unknown>)[]}
+        columns={columns}
+        searchKeys={["learner_nickname", "partner_nickname", "status"]}
+        exportFilename="bookings.csv"
+      />
+      <SessionTranscriptModal
+        open={!!selectedSession}
+        session={selectedSession}
+        onClose={() => setSelectedSession(null)}
+      />
+    </>
   );
 }

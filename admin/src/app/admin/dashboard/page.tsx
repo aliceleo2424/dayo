@@ -3,14 +3,16 @@
 /* ops-dashboard-v3 2026-09-14 — marketing dummy template removed */
 
 import { useCallback, useEffect, useState } from "react";
-import { CalendarCheck, GraduationCap, Users, Wallet } from "lucide-react";
+import { CalendarCheck, FileText, GraduationCap, Users, Wallet } from "lucide-react";
 import { AdminHeader } from "@/components/admin/header";
 import { RoleActions } from "@/components/admin/role-actions";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { updateProfileRole, detectMemberProvider, profileDisplayName } from "@/lib/admin-data";
+import { updateProfileRole, detectMemberProvider, profileDisplayName, type SessionTranscriptContext } from "@/lib/admin-data";
 import { ProviderBadge, KakaoPrivateEmailHint, LearningLanguageTag } from "@/components/admin/provider-badge";
 import { UserDetailDrawer } from "@/components/admin/UserDetailDrawer";
+import { SessionTranscriptModal } from "@/components/admin/SessionTranscriptModal";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
 
@@ -45,6 +47,7 @@ type SessionRow = {
   status: string | null;
   learner: string;
   partner: string;
+  learner_id: string | null;
 };
 
 const ZERO_KPI: KpiState = { members: 0, partners: 0, sessions: 0, paid: 0 };
@@ -67,6 +70,7 @@ export default function DashboardPage() {
   const [busyId, setBusyId] = useState("");
   const [notice, setNotice] = useState("");
   const [drawerUser, setDrawerUser] = useState<MemberRow | null>(null);
+  const [selectedSession, setSelectedSession] = useState<SessionTranscriptContext | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -162,6 +166,7 @@ export default function DashboardPage() {
           status: (row.status as string | null) || null,
           learner: names.get(learnerId) || "학습자",
           partner: names.get(partnerId) || String(row.partner_name || "파트너 미정"),
+          learner_id: learnerId || null,
         };
       }));
     } catch (err) {
@@ -324,6 +329,7 @@ export default function DashboardPage() {
                         <th className="px-3 py-3 font-medium">학습자</th>
                         <th className="px-3 py-3 font-medium">파트너</th>
                         <th className="px-3 py-3 font-medium">상태</th>
+                        <th className="px-3 py-3 font-medium">대화록</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -333,6 +339,25 @@ export default function DashboardPage() {
                           <td className="px-3 py-3">{row.learner}</td>
                           <td className="px-3 py-3">{row.partner}</td>
                           <td className="px-3 py-3">{row.status || "pending"}</td>
+                          <td className="px-3 py-3">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                setSelectedSession({
+                                  id: row.id,
+                                  scheduled_at: row.scheduled_at,
+                                  status: row.status,
+                                  learnerName: row.learner,
+                                  partnerName: row.partner,
+                                  learnerId: row.learner_id,
+                                })
+                              }
+                            >
+                              <FileText className="mr-1 h-3.5 w-3.5" />
+                              대화록 열람
+                            </Button>
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -349,6 +374,11 @@ export default function DashboardPage() {
         user={drawerUser}
         onClose={() => setDrawerUser(null)}
         onTicketChange={handleTicketChange}
+      />
+      <SessionTranscriptModal
+        open={!!selectedSession}
+        session={selectedSession}
+        onClose={() => setSelectedSession(null)}
       />
     </>
   );

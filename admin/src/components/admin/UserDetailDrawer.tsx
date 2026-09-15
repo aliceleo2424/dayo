@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ProviderBadge, KakaoPrivateEmailHint } from "@/components/admin/provider-badge";
+import { SessionTranscriptModal } from "@/components/admin/SessionTranscriptModal";
 import {
   adjustProfileTicketsWithLedger,
   bookingStatusLabel,
@@ -27,6 +28,7 @@ import {
   type DrawerMember,
   type MemberBookingSession,
   type MemberOrder,
+  type SessionTranscriptContext,
 } from "@/lib/admin-data";
 import { cn } from "@/lib/utils";
 
@@ -50,7 +52,7 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
   const [reasonOpen, setReasonOpen] = useState(false);
   const [pendingDelta, setPendingDelta] = useState<1 | -1>(1);
   const [reasonText, setReasonText] = useState("");
-  const [transcriptSessionId, setTranscriptSessionId] = useState<string | null>(null);
+  const [selectedSession, setSelectedSession] = useState<SessionTranscriptContext | null>(null);
 
   useEffect(() => {
     if (!open || !user) return;
@@ -362,10 +364,21 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
                         variant="outline"
                         size="sm"
                         className="mt-3"
-                        onClick={() => setTranscriptSessionId(session.id)}
+                        onClick={() =>
+                          setSelectedSession({
+                            id: session.id,
+                            scheduled_at: session.scheduled_at,
+                            status: session.status,
+                            learnerName: displayName || "학습자",
+                            partnerName: session.partner_name || "파트너",
+                            learnerId: session.learner_id || user?.user_id || user?.id || null,
+                            rating: session.rating,
+                            review: session.review,
+                          })
+                        }
                       >
                         <FileText className="mr-1 h-3.5 w-3.5" />
-                        대화록 & 리포트 확인
+                        대화록 & AI 리포트 전문 확인
                       </Button>
                     </div>
                   );
@@ -417,19 +430,11 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
         </div>
       ) : null}
 
-      {transcriptSessionId ? (
-        <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/45 p-4">
-          <div className="w-full max-w-md rounded-xl border bg-white p-5 shadow-xl">
-            <h3 className="text-lg font-semibold">대화록 & 리포트</h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              SessionTranscriptModal 연동 준비 중입니다. (session: {transcriptSessionId.slice(0, 8)})
-            </p>
-            <Button className="mt-4 w-full" variant="outline" onClick={() => setTranscriptSessionId(null)}>
-              닫기
-            </Button>
-          </div>
-        </div>
-      ) : null}
+      <SessionTranscriptModal
+        open={!!selectedSession}
+        session={selectedSession}
+        onClose={() => setSelectedSession(null)}
+      />
     </>
   );
 }
