@@ -522,7 +522,7 @@
       return {
         href: '#',
         icon: '🔑',
-        label: isLandingPage() ? '로그인' : t('login.loungeBtn'),
+        label: '로그인',
         openLogin: true
       };
     }
@@ -566,7 +566,7 @@
       : '<span data-i18n="' + config.i18n + '">' + t(config.i18n) + '</span>';
 
     if (config.openLogin) {
-      return '<button class="ms-btn ms-login-trigger" type="button" data-ms-open-login aria-label="로그인 / 회원가입">' + lead + label + '</button>';
+      return '<button class="ms-btn ms-login-trigger" type="button" data-ms-open-login aria-label="로그인">' + lead + label + '</button>';
     }
 
     if (config.landingMypage) {

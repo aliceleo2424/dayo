@@ -15,8 +15,9 @@ const STYLES: Record<AuthProvider, CSSProperties> = {
     gap: 4,
   },
   google: {
-    background: "#E8F0FE",
-    color: "#1967D2",
+    background: "#EFF6FF",
+    border: "1px solid #BFDBFE",
+    color: "#2563EB",
     fontSize: 11,
     fontWeight: 700,
     padding: "3px 8px",
@@ -27,7 +28,8 @@ const STYLES: Record<AuthProvider, CSSProperties> = {
   },
   email: {
     background: "#F5F5F4",
-    color: "#78716C",
+    border: "1px solid #D6D3D1",
+    color: "#44403C",
     fontSize: 11,
     fontWeight: 700,
     padding: "3px 8px",
@@ -40,7 +42,7 @@ const STYLES: Record<AuthProvider, CSSProperties> = {
 
 const LABELS: Record<AuthProvider, string> = {
   kakao: "🟡 카카오",
-  google: "🌐 구글",
+  google: "🔵 구글",
   email: "✉️ 이메일",
 };
 

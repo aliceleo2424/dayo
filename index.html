@@ -57,7 +57,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="mobile-nav.css?v=20260916-gnb-mobile">
+  <link rel="stylesheet" href="mobile-nav.css?v=20260916-gnb-minimal">
   <script src="scroll-lock.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1819,21 +1819,6 @@
     }
     .nav-drawer > .btn-logout { display: none; }
     body.is-logged-in .nav-drawer > .btn-logout { display: flex; }
-    .header-quiz-cta {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0.55rem 0.95rem;
-      border: 1px solid rgba(255, 107, 87, 0.28);
-      border-radius: 999px;
-      background: #fff;
-      color: #E85B48;
-      font-weight: 800;
-      font-size: 0.86rem;
-      cursor: pointer;
-      font-family: inherit;
-      white-space: nowrap;
-    }
     .header-mypage-cta {
       font-weight: 800;
     }
@@ -2314,7 +2299,6 @@
       <div class="header-actions">
         <div class="header-mode user-badge" data-mode-switch="inline"></div>
         <a href="https://dayo-sufk.vercel.app/admin/dashboard" class="admin-dash-link" data-admin-dashboard-link target="_blank" rel="noopener noreferrer" hidden aria-hidden="true">관리자 대시보드</a>
-        <button type="button" class="header-quiz-cta nav-guest-only" id="headerQuizBtn" data-open-quiz>무료 진단하기</button>
         <div data-i18n-lang="icon"></div>
         <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
       </div>
@@ -2331,7 +2315,6 @@
     <a href="#partners" data-i18n="nav.partners">대화 파트너</a>
     <a href="#how" data-i18n="nav.how">진행 방식</a>
     <a href="#tickets" data-i18n="nav.tickets">세션 티켓</a>
-    <button type="button" class="nav-guest-only" data-open-quiz data-nav-close>무료 진단하기</button>
     <a href="/mypage.html" class="header-cta nav-drawer__cta nav-auth-only" data-nav-close>👤 마이페이지 바로가기</a>
     <a href="https://dayo-sufk.vercel.app/admin/dashboard" class="admin-dash-link" data-admin-dashboard-link target="_blank" rel="noopener noreferrer" hidden aria-hidden="true">관리자 대시보드</a>
     <button type="button" onclick="handleLogout(event)" class="btn-logout" style="cursor: pointer;">로그아웃</button>
@@ -3658,7 +3641,7 @@
     });
   </script>
   <script src="supabase-env.js"></script>
-  <script type="module" src="profile-store.js"></script>
+  <script type="module" src="profile-store.js?v=20260916-provider-source"></script>
   <script src="chat-prefs.js"></script>
   <script src="ticket-wallet.js"></script>
   <script src="availability-slots.js"></script>
@@ -3667,7 +3650,7 @@
   <script src="terms-mini-modal.js"></script>
   <script src="tickets-modal.js?v=20260915-usedtrial"></script>
   <script src="auth.js"></script>
-  <script src="mode-switch.js?v=20260916-gnb-mobile"></script>
+  <script src="mode-switch.js?v=20260916-gnb-minimal"></script>
   <script type="module" src="webinar-apply.js"></script>
   <script src="greeting-banner.js"></script>
   <script src="logged-in-home.js"></script>

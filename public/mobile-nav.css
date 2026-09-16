@@ -169,10 +169,6 @@ body.nav-drawer-open .top-bar {
     flex-wrap: nowrap !important;
   }
 
-  .header-quiz-cta {
-    display: none !important;
-  }
-
   .header-actions > [data-i18n-lang="icon"],
   .topbar-right > [data-i18n-lang="icon"] {
     display: none !important;

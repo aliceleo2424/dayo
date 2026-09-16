@@ -159,6 +159,10 @@ function displayNameFromUser(user) {
 }
 
 function detectAuthProvider(user) {
+  var appProvider = String((user && user.app_metadata && user.app_metadata.provider) || '').toLowerCase();
+  if (appProvider === 'kakao') return 'kakao';
+  if (appProvider === 'google') return 'google';
+  if (appProvider === 'email') return 'email';
   var identities = (user && user.identities) || [];
   for (var i = 0; i < identities.length; i += 1) {
     var p = String(identities[i].provider || '').toLowerCase();
@@ -166,13 +170,9 @@ function detectAuthProvider(user) {
     if (p === 'google') return 'google';
   }
   var meta = (user && user.user_metadata) || {};
-  var raw = String(meta.provider || meta.iss || '').toLowerCase();
-  if (raw.indexOf('kakao') >= 0) return 'kakao';
-  if (raw.indexOf('google') >= 0) return 'google';
-  var email = String((user && user.email) || '').toLowerCase();
-  var avatar = String(meta.avatar_url || meta.picture || meta.profile_image || '').toLowerCase();
-  if (email.indexOf('kakao') >= 0 || avatar.indexOf('kakao') >= 0) return 'kakao';
-  if (email.indexOf('@gmail.com') >= 0 || email.indexOf('@googlemail.com') >= 0) return 'google';
+  var raw = String(meta.provider || '').toLowerCase();
+  if (raw === 'kakao') return 'kakao';
+  if (raw === 'google') return 'google';
   return 'email';
 }
 
@@ -673,11 +673,7 @@ async function syncSocialProfileFields(client, existing, user, name) {
   if (!String(existing.nickname || '').trim() && nextName) patch.nickname = nextName;
   if (!String(existing.user_name || '').trim() && nextName) patch.user_name = nextName;
   if (!String(existing.avatar_url || '').trim() && social.avatar) patch.avatar_url = social.avatar;
-  if (social.provider === 'kakao' && String(existing.provider || '').toLowerCase() !== 'kakao') {
-    patch.provider = 'kakao';
-  } else if (social.provider === 'google' && String(existing.provider || '').toLowerCase() !== 'google') {
-    patch.provider = 'google';
-  } else if (!String(existing.provider || '').trim() && social.provider) {
+  if (social.provider && String(existing.provider || '').toLowerCase() !== social.provider) {
     patch.provider = social.provider;
   }
 

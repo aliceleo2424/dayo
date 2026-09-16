@@ -57,15 +57,8 @@ export type MemberIdentity = {
 
 export function detectMemberProvider(row: MemberIdentity): AuthProvider {
   const provider = String(row.provider || "").trim().toLowerCase();
-  if (provider.includes("kakao")) return "kakao";
-  if (provider.includes("google")) return "google";
-
-  const email = String(row.email || "").trim().toLowerCase();
-  const avatar = String(row.avatar_url || "").trim().toLowerCase();
-  const clientKey = String(row.client_key || "").trim().toLowerCase();
-
-  if (email.includes("kakao") || avatar.includes("kakao") || clientKey.includes("kakao")) return "kakao";
-  if (email.endsWith("@gmail.com") || email.includes("googlemail") || avatar.includes("google")) return "google";
+  if (provider === "kakao") return "kakao";
+  if (provider === "google") return "google";
   return "email";
 }
 
