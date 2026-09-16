@@ -277,7 +277,9 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
                           <div className="flex flex-wrap items-start justify-between gap-2">
                             <div>
                               <p className="text-sm font-semibold text-[#292524]">
-                                {order.product_name || "이용권 패키지"}
+                                {order.amount === 19900 && Number(order.ticket_count || 1) === 1
+                                  ? "깔끔한 1회 티켓"
+                                  : order.product_name || "이용권 패키지"}
                               </p>
                               <p className="mt-1 text-xs text-[#78716C]">
                                 주문 {orderNo} · {formatSessionDateTime(order.created_at)}

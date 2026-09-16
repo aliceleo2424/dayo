@@ -10,7 +10,7 @@
     light11: { name: '가벼운 11 패키지', price: 179000, tickets: 11 },
     full33: { name: '마음껏 33 패키지', price: 499000, tickets: 33 },
     trial: { name: '첫 세션 체험 할인권', price: 9900, tickets: 1 },
-    single: { name: '1회 단품 이용권', price: 19900, tickets: 1 }
+    single: { name: '깔끔한 1회 티켓', price: 19900, tickets: 1 }
   };
 
   var ALIAS = {

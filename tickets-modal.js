@@ -1,6 +1,6 @@
 /* DayO 세션 이용권 구매 모달 — mypage / index 공용
  * 트리거: [data-tickets-open] 또는 ?tickets=open
- * 3단 위계: 신규 체험 배너 / 정규 패키지 3종 / 1회 단품
+ * 3단 위계: 신규 체험 배너 / 정규 패키지 3종 / 깔끔한 1회 티켓
  * 구매 시 amount·orderName·ticketCount 매핑
  */
 (function () {
@@ -76,14 +76,14 @@
       id: 'single',
       payId: 'single',
       tier: 'single',
-      title: '1회 단품 이용권',
-      orderName: '1회 단품 이용권',
+      title: '깔끔한 1회 티켓',
+      orderName: 'DayO 깔끔한 1회 티켓',
       price: '19,900원',
       priceValue: 19900,
       meta: '1회',
-      copy: '약정 없이 필요할 때 딱 한 번만 만나고 싶다면?',
+      copy: '약정 없이 필요할 때 딱 한 번만 만나고 싶다면? 깔끔한 1회 티켓 | 19,900원',
       tickets: 1,
-      cta: '1회권 구매하기'
+      cta: '구매하기'
     }
   ];
 
