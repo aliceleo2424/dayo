@@ -50,7 +50,11 @@ export function AdminSidebar() {
       <div className="flex h-16 items-center justify-between gap-2 border-b border-white/10 px-3">
         {!sidebarCollapsed && (
           <Link href="/admin/dashboard" className="flex min-w-0 items-center bg-transparent">
-            <img src="/images/logo.png" alt="DayO Admin" className="h-9 w-auto max-w-[10rem] object-contain bg-transparent" />
+            <img src="/images/logo.png" alt="DayO Admin" className="h-8 w-auto max-w-[6rem] object-contain bg-transparent" />
+            <span className="ml-1.5 inline-flex min-w-0 flex-col justify-center whitespace-nowrap border-l border-white/20 pl-1.5 text-left leading-[1.15]">
+              <span className="text-[9.5px] font-bold tracking-[-0.2px] text-white">1:1 Global</span>
+              <span className="text-[8.5px] font-medium tracking-[-0.3px] text-slate-400">Communication Lounge</span>
+            </span>
           </Link>
         )}
         <Button variant="ghost" size="icon" onClick={toggleSidebar} className={cn("text-white hover:bg-white/10", sidebarCollapsed && "mx-auto")}>
