@@ -49,42 +49,6 @@
         }
       }
 
-      function hasSbAuthToken() {
-        try {
-          var keys = Object.keys(localStorage);
-          for (var i = 0; i < keys.length; i++) {
-            if (keys[i].indexOf('sb-') !== 0 || keys[i].indexOf('-auth-token') < 0) continue;
-            var raw = localStorage.getItem(keys[i]);
-            if (!raw) continue;
-            var parsed = JSON.parse(raw);
-            if (parsed && (parsed.access_token || (parsed.currentSession && parsed.currentSession.access_token))) {
-              return true;
-            }
-          }
-        } catch (e) { /* ignore */ }
-        return false;
-      }
-
-      function peekLocalSessionEmail() {
-        try {
-          var keys = Object.keys(localStorage);
-          for (var i = 0; i < keys.length; i++) {
-            if (keys[i].indexOf('sb-') !== 0 || keys[i].indexOf('-auth-token') < 0) continue;
-            var raw = localStorage.getItem(keys[i]);
-            if (!raw) continue;
-            var parsed = JSON.parse(raw);
-            var session = parsed && (parsed.currentSession || parsed);
-            var user = session && (session.user || (session.currentSession && session.currentSession.user));
-            if (user && user.email) return String(user.email).toLowerCase();
-          }
-        } catch (e2) { /* ignore */ }
-        try {
-          return String(localStorage.getItem('dayo_user_email') || localStorage.getItem('dayo_userEmail') || '').toLowerCase();
-        } catch (e3) {
-          return '';
-        }
-      }
-
       function forceHideAuthModals() {
         var nodes = document.querySelectorAll(
           '#login-modal, #authModal, #loginModal, #signup-modal, .login-modal-overlay, .ms-overlay, .ms-welcome-overlay'
@@ -161,6 +125,8 @@
         setDisplay(nodes.auth, true);
         setDisplay(nodes.dash, false);
         setDisplay(nodes.recruit, false);
+        var applyButton = document.getElementById('partner-auth-apply-btn');
+        if (applyButton) applyButton.setAttribute('href', applyFormUrl());
       }
 
       function showPartnerLounge() {
@@ -231,45 +197,45 @@
         try {
           var byId = await client
             .from('profiles')
-            .select('role, is_partner')
+            .select('role, nickname, partner_status')
             .eq('id', uid)
             .maybeSingle();
           if (!byId.error && byId.data) return byId.data;
         } catch (e) { /* fall through */ }
 
-        var email = escapeOrValue(user.email || '');
-        var orFilter = 'id.eq.' + uid + ',user_id.eq.' + uid;
-        if (email) orFilter += ',email.eq.' + email;
         try {
           var res = await client
             .from('profiles')
-            .select('role, is_partner')
-            .or(orFilter)
-            .limit(1);
-          if (!res.error && res.data && res.data[0]) return res.data[0];
-          if (res.error) {
-            var fallback = await client
-              .from('profiles')
-              .select('role')
-              .or(orFilter)
-              .limit(1);
-            if (!fallback.error && fallback.data && fallback.data[0]) return fallback.data[0];
-          }
+            .select('role, nickname, partner_status')
+            .eq('user_id', uid)
+            .maybeSingle();
+          if (!res.error && res.data) return res.data;
         } catch (e2) { /* ignore */ }
         return null;
       }
 
-      function isAuthorized(profile, userEmail) {
+      function isAuthorized(profile) {
         var role = normalizeRole(profile && profile.role);
-        var isPartner = role === 'partner'
-          || (profile && (profile.is_partner === true || profile.is_partner === 'true' || profile.is_partner === 1));
-        var isAdmin = role === 'admin' || role === 'super_admin' || role === 'superadmin';
-        return !!(isPartner || isAdmin);
+        return role === 'partner';
       }
 
       function initPartnerDashboard(user, profile) {
         window.__dayoPartnerAuthUser = user || null;
         window.__dayoPartnerProfileGate = profile || null;
+        var metadata = (user && user.user_metadata) || {};
+        var nickname = String(
+          (profile && profile.nickname)
+          || metadata.full_name
+          || metadata.name
+          || (user && user.email ? user.email.split('@')[0] : '')
+          || '파트너'
+        ).trim();
+        var welcome = document.getElementById('partnerWelcome');
+        var miniName = document.getElementById('miniName');
+        var badge = document.querySelector('.partner-mode-badge');
+        if (welcome) welcome.textContent = nickname + '님, 반갑습니다! ☕';
+        if (miniName) miniName.textContent = nickname;
+        if (badge) badge.textContent = '🟢 파트너 활동중';
         showPartnerLounge();
         if (typeof window.loadLoungeStats === 'function') {
           try { window.loadLoungeStats(); } catch (e) { /* ignore */ }
@@ -288,16 +254,8 @@
           console.log('Auth event:', event, 'Session user:', session && session.user && session.user.email);
 
           if (!session || !session.user) {
-            /* Never reopen auth UI on flaky INITIAL_SESSION null while a token still exists */
-            if (event === 'SIGNED_OUT') {
-              showAuthSection();
-              lastAuthKey = 'anon';
-              return;
-            }
-            if (event === 'INITIAL_SESSION' && !hasSbAuthToken() && !window.__dayoPartnerLoungeLocked) {
-              showAuthSection();
-              lastAuthKey = 'anon';
-            }
+            showAuthSection();
+            lastAuthKey = 'anon';
             return;
           }
 
@@ -311,22 +269,18 @@
           var profile = await fetchProfile(client, session.user);
           if (myRun !== authRunId) return;
 
-          if (isAuthorized(profile, session.user.email)) {
+          if (isAuthorized(profile)) {
             lastAuthKey = authKey;
             initPartnerDashboard(session.user, profile);
             return;
           }
 
           lastAuthKey = authKey + ':recruit';
-          showPartnerRecruitView();
+          showAuthSection();
         } catch (err) {
           if (myRun !== authRunId) return;
           console.warn('파트너 라운지 가드 실패', err);
-          if (session && session.user && isAuthorized(null, session.user.email)) {
-            initPartnerDashboard(session.user, null);
-            return;
-          }
-          showPartnerRecruitView();
+          showAuthSection();
         }
       }
 
@@ -334,18 +288,9 @@
         document.documentElement.classList.remove('partner-guard-pending');
         if (document.body) document.body.classList.remove('partner-guard-pending');
 
-        /* Optimistic: known partner session token → show lounge immediately, kill login modals */
-        var emailHint = peekLocalSessionEmail();
-        if (hasSbAuthToken()) {
-          if (isAuthorized(null, emailHint)) {
-            showPartnerLounge();
-          }
-          /* Keep recruit/auth hidden until profile resolves — prevents FOUC */
-        }
-
         var client = await waitForClient(60);
         if (!client || !client.auth) {
-          if (!window.__dayoPartnerLoungeLocked && !hasSbAuthToken()) showAuthSection();
+          showAuthSection();
           return;
         }
 
@@ -354,14 +299,18 @@
         });
 
         try {
-          var now = await client.auth.getSession();
-          var session = now && now.data && now.data.session;
-          if (session && session.user) {
-            handleAuthState('GET_SESSION', session);
-          } else if (!hasSbAuthToken() && !window.__dayoPartnerLoungeLocked) {
+          var now = await client.auth.getUser();
+          var user = now && now.data && now.data.user;
+          if (!user) {
             showAuthSection();
+            return;
           }
-        } catch (e) { /* onAuthStateChange will settle */ }
+          var profile = await fetchProfile(client, user);
+          if (isAuthorized(profile)) initPartnerDashboard(user, profile);
+          else showAuthSection();
+        } catch (e) {
+          showAuthSection();
+        }
       }
 
       if (document.readyState === 'loading') {
@@ -383,7 +332,12 @@
 
     #partner-auth-section {
       width: min(520px, calc(100% - 2rem));
-      margin: 48px auto 72px;
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      z-index: 100;
+      transform: translate(-50%, -50%);
+      margin: 0;
       padding: 36px 28px;
       border-radius: 24px;
       background: #FFFFFF;
@@ -392,6 +346,14 @@
       text-align: center;
     }
     #partner-auth-section[hidden] { display: none !important; }
+    body.is-partner-auth::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      background: rgba(68, 64, 60, 0.32);
+      backdrop-filter: blur(5px);
+    }
     .partner-auth-kicker {
       margin: 0 0 8px;
       font-size: 11px;
@@ -2116,7 +2078,9 @@
     }
 
     body.is-partner-recruit .partner-mode-badge,
-    body.is-partner-recruit .welcome {
+    body.is-partner-recruit .welcome,
+    body.is-partner-auth .partner-mode-badge,
+    body.is-partner-auth .welcome {
       display: none !important;
     }
 
@@ -2281,7 +2245,7 @@
             <span id="partnerWelcome">DayO 파트너 님, 반갑습니다! ☕</span>
           </div>
         </div>
-        <span class="partner-mode-badge badge-partner partner-badge" data-i18n="partner.hostMode">☕ 호스트 모드</span>
+        <span class="partner-mode-badge badge-partner partner-badge">🟢 파트너 활동중</span>
         <div data-mode-switch="inline"></div>
         <div data-i18n-lang="icon"></div>
         <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
@@ -2299,11 +2263,11 @@
 
   <section id="partner-auth-section" hidden>
     <p class="partner-auth-kicker">DayO Partner Lounge</p>
-    <h2 class="partner-auth-title">로그인이 필요한 라운지예요 ☕</h2>
-    <p class="partner-auth-desc">DayO 파트너 라운지는 계정 확인 후 입장하실 수 있습니다. 상단 메뉴나 아래 버튼으로 로그인해 주세요.</p>
+    <h2 class="partner-auth-title">☕ 파트너 전용 라운지입니다</h2>
+    <p class="partner-auth-desc">DayO 글로벌 파트너로 승인된 호스트만 이용할 수 있는 공간이에요.<br>대화 파트너로 활동을 원하시면 지원서를 작성해 주세요!</p>
     <div class="partner-auth-actions">
-      <button type="button" class="partner-auth-btn partner-auth-btn--primary" id="partner-auth-login-btn">로그인하러 가기</button>
-      <a class="partner-auth-btn partner-auth-btn--ghost" href="/mypage.html">마이페이지로 이동</a>
+      <a class="partner-auth-btn partner-auth-btn--ghost" href="/">홈으로 돌아가기</a>
+      <a class="partner-auth-btn partner-auth-btn--primary" id="partner-auth-apply-btn" href="#" target="_blank" rel="noopener noreferrer">파트너 지원하기</a>
     </div>
   </section>
 
