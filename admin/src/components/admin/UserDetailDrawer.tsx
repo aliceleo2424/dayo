@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { FileText, Minus, Plus, Ticket, X } from "lucide-react";
+import { FileText, Mail, Minus, Plus, Ticket, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -48,6 +48,7 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
   const [loading, setLoading] = useState(false);
   const [busyTickets, setBusyTickets] = useState(false);
   const [busyMemo, setBusyMemo] = useState(false);
+  const [busyWelcome, setBusyWelcome] = useState(false);
   const [notice, setNotice] = useState("");
   const [reasonOpen, setReasonOpen] = useState(false);
   const [pendingDelta, setPendingDelta] = useState<1 | -1>(1);
@@ -169,6 +170,32 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
     }
   }
 
+  async function handleWelcomeEmailTest() {
+    const email = String(user?.email || "").trim();
+    if (!email || busyWelcome) {
+      if (!email) window.alert("웰컴 이메일을 발송할 회원 이메일이 없습니다.");
+      return;
+    }
+    setBusyWelcome(true);
+    setNotice("");
+    try {
+      const response = await fetch("/api/send-welcome", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, nickname: displayName || "회원" }),
+      });
+      const result = await response.json().catch(() => ({})) as { error?: string };
+      if (!response.ok) throw new Error(result.error || "웰컴 이메일 발송에 실패했습니다.");
+      setNotice(`웰컴 이메일을 ${email} 주소로 발송했습니다.`);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "웰컴 이메일 발송에 실패했습니다.";
+      setNotice(message);
+      window.alert(message);
+    } finally {
+      setBusyWelcome(false);
+    }
+  }
+
   return (
     <>
       <div
@@ -213,6 +240,16 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
               <span>가입 {user?.created_at ? formatSessionDateTime(user.created_at) : "—"}</span>
               {provider === "kakao" && kakaoId ? <span>kakao_id · {kakaoId}</span> : null}
             </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={!user?.email || busyWelcome}
+              onClick={() => void handleWelcomeEmailTest()}
+            >
+              <Mail className="mr-1.5 h-3.5 w-3.5" />
+              {busyWelcome ? "발송 중…" : "웰컴 이메일 테스트 발송"}
+            </Button>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} aria-label="닫기">
             <X className="h-4 w-4" />
