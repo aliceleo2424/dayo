@@ -1,6 +1,12 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/magazine/:id",
+      "destination": "https://dayo-sufk.vercel.app/magazine/:id"
+    }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",

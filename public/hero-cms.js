@@ -105,7 +105,9 @@
     posts.forEach(function (post) {
       var card = document.createElement('a');
       card.className = 'cms-magazine-card visible';
-      card.href = safeLink(post.link, '#magazine');
+      card.href = post.id
+        ? '/magazine/' + encodeURIComponent(String(post.id))
+        : safeLink(post.link, '#magazine');
       var imageUrl = safeImage(post.thumbnail_url);
       if (imageUrl) {
         var image = document.createElement('img');
