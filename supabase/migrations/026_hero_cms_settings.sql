@@ -54,10 +54,10 @@ values (
   '{
     "title": "외국인과 이야기해보고 싶지만,\n어디서 어떻게 시작할지 몰랐다면",
     "subtitle": "관심사가 맞는 사람과 준비된 이야기로 가볍게 만나보세요.\n단어가 생각나지 않을 때에는 AI 매니저가 함께해요.",
-    "primary_cta_text": "어떤 대화를 나누나요? 👉",
-    "primary_cta_link": "#topics",
-    "secondary_cta_text": "내 스피킹 감각 알아보기 >",
-    "secondary_cta_link": "#quiz",
+    "primary_cta_text": "내 스피킹 감각 알아보기 >",
+    "primary_cta_link": "#quiz",
+    "secondary_cta_text": "어떤 대화를 나누나요? 👉",
+    "secondary_cta_link": "#topics",
     "rolling_cards": []
   }'::jsonb
 )

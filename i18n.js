@@ -1127,10 +1127,10 @@
       KO: '🍰 1:1 글로벌 대화 라운지', EN: '🍰 1:1 Global Chat Lounge', ZH: '🍰 1:1 全球对话会客厅', JA: '🍰 1:1 Global Chat Lounge', FR: '🍰 1:1 Global Chat Lounge', ES: '🍰 1:1 Global Chat Lounge'
     },
     'hero.cta': {
-      KO: '어떤 대화를 나누나요? 👆', EN: 'What do we talk about? 👆', ZH: '会聊些什么？👆', JA: 'どんな会話をするの？👆', FR: 'De quoi parle-t-on ? 👆', ES: '¿De qué hablamos? 👆'
+      KO: '어떤 대화를 나누나요? 👉', EN: 'What do we talk about? 👉', ZH: '会聊些什么？👉', JA: 'どんな会話をするの？👉', FR: 'De quoi parle-t-on ? 👉', ES: '¿De qué hablamos? 👉'
     },
     'hero.quizCta': {
-      KO: '내 스피킹 감각 알아보기 ›', EN: 'See how my speaking feels ›', ZH: '了解我的口语感觉 ›', JA: 'スピーキング感覚を知る ›', FR: 'Découvrir mon speaking ›', ES: 'Conocer mi speaking ›'
+      KO: '내 스피킹 감각 알아보기 ✨', EN: 'See how my speaking feels ✨', ZH: '了解我的口语感觉 ✨', JA: 'スピーキング感覚を知る ✨', FR: 'Découvrir mon speaking ✨', ES: 'Conocer mi speaking ✨'
     },
     'hero.liveBadge': {
       KO: 'AI 코파일럿 실시간 지원 중', EN: 'AI copilot live support', ZH: 'AI副驾实时支持中', JA: 'AIコパイロットがリアルタイム支援中', FR: 'Copilote IA en direct', ES: 'Copiloto IA en vivo'

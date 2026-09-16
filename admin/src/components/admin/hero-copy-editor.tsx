@@ -31,16 +31,16 @@ type HeroSettings = {
 const DEFAULT_HERO: HeroSettings = {
   title: "외국인과 이야기해보고 싶지만,\n어디서 어떻게 시작할지 몰랐다면",
   subtitle: "관심사가 맞는 사람과 준비된 이야기로 가볍게 만나보세요.\n단어가 생각나지 않을 때에는 AI 매니저가 함께해요.",
-  primary_cta_text: "어떤 대화를 나누나요? 👉",
-  primary_cta_link: "#topics",
-  secondary_cta_text: "내 스피킹 감각 알아보기 >",
-  secondary_cta_link: "#quiz",
+  primary_cta_text: "내 스피킹 감각 알아보기 >",
+  primary_cta_link: "#quiz",
+  secondary_cta_text: "어떤 대화를 나누나요? 👉",
+  secondary_cta_link: "#topics",
   rolling_cards: [],
 };
 
 function normalizeSettings(value: unknown): HeroSettings {
   const raw = (value && typeof value === "object" ? value : {}) as Partial<HeroSettings>;
-  return {
+  const normalized = {
     ...DEFAULT_HERO,
     ...raw,
     rolling_cards: Array.isArray(raw.rolling_cards)
@@ -54,6 +54,16 @@ function normalizeSettings(value: unknown): HeroSettings {
       }))
       : DEFAULT_HERO.rolling_cards,
   };
+  if (normalized.primary_cta_link === "#topics" && normalized.secondary_cta_link === "#quiz") {
+    return {
+      ...normalized,
+      primary_cta_text: normalized.secondary_cta_text,
+      primary_cta_link: normalized.secondary_cta_link,
+      secondary_cta_text: normalized.primary_cta_text,
+      secondary_cta_link: normalized.primary_cta_link,
+    };
+  }
+  return normalized;
 }
 
 export function HeroCopyEditor() {
@@ -210,20 +220,20 @@ export function HeroCopyEditor() {
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="hero-primary-text">메인 CTA 버튼 텍스트</Label>
-              <Input id="hero-primary-text" value={settings.primary_cta_text} onChange={(event) => updateField("primary_cta_text", event.target.value)} />
+              <Label htmlFor="hero-primary-text">메인 CTA 버튼 · 스피킹 감각 진단</Label>
+              <Input id="hero-primary-text" value={settings.primary_cta_text} onChange={(event) => updateField("primary_cta_text", event.target.value)} placeholder="내 스피킹 감각 알아보기 >" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="hero-primary-link">메인 CTA 이동 링크</Label>
-              <Input id="hero-primary-link" value={settings.primary_cta_link} onChange={(event) => updateField("primary_cta_link", event.target.value)} placeholder="#topics" />
+              <Input id="hero-primary-link" value={settings.primary_cta_link} onChange={(event) => updateField("primary_cta_link", event.target.value)} placeholder="#quiz" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="hero-secondary-text">서브 링크 텍스트</Label>
-              <Input id="hero-secondary-text" value={settings.secondary_cta_text} onChange={(event) => updateField("secondary_cta_text", event.target.value)} />
+              <Label htmlFor="hero-secondary-text">서브 링크 · 대화 주제 안내</Label>
+              <Input id="hero-secondary-text" value={settings.secondary_cta_text} onChange={(event) => updateField("secondary_cta_text", event.target.value)} placeholder="어떤 대화를 나누나요? 👉" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="hero-secondary-link">서브 링크 이동 URL</Label>
-              <Input id="hero-secondary-link" value={settings.secondary_cta_link} onChange={(event) => updateField("secondary_cta_link", event.target.value)} placeholder="#quiz" />
+              <Input id="hero-secondary-link" value={settings.secondary_cta_link} onChange={(event) => updateField("secondary_cta_link", event.target.value)} placeholder="#topics" />
             </div>
           </div>
         </CardContent>

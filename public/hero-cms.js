@@ -22,8 +22,14 @@
   function bindCopy(settings) {
     var title = document.querySelector('[data-landing-hero] .hero-title');
     var subtitle = document.querySelector('[data-landing-hero] .hero-subtitle');
-    var primary = document.getElementById('scrollToTopicsBtn');
-    var secondary = document.getElementById('startQuizBtn');
+    var primary = document.getElementById('startQuizBtn');
+    var secondary = document.getElementById('scrollToTopicsBtn');
+    var legacyOrder = String(settings.primary_cta_link || '').trim() === '#topics'
+      && String(settings.secondary_cta_link || '').trim() === '#quiz';
+    var primaryText = legacyOrder ? settings.secondary_cta_text : settings.primary_cta_text;
+    var primaryLink = legacyOrder ? settings.secondary_cta_link : settings.primary_cta_link;
+    var secondaryText = legacyOrder ? settings.primary_cta_text : settings.secondary_cta_text;
+    var secondaryLink = legacyOrder ? settings.primary_cta_link : settings.secondary_cta_link;
     if (title) {
       title.textContent = safeText(settings.title, title.textContent);
       title.removeAttribute('data-i18n');
@@ -33,13 +39,13 @@
       subtitle.removeAttribute('data-i18n');
     }
     if (primary) {
-      primary.textContent = safeText(settings.primary_cta_text, primary.textContent);
-      primary.setAttribute('href', safeLink(settings.primary_cta_link, '#topics'));
+      primary.textContent = safeText(primaryText, primary.textContent);
+      primary.setAttribute('href', safeLink(primaryLink, '#quiz'));
       primary.removeAttribute('data-i18n');
     }
     if (secondary) {
-      secondary.textContent = safeText(settings.secondary_cta_text, secondary.textContent);
-      secondary.setAttribute('href', safeLink(settings.secondary_cta_link, '#quiz'));
+      secondary.textContent = safeText(secondaryText, secondary.textContent);
+      secondary.setAttribute('href', safeLink(secondaryLink, '#topics'));
       secondary.removeAttribute('data-i18n');
     }
   }
