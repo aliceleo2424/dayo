@@ -260,20 +260,29 @@ export async function fetchDashboardKpis(): Promise<DashboardKpis> {
 }
 
 export async function fetchPartnerProfiles() {
-  const fullSelect = "id, user_id, nickname, user_name, email, role, visa_type, languages, bank_name, bank_account, account_holder, point_balance, created_at";
-  const first = await supabase
+  const selects = [
+    "id, user_id, nickname, user_name, email, role, partner_status, nationality, visa_type, languages, bank_name, bank_account, account_holder, identity_number_masked, id_document_url, bank_document_url, point_balance, created_at",
+    "id, user_id, nickname, user_name, email, role, partner_status, visa_type, languages, bank_name, bank_account, account_holder, point_balance, created_at",
+    "id, user_id, nickname, user_name, email, role, visa_type, languages, bank_name, bank_account, account_holder, point_balance, created_at",
+    "id, user_id, nickname, user_name, email, role, point_balance, created_at",
+  ];
+
+  let last = await supabase
     .from("profiles")
-    .select(fullSelect)
+    .select(selects[selects.length - 1])
     .in("role", ["partner", "admin"])
     .order("created_at", { ascending: false });
 
-  if (!first.error) return first;
-
-  return supabase
-    .from("profiles")
-    .select("id, user_id, nickname, user_name, email, role, point_balance, created_at")
-    .in("role", ["partner", "admin"])
-    .order("created_at", { ascending: false });
+  for (const columns of selects) {
+    const result = await supabase
+      .from("profiles")
+      .select(columns)
+      .in("role", ["partner", "admin"])
+      .order("created_at", { ascending: false });
+    last = result;
+    if (!result.error) return result;
+  }
+  return last;
 }
 
 type BookingRecord = {

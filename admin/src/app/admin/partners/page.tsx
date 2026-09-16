@@ -2,7 +2,10 @@
 
 import { AdminHeader } from "@/components/admin/header";
 import { BookingMonitor } from "@/components/admin/booking-monitor";
-import { PartnerPayoutManager } from "@/app/admin/partners/partner-payout-manager";
+import {
+  PartnerManagementTable,
+  PartnerSettlementTable,
+} from "@/app/admin/partners/partner-payout-manager";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function PartnersPage() {
@@ -18,7 +21,7 @@ export default function PartnersPage() {
           </TabsList>
 
           <TabsContent value="partners" className="mt-6">
-            <PartnerPayoutManager />
+            <PartnerManagementTable />
           </TabsContent>
 
           <TabsContent value="bookings" className="mt-6">
@@ -26,7 +29,7 @@ export default function PartnersPage() {
           </TabsContent>
 
           <TabsContent value="payouts" className="mt-6">
-            <PartnerPayoutManager />
+            <PartnerSettlementTable />
           </TabsContent>
         </Tabs>
       </main>

@@ -1,11 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import { bookingStatusLabel, formatSessionDateTime, type SessionTranscriptContext } from "@/lib/admin-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SessionTranscriptModal } from "@/components/admin/SessionTranscriptModal";
 
 export type PartnerProfile = {
   id: string;
@@ -14,27 +18,68 @@ export type PartnerProfile = {
   user_name: string | null;
   email: string | null;
   role: string | null;
+  partner_status?: string | null;
+  nationality?: string | null;
   visa_type: string | null;
   languages: string | null;
   bank_name: string | null;
   bank_account: string | null;
   account_holder: string | null;
+  identity_number_masked?: string | null;
+  id_document_url?: string | null;
+  bank_document_url?: string | null;
   point_balance: number | null;
   created_at: string | null;
 };
 
-type Activity = {
-  completed_count: number;
-  avg_rating: number | null;
+type PartnerSession = {
+  id: string;
+  learner_id: string | null;
+  learner_name: string;
+  learner_email: string;
+  scheduled_at: string | null;
+  status: string | null;
+  rating: number | null;
+  review: string | null;
+};
+
+type LedgerEntry = {
+  id: string;
+  created_at: string | null;
+  label: string;
+  delta: number;
+  balance_after: number | null;
+  note: string;
 };
 
 function dash(value: string | null | undefined) {
-  const text = String(value || "").trim();
-  return text || "미등록";
+  return String(value || "").trim() || "미등록";
 }
 
 function partnerName(row: PartnerProfile) {
   return dash(row.nickname || row.user_name || row.email);
+}
+
+function maskIdentity(value?: string | null) {
+  const raw = String(value || "").trim();
+  if (!raw) return "미등록";
+  if (raw.includes("*")) return raw;
+  return raw.length > 6 ? `${raw.slice(0, 6)}-*******` : "******-*******";
+}
+
+function maskAccount(value?: string | null) {
+  const raw = String(value || "").trim();
+  return raw.length > 6 ? `${raw.slice(0, 3)}-****-${raw.slice(-3)}` : raw || "미등록";
+}
+
+function statusDetail(status?: string | null) {
+  const raw = String(status || "").toLowerCase();
+  if (raw === "learner_noshow") return { label: "학습자 노쇼", variant: "warning" as const, detail: "+6,000P 파트너 활동비 100% 보전 지급", delta: 6000 };
+  if (raw === "partner_noshow") return { label: "파트너 노쇼", variant: "warning" as const, detail: "패널티 -10,000P 차감 및 세션비 미지급", delta: -10000 };
+  if (raw === "completed") return { label: "정상 완료", variant: "success" as const, detail: "25분 대화 완료 (+6,000P 적립)", delta: 6000 };
+  if (raw === "cancelled" || raw === "canceled") return { label: "취소", variant: "default" as const, detail: "규정 내 취소", delta: 0 };
+  const base = bookingStatusLabel(raw);
+  return { ...base, detail: "예약된 세션", delta: 0 };
 }
 
 export function PartnerDetailModal({
@@ -50,10 +95,13 @@ export function PartnerDetailModal({
   onSettled?: (partnerId: string, nextBalance: number) => void;
   onUpdated?: (next: PartnerProfile) => void;
 }) {
-  const [activity, setActivity] = useState<Activity>({ completed_count: 0, avg_rating: null });
-  const [logs, setLogs] = useState<{ id: string; points_settled: number; created_at: string; note: string | null }[]>([]);
+  const [sessions, setSessions] = useState<PartnerSession[]>([]);
+  const [ledger, setLedger] = useState<LedgerEntry[]>([]);
+  const [settledTotal, setSettledTotal] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [selectedSession, setSelectedSession] = useState<SessionTranscriptContext | null>(null);
 
   const points = Number(partner?.point_balance || 0);
 
@@ -61,188 +109,311 @@ export function PartnerDetailModal({
     if (!open || !partner) return;
     const current = partner;
     let cancelled = false;
+    setLoading(true);
     setMessage("");
+    setSessions([]);
+    setLedger([]);
 
-    async function load() {
+    void (async () => {
       const uid = current.user_id || current.id;
-      const rpc = await supabase.rpc("admin_partner_activity", { p_partner_user_id: uid });
-      if (!cancelled && !rpc.error && rpc.data) {
-        const data = rpc.data as Activity;
-        setActivity({
-          completed_count: Number(data.completed_count || 0),
-          avg_rating: data.avg_rating == null ? null : Number(data.avg_rating),
-        });
-      } else if (!rpc.error) {
-        /* keep defaults */
-      } else {
-        const { count } = await supabase
-          .from("bookings")
-          .select("id", { count: "exact", head: true })
-          .eq("status", "completed")
-          .eq("partner_user_id", uid);
-        if (!cancelled) {
-          setActivity({ completed_count: count || 0, avg_rating: null });
+      const bookingSelects = [
+        "id, learner_id, scheduled_at, status, rating, review",
+        "id, learner_id, scheduled_at, status, rating",
+        "id, learner_id, scheduled_at, status",
+        "*",
+      ];
+      let bookingRows: Record<string, unknown>[] = [];
+      for (const columns of bookingSelects) {
+        const result = await supabase.from("bookings").select(columns).eq("partner_user_id", uid).order("scheduled_at", { ascending: false });
+        if (!result.error) {
+          bookingRows = (result.data || []) as unknown as Record<string, unknown>[];
+          break;
         }
       }
 
-      const { data: ledger } = await supabase
-        .from("settlement_logs")
-        .select("id, points_settled, created_at, note")
-        .or(`partner_user_id.eq.${uid},partner_profile_id.eq.${current.id}`)
-        .order("created_at", { ascending: false })
-        .limit(8);
-      if (!cancelled) setLogs((ledger || []) as typeof logs);
-    }
+      const learnerIds = Array.from(new Set(bookingRows.map((row) => String(row.learner_id || "")).filter(Boolean)));
+      const learnerMap = new Map<string, { name: string; email: string }>();
+      if (learnerIds.length) {
+        const learners = await supabase.from("profiles").select("user_id, nickname, user_name, email").in("user_id", learnerIds);
+        for (const row of (learners.data || []) as Record<string, unknown>[]) {
+          const id = String(row.user_id || "");
+          learnerMap.set(id, {
+            name: String(row.nickname || row.user_name || row.email || "학습자"),
+            email: String(row.email || "이메일 미등록"),
+          });
+        }
+      }
 
-    load();
-    return () => {
-      cancelled = true;
-    };
+      const reportsResult = await supabase
+        .from("session_reports")
+        .select("*")
+        .eq("partner_user_id", uid)
+        .order("created_at", { ascending: false });
+      const reportRows = (reportsResult.data || []) as unknown as Record<string, unknown>[];
+
+      const sessionRows: PartnerSession[] = bookingRows.map((row) => {
+        const learnerId = String(row.learner_id || "");
+        const learner = learnerMap.get(learnerId);
+        const report = reportRows.find((item) =>
+          String(item.booking_id || "") === String(row.id || "")
+        ) || reportRows.find((item) =>
+          learnerId && String(item.learner_id || "") === learnerId
+        );
+        return {
+          id: String(row.id || ""),
+          learner_id: learnerId || null,
+          learner_name: learner?.name || "학습자",
+          learner_email: learner?.email || "이메일 미등록",
+          scheduled_at: (row.scheduled_at as string | null) || null,
+          status: (row.status as string | null) || null,
+          rating: row.rating == null
+            ? report?.rating == null ? null : Number(report.rating)
+            : Number(row.rating),
+          review: String(
+            row.review || row.feedback || row.comment ||
+            report?.review || report?.user_review || ""
+          ).trim() || null,
+        };
+      });
+
+      const [credits, settlements] = await Promise.all([
+        supabase.from("credit_ledgers").select("*").eq("user_id", uid).order("created_at", { ascending: false }).limit(100),
+        supabase.from("settlement_logs").select("*").or(`partner_user_id.eq.${uid},partner_profile_id.eq.${current.id}`).order("created_at", { ascending: false }),
+      ]);
+      const creditRows = ((credits.data || []) as Record<string, unknown>[]).map((row) => ({
+        id: String(row.id || ""),
+        created_at: (row.created_at as string | null) || null,
+        label: String(row.source || "포인트 변동"),
+        delta: Number(row.delta || 0),
+        balance_after: row.balance_after == null ? null : Number(row.balance_after),
+        note: String(row.reason || "메모 없음"),
+      }));
+      const settlementRows = ((settlements.data || []) as Record<string, unknown>[]).map((row) => ({
+        id: String(row.id || ""),
+        created_at: (row.created_at as string | null) || null,
+        label: "정산 송금 완료",
+        delta: -Math.abs(Number(row.points_settled || 0)),
+        balance_after: 0,
+        note: String(row.note || "계좌 입금 완료"),
+      }));
+
+      if (!cancelled) {
+        setSessions(sessionRows);
+        setLedger([...creditRows, ...settlementRows].sort((a, b) =>
+          new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+        ));
+        setSettledTotal(((settlements.data || []) as Record<string, unknown>[]).reduce((sum, row) => sum + Number(row.amount_krw || 0), 0));
+        setLoading(false);
+      }
+    })();
+
+    return () => { cancelled = true; };
   }, [open, partner]);
 
-  async function updateRole(nextRole: "user" | "partner") {
-    if (!partner) return;
-    const label = nextRole === "user" ? "일반 유저로 강등" : "파트너 승인 완료";
-    const ok = window.confirm(`${partnerName(partner)} 님을 ${label} 처리할까요?`);
-    if (!ok) return;
+  const metrics = useMemo(() => {
+    const now = new Date();
+    const thisMonth = sessions.filter((session) => {
+      if (!session.scheduled_at) return false;
+      const date = new Date(session.scheduled_at);
+      return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+    });
+    const pending = thisMonth.reduce((sum, session) => sum + statusDetail(session.status).delta, 0);
+    const penalties = sessions.filter((session) => String(session.status) === "partner_noshow");
+    const ratings = sessions.map((session) => session.rating).filter((value): value is number => value != null && value > 0);
+    return {
+      pending: Math.max(0, pending),
+      penaltyTotal: penalties.length * 10000,
+      penaltyCount: penalties.length,
+      avgRating: ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null,
+      ratingCount: ratings.length,
+    };
+  }, [sessions]);
+
+  async function updateStatus(nextStatus: string) {
+    if (!partner || nextStatus === String(partner.partner_status || "active")) return;
+    const labels: Record<string, string> = { active: "활동중", vacation: "휴가중", suspended: "활동정지", withdrawn: "탈퇴(기록보존)" };
+    if (!window.confirm(`${partnerName(partner)} 파트너 상태를 '${labels[nextStatus]}'(으)로 변경할까요?`)) return;
     setBusy(true);
-    setMessage("");
-    const { error } = await supabase.from("profiles").update({ role: nextRole }).eq("id", partner.id);
+    const { error } = await supabase.from("profiles").update({
+      partner_status: nextStatus,
+      updated_at: new Date().toISOString(),
+    }).eq("id", partner.id);
     setBusy(false);
     if (error) {
-      setMessage(error.message || "권한 변경에 실패했습니다.");
+      setMessage(error.message || "상태 변경에 실패했습니다.");
       return;
     }
-    const next = { ...partner, role: nextRole };
+    const next = { ...partner, partner_status: nextStatus };
     onUpdated?.(next);
-    setMessage(nextRole === "user" ? "일반 유저로 강등되었습니다." : "파트너 승인이 완료되었습니다.");
+    setMessage(nextStatus === "withdrawn"
+      ? "탈퇴 상태로 보존했습니다. 세션·정산·리포트 데이터는 삭제되지 않습니다."
+      : "파트너 상태가 변경되었습니다.");
   }
 
   async function settle() {
-    if (!partner) return;
-    const ok = window.confirm("해당 파트너에게 포인트 정산 입금을 완료 처리하시겠습니까?");
-    if (!ok) return;
+    if (!partner || points <= 0) return;
+    if (!window.confirm(`${formatCurrency(points)} 송금을 완료 처리할까요?`)) return;
     setBusy(true);
-    setMessage("");
     const uid = partner.user_id || partner.id;
     const rpc = await supabase.rpc("settle_partner_payout", { p_partner_user_id: uid });
-    const rpcData = rpc.data as { success?: boolean; message?: string } | null;
-    if (!rpc.error && rpcData?.success) {
-      setBusy(false);
-      setMessage(rpcData.message || "정산 입금이 완료 처리되었습니다. 보유 포인트가 0으로 초기화되었습니다.");
-      onSettled?.(partner.id, 0);
-      return;
-    }
-
-    const fallbackAmount = points;
-    const { error: logErr } = await supabase.from("settlement_logs").insert({
-      partner_user_id: uid,
-      partner_profile_id: partner.id,
-      points_settled: fallbackAmount,
-      amount_krw: fallbackAmount,
-      note: "10일 정산 입금 완료",
-    });
-    const { error: updErr } = await supabase.from("profiles").update({ point_balance: 0 }).eq("id", partner.id);
+    const data = rpc.data as { success?: boolean; message?: string } | null;
     setBusy(false);
-    if (logErr || updErr) {
-      setMessage((rpc.error || logErr || updErr)?.message || "정산 처리에 실패했습니다.");
+    if (rpc.error || !data?.success) {
+      setMessage(rpc.error?.message || data?.message || "정산 처리에 실패했습니다.");
       return;
     }
-    setMessage("정산 입금이 완료 처리되었습니다. 보유 포인트가 0으로 초기화되었습니다.");
+    setSettledTotal((total) => total + points);
     onSettled?.(partner.id, 0);
+    setMessage(data.message || "정산 송금 완료 처리되었습니다.");
   }
 
-  const bankLine = [partner?.bank_name, partner?.account_holder, partner?.bank_account]
-    .filter((part) => String(part || "").trim())
-    .join(" · ");
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent id="partner-detail-modal" className="max-h-[90vh] max-w-2xl overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{partner ? partnerName(partner) : "파트너 상세"}</DialogTitle>
-        </DialogHeader>
-        {partner && (
-          <div className="space-y-4">
-            <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-sm">파트너 기본 정보</CardTitle></CardHeader>
-              <CardContent className="grid gap-2 text-sm sm:grid-cols-2">
-                <p><span className="text-muted-foreground">닉네임</span><br />{partnerName(partner)}</p>
-                <p><span className="text-muted-foreground">이메일</span><br />{dash(partner.email)}</p>
-                <p><span className="text-muted-foreground">권한 상태</span><br />{dash(partner.role)}</p>
-                <p><span className="text-muted-foreground">담당 언어</span><br />{dash(partner.languages)}</p>
-                <p><span className="text-muted-foreground">비자 유형</span><br />{dash(partner.visa_type)}</p>
-                <p className="sm:col-span-2">
-                  <span className="text-muted-foreground">가입일</span><br />
-                  {partner.created_at ? formatDate(partner.created_at) : "미등록"}
-                </p>
-              </CardContent>
-            </Card>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Card>
-                <CardHeader className="pb-2"><CardTitle className="text-sm">누적 완료 세션</CardTitle></CardHeader>
-                <CardContent><p className="text-2xl font-bold">{activity.completed_count}회</p></CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="pb-2"><CardTitle className="text-sm">평균 평점</CardTitle></CardHeader>
-                <CardContent>
-                  <p className="text-2xl font-bold">
-                    {activity.avg_rating == null ? "—" : `⭐ ${activity.avg_rating.toFixed(2)}`}
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card>
-              <CardHeader className="pb-2"><CardTitle className="text-sm">적립 및 정산 현황</CardTitle></CardHeader>
-              <CardContent className="space-y-3 text-sm">
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <p>
-                    <span className="text-muted-foreground">현재 보유 포인트</span><br />
-                    <strong>{`${points || 0} P`}</strong>
-                    <span className="text-muted-foreground"> (1P = 1원)</span>
-                  </p>
-                  <p>
-                    <span className="text-muted-foreground">지급 대기 정산액</span><br />
-                    <strong className="text-coral">{formatCurrency(points)}</strong>
-                  </p>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent id="partner-detail-modal" className="max-h-[90vh] max-w-4xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{partner ? `${partnerName(partner)} 파트너 마스터 관제` : "파트너 상세 관제"}</DialogTitle>
+          </DialogHeader>
+          {partner && (
+            <div className="space-y-5">
+              <section className="grid gap-4 rounded-xl border bg-[#FAFAF9] p-4 sm:grid-cols-[1fr_auto]">
+                <div className="grid gap-2 text-sm sm:grid-cols-2">
+                  <p><span className="text-muted-foreground">이메일</span><br />{dash(partner.email)}</p>
+                  <p><span className="text-muted-foreground">가입일</span><br />{partner.created_at ? formatDate(partner.created_at) : "미등록"}</p>
+                  <p><span className="text-muted-foreground">국적 / 출신</span><br />{dash(partner.nationality)}</p>
+                  <p><span className="text-muted-foreground">비자 정보</span><br />{dash(partner.visa_type)}</p>
                 </div>
-                <p>
-                  <span className="text-muted-foreground">정산 계좌</span><br />
-                  {bankLine || "미등록"}
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <Button variant="outline" disabled={busy || partner.role === "user"} onClick={() => updateRole("user")}>
-                    일반 유저로 강등
-                  </Button>
-                  <Button variant="outline" disabled={busy || partner.role === "partner"} onClick={() => updateRole("partner")}>
-                    파트너 승인 완료
-                  </Button>
-                  <Button variant="coral" disabled={busy || points <= 0} onClick={settle}>
-                    포인트 수동 정산/지급 완료 처리
-                  </Button>
-                </div>
-                {message && <p className="text-sm text-emerald-700">{message}</p>}
-                {logs.length > 0 && (
-                  <div className="border-t pt-3">
-                    <p className="mb-2 text-xs font-semibold text-muted-foreground">최근 정산 기록</p>
-                    <ul className="space-y-1 text-xs text-muted-foreground">
-                      {logs.map((log) => (
-                        <li key={log.id}>
-                          {formatDate(log.created_at)} · {Number(log.points_settled || 0).toLocaleString("ko-KR")}P
-                          {log.note ? ` · ${log.note}` : ""}
-                        </li>
-                      ))}
-                    </ul>
+                <label className="text-xs font-semibold text-muted-foreground">
+                  상태 변경
+                  <select
+                    className="mt-1 block rounded-md border bg-white px-3 py-2 text-sm text-foreground"
+                    value={String(partner.partner_status || "active")}
+                    disabled={busy}
+                    onChange={(event) => void updateStatus(event.target.value)}
+                  >
+                    <option value="active">🟢 활동중 (Active)</option>
+                    <option value="vacation">☕ 휴가중 (Vacation)</option>
+                    <option value="suspended">🚫 활동정지 (Suspended)</option>
+                    <option value="withdrawn">📁 탈퇴 (Withdrawn)</option>
+                  </select>
+                </label>
+              </section>
+
+              <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                {[
+                  ["이번 달 정산 예정액", formatCurrency(metrics.pending)],
+                  ["누적 정산 완료 송금액", formatCurrency(settledTotal)],
+                  ["누적 패널티 차감액", `-${formatCurrency(metrics.penaltyTotal)} (${metrics.penaltyCount}건)`],
+                  ["파트너 평균 평점", metrics.avgRating == null ? "— (0명 평가)" : `★ ${metrics.avgRating.toFixed(1)} (${metrics.ratingCount}명 평가)`],
+                ].map(([label, value], index) => (
+                  <Card key={label}>
+                    <CardHeader className="pb-2"><CardTitle className="text-xs text-muted-foreground">{label}</CardTitle></CardHeader>
+                    <CardContent><p className={`font-bold ${index === 2 ? "text-rose-600" : ""}`}>{value}</p></CardContent>
+                  </Card>
+                ))}
+              </section>
+
+              {message ? <p className="text-sm text-emerald-700">{message}</p> : null}
+
+              <Tabs defaultValue="sessions">
+                <TabsList className="grid h-auto w-full grid-cols-2 gap-1 lg:grid-cols-4">
+                  <TabsTrigger value="sessions">☕ 세션 히스토리</TabsTrigger>
+                  <TabsTrigger value="ledger">💰 정산·포인트</TabsTrigger>
+                  <TabsTrigger value="reviews">⭐ 학생 리뷰</TabsTrigger>
+                  <TabsTrigger value="tax">🏦 계좌·세무</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="sessions" className="mt-4 space-y-3">
+                  {loading ? <div className="h-32 animate-pulse rounded-xl bg-muted" /> : !sessions.length ? (
+                    <p className="rounded-xl border border-dashed py-12 text-center text-sm text-muted-foreground">세션 내역이 없습니다.</p>
+                  ) : sessions.map((session) => {
+                    const detail = statusDetail(session.status);
+                    return (
+                      <article key={session.id} className="rounded-xl border p-4">
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <div>
+                            <p className="font-semibold">{formatSessionDateTime(session.scheduled_at)} <span className="text-xs font-normal text-muted-foreground">(30분 세션)</span></p>
+                            <p className="mt-1 text-sm">{session.learner_name} <span className="text-muted-foreground">({session.learner_email})</span></p>
+                          </div>
+                          <Badge variant={detail.variant}>{detail.label}</Badge>
+                        </div>
+                        <p className="mt-2 text-xs text-muted-foreground">{detail.detail}</p>
+                        <p className="mt-2 text-sm">{session.rating == null ? "평가 없음" : `★ ${session.rating.toFixed(1)}`}{session.review ? ` (“${session.review}”)` : ""}</p>
+                        <Button
+                          className="mt-3"
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setSelectedSession({
+                            id: session.id,
+                            scheduled_at: session.scheduled_at,
+                            status: session.status,
+                            learnerName: session.learner_name,
+                            partnerName: partnerName(partner),
+                            learnerId: session.learner_id,
+                            rating: session.rating,
+                            review: session.review,
+                          })}
+                        >
+                          📄 파트너가 작성한 리포트 확인
+                        </Button>
+                      </article>
+                    );
+                  })}
+                </TabsContent>
+
+                <TabsContent value="ledger" className="mt-4">
+                  <div className="mb-3 flex justify-end">
+                    <Button variant="coral" disabled={busy || points <= 0} onClick={() => void settle()}>포인트 수동 정산 / 지급 완료</Button>
                   </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        )}
-      </DialogContent>
-    </Dialog>
+                  {!ledger.length ? (
+                    <p className="rounded-xl border border-dashed py-12 text-center text-sm text-muted-foreground">정산 장부 내역이 없습니다.</p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead><tr className="border-b text-left text-muted-foreground"><th className="p-2">발생일시</th><th className="p-2">내역 구분</th><th className="p-2">변동 포인트</th><th className="p-2">잔여 포인트</th><th className="p-2">메모</th></tr></thead>
+                        <tbody>{ledger.map((row) => (
+                          <tr key={row.id} className="border-b">
+                            <td className="p-2 whitespace-nowrap">{formatSessionDateTime(row.created_at)}</td>
+                            <td className="p-2">{row.label}</td>
+                            <td className={`p-2 font-semibold ${row.delta < 0 ? "text-rose-600" : "text-emerald-700"}`}>{row.delta > 0 ? "+" : ""}{row.delta.toLocaleString("ko-KR")} P</td>
+                            <td className="p-2">{row.balance_after == null ? "—" : `${row.balance_after.toLocaleString("ko-KR")} P`}</td>
+                            <td className="p-2 text-muted-foreground">{row.note}</td>
+                          </tr>
+                        ))}</tbody>
+                      </table>
+                    </div>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="reviews" className="mt-4 space-y-3">
+                  {sessions.filter((session) => session.rating != null || session.review).length ? sessions.filter((session) => session.rating != null || session.review).map((session) => (
+                    <article key={session.id} className="rounded-xl border p-4">
+                      <div className="flex justify-between gap-3"><strong>{session.learner_name}</strong><span className="font-semibold">★ {Number(session.rating || 0).toFixed(1)}</span></div>
+                      <p className="mt-2 text-sm text-muted-foreground">{session.review ? `“${session.review}”` : "후기 코멘트 없음"}</p>
+                      <p className="mt-2 text-xs text-muted-foreground">{formatSessionDateTime(session.scheduled_at)}</p>
+                    </article>
+                  )) : <p className="rounded-xl border border-dashed py-12 text-center text-sm text-muted-foreground">등록된 학생 리뷰가 없습니다.</p>}
+                </TabsContent>
+
+                <TabsContent value="tax" className="mt-4">
+                  <Card>
+                    <CardContent className="grid gap-4 pt-6 text-sm sm:grid-cols-2">
+                      <p><span className="text-muted-foreground">예금주 실명</span><br /><strong>{dash(partner.account_holder)}</strong></p>
+                      <p><span className="text-muted-foreground">거래 은행</span><br /><strong>{dash(partner.bank_name)}</strong></p>
+                      <p><span className="text-muted-foreground">계좌번호</span><br /><strong>{maskAccount(partner.bank_account)}</strong></p>
+                      <p><span className="text-muted-foreground">주민/외국인등록번호</span><br /><strong>{maskIdentity(partner.identity_number_masked)}</strong></p>
+                      <p><span className="text-muted-foreground">신분증 등록</span><br /><Badge variant={partner.id_document_url ? "success" : "warning"}>{partner.id_document_url ? "등록 완료" : "미등록"}</Badge></p>
+                      <p><span className="text-muted-foreground">통장사본 등록</span><br /><Badge variant={partner.bank_document_url ? "success" : "warning"}>{partner.bank_document_url ? "등록 완료" : "미등록"}</Badge></p>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+      <SessionTranscriptModal open={!!selectedSession} session={selectedSession} onClose={() => setSelectedSession(null)} />
+    </>
   );
 }
 
