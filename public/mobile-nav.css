@@ -162,6 +162,22 @@ body.nav-drawer-open .top-bar {
 @media (max-width: 767px) {
   .menu-toggle { display: inline-flex; }
 
+  .header-inner,
+  .topbar-inner,
+  .header-actions,
+  .topbar-right {
+    flex-wrap: nowrap !important;
+  }
+
+  .header-quiz-cta {
+    display: none !important;
+  }
+
+  .header-actions > [data-i18n-lang="icon"],
+  .topbar-right > [data-i18n-lang="icon"] {
+    display: none !important;
+  }
+
   body.is-room .nav-drawer-backdrop {
     background: rgba(92, 74, 66, 0.08);
     backdrop-filter: none;

@@ -132,7 +132,16 @@
     'padding:.7rem .85rem;cursor:pointer;}',
     '.ms-menu .ms-logout-btn:hover{background:var(--coral-pale,#FFE8E3);color:var(--coral,#FF6B57);}',
     '[data-mode-switch="block"] .ms-auth-in{display:flex;width:100%;}',
-    '[data-mode-switch="block"] .ms-auth-in .ms-btn{flex:1;justify-content:center;}'
+    '[data-mode-switch="block"] .ms-auth-in .ms-btn{flex:1;justify-content:center;}',
+    '@media(max-width:767px){',
+    '[data-mode-switch="inline"].ms-slot-guest{flex:0 0 auto!important;min-width:36px!important;max-width:none!important;}',
+    '[data-mode-switch="inline"] .ms-login-trigger{display:inline-flex;width:36px;height:36px;',
+    'min-width:36px;min-height:36px;flex:0 0 36px;padding:0!important;align-items:center;justify-content:center;',
+    'gap:0;border:1px solid #EDE4D5;border-radius:11px;background:#FFFCFA;box-shadow:none;line-height:1;}',
+    '[data-mode-switch="inline"] .ms-login-trigger:hover{transform:none;background:var(--coral-pale,#FFE8E3);}',
+    '[data-mode-switch="inline"] .ms-login-trigger>span:not([aria-hidden="true"]){display:none!important;}',
+    '[data-mode-switch="inline"] .ms-login-trigger>span[aria-hidden="true"]{display:block;font-size:17px;line-height:1;}',
+    '}'
   ].join('');
 
   var overlay;
@@ -557,7 +566,7 @@
       : '<span data-i18n="' + config.i18n + '">' + t(config.i18n) + '</span>';
 
     if (config.openLogin) {
-      return '<button class="ms-btn" type="button" data-ms-open-login>' + lead + label + '</button>';
+      return '<button class="ms-btn ms-login-trigger" type="button" data-ms-open-login aria-label="로그인 / 회원가입">' + lead + label + '</button>';
     }
 
     if (config.landingMypage) {
@@ -614,6 +623,7 @@
     var html = markup(buttonFor(role));
     var slots = document.querySelectorAll('[data-mode-switch]');
     Array.prototype.forEach.call(slots, function (slot) {
+      slot.classList.toggle('ms-slot-guest', !checkUserLoggedIn());
       slot.innerHTML = html;
     });
     applyI18n();
