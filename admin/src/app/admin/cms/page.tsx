@@ -4,12 +4,11 @@ import { AdminHeader } from "@/components/admin/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cmsBanners, cmsCopies, socialProofReviews } from "@/lib/mockData";
+import { cmsBanners, socialProofReviews } from "@/lib/mockData";
 import { ArticlesCms } from "@/components/admin/articles-cms";
+import { HeroCopyEditor } from "@/components/admin/hero-copy-editor";
 import { PURPOSE_LABELS } from "@/lib/types";
 import { formatDate } from "@/lib/utils";
 import { Plus, GripVertical } from "lucide-react";
@@ -50,21 +49,8 @@ export default function CmsPage() {
             <ArticlesCms />
           </TabsContent>
 
-          <TabsContent value="copy" className="mt-6 space-y-4">
-            {cmsCopies.map((copy) => (
-              <Card key={copy.id}>
-                <CardHeader><CardTitle className="text-base">{copy.label}</CardTitle></CardHeader>
-                <CardContent>
-                  <Label>{copy.key}</Label>
-                  {copy.key === "rolling_languages" ? (
-                    <Input defaultValue={copy.value} className="mt-1" placeholder="쉼표로 구분" />
-                  ) : (
-                    <Input defaultValue={copy.value} className="mt-1" />
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-            <Button variant="coral">변경사항 저장</Button>
+          <TabsContent value="copy" className="mt-6">
+            <HeroCopyEditor />
           </TabsContent>
 
           <TabsContent value="reviews" className="mt-6 space-y-4">

@@ -381,6 +381,7 @@
       font-weight: 700; line-height: 1.28; margin-bottom: 1.25rem;
       letter-spacing: -0.02em;
       word-break: keep-all;
+      white-space: pre-line;
     }
 
     .title-rotator { transition: opacity 0.55s ease; }
@@ -392,6 +393,7 @@
       color: var(--text-muted); line-height: 1.8;
       margin-bottom: 2rem; max-width: 36rem;
       word-break: keep-all;
+      white-space: pre-line;
     }
 
     .cta-wrap {
@@ -965,7 +967,10 @@
       border: 1px solid rgba(255,209,220,0.5);
       border-radius: 32px;
       box-shadow: 0 20px 48px var(--shadow-soft), 0 8px 20px var(--shadow-warm);
+      opacity: 1;
+      transition: opacity 0.5s ease-in-out;
     }
+    .visual-card.cms-fade { opacity: 0; }
 
     .live-badge {
       position: absolute; top: -0.75rem; left: 50%; transform: translateX(-50%);
@@ -1019,6 +1024,11 @@
       margin: 0 auto 0.55rem;
       overflow: hidden;
       box-shadow: 0 7px 18px var(--shadow-warm);
+    }
+    .partner-avatar > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .partner-avatar.cms-avatar-fallback {
+      display: flex; align-items: center; justify-content: center;
+      color: var(--coral-dark); font-size: 1.8rem; font-weight: 700;
     }
 
     .avatar-body {
@@ -2286,7 +2296,7 @@
             <p class="hero-subtitle" data-i18n="hero.subtitle">관심사가 맞는 사람과 준비된 이야기로 가볍게 만나보세요. 단어가 생각나지 않을 때에는 AI 매니저가 함께해요.</p>
             <div class="cta-wrap">
               <a href="#topics" class="home-cta-btn" id="scrollToTopicsBtn" data-i18n="hero.cta">어떤 대화를 나누나요? 👆</a>
-              <button class="home-quiz-link cta-btn" id="startQuizBtn" type="button" data-i18n="hero.quizCta">내 스피킹 감각 알아보기 ›</button>
+              <a href="#quiz" class="home-quiz-link cta-btn" id="startQuizBtn" data-i18n="hero.quizCta">내 스피킹 감각 알아보기 ›</a>
             </div>
           </div>
 
@@ -2703,11 +2713,18 @@
     document.addEventListener('dayo:langchange', () => renderPartner(langIndex));
 
     setInterval(() => {
+      if (window.__dayoCmsHeroActive) return;
       if (titleRotator) titleRotator.classList.add('fade-out');
       partnerProfile.classList.add('fade-out');
       partnerGreeting.classList.add('fade-out');
 
       setTimeout(() => {
+        if (window.__dayoCmsHeroActive) {
+          if (titleRotator) titleRotator.classList.remove('fade-out');
+          partnerProfile.classList.remove('fade-out');
+          partnerGreeting.classList.remove('fade-out');
+          return;
+        }
         langIndex = (langIndex + 1) % partners.length;
         renderPartner(langIndex);
         if (titleRotator) titleRotator.classList.remove('fade-out');
@@ -3444,7 +3461,13 @@
     }
 
     window.openQuizModal = openQuizModal;
-    if (startBtn) startBtn.addEventListener('click', openQuizModal);
+    if (startBtn) startBtn.addEventListener('click', function (event) {
+      const href = startBtn.getAttribute('href') || '#quiz';
+      if (href === '#quiz') {
+        event.preventDefault();
+        openQuizModal();
+      }
+    });
     var authSpeakBtn = document.getElementById('authSpeakTestBtn');
     if (authSpeakBtn) {
       authSpeakBtn.addEventListener('click', function () {
@@ -3825,5 +3848,6 @@
     if (modal) modal.style.display = 'none';
   }
 </script>
+<script src="hero-cms.js?v=20260916"></script>
 </body>
 </html>
