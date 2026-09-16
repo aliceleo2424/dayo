@@ -1117,6 +1117,7 @@ async function saveSessionLog(transcript, extra) {
   var payload = {
     client_key: getClientKey(),
     user_id: extra.userId || getAuthUserId() || null,
+    learner_id: extra.learnerId || extra.learner_id || null,
     user_name: lsGet(USER_KEY, ''),
     email: lsGet(EMAIL_KEY, ''),
     room_name: extra.roomName || '',
@@ -1143,6 +1144,7 @@ async function saveSessionLog(transcript, extra) {
       delete withoutPartner.partner_id;
       delete withoutPartner.booking_id;
       delete withoutPartner.session_id;
+      delete withoutPartner.learner_id;
       result = await client.from('session_logs').insert(withoutPartner).select('id').single();
     }
     if (result.error) {

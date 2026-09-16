@@ -224,6 +224,10 @@
           return params.get('bookingId') || params.get('booking_id') || localStorage.getItem('dayo_active_booking_id') || '';
         } catch (e) { return ''; }
       })(),
+      learnerId: (function () {
+        try { return localStorage.getItem('dayo_session_learner_id') || localStorage.getItem('dayo_learner_user_id') || ''; }
+        catch (e) { return ''; }
+      })(),
       userId: (window.DayOProfileStore && window.DayOProfileStore.getUserId && window.DayOProfileStore.getUserId())
         || (window.DayOMode && window.DayOMode.getUserId && window.DayOMode.getUserId())
         || ''
@@ -252,7 +256,9 @@
   function roomName() {
     try {
       var params = new URLSearchParams(window.location.search);
-      var raw = params.get('room') || params.get('session') || 'dayo-studio';
+      var raw = params.get('roomId') || params.get('room') || params.get('session')
+        || params.get('bookingId') || params.get('booking_id')
+        || localStorage.getItem('dayo_active_booking_id') || 'dayo-studio';
       var clean = String(raw).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40);
       return clean || 'dayo-studio';
     } catch (e) {
