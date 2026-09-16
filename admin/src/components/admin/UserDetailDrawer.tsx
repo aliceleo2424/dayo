@@ -13,6 +13,7 @@ import {
   adjustProfileTicketsWithLedger,
   bookingStatusLabel,
   detectMemberProvider,
+  fetchAdminMemo,
   fetchCreditLedgers,
   fetchMemberBookings,
   fetchMemberOrders,
@@ -50,6 +51,8 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
   const [busyMemo, setBusyMemo] = useState(false);
   const [busyWelcome, setBusyWelcome] = useState(false);
   const [notice, setNotice] = useState("");
+  const [memoNotice, setMemoNotice] = useState("");
+  const [memoError, setMemoError] = useState("");
   const [reasonOpen, setReasonOpen] = useState(false);
   const [pendingDelta, setPendingDelta] = useState<1 | -1>(1);
   const [reasonText, setReasonText] = useState("");
@@ -60,6 +63,8 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
     setTicketCount(Number(user.ticket_count || 0));
     setMemo(String(user.admin_memo || ""));
     setNotice("");
+    setMemoNotice("");
+    setMemoError("");
     setOrders([]);
     setLedgers([]);
     setSessions([]);
@@ -70,15 +75,20 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
 
     void (async () => {
       try {
-        const [orderRows, ledgerRows, bookingRows] = await Promise.all([
+        const [orderRows, ledgerRows, bookingRows, memoResult] = await Promise.all([
           fetchMemberOrders(authId).catch(() => [] as MemberOrder[]),
           fetchCreditLedgers(authId, user.id).catch(() => [] as CreditLedgerRow[]),
           fetchMemberBookings(authId).catch(() => [] as MemberBookingSession[]),
+          fetchAdminMemo(user.id)
+            .then((value) => ({ value, error: "" }))
+            .catch((err) => ({ value: "", error: err instanceof Error ? err.message : "CS 메모를 불러오지 못했습니다." })),
         ]);
         if (cancelled) return;
         setOrders(orderRows);
         setLedgers(ledgerRows);
         setSessions(bookingRows);
+        if (memoResult.error) setMemoError(memoResult.error);
+        else setMemo(memoResult.value);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -159,12 +169,18 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
   async function handleSaveMemo() {
     if (!user || busyMemo) return;
     setBusyMemo(true);
-    setNotice("");
+    setMemoNotice("");
+    setMemoError("");
     try {
-      await saveAdminMemo(user, memo);
-      setNotice("CS 메모가 저장되었습니다.");
+      const savedMemo = await saveAdminMemo(user, memo);
+      setMemo(savedMemo);
+      const success = "✅ CS 특이사항 메모가 저장되었습니다.";
+      setMemoNotice(success);
+      window.setTimeout(() => setMemoNotice((current) => current === success ? "" : current), 4500);
     } catch (err) {
-      setNotice(err instanceof Error ? err.message : "메모 저장에 실패했습니다. admin_memo 컬럼을 확인해 주세요.");
+      const message = err instanceof Error ? err.message : "CS 메모 저장에 실패했습니다.";
+      setMemoError(message);
+      window.alert(`CS 메모를 저장하지 못했습니다.\n${message}`);
     } finally {
       setBusyMemo(false);
     }
@@ -257,6 +273,8 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
         </header>
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
+          {memoNotice ? <div className="fixed right-6 top-6 z-[100] rounded-xl bg-emerald-600 px-5 py-4 text-sm font-semibold text-white shadow-xl">{memoNotice}</div> : null}
+          {memoError ? <p className="mb-3 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{memoError}</p> : null}
           {notice ? <p className="mb-3 text-xs text-muted-foreground">{notice}</p> : null}
 
           <Tabs defaultValue="billing" className="w-full">

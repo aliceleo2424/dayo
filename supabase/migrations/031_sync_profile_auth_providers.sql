@@ -38,5 +38,6 @@ where (profile.user_id = auth_user.id or profile.id = auth_user.id)
   end;
 
 update public.profiles
-set provider = 'email'
-where provider is null or lower(trim(provider)) not in ('email', 'google', 'kakao');
+set provider = null
+where provider is not null
+  and lower(trim(provider)) not in ('email', 'google', 'kakao');

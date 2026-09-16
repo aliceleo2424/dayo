@@ -38,12 +38,25 @@ const STYLES: Record<AuthProvider, CSSProperties> = {
     alignItems: "center",
     gap: 4,
   },
+  unknown: {
+    background: "#F5F5F4",
+    border: "1px solid #D6D3D1",
+    color: "#44403C",
+    fontSize: 11,
+    fontWeight: 700,
+    padding: "3px 8px",
+    borderRadius: 12,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 4,
+  },
 };
 
 const LABELS: Record<AuthProvider, string> = {
   kakao: "🟡 카카오",
   google: "🔵 구글",
   email: "✉️ 이메일",
+  unknown: "미확인",
 };
 
 export function ProviderBadge({ provider }: { provider: AuthProvider }) {

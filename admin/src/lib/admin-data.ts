@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 
-export type AuthProvider = "kakao" | "google" | "email";
+export type AuthProvider = "kakao" | "google" | "email" | "unknown";
 
 export type CrmMember = {
   id: string;
@@ -59,7 +59,8 @@ export function detectMemberProvider(row: MemberIdentity): AuthProvider {
   const provider = String(row.provider || "").trim().toLowerCase();
   if (provider === "kakao") return "kakao";
   if (provider === "google") return "google";
-  return "email";
+  if (provider === "email") return "email";
+  return "unknown";
 }
 
 export function profileDisplayName(row: MemberIdentity) {
@@ -664,21 +665,23 @@ export async function fetchCreditLedgers(userId: string, profileId?: string | nu
 }
 
 export async function saveAdminMemo(
-  row: { id: string; user_id?: string | null },
+  row: { id: string },
   memo: string
 ) {
   const payload = { admin_memo: memo, updated_at: new Date().toISOString() };
-  const first = await supabase.from("profiles").update(payload).eq("id", row.id).select("id");
-  if (!first.error && first.data && first.data.length) return;
+  const result = await supabase.from("profiles").update(payload).eq("id", row.id).select("admin_memo").single();
+  if (result.error) throw new Error(result.error.message);
+  return String(result.data?.admin_memo || "");
+}
 
-  const uid = row.user_id || row.id;
-  const second = await supabase.from("profiles").update(payload).eq("user_id", uid).select("id");
-  if (second.error) {
-    // fallback column name
-    const altPayload = { cs_memo: memo, updated_at: new Date().toISOString() };
-    const third = await supabase.from("profiles").update(altPayload).eq("id", row.id).select("id");
-    if (third.error) throw new Error(second.error.message || third.error.message || "메모 저장 실패");
-  }
+export async function fetchAdminMemo(profileId: string) {
+  const result = await supabase
+    .from("profiles")
+    .select("admin_memo")
+    .eq("id", profileId)
+    .single();
+  if (result.error) throw new Error(result.error.message);
+  return String(result.data?.admin_memo || "");
 }
 
 export async function fetchMemberBookings(learnerId: string): Promise<MemberBookingSession[]> {
