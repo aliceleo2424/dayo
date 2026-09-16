@@ -6,7 +6,7 @@
     || '[여기에_고객사_식별코드_입력]';
 
   var PRODUCTS = {
-    starter3: { name: '3회 스타터 팩', price: 54900, tickets: 3 },
+    starter3: { name: '산뜻한 3회 패키지', price: 54900, tickets: 3 },
     light11: { name: '가벼운 11 패키지', price: 179000, tickets: 11 },
     full33: { name: '마음껏 33 패키지', price: 499000, tickets: 33 },
     trial: { name: '첫 세션 체험 할인권', price: 9900, tickets: 1 },

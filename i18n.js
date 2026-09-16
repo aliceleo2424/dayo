@@ -1256,7 +1256,7 @@
       ES: 'Pases de sesión, tan ligeros como necesites'
     },
     'tickets.desc': {
-      KO: '첫 체험 9,900원부터 3회 스타터 팩, 11·33 패키지까지. 약정 없이 필요할 만큼만 충전해요.',
+      KO: '첫 체험 9,900원부터 산뜻한 3회 패키지, 11·33 패키지까지. 약정 없이 필요할 만큼만 충전해요.',
       EN: 'From the ₩9,900 first session to the 3-session starter and 11/33 packs. Top up only what you need — no commitment.',
       ZH: '从9,900韩元首次体验到3次入门包、11/33套餐。无需合约，按需充值。',
       JA: '初回9,900ウォンから3回スターター、11・33パックまで。契約なしで必要な分だけチャージ。',
@@ -1265,7 +1265,7 @@
     },
     'tickets.first.title': { KO: '첫 세션 체험 할인권', EN: 'First-session trial coupon', ZH: '首次会话体验券', JA: '初回セッション体験クーポン', FR: 'Coupon d’essai première session', ES: 'Cupón de primera sesión' },
     'tickets.first.price': { KO: '9,900원 · 1회 30분', EN: '₩9,900 · 30 min', ZH: '9,900韩元 · 30分钟', JA: '9,900ウォン · 30分', FR: '9 900 ₩ · 30 min', ES: '₩9,900 · 30 min' },
-    'tickets.starter.title': { KO: '3회 스타터 팩', EN: '3-session starter pack', ZH: '3次入门包', JA: '3回スターターパック', FR: 'Pack starter 3 séances', ES: 'Pack starter de 3 sesiones' },
+    'tickets.starter.title': { KO: '산뜻한 3회 패키지', EN: '3-session starter pack', ZH: '3次入门包', JA: '3回スターターパック', FR: 'Pack starter 3 séances', ES: 'Pack starter de 3 sesiones' },
     'tickets.starter.price': { KO: '54,900원 · 회당 약 18,300원', EN: '₩54,900 · about ₩18,300 per session', ZH: '54,900韩元 · 每次约18,300韩元', JA: '54,900ウォン · 1回あたり約18,300ウォン', FR: '54 900 ₩ · env. 18 300 ₩ / séance', ES: '₩54,900 · unos ₩18,300 por sesión' },
     'tickets.best.title': { KO: '가벼운 11 패키지', EN: 'Light 11 pack', ZH: '轻量11套餐', JA: '気軽11パッケージ', FR: 'Pack léger 11', ES: 'Pack ligero 11' },
     'tickets.best.price': { KO: '179,000원 · BEST 1회 보너스', EN: '₩179,000 · BEST +1 bonus session', ZH: '179,000韩元 · BEST 赠1次', JA: '179,000ウォン · BEST 1回ボーナス', FR: '179 000 ₩ · BEST +1 séance', ES: '₩179,000 · BEST +1 sesión' },
