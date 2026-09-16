@@ -18,9 +18,9 @@ export function AdminHeader({ title }: { title: string }) {
       <div className="flex min-w-0 items-center gap-3">
         <Link href="/admin/dashboard" className="flex shrink-0 items-center">
           <img src="/images/logo.png" alt="DayO" className="h-8 w-auto max-w-[8rem] object-contain bg-transparent" />
-          <span className="ml-2 inline-flex flex-col justify-center whitespace-nowrap border-l border-[#EDE4D5] pl-2 text-left leading-[1.15]">
-            <span className="text-[10.5px] font-bold tracking-[-0.2px] text-[#57534E]">1:1 Global</span>
-            <span className="text-[9.5px] font-medium tracking-[-0.3px] text-[#8C827A]">Communication Lounge</span>
+          <span className="ml-2 inline-flex flex-col justify-center whitespace-nowrap border-l border-[#EDE4D5] pl-2 text-left leading-[1.2]">
+            <span className="text-[10px] font-semibold tracking-[-0.2px] text-[#57534E]">1:1 Global Casual</span>
+            <span className="text-[10px] font-medium tracking-[-0.2px] text-[#78716C]">Communication Lounge</span>
           </span>
         </Link>
         <h1 className="truncate text-xl font-semibold text-navy">{title}</h1>
