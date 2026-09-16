@@ -396,8 +396,8 @@
   }
 
   function nameFromEmail(email) {
-    var local = String(email || '').split('@')[0] || 'DayO';
-    return local.replace(/[._-]+/g, ' ').trim() || 'DayO';
+    var local = String(email || '').split('@')[0] || '';
+    return local.replace(/[._-]+/g, ' ').trim();
   }
 
   function startMemberSession(name, email) {
@@ -1087,7 +1087,7 @@
       render();
       syncLoginI18n();
       if (welcomeOverlay && welcomeOverlay.classList.contains('is-open')) {
-        openWelcome(getUserName() || 'DayO');
+        openWelcome(getUserName());
         var cta = welcomeOverlay.querySelector('[data-ms-welcome-close]');
         if (cta) cta.textContent = t('login.welcomeCta');
       }

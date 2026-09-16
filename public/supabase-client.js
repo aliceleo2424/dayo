@@ -401,17 +401,6 @@
         return;
       }
       var newUser = signUpRes.data && signUpRes.data.user;
-      if (newUser && newUser.id) {
-        try {
-          await client.from('profiles').insert([{
-            user_id: newUser.id,
-            client_key: 'user:' + newUser.id,
-            email: email,
-            user_name: email.split('@')[0],
-            nickname: email.split('@')[0]
-          }]);
-        } catch (e) { /* trigger may already have created the row */ }
-      }
       if (!(signUpRes.data && signUpRes.data.session)) {
         alert('가입 확인 메일을 보냈어요. 메일함에서 인증 후 다시 로그인해 주세요.');
         return;
@@ -438,29 +427,28 @@
 
   async function grantWelcomeTicket(client, user, email) {
     if (!client || !user || !user.id) return;
-    var nickname = (email || user.email || '').split('@')[0] || 'DayO';
     try {
       var existing = await client
         .from('profiles')
-        .select('ticket_count, user_id')
+        .select('id, ticket_count, user_id')
         .eq('user_id', user.id)
         .maybeSingle();
-      if (existing.data && existing.data.user_id) {
-        if (Number(existing.data.ticket_count) < 1) {
-          await client.from('profiles').update({ ticket_count: 1 }).eq('user_id', user.id);
-        }
-      } else {
-        await client.from('profiles').insert([{
-          user_id: user.id,
-          client_key: 'user:' + user.id,
-          email: email || user.email || '',
-          user_name: nickname,
-          nickname: nickname,
-          ticket_count: 1,
-          has_welcome_coupon: true
-        }]);
+      if ((!existing.data || existing.error) && user.id) {
+        existing = await client
+          .from('profiles')
+          .select('id, ticket_count, user_id')
+          .eq('id', user.id)
+          .maybeSingle();
       }
-    } catch (e) { /* trigger may already have created the row */ }
+      if (existing.data) {
+        if (Number(existing.data.ticket_count) < 1) {
+          await client.from('profiles').update({
+            ticket_count: 1,
+            has_welcome_coupon: true
+          }).eq('id', existing.data.id);
+        }
+      }
+    } catch (e) { /* profile creation belongs to handle_new_user */ }
     if (typeof window.fetchAuthProfile === 'function') {
       try { await window.fetchAuthProfile(); } catch (err) { /* ignore */ }
     }

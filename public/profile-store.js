@@ -120,7 +120,7 @@ function getClientKey() {
 
 function nameFromEmail(email) {
   var local = String(email || '').split('@')[0] || '';
-  return local.replace(/[._-]+/g, ' ').trim() || '회원';
+  return local.replace(/[._-]+/g, ' ').trim();
 }
 
 function cachedNickname() {
@@ -142,8 +142,7 @@ function resolveDisplayName(profile, user, fallbackName) {
     return dbNick
       || String(meta.full_name || '').trim()
       || String(meta.name || '').trim()
-      || String(user.email || '').split('@')[0].trim()
-      || '회원';
+      || String(user.email || '').split('@')[0].trim();
   }
   var dbUserName = String((profile && profile.user_name) || '').trim();
   var cached = cachedNickname();
@@ -153,15 +152,15 @@ function resolveDisplayName(profile, user, fallbackName) {
   if (cached) return cached;
   if (dbUserName && dbUserName !== emailName) return dbUserName;
   if (fallback && fallback !== emailName) return fallback;
-  return dbUserName || emailName || '회원';
+  return dbUserName || emailName;
 }
 
 function displayNameFromUser(user) {
-  if (!user) return '회원';
+  if (!user) return '';
   var meta = user.user_metadata || {};
   return String(
-    meta.full_name || meta.name || String(user.email || '').split('@')[0] || '회원'
-  ).trim() || '회원';
+    meta.full_name || meta.name || String(user.email || '').split('@')[0] || ''
+  ).trim();
 }
 
 function detectAuthProvider(user) {
@@ -307,7 +306,11 @@ async function fetchOrCreateProfile() {
       preferred_request: local.preferred_request,
       updated_at: new Date().toISOString()
     };
-    var inserted = await client.from('profiles').insert(insertPayload).select('*').single();
+    var inserted = await client
+      .from('profiles')
+      .upsert(insertPayload, { onConflict: 'client_key' })
+      .select('*')
+      .single();
     if (inserted.error) throw inserted.error;
     profileCache = inserted.data;
     applyProfileToLocal(profileCache);
@@ -643,36 +646,6 @@ async function waitForTriggerProfile(client, userId) {
   return null;
 }
 
-async function insertProfileFallback(client, payload) {
-  if (!client || !payload) return { data: null, error: null };
-  try {
-    var inserted = await client.from('profiles').insert(payload).select('*').single();
-    if (inserted && inserted.error) {
-      var retryPayload = Object.assign({}, payload);
-      delete retryPayload.has_welcome_coupon;
-      try {
-        inserted = await client.from('profiles').insert(retryPayload).select('*').single();
-      } catch (retryErr) {
-        return { data: null, error: retryErr };
-      }
-      if (inserted && inserted.error) {
-        var stripped = Object.assign({}, retryPayload);
-        delete stripped.provider;
-        delete stripped.avatar_url;
-        delete stripped.nickname;
-        try {
-          inserted = await client.from('profiles').insert(stripped).select('*').single();
-        } catch (stripErr) {
-          return { data: null, error: stripErr };
-        }
-      }
-    }
-    return inserted || { data: null, error: null };
-  } catch (err) {
-    return { data: null, error: err };
-  }
-}
-
 async function syncSocialProfileFields(client, existing, user, name) {
   if (!client || !existing || !user) return existing;
   var social = socialFieldsFromUser(user);
@@ -792,31 +765,6 @@ async function ensureProfileForUser(user) {
       }
     }
 
-    var insertPayload = {
-      user_id: userId,
-      client_key: 'user:' + userId,
-      user_name: name,
-      nickname: name,
-      email: email,
-      provider: social.provider || 'email',
-      avatar_url: social.avatar || null,
-      ticket_count: 0,
-      has_welcome_coupon: true,
-      streak_count: 1,
-      last_login_date: today,
-      speech_speed: local.speech_speed,
-      preferred_style: local.preferred_style,
-      preferred_request: local.preferred_request,
-      updated_at: new Date().toISOString()
-    };
-    var inserted = await insertProfileFallback(client, insertPayload);
-    if (inserted && inserted.data) {
-      profileCache = inserted.data;
-      applyProfileToLocal(profileCache);
-      try { grantWelcomeCoupon(userId, 'user:' + userId); } catch (e) { /* trigger may already own the coupon */ }
-      return profileCache;
-    }
-
     var again = await waitForTriggerProfile(client, userId);
     if (again) {
       again = await syncSocialProfileFields(client, again, user, name);
@@ -825,9 +773,7 @@ async function ensureProfileForUser(user) {
       return profileCache;
     }
 
-    if (inserted && inserted.error) {
-      console.warn('[DayO] profiles insert skipped — trigger owns new users', inserted.error);
-    }
+    console.warn('[DayO] profile row unavailable — handle_new_user owns authenticated profile creation');
   } catch (err) {
     console.warn('[DayO] ensureProfileForUser failed — using local fallback', err);
   }

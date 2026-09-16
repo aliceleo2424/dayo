@@ -312,9 +312,9 @@
     var fromEmail = emailPrefix(email);
     if (fromEmail) return fromEmail;
     try {
-      return (localStorage.getItem('dayo_user_nickname') || localStorage.getItem('userName') || localStorage.getItem('dayo_user_name') || '').trim() || 'DayO';
+      return (localStorage.getItem('dayo_user_nickname') || localStorage.getItem('userName') || localStorage.getItem('dayo_user_name') || '').trim();
     } catch (e) {
-      return 'DayO';
+      return '';
     }
   }
 
