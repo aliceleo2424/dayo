@@ -50,21 +50,15 @@
       : [];
 
     var heroVisual = document.querySelector('[data-landing-hero] .hero-visual');
-    var heroGrid = heroVisual && heroVisual.closest('.hero-grid');
-    if (!cards.length) {
-      if (heroVisual) heroVisual.hidden = true;
-      if (heroGrid) heroGrid.classList.add('cms-no-visual');
-      return;
-    }
+    if (!cards.length) return false;
 
     if (heroVisual) heroVisual.hidden = false;
-    if (heroGrid) heroGrid.classList.remove('cms-no-visual');
     var visualCard = heroVisual && heroVisual.querySelector('.visual-card');
     var badge = visualCard && visualCard.querySelector('.live-badge');
     var avatar = document.getElementById('partnerAvatar');
     var name = document.getElementById('partnerName');
     var greeting = document.getElementById('partnerGreeting');
-    if (!visualCard || !badge || !avatar || !name || !greeting) return;
+    if (!visualCard || !badge || !avatar || !name || !greeting) return false;
 
     var index = 0;
     var paused = false;
@@ -116,6 +110,7 @@
     visualCard.addEventListener('mouseenter', function () { paused = true; });
     visualCard.addEventListener('mouseleave', function () { paused = false; });
     setInterval(next, 3500);
+    return true;
   }
 
   async function loadHeroSettings() {
@@ -124,17 +119,31 @@
     try {
       var result = await db
         .from('site_settings')
-        .select('value')
+        .select('value, updated_at')
         .eq('key', 'hero_section')
         .maybeSingle();
       if (result.error || !result.data || !result.data.value) return;
-      window.__dayoCmsHeroActive = true;
       bindCopy(result.data.value);
-      bindRollingCards(result.data.value);
+      window.__dayoCmsHeroActive = bindRollingCards(result.data.value);
     } catch (error) {
       console.warn('[DayO CMS] hero fallback retained', error);
     }
   }
 
-  loadHeroSettings();
+  function subscribeToHeroChanges() {
+    var db = window.supabaseClient;
+    if (!db || typeof db.channel !== 'function') return;
+    db.channel('public-hero-settings')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'site_settings',
+        filter: 'key=eq.hero_section'
+      }, function () {
+        window.location.reload();
+      })
+      .subscribe();
+  }
+
+  loadHeroSettings().then(subscribeToHeroChanges);
 })();

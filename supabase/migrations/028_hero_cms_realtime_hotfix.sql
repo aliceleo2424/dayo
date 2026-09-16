@@ -1,4 +1,7 @@
--- Public CMS images: anyone may read, only admins may upload or manage files.
+-- Idempotent production hotfix for hero CMS saves, uploads, and realtime refresh.
+
+alter table public.site_settings
+  add column if not exists updated_at timestamptz not null default now();
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (
@@ -69,13 +72,16 @@ create policy "public_assets_admin_delete"
     )
   );
 
--- Remove only the original all-Dicebear seed set from already migrated projects.
-update public.site_settings
-set value = jsonb_set(value, '{rolling_cards}', '[]'::jsonb, true),
-    updated_at = now()
-where key = 'hero_section'
-  and jsonb_typeof(value -> 'rolling_cards') = 'array'
-  and coalesce((
-    select bool_and(lower(coalesce(card ->> 'image_url', '')) like 'https://api.dicebear.com/%')
-    from jsonb_array_elements(value -> 'rolling_cards') as card
-  ), false);
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'site_settings'
+  ) then
+    alter publication supabase_realtime add table public.site_settings;
+  end if;
+end
+$$;

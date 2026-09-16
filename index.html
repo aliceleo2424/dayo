@@ -367,17 +367,14 @@
     }
 
     .hero-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: clamp(2.5rem, 6vw, 4.5rem);
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
       align-items: center;
-    }
-    .hero-grid.cms-no-visual {
-      grid-template-columns: minmax(0, 700px);
-      justify-content: center;
+      gap: 48px;
     }
 
-    .hero-copy { text-align: left; }
+    .hero-copy { flex: 1 1 0; min-width: 0; text-align: left; }
 
     .hero-title {
       font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
@@ -409,7 +406,8 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      width: 100%;
+      flex: 1 1 0;
+      min-width: 0;
       padding: 0 1rem;
       box-sizing: border-box;
     }
@@ -584,7 +582,7 @@
     }
     .auth-dashboard__inner {
       width: min(860px, 100%);
-      margin: 0 auto;
+      margin: 0 0 0 auto;
       display: flex;
       flex-direction: column;
       align-items: stretch;
@@ -1924,8 +1922,8 @@
       }
     }
 
-    @media (max-width: 860px) {
-      .hero-grid { grid-template-columns: 1fr; text-align: center; gap: 3rem; }
+    @media (max-width: 767px) {
+      .hero-grid { flex-direction: column; text-align: center; gap: 3rem; }
       .hero-copy { text-align: center; }
       .hero-subtitle { margin-left: auto; margin-right: auto; }
       .cta-wrap { align-items: center; }
@@ -1944,6 +1942,15 @@
         margin: 0 auto;
         box-sizing: border-box;
       }
+    }
+
+    @media (min-width: 768px) {
+      .hero-copy { text-align: left; }
+      .hero-visual { align-items: flex-end; }
+      .cta-wrap { align-items: flex-start; }
+    }
+
+    @media (max-width: 860px) {
       .journey-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
       .review-card { transform: none !important; }
     }
@@ -3852,6 +3859,6 @@
     if (modal) modal.style.display = 'none';
   }
 </script>
-<script src="hero-cms.js?v=20260916-storage"></script>
+<script src="hero-cms.js?v=20260916-realtime-hotfix"></script>
 </body>
 </html>

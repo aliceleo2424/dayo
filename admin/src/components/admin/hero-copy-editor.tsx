@@ -136,44 +136,51 @@ export function HeroCopyEditor() {
     setNotice("");
     setUploading((current) => ({ ...current, [uploadKey]: true }));
 
-    const result = await supabase.storage.from("cms").upload(objectPath, file, {
-      cacheControl: "3600",
-      contentType: file.type,
-      upsert: false,
-    });
-    if (result.error) {
-      setError(result.error.message || "사진 업로드에 실패했습니다.");
-      setUploading((current) => ({ ...current, [uploadKey]: false }));
-      return;
-    }
+    try {
+      const result = await supabase.storage.from("public-assets").upload(objectPath, file, {
+        cacheControl: "3600",
+        contentType: file.type,
+        upsert: false,
+      });
+      if (result.error) throw result.error;
 
-    const publicUrl = supabase.storage.from("cms").getPublicUrl(result.data.path).data.publicUrl;
-    setSettings((current) => ({
-      ...current,
-      rolling_cards: current.rolling_cards.map((item) =>
-        String(item.id) === uploadKey ? { ...item, image_url: publicUrl } : item
-      ),
-    }));
-    setUploading((current) => ({ ...current, [uploadKey]: false }));
+      const publicUrl = supabase.storage.from("public-assets").getPublicUrl(result.data.path).data.publicUrl;
+      setSettings((current) => ({
+        ...current,
+        rolling_cards: current.rolling_cards.map((item) =>
+          String(item.id) === uploadKey ? { ...item, image_url: publicUrl } : item
+        ),
+      }));
+    } catch (uploadError) {
+      const message = uploadError instanceof Error ? uploadError.message : "사진 업로드에 실패했습니다.";
+      console.error("[DayO CMS] hero image upload failed", uploadError);
+      setError(`사진 업로드 실패: ${message}`);
+      window.alert(`사진을 업로드하지 못했습니다.\n${message}`);
+    } finally {
+      setUploading((current) => ({ ...current, [uploadKey]: false }));
+    }
   }
 
   async function save() {
     setSaving(true);
     setNotice("");
     setError("");
-    const auth = await supabase.auth.getUser();
-    const result = await supabase.from("site_settings").upsert({
-      key: "hero_section",
-      value: settings,
-      updated_at: new Date().toISOString(),
-      updated_by: auth.data.user?.id || null,
-    }, { onConflict: "key" });
-    setSaving(false);
-    if (result.error) {
-      setError(result.error.message || "히어로 설정 저장에 실패했습니다.");
-      return;
+    try {
+      const result = await supabase.from("site_settings").upsert({
+        key: "hero_section",
+        value: settings,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "key" });
+      if (result.error) throw result.error;
+      setNotice("히어로 섹션 설정이 성공적으로 반영되었습니다 ✨");
+    } catch (saveError) {
+      const message = saveError instanceof Error ? saveError.message : "히어로 설정 저장에 실패했습니다.";
+      console.error("[DayO CMS] hero save failed", saveError);
+      setError(`저장 실패: ${message}`);
+      window.alert(`히어로 설정을 저장하지 못했습니다.\n${message}`);
+    } finally {
+      setSaving(false);
     }
-    setNotice("히어로 섹션 설정이 성공적으로 반영되었습니다 ✨");
   }
 
   if (loading) {
