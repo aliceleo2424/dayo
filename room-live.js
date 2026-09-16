@@ -218,6 +218,12 @@
       roomName: roomName(),
       startedAt: sessionStartedAt,
       endedAt: new Date().toISOString(),
+      bookingId: (function () {
+        try {
+          var params = new URLSearchParams(window.location.search);
+          return params.get('bookingId') || params.get('booking_id') || localStorage.getItem('dayo_active_booking_id') || '';
+        } catch (e) { return ''; }
+      })(),
       userId: (window.DayOProfileStore && window.DayOProfileStore.getUserId && window.DayOProfileStore.getUserId())
         || (window.DayOMode && window.DayOMode.getUserId && window.DayOMode.getUserId())
         || ''

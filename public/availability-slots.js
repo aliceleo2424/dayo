@@ -315,6 +315,7 @@
     try {
       localStorage.setItem('dayo_active_booking_id', booking.id);
       localStorage.setItem('dayo_session_learner_id', user.id);
+      localStorage.setItem('dayo_partner_user_id', partnerId);
     } catch (e) { /* ignore */ }
 
     var confirmFn = window.handleConfirmBooking;

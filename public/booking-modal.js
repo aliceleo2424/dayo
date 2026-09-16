@@ -948,6 +948,8 @@
     try {
       if (bookingId) localStorage.setItem('dayo_active_booking_id', bookingId);
       if (learnerId) localStorage.setItem('dayo_session_learner_id', learnerId);
+      if (state.partner) localStorage.setItem('dayo_partner_user_id', state.partner);
+      if (partner.name) localStorage.setItem('dayo_partner_name', partner.name);
       localStorage.setItem('dayo_next_session', JSON.stringify({
         partnerName: partner.name || '',
         scheduledAt: scheduledAt,

@@ -1120,6 +1120,8 @@ async function saveSessionLog(transcript, extra) {
     user_name: lsGet(USER_KEY, ''),
     email: lsGet(EMAIL_KEY, ''),
     room_name: extra.roomName || '',
+    booking_id: extra.bookingId || extra.booking_id || null,
+    session_id: extra.bookingId || extra.sessionId || extra.session_id || null,
     transcript: serialized,
     started_at: extra.startedAt || (serialized[0] && serialized[0].timestamp) || new Date().toISOString(),
     ended_at: extra.endedAt || new Date().toISOString(),
@@ -1139,6 +1141,8 @@ async function saveSessionLog(transcript, extra) {
     if (result.error) {
       var withoutPartner = Object.assign({}, payload);
       delete withoutPartner.partner_id;
+      delete withoutPartner.booking_id;
+      delete withoutPartner.session_id;
       result = await client.from('session_logs').insert(withoutPartner).select('id').single();
     }
     if (result.error) {

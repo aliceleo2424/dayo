@@ -726,15 +726,23 @@
       || '';
 
     if (client && learnerId) {
-      var insertRes = await client.from('session_reports').insert([{
+      var bookingId = '';
+      try { bookingId = localStorage.getItem('dayo_active_booking_id') || ''; } catch (e) { bookingId = ''; }
+      var reportRow = {
+        booking_id: bookingId || null,
         learner_id: learnerId,
+        partner_id: user && user.id || null,
+        partner_user_id: user && user.id || null,
         partner_name: payload.partnerName || 'Camille',
         spoken_sentence: payload.sentence,
         keyword: payload.keyword || 'daily',
         illust_url: payload.illustUrl,
         partner_comment: payload.partnerComment,
         stamp: payload.stamp
-      }]);
+      };
+      var insertRes = bookingId
+        ? await client.from('session_reports').upsert(reportRow, { onConflict: 'booking_id' })
+        : await client.from('session_reports').insert([reportRow]);
       if (insertRes.error) {
         console.warn('[DayO] session_reports insert failed', insertRes.error);
         try { localStorage.setItem('dayo_last_approved_card', JSON.stringify(payload)); } catch (e) { /* ignore */ }
@@ -749,13 +757,27 @@
 
   function normalizeReportCard(r) {
     if (!r) return null;
+    var booking = Array.isArray(r.bookings) ? r.bookings[0] : (r.bookings || {});
+    var expressions = r.key_expressions || r.keyExpressions || [];
+    if (typeof expressions === 'string') {
+      try { expressions = JSON.parse(expressions); } catch (e) { expressions = expressions.split(','); }
+    }
     return {
-      partner_name: r.partner_name || r.partnerName || 'DayO Partner',
+      id: r.id || '',
+      booking_id: r.booking_id || booking.id || '',
+      partner_name: r.partner_name || r.partnerName || booking.partner_name || 'DayO Partner',
       spoken_sentence: r.spoken_sentence || r.sentence || '',
       keyword: r.keyword || 'daily',
       illust_url: r.illust_url || r.illustUrl || ('https://image.pollinations.ai/prompt/' + encodeURIComponent('cute coffee, cute 3d pastel clay illustration, warm cozy aesthetic') + '?width=400&height=400&nologo=true'),
       partner_comment: r.partner_comment || r.partnerComment || '',
-      created_at: r.created_at || r.approvedAt || r.createdAt || ''
+      summary: r.summary || '',
+      key_expressions: Array.isArray(expressions) ? expressions.filter(Boolean) : [],
+      quiz_score: r.quiz_score == null ? null : Number(r.quiz_score),
+      word_help: Array.isArray(r.word_help) ? r.word_help : [],
+      feedback: Array.isArray(r.feedback) ? r.feedback : [],
+      language: r.language || booking.language || '',
+      partner_flag: r.partner_flag || booking.partner_flag || '',
+      created_at: booking.scheduled_at || r.created_at || r.approvedAt || r.createdAt || ''
     };
   }
 
@@ -890,6 +912,23 @@
     }
   }
 
+  function expressionChipsHtml(r, limit) {
+    var list = (r && Array.isArray(r.key_expressions)) ? r.key_expressions : [];
+    return list.slice(0, limit || 4).map(function (item) {
+      var label = typeof item === 'string' ? item : (item && (item.text || item.expression || item.word)) || '';
+      return label ? '<span style="display:inline-flex;padding:3px 8px;border-radius:999px;background:#FFF0EB;color:#9A4C3E;font-size:10.5px;font-weight:700;">' + esc(label) + '</span>' : '';
+    }).join('');
+  }
+
+  function partnerFlag(r) {
+    if (r && r.partner_flag) return String(r.partner_flag);
+    var lang = String((r && r.language) || '').toLowerCase();
+    if (/spanish|스페인|es/.test(lang)) return '🇪🇸';
+    if (/french|프랑스|fr/.test(lang)) return '🇫🇷';
+    if (/korean|한국|ko|kr/.test(lang)) return '🇰🇷';
+    return '🌍';
+  }
+
   function renderTalkThumb(r, idx) {
     var name = talkQuoteLabel(r);
     var dateLabel = formatAlbumDate(r.created_at);
@@ -916,6 +955,7 @@
     var name = talkQuoteLabel(r);
     var dateLabel = formatAlbumDate(r.created_at) || '날짜 미정';
     var topic = topicLabel(r);
+    var chips = expressionChipsHtml(r, 3);
     var img = esc((r && r.illust_url) || '');
     var icon = img
       ? '<img src="' + img + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:10px;">'
@@ -925,11 +965,12 @@
         '<div style="display: flex; align-items: center; gap: 12px; min-width: 0;">' +
           '<div style="width: 44px; height: 44px; border-radius: 10px; background: #FFE5DC; display: flex; align-items: center; justify-content: center; font-size: 20px; overflow: hidden; flex: 0 0 auto;">' + icon + '</div>' +
           '<div style="min-width: 0;">' +
-            '<div style="font-size: 14px; font-weight: 700; color: #333;">' + esc(name) + ' 파트너와의 대화</div>' +
+            '<div style="font-size: 14px; font-weight: 700; color: #333;">' + partnerFlag(r) + ' ' + esc(name) + ' 파트너와의 대화</div>' +
             '<div style="font-size: 12px; color: #888; margin-top: 2px;">' + esc(dateLabel) + ' · 주제: ' + esc(topic) + '</div>' +
+            (chips ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;">' + chips + '</div>' : '') +
           '</div>' +
         '</div>' +
-        '<span style="font-size: 12px; color: #FF5A36; font-weight: 700; white-space: nowrap;">리포트 &amp; 카드 보기 ➔</span>' +
+        '<span style="font-size: 12px; color: #FF5A36; font-weight: 700; white-space: nowrap;">리포트 전문 보기 ➔</span>' +
       '</button>'
     );
   }
@@ -997,6 +1038,14 @@
       }
     } catch (e) { timeLabel = ''; }
     var when = [dateLabel, timeLabel].filter(Boolean).join(' ');
+    var expressions = expressionChipsHtml(r, 8);
+    var wordHelp = (r.word_help || []).map(function (item) {
+      return typeof item === 'string' ? item : (item && (item.word || item.text)) || '';
+    }).filter(Boolean).join(', ');
+    var feedback = (r.feedback || []).map(function (item) {
+      if (typeof item === 'string') return item;
+      return item && ((item.original && item.corrected) ? (item.original + ' → ' + item.corrected) : (item.text || item.comment)) || '';
+    }).filter(Boolean).map(esc).join('<br>');
     return (
       '<div style="padding-top: 8px;">' +
         '<h3 style="margin: 0 0 4px; font-size: 17px; color: #222;">' + esc(name) + ' 파트너와의 대화</h3>' +
@@ -1005,6 +1054,10 @@
           '<div class="report-meta-row">💡 나눈 주제: ' + esc(topicLabel(r) === '요즘 나의 일상' ? '서울의 숨은 카페와 각자의 주말' : topicLabel(r)) + '</div>' +
           '<div class="report-meta-row">☕ 파트너 추천: "' + esc(talkQuoteText(r)) + '"</div>' +
           '<div class="report-meta-row">✨ 기억하고 싶은 표현: "' + esc(memorablePhrase(r)) + '"</div>' +
+          (expressions ? '<div class="report-meta-row"><strong>핵심 표현</strong><div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px;">' + expressions + '</div></div>' : '') +
+          (wordHelp ? '<div class="report-meta-row">💡 단어 도움: ' + esc(wordHelp) + '</div>' : '') +
+          (feedback ? '<div class="report-meta-row">📝 문장 피드백:<br>' + feedback + '</div>' : '') +
+          (r.quiz_score != null ? '<div class="report-meta-row">🎯 5분 복습 퀴즈: ' + esc(r.quiz_score) + '점</div>' : '') +
         '</div>' +
         '<div class="insta-card-export-wrap" style="display:flex; flex-direction:column; align-items:center;">' +
           renderViralReportCard(r, true, { bare: true }) +
@@ -1035,10 +1088,17 @@
     if (user && client) {
       var query = await client
         .from('session_reports')
-        .select('*')
+        .select('*, bookings(id, scheduled_at, partner_name, language)')
         .eq('learner_id', user.id)
         .order('created_at', { ascending: false });
 
+      if (query.error) {
+        query = await client
+          .from('session_reports')
+          .select('*')
+          .eq('learner_id', user.id)
+          .order('created_at', { ascending: false });
+      }
       if (query.error) {
         console.warn('[DayO] loadUserReports failed', query.error);
       }

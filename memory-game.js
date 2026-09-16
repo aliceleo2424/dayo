@@ -232,6 +232,7 @@
       clearTimeout(roundTimer);
       roundTimer = setTimeout(function () {
         hideMemoryModal();
+        window.__dayoQuizScore = 100;
         window.__dayoMemoryGameDone = true;
         window.__dayoMemorySentence = (gameSentenceQueue[0] && gameSentenceQueue[0].en) || '';
         if (typeof window.openCardDetailModal === 'function') {
@@ -338,6 +339,7 @@
   };
 
   window.skipToRecordCard = function () {
+    window.__dayoQuizScore = Number(window.__dayoQuizScore || 0);
     showTalkRecord();
   };
 

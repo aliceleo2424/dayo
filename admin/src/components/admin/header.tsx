@@ -1,14 +1,40 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Bell, Moon, Sun, User } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAdminStore } from "@/store/admin-store";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
 
 export function AdminHeader({ title }: { title: string }) {
   const { darkMode, toggleDarkMode, sidebarCollapsed } = useAdminStore();
+  const [urgentCount, setUrgentCount] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    async function refreshUrgentCount() {
+      const result = await supabase
+        .from("admin_notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("kind", "safety_emergency")
+        .is("read_at", null);
+      if (active && !result.error) setUrgentCount(result.count || 0);
+    }
+    void refreshUrgentCount();
+    const channel = supabase
+      .channel("admin-safety-notifications")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "admin_notifications" }, () => {
+        void refreshUrgentCount();
+      })
+      .subscribe();
+    return () => {
+      active = false;
+      void supabase.removeChannel(channel);
+    };
+  }, []);
 
   return (
     <header className={cn(
@@ -27,9 +53,13 @@ export function AdminHeader({ title }: { title: string }) {
       </div>
       <div className="flex items-center gap-3">
         <Badge variant="coral">Super Admin</Badge>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="icon" className="relative" title={`긴급 안전 알림 ${urgentCount}건`}>
           <Bell className="h-4 w-4" />
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-coral" />
+          {urgentCount > 0 && (
+            <span className="absolute -right-1 -top-1 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-bold text-white">
+              {urgentCount > 99 ? "99+" : urgentCount}
+            </span>
+          )}
         </Button>
         <Button variant="ghost" size="icon" onClick={toggleDarkMode}>
           {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
