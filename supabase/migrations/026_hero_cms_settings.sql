@@ -58,32 +58,7 @@ values (
     "primary_cta_link": "#topics",
     "secondary_cta_text": "내 스피킹 감각 알아보기 >",
     "secondary_cta_link": "#quiz",
-    "rolling_cards": [
-      {
-        "id": 1,
-        "tag": "🌸 AI 코파일럿 실시간 지원 중",
-        "partner_name": "Yui",
-        "country": "Japan",
-        "image_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=Yui",
-        "speech_bubble": "こんにちは！今日もお疲れ様です✨"
-      },
-      {
-        "id": 2,
-        "tag": "☕ 따뜻한 일상 대화",
-        "partner_name": "Camille",
-        "country": "France",
-        "image_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=Camille",
-        "speech_bubble": "Salut ! On parle de quoi aujourd’hui ?"
-      },
-      {
-        "id": 3,
-        "tag": "🗽 실전 여행 영어",
-        "partner_name": "Alex",
-        "country": "USA",
-        "image_url": "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
-        "speech_bubble": "Hey there! Ready to practice some real English?"
-      }
-    ]
+    "rolling_cards": []
   }'::jsonb
 )
 on conflict (key) do nothing;

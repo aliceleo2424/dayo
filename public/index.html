@@ -372,6 +372,10 @@
       gap: clamp(2.5rem, 6vw, 4.5rem);
       align-items: center;
     }
+    .hero-grid.cms-no-visual {
+      grid-template-columns: minmax(0, 700px);
+      justify-content: center;
+    }
 
     .hero-copy { text-align: left; }
 
@@ -3848,6 +3852,6 @@
     if (modal) modal.style.display = 'none';
   }
 </script>
-<script src="hero-cms.js?v=20260916"></script>
+<script src="hero-cms.js?v=20260916-storage"></script>
 </body>
 </html>

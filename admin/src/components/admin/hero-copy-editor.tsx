@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Save, Trash2 } from "lucide-react";
+import { ImagePlus, Loader2, Plus, Save, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,32 +35,7 @@ const DEFAULT_HERO: HeroSettings = {
   primary_cta_link: "#topics",
   secondary_cta_text: "내 스피킹 감각 알아보기 >",
   secondary_cta_link: "#quiz",
-  rolling_cards: [
-    {
-      id: 1,
-      tag: "🌸 AI 코파일럿 실시간 지원 중",
-      partner_name: "Yui",
-      country: "Japan",
-      image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Yui",
-      speech_bubble: "こんにちは！今日もお疲れ様です✨",
-    },
-    {
-      id: 2,
-      tag: "☕ 따뜻한 일상 대화",
-      partner_name: "Camille",
-      country: "France",
-      image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Camille",
-      speech_bubble: "Salut ! On parle de quoi aujourd'hui ?",
-    },
-    {
-      id: 3,
-      tag: "🗽 실전 여행 영어",
-      partner_name: "Alex",
-      country: "USA",
-      image_url: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
-      speech_bubble: "Hey there! Ready to practice some real English?",
-    },
-  ],
+  rolling_cards: [],
 };
 
 function normalizeSettings(value: unknown): HeroSettings {
@@ -85,6 +60,7 @@ export function HeroCopyEditor() {
   const [settings, setSettings] = useState<HeroSettings>(DEFAULT_HERO);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState<Record<string, boolean>>({});
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 
@@ -128,10 +104,10 @@ export function HeroCopyEditor() {
       ...settings.rolling_cards,
       {
         id: nextId,
-        tag: "✨ 새로운 대화",
+        tag: "",
         partner_name: "",
         country: "",
-        image_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(nextId)}`,
+        image_url: "",
         speech_bubble: "",
       },
     ]);
@@ -139,6 +115,46 @@ export function HeroCopyEditor() {
 
   function removeCard(index: number) {
     updateField("rolling_cards", settings.rolling_cards.filter((_, cardIndex) => cardIndex !== index));
+  }
+
+  async function uploadCardImage(index: number, file: File) {
+    if (!file.type.startsWith("image/")) {
+      setError("이미지 파일만 업로드할 수 있습니다.");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setError("사진은 10MB 이하 파일만 업로드할 수 있습니다.");
+      return;
+    }
+
+    const card = settings.rolling_cards[index];
+    if (!card) return;
+    const uploadKey = String(card.id);
+    const extension = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+    const objectPath = `hero-cards/${Date.now()}-${crypto.randomUUID()}.${extension}`;
+    setError("");
+    setNotice("");
+    setUploading((current) => ({ ...current, [uploadKey]: true }));
+
+    const result = await supabase.storage.from("cms").upload(objectPath, file, {
+      cacheControl: "3600",
+      contentType: file.type,
+      upsert: false,
+    });
+    if (result.error) {
+      setError(result.error.message || "사진 업로드에 실패했습니다.");
+      setUploading((current) => ({ ...current, [uploadKey]: false }));
+      return;
+    }
+
+    const publicUrl = supabase.storage.from("cms").getPublicUrl(result.data.path).data.publicUrl;
+    setSettings((current) => ({
+      ...current,
+      rolling_cards: current.rolling_cards.map((item) =>
+        String(item.id) === uploadKey ? { ...item, image_url: publicUrl } : item
+      ),
+    }));
+    setUploading((current) => ({ ...current, [uploadKey]: false }));
   }
 
   async function save() {
@@ -219,8 +235,14 @@ export function HeroCopyEditor() {
           {settings.rolling_cards.map((card, index) => (
             <section key={card.id} className="grid gap-4 rounded-xl border p-4 lg:grid-cols-[140px_1fr]">
               <div className="flex flex-col items-center justify-center rounded-xl bg-gradient-to-br from-rose-50 to-amber-50 p-3 text-center">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={card.image_url} alt="" className="h-20 w-20 rounded-full border-2 border-white bg-white object-cover shadow" />
+                {card.image_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={card.image_url} alt="" className="h-20 w-20 rounded-full border-2 border-white bg-white object-cover shadow" />
+                ) : (
+                  <div className="flex h-20 w-20 items-center justify-center rounded-full border-2 border-dashed border-stone-300 bg-white text-stone-400">
+                    <ImagePlus className="h-7 w-7" aria-hidden="true" />
+                  </div>
+                )}
                 <strong className="mt-2 text-sm">{card.partner_name || "파트너명"}</strong>
                 <span className="text-xs text-muted-foreground">{card.country || "국가"}</span>
               </div>
@@ -238,15 +260,30 @@ export function HeroCopyEditor() {
                   <Input value={card.country} onChange={(event) => updateCard(index, "country", event.target.value)} />
                 </div>
                 <div className="space-y-1 md:col-span-2">
-                  <Label>이미지 / 아바타 URL</Label>
-                  <Input value={card.image_url} onChange={(event) => updateCard(index, "image_url", event.target.value)} />
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    {["Yui", "Camille", "Alex"].map((seed) => (
-                      <Button key={seed} type="button" size="sm" variant="outline" onClick={() => updateCard(index, "image_url", `https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}`)}>
-                        {seed} 프리셋
-                      </Button>
-                    ))}
+                  <Label>파트너 사진</Label>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label className="inline-flex h-9 cursor-pointer items-center justify-center rounded-md border border-input bg-background px-3 text-sm font-medium hover:bg-accent">
+                      {uploading[String(card.id)] ? (
+                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> 업로드 중...</>
+                      ) : (
+                        <><ImagePlus className="mr-2 h-4 w-4" /> 사진 파일 선택</>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="sr-only"
+                        disabled={uploading[String(card.id)]}
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (file) void uploadCardImage(index, file);
+                          event.target.value = "";
+                        }}
+                      />
+                    </label>
+                    <span className="text-xs text-muted-foreground">JPG, PNG, WebP 등 · 최대 10MB</span>
                   </div>
+                  <Label className="block pt-2">또는 외부 이미지 URL</Label>
+                  <Input value={card.image_url} onChange={(event) => updateCard(index, "image_url", event.target.value)} placeholder="https://..." />
                 </div>
                 <div className="space-y-1 md:col-span-2">
                   <Label>말풍선 대화 텍스트</Label>
@@ -263,9 +300,9 @@ export function HeroCopyEditor() {
         </CardContent>
       </Card>
 
-      <Button variant="coral" size="lg" disabled={saving} onClick={() => void save()}>
+      <Button variant="coral" size="lg" disabled={saving || Object.values(uploading).some(Boolean)} onClick={() => void save()}>
         <Save className="mr-2 h-4 w-4" />
-        {saving ? "저장 중..." : "변경사항 저장"}
+        {saving ? "저장 중..." : Object.values(uploading).some(Boolean) ? "사진 업로드 완료 대기 중..." : "변경사항 저장"}
       </Button>
     </div>
   );

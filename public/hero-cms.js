@@ -46,11 +46,20 @@
 
   function bindRollingCards(settings) {
     var cards = Array.isArray(settings.rolling_cards)
-      ? settings.rolling_cards.filter(function (card) { return card && (card.partner_name || card.image_url || card.speech_bubble); })
+      ? settings.rolling_cards.filter(function (card) { return card && safeImage(card.image_url); })
       : [];
-    if (!cards.length) return;
 
-    var visualCard = document.querySelector('[data-landing-hero] .visual-card');
+    var heroVisual = document.querySelector('[data-landing-hero] .hero-visual');
+    var heroGrid = heroVisual && heroVisual.closest('.hero-grid');
+    if (!cards.length) {
+      if (heroVisual) heroVisual.hidden = true;
+      if (heroGrid) heroGrid.classList.add('cms-no-visual');
+      return;
+    }
+
+    if (heroVisual) heroVisual.hidden = false;
+    if (heroGrid) heroGrid.classList.remove('cms-no-visual');
+    var visualCard = heroVisual && heroVisual.querySelector('.visual-card');
     var badge = visualCard && visualCard.querySelector('.live-badge');
     var avatar = document.getElementById('partnerAvatar');
     var name = document.getElementById('partnerName');
