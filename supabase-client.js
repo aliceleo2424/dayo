@@ -257,30 +257,45 @@
 
   window.fetchAuthProfile = async function () {
     var client = window.supabaseClient;
-    if (!client) return null;
+    var isMypage = /(?:^|\/)mypage(?:\.html)?$/i.test(window.location.pathname);
+    if (!client) {
+      if (isMypage) window.location.replace('/index.html');
+      return null;
+    }
     var sessionRes = await client.auth.getUser();
     var user = sessionRes && sessionRes.data && sessionRes.data.user;
     window._dayoAuthUser = user || null;
-    if (!user) return null;
+    if (!user) {
+      window._dayoAuthProfile = null;
+      if (isMypage) {
+        try {
+          localStorage.removeItem('dayo_user_nickname');
+          localStorage.removeItem('userName');
+          localStorage.removeItem('dayo_user_name');
+        } catch (e) { /* ignore */ }
+        window.location.replace('/index.html');
+      }
+      return null;
+    }
     var profileCols = 'nickname, role, user_name, ticket_count, tickets, point_balance, email, speaking_level, last_test_score, last_test_date, streak_count, welcome_email_sent, created_at';
     var profileColsSafe = 'nickname, role, user_name, ticket_count, point_balance, email, speaking_level, last_test_score, last_test_date, streak_count, welcome_email_sent, created_at';
     var q = await client
       .from('profiles')
       .select(profileCols)
-      .eq('user_id', user.id)
-      .maybeSingle();
+      .eq('id', user.id)
+      .single();
     if (q.error) {
       q = await client
         .from('profiles')
         .select(profileColsSafe)
-        .eq('user_id', user.id)
+        .eq('id', user.id)
         .maybeSingle();
     }
     if ((q.error || !q.data) && user.id) {
       q = await client
         .from('profiles')
         .select(profileColsSafe)
-        .eq('id', user.id)
+        .eq('user_id', user.id)
         .maybeSingle();
     }
     if (q.error) {
@@ -291,7 +306,7 @@
         .maybeSingle();
     }
     var profile = q.data || {
-      nickname: window.getCachedNickname() || emailPrefix(user.email),
+      nickname: '',
       ticket_count: null,
       tickets: null,
       point_balance: 0,
@@ -307,31 +322,16 @@
       profile.ticket_count = ticketBalance;
     }
     var dbNick = String((profile && profile.nickname) || '').trim();
-    var dbUserName = String((profile && profile.user_name) || '').trim();
-    var cachedNickname = window.getCachedNickname();
-    var fallback = emailPrefix(user.email);
-    if (dbNick && !(cachedNickname && dbNick === fallback && cachedNickname !== fallback)) {
-      profile.nickname = dbNick;
-    } else if (cachedNickname) {
-      profile.nickname = cachedNickname;
-    } else if (dbUserName && dbUserName !== fallback) {
-      profile.nickname = dbUserName;
-    } else {
-      profile.nickname = fallback;
-    }
+    var metadata = user.user_metadata || {};
+    profile.nickname = dbNick
+      || String(metadata.full_name || '').trim()
+      || String(metadata.name || '').trim()
+      || emailPrefix(user.email)
+      || '회원';
     if (profile.point_balance == null) profile.point_balance = 0;
     rememberLocalProfile(profile, user.email);
     window._dayoAuthProfile = profile;
     window.updateProfileUI(profile.nickname);
-    if (cachedNickname && profile.nickname === cachedNickname && dbNick !== cachedNickname) {
-      client.from('profiles').update({ nickname: cachedNickname, user_name: cachedNickname }).eq('user_id', user.id)
-        .then(function (heal) {
-          if (heal && (heal.error || !heal.data)) {
-            client.from('profiles').update({ nickname: cachedNickname, user_name: cachedNickname }).eq('id', user.id);
-          }
-        })
-        .catch(function () { /* ignore heal */ });
-    }
     try {
       var hist = JSON.parse(localStorage.getItem('dayo_speaking_test_history') || '[]');
       var latest = Array.isArray(hist) ? hist[0] : null;
@@ -371,6 +371,7 @@
     }
     window.DayOSendWelcomeEmail(user, profile);
     document.dispatchEvent(new CustomEvent('dayo:authprofile', { detail: { user: user, profile: profile } }));
+    document.documentElement.classList.remove('dayo-auth-pending');
     return { user: user, profile: profile };
   };
 
@@ -1339,7 +1340,7 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
       var cached = window.getCachedNickname();
-      if (cached) window.updateProfileUI(cached);
+      if (cached && !/(?:^|\/)mypage(?:\.html)?$/i.test(window.location.pathname)) window.updateProfileUI(cached);
       window.fetchAuthProfile();
       window.bindLearnerSessionId();
       bindAdminDashboardNav();
@@ -1347,7 +1348,7 @@
     });
   } else {
     var cachedNow = window.getCachedNickname();
-    if (cachedNow) window.updateProfileUI(cachedNow);
+    if (cachedNow && !/(?:^|\/)mypage(?:\.html)?$/i.test(window.location.pathname)) window.updateProfileUI(cachedNow);
     window.fetchAuthProfile();
     window.bindLearnerSessionId();
     bindAdminDashboardNav();

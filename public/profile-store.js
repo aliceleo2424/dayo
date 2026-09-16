@@ -119,8 +119,8 @@ function getClientKey() {
 }
 
 function nameFromEmail(email) {
-  var local = String(email || '').split('@')[0] || 'DayO';
-  return local.replace(/[._-]+/g, ' ').trim() || 'DayO';
+  var local = String(email || '').split('@')[0] || '';
+  return local.replace(/[._-]+/g, ' ').trim() || '회원';
 }
 
 function cachedNickname() {
@@ -137,6 +137,14 @@ function rememberNickname(name) {
 
 function resolveDisplayName(profile, user, fallbackName) {
   var dbNick = String((profile && profile.nickname) || '').trim();
+  if (user) {
+    var meta = user.user_metadata || {};
+    return dbNick
+      || String(meta.full_name || '').trim()
+      || String(meta.name || '').trim()
+      || String(user.email || '').split('@')[0].trim()
+      || '회원';
+  }
   var dbUserName = String((profile && profile.user_name) || '').trim();
   var cached = cachedNickname();
   var emailName = nameFromEmail((user && user.email) || (profile && profile.email) || '');
@@ -145,17 +153,15 @@ function resolveDisplayName(profile, user, fallbackName) {
   if (cached) return cached;
   if (dbUserName && dbUserName !== emailName) return dbUserName;
   if (fallback && fallback !== emailName) return fallback;
-  return dbUserName || emailName || 'DayO';
+  return dbUserName || emailName || '회원';
 }
 
 function displayNameFromUser(user) {
-  var cached = cachedNickname();
-  if (cached) return cached;
-  if (!user) return 'DayO';
+  if (!user) return '회원';
   var meta = user.user_metadata || {};
   return String(
-    meta.nickname || meta.name || meta.full_name || meta.user_name || nameFromEmail(user.email)
-  ).trim() || 'DayO';
+    meta.full_name || meta.name || String(user.email || '').split('@')[0] || '회원'
+  ).trim() || '회원';
 }
 
 function detectAuthProvider(user) {
@@ -622,7 +628,10 @@ async function waitForTriggerProfile(client, userId) {
   var lastError = null;
   for (var i = 0; i < 5; i++) {
     try {
-      var byId = await client.from('profiles').select('*').eq('user_id', userId).maybeSingle();
+      var byId = await client.from('profiles').select('*').eq('id', userId).maybeSingle();
+      if (!byId.error && !byId.data) {
+        byId = await client.from('profiles').select('*').eq('user_id', userId).maybeSingle();
+      }
       if (byId.error) lastError = byId.error;
       else if (byId.data) return byId.data;
     } catch (err) {
@@ -1035,9 +1044,12 @@ async function signOutAuth() {
   } catch (e) {
     console.warn('[DayO] signOut failed', e);
   }
+  try { window.localStorage.clear(); } catch (e) { /* ignore */ }
+  try { window.sessionStorage.clear(); } catch (e) { /* ignore */ }
   clearAuthLocal();
   profileCache = null;
   dispatchAuthChange(false, { userName: '', userId: '', email: '' });
+  window.location.href = '/';
 }
 
 /** After login: rebind client_key to auth user / email and load/create that profile row */
@@ -1261,15 +1273,27 @@ function isSignedIn() {
 async function bootstrap() {
   var client = getClient();
   bindAuthListener(client);
-  if (!client) return fetchOrCreateProfile();
+  var isMypage = /(?:^|\/)mypage(?:\.html)?$/i.test(window.location.pathname);
+  if (!client) {
+    if (isMypage) {
+      window.location.replace('/index.html');
+      return null;
+    }
+    return fetchOrCreateProfile();
+  }
   try {
-    var sessionRes = await client.auth.getSession();
-    var session = sessionRes && sessionRes.data && sessionRes.data.session;
-    if (session && session.user) {
-      return ensureProfileForUser(session.user);
+    var userRes = await client.auth.getUser();
+    var user = userRes && userRes.data && userRes.data.user;
+    if (user) {
+      return ensureProfileForUser(user);
     }
   } catch (e) {
-    console.warn('[DayO] getSession failed', e);
+    console.warn('[DayO] getUser failed', e);
+  }
+  if (isMypage) {
+    try { window.localStorage.removeItem(NICKNAME_KEY); } catch (e) { /* ignore */ }
+    window.location.replace('/index.html');
+    return null;
   }
   return fetchOrCreateProfile();
 }

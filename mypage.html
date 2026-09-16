@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="dayo-auth-pending">
 <head>
   <meta charset="UTF-8">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-env.js"></script>
-  <script src="supabase-client.js"></script>
+  <script src="supabase-client.js?v=20260916-auth-strict"></script>
   <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="description" content="DayO 마이페이지 — 내 대화 현황과 예약 세션, 대화 기록을 한 곳에서 관리하세요.">
@@ -13,6 +13,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="scroll-lock.js"></script>
   <style>
+    html.dayo-auth-pending body { visibility: hidden; }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -1766,9 +1767,9 @@
   <script src="i18n.js?v=20260914-starter3"></script>
   <script src="materials.js"></script>
   <script src="supabase-env.js"></script>
-  <script type="module" src="profile-store.js?v=20260916-provider-source"></script>
+  <script type="module" src="profile-store.js?v=20260916-auth-strict"></script>
   <script src="mobile-nav.js"></script>
-  <script src="auth.js"></script>
+  <script src="auth.js?v=20260916-auth-strict"></script>
   <script src="terms-mini-modal.js"></script>
   <script src="mode-switch.js?v=20260916-gnb-minimal"></script>
   <script src="ticket-wallet.js"></script>

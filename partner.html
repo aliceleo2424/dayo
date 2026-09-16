@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="mobile-nav.css?v=20260916-gnb-minimal">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-env.js"></script>
-  <script src="supabase-client.js"></script>
+  <script src="supabase-client.js?v=20260916-auth-strict"></script>
   <script src="scroll-lock.js"></script>
   <script>
     (function partnerAccessGuard() {
@@ -264,12 +264,7 @@
         var isPartner = role === 'partner'
           || (profile && (profile.is_partner === true || profile.is_partner === 'true' || profile.is_partner === 1));
         var isAdmin = role === 'admin' || role === 'super_admin' || role === 'superadmin';
-        var email = String(userEmail || '').toLowerCase();
-        var emailHint = email.indexOf('partner') !== -1
-          || email.indexOf('aliceleo2424-partner') !== -1
-          || email === 'aliceleo2424-partner@gmail.com'
-          || /aliceleo2424.*partner/i.test(email);
-        return !!(isPartner || isAdmin || emailHint);
+        return !!(isPartner || isAdmin);
       }
 
       function initPartnerDashboard(user, profile) {
@@ -3560,7 +3555,7 @@
   <script src="materials.js"></script>
   <script src="supabase-env.js"></script>
   <script src="availability-slots.js"></script>
-  <script type="module" src="profile-store.js?v=20260916-provider-source"></script>
+  <script type="module" src="profile-store.js?v=20260916-auth-strict"></script>
   <script>
     (function waitForPartnerStore() {
       if (window.DayOProfileStore && typeof window.loadLoungeStats === 'function') {
@@ -3572,7 +3567,7 @@
   </script>
   <script src="terms-mini-modal.js"></script>
   <script src="mobile-nav.js"></script>
-  <script src="auth.js"></script>
+  <script src="auth.js?v=20260916-auth-strict"></script>
   <script src="mode-switch.js?v=20260916-gnb-minimal"></script>
   <script src="role-switch.js"></script>
   <script src="legal-footer.js"></script>

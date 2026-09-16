@@ -2,19 +2,6 @@
 (function () {
   'use strict';
 
-  var DAYO_SESSION_KEYS = [
-    'userName',
-    'dayo.memberSession',
-    'dayo_userEmail',
-    'dayo_is_logged_in',
-    'dayo_user_name',
-    'dayo_user_nickname',
-    'dayo_user_email',
-    'dayo.authUserId',
-    'dayo_users',
-    'dayo_point_balance'
-  ];
-
   function getAuthClient() {
     if (window.supabaseClient && window.supabaseClient.auth) return window.supabaseClient;
     if (window.supabase && window.supabase.auth && typeof window.supabase.auth.signOut === 'function') {
@@ -24,24 +11,7 @@
   }
 
   function purgeLocalAuth() {
-    try {
-      var keys = [];
-      var i;
-      for (i = 0; i < window.localStorage.length; i += 1) {
-        keys.push(window.localStorage.key(i));
-      }
-      keys.forEach(function (key) {
-        if (!key) return;
-        var lower = key.toLowerCase();
-        if (key.indexOf('sb-') === 0 || lower.indexOf('supabase') !== -1 || lower.indexOf('auth') !== -1) {
-          window.localStorage.removeItem(key);
-        }
-      });
-      DAYO_SESSION_KEYS.forEach(function (key) {
-        window.localStorage.removeItem(key);
-      });
-    } catch (e) { /* ignore quota / private mode */ }
-
+    try { window.localStorage.clear(); } catch (e) { /* ignore quota / private mode */ }
     try { window.sessionStorage.clear(); } catch (e) { /* ignore */ }
 
     window._dayoAuthUser = null;
