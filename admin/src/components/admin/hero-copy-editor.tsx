@@ -170,9 +170,11 @@ export function HeroCopyEditor() {
         key: "hero_section",
         value: settings,
         updated_at: new Date().toISOString(),
-      }, { onConflict: "key" });
+      }, { onConflict: "key" }).select("key, updated_at").single();
       if (result.error) throw result.error;
-      setNotice("히어로 섹션 설정이 성공적으로 반영되었습니다 ✨");
+      const success = "✅ 카피 에디터 설정이 저장되어 dayotalk.com 메인에 즉시 반영되었습니다.";
+      setNotice(success);
+      window.setTimeout(() => setNotice((current) => current === success ? "" : current), 4500);
     } catch (saveError) {
       const message = saveError instanceof Error ? saveError.message : "히어로 설정 저장에 실패했습니다.";
       console.error("[DayO CMS] hero save failed", saveError);
@@ -189,7 +191,7 @@ export function HeroCopyEditor() {
 
   return (
     <div className="space-y-6">
-      {notice && <p className="rounded-lg bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">{notice}</p>}
+      {notice && <div className="fixed right-6 top-6 z-[100] max-w-md rounded-xl bg-emerald-600 px-5 py-4 text-sm font-semibold text-white shadow-xl">{notice}</div>}
       {error && <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 
       <Card>

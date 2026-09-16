@@ -327,6 +327,43 @@
       box-shadow: 0 2px 0 var(--coral-dark), 0 4px 12px rgba(255, 107, 87, 0.22);
     }
 
+    .cms-announcement {
+      position: fixed; top: 64px; left: 0; right: 0; z-index: 95;
+      padding: 0.55rem 1rem; text-align: center;
+      background: linear-gradient(90deg, #FF6B57, #FF8A68);
+      box-shadow: 0 4px 14px rgba(92, 74, 66, 0.12);
+    }
+    .cms-announcement a { color: #fff; font-size: 0.86rem; font-weight: 800; text-decoration: none; }
+    .cms-magazine { padding: var(--section-gap) 0; }
+    .cms-magazine-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+    .cms-magazine-card {
+      overflow: hidden; border: 1px solid rgba(255,209,220,.55); border-radius: 22px;
+      background: var(--bg-card); color: var(--text); text-decoration: none;
+      box-shadow: 0 10px 26px var(--shadow-warm); transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .cms-magazine-card:hover { transform: translateY(-3px); box-shadow: 0 15px 32px var(--shadow-soft); }
+    .cms-magazine-card img { width: 100%; height: 160px; object-fit: cover; display: block; }
+    .cms-magazine-card__body { padding: 1.1rem; }
+    .cms-magazine-card__tag { color: var(--coral); font-size: .72rem; font-weight: 800; }
+    .cms-magazine-card h3 { margin: .45rem 0; font-size: 1rem; line-height: 1.45; }
+    .cms-magazine-card p { color: var(--text-muted); font-size: .82rem; line-height: 1.6; }
+    .cms-popup-overlay {
+      position: fixed; inset: 0; z-index: 500; display: flex; align-items: center; justify-content: center;
+      padding: 1.25rem; background: rgba(49, 39, 35, .46); backdrop-filter: blur(6px);
+    }
+    .cms-popup {
+      position: relative; width: min(420px, 100%); overflow: hidden; border-radius: 24px;
+      background: #FFFCFA; box-shadow: 0 24px 70px rgba(49,39,35,.25); text-align: center;
+    }
+    .cms-popup img { width: 100%; max-height: 260px; object-fit: cover; display: block; }
+    .cms-popup__body { padding: 1.4rem; }
+    .cms-popup h2 { margin: 0 0 .6rem; font-size: 1.2rem; }
+    .cms-popup p { color: var(--text-muted); line-height: 1.7; white-space: pre-line; }
+    .cms-popup__close {
+      position: absolute; top: .7rem; right: .7rem; width: 34px; height: 34px; border: 0;
+      border-radius: 50%; background: rgba(255,255,255,.9); color: var(--text); cursor: pointer; font-weight: 800;
+    }
+
     .page { position: relative; z-index: 2; width: 100%; max-width: 100%; overflow-x: hidden; box-sizing: border-box; }
 
     .app-container {
@@ -1953,6 +1990,7 @@
     @media (max-width: 860px) {
       .journey-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
       .review-card { transform: none !important; }
+      .cms-magazine-grid { grid-template-columns: 1fr; max-width: 430px; margin: 0 auto; }
     }
 
     @media (max-width: 600px) {
@@ -2282,6 +2320,9 @@
       </div>
     </div>
   </header>
+  <div class="cms-announcement" id="cmsAnnouncement" hidden>
+    <a id="cmsAnnouncementLink" href="#"></a>
+  </div>
   <div class="nav-drawer-backdrop" id="mobileNavBackdrop"></div>
   <nav class="nav-drawer" id="mobileNav" data-i18n="nav.mobileMenuAria" data-i18n-attr="aria-label" aria-label="모바일 메뉴">
     <div class="nav-drawer__head">DayO 메뉴</div>
@@ -2529,6 +2570,27 @@
         <div class="reveal" style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center;">
           <button type="button" class="header-cta" style="display: inline-flex; border: none; font-family: inherit; cursor: pointer;" data-booking-open data-i18n="tickets.cta">📅 대화 세션 예약하기</button>
           <button type="button" class="header-cta" style="display: inline-flex; border: none; font-family: inherit; cursor: pointer;" data-tickets-open data-i18n="tickets.chargeCta" onclick="openTicketModal()">세션 티켓 충전하기 💳</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="cms-magazine" id="magazine" data-landing-only>
+      <div class="section-inner">
+        <p class="section-label reveal">Lounge Magazine</p>
+        <h2 class="section-title reveal">DayO 라운지 매거진</h2>
+        <div class="cms-magazine-grid" id="cmsMagazineGrid">
+          <a class="cms-magazine-card reveal" href="#topics">
+            <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=800&q=80" alt="">
+            <div class="cms-magazine-card__body"><span class="cms-magazine-card__tag">대화팁</span><h3>처음 만난 사람과 편하게 대화하는 법</h3><p>부담 없이 시작하는 글로벌 스몰토크 가이드</p></div>
+          </a>
+          <a class="cms-magazine-card reveal" href="#partners">
+            <img src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=80" alt="">
+            <div class="cms-magazine-card__body"><span class="cms-magazine-card__tag">문화</span><h3>서로 다른 일상을 나누는 즐거움</h3><p>파트너와 문화 이야기를 자연스럽게 이어가 보세요</p></div>
+          </a>
+          <a class="cms-magazine-card reveal" href="#how">
+            <img src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=800&q=80" alt="">
+            <div class="cms-magazine-card__body"><span class="cms-magazine-card__tag">꿀팁</span><h3>말이 막힐 때 활용하는 AI 매니저</h3><p>단어 도움과 추천 표현으로 대화를 계속하는 방법</p></div>
+          </a>
         </div>
       </div>
     </section>
@@ -3859,6 +3921,6 @@
     if (modal) modal.style.display = 'none';
   }
 </script>
-<script src="hero-cms.js?v=20260916-realtime-hotfix"></script>
+<script src="hero-cms.js?v=20260916-full-cms"></script>
 </body>
 </html>
