@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ImagePlus, Loader2 } from "lucide-react";
 
 export type ArticleRow = {
   id: string;
@@ -20,6 +21,7 @@ export type ArticleRow = {
   content: string;
   thumbnail_url: string | null;
   is_published: boolean | null;
+  published: boolean | null;
   created_at: string;
 };
 
@@ -29,10 +31,10 @@ function articlesError(err: { message?: string; code?: string } | null, fallback
   const message = String(err?.message || "");
   const code = String(err?.code || "");
   if (code === "42P01" || /does not exist|relation .*articles/i.test(message)) {
-    return "articles 테이블이 없습니다. supabase/migrations/018_articles_and_settlement.sql 과 022_articles_admin_rls.sql 을 SQL 에디터에서 실행해 주세요.";
+    return "articles 테이블이 없습니다. 마이그레이션 018과 030을 적용해 주세요.";
   }
   if (code === "42501" || /row-level security|permission denied|RLS/i.test(message)) {
-    return "articles RLS가 쓰기를 막고 있습니다. 마이그레이션 022_articles_admin_rls.sql 을 Supabase SQL 에디터에서 실행해 주세요.";
+    return "articles RLS가 쓰기를 막고 있습니다. 관리자 로그인 상태와 마이그레이션 030 적용 여부를 확인해 주세요.";
   }
   return message || fallback;
 }
@@ -52,6 +54,7 @@ export function ArticlesCms() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
@@ -59,12 +62,13 @@ export function ArticlesCms() {
     if (!opts?.silent) setLoading(true);
     const { data, error: err } = await supabase
       .from("articles")
-      .select("id, title, category, summary, content, thumbnail_url, is_published, created_at")
+      .select("id, title, category, summary, content, thumbnail_url, is_published, published, created_at")
       .order("created_at", { ascending: false });
     if (err) {
-      setError(articlesError(err, "articles 테이블을 읽을 수 없습니다. 마이그레이션 018·022를 Supabase SQL 에디터에서 실행해 주세요."));
+      setError(articlesError(err, "articles 테이블을 읽을 수 없습니다. 마이그레이션 018·030을 적용해 주세요."));
       setRows([]);
     } else {
+      setError("");
       setRows((data || []) as unknown as ArticleRow[]);
     }
     setLoading(false);
@@ -104,6 +108,38 @@ export function ArticlesCms() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  async function uploadThumbnail(file: File) {
+    if (!file.type.startsWith("image/")) {
+      setError("이미지 파일만 업로드할 수 있습니다.");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setError("썸네일은 10MB 이하 파일만 업로드할 수 있습니다.");
+      return;
+    }
+    const extension = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "") || "jpg";
+    const path = `magazine/${Date.now()}-${crypto.randomUUID()}.${extension}`;
+    setUploading(true);
+    setError("");
+    try {
+      const result = await supabase.storage.from("public-assets").upload(path, file, {
+        cacheControl: "3600",
+        contentType: file.type,
+        upsert: false,
+      });
+      if (result.error) throw result.error;
+      const publicUrl = supabase.storage.from("public-assets").getPublicUrl(result.data.path).data.publicUrl;
+      setForm((current) => ({ ...current, thumbnail_url: publicUrl }));
+    } catch (uploadError) {
+      const message = uploadError instanceof Error ? uploadError.message : "썸네일 업로드에 실패했습니다.";
+      console.error("[DayO Articles] thumbnail upload failed", uploadError);
+      setError(message);
+      window.alert(`썸네일을 업로드하지 못했습니다.\n${message}`);
+    } finally {
+      setUploading(false);
+    }
+  }
+
   async function publish() {
     if (!form.title.trim() || !form.content.trim()) {
       setError("제목과 본문은 필수입니다.");
@@ -114,19 +150,22 @@ export function ArticlesCms() {
     setNotice("");
     const payload = {
       title: form.title.trim(),
-      category: form.category,
+      category: form.category || "대화팁",
       summary: form.summary.trim() || null,
       content: form.content.trim(),
       thumbnail_url: form.thumbnail_url.trim() || null,
       is_published: form.is_published,
+      published: form.is_published,
     };
-    const ARTICLES_COLS = "id, title, category, summary, content, thumbnail_url, is_published, created_at";
+    const ARTICLES_COLS = "id, title, category, summary, content, thumbnail_url, is_published, published, created_at";
     const result = editingId
       ? await supabase.from("articles").update(payload).eq("id", editingId).select(ARTICLES_COLS)
-      : await supabase.from("articles").insert(payload).select(ARTICLES_COLS);
+      : await supabase.from("articles").insert({ ...payload, created_at: new Date().toISOString() }).select(ARTICLES_COLS);
     setSaving(false);
     if (result.error) {
-      setError(articlesError(result.error, "발행에 실패했습니다. 마이그레이션 022를 적용해 주세요."));
+      const message = articlesError(result.error, "발행에 실패했습니다. 마이그레이션 030을 적용해 주세요.");
+      setError(message);
+      window.alert(`아티클을 저장하지 못했습니다.\n${message}`);
       await load({ silent: true });
       return;
     }
@@ -134,13 +173,15 @@ export function ArticlesCms() {
     if (saved) {
       setRows((prev) => [saved, ...prev.filter((row) => row.id !== saved.id)]);
     }
-    setNotice(editingId ? "아티클이 수정·발행되었습니다." : "새 아티클이 발행되었습니다.");
+    const success = editingId ? "🎉 아티클이 성공적으로 수정되었습니다!" : "🎉 아티클이 성공적으로 발행되었습니다!";
+    setNotice(success);
+    window.setTimeout(() => setNotice((current) => current === success ? "" : current), 4500);
     resetForm();
     await load({ silent: true });
   }
 
   async function togglePublished(row: ArticleRow, next: boolean) {
-    const { error: err } = await supabase.from("articles").update({ is_published: next }).eq("id", row.id);
+    const { error: err } = await supabase.from("articles").update({ is_published: next, published: next }).eq("id", row.id);
     if (err) {
       setError(articlesError(err, "발행 상태 변경에 실패했습니다."));
       return;
@@ -150,7 +191,7 @@ export function ArticlesCms() {
   }
 
   async function remove(row: ArticleRow) {
-    if (!window.confirm(`「${row.title}」 아티클을 삭제할까요?`)) return;
+    if (!window.confirm("이 아티클을 삭제하시겠습니까?")) return;
     const { error: err } = await supabase.from("articles").delete().eq("id", row.id);
     if (err) {
       setError(articlesError(err, "삭제에 실패했습니다."));
@@ -197,6 +238,27 @@ export function ArticlesCms() {
                 onChange={(e) => setForm((f) => ({ ...f, thumbnail_url: e.target.value }))}
                 placeholder="https://..."
               />
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <label className="inline-flex h-9 cursor-pointer items-center justify-center rounded-md border border-input bg-background px-3 text-sm font-medium hover:bg-accent">
+                  {uploading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> 업로드 중...</> : <><ImagePlus className="mr-2 h-4 w-4" /> 사진 파일 선택</>}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    disabled={uploading}
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      if (file) void uploadThumbnail(file);
+                      event.target.value = "";
+                    }}
+                  />
+                </label>
+                <span className="text-xs text-muted-foreground">최대 10MB</span>
+              </div>
+              {form.thumbnail_url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={form.thumbnail_url} alt="썸네일 미리보기" className="mt-3 h-24 w-40 rounded-lg border object-cover" />
+              )}
             </div>
             <div className="sm:col-span-2">
               <Label htmlFor="article-summary">한 줄 요약</Label>
@@ -224,7 +286,7 @@ export function ArticlesCms() {
               <Switch checked={form.is_published} onCheckedChange={(v) => setForm((f) => ({ ...f, is_published: v }))} />
               <span className="text-sm">바로 발행</span>
             </div>
-            <Button variant="coral" onClick={publish} disabled={saving}>
+            <Button variant="coral" onClick={publish} disabled={saving || uploading}>
               {saving ? "저장 중…" : "발행하기"}
             </Button>
             {editingId && (
@@ -232,7 +294,7 @@ export function ArticlesCms() {
             )}
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
-          {notice && <p className="text-sm text-emerald-700">{notice}</p>}
+          {notice && <div className="fixed right-6 top-6 z-[100] rounded-xl bg-emerald-600 px-5 py-4 text-sm font-semibold text-white shadow-xl">{notice}</div>}
         </CardContent>
       </Card>
 

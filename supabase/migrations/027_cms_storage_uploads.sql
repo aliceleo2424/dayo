@@ -24,7 +24,7 @@ create policy "public_assets_admin_insert"
   to authenticated
   with check (
     bucket_id = 'public-assets'
-    and (storage.foldername(name))[1] = 'hero-cards'
+    and (storage.foldername(name))[1] in ('hero-cards', 'magazine')
     and exists (
       select 1 from public.profiles
       where (profiles.id = auth.uid() or profiles.user_id = auth.uid())
@@ -38,7 +38,7 @@ create policy "public_assets_admin_update"
   to authenticated
   using (
     bucket_id = 'public-assets'
-    and (storage.foldername(name))[1] = 'hero-cards'
+    and (storage.foldername(name))[1] in ('hero-cards', 'magazine')
     and exists (
       select 1 from public.profiles
       where (profiles.id = auth.uid() or profiles.user_id = auth.uid())
@@ -47,7 +47,7 @@ create policy "public_assets_admin_update"
   )
   with check (
     bucket_id = 'public-assets'
-    and (storage.foldername(name))[1] = 'hero-cards'
+    and (storage.foldername(name))[1] in ('hero-cards', 'magazine')
     and exists (
       select 1 from public.profiles
       where (profiles.id = auth.uid() or profiles.user_id = auth.uid())
@@ -61,7 +61,7 @@ create policy "public_assets_admin_delete"
   to authenticated
   using (
     bucket_id = 'public-assets'
-    and (storage.foldername(name))[1] = 'hero-cards'
+    and (storage.foldername(name))[1] in ('hero-cards', 'magazine')
     and exists (
       select 1 from public.profiles
       where (profiles.id = auth.uid() or profiles.user_id = auth.uid())

@@ -116,7 +116,8 @@
         .from('articles')
         .select('*')
         .eq('is_published', true)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(4);
       if (query.error) {
         query = await supabase
           .from('lounge_posts')
@@ -248,6 +249,14 @@
     loadLoungePosts().then(function () {
       initLoungeCarousel();
     });
+    var supabase = getLoungeClient();
+    if (supabase && typeof supabase.channel === 'function') {
+      supabase.channel('mypage-published-articles')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'articles' }, function () {
+          loadLoungePosts();
+        })
+        .subscribe();
+    }
   }
 
   if (document.readyState === 'loading') {

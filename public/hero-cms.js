@@ -254,6 +254,35 @@
     return result.data || [];
   }
 
+  async function fetchPublishedArticles() {
+    var db = window.supabaseClient;
+    var env = window.__DAYO_ENV__ || {};
+    var url = String(env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/+$/, '');
+    var anonKey = String(env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '');
+    if (url && anonKey) {
+      try {
+        var endpoint = url + '/rest/v1/articles?select=id,title,category,thumbnail_url,summary,created_at&is_published=eq.true&order=created_at.desc&limit=4';
+        var response = await fetch(endpoint, {
+          method: 'GET',
+          cache: 'no-store',
+          headers: { apikey: anonKey, Authorization: 'Bearer ' + anonKey }
+        });
+        if (!response.ok) throw new Error('Article fetch failed: ' + response.status);
+        return await response.json();
+      } catch (fetchError) {
+        console.warn('[DayO CMS] article no-store fetch fallback', fetchError);
+      }
+    }
+    if (!db) return [];
+    var result = await db.from('articles')
+      .select('id, title, category, thumbnail_url, summary, created_at')
+      .eq('is_published', true)
+      .order('created_at', { ascending: false })
+      .limit(4);
+    if (result.error) return [];
+    return result.data || [];
+  }
+
   async function loadAllSettings() {
     try {
       var rows = await fetchAllSettings();
@@ -266,6 +295,8 @@
       }
       if (settings.magazine_posts) bindMagazine(settings.magazine_posts);
       if (settings.real_reviews) bindReviews(settings.real_reviews);
+      var articles = await fetchPublishedArticles();
+      if (articles.length) bindMagazine(articles);
     } catch (error) {
       console.warn('[DayO CMS] static fallbacks retained', error);
     }
@@ -279,6 +310,13 @@
         event: '*',
         schema: 'public',
         table: 'site_settings'
+      }, function () {
+        window.location.reload();
+      })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'articles'
       }, function () {
         window.location.reload();
       })
