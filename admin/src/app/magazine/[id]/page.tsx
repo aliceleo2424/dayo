@@ -159,8 +159,8 @@ export default async function MagazineArticlePage(
           <Link href={siteUrl} className="flex items-center">
             <Image src="/images/logo.png" alt="DayO" width={112} height={36} className="h-8 w-auto object-contain" priority />
             <span className="ml-2 inline-flex flex-col justify-center whitespace-nowrap border-l border-[#EDE4D5] pl-2 text-left text-[10px] leading-[1.2]">
-              <span className="font-semibold tracking-[-0.2px] text-[#57534E]">1:1 Global Casual</span>
-              <span className="font-medium tracking-[-0.2px] text-[#78716C]">Communication Lounge</span>
+              <span className="font-semibold tracking-[-0.2px] text-[#57534E]">1:1 Global Culture</span>
+              <span className="font-medium tracking-[-0.2px] text-[#78716C]">Conversation Lounge</span>
             </span>
           </Link>
         </div>

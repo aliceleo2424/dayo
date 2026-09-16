@@ -52,8 +52,8 @@ export function AdminSidebar() {
           <Link href="/admin/dashboard" className="flex min-w-0 flex-1 items-center bg-transparent">
             <img src="/images/logo.png" alt="DayO Admin" className="h-8 w-auto max-w-[4.5rem] object-contain bg-transparent" />
             <span className="ml-1.5 inline-flex min-w-0 flex-col justify-center whitespace-nowrap border-l border-white/20 pl-1.5 text-left leading-[1.2]">
-              <span className="text-[10px] font-semibold tracking-[-0.2px] text-white">1:1 Global Casual</span>
-              <span className="text-[10px] font-medium tracking-[-0.2px] text-slate-400">Communication Lounge</span>
+              <span className="text-[10px] font-semibold tracking-[-0.2px] text-white">1:1 Global Culture</span>
+              <span className="text-[10px] font-medium tracking-[-0.2px] text-slate-400">Conversation Lounge</span>
             </span>
           </Link>
         )}
