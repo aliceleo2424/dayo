@@ -943,22 +943,11 @@ export async function updateProfileRole(
   row: { id: string; user_id?: string | null },
   nextRole: "partner" | "user"
 ) {
-  const first = await supabase
-    .from("profiles")
-    .update({ role: nextRole })
-    .eq("id", row.id)
-    .select("id");
-  if (!first.error && first.data && first.data.length) return;
-
   const uid = row.user_id || row.id;
-  const second = await supabase
-    .from("profiles")
-    .update({ role: nextRole })
-    .eq("user_id", uid)
-    .select("id");
-  if (second.error) throw new Error(second.error.message);
-  if (first.error && !(second.data && second.data.length)) throw new Error(first.error.message);
-  if (!(second.data && second.data.length)) {
-    throw new Error("프로필을 찾지 못해 권한을 변경하지 못했습니다.");
-  }
+  const result = await supabase.rpc("admin_set_user_role", {
+    p_user_id: uid,
+    p_role: nextRole,
+  });
+  if (result.error) throw new Error(result.error.message);
+  if (!result.data) throw new Error("프로필 권한을 변경하지 못했습니다.");
 }
