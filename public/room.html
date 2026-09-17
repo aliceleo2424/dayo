@@ -1252,10 +1252,17 @@
       flex: 1 1 auto;
       min-height: 0;
       overflow-y: auto;
+      overscroll-behavior: contain;
       padding: 0.75rem 0.85rem 0.9rem;
       display: flex;
       flex-direction: column;
       gap: 0.7rem;
+    }
+
+    .talk-card-category {
+      color: var(--coral);
+      font-size: 0.75rem;
+      font-weight: 800;
     }
 
     .talk-card-question {
@@ -1268,6 +1275,46 @@
       line-height: 1.55;
       color: var(--text, #5C4A42);
       min-height: 5.5rem;
+    }
+
+    .talk-card-english {
+      color: var(--text-muted, #9A8580);
+      font-size: 0.8rem;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .talk-card-followups {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .talk-card-followups-title {
+      font-size: 0.76rem;
+      font-weight: 800;
+    }
+
+    #talkCardFollowups {
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .talk-card-followup {
+      padding: 0.65rem 0.75rem;
+      border: 1px solid var(--coral-pale);
+      border-radius: 12px;
+      background: #fff;
+      font-size: 0.79rem;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .talk-card-followup-en {
+      display: block;
+      margin-top: 0.2rem;
+      color: var(--text-muted, #9A8580);
+      font-size: 0.74rem;
     }
 
     .talk-card-actions {
@@ -3286,7 +3333,13 @@
           <button type="button" class="talk-card-tab" data-talk-cat="food" role="tab" aria-selected="false">🥐 디저트·음식</button>
         </div>
         <div class="talk-card-body">
+          <div class="talk-card-category" id="talkCardCategory"></div>
           <div class="talk-card-question" id="talkCardQuestion"></div>
+          <p class="talk-card-english" id="talkCardQuestionEn" lang="en"></p>
+          <div class="talk-card-followups">
+            <div class="talk-card-followups-title">조금 더 이야기해 볼까요?</div>
+            <div id="talkCardFollowups" aria-label="추가 질문"></div>
+          </div>
           <div class="talk-card-actions">
             <button type="button" class="talk-card-btn talk-card-btn--next" id="talkCardNextBtn">다음 질문 보기 🎲</button>
             <button type="button" class="talk-card-btn talk-card-btn--send" id="talkCardSendBtn">이 질문 채팅으로 전송 💬</button>
@@ -3437,6 +3490,7 @@
   <script src="supabase-env.js"></script>
   <script type="module" src="profile-store.js?v=20260916-auth-strict"></script>
   <script src="chat-prefs.js"></script>
+  <script src="talk-cards-data.js"></script>
   <script>window.__dayoUsePeerJS = true;</script>
   <script src="room-live.js"></script>
   <script>
@@ -4323,33 +4377,29 @@
     }
 
     /* Talk cards data + UI */
-    var TALK_CARD_POOL = {
-      daily: [
-        '스트레스를 받을 때 나만의 힐링 방법이 있다면?',
-        '최근에 본 영화나 유튜브 영상 중 가장 인상 깊었던 것은?',
-        '주말에 가장 좋아하는 나만의 루틴이 있나요?',
-        '친구에게 나를 한 문장으로 소개한다면 뭐라고 할까요?',
-        '요즘 가장 빠져 있는 취미나 관심사는 무엇인가요?',
-        '하루 중 가장 좋아하는 시간대는 언제인가요?'
-      ],
-      travel: [
-        '다른 나라에 살 수 있다면 어느 도시에서 살아보고 싶나요?',
-        '지금까지 여행 중 가장 기억에 남는 음식은 무엇이었나요?',
-        '다음에 꼭 가보고 싶은 여행지는 어디인가요?',
-        '여행할 때 계획형인가요, 즉흥형인가요?',
-        '현지에서만 할 수 있는 경험 중 해보고 싶은 것은?',
-        '여행 사진을 찍을 때 꼭 담는 순간이 있나요?'
-      ],
-      food: [
-        '한국에서 가장 좋아하는 길거리 음식이나 디저트는 무엇인가요?',
-        '커피와 디저트 중 하나를 고른다면 어떤 조합이 최고인가요?',
-        '집에서도 자주 해 먹는 간단한 요리가 있나요?',
-        '다른 나라 음식 중 처음 먹어보고 싶은 메뉴는?',
-        '매운 음식 vs 달콤한 음식, 오늘 기분은 어느 쪽인가요?',
-        '카페에서 항상 시키는 시그니처 메뉴가 있나요?'
-      ]
+    var talkCardData = Array.isArray(window.DayOTalkCards) ? window.DayOTalkCards : [];
+    var TALK_CARD_GROUPS = {
+      daily: ['daily', 'taste', 'korea-life'],
+      travel: ['korea-trip', 'world-trip', 'culture'],
+      food: ['food']
+    };
+    var TALK_CARD_CATEGORY_LABELS = {
+      daily: '일상',
+      taste: '취향',
+      'korea-life': '한국 생활',
+      'korea-trip': '한국 여행',
+      'world-trip': '해외 여행',
+      culture: '문화',
+      food: '음식'
     };
     var talkCardState = { category: 'daily', index: 0 };
+
+    function cardsForTalkCategory(category) {
+      var included = TALK_CARD_GROUPS[category] || TALK_CARD_GROUPS.daily;
+      return talkCardData.filter(function (card) {
+        return included.indexOf(card.category) !== -1;
+      });
+    }
 
     function pickNextTalkIndex(list, currentIndex) {
       if (!list || !list.length) return 0;
@@ -4364,17 +4414,51 @@
     }
 
     function renderTalkCardQuestion(advance) {
-      var list = TALK_CARD_POOL[talkCardState.category] || TALK_CARD_POOL.daily;
+      var list = cardsForTalkCategory(talkCardState.category);
+      var question = document.getElementById('talkCardQuestion');
+      var english = document.getElementById('talkCardQuestionEn');
+      var category = document.getElementById('talkCardCategory');
+      var followups = document.getElementById('talkCardFollowups');
+      if (!list.length) {
+        if (question) question.textContent = '대화카드를 불러오지 못했어요.';
+        if (english) english.textContent = '';
+        if (category) category.textContent = '';
+        if (followups) followups.replaceChildren();
+        return;
+      }
       if (advance) talkCardState.index = pickNextTalkIndex(list, talkCardState.index);
       if (talkCardState.index < 0 || talkCardState.index >= list.length) talkCardState.index = 0;
-      var el = document.getElementById('talkCardQuestion');
-      if (el) el.textContent = list[talkCardState.index];
+      var card = list[talkCardState.index];
+      if (question) {
+        question.textContent = card.questionKo;
+        question.setAttribute('data-card-id', card.id);
+      }
+      if (english) english.textContent = card.questionEn;
+      if (category) category.textContent = TALK_CARD_CATEGORY_LABELS[card.category] || card.category;
+      if (followups) {
+        followups.replaceChildren();
+        card.followupsKo.slice(0, 2).forEach(function (text, index) {
+          var item = document.createElement('div');
+          item.className = 'talk-card-followup';
+          var ko = document.createElement('span');
+          ko.textContent = (index + 1) + '. ' + text;
+          var en = document.createElement('span');
+          en.className = 'talk-card-followup-en';
+          en.lang = 'en';
+          en.textContent = card.followupsEn[index] || '';
+          item.append(ko, en);
+          followups.appendChild(item);
+        });
+      }
+      var body = document.querySelector('#talk-card-panel .talk-card-body');
+      if (body) body.scrollTop = 0;
     }
 
     function setTalkCategory(cat) {
-      if (!TALK_CARD_POOL[cat]) return;
+      if (!TALK_CARD_GROUPS[cat]) return;
       talkCardState.category = cat;
-      talkCardState.index = Math.floor(Math.random() * TALK_CARD_POOL[cat].length);
+      var list = cardsForTalkCategory(cat);
+      talkCardState.index = list.length ? Math.floor(Math.random() * list.length) : 0;
       document.querySelectorAll('[data-talk-cat]').forEach(function (btn) {
         var on = btn.getAttribute('data-talk-cat') === cat;
         btn.classList.toggle('is-active', on);
