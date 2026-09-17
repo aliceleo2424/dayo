@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
     const data = await resend.emails.send({
       from: fromAddress,
       to: email,
-      reply_to: 'dayo.speak@gmail.com',
+      replyTo: 'dayo.speak@gmail.com',
       subject: `[DayO] ${targetName}님, 첫 세션 9,900원 체험 할인권이 도착했습니다 ☕`,
       html: htmlContent,
     });
