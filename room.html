@@ -1381,6 +1381,16 @@
       color: var(--coral);
     }
 
+    .talk-card-tab:disabled,
+    .talk-card-btn:disabled { cursor: default; opacity: 0.72; }
+
+    .talk-card-readonly-note {
+      padding: 0.2rem 0.85rem 0;
+      color: var(--text-muted, #9A8580);
+      font-size: 0.73rem;
+      line-height: 1.45;
+    }
+
     .talk-card-body {
       flex: 1 1 auto;
       min-height: 0;
@@ -3456,6 +3466,7 @@
           <button type="button" class="talk-card-tab" data-talk-cat="travel" role="tab" aria-selected="false">✈️ 여행·문화</button>
           <button type="button" class="talk-card-tab" data-talk-cat="food" role="tab" aria-selected="false">🥐 디저트·음식</button>
         </div>
+        <p class="talk-card-readonly-note" id="talkCardReadonlyNote" hidden>파트너가 다음 질문을 선택해요.</p>
         <div class="talk-card-body">
           <div class="talk-card-category" id="talkCardCategory"></div>
           <div class="talk-card-question" id="talkCardQuestion"></div>
@@ -4347,6 +4358,10 @@
     const talkCardsBtn = document.getElementById('btn-talk-cards');
 
     var chatChannel = null;
+    var chatChannelReady = false;
+    var pendingCardRequestId = '';
+    var cardRequestSequence = 0;
+    var cardRequestSessionId = Math.random().toString(36).slice(2, 10);
     var chatClientId = 'c_' + Math.random().toString(36).slice(2, 10);
     try {
       if (window._dayoAuthUser && window._dayoAuthUser.id) chatClientId = String(window._dayoAuthUser.id);
@@ -4389,7 +4404,33 @@
           payload.message,
           false
         );
-      }).subscribe();
+      });
+      chatChannel.on('broadcast', { event: 'talk_card_change' }, function (event) {
+        applyRemoteTalkCard((event && event.payload) || {});
+      });
+      chatChannel.on('broadcast', { event: 'talk_card_state_request' }, function (event) {
+        var payload = (event && event.payload) || {};
+        var access = window.DayORoomAccess;
+        if (!isRealPartnerCardController() || payload.roomId !== access.roomId ||
+            payload.requestedBy !== access.learnerId || !payload.requestId) return;
+        broadcastCurrentTalkCard('talk_card_state_response', {
+          requestId: payload.requestId,
+          targetId: payload.requestedBy
+        });
+      });
+      chatChannel.on('broadcast', { event: 'talk_card_state_response' }, function (event) {
+        var payload = (event && event.payload) || {};
+        var access = window.DayORoomAccess;
+        if (!isLearnerCardViewer() || payload.targetId !== access.userId ||
+            payload.requestId !== pendingCardRequestId) return;
+        applyRemoteTalkCard(payload);
+      });
+      chatChannel.subscribe(function (status) {
+        chatChannelReady = status === 'SUBSCRIBED';
+        if (!chatChannelReady) return;
+        if (isRealPartnerCardController()) broadcastCurrentTalkCard('talk_card_change');
+        else if (isLearnerCardViewer()) requestCurrentTalkCard();
+      });
       return chatChannel;
     }
 
@@ -4432,7 +4473,7 @@
         chatToggle.classList.remove('is-active');
         chatToggle.setAttribute('aria-pressed', 'false');
       }
-      renderTalkCardQuestion(false);
+      if (canControlTalkCards() || talkCardState.updatedAt) renderTalkCardQuestion(false);
     }
 
     window.toggleTalkCardPanel = function () {
@@ -4521,7 +4562,85 @@
       culture: '문화',
       food: '음식'
     };
-    var talkCardState = { category: 'daily', index: 0 };
+    var talkCardState = { category: 'daily', index: 0, updatedAt: 0 };
+
+    function canControlTalkCards() {
+      var access = window.DayORoomAccess;
+      return !!(access && access.allowed && (access.adminTest || access.role === 'partner'));
+    }
+
+    function isRealPartnerCardController() {
+      var access = window.DayORoomAccess;
+      return !!(access && access.allowed && !access.adminTest && access.role === 'partner');
+    }
+
+    function isLearnerCardViewer() {
+      var access = window.DayORoomAccess;
+      return !!(access && access.allowed && !access.adminTest && access.role === 'user');
+    }
+
+    function updateTalkCategoryTabs() {
+      document.querySelectorAll('[data-talk-cat]').forEach(function (btn) {
+        var on = btn.getAttribute('data-talk-cat') === talkCardState.category;
+        btn.classList.toggle('is-active', on);
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      });
+    }
+
+    function sendRoomBroadcast(eventName, payload) {
+      if (!chatChannel || !chatChannelReady) return;
+      try {
+        Promise.resolve(chatChannel.send({ type: 'broadcast', event: eventName, payload: payload }))
+          .catch(function (err) { console.warn('[DayO Cards] broadcast failed', err); });
+      } catch (err) {
+        console.warn('[DayO Cards] broadcast failed', err);
+      }
+    }
+
+    function broadcastCurrentTalkCard(eventName, extra) {
+      if (!isRealPartnerCardController()) return;
+      var card = cardsForTalkCategory(talkCardState.category)[talkCardState.index];
+      if (!card) return;
+      var access = window.DayORoomAccess;
+      sendRoomBroadcast(eventName, Object.assign({
+        roomId: access.roomId,
+        cardId: card.id,
+        category: talkCardState.category,
+        changedBy: access.userId,
+        timestamp: new Date(talkCardState.updatedAt).toISOString()
+      }, extra || {}));
+    }
+
+    function requestCurrentTalkCard() {
+      if (!isLearnerCardViewer()) return;
+      var access = window.DayORoomAccess;
+      pendingCardRequestId = access.userId + ':' + cardRequestSessionId + ':' + (++cardRequestSequence);
+      sendRoomBroadcast('talk_card_state_request', {
+        roomId: access.roomId,
+        requestedBy: access.userId,
+        requestId: pendingCardRequestId,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    function applyRemoteTalkCard(payload) {
+      if (!isLearnerCardViewer()) return;
+      var access = window.DayORoomAccess;
+      if (payload.roomId !== access.roomId || payload.changedBy !== access.partnerId) return;
+      var list = TALK_CARD_GROUPS[payload.category] && cardsForTalkCategory(payload.category);
+      var index = list ? list.findIndex(function (card) { return card.id === payload.cardId; }) : -1;
+      if (index < 0) {
+        console.warn('[DayO Cards] unknown card ID or category', payload.cardId);
+        return;
+      }
+      var updatedAt = Date.parse(payload.timestamp);
+      if (!Number.isFinite(updatedAt) || updatedAt < talkCardState.updatedAt) return;
+      talkCardState.category = payload.category;
+      talkCardState.index = index;
+      talkCardState.updatedAt = updatedAt;
+      updateTalkCategoryTabs();
+      renderTalkCardQuestion(false);
+    }
 
     function cardsForTalkCategory(category) {
       var included = TALK_CARD_GROUPS[category] || TALK_CARD_GROUPS.daily;
@@ -4543,6 +4662,7 @@
     }
 
     function renderTalkCardQuestion(advance) {
+      if (advance && !canControlTalkCards()) return null;
       var list = cardsForTalkCategory(talkCardState.category);
       var question = document.getElementById('talkCardQuestion');
       var english = document.getElementById('talkCardQuestionEn');
@@ -4553,7 +4673,7 @@
         if (english) english.textContent = '';
         if (category) category.textContent = '';
         if (followups) followups.replaceChildren();
-        return;
+        return null;
       }
       if (advance) talkCardState.index = pickNextTalkIndex(list, talkCardState.index);
       if (talkCardState.index < 0 || talkCardState.index >= list.length) talkCardState.index = 0;
@@ -4581,19 +4701,23 @@
       }
       var body = document.querySelector('#talk-card-panel .talk-card-body');
       if (body) body.scrollTop = 0;
+      return card;
+    }
+
+    function markLocalTalkCardChange() {
+      if (!canControlTalkCards()) return;
+      talkCardState.updatedAt = Math.max(Date.now(), talkCardState.updatedAt + 1);
+      broadcastCurrentTalkCard('talk_card_change');
     }
 
     function setTalkCategory(cat) {
-      if (!TALK_CARD_GROUPS[cat]) return;
+      if (!canControlTalkCards() || !TALK_CARD_GROUPS[cat]) return;
       talkCardState.category = cat;
       var list = cardsForTalkCategory(cat);
       talkCardState.index = list.length ? Math.floor(Math.random() * list.length) : 0;
-      document.querySelectorAll('[data-talk-cat]').forEach(function (btn) {
-        var on = btn.getAttribute('data-talk-cat') === cat;
-        btn.classList.toggle('is-active', on);
-        btn.setAttribute('aria-selected', on ? 'true' : 'false');
-      });
+      updateTalkCategoryTabs();
       renderTalkCardQuestion(false);
+      markLocalTalkCardChange();
     }
 
     document.querySelectorAll('[data-talk-cat]').forEach(function (btn) {
@@ -4605,13 +4729,33 @@
     var talkCardNextBtn = document.getElementById('talkCardNextBtn');
     if (talkCardNextBtn) {
       talkCardNextBtn.addEventListener('click', function () {
+        if (!canControlTalkCards()) return;
         renderTalkCardQuestion(true);
+        markLocalTalkCardChange();
       });
     }
 
     window.DayORoomAccessReady.then(function (access) {
       if (!access.allowed) return;
-      renderTalkCardQuestion(false);
+      var controller = canControlTalkCards();
+      document.querySelectorAll('[data-talk-cat]').forEach(function (btn) {
+        btn.disabled = !controller;
+        btn.setAttribute('aria-disabled', controller ? 'false' : 'true');
+      });
+      if (talkCardNextBtn) talkCardNextBtn.disabled = !controller;
+      var readonlyNote = document.getElementById('talkCardReadonlyNote');
+      if (readonlyNote) readonlyNote.hidden = controller;
+      if (controller) {
+        renderTalkCardQuestion(false);
+        markLocalTalkCardChange();
+      } else {
+        var waitingQuestion = document.getElementById('talkCardQuestion');
+        if (waitingQuestion) waitingQuestion.textContent = '파트너의 대화카드를 기다리고 있어요.';
+        document.querySelectorAll('[data-talk-cat]').forEach(function (btn) {
+          btn.classList.remove('is-active');
+          btn.setAttribute('aria-selected', 'false');
+        });
+      }
       ensureChatChannel();
     });
 
