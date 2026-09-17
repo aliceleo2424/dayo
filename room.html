@@ -5,6 +5,79 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-env.js"></script>
   <script src="supabase-client.js?v=20260916-auth-strict"></script>
+  <style>
+    body:not(.room-access-granted) .studio { visibility: hidden; }
+    #room-access-screen { position: fixed; inset: 0; z-index: 2147483647; display: grid; place-items: center; padding: 24px; background: #FFF8F5; color: #5C4A42; text-align: center; font-family: 'Gowun Dodum', sans-serif; }
+    #room-access-screen .room-access-box { max-width: 360px; }
+    #room-access-screen h1 { margin: 0 0 12px; font-size: 22px; }
+    #room-access-screen p { margin: 0 0 22px; font-size: 15px; line-height: 1.6; }
+    #room-access-screen a { display: inline-block; padding: 11px 20px; border-radius: 12px; background: #FF6B57; color: white; text-decoration: none; font-weight: 700; }
+    body.room-access-granted #room-access-screen { display: none; }
+  </style>
+  <script>
+    (function () {
+      var uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      function storedBookingId() {
+        try { return localStorage.getItem('dayo_active_booking_id') || ''; } catch (e) { return ''; }
+      }
+      function showAccess(state) {
+        window.DayORoomAccess = state;
+        var render = function () {
+          if (state.allowed) {
+            document.body.classList.add('room-access-granted');
+            if (typeof window.dayoApplyRoomRole === 'function') window.dayoApplyRoomRole();
+            return;
+          }
+          var message = document.getElementById('room-access-message');
+          if (message) message.textContent = state.message;
+          var title = document.getElementById('room-access-title');
+          if (title) title.textContent = state.title;
+        };
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render, { once: true });
+        else render();
+        return state;
+      }
+      window.DayORoomAccess = { allowed: false };
+      window.DayORoomAccessReady = (async function () {
+        var db = window.supabaseClient;
+        if (!db || !db.auth) return showAccess({ allowed: false, title: '대화방에 입장할 수 없어요.', message: '로그인 상태를 확인하지 못했어요. 잠시 후 다시 시도해 주세요.' });
+        try {
+          var auth = await db.auth.getUser();
+          var user = auth && auth.data && auth.data.user;
+          if (!user || auth.error) return showAccess({ allowed: false, title: '로그인이 필요한 페이지예요.', message: '로그인한 뒤 예약된 대화로 입장해 주세요.' });
+
+          var profile = await db.from('profiles').select('role').eq('id', user.id).maybeSingle();
+          if (!profile.data && !profile.error) profile = await db.from('profiles').select('role').eq('user_id', user.id).maybeSingle();
+          if (profile.error) throw profile.error;
+
+          if (profile.data && profile.data.role === 'admin') {
+            return showAccess({ allowed: true, adminTest: true, role: new URLSearchParams(location.search).get('role') === 'partner' ? 'partner' : 'user', userId: user.id,
+              bookingId: null, roomId: 'dayo_admin_test_' + user.id.replace(/-/g, '').slice(0, 20) });
+          }
+
+          var params = new URLSearchParams(location.search);
+          var bookingId = params.get('bookingId') || params.get('booking_id') || storedBookingId();
+          if (!uuid.test(bookingId || '')) return showAccess({ allowed: false, title: '예약된 대화가 없어요.', message: '마이페이지에서 예약을 확인한 뒤 입장해 주세요.' });
+          var result = await db.from('bookings').select('id, learner_id, partner_user_id, status').eq('id', bookingId).maybeSingle();
+          if (result.error) throw result.error;
+          var booking = result.data;
+          if (!booking || (booking.learner_id !== user.id && booking.partner_user_id !== user.id)) {
+            return showAccess({ allowed: false, title: '이 대화에 참여할 수 없어요.', message: '본인이 예약하거나 배정받은 대화인지 확인해 주세요.' });
+          }
+          if (booking.status !== 'confirmed') {
+            var ended = ['completed', 'cancelled', 'tech_issue', 'safety_reported'].includes(booking.status);
+            return showAccess({ allowed: false, title: ended ? '이미 종료된 대화예요.' : '아직 입장할 수 없는 예약이에요.', message: '마이페이지에서 예약 상태를 확인해 주세요.' });
+          }
+          return showAccess({ allowed: true, adminTest: false, role: booking.learner_id === user.id ? 'user' : 'partner',
+            userId: user.id, bookingId: booking.id, learnerId: booking.learner_id, partnerId: booking.partner_user_id,
+            roomId: booking.id.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40) });
+        } catch (e) {
+          console.warn('[DayO Room] access check failed', e);
+          return showAccess({ allowed: false, title: '대화방에 입장할 수 없어요.', message: '예약 정보를 확인하지 못했어요. 잠시 후 다시 시도해 주세요.' });
+        }
+      })();
+    })();
+  </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script>
@@ -3091,27 +3164,17 @@
   </style>
 </head>
 <body class="is-room theme-learner">
+  <div id="room-access-screen" role="status" aria-live="polite">
+    <div class="room-access-box"><h1 id="room-access-title">대화방 입장 확인 중</h1><p id="room-access-message">로그인과 예약 정보를 확인하고 있어요.</p><a href="index.html">메인으로 돌아가기</a></div>
+  </div>
   <script>
     (function applyPartnerTheme() {
       window.isObserverRoomMode = function () {
-        try {
-          return String(new URLSearchParams(window.location.search).get('role') || '').toLowerCase() === 'observer';
-        } catch (e) {
-          return false;
-        }
+        return false;
       };
 
       window.isPartnerRoomMode = function() {
-        try {
-          var urlParams = new URLSearchParams(window.location.search);
-          var roleParam = String(urlParams.get('role') || '').toLowerCase();
-          if (roleParam === 'observer') return false;
-          if (roleParam === 'partner') return true;
-          if (roleParam === 'user' || roleParam === 'learner') return false;
-          return localStorage.getItem('dayo_current_mode') === 'PARTNER';
-        } catch (e) {
-          return false;
-        }
+        return !!(window.DayORoomAccess && window.DayORoomAccess.allowed && window.DayORoomAccess.role === 'partner');
       };
 
       function getLearnerDisplayName() {
@@ -3228,11 +3291,12 @@
         else window.goToView('viewLearnerHome');
       };
 
-      try {
-        if (window.isObserverRoomMode && window.isObserverRoomMode()) enterObserver();
-        else if (window.isPartnerRoomMode()) enterPartner();
+      window.dayoApplyRoomRole = function () {
+        if (!window.DayORoomAccess || !window.DayORoomAccess.allowed) return;
+        if (window.isPartnerRoomMode()) enterPartner();
         else enterLearner();
-      } catch (e) {}
+      };
+      window.DayORoomAccessReady.then(window.dayoApplyRoomRole);
     })();
   </script>
   <script src="i18n.js"></script>
@@ -3491,19 +3555,14 @@
   <script src="chat-prefs.js"></script>
   <script src="talk-cards-data.js"></script>
   <script>window.__dayoUsePeerJS = true;</script>
-  <script src="room-live.js"></script>
+  <script src="room-live.js?v=20260918-access-gate"></script>
   <script>
     /* 1:1 WebRTC (PeerJS) — Partner = host/receiver, User = guest/caller
      * Observer = receive-only ghost (empty outbound stream); never replaces activeCall */
     (function initDayOPeerVideo() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const currentRole = (urlParams.get('role') || 'user').toLowerCase();
-      const isObserver = (currentRole === 'observer');
-      const currentRoomId = String(
-        urlParams.get('roomId') || urlParams.get('room') || urlParams.get('session')
-        || urlParams.get('bookingId') || urlParams.get('booking_id')
-        || localStorage.getItem('dayo_active_booking_id') || 'dayo_room_1'
-      ).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40) || 'dayo_room_1';
+      let currentRole = 'user';
+      const isObserver = false;
+      let currentRoomId = '';
 
       const localVideo = document.getElementById('local-video')
         || document.getElementById('selfVideo')
@@ -3523,7 +3582,7 @@
       let observerGuestCall = null;
       let observerHostCall = null;
       let observerProbeTimer = 0;
-      const HOST_ID = currentRoomId + '_host';
+      let HOST_ID = '';
       const MAX_HOST_CALL_ATTEMPTS = 12;
 
       function isObserverPeerId(peerId) {
@@ -3784,6 +3843,11 @@
 
       async function initWebRTC() {
         if (destroyed) return;
+        const access = await window.DayORoomAccessReady;
+        if (!access.allowed || destroyed) return;
+        currentRole = access.role;
+        currentRoomId = access.roomId;
+        HOST_ID = currentRoomId + '_host';
         if (isObserver) {
           return initObserverWebRTC();
         }
@@ -4014,7 +4078,9 @@
       }
 
       render();
-      tickInterval = setInterval(tick, 1000);
+      window.DayORoomAccessReady.then(function (access) {
+        if (access.allowed) tickInterval = setInterval(tick, 1000);
+      });
 
       window.DayOSessionTimer = {
         getRemainingSeconds: function () { return remainingSeconds; },
@@ -4227,24 +4293,11 @@
     } catch (e) { /* ignore */ }
 
     function resolveRoomChatId() {
-      try {
-        var p = new URLSearchParams(window.location.search);
-        return String(p.get('roomId') || p.get('room') || p.get('session') || 'dayo_room_1')
-          .replace(/[^a-zA-Z0-9_-]/g, '')
-          .slice(0, 40) || 'dayo_room_1';
-      } catch (e2) {
-        return 'dayo_room_1';
-      }
+      return window.DayORoomAccess && window.DayORoomAccess.allowed ? window.DayORoomAccess.roomId : '';
     }
 
     function resolveCurrentRole() {
-      try {
-        var role = (new URLSearchParams(window.location.search).get('role') || 'user').toLowerCase();
-        if (role === 'host') return 'partner';
-        return role || 'user';
-      } catch (e3) {
-        return 'user';
-      }
+      return window.DayORoomAccess && window.DayORoomAccess.allowed ? window.DayORoomAccess.role : 'user';
     }
 
     function appendMessageToChatUI(senderRole, senderName, message, isMine) {
@@ -4261,6 +4314,7 @@
     }
 
     function ensureChatChannel() {
+      if (!window.DayORoomAccess || !window.DayORoomAccess.allowed) return null;
       var supabase = window.supabaseClient;
       if (!supabase || typeof supabase.channel !== 'function') return null;
       if (chatChannel) return chatChannel;
@@ -4495,8 +4549,11 @@
       });
     }
 
-    renderTalkCardQuestion(false);
-    ensureChatChannel();
+    window.DayORoomAccessReady.then(function (access) {
+      if (!access.allowed) return;
+      renderTalkCardQuestion(false);
+      ensureChatChannel();
+    });
 
     /* Bottom sheets */
     function openSheet(name) {
@@ -5690,6 +5747,10 @@
     };
 
     window.executePartnerPayoutAndExit = async function () {
+      if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
+        window.showDayoToast('테스트룸에서는 예약 정산을 사용할 수 없어요.');
+        return;
+      }
       window.dayoSessionEnded = true;
 
       if (!window.currentSelectedCard) {
@@ -5721,8 +5782,7 @@
         } catch (e) { user = null; }
       }
 
-      var bookingId = '';
-      try { bookingId = localStorage.getItem('dayo_active_booking_id') || ''; } catch (e) { bookingId = ''; }
+      var bookingId = window.DayORoomAccess && window.DayORoomAccess.bookingId || '';
       if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(bookingId)) {
         alert('실제 예약 정보를 확인할 수 없어 정산을 진행하지 않았습니다. 마이페이지의 예약 세션으로 다시 입장해 주세요.');
         return;
@@ -5750,6 +5810,14 @@
     window.submitPartnerReportAndLeave = window.executePartnerPayoutAndExit;
 
     window.handleHeaderExitClick = function () {
+      if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
+        try {
+          if (window.DayOLive) window.DayOLive.hangUp();
+          if (window.DayOPeerVideo) window.DayOPeerVideo.destroy();
+        } catch (e) { /* test room only */ }
+        window.location.href = 'index.html';
+        return;
+      }
       if (typeof window.isObserverRoomMode === 'function' && window.isObserverRoomMode()) {
         try {
           if (window.DayOLive && typeof window.DayOLive.hangUp === 'function') window.DayOLive.hangUp();
@@ -5818,6 +5886,10 @@
 
     window.handleDevSkipClick = function (e) {
       if (e) { e.preventDefault(); e.stopPropagation(); }
+      if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
+        window.showDayoToast('테스트룸에서는 예약 종료 미리보기를 사용할 수 없어요.');
+        return;
+      }
       if (typeof window.handleSessionEndRouting === 'function') {
         window.handleSessionEndRouting();
       }
@@ -5848,6 +5920,8 @@
     }
 
     async function attachLocalStreamToPip() {
+      var access = await window.DayORoomAccessReady;
+      if (!access.allowed) return;
       if (window.isObserverRoomMode && window.isObserverRoomMode()) return;
       if (window.__dayoUsePeerJS) return;
       if (window.__localCamBound) return;
@@ -6102,6 +6176,6 @@
   <div style="font-size: 10px; color: #A0AAB0; margin-top: 6px; text-align: center;">터치하면 클립보드에 복사돼요 📋</div>
 </div>
 
-<script src="session-lifecycle.js?v=20260917-report-only"></script>
+<script src="session-lifecycle.js?v=20260918-access-gate"></script>
 </body>
 </html>

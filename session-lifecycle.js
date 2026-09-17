@@ -22,20 +22,9 @@
   }
 
   function context() {
-    var params = new URLSearchParams(location.search || '');
-    var bookingId = uuidOrNull(
-      params.get('bookingId') || params.get('booking_id') ||
-      stored('dayo_active_booking_id') || stored('dayo_booking_id')
-    );
-    var partnerId = uuidOrNull(
-      params.get('partnerId') || params.get('partner_id') ||
-      stored('dayo_partner_user_id') || stored('dayo_selected_partner_id')
-    );
-    var learnerId = uuidOrNull(
-      params.get('learnerId') || params.get('learner_id') ||
-      stored('dayo_session_learner_id') || stored('dayo_learner_user_id')
-    );
-    return { bookingId: bookingId, partnerId: partnerId, learnerId: learnerId };
+    var access = window.DayORoomAccess;
+    if (!access || !access.allowed || access.adminTest) return { bookingId: null, partnerId: null, learnerId: null };
+    return { bookingId: uuidOrNull(access.bookingId), partnerId: uuidOrNull(access.partnerId), learnerId: uuidOrNull(access.learnerId) };
   }
 
   async function authUser() {
@@ -120,6 +109,10 @@
   }
 
   function showSafetyModal() {
+    if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
+      toast('테스트룸에서는 안전 신고를 사용할 수 없어요.');
+      return;
+    }
     if (typeof window.closeEarlyExitModal === 'function') window.closeEarlyExitModal();
     var modal = document.getElementById('safety-report-modal');
     if (!modal) return;
@@ -162,6 +155,10 @@
   }
 
   async function submitSafetyReport() {
+    if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
+      safetyStatus('테스트룸에서는 안전 신고를 사용할 수 없어요.');
+      return;
+    }
     if (submittingSafety) return;
     var modal = document.getElementById('safety-report-modal');
     var selected = modal && modal.querySelector('input[name="safety_reason"]:checked');
@@ -304,6 +301,11 @@
   }
 
   async function personalExit() {
+    if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
+      stopMedia();
+      window.location.href = 'index.html';
+      return;
+    }
     var ctx = context();
     if (typeof window.closeEarlyExitModal === 'function') window.closeEarlyExitModal();
     window.isEarlyExit = false;
@@ -326,6 +328,10 @@
   }
 
   async function techIssueExit() {
+    if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
+      toast('테스트룸에서는 예약 관련 종료를 사용할 수 없어요.');
+      return;
+    }
     var ctx = context();
     if (typeof window.closeEarlyExitModal === 'function') window.closeEarlyExitModal();
     await persistTranscript();
