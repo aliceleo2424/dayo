@@ -1337,11 +1337,6 @@
       color: #8A6A1F;
     }
 
-    .talk-card-btn--send {
-      background: var(--coral);
-      color: #fff;
-    }
-
     .chat-header {
       display: flex;
       align-items: center;
@@ -1480,6 +1475,11 @@
       background: #F3EDEB;
       color: #9A8580;
       box-shadow: none;
+    }
+    .ctrl-btn.is-active {
+      background: var(--coral-pale);
+      border-color: var(--coral);
+      color: var(--coral);
     }
     .ctrl-btn .ctrl-icon {
       position: relative;
@@ -3324,7 +3324,7 @@
 
       <aside class="chat-panel talk-card-panel" id="talk-card-panel" aria-label="DayO 대화카드">
         <div class="chat-header">
-          <span>🎴 DayO 대화카드</span>
+          <span>🌐 DayO 대화카드</span>
           <button class="chat-close" id="talkCardClose" type="button" aria-label="대화카드 닫기">✕</button>
         </div>
         <div class="talk-card-tabs" role="tablist" aria-label="대화카드 카테고리">
@@ -3341,8 +3341,7 @@
             <div id="talkCardFollowups" aria-label="추가 질문"></div>
           </div>
           <div class="talk-card-actions">
-            <button type="button" class="talk-card-btn talk-card-btn--next" id="talkCardNextBtn">다음 질문 보기 🎲</button>
-            <button type="button" class="talk-card-btn talk-card-btn--send" id="talkCardSendBtn">이 질문 채팅으로 전송 💬</button>
+            <button type="button" class="talk-card-btn talk-card-btn--next" id="talkCardNextBtn">다음 질문 보기</button>
           </div>
         </div>
       </aside>
@@ -3364,10 +3363,10 @@
         <span class="ctrl-btn__text label">단어도움</span>
       </button>
       <button class="ctrl-btn ctrl-btn--ai" id="btn-talk-cards" type="button">
-        <span class="ctrl-btn__icon" aria-hidden="true">🎴</span>
+        <span class="ctrl-btn__icon" aria-hidden="true">🌐</span>
         <span class="ctrl-btn__text label">대화카드</span>
       </button>
-      <button class="ctrl-btn" id="chatToggle" type="button">
+      <button class="ctrl-btn" id="chatToggle" type="button" aria-pressed="false">
         <span class="ctrl-btn__icon" aria-hidden="true">💬</span>
         <span class="ctrl-btn__text label" data-i18n="room.chatLabel">채팅</span>
       </button>
@@ -4098,11 +4097,15 @@
       var talkBtn = document.getElementById('btn-talk-cards');
       if (talkBtn) {
         talkBtn.innerHTML =
-          '<span class="ctrl-btn__icon" aria-hidden="true">🎴</span>' +
+          '<span class="ctrl-btn__icon" aria-hidden="true">🌐</span>' +
           '<span class="ctrl-btn__text label">대화카드</span>';
       }
       var chatBtn = document.getElementById('chatToggle');
-      if (chatBtn) setCtrlBtnContent(chatBtn, '💬', 'room.chatLabel');
+      if (chatBtn) {
+        chatBtn.innerHTML =
+          '<span class="ctrl-btn__icon" aria-hidden="true">💬</span>' +
+          '<span class="ctrl-btn__text label">' + t('room.chatLabel') + '</span>';
+      }
     }
 
     function renderMicLabel() {
@@ -4280,6 +4283,10 @@
       if (!mainStage) return;
       mainStage.classList.remove('talk-open');
       mainStage.classList.remove('chat-collapsed');
+      if (chatToggle) {
+        chatToggle.classList.add('is-active');
+        chatToggle.setAttribute('aria-pressed', 'true');
+      }
       ensureChatChannel();
     }
 
@@ -4290,6 +4297,10 @@
       } else {
         mainStage.classList.remove('talk-open');
         mainStage.classList.add('chat-collapsed');
+      }
+      if (chatToggle) {
+        chatToggle.classList.remove('is-active');
+        chatToggle.setAttribute('aria-pressed', 'false');
       }
     }
 
@@ -4303,6 +4314,10 @@
       if (!mainStage) return;
       mainStage.classList.remove('chat-collapsed');
       mainStage.classList.add('talk-open');
+      if (chatToggle) {
+        chatToggle.classList.remove('is-active');
+        chatToggle.setAttribute('aria-pressed', 'false');
+      }
       renderTalkCardQuestion(false);
     }
 
@@ -4474,25 +4489,9 @@
     });
 
     var talkCardNextBtn = document.getElementById('talkCardNextBtn');
-    var talkCardSendBtn = document.getElementById('talkCardSendBtn');
     if (talkCardNextBtn) {
       talkCardNextBtn.addEventListener('click', function () {
         renderTalkCardQuestion(true);
-      });
-    }
-    if (talkCardSendBtn) {
-      talkCardSendBtn.addEventListener('click', function () {
-        var qEl = document.getElementById('talkCardQuestion');
-        var text = qEl ? String(qEl.textContent || '').trim() : '';
-        if (!text) return;
-        openChat();
-        var input = document.getElementById('chatInput')
-          || document.getElementById('chat-input')
-          || document.querySelector('.chat-input-box');
-        if (input) {
-          input.value = text;
-          handleSendMessage();
-        }
       });
     }
 
@@ -6071,9 +6070,8 @@
       </button>
     </div>
 
-    <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed #EDE4D5; display: flex; justify-content: space-around; font-size: 11.5px;">
+    <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed #EDE4D5; display: flex; justify-content: center; font-size: 11.5px;">
       <a href="javascript:void(0)" onclick="handleTechIssueExit()" style="color: #4F7460; font-weight: 700; text-decoration: underline;">🛠️ 음성/연결 오류로 종료</a>
-      <a href="javascript:void(0)" onclick="handleReportExit()" style="color: #F07A68; font-weight: 700; text-decoration: underline;">🚨 비매너 신고</a>
     </div>
   </div>
 </div>
