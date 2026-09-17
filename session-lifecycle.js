@@ -120,10 +120,10 @@
   }
 
   function showSafetyModal() {
-    protectReporter();
     if (typeof window.closeEarlyExitModal === 'function') window.closeEarlyExitModal();
     var modal = document.getElementById('safety-report-modal');
     if (!modal) return;
+    safetyStatus('');
     modal.hidden = false;
     modal.style.setProperty('display', 'flex', 'important');
     var first = modal.querySelector('input[name="safety_reason"]');
@@ -135,6 +135,14 @@
     if (!modal) return;
     modal.hidden = true;
     modal.style.setProperty('display', 'none', 'important');
+  }
+
+  function safetyStatus(message, success) {
+    var node = document.getElementById('safety-report-status');
+    if (!node) return;
+    node.textContent = message || '';
+    node.hidden = !message;
+    node.style.color = success ? '#166534' : '#BE123C';
   }
 
   function syncTicketCount(value) {
@@ -161,49 +169,57 @@
     var reason = selected ? String(selected.value || '') : '';
     if (reason === '기타') reason = String(other && other.value || '').trim();
     if (!reason) {
-      toast('신고 사유를 선택하거나 입력해 주세요.');
+      safetyStatus('신고 사유를 선택하거나 입력해 주세요.');
       return;
     }
 
     var ctx = context();
-    var user = await authUser();
-    var reporterId = user && user.id || null;
     var partnerMode = window.isPartnerRoomMode && window.isPartnerRoomMode();
     var targetId = partnerMode ? ctx.learnerId : ctx.partnerId;
-    if (!ctx.bookingId || !reporterId || !client()) {
-      toast('로그인된 예약 세션 정보를 확인할 수 없습니다.');
+    var db = client();
+    if (!ctx.bookingId || !db) {
+      safetyStatus('로그인된 예약 세션 정보를 확인할 수 없습니다.');
       return;
     }
 
     submittingSafety = true;
     var submit = document.getElementById('safety-report-submit');
     if (submit) submit.disabled = true;
-    var result = await client().rpc('submit_safety_report', {
-      p_session_id: ctx.bookingId,
-      p_target_id: targetId,
-      p_reason: reason,
-      p_transcript_snapshot: transcriptRows()
-    });
-    var data = result && result.data || {};
-    if (result.error || !data.success) {
+    safetyStatus('');
+    try {
+      var user = await authUser();
+      if (!user || !user.id) {
+        safetyStatus('로그인 정보를 확인할 수 없습니다.');
+        return;
+      }
+      var result = await db.rpc('submit_safety_report_only', {
+        p_session_id: ctx.bookingId,
+        p_target_id: targetId,
+        p_reason: reason,
+        p_transcript_snapshot: transcriptRows().slice(-50)
+      });
+      var data = result && result.data || {};
+      if (result.error || !data.success) {
+        var duplicate = (result.error && result.error.code === '23505') || data.code === 'already_reported';
+        safetyStatus(duplicate ? '이미 신고가 접수되었습니다.' : (data.message || '신고를 전송하지 못했습니다. 다시 시도해 주세요.'));
+        return;
+      }
+
+      closeSafetyModal();
+      toast('신고가 접수되었습니다. 대화를 계속할 수 있습니다.');
+      sendEmergencyAlert({
+        reportId: data.report_id,
+        sessionId: ctx.bookingId,
+        reporterId: user.id,
+        targetId: targetId,
+        reason: reason
+      });
+    } catch (e) {
+      safetyStatus('신고를 전송하지 못했습니다. 다시 시도해 주세요.');
+    } finally {
       submittingSafety = false;
       if (submit) submit.disabled = false;
-      toast((result.error && result.error.message) || data.message || '신고 접수에 실패했습니다.');
-      return;
     }
-
-    syncTicketCount(data.ticket_count);
-    await sendEmergencyAlert({
-      reportId: data.report_id,
-      sessionId: ctx.bookingId,
-      reporterId: reporterId,
-      targetId: targetId,
-      reason: reason
-    });
-    stopMedia();
-    closeSafetyModal();
-    toast('신고가 접수되었습니다. 이용권은 즉시 보호 처리됩니다.');
-    setTimeout(function () { window.location.href = 'mypage.html'; }, 900);
   }
 
   function expressionList() {

@@ -5801,14 +5801,10 @@
 
     window.handleReportExit = function () {
       window.closeEarlyExitModal();
-      try {
-        if (window.DayOLive && typeof window.DayOLive.hangUp === 'function') window.DayOLive.hangUp();
-        if (window.__localCamStream) {
-          window.__localCamStream.getTracks().forEach(function (track) { track.stop(); });
-        }
-      } catch (e) { /* ignore */ }
-      alert('신고가 접수되었으며 안전을 위해 세션이 즉시 종료됩니다. 운영팀에서 확인 후 신속히 조치하겠습니다.');
-      window.location.href = 'index.html?view=mypage';
+      var modal = document.getElementById('safety-report-modal');
+      if (!modal) return;
+      modal.hidden = false;
+      modal.style.setProperty('display', 'flex', 'important');
     };
 
     var endSessionBtn = document.getElementById('endBtn')
@@ -6081,7 +6077,7 @@
       <div>
         <div style="font-size:28px;" aria-hidden="true">🛡️</div>
         <h2 id="safety-report-title" style="margin:6px 0 4px;font-size:18px;color:#292524;">비매너 파트너/유저 신고</h2>
-        <p style="margin:0 0 16px;font-size:12.5px;line-height:1.55;color:#78716C;">상대방의 미디어를 즉시 차단했습니다. 접수 즉시 퇴장되며 운영팀에 긴급 알림이 전달됩니다.</p>
+        <p style="margin:0 0 16px;font-size:12.5px;line-height:1.55;color:#78716C;">신고 내용은 운영팀에 전달됩니다. 신고 후에도 대화를 계속할 수 있으며, 종료는 별도로 선택할 수 있습니다.</p>
       </div>
       <button type="button" onclick="closeSafetyReportModal()" aria-label="신고창 닫기" style="border:0;background:#F5F5F4;width:34px;height:34px;border-radius:50%;cursor:pointer;">✕</button>
     </div>
@@ -6093,7 +6089,8 @@
       <label style="padding:11px;border:1px solid #E7E5E4;border-radius:12px;font-size:13px;"><input type="radio" name="safety_reason" value="기타"> 기타 사유</label>
       <textarea id="safety-reason-other" rows="3" maxlength="500" placeholder="기타 사유를 입력해 주세요." style="width:100%;box-sizing:border-box;resize:vertical;border:1px solid #D6D3D1;border-radius:12px;padding:10px;font:inherit;font-size:13px;"></textarea>
     </fieldset>
-    <button id="safety-report-submit" type="button" onclick="submitSafetyReport()" style="width:100%;margin-top:16px;padding:13px;border:0;border-radius:12px;background:#E11D48;color:#FFFFFF;font-size:14px;font-weight:800;cursor:pointer;">신고 및 즉시 퇴장</button>
+    <p id="safety-report-status" role="status" aria-live="polite" hidden style="margin:12px 0 0;font-size:13px;font-weight:700;line-height:1.5;"></p>
+    <button id="safety-report-submit" type="button" onclick="submitSafetyReport()" style="width:100%;margin-top:16px;padding:13px;border:0;border-radius:12px;background:#E11D48;color:#FFFFFF;font-size:14px;font-weight:800;cursor:pointer;">신고 전송하기</button>
   </div>
 </div>
 <div id="dayo-help-hint-modal" style="display: none; position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); z-index: 99999; background: #FFFFFF; border: 1.5px solid #F6D365; border-radius: 16px; padding: 14px 18px; box-shadow: 0 12px 30px rgba(0,0,0,0.18); width: 90%; max-width: 440px; box-sizing: border-box;">
@@ -6105,6 +6102,6 @@
   <div style="font-size: 10px; color: #A0AAB0; margin-top: 6px; text-align: center;">터치하면 클립보드에 복사돼요 📋</div>
 </div>
 
-<script src="session-lifecycle.js?v=20260916-safety"></script>
+<script src="session-lifecycle.js?v=20260917-report-only"></script>
 </body>
 </html>
