@@ -530,6 +530,7 @@
   }
 
   function open() {
+    if (el.overlay.classList.contains('is-open')) return;
     lastFocused = document.activeElement;
     el.overlay.classList.add('is-open');
     if (window.DayOScrollLock) window.DayOScrollLock.lock();
