@@ -2757,7 +2757,7 @@
     }
 
     async function persistPartnerStatus(nextActive) {
-      var client = supabaseClient();
+      var client = getPartnerSupabaseClient();
       if (!client) return false;
       var sessionRes = await client.auth.getSession();
       var user = sessionRes && sessionRes.data && sessionRes.data.session && sessionRes.data.session.user;
@@ -2796,7 +2796,7 @@
     }
 
     async function savePartnerProfile() {
-      var client = supabaseClient();
+      var client = getPartnerSupabaseClient();
       if (!client) {
         showToast('저장 서버에 연결할 수 없습니다.');
         return;
@@ -2960,7 +2960,7 @@
     });
 
     async function savePartnerAvatar() {
-      var client = supabaseClient();
+      var client = getPartnerSupabaseClient();
       if (!client) throw new Error('no client');
       var sessionRes = await client.auth.getSession();
       var user = sessionRes && sessionRes.data && sessionRes.data.session && sessionRes.data.session.user;
@@ -3088,7 +3088,7 @@
       });
     }
 
-    function supabaseClient() {
+    function getPartnerSupabaseClient() {
       return window.supabaseClient || null;
     }
 
@@ -3134,7 +3134,7 @@
     }
 
     async function fetchPartnerProfile(session) {
-      var client = supabaseClient();
+      var client = getPartnerSupabaseClient();
       if (!client || !session || !session.user) return null;
       var cols = 'point_balance, nickname, role, bio, avatar_url, is_available, partner_status';
       var q = await client
@@ -3202,7 +3202,7 @@
     }
 
     window.loadPartnerSlots = async function loadPartnerSlots() {
-      var client = supabaseClient();
+      var client = getPartnerSupabaseClient();
       var emptyEl = document.getElementById('partner-slot-empty');
       if (!client) {
         paintPartnerSlots([]);
@@ -3260,7 +3260,7 @@
 
     document.getElementById('add-slot-form').addEventListener('submit', async function (event) {
       event.preventDefault();
-      var client = supabaseClient();
+      var client = getPartnerSupabaseClient();
       var dateEl = document.getElementById('slot-date');
       var hourEl = document.getElementById('slot-hour');
       var minuteEl = document.getElementById('slot-minute');
@@ -3364,7 +3364,7 @@
     window.loadLoungeStats = function loadLoungeStats() {
       var store = window.DayOProfileStore;
       var profileTask = (async function () {
-        var client = supabaseClient();
+        var client = getPartnerSupabaseClient();
         if (!client) {
           paintPoints(0);
           paintPartnerProfile(null);
