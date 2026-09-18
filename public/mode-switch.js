@@ -281,26 +281,15 @@
 
   function getUserName() {
     try {
-      if (typeof window.getCachedNickname === 'function') {
-        var cached = window.getCachedNickname();
-        if (cached) return cached;
-      }
+      var user = window._dayoAuthUser;
+      if (!user || !user.id) return '';
       var profile = window._dayoAuthProfile;
-      if (profile && (profile.nickname || profile.user_name)) {
+      if (profile && profile._authUserId === user.id && (profile.nickname || profile.user_name)) {
         return String(profile.nickname || profile.user_name).trim();
       }
-      if (window.DayOProfileStore && typeof window.DayOProfileStore.getUser === 'function') {
-        var user = window.DayOProfileStore.getUser();
-        if (user) {
-          var meta = user.user_metadata || {};
-          return String(meta.user_name || meta.full_name || meta.name || '').trim()
-            || (window.localStorage.getItem(USER_KEY) || '').trim();
-        }
-      }
-      if (!checkUserLoggedIn()) return '';
-      return (window.localStorage.getItem('dayo_user_nickname') || '').trim()
-        || (window.localStorage.getItem(USER_KEY) || '').trim()
-        || (window.localStorage.getItem('dayo_user_name') || '').trim();
+      var meta = user.user_metadata || {};
+      return String(meta.user_name || meta.full_name || meta.name || '').trim()
+        || String(user.email || '').split('@')[0];
     } catch (e) {
       return '';
     }
@@ -531,7 +520,7 @@
       return {
         href: '/mypage.html',
         icon: '👤',
-        label: '마이페이지 바로가기',
+        label: '마이페이지',
         landingMypage: true
       };
     }

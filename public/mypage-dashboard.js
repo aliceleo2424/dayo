@@ -296,26 +296,15 @@
   }
 
   function displayName() {
-    if (typeof window.getCachedNickname === 'function') {
-      var cached = window.getCachedNickname();
-      if (cached) return cached;
-    }
-    var profile = window._dayoAuthProfile || {};
+    var user = window._dayoAuthUser;
+    if (!user || !user.id) return '';
+    var profile = window._dayoAuthProfile;
+    if (!profile || profile._authUserId !== user.id) profile = {};
     var name = String(profile.nickname || profile.user_name || '').trim();
     if (name) return name;
-    var email = profile.email
-      || (window._dayoAuthUser && window._dayoAuthUser.email)
-      || '';
-    try {
-      if (!email) email = localStorage.getItem('dayo_user_email') || localStorage.getItem('dayo_userEmail') || '';
-    } catch (e) { /* ignore */ }
-    var fromEmail = emailPrefix(email);
-    if (fromEmail) return fromEmail;
-    try {
-      return (localStorage.getItem('dayo_user_nickname') || localStorage.getItem('userName') || localStorage.getItem('dayo_user_name') || '').trim();
-    } catch (e) {
-      return '';
-    }
+    var metadata = user.user_metadata || {};
+    var metaName = String(metadata.user_name || metadata.full_name || metadata.name || '').trim();
+    return metaName || emailPrefix(user.email);
   }
 
   function applyDisplayName(name) {

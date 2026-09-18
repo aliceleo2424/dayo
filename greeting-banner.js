@@ -39,19 +39,18 @@
 
   function getUserName() {
     try {
-      if (typeof window.getCachedNickname === 'function') {
-        var cached = window.getCachedNickname();
-        if (cached) return cached;
-      }
-      var profile = window._dayoAuthProfile || {};
+      var user = window._dayoAuthUser;
+      if (!user || !user.id) return '';
+      var profile = window._dayoAuthProfile;
+      if (!profile || profile._authUserId !== user.id) profile = {};
       var nick = String(profile.nickname || '').trim();
       if (nick) return nick;
       var named = String(profile.user_name || '').trim();
       if (named) return named;
-      var stored = (window.localStorage.getItem('dayo_user_nickname') || window.localStorage.getItem(USER_KEY) || localStorage.getItem('dayo_user_name') || '').trim();
-      if (stored) return stored;
-      var email = profile.email || (window._dayoAuthUser && window._dayoAuthUser.email) || '';
-      if (!email) email = localStorage.getItem('dayo_user_email') || localStorage.getItem('dayo_userEmail') || '';
+      var metadata = user.user_metadata || {};
+      var metaName = String(metadata.user_name || metadata.full_name || metadata.name || '').trim();
+      if (metaName) return metaName;
+      var email = user.email || '';
       if (email && email.indexOf('@') > 0) return email.split('@')[0];
       return '';
     } catch (e) {

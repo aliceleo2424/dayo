@@ -741,30 +741,6 @@ async function ensureProfileForUser(user) {
       return profileCache;
     }
 
-    if (email) {
-      try {
-        var byEmail = await client.from('profiles').select('*').eq('email', email).maybeSingle();
-        if (byEmail.data) {
-          var emailPatch = {
-            user_id: userId,
-            client_key: 'user:' + userId,
-            user_name: byEmail.data.user_name || name,
-            last_login_date: today,
-            updated_at: new Date().toISOString()
-          };
-          if (!byEmail.data.nickname && name) emailPatch.nickname = name;
-          if (!byEmail.data.avatar_url && social.avatar) emailPatch.avatar_url = social.avatar;
-          if (!byEmail.data.provider && social.provider) emailPatch.provider = social.provider;
-          var patched = await client.from('profiles').update(emailPatch).eq('id', byEmail.data.id).select('*').single();
-          profileCache = patched.data || Object.assign({}, byEmail.data, { user_id: userId });
-          applyProfileToLocal(profileCache);
-          return profileCache;
-        }
-      } catch (e) {
-        console.warn('[DayO] email profile link failed', e);
-      }
-    }
-
     var again = await waitForTriggerProfile(client, userId);
     if (again) {
       again = await syncSocialProfileFields(client, again, user, name);

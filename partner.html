@@ -197,7 +197,7 @@
         try {
           var byId = await client
             .from('profiles')
-            .select('role, nickname, partner_status')
+            .select('role, nickname')
             .eq('id', uid)
             .maybeSingle();
           if (!byId.error && byId.data) return byId.data;
@@ -206,7 +206,7 @@
         try {
           var res = await client
             .from('profiles')
-            .select('role, nickname, partner_status')
+            .select('role, nickname')
             .eq('user_id', uid)
             .maybeSingle();
           if (!res.error && res.data) return res.data;

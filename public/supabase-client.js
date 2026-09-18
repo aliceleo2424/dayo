@@ -264,7 +264,9 @@
     }
     var sessionRes = await client.auth.getUser();
     var user = sessionRes && sessionRes.data && sessionRes.data.user;
+    var previousUserId = window._dayoAuthUser && window._dayoAuthUser.id;
     window._dayoAuthUser = user || null;
+    if (!user || previousUserId !== user.id) window._dayoAuthProfile = null;
     if (!user) {
       window._dayoAuthProfile = null;
       if (isMypage) {
@@ -277,8 +279,8 @@
       }
       return null;
     }
-    var profileCols = 'nickname, role, user_name, ticket_count, tickets, point_balance, email, speaking_level, last_test_score, last_test_date, streak_count, welcome_email_sent, created_at';
-    var profileColsSafe = 'nickname, role, user_name, ticket_count, point_balance, email, speaking_level, last_test_score, last_test_date, streak_count, welcome_email_sent, created_at';
+    var profileCols = 'nickname, role, user_name, ticket_count, point_balance, email, welcome_email_sent, created_at';
+    var profileColsSafe = 'nickname, role, user_name, ticket_count, email';
     var q = await client
       .from('profiles')
       .select(profileCols)
@@ -328,7 +330,9 @@
       || String(metadata.name || '').trim()
       || emailPrefix(user.email)
       || '회원';
+    profile._authUserId = user.id;
     if (profile.point_balance == null) profile.point_balance = 0;
+    if (!window._dayoAuthUser || window._dayoAuthUser.id !== user.id) return null;
     rememberLocalProfile(profile, user.email);
     window._dayoAuthProfile = profile;
     window.updateProfileUI(profile.nickname);
@@ -1327,16 +1331,12 @@
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
-      var cached = window.getCachedNickname();
-      if (cached && !/(?:^|\/)mypage(?:\.html)?$/i.test(window.location.pathname)) window.updateProfileUI(cached);
       window.fetchAuthProfile();
       window.bindLearnerSessionId();
       bindAdminDashboardNav();
       if (document.getElementById('mypage-card-feed')) window.loadUserReports();
     });
   } else {
-    var cachedNow = window.getCachedNickname();
-    if (cachedNow && !/(?:^|\/)mypage(?:\.html)?$/i.test(window.location.pathname)) window.updateProfileUI(cachedNow);
     window.fetchAuthProfile();
     window.bindLearnerSessionId();
     bindAdminDashboardNav();
