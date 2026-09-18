@@ -187,31 +187,14 @@
         });
       }
 
-      function escapeOrValue(value) {
-        return String(value || '').replace(/[,()]/g, '');
-      }
-
       async function fetchProfile(client, user) {
-        if (!client || !user) return null;
-        var uid = escapeOrValue(user.id);
-        try {
-          var byId = await client
-            .from('profiles')
-            .select('role, nickname')
-            .eq('id', uid)
-            .maybeSingle();
-          if (!byId.error && byId.data) return byId.data;
-        } catch (e) { /* fall through */ }
-
-        try {
-          var res = await client
-            .from('profiles')
-            .select('role, nickname')
-            .eq('user_id', uid)
-            .maybeSingle();
-          if (!res.error && res.data) return res.data;
-        } catch (e2) { /* ignore */ }
-        return null;
+        if (!client || !user || !user.id) return null;
+        var res = await client
+          .from('profiles')
+          .select('role, nickname')
+          .eq('id', user.id)
+          .maybeSingle();
+        return res.error ? null : res.data;
       }
 
       function isAuthorized(profile) {
@@ -247,35 +230,31 @@
 
       window.initPartnerDashboard = initPartnerDashboard;
 
-      async function handleAuthState(event, session) {
-        if (event === 'TOKEN_REFRESHED') return;
+      async function handleAuthState() {
         var myRun = ++authRunId;
         try {
-          console.log('Auth event:', event, 'Session user:', session && session.user && session.user.email);
-
-          if (!session || !session.user) {
+          var client = window.supabaseClient;
+          var current = await client.auth.getUser();
+          if (myRun !== authRunId) return;
+          var user = current && current.data && current.data.user;
+          if (!user || current.error) {
             showAuthSection();
             lastAuthKey = 'anon';
             return;
           }
 
-          var authKey = String(session.user.id || '') + ':' + String(session.user.email || '');
-          if (authKey === lastAuthKey && document.body && document.body.classList.contains('is-partner-lounge')) {
-            installAuthModalKillSwitch();
-            return;
-          }
-
-          var client = window.supabaseClient;
-          var profile = await fetchProfile(client, session.user);
+          var profile = await fetchProfile(client, user);
           if (myRun !== authRunId) return;
 
           if (isAuthorized(profile)) {
+            var authKey = String(user.id);
+            if (authKey === lastAuthKey && document.body && document.body.classList.contains('is-partner-lounge')) return;
             lastAuthKey = authKey;
-            initPartnerDashboard(session.user, profile);
+            initPartnerDashboard(user, profile);
             return;
           }
 
-          lastAuthKey = authKey + ':recruit';
+          lastAuthKey = '';
           showAuthSection();
         } catch (err) {
           if (myRun !== authRunId) return;
@@ -294,23 +273,10 @@
           return;
         }
 
-        client.auth.onAuthStateChange(function (event, session) {
-          handleAuthState(event, session);
+        client.auth.onAuthStateChange(function () {
+          setTimeout(handleAuthState, 0);
         });
-
-        try {
-          var now = await client.auth.getUser();
-          var user = now && now.data && now.data.user;
-          if (!user) {
-            showAuthSection();
-            return;
-          }
-          var profile = await fetchProfile(client, user);
-          if (isAuthorized(profile)) initPartnerDashboard(user, profile);
-          else showAuthSection();
-        } catch (e) {
-          showAuthSection();
-        }
+        handleAuthState();
       }
 
       if (document.readyState === 'loading') {
