@@ -3223,7 +3223,7 @@
       const topicCards = quizTopicCardsForLang(quizLang).map((title, idx) => (
         '<article class="quiz-topic-card">' +
           '<p class="quiz-topic-card-title">' + escapeHtml(title) + '</p>' +
-          '<a class="quiz-topic-cta" href="room.html?role=user" data-ms-guard data-ticket-gate data-quiz-start-cta data-quiz-topic="' + idx + '">' +
+          '<a class="quiz-topic-cta" href="mypage.html" data-ms-guard data-ticket-gate data-quiz-start-cta data-quiz-topic="' + idx + '">' +
             escapeHtml(t('quiz.resultTopicCta')) +
           '</a>' +
         '</article>'
@@ -3272,7 +3272,7 @@
           </form>
           <div class="quiz-lead-done">
             <p class="quiz-lead-success" id="quizLeadSuccess"></p>
-            <a class="quiz-lead-cta" href="room.html?role=user" data-ms-guard data-ticket-gate data-quiz-start-cta>${escapeHtml(t('quiz.lead.startCta'))}</a>
+            <a class="quiz-lead-cta" href="mypage.html" data-ms-guard data-ticket-gate data-quiz-start-cta>${escapeHtml(t('quiz.lead.startCta'))}</a>
           </div>
         </div>
         <button class="quiz-result-retry" type="button">${escapeHtml(t('quiz.resultRetry'))}</button>

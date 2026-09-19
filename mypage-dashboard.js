@@ -51,6 +51,16 @@
     }).join(', ');
   }
 
+  function roomUrl(bookingId) {
+    return 'room.html?bookingId=' + encodeURIComponent(String(bookingId || ''));
+  }
+
+  function syncRoomEntryLinks(bookingId) {
+    window.__dayoUpcomingBookingId = bookingId || '';
+    var link = document.querySelector('.mypage-welcome-cta--room');
+    if (link) link.setAttribute('href', bookingId ? roomUrl(bookingId) : 'index.html?booking=open');
+  }
+
   async function loadUrgentSessionBanner() {
     var urgent = document.getElementById('urgent-session-banner');
     if (!urgent) return;
@@ -59,6 +69,8 @@
     var badgeEl = document.getElementById('urgent-session-badge');
 
     var session = readLocalNextSession();
+    var confirmedBookingId = '';
+    syncRoomEntryLinks('');
     var supabase = window.supabaseClient;
     var userId = (window._dayoAuthUser && window._dayoAuthUser.id) || '';
     if (supabase) {
@@ -72,18 +84,21 @@
             .from('bookings')
             .select('id, partner_name, scheduled_at, status, language')
             .eq('learner_id', userId)
-            .in('status', ['confirmed', 'pending'])
+            .eq('status', 'confirmed')
             .order('scheduled_at', { ascending: true })
             .limit(5);
+          if (q.error) throw q.error;
           var now = Date.now();
           var upcoming = (q.data || []).filter(function (row) {
             if (!row.scheduled_at) return true;
             var at = new Date(row.scheduled_at).getTime();
             return !isNaN(at) && at + 30 * 60000 >= now;
           })[0];
+          session = null;
           if (upcoming) {
+            confirmedBookingId = upcoming.id;
             session = {
-              partnerName: upcoming.partner_name,
+              partnerName: upcoming.partner_name || 'DayO 파트너',
               scheduledAt: upcoming.scheduled_at,
               bookingId: upcoming.id,
               language: upcoming.language,
@@ -95,6 +110,8 @@
         console.warn('다가오는 예약 로드 실패:', err);
       }
     }
+
+    syncRoomEntryLinks(confirmedBookingId);
 
     if (!session || !session.partnerName) {
       if (titleEl) titleEl.textContent = i18n('mypage.urgent.empty');
@@ -238,7 +255,12 @@
   }
 
   window.enterStudio = function () {
-    window.location.href = 'room.html?role=user';
+    var bookingId = window.__dayoUpcomingBookingId || '';
+    if (bookingId) {
+      window.location.href = roomUrl(bookingId);
+      return;
+    }
+    openBookingModal();
   };
 
   window.openBookingModal = openBookingModal;

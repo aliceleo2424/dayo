@@ -53,6 +53,99 @@
     return raw;
   }
 
+  function formatBookingTime(value) {
+    if (!value) return '예약 시간 확인';
+    var date = new Date(value);
+    if (isNaN(date.getTime())) return '예약 시간 확인';
+    return new Intl.DateTimeFormat('ko-KR', {
+      timeZone: 'Asia/Seoul', month: 'long', day: 'numeric', weekday: 'short',
+      hour: '2-digit', minute: '2-digit', hour12: false
+    }).format(date);
+  }
+
+  function renderPartnerBookings(rows) {
+    var container = document.getElementById('partnerUpcomingBookings');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!rows || !rows.length) {
+      var empty = document.createElement('p');
+      empty.className = 'card-subtitle';
+      empty.textContent = '예정된 대화가 없습니다.';
+      container.appendChild(empty);
+      return;
+    }
+    rows.forEach(function (booking) {
+      var article = document.createElement('article');
+      article.className = 'session';
+
+      var status = document.createElement('span');
+      status.className = 'session-status';
+      status.textContent = '● 예약 확정';
+      article.appendChild(status);
+
+      var title = document.createElement('h3');
+      title.className = 'session-title';
+      title.textContent = '예약된 대화';
+      article.appendChild(title);
+
+      var purpose = document.createElement('p');
+      purpose.className = 'session-purpose';
+      purpose.textContent = '주제: ' + (booking.language || '글로벌 대화');
+      article.appendChild(purpose);
+
+      var time = document.createElement('p');
+      time.className = 'session-time';
+      time.textContent = formatBookingTime(booking.scheduled_at);
+      article.appendChild(time);
+
+      var actions = document.createElement('div');
+      actions.className = 'session-actions';
+      var enter = document.createElement('a');
+      enter.className = 'studio-link btn-partner-mint';
+      enter.setAttribute('data-enter-studio', '');
+      enter.setAttribute('data-booking-id', booking.id);
+      enter.href = 'room.html?bookingId=' + encodeURIComponent(booking.id);
+      enter.textContent = '🟢 스튜디오 입장';
+      actions.appendChild(enter);
+      article.appendChild(actions);
+      container.appendChild(article);
+    });
+  }
+
+  window.loadPartnerBookings = async function () {
+    var container = document.getElementById('partnerUpcomingBookings');
+    if (!container) return [];
+    var supabase = client();
+    if (!supabase || !supabase.auth) return [];
+    try {
+      var auth = await supabase.auth.getUser();
+      var user = auth && auth.data && auth.data.user;
+      if (!user || auth.error) {
+        renderPartnerBookings([]);
+        return [];
+      }
+      var result = await supabase
+        .from('bookings')
+        .select('id, scheduled_at, status, language, learner_id, partner_user_id')
+        .eq('partner_user_id', user.id)
+        .eq('status', 'confirmed')
+        .order('scheduled_at', { ascending: true });
+      if (result.error) throw result.error;
+      var now = Date.now();
+      var upcoming = (result.data || []).filter(function (booking) {
+        if (!booking.scheduled_at) return true;
+        var at = new Date(booking.scheduled_at).getTime();
+        return !isNaN(at) && at + 30 * 60000 >= now;
+      });
+      renderPartnerBookings(upcoming);
+      return upcoming;
+    } catch (err) {
+      console.warn('[DayO] loadPartnerBookings failed', err);
+      renderPartnerBookings([]);
+      return [];
+    }
+  };
+
   function collectScheduleSlots() {
     var schedule = window.__dayoPartnerSchedule;
     var slots = [];
@@ -332,8 +425,12 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', function () {
       if (window.__dayoPartnerSchedule) window.loadPartnerSchedule();
+      window.loadPartnerBookings();
     });
   } else if (window.__dayoPartnerSchedule) {
     window.loadPartnerSchedule();
+    window.loadPartnerBookings();
+  } else {
+    window.loadPartnerBookings();
   }
 })();
