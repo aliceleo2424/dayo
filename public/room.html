@@ -87,7 +87,8 @@
           if (profile.error) throw profile.error;
 
           if (profile.data && profile.data.role === 'admin') {
-            return showAccess({ allowed: true, adminTest: true, role: new URLSearchParams(location.search).get('role') === 'partner' ? 'partner' : 'user', userId: user.id,
+            var requestedPreviewRole = new URLSearchParams(location.search).get('role') === 'partner' ? 'partner' : 'user';
+            return showAccess({ allowed: true, adminTest: true, role: 'admin', previewRole: requestedPreviewRole, userId: user.id,
               bookingId: null, roomId: 'dayo_admin_test_' + user.id.replace(/-/g, '').slice(0, 20) });
           }
 
@@ -600,6 +601,25 @@
 
     .timer.is-warning {
       animation: timerPulse 1.2s ease-in-out infinite;
+    }
+
+    .partner-end-countdown {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.75rem;
+      height: 1.75rem;
+      border-radius: 999px;
+      background: rgba(79, 116, 96, 0.12);
+      color: #4F7460;
+      font-family: 'Quicksand', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .partner-end-countdown[hidden] {
+      display: none !important;
     }
 
     .badge-dayo-live {
@@ -3243,8 +3263,14 @@
         return false;
       };
 
+      window.getDayORoomUiRole = function () {
+        var access = window.DayORoomAccess;
+        if (!access || !access.allowed) return 'user';
+        return access.adminTest ? access.previewRole : access.role;
+      };
+
       window.isPartnerRoomMode = function() {
-        return !!(window.DayORoomAccess && window.DayORoomAccess.allowed && window.DayORoomAccess.role === 'partner');
+        return window.getDayORoomUiRole() === 'partner';
       };
 
       function getLearnerDisplayName() {
@@ -3269,11 +3295,14 @@
 
         if (!isPartner) return;
 
+        var access = window.DayORoomAccess;
+        var isPartnerPreview = !!(access && access.adminTest && access.previewRole === 'partner');
+
         var partnerStatusSub = document.querySelector('.partner-status-sub') ||
           document.querySelector('.video-center-desc') ||
           document.getElementById('center-status-text');
         if (partnerStatusSub) {
-          partnerStatusSub.innerText = '유저와 1:1 대화 중';
+          partnerStatusSub.innerText = isPartnerPreview ? '파트너 화면 미리보기' : '유저와 1:1 대화 중';
           partnerStatusSub.removeAttribute('data-i18n');
         }
 
@@ -3281,12 +3310,15 @@
         var partnerNameNodes = document.querySelectorAll('.partner-name, #center-target-name, #header-partner-name');
         if (partnerNameNodes.length) {
           partnerNameNodes.forEach(function (el) {
-            if (el.innerText.includes('Camille') || el.innerText.includes('학습자')) {
+            if (isPartnerPreview) {
+              el.innerText = '파트너 (Partner)';
+            } else if (el.innerText.includes('Camille') || el.innerText.includes('학습자')) {
               el.innerText = '유저 (User)';
             }
           });
-        } else if (partnerNameEl && (partnerNameEl.innerText.includes('Camille') || partnerNameEl.innerText.includes('학습자'))) {
-          partnerNameEl.innerText = '유저 (User)';
+        } else if (partnerNameEl) {
+          if (isPartnerPreview) partnerNameEl.innerText = '파트너 (Partner)';
+          else if (partnerNameEl.innerText.includes('Camille') || partnerNameEl.innerText.includes('학습자')) partnerNameEl.innerText = '유저 (User)';
         }
 
         var headerPartnerSub = document.querySelector('.header-partner-sub') || document.querySelector('.partner-badge-sub');
@@ -3374,6 +3406,7 @@
     <header class="top-bar">
       <div class="top-left">
         <div class="timer" id="timer" aria-live="polite">⏱️ 03:00</div>
+        <span id="partner-end-countdown" class="partner-end-countdown" hidden aria-label="대화 종료까지 남은 초">30</span>
         <span class="badge-dayo-live" aria-label="DayO 라이브 세션"><span class="live-dot" aria-hidden="true"></span>DayO LIVE</span>
       </div>
       <div class="top-center">
@@ -3436,7 +3469,10 @@
               </button>
             </div>
             <div id="partner-topic-card" style="display: none; background: #FFF9E8; border: 1.5px solid #FFEAA7; border-radius: 14px; padding: 14px; margin-top: 10px;">
-              <div style="font-size: 11px; font-weight: 800; color: #966914; margin-bottom: 4px;">✨ Host Guide Prompt</div>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px;">
+                <div style="font-size: 11px; font-weight: 800; color: #966914;">✨ Host Guide Prompt</div>
+                <button type="button" onclick="closePartnerTopicHint()" aria-label="추천 패널 닫기" style="border: 0; background: transparent; color: #966914; font-size: 16px; line-height: 1; cursor: pointer; padding: 2px 4px;">✕</button>
+              </div>
               <div id="partner-topic-content" style="font-size: 13px; color: #3E322D; font-weight: 700; line-height: 1.5;"></div>
             </div>
           </div>
@@ -3916,7 +3952,7 @@
         if (destroyed) return;
         const access = await window.DayORoomAccessReady;
         if (!access.allowed || destroyed) return;
-        currentRole = access.role;
+        currentRole = access.adminTest ? access.previewRole : access.role;
         currentRoomId = access.roomId;
         HOST_ID = currentRoomId + '_host';
         if (isObserver) {
@@ -4047,6 +4083,7 @@
       const WARN_AT_1_MIN = 60;
 
       const el = document.getElementById('timer');
+      const partnerCountdown = document.getElementById('partner-end-countdown');
       if (!el) return;
 
       let remainingSeconds = TOTAL_SESSION_SECONDS;
@@ -4073,6 +4110,20 @@
         const m = Math.floor(remainingSeconds / 60);
         const s = remainingSeconds % 60;
         el.textContent = '⏱️ ' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+        const access = window.DayORoomAccess;
+        const showPartnerCountdown = !!(
+          partnerCountdown &&
+          access &&
+          access.allowed &&
+          (access.adminTest ? access.previewRole : access.role) === 'partner' &&
+          !sessionEnded &&
+          remainingSeconds > 0 &&
+          remainingSeconds <= 30
+        );
+        if (partnerCountdown) {
+          partnerCountdown.hidden = !showPartnerCountdown;
+          if (showPartnerCountdown) partnerCountdown.textContent = String(remainingSeconds);
+        }
       }
 
       function playWrapUpChime() {
@@ -4372,6 +4423,7 @@
     }
 
     function resolveCurrentRole() {
+      if (typeof window.getDayORoomUiRole === 'function') return window.getDayORoomUiRole();
       return window.DayORoomAccess && window.DayORoomAccess.allowed ? window.DayORoomAccess.role : 'user';
     }
 
@@ -5526,6 +5578,8 @@
       var GEMINI_MODEL = 'gemini-1.5-flash';
       var HINT_TIMEOUT_MS = 3000;
       var busy = false;
+      var openKind = '';
+      var requestSequence = 0;
 
       var FALLBACK = {
         question: [
@@ -5670,11 +5724,25 @@
         });
       }
 
+      window.closePartnerTopicHint = function () {
+        var card = document.getElementById('partner-topic-card');
+        if (card) card.style.display = 'none';
+        openKind = '';
+        requestSequence += 1;
+        setBusy(false);
+      };
+
       window.generatePartnerTopicHint = function (mode) {
         if (busy) return;
         var kind = mode === 'topic' ? 'topic' : 'question';
         var content = document.getElementById('partner-topic-content');
         var card = document.getElementById('partner-topic-card');
+        if (card && card.style.display !== 'none' && openKind === kind) {
+          window.closePartnerTopicHint();
+          return;
+        }
+        openKind = kind;
+        var requestId = ++requestSequence;
         if (content && card) {
           content.innerHTML = '<div class="partner-topic-item">AI가 추천 질문을 정리하는 중...</div>';
           card.style.display = 'block';
@@ -5683,13 +5751,13 @@
 
         withTimeout(askGemini(kind, readTranscript()), HINT_TIMEOUT_MS)
           .then(function (questions) {
-            render(questions, false);
+            if (requestId === requestSequence) render(questions, false);
           })
           .catch(function () {
-            render(FALLBACK[kind], true);
+            if (requestId === requestSequence) render(FALLBACK[kind], true);
           })
           .then(function () {
-            setBusy(false);
+            if (requestId === requestSequence) setBusy(false);
           });
       };
     })();
@@ -5950,12 +6018,31 @@
       if (typeof window.initInstaCardSection === 'function') window.initInstaCardSection();
     };
 
+    function setPartnerReportSubmitStatus(message, success) {
+      var status = document.getElementById('partner-report-submit-status');
+      if (!status) return;
+      status.textContent = message || '';
+      status.hidden = !message;
+      status.style.color = success ? '#166534' : '#BE123C';
+    }
+
+    function setPartnerReportSubmitBusy(busy) {
+      var button = document.getElementById('btn-final-partner-submit');
+      if (!button) return;
+      button.disabled = !!busy;
+      button.style.opacity = busy ? '0.65' : '1';
+    }
+
     window.executePartnerPayoutAndExit = async function () {
       if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
-        window.showDayoToast('테스트룸에서는 예약 정산을 사용할 수 없어요.');
+        setPartnerReportSubmitBusy(true);
+        setPartnerReportSubmitStatus('테스트 미리보기입니다. 실제 포인트는 지급되지 않아요.', true);
+        setTimeout(function () { window.location.href = 'index.html?mode=partner'; }, 1200);
         return;
       }
       window.dayoSessionEnded = true;
+      setPartnerReportSubmitBusy(true);
+      setPartnerReportSubmitStatus('대화 기록을 저장하고 포인트 지급을 확인하고 있어요.', true);
 
       if (!window.currentSelectedCard) {
         var rows = collectSessionTranscriptRows();
@@ -5988,40 +6075,53 @@
 
       var bookingId = window.DayORoomAccess && window.DayORoomAccess.bookingId || '';
       if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(bookingId)) {
-        alert('실제 예약 정보를 확인할 수 없어 정산을 진행하지 않았습니다. 마이페이지의 예약 세션으로 다시 입장해 주세요.');
+        setPartnerReportSubmitStatus('실제 예약 정보를 확인할 수 없어 포인트를 지급하지 않았어요. 파트너 라운지의 예약 세션으로 다시 입장해 주세요.', false);
+        setPartnerReportSubmitBusy(false);
         return;
       }
 
-      if (user && typeof window.persistSessionReport === 'function') {
-        await window.persistSessionReport(cardData);
-      } else {
-        try { localStorage.setItem('dayo_last_approved_card', JSON.stringify(cardData)); } catch (e) { /* ignore */ }
-      }
-
       var rewarded = false;
-      if (user && user.id && bookingId && typeof window.handleCompleteSession === 'function') {
-        rewarded = await window.handleCompleteSession(bookingId, user.id);
+      try {
+        if (user && typeof window.persistSessionReport === 'function') {
+          await window.persistSessionReport(cardData);
+        } else {
+          try { localStorage.setItem('dayo_last_approved_card', JSON.stringify(cardData)); } catch (e) { /* ignore */ }
+        }
+
+        if (user && user.id && bookingId && typeof window.handleCompleteSession === 'function') {
+          rewarded = await window.handleCompleteSession(bookingId, user.id);
+        }
+      } catch (err) {
+        console.warn('[DayO] partner report completion failed', err);
+        setPartnerReportSubmitStatus('대화 기록을 완료하지 못했어요. 잠시 후 다시 시도해 주세요.', false);
+        setPartnerReportSubmitBusy(false);
+        return;
       }
 
       console.log('✨ 파트너 리포트 검수 완료 트리거');
-      alert(rewarded
-        ? '🎉 오늘의 대화 기록이 유저 계정으로 전송되었으며, 6,000P가 정산되었습니다.'
-        : '🎉 오늘의 대화 기록이 유저 계정으로 전송되었습니다.');
+      if (!rewarded) {
+        setPartnerReportSubmitStatus('포인트 지급 조건을 확인하지 못했어요. 예약 시간과 세션 상태를 확인한 뒤 다시 시도해 주세요.', false);
+        setPartnerReportSubmitBusy(false);
+        return;
+      }
+
+      setPartnerReportSubmitStatus('오늘의 대화 기록을 전송했고 6,000P가 지급되었어요.', true);
       try { localStorage.setItem('dayo_current_mode', 'PARTNER'); } catch (e) {}
-      window.location.href = 'index.html?mode=partner';
+      setTimeout(function () { window.location.href = 'partner.html'; }, 1200);
     };
 
     window.submitPartnerReportAndLeave = window.executePartnerPayoutAndExit;
 
     window.handleHeaderExitClick = function () {
-      if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
-        try {
-          if (window.DayOLive) window.DayOLive.hangUp();
-          if (window.DayOPeerVideo) window.DayOPeerVideo.destroy();
-        } catch (e) { /* test room only */ }
-        window.location.href = 'index.html';
+      var remaining = window.DayOSessionTimer && typeof window.DayOSessionTimer.getRemainingSeconds === 'function'
+        ? window.DayOSessionTimer.getRemainingSeconds()
+        : 0;
+      if (remaining > 0) {
+        var earlyModal = document.getElementById('early-exit-modal');
+        if (earlyModal) earlyModal.style.setProperty('display', 'flex', 'important');
         return;
       }
+
       if (typeof window.isObserverRoomMode === 'function' && window.isObserverRoomMode()) {
         try {
           if (window.DayOLive && typeof window.DayOLive.hangUp === 'function') window.DayOLive.hangUp();
@@ -6040,8 +6140,7 @@
         return;
       }
 
-      const modal = document.getElementById('early-exit-modal');
-      if (modal) modal.style.setProperty('display', 'flex', 'important');
+      if (typeof window.handleSessionEndRouting === 'function') window.handleSessionEndRouting();
     };
 
     window.closeEarlyExitModal = function () {
@@ -6090,14 +6189,33 @@
 
     window.handleDevSkipClick = function (e) {
       if (e) { e.preventDefault(); e.stopPropagation(); }
-      if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
-        window.showDayoToast('테스트룸에서는 예약 종료 미리보기를 사용할 수 없어요.');
+      if (!window.dayoCanUseRoomTestControls || !window.dayoCanUseRoomTestControls()) {
         return;
       }
-      if (typeof window.handleSessionEndRouting === 'function') {
-        window.handleSessionEndRouting();
+      if (window.DayOSessionTimer && typeof window.DayOSessionTimer.skipToEnd === 'function') {
+        window.DayOSessionTimer.skipToEnd();
       }
     };
+
+    window.dayoCanUseRoomTestControls = function () {
+      var access = window.DayORoomAccess;
+      return !!(access && access.allowed && access.adminTest === true);
+    };
+
+    function syncDevTestSkipButton() {
+      var button = document.getElementById('dev-test-skip-btn');
+      if (button) button.hidden = !window.dayoCanUseRoomTestControls();
+    }
+
+    function prepareDevTestSkipButton() {
+      Promise.resolve(window.DayORoomAccessReady).then(syncDevTestSkipButton, syncDevTestSkipButton);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', prepareDevTestSkipButton, { once: true });
+    } else {
+      prepareDevTestSkipButton();
+    }
 
     function purgeStrayLocalVideos(pipBox) {
       document.querySelectorAll('video#local-video-preview, video#selfVideo').forEach(function (el) {
@@ -6238,8 +6356,8 @@
   }, 2000);
 })();
   </script>
-  <button type="button" id="dev-test-skip-btn" onclick="handleDevSkipClick(event)" style="position: fixed; top: 58px; left: 12px; z-index: 999999; background: rgba(0,0,0,0.65); color: #FFF; font-size: 10.5px; padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3); opacity: 0.8; cursor: pointer;">
-    ⚡ [종료 미리보기]
+  <button type="button" id="dev-test-skip-btn" hidden onclick="handleDevSkipClick(event)" style="position: fixed; top: 58px; left: 12px; z-index: 999999; background: rgba(0,0,0,0.65); color: #FFF; font-size: 10.5px; padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3); opacity: 0.8; cursor: pointer;">
+    [테스트 종료]
   </button>
 
   <div id="partner-report-popup" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); z-index: 99999999; justify-content: center; align-items: center; padding: 20px;">
@@ -6320,8 +6438,9 @@
           </div>
         </div>
 
+        <p id="partner-report-submit-status" role="status" aria-live="polite" hidden style="margin: 0; font-size: 12.5px; font-weight: 700; line-height: 1.5; text-align: center;"></p>
         <button type="button" id="btn-final-partner-submit" onclick="executePartnerPayoutAndExit()" style="background: #4F7460; color: #FFF; border: none; border-radius: 12px; padding: 14px; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 4px; box-shadow: 0 4px 14px rgba(79, 116, 96, 0.28); transition: opacity 0.2s;">
-          ✨ 검수 완료 및 6,000P 정산 받기
+          ✨ 검수 완료하고 6,000P 받기
         </button>
       </div>
     </div>
@@ -6340,7 +6459,7 @@
         계속 대화하기
       </button>
       <button type="button" onclick="confirmEarlyExit()" style="width: 100%; padding: 11px; background: #F8FAF9; color: #6E7A72; border: 1px solid #EDE4D5; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer;">
-        개인 사정으로 지금 종료
+        사정이 있어 종료하기
       </button>
     </div>
 
