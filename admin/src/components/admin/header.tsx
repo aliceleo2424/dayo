@@ -1,17 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell, Moon, Sun, User } from "lucide-react";
+import { Bell, LogOut, Moon, Sun, User } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useAdminAuth } from "@/components/admin/admin-auth-guard";
 import { useAdminStore } from "@/store/admin-store";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 
 export function AdminHeader({ title }: { title: string }) {
+  const router = useRouter();
+  const admin = useAdminAuth();
   const { darkMode, toggleDarkMode, sidebarCollapsed } = useAdminStore();
   const [urgentCount, setUrgentCount] = useState(0);
+  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -36,6 +41,14 @@ export function AdminHeader({ title }: { title: string }) {
     };
   }, []);
 
+  async function signOut() {
+    if (signingOut) return;
+    setSigningOut(true);
+    await supabase.auth.signOut();
+    router.replace("/login");
+    router.refresh();
+  }
+
   return (
     <header className={cn(
       "sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60",
@@ -52,7 +65,7 @@ export function AdminHeader({ title }: { title: string }) {
         <h1 className="truncate text-xl font-semibold text-navy">{title}</h1>
       </div>
       <div className="flex items-center gap-3">
-        <Badge variant="coral">Super Admin</Badge>
+        <Badge variant="coral">Admin</Badge>
         <Button variant="ghost" size="icon" className="relative" title={`긴급 안전 알림 ${urgentCount}건`}>
           <Bell className="h-4 w-4" />
           {urgentCount > 0 && (
@@ -68,8 +81,12 @@ export function AdminHeader({ title }: { title: string }) {
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-navy text-xs text-white">
             <User className="h-3.5 w-3.5" />
           </div>
-          <span className="text-sm font-medium">Alice</span>
+          <span className="max-w-36 truncate text-sm font-medium" title={admin.email}>{admin.displayName}</span>
         </div>
+        <Button variant="ghost" size="sm" onClick={() => void signOut()} disabled={signingOut}>
+          <LogOut className="mr-1.5 h-4 w-4" />
+          로그아웃
+        </Button>
       </div>
     </header>
   );
