@@ -53,6 +53,49 @@
     return raw;
   }
 
+  function isThirtyMinuteStart(value) {
+    return /^(?:0\d|1\d|2[0-3]):(?:00|30)$/.test(String(value || ''));
+  }
+
+  function parseDatedSlotStart(value) {
+    var raw = String(value || '');
+    if (!/^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}/.test(raw)) return null;
+    var normalized = raw.replace(' ', 'T');
+    if (/[+-]\d{2}$/.test(normalized)) normalized += ':00';
+    else if (/[+-]\d{4}$/.test(normalized)) {
+      normalized = normalized.slice(0, -2) + ':' + normalized.slice(-2);
+    }
+    var parsed = new Date(normalized);
+    return isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  function isThirtyMinuteDatedSlot(value) {
+    var match = String(value || '').match(/^\d{4}-\d{2}-\d{2}[T ](\d{2}:\d{2})/);
+    return !!match && isThirtyMinuteStart(match[1]);
+  }
+
+  function isFutureBookableDatedSlot(value, nowMs) {
+    var start = parseDatedSlotStart(value);
+    return !!start && isThirtyMinuteDatedSlot(value) && start.getTime() > nowMs;
+  }
+
+  function materializationDateSet() {
+    var dates = {};
+    DAY_IDS.forEach(function (dayId) {
+      upcomingDatesForDay(dayId, WEEKS_AHEAD).forEach(function (isoDate) {
+        dates[isoDate] = true;
+      });
+    });
+    return dates;
+  }
+
+  async function deleteAvailableSlotIds(supabase, ids) {
+    for (var i = 0; i < ids.length; i += 100) {
+      var result = await supabase.from('availability_slots').delete().in('id', ids.slice(i, i + 100));
+      if (result.error) throw result.error;
+    }
+  }
+
   function formatBookingTime(value) {
     if (!value) return '예약 시간 확인';
     var date = new Date(value);
@@ -158,7 +201,7 @@
           set.forEach(function (time) { times.push(time); });
         }
         times.forEach(function (time) {
-          slots.push({ dayId: dayId, time: time });
+          if (isThirtyMinuteStart(time)) slots.push({ dayId: dayId, time: time });
         });
       });
     }
@@ -166,7 +209,7 @@
       document.querySelectorAll('.time-chip.open, .time-chip.selected, .slot-open, .slot-btn.active').forEach(function (el) {
         var time = el.getAttribute('data-time') || String(el.textContent || '').trim().slice(0, 5);
         var dayId = el.getAttribute('data-day') || (window.__dayoPartnerActiveDay || 'mon');
-        if (time) slots.push({ dayId: dayId, time: time });
+        if (isThirtyMinuteStart(time)) slots.push({ dayId: dayId, time: time });
       });
     }
     return slots;
@@ -175,7 +218,9 @@
   function buildRows(partnerId, openSlots) {
     var rows = [];
     var seen = {};
+    var nowMs = Date.now();
     openSlots.forEach(function (slot) {
+      if (!DAY_INDEX.hasOwnProperty(slot.dayId) || !isThirtyMinuteStart(slot.time)) return;
       var weeklyKey = 'weekly:' + slot.dayId + '|' + slot.time;
       if (!seen[weeklyKey]) {
         seen[weeklyKey] = true;
@@ -183,6 +228,8 @@
       }
       upcomingDatesForDay(slot.dayId, WEEKS_AHEAD).forEach(function (isoDate) {
         var dated = isoDate + 'T' + slot.time + ':00';
+        var start = parseDatedSlotStart(dated);
+        if (!start || start.getTime() <= nowMs) return;
         if (seen[dated]) return;
         seen[dated] = true;
         rows.push({ partner_id: partnerId, slot_time: dated, status: 'available' });
@@ -197,11 +244,6 @@
       || document.getElementById('saveSchedule');
     var activeSlots = document.querySelectorAll('.slot-btn.active, .time-chip.selected, .slot-open, .time-chip.open');
     var collected = collectScheduleSlots();
-
-    if (collected.length === 0 && activeSlots.length === 0) {
-      alert('오픈할 시간대를 최소 1개 이상 선택해 주세요.');
-      return;
-    }
 
     var supabase = client();
     if (!supabase) {
@@ -227,8 +269,16 @@
       });
 
       var slotsToInsert = buildRows(user.id, openSlots);
-      var keepTimes = {};
-      slotsToInsert.forEach(function (row) { keepTimes[row.slot_time] = true; });
+      var weeklyRows = slotsToInsert.filter(function (row) {
+        return String(row.slot_time || '').indexOf('weekly:') === 0;
+      });
+      var datedRows = slotsToInsert.filter(function (row) {
+        return String(row.slot_time || '').indexOf('weekly:') !== 0;
+      });
+      var keepWeeklyTimes = {};
+      weeklyRows.forEach(function (row) {
+        keepWeeklyTimes[row.slot_time] = true;
+      });
 
       var existingRes = await supabase
         .from('availability_slots')
@@ -237,26 +287,56 @@
       if (existingRes.error) throw existingRes.error;
 
       var booked = {};
+      var bookedStarts = {};
       (existingRes.data || []).forEach(function (row) {
-        if (row.status === 'booked') booked[row.slot_time] = true;
+        if (row.status !== 'booked') return;
+        booked[row.slot_time] = true;
+        var bookedStart = parseDatedSlotStart(row.slot_time);
+        if (bookedStart) bookedStarts[bookedStart.getTime()] = true;
       });
 
-      var toUpsert = slotsToInsert.filter(function (row) { return !booked[row.slot_time]; });
-      if (toUpsert.length) {
+      var weeklyToUpsert = weeklyRows.filter(function (row) { return !booked[row.slot_time]; });
+      if (weeklyToUpsert.length) {
         const { error } = await supabase
           .from('availability_slots')
-          .upsert(toUpsert, { onConflict: 'partner_id,slot_time' });
+          .upsert(weeklyToUpsert, { onConflict: 'partner_id,slot_time' });
         if (error) throw error;
       }
 
       var staleIds = (existingRes.data || [])
         .filter(function (row) {
-          return row.status === 'available' && !keepTimes[row.slot_time];
+          var slotTime = String(row.slot_time || '');
+          return row.status === 'available'
+            && slotTime.indexOf('weekly:') === 0
+            && !keepWeeklyTimes[slotTime];
         })
         .map(function (row) { return row.id; });
       if (staleIds.length) {
-        var delRes = await supabase.from('availability_slots').delete().in('id', staleIds);
-        if (delRes.error) throw delRes.error;
+        await deleteAvailableSlotIds(supabase, staleIds);
+      }
+
+      var windowDates = materializationDateSet();
+      var nowMs = Date.now();
+      var staleDatedIds = (existingRes.data || [])
+        .filter(function (row) {
+          if (row.status !== 'available') return false;
+          var start = parseDatedSlotStart(row.slot_time);
+          return !!start && start.getTime() > nowMs && !!windowDates[toIsoDate(start)];
+        })
+        .map(function (row) { return row.id; });
+      if (staleDatedIds.length) {
+        await deleteAvailableSlotIds(supabase, staleDatedIds);
+      }
+
+      var datedToUpsert = datedRows.filter(function (row) {
+        var start = parseDatedSlotStart(row.slot_time);
+        return !booked[row.slot_time] && (!start || !bookedStarts[start.getTime()]);
+      });
+      if (datedToUpsert.length) {
+        const { error } = await supabase
+          .from('availability_slots')
+          .upsert(datedToUpsert, { onConflict: 'partner_id,slot_time' });
+        if (error) throw error;
       }
 
       alert('✅ 주간 대화 가능 시간이 성공적으로 저장되었습니다!');
@@ -269,7 +349,7 @@
     } finally {
       if (saveBtn) {
         saveBtn.disabled = false;
-        saveBtn.innerHTML = original || '💾 변경된 스케줄 저장하기';
+        saveBtn.innerHTML = original || '반복 가능시간 저장';
       }
     }
   };
@@ -287,7 +367,6 @@
         .eq('partner_id', user.id);
       if (res.error || !res.data || !res.data.length) return;
 
-      var hasWeekly = false;
       DAY_IDS.forEach(function (dayId) {
         if (schedule[dayId] && schedule[dayId].clear) schedule[dayId] = new Set();
       });
@@ -295,25 +374,13 @@
       res.data.forEach(function (row) {
         var raw = String(row.slot_time || '');
         if (raw.indexOf('weekly:') === 0) {
-          hasWeekly = true;
           var parts = raw.slice(7).split('|');
-          if (parts[0] && parts[1]) {
+          if (parts[0] && isThirtyMinuteStart(parts[1])) {
             if (!schedule[parts[0]]) schedule[parts[0]] = new Set();
             schedule[parts[0]].add(parts[1]);
           }
         }
       });
-
-      if (!hasWeekly) {
-        res.data.forEach(function (row) {
-          var match = String(row.slot_time || '').match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
-          if (!match) return;
-          var dayId = weekdayIdFromDate(match[1]);
-          if (!dayId) return;
-          if (!schedule[dayId]) schedule[dayId] = new Set();
-          schedule[dayId].add(match[2]);
-        });
-      }
 
       if (typeof window.__dayoRenderPartnerTimes === 'function') window.__dayoRenderPartnerTimes();
     } catch (err) {
@@ -348,8 +415,8 @@
     var visible = (slots || []).filter(function (s) {
       var raw = String(s.slot_time || '');
       if (raw.indexOf('weekly:') === 0) return false;
-      if (dateFilter) return raw.indexOf(dateFilter) === 0;
-      return raw.indexOf('T') > 0 || /\d{4}-\d{2}-\d{2}\s/.test(raw);
+      if (dateFilter && raw.indexOf(dateFilter) !== 0) return false;
+      return isFutureBookableDatedSlot(raw, Date.now());
     });
 
     if (error || !visible.length) {

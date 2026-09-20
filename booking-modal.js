@@ -686,11 +686,18 @@
     return match ? match[1] : raw;
   }
 
-  function weekdayKey(isoDate) {
-    var parts = String(isoDate || '').split('-');
-    if (parts.length < 3) return '';
-    var date = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
-    return ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][date.getDay()] || '';
+  function isFutureThirtyMinuteConcreteSlot(slot) {
+    var raw = String(slot && slot.slot_time || '');
+    if (raw.indexOf('weekly:') === 0) return false;
+    var match = raw.match(/^\d{4}-\d{2}-\d{2}[T ]\d{2}:(\d{2})/);
+    if (!match || (match[1] !== '00' && match[1] !== '30')) return false;
+    var normalized = raw.replace(' ', 'T');
+    if (/[+-]\d{2}$/.test(normalized)) normalized += ':00';
+    else if (/[+-]\d{4}$/.test(normalized)) {
+      normalized = normalized.slice(0, -2) + ':' + normalized.slice(-2);
+    }
+    var start = new Date(normalized);
+    return !isNaN(start.getTime()) && start.getTime() > Date.now();
   }
 
   async function fetchPartnerSlots(partnerId, isoDate) {
@@ -742,25 +749,12 @@
         if (!likeRes.error) slots = likeRes.data || [];
       }
 
-      if (!slots.length) {
-        var dayId = weekdayKey(isoDate);
-        if (dayId) {
-          var weeklyRes = await supabase
-            .from('availability_slots')
-            .select('id, slot_time, status')
-            .eq('partner_id', selectedPartnerId)
-            .eq('status', 'available')
-            .like('slot_time', 'weekly:' + dayId + '|%')
-            .order('slot_time', { ascending: true });
-          if (!weeklyRes.error) slots = weeklyRes.data || [];
-        }
-      }
     } catch (err) {
       console.error('슬롯 로드 실패:', err);
       slots = [];
     }
 
-    liveSlots = slots || [];
+    liveSlots = (slots || []).filter(isFutureThirtyMinuteConcreteSlot);
     renderSlotChips();
     return liveSlots;
   }

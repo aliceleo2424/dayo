@@ -863,12 +863,12 @@
       KO: '📅 주간 대화 가능 시간', EN: '📅 Weekly Availability', ZH: '📅 每周可用时间', JA: '📅 週間スケジュール', FR: '📅 Disponibilités hebdo', ES: '📅 Disponibilidad semanal'
     },
     'partner.schedule.sub': {
-      KO: '요일을 고르고 예약을 받을 수 있는 시간을 열어주세요.',
-      EN: 'Pick days and open time slots for bookings.',
-      ZH: '选择日期并开放可预约时段。',
-      JA: '曜日を選び、予約可能な時間を開放してください。',
-      FR: 'Choisissez les jours et créneaux ouverts.',
-      ES: 'Elige días y horarios disponibles.'
+      KO: '매주 반복해서 가능한 시간을 선택해 주세요. 예약은 30분 단위로 열립니다.',
+      EN: 'Choose the times you are available every week. Bookings open in 30-minute slots.',
+      ZH: '请选择每周可重复安排的时间。预约以30分钟为单位开放。',
+      JA: '毎週繰り返し対応できる時間を選んでください。予約枠は30分単位です。',
+      FR: 'Choisissez vos disponibilités hebdomadaires. Les réservations sont ouvertes par créneaux de 30 minutes.',
+      ES: 'Elige tus horarios disponibles cada semana. Las reservas se abren en bloques de 30 minutos.'
     },
     'partner.gcal.title': {
       KO: '📅 Google Calendar 연동하기', EN: '📅 Connect Google Calendar', ZH: '📅 连接Google日历', JA: '📅 Googleカレンダー連携', FR: '📅 Lier Google Calendar', ES: '📅 Conectar Google Calendar'
@@ -882,7 +882,7 @@
       ES: '¡Tus horarios ocupados se bloquean!'
     },
     'partner.schedule.save': {
-      KO: '💾 변경된 스케줄 저장하기', EN: '💾 Save Schedule', ZH: '💾 保存日程', JA: '💾 スケジュール保存', FR: '💾 Enregistrer', ES: '💾 Guardar horario'
+      KO: '반복 가능시간 저장', EN: 'Save weekly availability', ZH: '保存每周可用时间', JA: '繰り返し可能時間を保存', FR: 'Enregistrer les disponibilités récurrentes', ES: 'Guardar disponibilidad semanal'
     },
     'partner.sessions.title': {
       KO: '⏰ 다가오는 대화', EN: '⏰ Upcoming Chats', ZH: '⏰ 即将开始的对话', JA: '⏰ 予定の会話', FR: '⏰ Sessions à venir', ES: '⏰ Próximas charlas'
@@ -924,12 +924,12 @@
       KO: '적립 포인트', EN: 'Earned points', ZH: '累计积分', JA: '保有ポイント', FR: 'Points cumulés', ES: 'Puntos acumulados'
     },
     'partner.stats.pointsHint': {
-      KO: '30분 세션(25분 대화) 완료 시 6,000P가 자동 적립되며, 매월 정산일에 100% 현금 출금 가능합니다.',
-      EN: '6,000P is credited automatically after a 30-minute session (25 minutes of conversation), and can be withdrawn in full on the monthly payout date.',
-      ZH: '完成30分钟会话（25分钟对话）后将自动累计6,000P，并在每月结算日可100%兑换现金。',
-      JA: '30分セッション（25分会話）完了時に6,000Pが自動加算され、毎月の精算日に100%現金引き出しできます。',
-      FR: '6 000P sont crédités automatiquement après une session de 30 min (25 min de conversation) et peuvent être retirés à 100 % à la date de paiement mensuelle.',
-      ES: 'Se acreditan 6.000P automáticamente al completar una sesión de 30 min (25 min de conversación) y se pueden retirar al 100% en la fecha de pago mensual.'
+      KO: '30분 세션 완료 시 6,000P가 적립됩니다. 30,000P부터 출금 신청이 가능합니다. 출금은 월 정산 일정에 따라 처리됩니다.',
+      EN: 'Earn 6,000P after completing a 30-minute session. Withdrawal requests are available from 30,000P and are processed on the monthly payout schedule.',
+      ZH: '完成30分钟会话后可获得6,000P。积分达到30,000P后可申请提现，并按每月结算日程处理。',
+      JA: '30分のセッション完了時に6,000Pが加算されます。30,000Pから出金申請が可能で、月次精算スケジュールに沿って処理されます。',
+      FR: 'Une session de 30 minutes rapporte 6 000P. Les demandes de retrait sont possibles à partir de 30 000P et sont traitées selon le calendrier mensuel.',
+      ES: 'Al completar una sesión de 30 minutos se acreditan 6.000P. Se puede solicitar un retiro desde 30.000P y se procesa según el calendario mensual.'
     },
     'partner.stats.settled': {
       KO: '누적 정산 완료 금액', EN: 'Settled activity pay', ZH: '累计已结算金额', JA: '累計精算済み金額', FR: 'Montant déjà réglé', ES: 'Importe ya liquidado'
@@ -2231,20 +2231,14 @@
     /* ===== Partner portal extras (partner.html) ===== */
     'partner.photoModal.title': { KO: '📷 프로필 사진 변경', EN: '📷 Change Profile Photo', ZH: '📷 更换个人资料照片', JA: '📷 プロフィール写真変更', FR: '📷 Changer la photo de profil', ES: '📷 Cambiar foto de perfil' },
     'partner.photoModal.desc': {
-      KO: '파스텔 캐릭터 아바타를 고르거나 내 사진을 올려보세요.', EN: 'Choose a pastel character avatar or upload your own photo.', ZH: '选择粉彩角色头像或上传自己的照片。', JA: 'パステルキャラクターアバターを選ぶか、写真をアップロードしてください。', FR: 'Choisissez un avatar pastel ou téléchargez votre photo.', ES: 'Elige un avatar pastel o sube tu propia foto.'
+      KO: '파트너 프로필에 사용할 본인 얼굴 사진을 업로드해 주세요.', EN: 'Upload a photo of your face for your partner profile.', ZH: '请上传用于伙伴资料的本人脸部照片。', JA: 'パートナープロフィールに使用するご本人の顔写真をアップロードしてください。', FR: 'Téléchargez une photo de votre visage pour votre profil partenaire.', ES: 'Sube una foto de tu rostro para tu perfil de partner.'
     },
     'partner.photoModal.closeAria': { KO: '닫기', EN: 'Close', ZH: '关闭', JA: '閉じる', FR: 'Fermer', ES: 'Cerrar' },
-    'partner.photoModal.tabPhoto': { KO: '📷 실제 얼굴 사진', EN: '📷 Real Photo', ZH: '📷 真实照片', JA: '📷 実際の顔写真', FR: '📷 Vraie photo', ES: '📷 Foto real' },
-    'partner.photoModal.tabAvatar': { KO: '🎨 파스텔 캐릭터 아바타', EN: '🎨 Pastel Avatar', ZH: '🎨 粉彩角色头像', JA: '🎨 パステルアバター', FR: '🎨 Avatar pastel', ES: '🎨 Avatar pastel' },
     'partner.photoModal.uploadTitle': { KO: '내 얼굴 사진을 올려보세요', EN: 'Upload your face photo', ZH: '上传我的脸部照片', JA: '自分の顔写真をアップロード', FR: 'Téléchargez votre photo', ES: 'Sube tu foto de cara' },
     'partner.photoModal.uploadHint': {
       KO: 'JPG 또는 PNG 파일을 선택하면 바로 미리보기로 확인할 수 있어요.', EN: 'Choose a JPG or PNG file to see an instant preview.', ZH: '选择JPG或PNG文件即可立即预览。', JA: 'JPGまたはPNGファイルを選ぶと、すぐにプレビューできます。', FR: 'Choisissez un fichier JPG ou PNG pour un aperçu instantané.', ES: 'Elige un archivo JPG o PNG para ver una vista previa al instante.'
     },
-    'partner.photoModal.uploadBtn': { KO: '📷 실제 얼굴 사진 업로드', EN: '📷 Upload Real Photo', ZH: '📷 上传真实照片', JA: '📷 実際の顔写真をアップロード', FR: '📷 Télécharger la photo', ES: '📷 Subir foto real' },
-    'partner.photoModal.removeBtn': { KO: '🗑️ 사진 지우기', EN: '🗑️ Remove Photo', ZH: '🗑️ 删除照片', JA: '🗑️ 写真を削除', FR: '🗑️ Supprimer la photo', ES: '🗑️ Quitar foto' },
-    'partner.photoModal.avatarHint': {
-      KO: '사진 대신 파스텔 캐릭터 아바타로 프로필을 꾸밀 수 있어요.', EN: 'You can decorate your profile with a pastel avatar instead of a photo.', ZH: '也可以用粉彩角色头像代替照片装饰资料。', JA: '写真の代わりにパステルアバターでプロフィールを飾れます。', FR: "Vous pouvez décorer votre profil avec un avatar pastel.", ES: 'Puedes decorar tu perfil con un avatar pastel.'
-    },
+    'partner.photoModal.uploadBtn': { KO: '📷 사진 업로드', EN: '📷 Upload Photo', ZH: '📷 上传照片', JA: '📷 写真をアップロード', FR: '📷 Télécharger une photo', ES: '📷 Subir foto' },
     'partner.photoModal.previewAria': { KO: '업로드한 프로필 사진 미리보기', EN: 'Uploaded profile photo preview', ZH: '已上传的个人资料照片预览', JA: 'アップロードしたプロフィール写真のプレビュー', FR: 'Aperçu de la photo de profil téléchargée', ES: 'Vista previa de la foto de perfil subida' },
     'partner.historyModal.title': { KO: '📜 닉네임 변경 이력', EN: '📜 Nickname History', ZH: '📜 昵称变更记录', JA: '📜 ニックネーム変更履歴', FR: '📜 Historique du pseudo', ES: '📜 Historial de apodos' },
     'partner.historyModal.desc': { KO: '지금까지 사용한 닉네임 기록이에요.', EN: "Here's a record of nicknames you've used.", ZH: '这是您使用过的昵称记录。', JA: 'これまで使用したニックネームの記録です。', FR: 'Voici les pseudos que vous avez utilisés.', ES: 'Aquí están los apodos que has usado.' },
@@ -2272,32 +2266,15 @@
     'partner.toast.nicknameChangedFormat': {
       KO: "닉네임이 '{name}'(으)로 변경되었습니다 ✨", EN: "Nickname changed to '{name}' ✨", ZH: "昵称已更改为'{name}' ✨", JA: "ニックネームが「{name}」に変更されました ✨", FR: "Pseudo changé en « {name} » ✨", ES: "Apodo cambiado a '{name}' ✨"
     },
-    'partner.toast.photoRemoved': { KO: '사진을 지우고 파스텔 아바타로 되돌렸어요 🎨', EN: 'Removed the photo and reverted to a pastel avatar 🎨', ZH: '已删除照片并恢复为粉彩头像 🎨', JA: '写真を削除してパステルアバターに戻しました 🎨', FR: 'Photo supprimée, retour à un avatar pastel 🎨', ES: 'Foto eliminada, volviendo a un avatar pastel 🎨' },
-    'partner.toast.avatarApplied': { KO: '파스텔 아바타가 적용되었습니다 🎨', EN: 'Pastel avatar applied 🎨', ZH: '已应用粉彩头像 🎨', JA: 'パステルアバターが適用されました 🎨', FR: 'Avatar pastel appliqué 🎨', ES: 'Avatar pastel aplicado 🎨' },
     'partner.toast.photoApplied': { KO: '실제 프로필 사진이 미리보기로 적용되었습니다 📷', EN: 'Your real photo was applied as a preview 📷', ZH: '真实资料照片已应用为预览 📷', JA: '実際のプロフィール写真がプレビューに適用されました 📷', FR: 'Votre vraie photo a été appliquée en aperçu 📷', ES: 'Tu foto real se aplicó como vista previa 📷' },
-    'partner.profile.avatarAria': { KO: '환하게 미소 짓는 대화 파트너 파스텔 아바타', EN: 'Brightly smiling pastel avatar of a conversation partner', ZH: '灿烂微笑的对话伙伴粉彩头像', JA: '明るく微笑む会話パートナーのパステルアバター', FR: 'Avatar pastel souriant du partenaire de conversation', ES: 'Avatar pastel sonriente del compañero de conversación' },
+    'partner.profile.avatarAria': { KO: '파트너 프로필 사진', EN: 'Partner profile photo', ZH: '伙伴资料照片', JA: 'パートナーのプロフィール写真', FR: 'Photo de profil du partenaire', ES: 'Foto de perfil del partner' },
     'partner.profile.nicknamePlaceholder': { KO: '이름을 입력해 주세요', EN: 'Please enter a name', ZH: '请输入姓名', JA: '名前を入力してください', FR: 'Veuillez entrer un nom', ES: 'Por favor ingresa un nombre' },
     'partner.profile.defaultName': { KO: 'DayO 파트너', EN: 'DayO Partner', ZH: 'DayO伙伴', JA: 'DayOパートナー', FR: 'Partenaire DayO', ES: 'Compañero DayO' },
     'partner.badge.verified': { KO: '✅ 인증 파트너', EN: '✅ Verified partner', ZH: '✅ 认证伙伴', JA: '✅ 認証パートナー', FR: '✅ Partenaire vérifié', ES: '✅ Compañero verificado' },
     'partner.badge.pending': { KO: '검토 대기중', EN: 'Pending review', ZH: '审核中', JA: '審査待ち', FR: 'En revue', ES: 'En revisión' },
-    'partner.slot.add': { KO: '➕ 가용 시간 등록', EN: '➕ Add availability', ZH: '➕ 登记可用时间', JA: '➕ 空き時間を登録', FR: '➕ Ajouter un créneau', ES: '➕ Añadir horario' },
     'partner.slot.empty': { KO: '등록된 가용 슬롯이 없습니다. 대화 가능한 시간대를 열어주세요 🌿', EN: 'No availability slots yet. Open a time when you can chat 🌿', ZH: '还没有可用时段。请开放可以对话的时间 🌿', JA: '登録された空き枠がありません。会話できる時間を開いてください 🌿', FR: 'Aucun créneau pour le moment. Ouvrez un horaire de conversation 🌿', ES: 'Aún no hay horarios. Abre un espacio para conversar 🌿' },
-    'partner.slot.modalTitle': { KO: '가용 시간 등록', EN: 'Add availability', ZH: '登记可用时间', JA: '空き時間を登録', FR: 'Ajouter un créneau', ES: 'Añadir horario' },
-    'partner.slot.modalDesc': { KO: '대화 가능한 날짜와 시간을 선택해 슬롯을 열어주세요.', EN: 'Pick a date and time to open a bookable slot.', ZH: '请选择可对话的日期和时间来开放时段。', JA: '会話できる日付と時間を選んで枠を開いてください。', FR: 'Choisissez une date et une heure pour ouvrir un créneau.', ES: 'Elige fecha y hora para abrir un horario.' },
-    'partner.slot.date': { KO: '날짜', EN: 'Date', ZH: '日期', JA: '日付', FR: 'Date', ES: 'Fecha' },
-    'partner.slot.hour': { KO: '시', EN: 'Hour', ZH: '时', JA: '時', FR: 'Heure', ES: 'Hora' },
-    'partner.slot.minute': { KO: '분', EN: 'Minute', ZH: '分', JA: '分', FR: 'Minute', ES: 'Minuto' },
-    'partner.slot.submit': { KO: '등록하기', EN: 'Save slot', ZH: '登记', JA: '登録する', FR: 'Enregistrer', ES: 'Guardar' },
-    'partner.slot.saving': { KO: '등록 중…', EN: 'Saving…', ZH: '登记中…', JA: '登録中…', FR: 'Enregistrement…', ES: 'Guardando…' },
-    'partner.slot.saved': { KO: '가용 시간이 등록되었습니다 🌿', EN: 'Availability slot saved 🌿', ZH: '可用时间已登记 🌿', JA: '空き時間を登録しました 🌿', FR: 'Créneau enregistré 🌿', ES: 'Horario guardado 🌿' },
-    'partner.slot.error': { KO: '슬롯 등록에 실패했습니다. 잠시 후 다시 시도해 주세요.', EN: 'Could not save the slot. Please try again.', ZH: '时段登记失败，请稍后重试。', JA: '枠の登録に失敗しました。しばらくして再試行してください。', FR: 'Impossible d’enregistrer le créneau. Réessayez.', ES: 'No se pudo guardar el horario. Inténtalo de nuevo.' },
-    'partner.slot.invalid': { KO: '날짜와 시간을 모두 선택해 주세요.', EN: 'Please choose both a date and a time.', ZH: '请选择日期和时间。', JA: '日付と時間を選んでください。', FR: 'Choisissez une date et une heure.', ES: 'Elige una fecha y una hora.' },
     'partner.slot.available': { KO: '예약 가능', EN: 'Available', ZH: '可预约', JA: '予約可能', FR: 'Disponible', ES: 'Disponible' },
     'partner.slot.booked': { KO: '예약됨', EN: 'Booked', ZH: '已预约', JA: '予約済み', FR: 'Réservé', ES: 'Reservado' },
-    'partner.avatar.peach': { KO: '피치', EN: 'Peach', ZH: '桃色', JA: 'ピーチ', FR: 'Pêche', ES: 'Durazno' },
-    'partner.avatar.rose': { KO: '로즈', EN: 'Rose', ZH: '玫瑰', JA: 'ローズ', FR: 'Rose', ES: 'Rosa' },
-    'partner.avatar.mint': { KO: '민트', EN: 'Mint', ZH: '薄荷', JA: 'ミント', FR: 'Menthe', ES: 'Menta' },
-    'partner.avatar.butter': { KO: '버터', EN: 'Butter', ZH: '奶油', JA: 'バター', FR: 'Beurre', ES: 'Mantequilla' },
     'partner.session1.status': { KO: '● 30분 후 시작', EN: '● Starts in 30 min', ZH: '● 30分钟后开始', JA: '● 30分後に開始', FR: '● Débute dans 30 min', ES: '● Comienza en 30 min' },
     'partner.session1.title': { KO: '20대 K님', EN: 'K, in their 20s', ZH: '20多岁K先生', JA: '20代Kさん', FR: 'K, la vingtaine', ES: 'K, de 20 años' },
     'partner.session1.purpose': { KO: '목적: ✈️ 프랑스 여행 회화', EN: 'Purpose: ✈️ French Travel Conversation', ZH: '目的：✈️ 法语旅行会话', JA: '目的：✈️ フランス旅行会話', FR: 'Objectif : ✈️ Conversation voyage en français', ES: 'Propósito: ✈️ Conversación de viaje en francés' },

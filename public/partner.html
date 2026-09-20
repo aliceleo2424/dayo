@@ -213,10 +213,8 @@
           || (user && user.email ? user.email.split('@')[0] : '')
           || ''
         ).trim();
-        var welcome = document.getElementById('partnerWelcome');
         var miniName = document.getElementById('miniName');
         var badge = document.querySelector('.partner-mode-badge');
-        if (welcome) welcome.textContent = nickname + '님, 반갑습니다! ☕';
         if (miniName) miniName.textContent = nickname;
         if (badge) badge.textContent = '🟢 파트너 활동중';
         showPartnerLounge();
@@ -619,83 +617,23 @@
     }
 
     .avatar {
-      --av-bg: var(--pink);
-      --av-hair: #85583F;
-      --av-skin: #F0C9AA;
       position: relative;
+      display: grid;
+      place-items: center;
       width: 104px;
       height: 104px;
       overflow: hidden;
       border: 4px solid rgba(255,255,255,0.95);
       border-radius: 50%;
-      background: var(--av-bg) center / cover no-repeat;
+      background: rgba(255,255,255,0.82) center / cover no-repeat;
       box-shadow: 0 10px 22px rgba(113, 83, 72, 0.12);
     }
 
     .avatar.has-photo > span { display: none; }
 
-    .avatar-body {
-      position: absolute;
-      left: 20px;
-      bottom: -17px;
-      width: 64px;
-      height: 50px;
-      border-radius: 50% 50% 18px 18px;
-      background: #FFF9F3;
-    }
-
-    .avatar-neck {
-      position: absolute;
-      left: 44px;
-      bottom: 25px;
-      width: 17px;
-      height: 20px;
-      border-radius: 0 0 9px 9px;
-      background: var(--av-skin);
-    }
-
-    .avatar-hair {
-      position: absolute;
-      left: 18px;
-      top: 10px;
-      width: 69px;
-      height: 72px;
-      border-radius: 49% 51% 38% 40%;
-      background: var(--av-hair);
-    }
-
-    .avatar-face {
-      position: absolute;
-      left: 28px;
-      top: 23px;
-      width: 50px;
-      height: 57px;
-      border-radius: 48%;
-      background: var(--av-skin);
-    }
-
-    .avatar-face::before,
-    .avatar-face::after {
-      content: "";
-      position: absolute;
-      top: 24px;
-      width: 8px;
-      height: 4px;
-      border-bottom: 2px solid #604139;
-      border-radius: 0 0 10px 10px;
-    }
-
-    .avatar-face::before { left: 9px; }
-    .avatar-face::after { right: 9px; }
-
-    .avatar-smile {
-      position: absolute;
-      left: 16px;
-      top: 38px;
-      width: 18px;
-      height: 9px;
-      border-bottom: 3px solid #C65D5D;
-      border-radius: 0 0 18px 18px;
+    .profile-photo-placeholder {
+      color: var(--muted);
+      font-size: 2rem;
     }
 
     .avatar-name {
@@ -869,74 +807,6 @@
     }
 
     .modal-close:hover { color: var(--coral); }
-
-    .avatar-options {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 0.6rem;
-    }
-
-    .avatar-option {
-      padding: 0.6rem 0.3rem;
-      border: 2px solid transparent;
-      border-radius: 18px;
-      background: var(--cream);
-      cursor: pointer;
-      transition: border-color 0.18s, transform 0.18s;
-    }
-
-    .avatar-option:hover { transform: translateY(-2px); }
-    .avatar-option.is-selected { border-color: var(--coral); background: var(--coral-pale); }
-
-    .avatar-option .avatar {
-      display: block;
-      width: 58px;
-      height: 58px;
-      margin: 0 auto;
-      border-width: 3px;
-    }
-
-    .avatar-option .avatar-body { left: 11px; bottom: -10px; width: 36px; height: 28px; }
-    .avatar-option .avatar-neck { left: 24px; bottom: 14px; width: 10px; height: 11px; }
-    .avatar-option .avatar-hair { left: 10px; top: 6px; width: 38px; height: 40px; }
-    .avatar-option .avatar-face { left: 15px; top: 13px; width: 28px; height: 32px; }
-    .avatar-option .avatar-face::before,
-    .avatar-option .avatar-face::after { top: 13px; width: 5px; height: 3px; border-bottom-width: 2px; }
-    .avatar-option .avatar-face::before { left: 5px; }
-    .avatar-option .avatar-face::after { right: 5px; }
-    .avatar-option .avatar-smile { left: 9px; top: 21px; width: 10px; height: 5px; border-bottom-width: 2px; }
-
-    .avatar-option-name {
-      display: block;
-      margin-top: 0.45rem;
-      font-size: 0.68rem;
-      font-weight: 800;
-    }
-
-    .modal-tabs {
-      display: flex;
-      gap: 0.4rem;
-      margin-bottom: 1.1rem;
-    }
-
-    .modal-tab {
-      flex: 1;
-      padding: 0.6rem 0.5rem;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: var(--cream);
-      color: var(--muted);
-      font-size: 0.76rem;
-      font-weight: 800;
-      cursor: pointer;
-      transition: border-color 0.18s, background 0.18s, color 0.18s;
-    }
-
-    .modal-tab.is-active {
-      border-color: var(--coral);
-      color: var(--coral-dark);
-      background: var(--coral-pale);
-    }
 
     .upload-drop {
       padding: 1.4rem 1rem;
@@ -1348,97 +1218,6 @@
       font-size: 0.78rem;
       font-weight: 700;
       line-height: 1.5;
-    }
-
-    .slot-toolbar {
-      display: flex;
-      justify-content: flex-end;
-      margin: 0 0 0.85rem;
-    }
-
-    .slot-add-btn {
-      width: auto;
-      min-width: 180px;
-      margin-top: 0;
-      padding: 0.7rem 1rem;
-      font-size: 0.82rem;
-    }
-
-    .partner-slot-list {
-      display: grid;
-      gap: 0.55rem;
-      margin-bottom: 0.9rem;
-    }
-
-    .partner-slot-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      padding: 0.78rem 0.9rem;
-      border: 1px solid var(--partner-mint);
-      border-radius: 14px;
-      background: #fff;
-    }
-
-    .partner-slot-item strong {
-      color: var(--partner-mint-deep);
-      font-size: 0.88rem;
-    }
-
-    .partner-slot-item span {
-      color: var(--muted);
-      font-size: 0.72rem;
-      font-weight: 700;
-    }
-
-    .partner-slot-empty {
-      margin: 0 0 0.9rem;
-      padding: 1.15rem 1rem;
-      border: 2px dashed var(--partner-mint);
-      border-radius: 14px;
-      background: #fff;
-      color: var(--partner-mint-deep);
-      text-align: center;
-      font-size: 0.86rem;
-      font-weight: 700;
-      line-height: 1.55;
-    }
-
-    .slot-form {
-      display: grid;
-      gap: 0.85rem;
-    }
-
-    .slot-form-row {
-      display: grid;
-      grid-template-columns: 1fr 0.7fr 0.7fr;
-      gap: 0.6rem;
-    }
-
-    .slot-form .field-label {
-      display: block;
-      margin-bottom: 0.35rem;
-    }
-
-    .slot-form-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.55rem;
-      margin-top: 0.35rem;
-    }
-
-    .slot-form-actions .save-button {
-      width: auto;
-      min-width: 140px;
-      margin-top: 0;
-      padding: 0.7rem 1.1rem;
-    }
-
-    @media (max-width: 640px) {
-      .slot-form-row { grid-template-columns: 1fr; }
-      .slot-toolbar { justify-content: stretch; }
-      .slot-add-btn { width: 100%; }
     }
 
     .tips-card {
@@ -2205,12 +1984,6 @@
         </div>
       </a>
       <div class="topbar-right">
-        <div class="topbar-extras">
-          <div class="welcome">
-            <span class="welcome-dot" aria-hidden="true"></span>
-            <span id="partnerWelcome">DayO 파트너 님, 반갑습니다! ☕</span>
-          </div>
-        </div>
         <span class="partner-mode-badge badge-partner partner-badge">🟢 파트너 활동중</span>
         <div data-mode-switch="inline"></div>
         <div data-i18n-lang="icon"></div>
@@ -2298,7 +2071,7 @@
       <article class="stat-box partner-stat-card partner-point-box is-clickable" id="stat-points-card" role="button" tabindex="0" aria-label="적립 포인트 상세 내역 보기">
         <p class="stat-label" data-i18n="partner.stats.points">적립 포인트</p>
         <p class="stat-value partner-stat-val partner-point-val" id="statPointBalance" data-i18n="partner.stats.loading">불러오는 중…</p>
-        <p class="stat-hint" data-i18n="partner.stats.pointsHint">30분 세션(25분 대화) 완료 시 6,000P가 자동 적립되며, 매월 정산일에 100% 현금 출금 가능합니다.</p>
+        <p class="stat-hint" data-i18n="partner.stats.pointsHint">30분 세션 완료 시 6,000P가 적립됩니다. 30,000P부터 출금 신청이 가능합니다. 출금은 월 정산 일정에 따라 처리됩니다.</p>
       </article>
       <article class="stat-box partner-stat-card partner-point-box is-clickable" id="stat-settled-card" role="button" tabindex="0" aria-label="누적 정산 금액 상세 내역 보기">
         <p class="stat-label" data-i18n="partner.stats.settled">누적 정산 완료 금액</p>
@@ -2309,11 +2082,8 @@
 
     <section class="card profile-card" aria-labelledby="profileTitle">
       <div class="avatar-panel">
-        <div class="avatar" id="profileAvatar" role="img" data-i18n="partner.profile.avatarAria" data-i18n-attr="aria-label" aria-label="환하게 미소 짓는 대화 파트너 파스텔 아바타">
-          <span class="avatar-body"></span>
-          <span class="avatar-neck"></span>
-          <span class="avatar-hair"></span>
-          <span class="avatar-face"><span class="avatar-smile"></span></span>
+        <div class="avatar" id="profileAvatar" role="img" data-i18n="partner.profile.avatarAria" data-i18n-attr="aria-label" aria-label="파트너 프로필 사진">
+          <span class="profile-photo-placeholder" aria-hidden="true">📷</span>
         </div>
         <div class="avatar-meta">
           <p class="avatar-name" id="miniName">DayO 파트너</p>
@@ -2340,7 +2110,9 @@
             <input class="input" id="nickname" name="nickname" value="" placeholder="DayO 파트너" autocomplete="nickname" data-i18n="partner.profile.nicknamePlaceholder">
           </div>
           <div class="field">
-            <label class="field-label" for="origin" data-i18n="partner.profile.origin">대표 출신 국가 (Passport Origin)</label>
+            <div class="label-row">
+              <label class="field-label" for="origin" data-i18n="partner.profile.origin">대표 출신 국가 (Passport Origin)</label>
+            </div>
             <select class="select-input" id="origin" name="origin">
               <option value="fr" selected data-i18n="partner.origin.fr">🇫🇷 프랑스</option>
               <option value="ca" data-i18n="partner.origin.ca">🇨🇦 캐나다</option>
@@ -2363,11 +2135,11 @@
               <span class="field-guide" data-i18n="partner.profile.langGuide">💡 선택하신 언어만 유저 대화 예약 서비스에 반영됩니다.</span>
             </div>
             <div class="chip-row" data-multi-select>
-              <button class="select-chip active" type="button" aria-pressed="true">🇫🇷 <span data-i18n="book.lang.fr">프랑스어</span></button>
-              <button class="select-chip active" type="button" aria-pressed="true">🇺🇸 <span data-i18n="book.lang.en">영어</span></button>
-              <button class="select-chip" type="button" aria-pressed="false">🇰🇷 <span data-i18n="book.lang.ko">한국어</span></button>
-              <button class="select-chip" type="button" aria-pressed="false">🇪🇸 <span data-i18n="book.lang.es">스페인어</span></button>
-              <button class="select-chip" type="button" aria-pressed="false">🇮🇹 <span data-i18n="book.lang.it">이탈리아어</span></button>
+              <button class="select-chip active" type="button" aria-pressed="true" data-language="fr">🇫🇷 <span data-i18n="book.lang.fr">프랑스어</span></button>
+              <button class="select-chip active" type="button" aria-pressed="true" data-language="en">🇺🇸 <span data-i18n="book.lang.en">영어</span></button>
+              <button class="select-chip" type="button" aria-pressed="false" data-language="ko">🇰🇷 <span data-i18n="book.lang.ko">한국어</span></button>
+              <button class="select-chip" type="button" aria-pressed="false" data-language="es">🇪🇸 <span data-i18n="book.lang.es">스페인어</span></button>
+              <button class="select-chip" type="button" aria-pressed="false" data-language="it">🇮🇹 <span data-i18n="book.lang.it">이탈리아어</span></button>
             </div>
           </div>
           <div class="field field--wide">
@@ -2385,15 +2157,9 @@
         <div class="card-head">
           <div>
             <h2 class="card-title" id="scheduleTitle" data-i18n="partner.schedule.title">📅 주간 대화 가능 시간</h2>
-            <p class="card-subtitle" data-i18n="partner.schedule.sub">요일을 고르고 예약을 받을 수 있는 시간을 열어주세요.</p>
+            <p class="card-subtitle" data-i18n="partner.schedule.sub">매주 반복해서 가능한 시간을 선택해 주세요. 예약은 30분 단위로 열립니다.</p>
           </div>
         </div>
-
-        <div class="slot-toolbar">
-          <button class="save-button btn-partner-mint slot-add-btn" type="button" id="add-slot-btn" data-i18n="partner.slot.add">➕ 가용 시간 등록</button>
-        </div>
-        <div class="partner-slot-list" id="partner-slot-list" aria-live="polite"></div>
-        <p class="partner-slot-empty" id="partner-slot-empty" hidden data-i18n="partner.slot.empty">등록된 가용 슬롯이 없습니다. 대화 가능한 시간대를 열어주세요 🌿</p>
 
         <button class="gcal-card" type="button" id="gcalSync">
           <span class="gcal-badge" aria-hidden="true">G</span>
@@ -2410,7 +2176,7 @@
           <span class="guide-item"><span class="guide-dot"></span><span data-i18n="partner.schedule.guideClosed">불가능</span></span>
         </div>
         <div class="time-grid partner-slot-create-box" id="timeGrid" aria-live="polite"></div>
-        <button class="save-button btn-partner-mint btn-save-schedule" type="button" id="saveSchedule" data-i18n="partner.schedule.save">💾 변경된 스케줄 저장하기</button>
+        <button class="save-button btn-partner-mint btn-save-schedule" type="button" id="saveSchedule" data-i18n="partner.schedule.save">반복 가능시간 저장</button>
       </section>
 
       <aside class="side-column">
@@ -2491,17 +2257,12 @@
       <div class="modal-head">
         <div>
           <h2 class="card-title" id="photoModalTitle" data-i18n="partner.photoModal.title">📷 프로필 사진 변경</h2>
-          <p class="card-subtitle" data-i18n="partner.photoModal.desc">파스텔 캐릭터 아바타를 고르거나 내 사진을 올려보세요.</p>
+          <p class="card-subtitle" data-i18n="partner.photoModal.desc">파트너 프로필에 사용할 본인 얼굴 사진을 업로드해 주세요.</p>
         </div>
         <button class="modal-close" type="button" data-close-modal data-i18n="partner.photoModal.closeAria" data-i18n-attr="aria-label" aria-label="닫기">✕</button>
       </div>
 
-      <div class="modal-tabs" role="tablist" data-i18n="partner.photoModal.tabsAria" data-i18n-attr="aria-label" aria-label="프로필 타입 선택">
-        <button class="modal-tab is-active" type="button" role="tab" data-photo-tab="photo" aria-selected="true" data-i18n="partner.photoModal.tabPhoto">📷 실제 얼굴 사진</button>
-        <button class="modal-tab" type="button" role="tab" data-photo-tab="avatar" aria-selected="false" data-i18n="partner.photoModal.tabAvatar">🎨 파스텔 캐릭터 아바타</button>
-      </div>
-
-      <div data-photo-panel="photo">
+      <div>
         <div class="upload-drop" id="uploadDrop">
           <div class="upload-preview" id="photoPreview" role="img" data-i18n="partner.photoModal.previewAria" data-i18n-attr="aria-label" aria-label="업로드한 프로필 사진 미리보기">
             <span class="upload-preview-empty" aria-hidden="true">📷</span>
@@ -2509,17 +2270,12 @@
           <p class="upload-title" data-i18n="partner.photoModal.uploadTitle">내 얼굴 사진을 올려보세요</p>
           <p class="upload-hint" data-i18n="partner.photoModal.uploadHint">JPG 또는 PNG 파일을 선택하면 바로 미리보기로 확인할 수 있어요.</p>
           <div class="upload-actions">
-            <button class="photo-upload-btn" type="button" id="uploadBtn" data-i18n="partner.photoModal.uploadBtn">📷 실제 얼굴 사진 업로드</button>
-            <button class="mini-btn" type="button" id="removePhotoBtn" hidden data-i18n="partner.photoModal.removeBtn">🗑️ 사진 지우기</button>
+            <button class="photo-upload-btn" type="button" id="uploadBtn" data-i18n="partner.photoModal.uploadBtn">📷 사진 업로드</button>
           </div>
           <input type="file" id="photoInput" accept="image/*" hidden>
         </div>
       </div>
 
-      <div data-photo-panel="avatar" hidden>
-        <div class="avatar-options" id="avatarOptions"></div>
-        <p class="upload-hint" data-i18n="partner.photoModal.avatarHint">사진 대신 파스텔 캐릭터 아바타로 프로필을 꾸밀 수 있어요.</p>
-      </div>
       <button type="button" class="photo-save-btn" id="photo-save-btn">✔ 이 사진으로 저장하기</button>
     </div>
   </div>
@@ -2558,42 +2314,6 @@
     </div>
   </div>
 
-  <div class="modal-overlay" id="add-slot-modal">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="addSlotModalTitle">
-      <div class="modal-head">
-        <div>
-          <h2 class="card-title" id="addSlotModalTitle" data-i18n="partner.slot.modalTitle">가용 시간 등록</h2>
-          <p class="card-subtitle" data-i18n="partner.slot.modalDesc">대화 가능한 날짜와 시간을 선택해 슬롯을 열어주세요.</p>
-        </div>
-        <button class="modal-close" type="button" data-close-modal data-i18n="partner.photoModal.closeAria" data-i18n-attr="aria-label" aria-label="닫기">✕</button>
-      </div>
-      <form class="slot-form" id="add-slot-form">
-        <div class="slot-form-row">
-          <div>
-            <label class="field-label" for="slot-date" data-i18n="partner.slot.date">날짜</label>
-            <input class="input" type="date" id="slot-date" name="slot-date" required>
-          </div>
-          <div>
-            <label class="field-label" for="slot-hour" data-i18n="partner.slot.hour">시</label>
-            <select class="select-input" id="slot-hour" name="slot-hour" required></select>
-          </div>
-          <div>
-            <label class="field-label" for="slot-minute" data-i18n="partner.slot.minute">분</label>
-            <select class="select-input" id="slot-minute" name="slot-minute" required>
-              <option value="00">00</option>
-              <option value="15">15</option>
-              <option value="30">30</option>
-              <option value="45">45</option>
-            </select>
-          </div>
-        </div>
-        <div class="slot-form-actions">
-          <button class="save-button btn-partner-mint" type="submit" id="add-slot-submit" data-i18n="partner.slot.submit">등록하기</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script>
@@ -2607,8 +2327,11 @@
       return DAY_IDS.map((id) => ({ id: id, label: t('partner.day.' + id) }));
     }
 
-    const TIMES = Array.from({ length: 15 }, (_, index) => {
-      return String(index + 9).padStart(2, '0') + ':00';
+    const TIMES = Array.from({ length: 29 }, (_, index) => {
+      const totalMinutes = (9 * 60) + (index * 30);
+      const hour = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
+      const minute = String(totalMinutes % 60).padStart(2, '0');
+      return hour + ':' + minute;
     });
 
     const schedule = {
@@ -2708,6 +2431,8 @@
     /* 프로필 미니 카드 실시간 반영 */
     const nicknameInput = document.getElementById('nickname');
     const introInput = document.getElementById('partner-bio-input') || document.getElementById('intro');
+    const originInput = document.getElementById('origin');
+    const languageChips = Array.from(document.querySelectorAll('[data-multi-select] [data-language]'));
     const miniName = document.getElementById('miniName');
     const miniIntro = document.getElementById('partner-bio-preview') || document.getElementById('miniIntro');
     const profileSaveBtn = document.getElementById('partner-profile-save-btn');
@@ -2716,6 +2441,7 @@
     let savedNickname = nicknameInput ? nicknameInput.value.trim() : '';
     let partnerActive = true;
     let pendingAvatarUrl = '';
+    let partnerProfileLoadVersion = 0;
 
     const syncName = () => {
       if (miniName && nicknameInput) {
@@ -2794,28 +2520,49 @@
         showToast('저장 서버에 연결할 수 없습니다.');
         return;
       }
-      var sessionRes = await client.auth.getSession();
-      var user = sessionRes && sessionRes.data && sessionRes.data.session && sessionRes.data.session.user;
+      var userRes = await client.auth.getUser();
+      var user = userRes && userRes.data && userRes.data.user;
+      if (userRes && userRes.error) throw userRes.error;
       if (!user) {
         showToast('로그인이 필요합니다.');
         return;
       }
       var nickname = nicknameInput ? nicknameInput.value.trim() : '';
       var bio = introInput ? introInput.value.trim() : '';
+      var languages = languageChips.filter(function (chip) {
+        return chip.classList.contains('active');
+      }).map(function (chip) {
+        return chip.getAttribute('data-language');
+      }).filter(Boolean).join(',');
       var payload = {
         nickname: nickname || defaultPartnerName(),
         bio: bio,
-        user_name: nickname || defaultPartnerName()
+        country_code: originInput ? originInput.value : null,
+        learning_languages: languages
       };
-      var res = await client.from('profiles').update(payload).eq('id', user.id);
+      var res = await client
+        .from('profiles')
+        .update(payload)
+        .eq('id', user.id)
+        .select('id,nickname,bio,country_code,learning_languages,avatar_url')
+        .single();
       if (res.error) {
-        res = await client.from('profiles').update(payload).eq('user_id', user.id);
+        console.error('[DayO] profiles update failed', res.error);
+        throw res.error;
       }
-      if (res.error) throw res.error;
-      if (window.__dayoPartnerProfile) {
-        window.__dayoPartnerProfile.nickname = payload.nickname;
-        window.__dayoPartnerProfile.bio = payload.bio;
+      var saved = res.data;
+      var fieldsMatch = saved
+        && String(saved.nickname || '').trim() === payload.nickname
+        && String(saved.bio || '') === payload.bio
+        && String(saved.country_code || '').toLowerCase() === String(payload.country_code || '').toLowerCase()
+        && String(saved.learning_languages || '') === payload.learning_languages;
+      if (!fieldsMatch) {
+        console.error('[DayO] profiles update verification failed', { expected: payload, received: saved });
+        throw new Error('저장된 프로필 값이 요청한 값과 일치하지 않습니다.');
       }
+      partnerProfileLoadVersion += 1;
+      window.__dayoPartnerProfile = Object.assign({}, window.__dayoPartnerProfile || {}, saved);
+      paintPartnerProfile(window.__dayoPartnerProfile);
       showToast('프로필이 성공적으로 저장되었습니다 ✨');
     }
 
@@ -2825,7 +2572,7 @@
         try {
           await savePartnerProfile();
         } catch (err) {
-          console.warn('[DayO] profile save failed', err);
+          console.error('[DayO] profile save failed', err);
           showToast('프로필 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
         } finally {
           profileSaveBtn.disabled = false;
@@ -2861,76 +2608,10 @@
       showToast(t('partner.toast.nicknameChangedFormat', { name: next }));
     });
 
-    /* 프로필 사진 & 아바타 변경 */
-    const AVATARS = [
-      { id: 'peach', key: 'partner.avatar.peach', bg: '#FFE5C4', hair: '#85583F', skin: '#F0C9AA' },
-      { id: 'rose', key: 'partner.avatar.rose', bg: '#FFD6DF', hair: '#3B2A24', skin: '#F6D3B4' },
-      { id: 'mint', key: 'partner.avatar.mint', bg: '#DDEFE4', hair: '#6B4A34', skin: '#EAC0A0' },
-      { id: 'butter', key: 'partner.avatar.butter', bg: '#FFF3C4', hair: '#2F2A28', skin: '#E8B992' }
-    ];
-
+    /* 프로필 사진 변경 */
     const profileAvatar = document.getElementById('profileAvatar');
-    const avatarOptions = document.getElementById('avatarOptions');
     const photoInput = document.getElementById('photoInput');
     const photoPreview = document.getElementById('photoPreview');
-    const removePhotoBtn = document.getElementById('removePhotoBtn');
-    let selectedAvatar = 'peach';
-
-    function renderAvatarOptions() {
-      avatarOptions.innerHTML = AVATARS.map((item) => `
-        <button class="avatar-option${item.id === selectedAvatar ? ' is-selected' : ''}" type="button"
-                data-avatar="${item.id}" aria-pressed="${item.id === selectedAvatar}">
-          <span class="avatar" style="--av-bg:${item.bg};--av-hair:${item.hair};--av-skin:${item.skin}">
-            <span class="avatar-body"></span>
-            <span class="avatar-neck"></span>
-            <span class="avatar-hair"></span>
-            <span class="avatar-face"><span class="avatar-smile"></span></span>
-          </span>
-          <span class="avatar-option-name">${t(item.key)}</span>
-        </button>
-      `).join('');
-    }
-
-    function applyAvatar(id) {
-      const theme = AVATARS.find((item) => item.id === id);
-      if (!theme) return;
-      selectedAvatar = id;
-      pendingAvatarUrl = 'https://api.dicebear.com/7.x/lorelei/svg?seed=dayo-' + id;
-      profileAvatar.classList.remove('has-photo');
-      profileAvatar.style.backgroundImage = '';
-      profileAvatar.style.setProperty('--av-bg', theme.bg);
-      profileAvatar.style.setProperty('--av-hair', theme.hair);
-      profileAvatar.style.setProperty('--av-skin', theme.skin);
-      photoPreview.classList.remove('has-photo');
-      photoPreview.style.backgroundImage = '';
-      removePhotoBtn.hidden = true;
-      renderAvatarOptions();
-    }
-
-    document.querySelectorAll('[data-photo-tab]').forEach((tab) => {
-      tab.addEventListener('click', () => {
-        const target = tab.dataset.photoTab;
-        document.querySelectorAll('[data-photo-tab]').forEach((item) => {
-          const active = item === tab;
-          item.classList.toggle('is-active', active);
-          item.setAttribute('aria-selected', String(active));
-        });
-        document.querySelectorAll('[data-photo-panel]').forEach((panel) => {
-          panel.hidden = panel.dataset.photoPanel !== target;
-        });
-      });
-    });
-
-    removePhotoBtn.addEventListener('click', () => {
-      applyAvatar(selectedAvatar || 'peach');
-      showToast(t('partner.toast.photoRemoved'));
-    });
-
-    avatarOptions.addEventListener('click', (event) => {
-      const option = event.target.closest('[data-avatar]');
-      if (!option) return;
-      applyAvatar(option.dataset.avatar);
-    });
 
     document.getElementById('uploadBtn').addEventListener('click', () => photoInput.click());
 
@@ -2940,13 +2621,10 @@
       const reader = new FileReader();
       reader.onload = () => {
         pendingAvatarUrl = String(reader.result || '');
-        selectedAvatar = '';
         profileAvatar.classList.add('has-photo');
         profileAvatar.style.backgroundImage = `url(${reader.result})`;
         photoPreview.classList.add('has-photo');
         photoPreview.style.backgroundImage = `url(${reader.result})`;
-        removePhotoBtn.hidden = false;
-        renderAvatarOptions();
       };
       reader.readAsDataURL(file);
       photoInput.value = '';
@@ -2955,21 +2633,18 @@
     async function savePartnerAvatar() {
       var client = getPartnerSupabaseClient();
       if (!client) throw new Error('no client');
-      var sessionRes = await client.auth.getSession();
-      var user = sessionRes && sessionRes.data && sessionRes.data.session && sessionRes.data.session.user;
+      var userRes = await client.auth.getUser();
+      var user = userRes && userRes.data && userRes.data.user;
+      if (userRes && userRes.error) throw userRes.error;
       if (!user) throw new Error('no session');
-      if (!pendingAvatarUrl) {
-        pendingAvatarUrl = selectedAvatar
-          ? ('https://api.dicebear.com/7.x/lorelei/svg?seed=dayo-' + selectedAvatar)
-          : '';
-      }
       if (!pendingAvatarUrl) throw new Error('no avatar');
       var payload = { avatar_url: pendingAvatarUrl };
-      var res = await client.from('profiles').update(payload).eq('id', user.id);
+      var res = await client.from('profiles').update(payload).eq('id', user.id).select('id').maybeSingle();
       if (res.error) {
-        res = await client.from('profiles').update(payload).eq('user_id', user.id);
+        console.error('[DayO] avatar update failed', res.error);
+        throw res.error;
       }
-      if (res.error) throw res.error;
+      if (!res.data) throw new Error('현재 로그인한 파트너 프로필을 찾을 수 없습니다.');
       if (window.__dayoPartnerProfile) window.__dayoPartnerProfile.avatar_url = pendingAvatarUrl;
       if (pendingAvatarUrl.indexOf('data:') === 0 || pendingAvatarUrl.indexOf('http') === 0) {
         profileAvatar.classList.add('has-photo');
@@ -2998,7 +2673,6 @@
     /* 모달 열고 닫기 */
     const photoModal = document.getElementById('photoModal');
     const historyModal = document.getElementById('historyModal');
-    const addSlotModal = document.getElementById('add-slot-modal');
     const settlementModal = document.getElementById('settlement-history-modal');
 
     function openModal(modal) {
@@ -3061,7 +2735,7 @@
       });
     });
 
-    [photoModal, historyModal, addSlotModal, settlementModal].forEach((modal) => {
+    [photoModal, historyModal, settlementModal].forEach((modal) => {
       if (!modal) return;
       modal.addEventListener('click', (event) => {
         if (event.target === modal || event.target.closest('[data-close-modal]')) closeModal(modal);
@@ -3070,7 +2744,7 @@
 
     document.addEventListener('keydown', (event) => {
       if (event.key !== 'Escape') return;
-      [photoModal, historyModal, addSlotModal, settlementModal].forEach((modal) => {
+      [photoModal, historyModal, settlementModal].forEach((modal) => {
         if (modal && modal.classList.contains('is-open')) closeModal(modal);
       });
     });
@@ -3099,14 +2773,16 @@
     }
 
     function paintPartnerProfile(profile) {
+      if (!profile) {
+        paintStatusToggle();
+        return;
+      }
       var nickname = String((profile && profile.nickname) || '').trim() || defaultPartnerName();
-      var bio = String((profile && (profile.bio || profile.intro)) || '').trim();
-      var welcomeEl = document.getElementById('partnerWelcome');
-      if (welcomeEl) welcomeEl.textContent = t('partner.welcomeFormat', { name: nickname });
-      if (nicknameInput && !nicknameInput.value.trim()) nicknameInput.value = nickname;
-      if (miniName) miniName.textContent = nicknameInput && nicknameInput.value.trim() ? nicknameInput.value.trim() : nickname;
-      savedNickname = (nicknameInput && nicknameInput.value.trim()) || nickname;
-      if (introInput && bio && !introInput.value.trim()) {
+      var bio = String((profile && profile.bio) || '').trim();
+      if (nicknameInput) nicknameInput.value = nickname;
+      if (miniName) miniName.textContent = nickname;
+      savedNickname = nickname;
+      if (introInput) {
         introInput.value = bio;
         syncIntro();
       }
@@ -3114,6 +2790,27 @@
         pendingAvatarUrl = String(profile.avatar_url);
         profileAvatar.classList.add('has-photo');
         profileAvatar.style.backgroundImage = 'url(' + pendingAvatarUrl + ')';
+        photoPreview.classList.add('has-photo');
+        photoPreview.style.backgroundImage = 'url(' + pendingAvatarUrl + ')';
+      } else {
+        pendingAvatarUrl = '';
+        profileAvatar.classList.remove('has-photo');
+        profileAvatar.style.backgroundImage = '';
+        photoPreview.classList.remove('has-photo');
+        photoPreview.style.backgroundImage = '';
+      }
+      if (originInput && profile && profile.country_code) {
+        originInput.value = String(profile.country_code).toLowerCase();
+      }
+      if (profile && profile.learning_languages != null) {
+        var savedLanguages = String(profile.learning_languages).split(',').map(function (value) {
+          return value.trim().toLowerCase();
+        }).filter(Boolean);
+        languageChips.forEach(function (chip) {
+          var selected = savedLanguages.indexOf(String(chip.getAttribute('data-language') || '').toLowerCase()) !== -1;
+          chip.classList.toggle('active', selected);
+          chip.setAttribute('aria-pressed', String(selected));
+        });
       }
       if (profile && (profile.is_available === false || profile.partner_status === 'resting')) {
         partnerActive = false;
@@ -3130,7 +2827,7 @@
     async function fetchPartnerProfile(session) {
       var client = getPartnerSupabaseClient();
       if (!client || !session || !session.user) return null;
-      var cols = 'point_balance, nickname, role, bio, avatar_url, is_available, partner_status';
+      var cols = 'point_balance, nickname, role, bio, avatar_url, country_code, learning_languages, is_available, partner_status';
       var q = await client
         .from('profiles')
         .select(cols)
@@ -3139,183 +2836,15 @@
       if (q.error) {
         q = await client
           .from('profiles')
-          .select('point_balance, nickname, role, bio, avatar_url')
+          .select('point_balance, nickname, role, bio, avatar_url, country_code, learning_languages')
           .eq('id', session.user.id)
-          .maybeSingle();
-      }
-      if (q.error || !q.data) {
-        q = await client
-          .from('profiles')
-          .select('point_balance, nickname, role, bio, avatar_url')
-          .eq('user_id', session.user.id)
           .maybeSingle();
       }
       return q.data || null;
     }
 
-    function formatSlotDateTime(raw) {
-      var value = String(raw || '');
-      var date = value ? new Date(value) : null;
-      if (date && !Number.isNaN(date.getTime())) {
-        return date.toLocaleString('ko-KR', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-      }
-      return value.replace('T', ' ').replace(':00.000Z', '').replace(':00Z', '');
-    }
-
-    function paintPartnerSlots(slots) {
-      var listEl = document.getElementById('partner-slot-list');
-      var emptyEl = document.getElementById('partner-slot-empty');
-      if (!listEl || !emptyEl) return;
-      var dated = (slots || []).filter(function (row) {
-        var raw = String(row.slot_time || row.slot_start_utc || '');
-        return raw && raw.indexOf('weekly:') !== 0;
-      });
-      if (!dated.length) {
-        listEl.innerHTML = '';
-        emptyEl.hidden = false;
-        emptyEl.textContent = t('partner.slot.empty');
-        return;
-      }
-      emptyEl.hidden = true;
-      listEl.innerHTML = dated.map(function (row) {
-        var label = formatSlotDateTime(row.slot_start_utc || row.slot_time);
-        var status = row.status === 'booked' ? t('partner.slot.booked') : t('partner.slot.available');
-        return (
-          '<article class="partner-slot-item">' +
-            '<strong>' + label + '</strong>' +
-            '<span>' + status + '</span>' +
-          '</article>'
-        );
-      }).join('');
-    }
-
-    window.loadPartnerSlots = async function loadPartnerSlots() {
-      var client = getPartnerSupabaseClient();
-      var emptyEl = document.getElementById('partner-slot-empty');
-      if (!client) {
-        paintPartnerSlots([]);
-        return [];
-      }
-      try {
-        var sessionRes = await client.auth.getSession();
-        var session = sessionRes && sessionRes.data && sessionRes.data.session;
-        if (!session || !session.user) {
-          paintPartnerSlots([]);
-          return [];
-        }
-        var res = await client
-          .from('availability_slots')
-          .select('id, slot_time, status, created_at')
-          .eq('partner_id', session.user.id)
-          .order('slot_time', { ascending: true });
-        if (res.error) throw res.error;
-        paintPartnerSlots(res.data || []);
-        return res.data || [];
-      } catch (err) {
-        console.warn('[DayO] loadPartnerSlots failed', err);
-        if (emptyEl) {
-          emptyEl.hidden = false;
-          emptyEl.textContent = t('partner.slot.empty');
-        }
-        return [];
-      }
-    };
-
-    function fillSlotHourOptions() {
-      var hourEl = document.getElementById('slot-hour');
-      if (!hourEl || hourEl.options.length) return;
-      var html = '';
-      for (var h = 0; h < 24; h += 1) {
-        var value = String(h).padStart(2, '0');
-        html += '<option value="' + value + '">' + value + '</option>';
-      }
-      hourEl.innerHTML = html;
-      hourEl.value = '20';
-    }
-
-    function openAddSlotModal() {
-      fillSlotHourOptions();
-      var dateEl = document.getElementById('slot-date');
-      if (dateEl && !dateEl.value) {
-        var now = new Date();
-        dateEl.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
-        dateEl.min = dateEl.value;
-      }
-      openModal(addSlotModal);
-    }
-
-    document.getElementById('add-slot-btn').addEventListener('click', openAddSlotModal);
-
-    document.getElementById('add-slot-form').addEventListener('submit', async function (event) {
-      event.preventDefault();
-      var client = getPartnerSupabaseClient();
-      var dateEl = document.getElementById('slot-date');
-      var hourEl = document.getElementById('slot-hour');
-      var minuteEl = document.getElementById('slot-minute');
-      var submitBtn = document.getElementById('add-slot-submit');
-      var dateValue = dateEl && dateEl.value;
-      var hourValue = hourEl && hourEl.value;
-      var minuteValue = minuteEl && minuteEl.value;
-      if (!dateValue || !hourValue || !minuteValue) {
-        showToast(t('partner.slot.invalid'));
-        return;
-      }
-      if (!client) {
-        showToast(t('partner.slot.error'));
-        return;
-      }
-      var localDate = new Date(dateValue + 'T' + hourValue + ':' + minuteValue + ':00');
-      if (Number.isNaN(localDate.getTime())) {
-        showToast(t('partner.slot.invalid'));
-        return;
-      }
-      var selectedDateTimeUTC = localDate.toISOString();
-      var slotTimeLocal = dateValue + 'T' + hourValue + ':' + minuteValue + ':00';
-      var original = submitBtn ? submitBtn.innerHTML : '';
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = t('partner.slot.saving');
-      }
-      try {
-        var sessionRes = await client.auth.getSession();
-        var session = sessionRes && sessionRes.data && sessionRes.data.session;
-        if (!session || !session.user) throw new Error('auth');
-        var payload = {
-          partner_id: session.user.id,
-          slot_start_utc: selectedDateTimeUTC,
-          slot_time: slotTimeLocal,
-          status: 'available'
-        };
-        var res = await client.from('availability_slots').insert(payload);
-        if (res.error && /slot_start_utc/i.test(String(res.error.message || ''))) {
-          delete payload.slot_start_utc;
-          res = await client.from('availability_slots').insert(payload);
-        }
-        if (res.error) throw res.error;
-        closeModal(addSlotModal);
-        showToast(t('partner.slot.saved'));
-        await window.loadPartnerSlots();
-        if (typeof window.loadPartnerSchedule === 'function') window.loadPartnerSchedule();
-      } catch (err) {
-        console.warn('[DayO] add slot failed', err);
-        showToast(t('partner.slot.error'));
-      } finally {
-        if (submitBtn) {
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = original || t('partner.slot.submit');
-        }
-      }
-    });
-
     renderDays();
     renderTimes();
-    renderAvatarOptions();
     renderHistory();
     forcePartnerRoomLinks();
     if (typeof window.loadPartnerSchedule === 'function') window.loadPartnerSchedule();
@@ -3323,13 +2852,11 @@
     document.addEventListener('dayo:langchange', () => {
       renderDays();
       renderTimes();
-      renderAvatarOptions();
       renderHistory();
       syncName();
       paintLoungeStats();
       paintPoints(window.__dayoPartnerPoints);
       paintPartnerProfile(window.__dayoPartnerProfile);
-      if (window.__dayoPartnerSlots) paintPartnerSlots(window.__dayoPartnerSlots);
       forcePartnerRoomLinks();
     });
 
@@ -3357,6 +2884,7 @@
 
     window.loadLoungeStats = function loadLoungeStats() {
       var store = window.DayOProfileStore;
+      var profileLoadVersion = ++partnerProfileLoadVersion;
       var profileTask = (async function () {
         var client = getPartnerSupabaseClient();
         if (!client) {
@@ -3373,28 +2901,25 @@
         }
         var profile = await fetchPartnerProfile(session);
         var currentPoints = (profile && profile.point_balance) || 0;
-        window.__dayoPartnerProfile = profile || { nickname: defaultPartnerName(), role: '', point_balance: 0 };
+        if (!profile) throw new Error('현재 로그인한 파트너 프로필을 불러오지 못했습니다.');
+        if (profileLoadVersion !== partnerProfileLoadVersion) return profile;
+        window.__dayoPartnerProfile = profile;
         window.__dayoPartnerPoints = currentPoints;
         paintPoints(currentPoints);
         paintPartnerProfile(window.__dayoPartnerProfile);
         return profile;
       })().catch(function (err) {
+        if (profileLoadVersion !== partnerProfileLoadVersion) return null;
         console.warn('[DayO] partner profile bind failed', err);
         paintPoints(0);
         paintPartnerProfile(null);
       });
 
-      var slotsTask = window.loadPartnerSlots().then(function (rows) {
-        window.__dayoPartnerSlots = rows || [];
-        return rows;
-      });
-
       if (!store || typeof store.fetchPartnerSessionLogs !== 'function') {
-        return Promise.all([profileTask, slotsTask]);
+        return Promise.all([profileTask]);
       }
       return Promise.all([
         profileTask,
-        slotsTask,
         Promise.resolve(store.ready ? store.ready() : null)
           .then(function () { return store.fetchPartnerSessionLogs(); })
           .then(function (rows) {
