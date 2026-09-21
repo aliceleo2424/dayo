@@ -3647,7 +3647,7 @@
   <script src="ticket-wallet.js"></script>
   <script src="availability-slots.js"></script>
   <script src="booking-modal.js"></script>
-  <script src="ticket-payment.js?v=20260915-usedtrial"></script>
+  <script src="ticket-payment.js?v=20260921-secure-payment-test"></script>
   <script src="terms-mini-modal.js"></script>
   <script src="tickets-modal.js?v=20260915-usedtrial"></script>
   <script src="auth.js?v=20260916-auth-strict"></script>
@@ -3883,23 +3883,41 @@
     const modal = document.getElementById('demo-notice-modal');
     if (!modal) return;
 
+    const showPreOpenNotice = function () {
+      const hideDate = localStorage.getItem('hideDayODemoNoticeDate');
+      const todayStr = new Date().toISOString().slice(0, 10);
+      modal.style.display = hideDate !== todayStr ? 'flex' : 'none';
+    };
+
+    const paymentTestRequested = new URLSearchParams(window.location.search).get('paymentTest') === '1';
+    if (!paymentTestRequested) {
+      showPreOpenNotice();
+      return;
+    }
+
     try {
-      const gate = window.DayOPaymentTestAccess;
-      if (gate && typeof gate.requested === 'function' && gate.requested() &&
-          typeof gate.isAllowed === 'function' && await gate.isAllowed()) {
-        modal.style.display = 'none';
+      const client = window.supabaseClient;
+      if (!client || !client.auth || typeof client.auth.getUser !== 'function') {
+        showPreOpenNotice();
         return;
       }
-    } catch (e) { /* keep the PRE-OPEN notice on any verification failure */ }
-
-    const hideDate = localStorage.getItem('hideDayODemoNoticeDate');
-    const todayStr = new Date().toISOString().slice(0, 10);
-
-    if (hideDate !== todayStr) {
-      modal.style.display = 'flex';
-    } else {
-      modal.style.display = 'none';
+      const userResult = await client.auth.getUser();
+      const user = userResult && userResult.data && userResult.data.user;
+      if (userResult.error || !user) {
+        showPreOpenNotice();
+        return;
+      }
+      const profileResult = await client
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle();
+      const role = profileResult.data && String(profileResult.data.role || '').trim().toLowerCase();
+      if (!profileResult.error && role === 'admin') return;
+    } catch (e) {
+      /* Keep PRE-OPEN closed during verification, then show it on any failure. */
     }
+    showPreOpenNotice();
   })();
 
   function dismissModalForToday() {
