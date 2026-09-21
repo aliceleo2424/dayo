@@ -105,8 +105,8 @@
             var ended = ['completed', 'cancelled', 'tech_issue', 'safety_reported'].includes(booking.status);
             return showAccess({ allowed: false, title: ended ? '이미 종료된 대화예요.' : '아직 입장할 수 없는 예약이에요.', message: '마이페이지에서 예약 상태를 확인해 주세요.' });
           }
-          var startAt = NaN;
-          if (booking.slot_id) {
+          var startAt = booking.scheduled_at ? parseZonedInstant(booking.scheduled_at) : NaN;
+          if (!Number.isFinite(startAt) && booking.slot_id) {
             var slotResult = await db.from('availability_slots').select('*').eq('id', booking.slot_id).maybeSingle();
             if (slotResult.error) throw slotResult.error;
             var slot = slotResult.data;
@@ -114,9 +114,6 @@
               startAt = parseZonedInstant(slot.slot_start_utc);
               if (!Number.isFinite(startAt)) startAt = parseSeoulSlotTime(slot.slot_time);
             }
-          }
-          if (!Number.isFinite(startAt) && booking.scheduled_at) {
-            startAt = parseZonedInstant(booking.scheduled_at);
           }
           if (!Number.isFinite(startAt)) {
             return showAccess({ allowed: false, title: '예약 시간을 확인할 수 없어요.', message: '마이페이지에서 예약 정보를 확인해 주세요.' });
@@ -131,6 +128,7 @@
           }
           return showAccess({ allowed: true, adminTest: false, role: booking.learner_id === user.id ? 'user' : 'partner',
             userId: user.id, bookingId: booking.id, learnerId: booking.learner_id, partnerId: booking.partner_user_id,
+            scheduledAt: new Date(startAt).toISOString(),
             roomId: booking.id.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40) });
         } catch (e) {
           console.warn('[DayO Room] access check failed', e);
@@ -4087,6 +4085,10 @@
       if (!el) return;
 
       let remainingSeconds = TOTAL_SESSION_SECONDS;
+      let secondsUntilStart = 0;
+      let sessionStartAt = NaN;
+      let sessionEndAt = NaN;
+      let timerReady = false;
       let tickInterval = null;
       let sessionEnded = false;
       let warned3Min = false;
@@ -4107,6 +4109,18 @@
       }
 
       function render() {
+        if (!timerReady) {
+          el.textContent = '⏱️ --:--';
+          if (partnerCountdown) partnerCountdown.hidden = true;
+          return;
+        }
+        if (secondsUntilStart > 0) {
+          const waitMinutes = Math.floor(secondsUntilStart / 60);
+          const waitSeconds = secondsUntilStart % 60;
+          el.textContent = '⏳ 시작까지 ' + String(waitMinutes).padStart(2, '0') + ':' + String(waitSeconds).padStart(2, '0');
+          if (partnerCountdown) partnerCountdown.hidden = true;
+          return;
+        }
         const m = Math.floor(remainingSeconds / 60);
         const s = remainingSeconds % 60;
         el.textContent = '⏱️ ' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
@@ -4182,16 +4196,30 @@
         document.dispatchEvent(new CustomEvent('dayo:session-ended'));
       }
 
+      function syncWithScheduledTime(now) {
+        const current = Number.isFinite(now) ? now : Date.now();
+        if (!Number.isFinite(sessionStartAt) || !Number.isFinite(sessionEndAt)) return;
+        secondsUntilStart = current < sessionStartAt
+          ? Math.max(1, Math.ceil((sessionStartAt - current) / 1000))
+          : 0;
+        remainingSeconds = secondsUntilStart > 0
+          ? TOTAL_SESSION_SECONDS
+          : Math.max(0, Math.ceil((sessionEndAt - current) / 1000));
+      }
+
       function tick() {
+        syncWithScheduledTime(Date.now());
+        if (secondsUntilStart > 0) {
+          render();
+          return;
+        }
         if (remainingSeconds <= 0) {
           endSession();
           return;
         }
-        if (remainingSeconds === WARN_AT_3_MIN) showThreeMinWarning();
-        if (remainingSeconds === WARN_AT_1_MIN) showOneMinWarning();
-        remainingSeconds -= 1;
+        if (remainingSeconds <= WARN_AT_3_MIN) showThreeMinWarning();
+        if (remainingSeconds <= WARN_AT_1_MIN) showOneMinWarning();
         render();
-        if (remainingSeconds <= 0) endSession();
       }
 
       function skipToEnd() {
@@ -4199,9 +4227,23 @@
         endSession();
       }
 
-      render();
       window.DayORoomAccessReady.then(function (access) {
-        if (access.allowed) tickInterval = setInterval(tick, 1000);
+        if (!access.allowed) return;
+        if (access.adminTest) {
+          sessionStartAt = Date.now();
+        } else {
+          sessionStartAt = Date.parse(access.scheduledAt || '');
+        }
+        if (!Number.isFinite(sessionStartAt)) return;
+        sessionEndAt = sessionStartAt + TOTAL_SESSION_SECONDS * 1000;
+        timerReady = true;
+        syncWithScheduledTime(Date.now());
+        render();
+        if (remainingSeconds <= 0 && secondsUntilStart === 0) {
+          endSession();
+          return;
+        }
+        tickInterval = setInterval(tick, 1000);
       });
 
       window.DayOSessionTimer = {
