@@ -251,7 +251,12 @@
   }
 
   async function preparePayment(session, productId) {
-    return paymentApi(session, { action: 'prepare', product_id: productId, payment_test: true });
+    var body = { action: 'prepare', product_id: productId, payment_test: true };
+    preopenDebug('PREPARE_REQUEST', {
+      payment_test: body.payment_test,
+      payment_test_type: typeof body.payment_test
+    });
+    return paymentApi(session, body);
   }
 
   async function finalizePayment(session, rsp, prepared) {

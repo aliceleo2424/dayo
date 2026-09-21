@@ -67,6 +67,10 @@ function validTokenPart(value, max) {
   return /^[A-Za-z0-9_.:-]+$/.test(text) ? text : '';
 }
 
+function shortDebugId(value) {
+  return value ? String(value).slice(0, 8) : null;
+}
+
 function makeClients(config) {
   if (!config.supabaseUrl || !config.anonKey || !config.serviceKey) return null;
   var options = { auth: { persistSession: false, autoRefreshToken: false } };
@@ -126,16 +130,36 @@ function merchantUid(productKey) {
 // It currently blocks ordinary users from calling the payment API directly; only a
 // payment_test=1 request from an authenticated, verified admin may run the payment E2E flow.
 async function prepare(service, user, body) {
+  console.log('[DayO PAYMENT TEST DEBUG]', 'PREPARE_REQUEST', {
+    payment_test: body.payment_test,
+    payment_test_type: typeof body.payment_test,
+    auth_user_id: shortDebugId(user && user.id)
+  });
   if (body.payment_test !== true) {
     return { status: 403, body: { ok: false, error: 'payment-preopen' } };
   }
   var profileResult = await service
     .from('profiles')
-    .select('role')
+    .select('id,role')
     .eq('id', user.id)
     .maybeSingle();
-  if (profileResult.error || !profileResult.data ||
-      String(profileResult.data.role || '').trim().toLowerCase() !== 'admin') {
+  var profileRole = profileResult.data
+    ? String(profileResult.data.role || '').trim().toLowerCase()
+    : '';
+  var allowPaymentTest = !profileResult.error && !!profileResult.data && profileRole === 'admin';
+  console.log('[DayO PAYMENT TEST DEBUG]', 'SERVER_ADMIN_CHECK', {
+    query_success: !profileResult.error,
+    error_code: profileResult.error && profileResult.error.code ? profileResult.error.code : null,
+    error_message: profileResult.error && profileResult.error.message
+      ? String(profileResult.error.message).slice(0, 200)
+      : null,
+    profile_found: !!profileResult.data,
+    auth_user_id: shortDebugId(user && user.id),
+    profile_id: shortDebugId(profileResult.data && profileResult.data.id),
+    profile_role: profileRole || null,
+    allow_payment_test: allowPaymentTest
+  });
+  if (!allowPaymentTest) {
     return { status: 403, body: { ok: false, error: 'admin-payment-test-required' } };
   }
 
