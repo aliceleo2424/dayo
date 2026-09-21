@@ -46,13 +46,74 @@ function normalizeSupabaseUrl(url) {
 }
 
 function env() {
+  var nextPublicSupabaseUrl = String(process.env.NEXT_PUBLIC_SUPABASE_URL || '');
+  var fallbackSupabaseUrl = String(process.env.SUPABASE_URL || '');
+  var rawServiceKey = String(process.env.SUPABASE_SERVICE_ROLE_KEY || '');
+  var trimmedServiceKey = rawServiceKey.trim();
+  var selectedUrl = nextPublicSupabaseUrl || fallbackSupabaseUrl;
   return {
-    supabaseUrl: normalizeSupabaseUrl(process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL),
+    supabaseUrl: normalizeSupabaseUrl(selectedUrl),
     anonKey: String(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim(),
-    serviceKey: String(process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim(),
+    serviceKey: trimmedServiceKey,
     portoneKey: String(process.env.PORTONE_API_KEY || '').trim(),
-    portoneSecret: String(process.env.PORTONE_API_SECRET || '').trim()
+    portoneSecret: String(process.env.PORTONE_API_SECRET || '').trim(),
+    diagnostics: {
+      supabaseUrlSource: nextPublicSupabaseUrl
+        ? 'NEXT_PUBLIC_SUPABASE_URL'
+        : (fallbackSupabaseUrl ? 'SUPABASE_URL' : 'none'),
+      serviceKeyTrimChanged: rawServiceKey.length !== trimmedServiceKey.length,
+      serviceKeyEnvEmpty: rawServiceKey.length === 0
+    }
   };
+}
+
+function serviceKeyPrefix(value) {
+  var key = String(value || '');
+  if (key.indexOf('sb_secret_') === 0) return 'sb_secret_';
+  if (key.indexOf('eyJ') === 0) return 'eyJ';
+  return 'other';
+}
+
+function supabaseEndpointInfo(value) {
+  try {
+    var parsed = new URL(value);
+    var hostname = parsed.hostname;
+    var projectRef = /\.supabase\.co$/i.test(hostname) ? hostname.split('.')[0] : null;
+    return { hostname: hostname, projectRef: projectRef };
+  } catch (error) {
+    return { hostname: null, projectRef: null };
+  }
+}
+
+async function logSupabaseServiceDiagnostics(config, service) {
+  var endpoint = supabaseEndpointInfo(config.supabaseUrl);
+  console.log('[DayO PAYMENT CONFIG DEBUG]', 'SUPABASE_CONFIG', {
+    hostname: endpoint.hostname,
+    project_ref: endpoint.projectRef,
+    url_source: config.diagnostics.supabaseUrlSource,
+    anon_key_present: !!config.anonKey,
+    service_key_present: !!config.serviceKey,
+    service_key_env_empty: config.diagnostics.serviceKeyEnvEmpty,
+    service_key_trim_changed: config.diagnostics.serviceKeyTrimChanged,
+    service_key_prefix: serviceKeyPrefix(config.serviceKey)
+  });
+
+  try {
+    var probe = await service.from('profiles').select('id').limit(1);
+    console.log('[DayO PAYMENT CONFIG DEBUG]', 'SERVICE_READ_PROBE', {
+      status: typeof probe.status === 'number' ? probe.status : null,
+      error_code: probe.error && probe.error.code ? probe.error.code : null,
+      error_message: probe.error && probe.error.message
+        ? String(probe.error.message).slice(0, 200)
+        : null
+    });
+  } catch (error) {
+    console.log('[DayO PAYMENT CONFIG DEBUG]', 'SERVICE_READ_PROBE', {
+      status: error && typeof error.status === 'number' ? error.status : null,
+      error_code: error && error.code ? error.code : null,
+      error_message: error && error.message ? String(error.message).slice(0, 200) : 'unknown-error'
+    });
+  }
 }
 
 function bearerToken(req) {
@@ -260,6 +321,7 @@ module.exports = async function handler(req, res) {
   if (!clients) return json(res, 503, { ok: false, error: 'payment-service-not-configured' });
 
   try {
+    await logSupabaseServiceDiagnostics(config, clients.service);
     var user = await authenticatedUser(clients.auth, req);
     if (!user) return json(res, 401, { ok: false, error: 'authentication-required' });
     var body = await readBody(req);
