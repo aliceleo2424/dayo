@@ -338,6 +338,196 @@ async function portoneProbe(config, service, user, body) {
   }
 }
 
+// PRE-OPEN temporary admin probe. It reads PortOne V1 payment metadata by
+// merchant_uid only and must not create, finalize, cancel, or persist anything.
+async function portoneFind(config, service, user, body) {
+  if (body.payment_test !== true) {
+    return { status: 403, body: { success: false, error: 'payment-preopen' } };
+  }
+
+  var profileResult = await service
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+  var role = profileResult.data
+    ? String(profileResult.data.role || '').trim().toLowerCase()
+    : '';
+  if (profileResult.error || !profileResult.data || role !== 'admin') {
+    return { status: 403, body: { success: false, error: 'admin-payment-test-required' } };
+  }
+
+  var requestedMerchantUid = validTokenPart(body.merchant_uid, 120);
+  if (!requestedMerchantUid) {
+    return { status: 400, body: { success: false, error: 'invalid-merchant-uid' } };
+  }
+
+  if (!config.portoneKey || !config.portoneSecret) {
+    return {
+      status: 503,
+      body: {
+        success: false,
+        stage: 'ACCESS_TOKEN',
+        found: false,
+        merchant_uid: requestedMerchantUid,
+        http_status: null,
+        portone_code: null,
+        message: 'portone-not-configured'
+      }
+    };
+  }
+
+  var controller = new AbortController();
+  var timeout = setTimeout(function () { controller.abort(); }, 10000);
+  var stage = 'ACCESS_TOKEN';
+  try {
+    var tokenResponse = await fetch('https://api.iamport.kr/users/getToken', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        imp_key: config.portoneKey,
+        imp_secret: config.portoneSecret
+      }),
+      signal: controller.signal
+    });
+    var tokenPayload = await tokenResponse.json().catch(function () { return {}; });
+    var accessToken = tokenPayload && tokenPayload.response && tokenPayload.response.access_token;
+    if (!tokenResponse.ok || Number(tokenPayload && tokenPayload.code) !== 0 || !accessToken) {
+      var tokenMessage = tokenPayload && tokenPayload.message
+        ? String(tokenPayload.message).slice(0, 200)
+        : 'access-token-not-issued';
+      logPortoneUpstreamFailure(
+        portoneDiagnosticContext(stage, null, requestedMerchantUid),
+        {
+          httpStatus: tokenResponse.status,
+          portoneCode: tokenPayload && tokenPayload.code,
+          portoneMessage: tokenMessage,
+          networkMessage: null
+        }
+      );
+      return {
+        status: 502,
+        body: {
+          success: false,
+          stage: stage,
+          found: false,
+          merchant_uid: requestedMerchantUid,
+          http_status: tokenResponse.status,
+          portone_code: tokenPayload && tokenPayload.code !== undefined ? tokenPayload.code : null,
+          message: tokenMessage
+        }
+      };
+    }
+
+    stage = 'PAYMENT_FIND';
+    var findResponse = await fetch(
+      'https://api.iamport.kr/payments/findAll/' + encodeURIComponent(requestedMerchantUid),
+      {
+        method: 'GET',
+        headers: { Authorization: accessToken },
+        signal: controller.signal
+      }
+    );
+    var findPayload = await findResponse.json().catch(function () { return {}; });
+    if (!findResponse.ok || Number(findPayload && findPayload.code) !== 0) {
+      var findMessage = findPayload && findPayload.message
+        ? String(findPayload.message).slice(0, 200)
+        : 'payment-find-failed';
+      logPortoneUpstreamFailure(
+        portoneDiagnosticContext(stage, null, requestedMerchantUid),
+        {
+          httpStatus: findResponse.status,
+          portoneCode: findPayload && findPayload.code,
+          portoneMessage: findMessage,
+          networkMessage: null
+        }
+      );
+      return {
+        status: 502,
+        body: {
+          success: false,
+          stage: stage,
+          found: false,
+          merchant_uid: requestedMerchantUid,
+          http_status: findResponse.status,
+          portone_code: findPayload && findPayload.code !== undefined ? findPayload.code : null,
+          message: findMessage
+        }
+      };
+    }
+
+    var responseBody = findPayload && findPayload.response;
+    var payments = Array.isArray(responseBody)
+      ? responseBody
+      : (responseBody && Array.isArray(responseBody.list) ? responseBody.list : null);
+    if (!payments) {
+      return {
+        status: 502,
+        body: {
+          success: false,
+          stage: stage,
+          found: false,
+          merchant_uid: requestedMerchantUid,
+          http_status: findResponse.status,
+          portone_code: findPayload && findPayload.code !== undefined ? findPayload.code : null,
+          message: 'unexpected-payment-list-response'
+        }
+      };
+    }
+
+    var matches = payments.filter(function (payment) {
+      return payment && String(payment.merchant_uid || '') === requestedMerchantUid;
+    });
+    var payment = matches.find(function (candidate) {
+      return String(candidate.status || '').trim().toLowerCase() === 'paid';
+    }) || matches[0] || null;
+    var impUid = payment && payment.imp_uid ? String(payment.imp_uid) : '';
+    var amount = payment && payment.amount !== null && payment.amount !== undefined &&
+      Number.isFinite(Number(payment.amount))
+      ? Number(payment.amount)
+      : null;
+    return {
+      status: 200,
+      body: {
+        success: true,
+        found: !!payment,
+        merchant_uid: requestedMerchantUid,
+        payment_status: payment && payment.status ? String(payment.status) : null,
+        amount: amount,
+        imp_uid_present: !!impUid,
+        imp_uid_prefix: impUid ? impUid.slice(0, 8) : null
+      }
+    };
+  } catch (error) {
+    var networkMessage = error && error.message
+      ? String(error.message).slice(0, 200)
+      : 'unknown-error';
+    logPortoneUpstreamFailure(
+      portoneDiagnosticContext(stage, null, requestedMerchantUid),
+      {
+        httpStatus: error && error.status,
+        portoneCode: null,
+        portoneMessage: null,
+        networkMessage: networkMessage
+      }
+    );
+    return {
+      status: 502,
+      body: {
+        success: false,
+        stage: stage,
+        found: false,
+        merchant_uid: requestedMerchantUid,
+        http_status: null,
+        portone_code: null,
+        message: networkMessage
+      }
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 function merchantUid(productKey) {
   return 'dayo_' + productKey + '_' + Date.now() + '_' + crypto.randomUUID().replace(/-/g, '').slice(0, 12);
 }
@@ -487,7 +677,8 @@ module.exports = async function handler(req, res) {
     var body = await readBody(req);
     var action = String(body.action || '').trim();
     var result;
-    if (action === 'portone_probe') result = await portoneProbe(config, clients.service, user, body);
+    if (action === 'portone_find') result = await portoneFind(config, clients.service, user, body);
+    else if (action === 'portone_probe') result = await portoneProbe(config, clients.service, user, body);
     else if (action === 'prepare') result = await prepare(clients.service, user, body);
     else if (action === 'finalize') result = await finalize(config, clients.service, user, body);
     else result = { status: 400, body: { ok: false, error: 'invalid-action' } };
