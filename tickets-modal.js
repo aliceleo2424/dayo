@@ -12,6 +12,20 @@
   }
 
   var PLANS = [
+    // REMOVE BEFORE PUBLIC LAUNCH: rendered only after the real admin payment-test gate succeeds.
+    {
+      id: 'admin_test_1000',
+      payId: 'admin_test_1000',
+      tier: 'single',
+      title: '결제 테스트 1,000원',
+      orderName: '결제 테스트 1,000원',
+      price: '1,000원',
+      priceValue: 1000,
+      meta: '관리자 전용 · 이용권 1장',
+      copy: 'PortOne 전체 결제 흐름을 확인하는 정식 오픈 전 임시 상품입니다.',
+      tickets: 1,
+      cta: '1,000원 테스트 결제'
+    },
     {
       id: 'trial',
       payId: 'trial',
@@ -155,6 +169,8 @@
     '.tk-single__ask{margin:0 0 .55rem;font-size:.84rem;font-weight:700;line-height:1.5;color:#9A8580;}',
     '.tk-single__row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.65rem;}',
     '.tk-single__name{margin:0;font-size:.95rem;font-weight:800;color:#5C4A42;}',
+    '.tk-admin-test{margin-top:.85rem;padding-top:.85rem;border-top:1px dashed rgba(255,107,87,.35);}',
+    '.tk-admin-test .tk-badge{margin-bottom:.45rem;background:#5C4A42;color:#fff;border-color:transparent;}',
     '.tk-policy{margin-top:1.1rem;padding:1rem 1.05rem;border-radius:20px;',
     'border:1px solid rgba(255,209,220,.65);background:linear-gradient(160deg,rgba(255,246,242,.95),rgba(255,249,230,.9));}',
     '.tk-policy__title{margin:0 0 .7rem;font-size:.88rem;font-weight:800;}',
@@ -207,6 +223,7 @@
   var lastFocused = null;
   var toastTimer = null;
   var buying = false;
+  var adminPaymentTestVisible = false;
   var couponState = {
     unusedWelcome: null,
     applyWelcome: true,
@@ -327,7 +344,16 @@
     if (el.grid) {
       el.grid.innerHTML = [findPlan('pack3'), findPlan('pack11'), findPlan('pack33')].map(planCard).join('');
     }
-    if (el.single) el.single.innerHTML = singleRow(findPlan('single'));
+    if (el.single) {
+      var singleHtml = singleRow(findPlan('single'));
+      if (adminPaymentTestVisible) {
+        singleHtml += '<div class="tk-admin-test" data-tk-admin-test>' +
+          '<span class="tk-badge">ADMIN TEST</span>' +
+          singleRow(findPlan('admin_test_1000')) +
+        '</div>';
+      }
+      el.single.innerHTML = singleHtml;
+    }
     if (el.used) {
       el.used.hidden = !used;
       el.used.innerHTML = used ? usedTrialCard(findPlan('trial')) : '';
@@ -529,6 +555,20 @@
     return couponState.unusedWelcome;
   }
 
+  async function loadAdminPaymentTestAccess() {
+    adminPaymentTestVisible = false;
+    renderPlans();
+    var gate = window.DayOPaymentTestAccess;
+    if (!gate || typeof gate.isAllowed !== 'function') return false;
+    try {
+      adminPaymentTestVisible = (await gate.isAllowed()) === true;
+    } catch (error) {
+      adminPaymentTestVisible = false;
+    }
+    renderPlans();
+    return adminPaymentTestVisible;
+  }
+
   function open() {
     if (el.overlay.classList.contains('is-open')) return;
     lastFocused = document.activeElement;
@@ -538,6 +578,7 @@
     var closeBtn = el.overlay.querySelector('[data-tk-close]');
     if (closeBtn) closeBtn.focus();
     loadCoupons();
+    loadAdminPaymentTestAccess();
   }
 
   function close() {
@@ -778,6 +819,7 @@
     };
     openFromQuery();
     loadCoupons();
+    loadAdminPaymentTestAccess();
   }
 
   if (document.readyState === 'loading') {
