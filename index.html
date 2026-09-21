@@ -3883,41 +3883,90 @@
     const modal = document.getElementById('demo-notice-modal');
     if (!modal) return;
 
-    const showPreOpenNotice = function () {
+    const debugPrefix = '[DayO PREOPEN DEBUG]';
+    const paymentTestValue = new URLSearchParams(window.location.search).get('paymentTest');
+    const paymentTestRequested = paymentTestValue === '1';
+    const debugEnabled = paymentTestRequested;
+    const shortId = function (value) {
+      return value ? String(value).slice(0, 8) : null;
+    };
+    const debug = function (stage, details) {
+      if (!debugEnabled) return;
+      console.log(debugPrefix, stage, details);
+    };
+    const showPreOpenNotice = function (reason) {
       const hideDate = localStorage.getItem('hideDayODemoNoticeDate');
       const todayStr = new Date().toISOString().slice(0, 10);
       modal.style.display = hideDate !== todayStr ? 'flex' : 'none';
+      debug('SHOW_CALL', { source: 'index', reason: reason, modalDisplay: modal.style.display });
+      debug('DECISION', { allowPaymentTest: false, action: 'SHOW_PREOPEN', reason: reason });
     };
 
-    const paymentTestRequested = new URLSearchParams(window.location.search).get('paymentTest') === '1';
+    debug('START', {
+      href: window.location.href,
+      search: window.location.search,
+      paymentTest: paymentTestValue,
+      paymentTestIsOne: paymentTestRequested,
+      supabaseClientExists: !!window.supabaseClient
+    });
+
     if (!paymentTestRequested) {
-      showPreOpenNotice();
+      showPreOpenNotice('paymentTest-not-requested');
       return;
     }
 
+    let failureReason = 'role-not-admin';
+    let phase = 'client';
     try {
       const client = window.supabaseClient;
       if (!client || !client.auth || typeof client.auth.getUser !== 'function') {
-        showPreOpenNotice();
+        debug('AUTH', { success: false, reason: 'supabase-client-unavailable', userIdExists: false, userId: null });
+        showPreOpenNotice('supabase-client-unavailable');
         return;
       }
+      phase = 'auth.getUser';
       const userResult = await client.auth.getUser();
       const user = userResult && userResult.data && userResult.data.user;
+      debug('AUTH', {
+        source: 'index',
+        success: !userResult.error && !!user,
+        error: !!userResult.error,
+        userIdExists: !!(user && user.id),
+        userId: shortId(user && user.id)
+      });
       if (userResult.error || !user) {
-        showPreOpenNotice();
+        showPreOpenNotice('auth-getUser-failed');
         return;
       }
+      phase = 'profiles.select';
       const profileResult = await client
         .from('profiles')
-        .select('role')
+        .select('id,role')
         .eq('id', user.id)
         .maybeSingle();
       const role = profileResult.data && String(profileResult.data.role || '').trim().toLowerCase();
-      if (!profileResult.error && role === 'admin') return;
+      debug('PROFILE', {
+        source: 'index',
+        success: !profileResult.error && !!profileResult.data,
+        error: !!profileResult.error,
+        profileId: shortId(profileResult.data && profileResult.data.id),
+        role: role || null
+      });
+      if (!profileResult.error && role === 'admin') {
+        debug('DECISION', { source: 'index', allowPaymentTest: true, action: 'HIDE_PREOPEN', reason: 'verified-admin' });
+        return;
+      }
+      failureReason = profileResult.error ? 'profile-query-failed' : 'role-not-admin';
     } catch (e) {
-      /* Keep PRE-OPEN closed during verification, then show it on any failure. */
+      failureReason = phase + '-exception';
+      debug('ERROR', { phase: phase, name: e && e.name ? e.name : 'Error' });
+      if (phase === 'auth.getUser') {
+        debug('AUTH', { source: 'index', success: false, error: true, userIdExists: false, userId: null });
+      } else if (phase === 'profiles.select') {
+        debug('PROFILE', { source: 'index', success: false, error: true, profileId: null, role: null });
+      }
     }
-    showPreOpenNotice();
+    showPreOpenNotice(failureReason);
   })();
 
   function dismissModalForToday() {

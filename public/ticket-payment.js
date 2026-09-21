@@ -107,6 +107,31 @@
     '정식 오픈 시 등록하신 이메일로 가장 먼저 안내해 드릴게요!\n' +
     '(문의: dayo.speak@gmail.com)';
 
+  var PREOPEN_DEBUG_PREFIX = '[DayO PREOPEN DEBUG]';
+
+  function paymentTestValue() {
+    try {
+      return new URLSearchParams(window.location.search).get('paymentTest');
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function shortDebugId(value) {
+    return value ? String(value).slice(0, 8) : null;
+  }
+
+  function preopenDebug(stage, details) {
+    if (paymentTestValue() !== '1') return;
+    console.log(PREOPEN_DEBUG_PREFIX, stage, details);
+  }
+
+  function showPreopenPaymentNotice(reason) {
+    preopenDebug('SHOW_CALL', { source: 'ticket-payment', reason: reason });
+    preopenDebug('DECISION', { allowPaymentTest: false, action: 'SHOW_PREOPEN', reason: reason });
+    notify(PREOPEN_PAY_NOTICE);
+  }
+
   function isPortoneConfigured(code) {
     var value = String(code || '').trim();
     if (!value) return false;
@@ -118,12 +143,12 @@
   function ensureImp() {
     var IMP = window.IMP;
     if (!IMP || typeof IMP.init !== 'function' || typeof IMP.request_pay !== 'function') {
-      notify(PREOPEN_PAY_NOTICE);
+      showPreopenPaymentNotice('portone-sdk-unavailable');
       return null;
     }
     var code = String(PORTONE_IMP_CODE || '').trim();
     if (!isPortoneConfigured(code)) {
-      notify(PREOPEN_PAY_NOTICE);
+      showPreopenPaymentNotice('portone-merchant-code-unavailable');
       return null;
     }
     if (!impReady) {
@@ -141,29 +166,69 @@
   }
 
   function paymentTestRequested() {
-    try {
-      return new URLSearchParams(window.location.search).get('paymentTest') === '1';
-    } catch (e) {
-      return false;
-    }
+    return paymentTestValue() === '1';
   }
 
   function hasAdminPaymentTestAccess() {
     if (!paymentTestRequested()) return Promise.resolve(false);
+    var phase = 'client';
     return (async function () {
       var supabase = getSupabase();
-      if (!supabase || !supabase.auth) return false;
+      preopenDebug('TICKET_GATE_START', {
+        href: window.location.href,
+        search: window.location.search,
+        paymentTest: paymentTestValue(),
+        paymentTestIsOne: paymentTestRequested(),
+        supabaseClientExists: !!window.supabaseClient,
+        resolvedClientExists: !!supabase
+      });
+      if (!supabase || !supabase.auth) {
+        preopenDebug('AUTH', { success: false, reason: 'supabase-client-unavailable', userIdExists: false, userId: null });
+        return false;
+      }
+      phase = 'auth.getUser';
       var userResult = await supabase.auth.getUser();
       var user = userResult && userResult.data && userResult.data.user;
+      preopenDebug('AUTH', {
+        source: 'ticket-payment',
+        success: !userResult.error && !!user,
+        error: !!userResult.error,
+        userIdExists: !!(user && user.id),
+        userId: shortDebugId(user && user.id)
+      });
       if (userResult.error || !user) return false;
+      phase = 'profiles.select';
       var profileResult = await supabase
         .from('profiles')
-        .select('role')
+        .select('id,role')
         .eq('id', user.id)
         .maybeSingle();
-      return !profileResult.error && !!profileResult.data &&
-        String(profileResult.data.role || '').trim().toLowerCase() === 'admin';
-    })().catch(function () { return false; });
+      var role = profileResult.data && String(profileResult.data.role || '').trim().toLowerCase();
+      var allowed = !profileResult.error && !!profileResult.data && role === 'admin';
+      preopenDebug('PROFILE', {
+        source: 'ticket-payment',
+        success: !profileResult.error && !!profileResult.data,
+        error: !!profileResult.error,
+        profileId: shortDebugId(profileResult.data && profileResult.data.id),
+        role: role || null
+      });
+      preopenDebug('DECISION', {
+        source: 'ticket-payment',
+        allowPaymentTest: allowed,
+        action: allowed ? 'HIDE_PREOPEN' : 'SHOW_PREOPEN',
+        reason: allowed ? 'verified-admin' : (profileResult.error ? 'profile-query-failed' : 'role-not-admin')
+      });
+      return allowed;
+    })().catch(function (error) {
+      preopenDebug('ERROR', { source: 'ticket-payment', phase: phase, name: error && error.name ? error.name : 'Error' });
+      if (phase === 'auth.getUser') {
+        preopenDebug('AUTH', { source: 'ticket-payment', success: false, error: true, userIdExists: false, userId: null });
+      } else if (phase === 'profiles.select') {
+        preopenDebug('PROFILE', { source: 'ticket-payment', success: false, error: true, profileId: null, role: null });
+      }
+      preopenDebug('DECISION', { allowPaymentTest: false, action: 'SHOW_PREOPEN', reason: 'ticket-gate-exception' });
+      return false;
+    });
   }
 
   async function paymentApi(session, body) {
@@ -261,7 +326,7 @@
 
       var paymentTestAccess = await hasAdminPaymentTestAccess();
       if (!paymentTestAccess) {
-        notify(PREOPEN_PAY_NOTICE);
+        showPreopenPaymentNotice('admin-payment-test-access-denied');
         paying = false;
         return;
       }
