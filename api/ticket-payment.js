@@ -149,24 +149,63 @@ async function authenticatedUser(client, req) {
   return result.data.user;
 }
 
-async function fetchJson(url, options) {
+function portoneDiagnosticContext(stage, impUid, merchantUid) {
+  return {
+    upstream_stage: stage,
+    imp_uid_present: !!impUid,
+    imp_uid_prefix: impUid ? String(impUid).slice(0, 8) : null,
+    merchant_uid: merchantUid ? String(merchantUid).slice(0, 120) : null
+  };
+}
+
+function logPortoneUpstreamFailure(context, details) {
+  console.error('[DayO PORTONE UPSTREAM DEBUG]', Object.assign({}, context, {
+    http_status: typeof details.httpStatus === 'number' ? details.httpStatus : null,
+    portone_code: details.portoneCode === undefined ? null : details.portoneCode,
+    portone_message: details.portoneMessage
+      ? String(details.portoneMessage).slice(0, 200)
+      : null,
+    network_exception_message: details.networkMessage
+      ? String(details.networkMessage).slice(0, 200)
+      : null
+  }));
+}
+
+async function fetchJson(url, options, diagnosticContext) {
   var controller = new AbortController();
   var timeout = setTimeout(function () { controller.abort(); }, 10000);
   try {
     var response = await fetch(url, Object.assign({}, options, { signal: controller.signal }));
     var body = await response.json().catch(function () { return {}; });
     if (!response.ok || Number(body && body.code) !== 0) {
+      logPortoneUpstreamFailure(diagnosticContext, {
+        httpStatus: response.status,
+        portoneCode: body && body.code,
+        portoneMessage: body && body.message,
+        networkMessage: null
+      });
       var error = new Error('upstream-request-failed');
       error.status = response.status;
+      error.upstreamLogged = true;
       throw error;
     }
     return body && body.response;
+  } catch (error) {
+    if (!error.upstreamLogged) {
+      logPortoneUpstreamFailure(diagnosticContext, {
+        httpStatus: error && error.status,
+        portoneCode: null,
+        portoneMessage: null,
+        networkMessage: error && error.message ? error.message : 'unknown-error'
+      });
+    }
+    throw error;
   } finally {
     clearTimeout(timeout);
   }
 }
 
-async function portonePayment(config, impUid) {
+async function portonePayment(config, impUid, merchantUid) {
   if (!config.portoneKey || !config.portoneSecret) throw new Error('portone-not-configured');
   var access = await fetchJson('https://api.iamport.kr/users/getToken', {
     method: 'POST',
@@ -175,12 +214,20 @@ async function portonePayment(config, impUid) {
       imp_key: config.portoneKey,
       imp_secret: config.portoneSecret
     })
-  });
-  if (!access || !access.access_token) throw new Error('portone-auth-failed');
+  }, portoneDiagnosticContext('ACCESS_TOKEN', impUid, merchantUid));
+  if (!access || !access.access_token) {
+    logPortoneUpstreamFailure(portoneDiagnosticContext('ACCESS_TOKEN', impUid, merchantUid), {
+      httpStatus: null,
+      portoneCode: 0,
+      portoneMessage: 'access-token-missing',
+      networkMessage: null
+    });
+    throw new Error('portone-auth-failed');
+  }
   return fetchJson('https://api.iamport.kr/payments/' + encodeURIComponent(impUid), {
     method: 'GET',
     headers: { Authorization: access.access_token }
-  });
+  }, portoneDiagnosticContext('PAYMENT_LOOKUP', impUid, merchantUid));
 }
 
 function merchantUid(productKey) {
@@ -251,6 +298,11 @@ async function prepare(service, user, body) {
 }
 
 async function finalize(config, service, user, body) {
+  console.log('[DayO PAYMENT FINALIZE DEBUG]', 'INPUT', {
+    imp_uid_present: !!body.imp_uid,
+    imp_uid_prefix: body.imp_uid ? String(body.imp_uid).slice(0, 8) : null,
+    merchant_uid: body.merchant_uid ? String(body.merchant_uid).slice(0, 120) : null
+  });
   var impUid = validTokenPart(body.imp_uid, 100);
   var merchant = validTokenPart(body.merchant_uid, 120);
   if (!impUid || !merchant) {
@@ -270,7 +322,7 @@ async function finalize(config, service, user, body) {
     return { status: 403, body: { ok: false, error: 'payment-owner-mismatch' } };
   }
 
-  var payment = await portonePayment(config, impUid);
+  var payment = await portonePayment(config, impUid, merchant);
   if (!payment || payment.status !== 'paid') {
     return { status: 409, body: { ok: false, error: 'payment-not-paid' } };
   }
