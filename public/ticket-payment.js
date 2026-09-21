@@ -275,6 +275,16 @@
     return result;
   }
 
+  function paymentFailureMessage(rsp) {
+    var reason = rsp && rsp.error_msg
+      ? String(rsp.error_msg).replace(/[\u0000-\u001f\u007f]+/g, ' ').trim().slice(0, 200)
+      : '';
+    var errorCode = rsp && rsp.error_code ? String(rsp.error_code) : '';
+    var cancelled = /취소|cancel/i.test(errorCode + ' ' + reason);
+    var message = cancelled ? '결제가 취소되었습니다.' : '결제가 완료되지 않았습니다.';
+    return reason ? message + '\n사유: ' + reason : message;
+  }
+
   async function markWelcomeTicketUsed(session) {
     var supabase = getSupabase();
     var userId = session && session.user && session.user.id;
@@ -362,28 +372,32 @@
         buyer_name: (session.user.user_metadata && (session.user.user_metadata.name || session.user.user_metadata.full_name)) || 'DayO 유저'
       }, async function (rsp) {
         try {
+          var callbackFailed = !rsp || rsp.success === false || rsp.imp_success === false ||
+            !!(rsp && rsp.error_code);
           var hasPaymentIds = !!(rsp && rsp.imp_uid && rsp.merchant_uid);
-          var callbackSucceeded = !!(rsp && (
-            rsp.success === true || rsp.imp_success === true ||
-            (hasPaymentIds && rsp.success !== false && rsp.imp_success !== false)
-          ));
-          if (callbackSucceeded) {
-            try {
-              var finalized = await finalizePayment(session, rsp, prepared);
-              if (prepared.product.id === 'trial') await markWelcomeTicketUsed(session);
-              if (finalized.duplicate) {
-                alert('이미 처리된 결제입니다. 현재 티켓 잔액을 확인해 주세요.');
-              } else {
-                alert('🎉 결제가 완료되었습니다! 세션 티켓 ' + Number(finalized.added_tickets || 0) + '장이 충전되었습니다.');
-              }
-              closeTicketModal();
-              window.location.reload();
-            } catch (err) {
-              console.error('결제 검증 및 티켓 충전 중 오류:', err);
-              alert('결제 확인 중 문제가 발생했습니다. 고객센터로 문의해 주세요.');
+          if (callbackFailed || !hasPaymentIds) {
+            console.warn('[DayO] payment was not completed', {
+              success: rsp && rsp.success,
+              error_code: rsp && rsp.error_code ? String(rsp.error_code).slice(0, 80) : null,
+              imp_uid_present: !!(rsp && rsp.imp_uid)
+            });
+            alert(paymentFailureMessage(rsp));
+            return;
+          }
+
+          try {
+            var finalized = await finalizePayment(session, rsp, prepared);
+            if (prepared.product.id === 'trial') await markWelcomeTicketUsed(session);
+            if (finalized.duplicate) {
+              alert('이미 처리된 결제입니다. 현재 티켓 잔액을 확인해 주세요.');
+            } else {
+              alert('🎉 결제가 완료되었습니다! 세션 티켓 ' + Number(finalized.added_tickets || 0) + '장이 충전되었습니다.');
             }
-          } else {
-            alert('결제에 실패하였습니다: ' + ((rsp && rsp.error_msg) || '취소되었거나 실패했습니다.'));
+            closeTicketModal();
+            window.location.reload();
+          } catch (err) {
+            console.error('결제 검증 및 티켓 충전 중 오류:', err);
+            alert('결제 확인 중 문제가 발생했습니다. 고객센터로 문의해 주세요.');
           }
         } finally {
           paying = false;
