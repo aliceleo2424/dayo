@@ -3879,9 +3879,18 @@
 </style>
 
 <script>
-  (function initDayODemoNotice() {
+  (async function initDayODemoNotice() {
     const modal = document.getElementById('demo-notice-modal');
     if (!modal) return;
+
+    try {
+      const gate = window.DayOPaymentTestAccess;
+      if (gate && typeof gate.requested === 'function' && gate.requested() &&
+          typeof gate.isAllowed === 'function' && await gate.isAllowed()) {
+        modal.style.display = 'none';
+        return;
+      }
+    } catch (e) { /* keep the PRE-OPEN notice on any verification failure */ }
 
     const hideDate = localStorage.getItem('hideDayODemoNoticeDate');
     const todayStr = new Date().toISOString().slice(0, 10);

@@ -76,6 +76,10 @@
       product.name = payload.orderName || product.name;
       product.price = Number(payload.amount) || product.price;
       product.tickets = Number(payload.ticketCount) || product.tickets;
+      if (product.price === PRODUCTS.trial.price && product.tickets === PRODUCTS.trial.tickets &&
+          /체험|trial/i.test(product.name)) {
+        product.id = 'trial';
+      }
     }
     return product;
   }
@@ -136,79 +140,69 @@
     return res && res.data ? res.data.session : null;
   }
 
-  async function persistOrderAndTickets(session, selectedProduct, rsp) {
-    var supabase = getSupabase();
-    var userId = session.user.id;
-    var charged = false;
-
-    if (supabase) {
-      var rpc = await supabase.rpc('grant_purchased_tickets', {
-        p_user_id: userId,
-        p_ticket_count: selectedProduct.tickets,
-        p_merchant_uid: rsp.merchant_uid,
-        p_imp_uid: rsp.imp_uid,
-        p_product_name: selectedProduct.name,
-        p_amount: selectedProduct.price
-      });
-
-      if (!rpc.error && rpc.data && rpc.data.success) {
-        charged = true;
-      } else {
-        if (rpc.error) console.warn('[DayO] grant_purchased_tickets', rpc.error);
-
-        var orderRes = await supabase.from('orders').insert({
-          user_id: userId,
-          merchant_uid: rsp.merchant_uid,
-          product_name: selectedProduct.name,
-          amount: selectedProduct.price,
-          ticket_count: selectedProduct.tickets,
-          imp_uid: rsp.imp_uid,
-          status: 'paid'
-        });
-        if (orderRes && orderRes.error) {
-          console.warn('[DayO] orders insert failed', orderRes.error);
-        }
-
-        var profileRes = await supabase
-          .from('profiles')
-          .select('ticket_count')
-          .eq('user_id', userId)
-          .maybeSingle();
-        if ((profileRes.error || !profileRes.data) && supabase) {
-          profileRes = await supabase
-            .from('profiles')
-            .select('ticket_count')
-            .eq('id', userId)
-            .maybeSingle();
-        }
-
-        var newCount = (Number(profileRes && profileRes.data && profileRes.data.ticket_count) || 0)
-          + selectedProduct.tickets;
-        var upd = await supabase
-          .from('profiles')
-          .update({ ticket_count: newCount })
-          .eq('user_id', userId);
-        if (upd.error) {
-          upd = await supabase
-            .from('profiles')
-            .update({ ticket_count: newCount })
-            .eq('id', userId);
-        }
-        if (upd.error) throw upd.error;
-        charged = true;
-      }
+  function paymentTestRequested() {
+    try {
+      return new URLSearchParams(window.location.search).get('paymentTest') === '1';
+    } catch (e) {
+      return false;
     }
+  }
 
-    if (window.DayOTicketWallet && typeof window.DayOTicketWallet.addTickets === 'function') {
-      window.DayOTicketWallet.addTickets(selectedProduct.tickets);
-    } else if (window.DayOProfileStore && typeof window.DayOProfileStore.updateProfile === 'function') {
-      var current = window.DayOTicketWallet && typeof window.DayOTicketWallet.getCount === 'function'
-        ? window.DayOTicketWallet.getCount()
-        : 0;
-      window.DayOProfileStore.updateProfile({ ticket_count: current + selectedProduct.tickets }, { skipEvents: true });
+  function hasAdminPaymentTestAccess() {
+    if (!paymentTestRequested()) return Promise.resolve(false);
+    return (async function () {
+      var supabase = getSupabase();
+      if (!supabase || !supabase.auth) return false;
+      var userResult = await supabase.auth.getUser();
+      var user = userResult && userResult.data && userResult.data.user;
+      if (userResult.error || !user) return false;
+      var profileResult = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle();
+      return !profileResult.error && !!profileResult.data &&
+        String(profileResult.data.role || '').trim().toLowerCase() === 'admin';
+    })().catch(function () { return false; });
+  }
+
+  async function paymentApi(session, body) {
+    if (!session || !session.access_token) throw new Error('authentication-required');
+    var response = await fetch('/api/ticket-payment', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + session.access_token,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body || {})
+    });
+    var data = await response.json().catch(function () { return {}; });
+    if (!response.ok || !data.ok) {
+      var error = new Error((data && data.error) || 'payment-api-failed');
+      error.status = response.status;
+      throw error;
     }
+    return data;
+  }
 
-    return charged;
+  async function preparePayment(session, productId) {
+    return paymentApi(session, { action: 'prepare', product_id: productId, payment_test: true });
+  }
+
+  async function finalizePayment(session, rsp, prepared) {
+    if (!rsp || !rsp.imp_uid) throw new Error('missing-payment-identifier');
+    if (rsp.merchant_uid && rsp.merchant_uid !== prepared.merchant_uid) {
+      throw new Error('payment-identifier-mismatch');
+    }
+    var result = await paymentApi(session, {
+      action: 'finalize',
+      imp_uid: rsp.imp_uid,
+      merchant_uid: prepared.merchant_uid
+    });
+    if (window.DayOTicketWallet && typeof window.DayOTicketWallet.syncUI === 'function') {
+      window.DayOTicketWallet.syncUI(result.ticket_count);
+    }
+    return result;
   }
 
   async function markWelcomeTicketUsed(session) {
@@ -265,8 +259,25 @@
         return;
       }
 
+      var paymentTestAccess = await hasAdminPaymentTestAccess();
+      if (!paymentTestAccess) {
+        notify(PREOPEN_PAY_NOTICE);
+        paying = false;
+        return;
+      }
+
       var IMP = ensureImp();
       if (!IMP) {
+        paying = false;
+        return;
+      }
+
+      var prepared;
+      try {
+        prepared = await preparePayment(session, selectedProduct.id);
+      } catch (prepareError) {
+        console.error('[DayO] payment prepare failed', prepareError);
+        notify('결제 준비 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.');
         paying = false;
         return;
       }
@@ -274,23 +285,32 @@
       IMP.request_pay({
         pg: 'tosspayments',
         pay_method: 'card',
-        merchant_uid: 'dayo_order_' + Date.now(),
-        name: selectedProduct.name,
-        amount: selectedProduct.price,
+        merchant_uid: prepared.merchant_uid,
+        name: prepared.product.name,
+        amount: prepared.product.amount,
         buyer_email: session.user.email,
         buyer_name: (session.user.user_metadata && (session.user.user_metadata.name || session.user.user_metadata.full_name)) || 'DayO 유저'
       }, async function (rsp) {
         try {
-          if (rsp && rsp.success) {
+          var hasPaymentIds = !!(rsp && rsp.imp_uid && rsp.merchant_uid);
+          var callbackSucceeded = !!(rsp && (
+            rsp.success === true || rsp.imp_success === true ||
+            (hasPaymentIds && rsp.success !== false && rsp.imp_success !== false)
+          ));
+          if (callbackSucceeded) {
             try {
-              await persistOrderAndTickets(session, selectedProduct, rsp);
-              if (selectedProduct.id === 'trial') await markWelcomeTicketUsed(session);
-              alert('🎉 결제가 완료되었습니다! 세션 티켓 ' + selectedProduct.tickets + '장이 충전되었습니다.');
+              var finalized = await finalizePayment(session, rsp, prepared);
+              if (prepared.product.id === 'trial') await markWelcomeTicketUsed(session);
+              if (finalized.duplicate) {
+                alert('이미 처리된 결제입니다. 현재 티켓 잔액을 확인해 주세요.');
+              } else {
+                alert('🎉 결제가 완료되었습니다! 세션 티켓 ' + Number(finalized.added_tickets || 0) + '장이 충전되었습니다.');
+              }
               closeTicketModal();
               window.location.reload();
             } catch (err) {
-              console.error('티켓 충전 중 오류:', err);
-              alert('결제는 성공했으나 티켓 충전 중 오류가 발생했습니다. 고객센터로 문의해주세요.');
+              console.error('결제 검증 및 티켓 충전 중 오류:', err);
+              alert('결제 확인 중 문제가 발생했습니다. 고객센터로 문의해 주세요.');
             }
           } else {
             alert('결제에 실패하였습니다: ' + ((rsp && rsp.error_msg) || '취소되었거나 실패했습니다.'));
@@ -308,6 +328,10 @@
 
   window.requestPay = requestPay;
   window.closeTicketModal = closeTicketModal;
+  window.DayOPaymentTestAccess = {
+    requested: paymentTestRequested,
+    isAllowed: hasAdminPaymentTestAccess
+  };
   window.DayOPay = window.DayOPay || {};
   window.DayOPay.request = function (payload) {
     var id = payload && (payload.planId || payload.id);
