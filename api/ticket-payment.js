@@ -230,6 +230,114 @@ async function portonePayment(config, impUid, merchantUid) {
   }, portoneDiagnosticContext('PAYMENT_LOOKUP', impUid, merchantUid));
 }
 
+// PRE-OPEN temporary admin probe. It only verifies PortOne V1 access-token
+// issuance and must not create, finalize, or cancel any payment or order.
+async function portoneProbe(config, service, user, body) {
+  if (body.payment_test !== true) {
+    return { status: 403, body: { success: false, error: 'payment-preopen' } };
+  }
+
+  var profileResult = await service
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle();
+  var role = profileResult.data
+    ? String(profileResult.data.role || '').trim().toLowerCase()
+    : '';
+  if (profileResult.error || !profileResult.data || role !== 'admin') {
+    return { status: 403, body: { success: false, error: 'admin-payment-test-required' } };
+  }
+
+  if (!config.portoneKey || !config.portoneSecret) {
+    return {
+      status: 503,
+      body: {
+        success: false,
+        stage: 'ACCESS_TOKEN',
+        configured: false,
+        http_status: null,
+        portone_code: null,
+        message: 'portone-not-configured'
+      }
+    };
+  }
+
+  var controller = new AbortController();
+  var timeout = setTimeout(function () { controller.abort(); }, 10000);
+  var context = portoneDiagnosticContext('ACCESS_TOKEN', null, null);
+  try {
+    var response = await fetch('https://api.iamport.kr/users/getToken', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        imp_key: config.portoneKey,
+        imp_secret: config.portoneSecret
+      }),
+      signal: controller.signal
+    });
+    var payload = await response.json().catch(function () { return {}; });
+    var accessTokenIssued = response.ok && Number(payload && payload.code) === 0 &&
+      !!(payload && payload.response && payload.response.access_token);
+
+    if (!accessTokenIssued) {
+      var failureMessage = payload && payload.message
+        ? String(payload.message).slice(0, 200)
+        : 'access-token-not-issued';
+      logPortoneUpstreamFailure(context, {
+        httpStatus: response.status,
+        portoneCode: payload && payload.code,
+        portoneMessage: failureMessage,
+        networkMessage: null
+      });
+      return {
+        status: 502,
+        body: {
+          success: false,
+          stage: 'ACCESS_TOKEN',
+          configured: true,
+          http_status: response.status,
+          portone_code: payload && payload.code !== undefined ? payload.code : null,
+          message: failureMessage
+        }
+      };
+    }
+
+    console.log('[DayO PORTONE PROBE]', {
+      success: true,
+      stage: 'ACCESS_TOKEN',
+      http_status: response.status
+    });
+    return {
+      status: 200,
+      body: { success: true, stage: 'ACCESS_TOKEN', configured: true }
+    };
+  } catch (error) {
+    var networkMessage = error && error.message
+      ? String(error.message).slice(0, 200)
+      : 'unknown-error';
+    logPortoneUpstreamFailure(context, {
+      httpStatus: error && error.status,
+      portoneCode: null,
+      portoneMessage: null,
+      networkMessage: networkMessage
+    });
+    return {
+      status: 502,
+      body: {
+        success: false,
+        stage: 'ACCESS_TOKEN',
+        configured: true,
+        http_status: null,
+        portone_code: null,
+        message: networkMessage
+      }
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 function merchantUid(productKey) {
   return 'dayo_' + productKey + '_' + Date.now() + '_' + crypto.randomUUID().replace(/-/g, '').slice(0, 12);
 }
@@ -379,7 +487,8 @@ module.exports = async function handler(req, res) {
     var body = await readBody(req);
     var action = String(body.action || '').trim();
     var result;
-    if (action === 'prepare') result = await prepare(clients.service, user, body);
+    if (action === 'portone_probe') result = await portoneProbe(config, clients.service, user, body);
+    else if (action === 'prepare') result = await prepare(clients.service, user, body);
     else if (action === 'finalize') result = await finalize(config, clients.service, user, body);
     else result = { status: 400, body: { ok: false, error: 'invalid-action' } };
     return json(res, result.status, result.body);
