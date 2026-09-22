@@ -710,40 +710,34 @@
       } catch (e) { user = null; }
     }
 
-    var learnerId = window.dayoLearnerUserId
-      || (function () {
-        try { return localStorage.getItem('dayo_session_learner_id') || localStorage.getItem('dayo_learner_user_id') || ''; }
-        catch (e) { return ''; }
-      })()
-      || (user && user.id)
-      || '';
+    var access = window.DayORoomAccess;
+    var bookingId = access && access.allowed && !access.adminTest ? access.bookingId : '';
+    var learnerId = access && access.learnerId || '';
+    var partnerId = access && access.partnerId || '';
 
-    if (client && learnerId) {
-      var bookingId = '';
-      try { bookingId = localStorage.getItem('dayo_active_booking_id') || ''; } catch (e) { bookingId = ''; }
-      var reportRow = {
-        booking_id: bookingId || null,
-        learner_id: learnerId,
-        partner_id: user && user.id || null,
-        partner_user_id: user && user.id || null,
-        partner_name: payload.partnerName || 'Camille',
-        spoken_sentence: payload.sentence,
-        keyword: payload.keyword || 'daily',
-        illust_url: payload.illustUrl,
-        partner_comment: payload.partnerComment,
-        stamp: payload.stamp
+    if (client && user && bookingId && learnerId && partnerId && user.id === partnerId && access.role === 'partner') {
+      var reportPayload = {
+        partner_name: payload.partnerName || null,
+        spoken_sentence: payload.sentence || null,
+        keyword: payload.keyword || null,
+        illust_url: payload.illustUrl || null,
+        partner_comment: payload.partnerComment || null,
+        stamp: payload.stamp || null
       };
-      var insertRes = bookingId
-        ? await client.from('session_reports').upsert(reportRow, { onConflict: 'booking_id' })
-        : await client.from('session_reports').insert([reportRow]);
-      if (insertRes.error) {
-        console.warn('[DayO] session_reports insert failed', insertRes.error);
+      var insertRes = await client.rpc('merge_partner_session_report', {
+        p_booking_id: bookingId,
+        p_report: reportPayload
+      });
+      var resultData = insertRes && insertRes.data || {};
+      if (insertRes.error || !resultData.success || resultData.learner_id !== learnerId) {
+        console.warn('[DayO] session_reports merge failed', insertRes.error || resultData.message || 'identity-mismatch');
         try { localStorage.setItem('dayo_last_approved_card', JSON.stringify(payload)); } catch (e) { /* ignore */ }
-        return { ok: false, error: insertRes.error };
+        return { ok: false, error: insertRes.error || new Error(resultData.message || 'identity-mismatch') };
       }
       return { ok: true, learnerId: learnerId };
     }
 
+    console.warn('[DayO] session report skipped: verified partner room identity is unavailable');
     try { localStorage.setItem('dayo_last_approved_card', JSON.stringify(payload)); } catch (e) { /* ignore */ }
     return { ok: false, skipped: true };
   };

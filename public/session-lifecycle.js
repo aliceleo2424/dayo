@@ -55,7 +55,9 @@
     var rows = transcriptRows();
     try { localStorage.setItem('last_session_transcript', JSON.stringify(rows)); } catch (e) { /* ignore */ }
     if (window.DayOLive && typeof window.DayOLive.saveTranscript === 'function') {
-      try { return await window.DayOLive.saveTranscript(); } catch (e) { /* local copy is retained */ }
+      try { return await window.DayOLive.saveTranscript(); } catch (e) {
+        console.error('[DayO Session] transcript save failed', e);
+      }
     }
     return { ok: false, local: true, transcript: rows };
   }
@@ -244,33 +246,35 @@
     var ctx = context();
     if (!db || !user || !ctx.bookingId) return false;
     var expressions = expressionList();
-    var partnerName = stored('dayo_partner_name') || stored('bookedPartnerName') || 'DayO Partner';
     var summary = expressions.length
       ? '오늘 대화에서 ' + expressions.length + '개의 핵심 표현을 복습했어요.'
-      : '오늘의 1:1 대화 복습을 완료했어요.';
+      : '인식된 대화 내용이 없어 핵심 표현을 생성하지 않았어요.';
+    if (!ctx.learnerId || user.id !== ctx.learnerId) {
+      console.error('[DayO Session] learner report identity mismatch');
+      return false;
+    }
     var payload = {
-      booking_id: ctx.bookingId,
-      learner_id: ctx.learnerId || user.id,
-      partner_id: ctx.partnerId,
-      partner_user_id: ctx.partnerId,
-      partner_name: partnerName,
       summary: summary,
       key_expressions: expressions,
       quiz_score: Number(window.__dayoQuizScore || 0),
       word_help: window.__dayoWordHelpHistory.slice(-12),
       feedback: selectedFeedback(),
-      spoken_sentence: expressions[0] || '오늘의 대화 복습 완료',
+      spoken_sentence: expressions[0] || null,
       keyword: 'session-review'
     };
     var rating = document.querySelectorAll('.star-btn.active').length;
     if (rating > 0) payload.rating = rating;
-    var result = await db.from('session_reports').upsert(payload, { onConflict: 'booking_id' });
-    if (result.error) {
-      console.warn('[DayO] review report save failed', result.error);
+    var result = await db.rpc('merge_learner_session_report', {
+      p_booking_id: ctx.bookingId,
+      p_report: payload
+    });
+    var resultData = result && result.data || {};
+    if (result.error || !resultData.success) {
+      console.warn('[DayO] review report save failed', result.error || resultData.message || 'unknown-error');
       return false;
     }
     if (rating > 0) {
-      await db.from('bookings').update({ rating: rating }).eq('id', ctx.bookingId).eq('learner_id', payload.learner_id);
+      await db.from('bookings').update({ rating: rating }).eq('id', ctx.bookingId).eq('learner_id', ctx.learnerId);
     }
     window.__dayoReviewReportSaved = true;
     return true;
@@ -309,7 +313,11 @@
     var ctx = context();
     if (typeof window.closeEarlyExitModal === 'function') window.closeEarlyExitModal();
     window.isEarlyExit = false;
-    await persistTranscript();
+    var transcriptResult = await persistTranscript();
+    if (!transcriptResult || !transcriptResult.ok) {
+      console.error('[DayO Session] early-exit transcript was not stored remotely', transcriptResult && transcriptResult.error);
+      toast('대화 기록을 서버에 저장하지 못해 이 기기에 임시 보관했어요.');
+    }
     if (ctx.bookingId && client()) {
       var result = await client().rpc('complete_learner_session', {
         p_booking_id: ctx.bookingId,
@@ -334,7 +342,11 @@
     }
     var ctx = context();
     if (typeof window.closeEarlyExitModal === 'function') window.closeEarlyExitModal();
-    await persistTranscript();
+    var transcriptResult = await persistTranscript();
+    if (!transcriptResult || !transcriptResult.ok) {
+      console.error('[DayO Session] tech-exit transcript was not stored remotely', transcriptResult && transcriptResult.error);
+      toast('대화 기록을 서버에 저장하지 못해 이 기기에 임시 보관했어요.');
+    }
     if (ctx.bookingId && client()) {
       var result = await client().rpc('report_session_tech_issue', { p_booking_id: ctx.bookingId });
       if (result && result.data) syncTicketCount(result.data.ticket_count);
@@ -398,7 +410,22 @@
     if (window._dayoUserQuizCompleteNavigating) return;
     window._dayoUserQuizCompleteNavigating = true;
     clearInterval(quizTimer);
-    await persistReviewReport();
+    if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
+      window.location.href = 'index.html?view=mypage';
+      return;
+    }
+    var saved = false;
+    try {
+      saved = await persistReviewReport();
+    } catch (e) {
+      console.error('[DayO Session] report persistence failed', e);
+    }
+    if (!saved) {
+      console.error('[DayO Session] report was not saved; navigation paused');
+      toast('대화 기록을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.');
+      window._dayoUserQuizCompleteNavigating = false;
+      return;
+    }
     window.location.href = 'mypage.html';
   };
 })();

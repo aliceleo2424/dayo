@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-env.js"></script>
-  <script src="supabase-client.js?v=20260916-auth-strict"></script>
+  <script src="supabase-client.js?v=20260921-session-persistence"></script>
   <style>
     body:not(.room-access-granted) .studio { visibility: hidden; }
     #room-access-screen { position: fixed; inset: 0; z-index: 2147483647; display: grid; place-items: center; padding: 24px; background: #FFF8F5; color: #5C4A42; text-align: center; font-family: 'Gowun Dodum', sans-serif; }
@@ -3656,11 +3656,11 @@
 
   <script crossorigin src="https://unpkg.com/@daily-co/daily-js"></script>
   <script src="supabase-env.js"></script>
-  <script type="module" src="profile-store.js?v=20260916-auth-strict"></script>
+  <script type="module" src="profile-store.js?v=20260921-session-persistence"></script>
   <script src="chat-prefs.js"></script>
   <script src="talk-cards-data.js"></script>
   <script>window.__dayoUsePeerJS = true;</script>
-  <script src="room-live.js?v=20260918-access-gate"></script>
+  <script src="room-live.js?v=20260921-session-persistence"></script>
   <script>
     /* 1:1 WebRTC (PeerJS) — Partner = host/receiver, User = guest/caller
      * Observer = receive-only ghost (empty outbound stream); never replaces activeCall */
@@ -5187,7 +5187,7 @@
       openReviewFromTranscript(result, { autoStart: true });
     };
 
-    function handleSessionEndRouting(result) {
+    async function handleSessionEndRouting(result) {
       if (window.__dayoSessionEndRouted) return;
       window.__dayoSessionEndRouted = true;
       window.dayoSessionEnded = true;
@@ -5207,7 +5207,16 @@
         return;
       }
 
-      try { persistTranscript(); } catch (e) { /* ignore */ }
+      var transcriptResult = null;
+      try {
+        transcriptResult = await persistTranscript();
+      } catch (e) {
+        console.error('[DayO Session] transcript persistence failed', e);
+      }
+      if (!(window.DayORoomAccess && window.DayORoomAccess.adminTest) && (!transcriptResult || !transcriptResult.ok)) {
+        console.error('[DayO Session] transcript was not stored remotely', transcriptResult && transcriptResult.error);
+        showToast('대화 기록을 서버에 저장하지 못했어요. 이 기기에 임시 보관했어요.');
+      }
 
       // 1) 파트너인 경우: 유저용 모달 차단 및 파트너 리포트 검수 팝업만 오픈
       if (isPartner) {
@@ -5296,8 +5305,8 @@
       }
     });
 
-    document.addEventListener('dayo:session-ended', () => {
-      handleSessionEndRouting(null);
+    document.addEventListener('dayo:session-ended', async () => {
+      await handleSessionEndRouting(null);
     });
 
     starButtons.forEach((btn) => {
@@ -5313,7 +5322,7 @@
       chip.addEventListener('click', () => chip.classList.toggle('selected'));
     });
 
-    document.getElementById('feedbackSubmit').addEventListener('click', () => {
+    document.getElementById('feedbackSubmit').addEventListener('click', async () => {
       closeRatingModal();
       if (window.isEarlyExit) {
         goToMypage();
@@ -5321,12 +5330,16 @@
       }
       showToast(t('room.toastFeedbackSent'));
       stopAllMedia();
+      var transcriptResult = await persistTranscript();
+      if (!transcriptResult || !transcriptResult.ok) {
+        console.error('[DayO Session] transcript save failed before review', transcriptResult && transcriptResult.error);
+        showToast('대화 기록을 서버에 저장하지 못했어요. 이 기기에 임시 보관했어요.');
+      }
       if (typeof window.openQuizModalImmediately === 'function') {
         window.openQuizModalImmediately();
       } else {
         openReviewFromTranscript(null, { autoStart: true });
       }
-      persistTranscript();
     });
 
     document.querySelectorAll('#ratingModal .close-btn, #ratingModal [data-dismiss]').forEach(function (btn) {
@@ -5514,7 +5527,7 @@
         });
         var places = placeHits.length
           ? placeHits.slice(0, 3).join(', ')
-          : '망원한강공원, 성수동 소품숍';
+          : '인식된 추천 장소 없음';
 
         var partnerName = '오늘의 대화 파트너';
         try {
@@ -5926,7 +5939,6 @@
       var rows = collectSessionTranscriptRows();
       var seen = {};
       var userQuotes = [];
-      var anyQuotes = [];
       rows.forEach(function (log) {
         if (!log) return;
         var text = String((typeof log === 'string') ? log : (log.text || log.message || '')).trim();
@@ -5940,18 +5952,12 @@
           if (seen[key]) return;
           seen[key] = true;
           if (isUser) userQuotes.push(sentence);
-          else anyQuotes.push(sentence);
         });
       });
-      return userQuotes.length ? userQuotes : anyQuotes;
+      return userQuotes;
     }
 
     function buildActiveInstaCards() {
-      var fallbackQuotes = [
-        'Small talk makes a big day ☕',
-        'I love matcha latte on weekends!',
-        'Step by step, my English grows! 🌟'
-      ];
       var userQuotes = extractUserSpokenQuotes();
       var activeCards = [];
       if (userQuotes.length) {
@@ -5961,11 +5967,6 @@
             quote: sentence.replace(/^["“”]+|["“”]+$/g, '')
           });
         });
-      }
-      var i = 0;
-      while (activeCards.length < 3 && i < fallbackQuotes.length) {
-        activeCards.push({ id: 'preset-' + (i + 1), quote: fallbackQuotes[i] });
-        i += 1;
       }
       return activeCards;
     }
@@ -6009,7 +6010,11 @@
       var container = document.getElementById('card-sentence-options');
       if (!container) return;
       var activeCards = buildActiveInstaCards();
-      if (!activeCards.length) return;
+      window.currentSelectedCard = null;
+      if (!activeCards.length) {
+        container.innerHTML = '<div style="font-size: 12px; color: #88928B; line-height: 1.5;">인식된 학습자 발화가 없어 문장 카드를 저장하지 않습니다.</div>';
+        return;
+      }
       window.activeCardPool = activeCards;
       window.currentCardIndex = 0;
       window.currentCardVariation = 0;
@@ -6086,22 +6091,12 @@
       setPartnerReportSubmitBusy(true);
       setPartnerReportSubmitStatus('대화 기록을 저장하고 포인트 지급을 확인하고 있어요.', true);
 
-      if (!window.currentSelectedCard) {
-        var rows = collectSessionTranscriptRows();
-        var firstRow = rows[0];
-        var firstSentence = firstRow
-          ? String((typeof firstRow === 'string') ? firstRow : (firstRow.text || firstRow.message || '')).trim()
-          : 'I like talking with friends';
-        if (!firstSentence) firstSentence = 'I like talking with friends';
-        window.selectCardSentence(firstSentence);
-      }
-
       var cardData = window.currentSelectedCard || {
-        sentence: 'Small talk makes a big day',
-        keyword: 'coffee',
-        illustUrl: 'https://api.iconify.design/fluent-emoji:sparkles.svg',
-        partnerComment: (document.getElementById('popup-partner-comment') || {}).value || 'Great job!',
-        stamp: (document.querySelector('input[name="popup_stamp"]:checked') || {}).value || 'coffee'
+        sentence: null,
+        keyword: null,
+        illustUrl: null,
+        partnerComment: (document.getElementById('popup-partner-comment') || {}).value || '',
+        stamp: (document.querySelector('input[name="popup_stamp"]:checked') || {}).value || null
       };
       cardData.partnerComment = (document.getElementById('popup-partner-comment') || {}).value || cardData.partnerComment || '';
       cardData.stamp = (document.querySelector('input[name="popup_stamp"]:checked') || {}).value || cardData.stamp || 'coffee';
@@ -6124,10 +6119,25 @@
 
       var rewarded = false;
       try {
+        var transcriptSave = await persistTranscript();
+        if (!transcriptSave || !transcriptSave.ok) {
+          console.error('[DayO Partner] transcript was not saved', transcriptSave && transcriptSave.error);
+          setPartnerReportSubmitStatus('대화 기록 저장에 실패했어요. 잠시 후 다시 시도해 주세요.', false);
+          setPartnerReportSubmitBusy(false);
+          return;
+        }
         if (user && typeof window.persistSessionReport === 'function') {
-          await window.persistSessionReport(cardData);
+          var reportSave = await window.persistSessionReport(cardData);
+          if (!reportSave || !reportSave.ok) {
+            console.error('[DayO Partner] report was not saved', reportSave && reportSave.error);
+            setPartnerReportSubmitStatus('파트너 검수 내용을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.', false);
+            setPartnerReportSubmitBusy(false);
+            return;
+          }
         } else {
-          try { localStorage.setItem('dayo_last_approved_card', JSON.stringify(cardData)); } catch (e) { /* ignore */ }
+          setPartnerReportSubmitStatus('로그인 정보를 확인할 수 없어 검수 내용을 저장하지 못했어요.', false);
+          setPartnerReportSubmitBusy(false);
+          return;
         }
 
         if (user && user.id && bookingId && typeof window.handleCompleteSession === 'function') {
@@ -6541,6 +6551,6 @@
   <div style="font-size: 10px; color: #A0AAB0; margin-top: 6px; text-align: center;">터치하면 클립보드에 복사돼요 📋</div>
 </div>
 
-<script src="session-lifecycle.js?v=20260918-access-gate"></script>
+<script src="session-lifecycle.js?v=20260921-session-persistence"></script>
 </body>
 </html>

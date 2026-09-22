@@ -33,6 +33,7 @@
   var sessionStartedAt = new Date().toISOString();
   var utteranceSeq = 0;
   var sttRestartTimer = 0;
+  var transcriptSavePromise = null;
 
   window.sessionTranscript = window.sessionTranscript || [];
   window.dayoSessionEnded = false;
@@ -121,7 +122,7 @@
       else if (!ts) ts = new Date().toISOString();
       return {
         id: (row && row.id) || ('t-' + i),
-        speaker: (row && row.speaker) || 'user',
+        speaker: (row && row.speaker) || 'learner',
         text: String((row && row.text) || '').trim(),
         timestamp: ts
       };
@@ -160,7 +161,7 @@
     var viewer = document.getElementById('popup-transcript-list') ||
       document.getElementById('partner-transcript-viewer');
     if (!viewer) return;
-    var speaker = String(entry.speaker || 'user').toLowerCase();
+    var speaker = String(entry.speaker || 'learner').toLowerCase();
     var isUser = speaker !== 'partner';
     var row = document.createElement('div');
     row.style.cssText = isUser
@@ -193,7 +194,7 @@
   function pushTranscript(text, speaker) {
     var cleaned = String(text || '').trim();
     if (!cleaned) return null;
-    var role = speaker || 'user';
+    var role = speaker || 'learner';
     var last = sessionTranscript[sessionTranscript.length - 1];
     if (last && last.speaker === role && last.text === cleaned) return last;
     utteranceSeq += 1;
@@ -212,11 +213,20 @@
     return entry;
   }
 
+  function localTranscriptSpeaker() {
+    var access = window.DayORoomAccess;
+    if (access && access.allowed) {
+      return access.role === 'partner' ? 'partner' : 'learner';
+    }
+    return 'learner';
+  }
+
   function saveTranscript() {
+    if (transcriptSavePromise) return transcriptSavePromise;
     var serialized = backupTranscriptLocal();
     var access = window.DayORoomAccess;
     if (!access || !access.allowed || access.adminTest) {
-      return Promise.resolve({ ok: false, local: true, transcript: serialized });
+      return Promise.resolve({ ok: false, local: true, transcript: serialized, skipped: true });
     }
     var extra = {
       roomName: roomName(),
@@ -226,8 +236,8 @@
       learnerId: access.learnerId,
       userId: access.userId
     };
-    if (document.body && document.body.getAttribute('data-dayo-role') === 'partner') {
-      extra.partnerId = extra.userId;
+    if (access.role === 'partner') {
+      extra.partnerId = access.partnerId;
     }
     var store = window.DayOProfileStore;
     var done = function (result) {
@@ -236,9 +246,13 @@
       return payload;
     };
     if (store && typeof store.saveSessionLog === 'function') {
-      return store.saveSessionLog(sessionTranscript, extra).then(done).catch(function (err) {
+      transcriptSavePromise = store.saveSessionLog(sessionTranscript, extra).then(done).catch(function (err) {
         return done({ ok: false, local: true, transcript: serialized, error: err });
+      }).then(function (result) {
+        if (!result || !result.ok) transcriptSavePromise = null;
+        return result;
       });
+      return transcriptSavePromise;
     }
     return Promise.resolve(done({ ok: false, local: true, transcript: serialized }));
   }
@@ -827,7 +841,7 @@
           var chunk = event.results[i][0] && event.results[i][0].transcript;
           var finalText = String(chunk || '').trim();
           if (finalText) {
-            pushTranscript(finalText, 'user');
+            pushTranscript(finalText, localTranscriptSpeaker());
             scheduleCopilot(finalText);
           }
         }

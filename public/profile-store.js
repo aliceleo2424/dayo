@@ -1017,7 +1017,7 @@ function serializeTranscript(rows) {
     else if (ts == null) ts = new Date().toISOString();
     return {
       id: (row && row.id) || ('t-' + i),
-      speaker: (row && row.speaker) || 'user',
+      speaker: (row && row.speaker) || 'learner',
       text: String((row && row.text) || '').trim(),
       timestamp: ts
     };
@@ -1069,23 +1069,6 @@ async function saveSessionLog(transcript, extra) {
 
   try {
     var result = await client.from('session_logs').insert(payload).select('id').single();
-    if (result.error) {
-      var withoutPartner = Object.assign({}, payload);
-      delete withoutPartner.partner_id;
-      delete withoutPartner.booking_id;
-      delete withoutPartner.session_id;
-      delete withoutPartner.learner_id;
-      result = await client.from('session_logs').insert(withoutPartner).select('id').single();
-    }
-    if (result.error) {
-      var withoutUser = Object.assign({}, payload);
-      delete withoutUser.user_id;
-      delete withoutUser.partner_id;
-      result = await client.from('session_logs').insert(withoutUser).select('id').single();
-    }
-    if (result.error) {
-      result = await client.from('transcripts').insert(payload).select('id').single();
-    }
     if (result.error) throw result.error;
     return {
       ok: true,
@@ -1095,7 +1078,7 @@ async function saveSessionLog(transcript, extra) {
       payload: payload
     };
   } catch (err) {
-    console.warn('[DayO] session_logs insert failed — localStorage kept', err);
+    console.error('[DayO] session_logs insert failed — localStorage kept', err);
     return { ok: false, local: true, transcript: serialized, payload: payload, error: err };
   }
 }
