@@ -3712,6 +3712,8 @@
       let observerGuestCall = null;
       let observerHostCall = null;
       let observerProbeTimer = 0;
+      let observerGuestPeerId = '';
+      const observerOutboundCalls = {};
       let HOST_ID = '';
       const MAX_HOST_CALL_ATTEMPTS = 12;
 
@@ -3738,8 +3740,6 @@
 
       setupVideoElement(localVideo, true);
       setupVideoElement(remoteVideo, false);
-      setupVideoElement(observerPartnerVideo, false);
-      setupVideoElement(observerUserVideo, false);
 
       function bindLocalPip() {
         if (isObserver) return;
@@ -3869,6 +3869,22 @@
               } catch (e) { /* ignore */ }
               return;
             }
+            if (msg.type === 'observer-watch-request' && isObserverPeerId(conn.peer)) {
+              if (!localStream || observerOutboundCalls[conn.peer]) return;
+              try {
+                var observerCall = peer.call(conn.peer, localStream);
+                if (!observerCall) return;
+                observerOutboundCalls[conn.peer] = observerCall;
+                var clearObserverCall = function () {
+                  if (observerOutboundCalls[conn.peer] === observerCall) {
+                    delete observerOutboundCalls[conn.peer];
+                  }
+                };
+                observerCall.on('close', clearObserverCall);
+                observerCall.on('error', clearObserverCall);
+              } catch (e) { /* observer will retry the request */ }
+              return;
+            }
             if (msg.type === 'internal-test-end') {
               var access = window.DayORoomAccess;
               var fromCurrentGuest = !!(window.__dayoGuestPeerId && conn.peer === window.__dayoGuestPeerId);
@@ -3925,15 +3941,15 @@
       function watchPeer(peerId, videoEl, slot) {
         if (destroyed || !peer || !peerId || !localStream) return null;
         try {
-          var call = peer.call(peerId, localStream);
-          if (!call) return null;
-          call.on('stream', function (incomingStream) {
-            attachObserverStream(videoEl, incomingStream, slot);
+          console.log('[DayO Observer] call attempt', slot, peerId);
+          var conn = peer.connect(peerId, { reliable: true });
+          conn.on('open', function () {
+            conn.send({ type: 'observer-watch-request' });
           });
-          call.on('error', function (err) {
-            console.warn('[DayO Observer] watch error', slot, err && err.type ? err.type : err);
+          conn.on('error', function (err) {
+            console.warn('[DayO Observer] call error', slot, err && err.type ? err.type : err);
           });
-          return call;
+          return conn;
         } catch (e) {
           console.warn('[DayO Observer] watch failed', slot, e);
           return null;
@@ -3942,11 +3958,15 @@
 
       function probeGuestPeer(guestId) {
         if (!guestId || destroyed) return;
-        if (observerGuestCall) {
+        if (observerGuestPeerId !== guestId && observerGuestCall) {
           try { observerGuestCall.close(); } catch (e) { /* ignore */ }
           observerGuestCall = null;
         }
-        observerGuestCall = watchPeer(guestId, observerUserVideo, 'user');
+        observerGuestPeerId = guestId;
+        if (!observerGuestCall) {
+          console.log('[DayO Observer] target learner peer ID', guestId);
+          watchPeer(guestId, observerUserVideo, 'learner');
+        }
       }
 
       function askHostForGuestId() {
@@ -3964,17 +3984,17 @@
       }
 
       function startObserverWatch() {
-        if (observerHostCall) {
-          try { observerHostCall.close(); } catch (e) { /* ignore */ }
-        }
-        observerHostCall = watchPeer(HOST_ID, observerPartnerVideo, 'partner');
+        console.log('[DayO Observer] target partner peer ID', HOST_ID);
+        if (!observerHostCall) watchPeer(HOST_ID, observerPartnerVideo, 'partner');
         askHostForGuestId();
         clearInterval(observerProbeTimer);
         observerProbeTimer = setInterval(function () {
           if (destroyed) return;
           askHostForGuestId();
-          if (!observerHostCall) {
-            observerHostCall = watchPeer(HOST_ID, observerPartnerVideo, 'partner');
+          if (!observerHostCall) watchPeer(HOST_ID, observerPartnerVideo, 'partner');
+          if (observerGuestPeerId && !observerGuestCall) {
+            console.log('[DayO Observer] target learner peer ID', observerGuestPeerId);
+            watchPeer(observerGuestPeerId, observerUserVideo, 'learner');
           }
         }, 4000);
       }
@@ -4009,15 +4029,46 @@
           });
 
           peer.on('open', function (id) {
-            console.log('👻 Observer Peer ID:', id);
+            console.log('[DayO Observer] peer open ID', id);
             startObserverWatch();
             document.dispatchEvent(new CustomEvent('dayo:room-ready'));
           });
 
+          peer.on('call', function (call) {
+            var slot = call.peer === HOST_ID
+              ? 'partner'
+              : (observerGuestPeerId && call.peer === observerGuestPeerId ? 'learner' : '');
+            if (!slot) {
+              call.close();
+              return;
+            }
+            var videoEl = slot === 'partner' ? observerPartnerVideo : observerUserVideo;
+            if (slot === 'partner' && observerHostCall) observerHostCall.close();
+            if (slot === 'learner' && observerGuestCall) observerGuestCall.close();
+            if (slot === 'partner') observerHostCall = call;
+            else observerGuestCall = call;
+            call.answer(localStream);
+            call.on('stream', function (incomingStream) {
+              console.log('[DayO Observer] incoming remote stream', slot,
+                incomingStream.getTracks().map(function (track) { return track.kind + ':' + track.readyState; }));
+              attachObserverStream(videoEl, incomingStream, slot === 'learner' ? 'user' : slot);
+            });
+            call.on('close', function () {
+              if (slot === 'partner' && observerHostCall === call) observerHostCall = null;
+              if (slot === 'learner' && observerGuestCall === call) observerGuestCall = null;
+            });
+            call.on('error', function (err) {
+              console.warn('[DayO Observer] call error', slot, err && err.type ? err.type : err);
+              if (slot === 'partner' && observerHostCall === call) observerHostCall = null;
+              if (slot === 'learner' && observerGuestCall === call) observerGuestCall = null;
+            });
+          });
+
           peer.on('error', function (err) {
             var type = err && err.type;
-            console.warn('Observer PeerJS Status:', type || err);
+            console.warn('[DayO Observer] peer status', type || err);
             if (type === 'peer-unavailable' || type === 'network') {
+              if (type === 'peer-unavailable') console.warn('[DayO Observer] peer-unavailable');
               setTimeout(startObserverWatch, 2000);
             }
             if (type === 'disconnected' && peer && typeof peer.reconnect === 'function') {
@@ -4136,6 +4187,10 @@
         try { if (activeCall) activeCall.close(); } catch (e) { /* ignore */ }
         try { if (observerHostCall) observerHostCall.close(); } catch (e) { /* ignore */ }
         try { if (observerGuestCall) observerGuestCall.close(); } catch (e) { /* ignore */ }
+        Object.keys(observerOutboundCalls).forEach(function (id) {
+          try { observerOutboundCalls[id].close(); } catch (e) { /* ignore */ }
+          delete observerOutboundCalls[id];
+        });
         activeCall = null;
         observerHostCall = null;
         observerGuestCall = null;
@@ -4975,15 +5030,16 @@
 
     /* Word / Sentence Help — on-demand popup from sessionTranscript */
     const defaultWordHints = [
-      { word: 'actually', meaning: '사실은, 실제로는' },
-      { word: 'comfortable', meaning: '편안한, 아늑한' },
-      { word: 'recommend', meaning: '추천하다' }
+      { word: 'beautiful', meaning: '아름다운' },
+      { word: 'recommend', meaning: '추천하다' },
+      { word: 'souvenir', meaning: '기념품' }
     ];
     const defaultSentenceHints = [
-      { text: 'Could you tell me more about that?', meaning: '그거에 대해 좀 더 말씀해 주실래요?' },
-      { text: 'I totally agree with you.', meaning: '완전 공감해요!' },
-      { text: 'How do you usually spend your weekend?', meaning: '주말에는 보통 뭐 하세요?' }
+      { text: 'I want to visit there.', meaning: '그곳에 가보고 싶어요.' },
+      { text: 'The food was delicious.', meaning: '음식이 맛있었어요.' },
+      { text: 'What did you like the most?', meaning: '무엇이 가장 좋았어요?' }
     ];
+    var wordHelpRequestInFlight = false;
 
     function escapeHelpHtml(str) {
       return String(str == null ? '' : str)
@@ -5002,13 +5058,20 @@
         try { rows = window.DayOLive.getTranscript() || []; } catch (e) { rows = []; }
       }
       if (!rows.length && Array.isArray(window.DayOLastTranscript)) rows = window.DayOLastTranscript;
-      return rows.map(function (row) {
+      return rows.slice(-6).map(function (row) {
         return String((row && row.text) || row || '').trim();
-      }).filter(Boolean).join(' ').toLowerCase();
+      }).filter(Boolean).join(' ').trim().slice(-1200);
     }
 
     function buildWordHints() {
-      var context = getHelpTranscriptText();
+      var context = getHelpTranscriptText().toLowerCase();
+      if (/travel|trip|vacation|visit|visited|went|hotel|airport|beach|museum|restaurant|food|japan|korea|busan|seoul|여행|일본|한국|호텔|공항|해변|박물관|음식/.test(context)) {
+        return [
+          { word: 'beautiful', meaning: '아름다운' },
+          { word: 'local food', meaning: '현지 음식' },
+          { word: 'recommend', meaning: '추천하다' }
+        ];
+      }
       if (/cafe|coffee|latte|americano|커피|카페/.test(context)) {
         return [
           { word: 'atmosphere', meaning: '카페 분위기' },
@@ -5027,7 +5090,14 @@
     }
 
     function buildSentenceHints() {
-      var context = getHelpTranscriptText();
+      var context = getHelpTranscriptText().toLowerCase();
+      if (/travel|trip|vacation|visit|visited|went|hotel|airport|beach|museum|restaurant|food|japan|korea|busan|seoul|여행|일본|한국|호텔|공항|해변|박물관|음식/.test(context)) {
+        return [
+          { text: 'I went there last year.', meaning: '작년에 그곳에 갔어요.' },
+          { text: 'The food was delicious.', meaning: '음식이 맛있었어요.' },
+          { text: 'What did you like the most?', meaning: '무엇이 가장 좋았어요?' }
+        ];
+      }
       if (/cafe|coffee|latte|americano|커피|카페/.test(context)) {
         return [
           { text: 'Can I get a hot Americano, please?', meaning: '따뜻한 아메리카노 주세요.' },
@@ -5086,23 +5156,71 @@
       }).join('');
     }
 
+    function renderWordHelpResults(words, phrases) {
+      var safeWords = (words || []).slice(0, 3);
+      var safePhrases = (phrases || []).slice(0, 3);
+      fillSheetCards('wordCards', safeWords, false);
+      var content = document.getElementById('help-modal-content');
+      if (!content) return;
+      content.innerHTML =
+        '<div style="font-size:10.5px;font-weight:800;color:#4F7460;margin-top:1px;">단어</div>' +
+        safeWords.map(function (item) {
+          return helpChipMarkup(
+            item.word,
+            '<strong style="color:#3E4A42;font-size:12.5px;">' + escapeHelpHtml(item.word) + '</strong>',
+            '<span style="color:#6E7A72;font-size:11.5px;margin-left:8px;">' + escapeHelpHtml(item.meaning) + '</span>'
+          );
+        }).join('') +
+        '<div style="font-size:10.5px;font-weight:800;color:#4F7460;margin-top:4px;">바로 말하기</div>' +
+        safePhrases.map(function (item) {
+          return helpChipMarkup(
+            item.text,
+            '<strong style="color:#3E4A42;font-size:12px;line-height:1.3;">' + escapeHelpHtml(item.text) + '</strong>',
+            '<span style="color:#6E7A72;font-size:11px;margin-left:8px;">' + escapeHelpHtml(item.meaning) + '</span>'
+          );
+        }).join('');
+    }
+
     window.openWordHelp = function () {
       var modal = document.getElementById('dayo-help-hint-modal');
       var title = document.getElementById('help-modal-title');
-      var content = document.getElementById('help-modal-content');
-      var hints = buildWordHints();
-      fillSheetCards('wordCards', hints, false);
-      if (title) title.innerText = '💡 추천 단어 힌트 (막힐 때 써보세요)';
-      if (content) {
-        content.innerHTML = hints.map(function (item) {
-          return helpChipMarkup(
-            item.word,
-            '<strong style="color: #3E4A42; font-size: 12.5px;">' + escapeHelpHtml(item.word) + '</strong>',
-            '<span style="color: #6E7A72; font-size: 11.5px; margin-left: 8px;">' + escapeHelpHtml(item.meaning) + '</span>'
-          );
-        }).join('');
-      }
+      var fallbackWords = buildWordHints();
+      var fallbackPhrases = buildSentenceHints();
+      renderWordHelpResults(fallbackWords, fallbackPhrases);
+      if (title) title.innerText = '💡 단어도움';
       if (modal) modal.style.display = 'block';
+      if (wordHelpRequestInFlight) return;
+
+      var context = getHelpTranscriptText();
+      if (!context) return;
+      wordHelpRequestInFlight = true;
+      if (title) title.innerText = '도움말을 찾고 있어요…';
+      var controller = new AbortController();
+      var timeout = setTimeout(function () { controller.abort(); }, 4000);
+      fetch('/api/word-help', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
+        body: JSON.stringify({ context: context })
+      }).then(function (response) {
+        if (!response.ok) throw new Error('word-help-unavailable');
+        return response.json();
+      }).then(function (result) {
+        var words = Array.isArray(result && result.words) ? result.words.slice(0, 3).map(function (item) {
+          return { word: String(item && item.text || '').trim(), meaning: String(item && item.ko || '').trim() };
+        }).filter(function (item) { return item.word && item.meaning; }) : [];
+        var phrases = Array.isArray(result && result.phrases) ? result.phrases.slice(0, 3).map(function (item) {
+          return { text: String(item && item.text || '').trim(), meaning: String(item && item.ko || '').trim() };
+        }).filter(function (item) { return item.text && item.meaning; }) : [];
+        if (!words.length || !phrases.length) throw new Error('empty-word-help');
+        renderWordHelpResults(words, phrases);
+      }).catch(function () {
+        renderWordHelpResults(fallbackWords, fallbackPhrases);
+      }).finally(function () {
+        clearTimeout(timeout);
+        wordHelpRequestInFlight = false;
+        if (title) title.innerText = '💡 단어도움';
+      });
     };
 
     window.openSentenceHelp = function () {
@@ -5484,11 +5602,7 @@
           })
           .map(function (t) { return t.text.trim(); });
 
-        const baseSentences = userSentences.length > 0 ? userSentences : [
-          'I like talking with my partner',
-          'English conversation is very fun',
-          'Today was a great session'
-        ];
+        const baseSentences = userSentences;
 
         const quizList = [];
         const dummyDistractors = ['coffee', 'yesterday', 'happy', 'together', 'important', 'delicious', 'travel', 'morning'];
@@ -6650,12 +6764,12 @@
     <button id="safety-report-submit" type="button" onclick="submitSafetyReport()" style="width:100%;margin-top:16px;padding:13px;border:0;border-radius:12px;background:#E11D48;color:#FFFFFF;font-size:14px;font-weight:800;cursor:pointer;">신고 전송하기</button>
   </div>
 </div>
-<div id="dayo-help-hint-modal" style="display: none; position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); z-index: 99999; background: #FFFFFF; border: 1.5px solid #F6D365; border-radius: 16px; padding: 14px 18px; box-shadow: 0 12px 30px rgba(0,0,0,0.18); width: 90%; max-width: 440px; box-sizing: border-box;">
+<div id="dayo-help-hint-modal" style="display: none; position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); z-index: 99999; background: #FFFFFF; border: 1.5px solid #F6D365; border-radius: 16px; padding: 14px 18px; box-shadow: 0 12px 30px rgba(0,0,0,0.18); width: 90%; max-width: 440px; max-height: 35vh; overflow: hidden; box-sizing: border-box;">
   <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
     <div id="help-modal-title" style="font-size: 12px; font-weight: 800; color: #4F7460;">💡 추천 단어 힌트</div>
     <button type="button" onclick="closeHelpModal()" style="background: none; border: none; font-size: 16px; color: #88928B; cursor: pointer; padding: 0 4px;">&times;</button>
   </div>
-  <div id="help-modal-content" style="display: flex; flex-direction: column; gap: 6px;"></div>
+  <div id="help-modal-content" style="display: flex; flex-direction: column; gap: 6px; max-height: calc(35vh - 70px); overflow-y: auto; overscroll-behavior: contain; padding-right: 2px;"></div>
   <div style="font-size: 10px; color: #A0AAB0; margin-top: 6px; text-align: center;">터치하면 클립보드에 복사돼요 📋</div>
 </div>
 

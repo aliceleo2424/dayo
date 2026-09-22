@@ -2,12 +2,6 @@
 (function () {
   'use strict';
 
-  var DEFAULT_SENTENCES = [
-    { en: "I've been into pottery lately", kr: '난 요즘 도예에 푹 빠져 있어' },
-    { en: 'Finding hidden spots is fun', kr: '숨은 동네 명소를 찾는 건 늘 즐거워' },
-    { en: 'A cup of coffee makes my day', kr: '커피 한 잔이 하루를 기분 좋게 만들어' }
-  ];
-
   var gameSentenceQueue = [];
   var currentRoundIndex = 0;
   var userPickedWords = [];
@@ -60,10 +54,6 @@
       if (/opic|daily|casual|일상/.test(joined)) return 'daily';
     } catch (e) { /* ignore */ }
     return 'daily';
-  }
-
-  function fallbackForTopic() {
-    return DEFAULT_SENTENCES[0];
   }
 
   function looksEnglish(text) {
@@ -139,13 +129,6 @@
   }
 
   function meaningFor(en) {
-    var target = normalizeSentence(en).toLowerCase();
-    var i;
-    for (i = 0; i < DEFAULT_SENTENCES.length; i += 1) {
-      if (normalizeSentence(DEFAULT_SENTENCES[i].en).toLowerCase() === target) {
-        return DEFAULT_SENTENCES[i].kr;
-      }
-    }
     return '오늘 대화에서 나온 표현이에요';
   }
 
@@ -256,7 +239,11 @@
   }
 
   function loadRound(index) {
-    var data = gameSentenceQueue[index] || DEFAULT_SENTENCES[0];
+    var data = gameSentenceQueue[index];
+    if (!data) {
+      showTalkRecord();
+      return;
+    }
     var cleanEn = normalizeSentence(data.en);
     currentCorrectWords = cleanEn.split(' ').filter(Boolean);
     userPickedWords = [];
@@ -285,7 +272,6 @@
       out.push({ en: en, kr: kr });
     }
     (sentenceList || []).forEach(add);
-    DEFAULT_SENTENCES.forEach(add);
     return out.slice(0, 3);
   }
 
@@ -293,6 +279,10 @@
     if (isPartner()) return;
     window.__dayoMemoryGameDone = false;
     gameSentenceQueue = normalizeQueue(sentenceList);
+    if (!gameSentenceQueue.length) {
+      showTalkRecord();
+      return;
+    }
     currentRoundIndex = 0;
     loadRound(currentRoundIndex);
     showMemoryModal();
@@ -302,7 +292,7 @@
     if (extractedSentence) {
       window.startMultiMemoryGame([
         { en: extractedSentence, kr: meaningKr || meaningFor(extractedSentence) }
-      ].concat(DEFAULT_SENTENCES).slice(0, 3));
+      ]);
       return;
     }
     window.startMultiMemoryGame(null);
