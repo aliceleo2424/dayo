@@ -3734,6 +3734,7 @@
           videoEl.setAttribute('muted', '');
         } else {
           videoEl.muted = false;
+          videoEl.volume = 1;
           videoEl.removeAttribute('muted');
         }
       }
@@ -3774,13 +3775,15 @@
               remoteVideo.muted = true;
               remoteVideo.play().catch(function () { /* ignore */ });
               var unlockPlay = function () {
-                remoteVideo.muted = false;
+                setupVideoElement(remoteVideo, false);
                 remoteVideo.play().catch(function () { /* ignore */ });
-                document.removeEventListener('click', unlockPlay);
-                document.removeEventListener('touchstart', unlockPlay);
+                document.removeEventListener('pointerdown', unlockPlay, true);
+                document.removeEventListener('touchstart', unlockPlay, true);
+                document.removeEventListener('click', unlockPlay, true);
               };
-              document.addEventListener('click', unlockPlay);
-              document.addEventListener('touchstart', unlockPlay, { passive: true });
+              document.addEventListener('pointerdown', unlockPlay, { capture: true, once: true });
+              document.addEventListener('touchstart', unlockPlay, { capture: true, once: true, passive: true });
+              document.addEventListener('click', unlockPlay, { capture: true, once: true });
             });
           }
         };
