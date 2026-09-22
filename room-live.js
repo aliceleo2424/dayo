@@ -225,7 +225,7 @@
     if (transcriptSavePromise) return transcriptSavePromise;
     var serialized = backupTranscriptLocal();
     var access = window.DayORoomAccess;
-    if (!access || !access.allowed || access.adminTest) {
+    if (!access || !access.allowed || access.adminTest || access.observer) {
       return Promise.resolve({ ok: false, local: true, transcript: serialized, skipped: true });
     }
     var extra = {

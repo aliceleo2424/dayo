@@ -17,6 +17,8 @@
   <script>
     (function () {
       var uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      var INTERNAL_TEST_LEARNER_ID = '131a43d2-8a90-41bb-a17a-2217b1ef283f';
+      var INTERNAL_TEST_PARTNER_ID = '1bc0eab5-9399-4da8-a90c-145ab0c4409d';
       var seoulClock = new Intl.DateTimeFormat('en-US', {
         timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit',
         hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
@@ -86,19 +88,31 @@
           if (!profile.data && !profile.error) profile = await db.from('profiles').select('role').eq('user_id', user.id).maybeSingle();
           if (profile.error) throw profile.error;
 
-          if (profile.data && profile.data.role === 'admin') {
+          var params = new URLSearchParams(location.search);
+          var requestedRole = String(params.get('role') || '').toLowerCase();
+          var observerRequested = requestedRole === 'observer';
+          var isAdmin = !!(profile.data && profile.data.role === 'admin');
+
+          if (observerRequested && !isAdmin) {
+            return showAccess({ allowed: false, title: '옵저버로 입장할 수 없어요.', message: '관리자 계정으로 로그인한 뒤 다시 시도해 주세요.' });
+          }
+
+          if (isAdmin && !observerRequested) {
             var requestedPreviewRole = new URLSearchParams(location.search).get('role') === 'partner' ? 'partner' : 'user';
             return showAccess({ allowed: true, adminTest: true, role: 'admin', previewRole: requestedPreviewRole, userId: user.id,
               bookingId: null, roomId: 'dayo_admin_test_' + user.id.replace(/-/g, '').slice(0, 20) });
           }
 
-          var params = new URLSearchParams(location.search);
           var bookingId = params.get('bookingId') || params.get('booking_id') || storedBookingId();
           if (!uuid.test(bookingId || '')) return showAccess({ allowed: false, title: '예약된 대화가 없어요.', message: '마이페이지에서 예약을 확인한 뒤 입장해 주세요.' });
-          var result = await db.from('bookings').select('id, learner_id, partner_user_id, status, scheduled_at, slot_id').eq('id', bookingId).maybeSingle();
+          var result = await db.from('bookings').select('id, learner_id, partner_id, partner_user_id, status, scheduled_at, slot_id').eq('id', bookingId).maybeSingle();
           if (result.error) throw result.error;
           var booking = result.data;
-          if (!booking || (booking.learner_id !== user.id && booking.partner_user_id !== user.id)) {
+          var internalTest = !!(booking && booking.learner_id === INTERNAL_TEST_LEARNER_ID &&
+            (booking.partner_user_id === INTERNAL_TEST_PARTNER_ID || booking.partner_id === INTERNAL_TEST_PARTNER_ID));
+          var isParticipant = !!(booking && (booking.learner_id === user.id || booking.partner_user_id === user.id ||
+            (internalTest && booking.partner_id === user.id)));
+          if (!booking || (!observerRequested && !isParticipant)) {
             return showAccess({ allowed: false, title: '이 대화에 참여할 수 없어요.', message: '본인이 예약하거나 배정받은 대화인지 확인해 주세요.' });
           }
           if (booking.status !== 'confirmed') {
@@ -119,15 +133,20 @@
             return showAccess({ allowed: false, title: '예약 시간을 확인할 수 없어요.', message: '마이페이지에서 예약 정보를 확인해 주세요.' });
           }
           var now = Date.now();
-          if (now < startAt - 10 * 60 * 1000) {
+          if (!internalTest && now < startAt - 10 * 60 * 1000) {
             return showAccess({ allowed: false, title: '아직 입장 시간이 아니에요.',
               message: '예약 시작 10분 전부터 입장할 수 있어요. 예약 시작: ' + seoulLabel.format(new Date(startAt)) });
           }
-          if (now >= startAt + 30 * 60 * 1000) {
+          if (!internalTest && now >= startAt + 30 * 60 * 1000) {
             return showAccess({ allowed: false, title: '이 예약의 입장 가능 시간이 지났어요.', message: '마이페이지에서 다음 예약을 확인해 주세요.' });
           }
-          return showAccess({ allowed: true, adminTest: false, role: booking.learner_id === user.id ? 'user' : 'partner',
-            userId: user.id, bookingId: booking.id, learnerId: booking.learner_id, partnerId: booking.partner_user_id,
+          if (observerRequested) {
+            return showAccess({ allowed: true, adminTest: false, observer: true, internalTest: internalTest, role: 'observer', userId: user.id,
+              bookingId: null, learnerId: null, partnerId: null, scheduledAt: new Date(startAt).toISOString(),
+              roomId: booking.id.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40) });
+          }
+          return showAccess({ allowed: true, adminTest: false, observer: false, internalTest: internalTest, role: booking.learner_id === user.id ? 'user' : 'partner',
+            userId: user.id, bookingId: booking.id, learnerId: booking.learner_id, partnerId: booking.partner_user_id || booking.partner_id,
             scheduledAt: new Date(startAt).toISOString(),
             roomId: booking.id.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40) });
         } catch (e) {
@@ -3258,7 +3277,8 @@
   <script>
     (function applyPartnerTheme() {
       window.isObserverRoomMode = function () {
-        return false;
+        var access = window.DayORoomAccess;
+        return !!(access && access.allowed && access.observer === true && access.role === 'observer');
       };
 
       window.getDayORoomUiRole = function () {
@@ -3393,7 +3413,8 @@
 
       window.dayoApplyRoomRole = function () {
         if (!window.DayORoomAccess || !window.DayORoomAccess.allowed) return;
-        if (window.isPartnerRoomMode()) enterPartner();
+        if (window.isObserverRoomMode()) enterObserver();
+        else if (window.isPartnerRoomMode()) enterPartner();
         else enterLearner();
       };
       window.DayORoomAccessReady.then(window.dayoApplyRoomRole);
@@ -3666,7 +3687,7 @@
      * Observer = receive-only ghost (empty outbound stream); never replaces activeCall */
     (function initDayOPeerVideo() {
       let currentRole = 'user';
-      const isObserver = false;
+      let isObserver = false;
       let currentRoomId = '';
 
       const localVideo = document.getElementById('local-video')
@@ -3822,15 +3843,67 @@
         if (!peer) return;
         peer.on('connection', function (conn) {
           conn.on('data', function (msg) {
-            if (!msg || msg.type !== 'observer-hello') return;
-            try {
-              conn.send({
-                type: 'session-peers',
-                hostId: HOST_ID,
-                guestId: window.__dayoGuestPeerId || (currentRole !== 'partner' && currentRole !== 'observer' ? peer.id : null)
-              });
-            } catch (e) { /* ignore */ }
+            if (!msg) return;
+            if (msg.type === 'observer-hello') {
+              try {
+                conn.send({
+                  type: 'session-peers',
+                  hostId: HOST_ID,
+                  guestId: window.__dayoGuestPeerId || (currentRole !== 'partner' && currentRole !== 'observer' ? peer.id : null)
+                });
+              } catch (e) { /* ignore */ }
+              return;
+            }
+            if (msg.type === 'internal-test-end') {
+              var access = window.DayORoomAccess;
+              var fromCurrentGuest = !!(window.__dayoGuestPeerId && conn.peer === window.__dayoGuestPeerId);
+              if (currentRole === 'partner' && access && access.internalTest === true && fromCurrentGuest &&
+                  window.DayOSessionTimer && typeof window.DayOSessionTimer.skipToEnd === 'function') {
+                try { conn.send({ type: 'internal-test-end-ack' }); } catch (e) { /* continue local end */ }
+                window.DayOSessionTimer.skipToEnd();
+              }
+            }
           });
+        });
+      }
+
+      function notifyPartnerOfInternalTestEnd() {
+        return new Promise(function (resolve) {
+          var access = window.DayORoomAccess;
+          if (!peer || (currentRole !== 'user' && currentRole !== 'learner') || !access || access.internalTest !== true ||
+              access.userId !== '131a43d2-8a90-41bb-a17a-2217b1ef283f') {
+            resolve(false);
+            return;
+          }
+          var settled = false;
+          var finish = function (sent) {
+            if (settled) return;
+            settled = true;
+            resolve(sent);
+          };
+          try {
+            var conn = peer.connect(HOST_ID, { reliable: true });
+            var timer = setTimeout(function () { finish(false); }, 1500);
+            conn.on('open', function () {
+              try {
+                conn.send({ type: 'internal-test-end' });
+              } catch (e) {
+                clearTimeout(timer);
+                finish(false);
+              }
+            });
+            conn.on('data', function (msg) {
+              if (!msg || msg.type !== 'internal-test-end-ack') return;
+              clearTimeout(timer);
+              finish(true);
+            });
+            conn.on('error', function () {
+              clearTimeout(timer);
+              finish(false);
+            });
+          } catch (e) {
+            finish(false);
+          }
         });
       }
 
@@ -3950,7 +4023,8 @@
         if (destroyed) return;
         const access = await window.DayORoomAccessReady;
         if (!access.allowed || destroyed) return;
-        currentRole = access.adminTest ? access.previewRole : access.role;
+        isObserver = !!access.observer;
+        currentRole = isObserver ? 'observer' : (access.adminTest ? access.previewRole : access.role);
         currentRoomId = access.roomId;
         HOST_ID = currentRoomId + '_host';
         if (isObserver) {
@@ -4063,7 +4137,8 @@
         destroy: destroy,
         getLocalStream: function () { return localStream; },
         getPeerId: function () { return peer && peer.id; },
-        isObserver: function () { return isObserver; }
+        isObserver: function () { return isObserver; },
+        notifyPartnerOfInternalTestEnd: notifyPartnerOfInternalTestEnd
       };
 
       if (document.readyState === 'loading') {
@@ -4229,7 +4304,7 @@
 
       window.DayORoomAccessReady.then(function (access) {
         if (!access.allowed) return;
-        if (access.adminTest) {
+        if (access.adminTest || access.internalTest) {
           sessionStartAt = Date.now();
         } else {
           sessionStartAt = Date.parse(access.scheduledAt || '');
@@ -6081,6 +6156,7 @@
     }
 
     window.executePartnerPayoutAndExit = async function () {
+      if (window.isObserverRoomMode && window.isObserverRoomMode()) return;
       if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
         setPartnerReportSubmitBusy(true);
         setPartnerReportSubmitStatus('테스트 미리보기입니다. 실제 포인트는 지급되지 않아요.', true);
@@ -6239,10 +6315,20 @@
       endSessionBtn.onclick = window.handleHeaderExitClick;
     }
 
-    window.handleDevSkipClick = function (e) {
+    window.handleDevSkipClick = async function (e) {
       if (e) { e.preventDefault(); e.stopPropagation(); }
       if (!window.dayoCanUseRoomTestControls || !window.dayoCanUseRoomTestControls()) {
         return;
+      }
+      var button = document.getElementById('dev-test-skip-btn');
+      if (window.__dayoInternalTestEnding || (button && button.disabled)) return;
+      window.__dayoInternalTestEnding = true;
+      if (button) {
+        button.disabled = true;
+        button.textContent = '종료 처리 중…';
+      }
+      if (window.DayOPeerVideo && typeof window.DayOPeerVideo.notifyPartnerOfInternalTestEnd === 'function') {
+        await window.DayOPeerVideo.notifyPartnerOfInternalTestEnd();
       }
       if (window.DayOSessionTimer && typeof window.DayOSessionTimer.skipToEnd === 'function') {
         window.DayOSessionTimer.skipToEnd();
@@ -6251,12 +6337,16 @@
 
     window.dayoCanUseRoomTestControls = function () {
       var access = window.DayORoomAccess;
-      return !!(access && access.allowed && access.adminTest === true);
+      return !!(access && access.allowed && access.internalTest === true && access.observer !== true &&
+        access.role === 'user' && access.userId === '131a43d2-8a90-41bb-a17a-2217b1ef283f');
     };
 
     function syncDevTestSkipButton() {
       var button = document.getElementById('dev-test-skip-btn');
       if (button) button.hidden = !window.dayoCanUseRoomTestControls();
+      var badge = document.getElementById('internal-test-mode-badge');
+      var access = window.DayORoomAccess;
+      if (badge) badge.hidden = !(access && access.allowed && access.internalTest === true);
     }
 
     function prepareDevTestSkipButton() {
@@ -6408,8 +6498,11 @@
   }, 2000);
 })();
   </script>
+  <div id="internal-test-mode-badge" hidden style="position: fixed; top: 12px; left: 12px; z-index: 999999; background: rgba(124,58,237,0.88); color: #FFF; font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 999px; pointer-events: none;">
+    내부 테스트 모드
+  </div>
   <button type="button" id="dev-test-skip-btn" hidden onclick="handleDevSkipClick(event)" style="position: fixed; top: 58px; left: 12px; z-index: 999999; background: rgba(0,0,0,0.65); color: #FFF; font-size: 10.5px; padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.3); opacity: 0.8; cursor: pointer;">
-    [테스트 종료]
+    테스트 종료 → 퀴즈/리포트
   </button>
 
   <div id="partner-report-popup" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); z-index: 99999999; justify-content: center; align-items: center; padding: 20px;">

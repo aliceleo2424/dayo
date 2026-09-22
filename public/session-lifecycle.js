@@ -23,8 +23,12 @@
 
   function context() {
     var access = window.DayORoomAccess;
-    if (!access || !access.allowed || access.adminTest) return { bookingId: null, partnerId: null, learnerId: null };
+    if (!access || !access.allowed || access.adminTest || access.observer) return { bookingId: null, partnerId: null, learnerId: null };
     return { bookingId: uuidOrNull(access.bookingId), partnerId: uuidOrNull(access.partnerId), learnerId: uuidOrNull(access.learnerId) };
+  }
+
+  function isObserver() {
+    return !!(window.isObserverRoomMode && window.isObserverRoomMode());
   }
 
   async function authUser() {
@@ -111,6 +115,7 @@
   }
 
   function showSafetyModal() {
+    if (isObserver()) return;
     if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
       toast('테스트룸에서는 안전 신고를 사용할 수 없어요.');
       return;
@@ -157,6 +162,7 @@
   }
 
   async function submitSafetyReport() {
+    if (isObserver()) return;
     if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
       safetyStatus('테스트룸에서는 안전 신고를 사용할 수 없어요.');
       return;
@@ -240,6 +246,7 @@
   }
 
   async function persistReviewReport() {
+    if (isObserver()) return false;
     if (window.__dayoReviewReportSaved) return true;
     var db = client();
     var user = await authUser();
@@ -305,6 +312,7 @@
   }
 
   async function personalExit() {
+    if (isObserver()) return;
     if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
       stopMedia();
       window.location.href = 'index.html';
@@ -336,6 +344,7 @@
   }
 
   async function techIssueExit() {
+    if (isObserver()) return;
     if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
       toast('테스트룸에서는 예약 관련 종료를 사용할 수 없어요.');
       return;
@@ -407,6 +416,7 @@
   });
 
   window.handleUserQuizComplete = async function () {
+    if (isObserver()) return;
     if (window._dayoUserQuizCompleteNavigating) return;
     window._dayoUserQuizCompleteNavigating = true;
     clearInterval(quizTimer);
