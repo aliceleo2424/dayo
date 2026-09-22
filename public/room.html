@@ -105,7 +105,7 @@
 
           var bookingId = params.get('bookingId') || params.get('booking_id') || storedBookingId();
           if (!uuid.test(bookingId || '')) return showAccess({ allowed: false, title: '예약된 대화가 없어요.', message: '마이페이지에서 예약을 확인한 뒤 입장해 주세요.' });
-          var result = await db.from('bookings').select('id, learner_id, partner_id, partner_user_id, status, scheduled_at, slot_id').eq('id', bookingId).maybeSingle();
+          var result = await db.from('bookings').select('id, learner_id, partner_id, partner_user_id, partner_name, status, scheduled_at, slot_id').eq('id', bookingId).maybeSingle();
           if (result.error) throw result.error;
           var booking = result.data;
           var internalTest = !!(booking && booking.learner_id === INTERNAL_TEST_LEARNER_ID &&
@@ -142,12 +142,12 @@
           }
           if (observerRequested) {
             return showAccess({ allowed: true, adminTest: false, observer: true, internalTest: internalTest, role: 'observer', userId: user.id,
-              bookingId: null, learnerId: null, partnerId: null, scheduledAt: new Date(startAt).toISOString(),
+              bookingId: null, learnerId: null, partnerId: null, partnerName: booking.partner_name || '', scheduledAt: new Date(startAt).toISOString(),
               roomId: booking.id.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40) });
           }
           return showAccess({ allowed: true, adminTest: false, observer: false, internalTest: internalTest, role: booking.learner_id === user.id ? 'user' : 'partner',
             userId: user.id, bookingId: booking.id, learnerId: booking.learner_id, partnerId: booking.partner_user_id || booking.partner_id,
-            scheduledAt: new Date(startAt).toISOString(),
+            partnerName: booking.partner_name || '', scheduledAt: new Date(startAt).toISOString(),
             roomId: booking.id.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40) });
         } catch (e) {
           console.warn('[DayO Room] access check failed', e);
@@ -405,21 +405,11 @@
       display: none !important;
     }
 
-    /* Ghost observer (OBS) — isolated monitoring view; never affects user/partner tiles */
+    /* Ghost observer (OBS) — learner room composition, read-only controls */
     body.theme-observer {
-      background: linear-gradient(180deg, #111827 0%, #1f2937 100%) !important;
+      background: linear-gradient(180deg, #FFF9F2 0%, #FFF0ED 100%) !important;
     }
-    body.theme-observer .self-pip,
-    body.theme-observer #wordHelpBtn,
-    body.theme-observer #btn-talk-cards,
-    body.theme-observer #micBtn,
-    body.theme-observer #camBtn,
-    body.theme-observer #chatToggle,
-    body.theme-observer .ctrl-divider,
-    body.theme-observer #copilotBar,
-    body.theme-observer #chatPanel,
-    body.theme-observer #talk-card-panel,
-    body.theme-observer #sideDrawer,
+    body.theme-observer .observer-stage,
     body.theme-observer #partner-control-bar,
     body.theme-observer #wordSheetOverlay,
     body.theme-observer #sentenceSheetOverlay,
@@ -429,24 +419,17 @@
     body.theme-observer #partner-report-popup,
     body.theme-observer #ratingModal,
     body.theme-observer #exitConfirmOverlay,
-    body.theme-observer #dailyHost,
-    body.theme-observer .tutor-video,
-    body.theme-observer .bottom-bar {
+    body.theme-observer #internal-test-mode-badge,
+    body.theme-observer #dev-test-skip-btn {
       display: none !important;
     }
-    body.theme-observer .observer-stage {
-      display: grid !important;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      width: 100%;
-      height: 100%;
-      min-height: 0;
-      padding: 10px;
-      box-sizing: border-box;
-    }
-    body.theme-observer .video-stage {
-      background: #0f172a;
-      border-color: #334155;
+    body.theme-observer button,
+    body.theme-observer input,
+    body.theme-observer textarea,
+    body.theme-observer select,
+    body.theme-observer .self-pip,
+    body.theme-observer .tutor-video {
+      pointer-events: none !important;
     }
     .observer-stage {
       display: none;
@@ -477,12 +460,6 @@
       font-size: 12px;
       font-weight: 800;
     }
-    @media (max-width: 800px) {
-      body.theme-observer .observer-stage {
-        grid-template-columns: 1fr;
-      }
-    }
-
     #partner-control-bar {
       display: flex;
       gap: 10px;
@@ -3308,6 +3285,14 @@
         }
       }
 
+      function applyLearnerPartnerName() {
+        var access = window.DayORoomAccess;
+        var partnerName = String((access && access.partnerName) || '').trim() || 'Conversation Partner';
+        document.querySelectorAll('.partner-name, #center-target-name, #header-partner-name').forEach(function (el) {
+          el.innerText = partnerName;
+        });
+      }
+
       window.updateRoomRoleText = function updateRoomRoleText() {
         var isPartner = typeof window.isPartnerRoomMode === 'function' && window.isPartnerRoomMode();
 
@@ -3332,13 +3317,13 @@
           partnerNameNodes.forEach(function (el) {
             if (isPartnerPreview) {
               el.innerText = window.DayOI18n.t('room.partner.previewName');
-            } else if (el.innerText.includes('Camille') || el.innerText.includes('학습자')) {
+            } else if (el.innerText.includes('Conversation Partner') || el.innerText.includes('Camille') || el.innerText.includes('학습자')) {
               el.innerText = window.DayOI18n.t('room.partner.userName');
             }
           });
         } else if (partnerNameEl) {
           if (isPartnerPreview) partnerNameEl.innerText = window.DayOI18n.t('room.partner.previewName');
-          else if (partnerNameEl.innerText.includes('Camille') || partnerNameEl.innerText.includes('학습자')) partnerNameEl.innerText = window.DayOI18n.t('room.partner.userName');
+          else if (partnerNameEl.innerText.includes('Conversation Partner') || partnerNameEl.innerText.includes('Camille') || partnerNameEl.innerText.includes('학습자')) partnerNameEl.innerText = window.DayOI18n.t('room.partner.userName');
         }
 
         var headerPartnerSub = document.querySelector('.header-partner-sub') || document.querySelector('.partner-badge-sub');
@@ -3393,15 +3378,27 @@
         document.body.removeAttribute('data-mode');
         document.body.setAttribute('data-dayo-role', 'learner');
         try { localStorage.setItem('dayo_current_mode', 'LEARNER'); } catch (e) {}
+        applyLearnerPartnerName();
       }
       function enterObserver() {
-        document.body.classList.add('is-room', 'theme-observer');
-        document.body.classList.remove('theme-partner', 'theme-learner');
-        document.body.style.background = 'linear-gradient(180deg, #111827 0%, #1f2937 100%)';
+        document.body.classList.add('is-room', 'theme-learner', 'theme-observer');
+        document.body.classList.remove('theme-partner');
+        document.body.style.background = 'linear-gradient(180deg, #FFF9F2 0%, #FFF0ED 100%)';
         document.body.setAttribute('data-mode', 'observer');
         document.body.setAttribute('data-dayo-role', 'observer');
+        applyLearnerPartnerName();
         var stage = document.getElementById('observerStage');
-        if (stage) stage.hidden = false;
+        if (stage) stage.hidden = true;
+        document.querySelectorAll('button, input, textarea, select').forEach(function (control) {
+          control.disabled = true;
+          control.setAttribute('aria-disabled', 'true');
+        });
+        var selfPip = document.getElementById('selfPip');
+        if (selfPip) {
+          selfPip.removeAttribute('role');
+          selfPip.removeAttribute('tabindex');
+          selfPip.setAttribute('aria-disabled', 'true');
+        }
       }
       window.goToView = function(viewId) {
         var id = String(viewId || '');
@@ -3439,7 +3436,7 @@
         <div class="tutor-chip">
           <div class="tutor-avatar">C</div>
           <div class="tutor-name-line">
-            <div class="tutor-name partner-name" id="header-partner-name">Camille</div>
+            <div class="tutor-name partner-name" id="header-partner-name">Conversation Partner</div>
           </div>
         </div>
         <div class="tutor-status header-partner-sub partner-badge-sub" data-i18n="room.partnerStatus" hidden aria-hidden="true">Live · 프랑스어 대화 파트너</div>
@@ -3458,7 +3455,7 @@
             <video id="tutorVideo" class="remote-stream-video" playsinline webkit-playsinline autoplay></video>
             <div class="tutor-placeholder">
               <div class="tutor-placeholder-avatar">C</div>
-              <div class="tutor-placeholder-name partner-name" id="center-target-name">Camille</div>
+              <div class="tutor-placeholder-name partner-name" id="center-target-name">Conversation Partner</div>
               <div class="tutor-placeholder-sub partner-status-sub video-center-desc" id="center-status-text" data-i18n="room.chatting">원어민 대화 파트너와 대화 중</div>
             </div>
           </div>
@@ -3703,8 +3700,8 @@
       const remoteVideo = document.getElementById('remote-video')
         || document.getElementById('tutorVideo')
         || document.querySelector('.remote-stream-video');
-      const observerPartnerVideo = document.getElementById('observerPartnerVideo');
-      const observerUserVideo = document.getElementById('observerUserVideo');
+      const observerPartnerVideo = remoteVideo;
+      const observerUserVideo = localVideo;
 
       let localStream = null;
       let peer = null;
@@ -3793,10 +3790,21 @@
         });
       }
 
-      function attachObserverStream(videoEl, stream) {
+      function attachObserverStream(videoEl, stream, slot) {
         if (!videoEl || !stream) return;
         setupVideoElement(videoEl, false);
         videoEl.srcObject = stream;
+        videoEl.classList.add('has-stream');
+        videoEl.style.display = 'block';
+        videoEl.style.visibility = 'visible';
+        videoEl.style.opacity = '1';
+        if (slot === 'partner') {
+          var remoteBox = document.getElementById('tutorVideoBox') || videoEl.closest('.tutor-video');
+          if (remoteBox) remoteBox.classList.add('has-stream');
+        } else if (slot === 'user') {
+          var learnerPip = document.getElementById('selfPip') || videoEl.closest('.self-pip');
+          if (learnerPip) learnerPip.classList.add('has-stream');
+        }
         videoEl.muted = false;
         videoEl.removeAttribute('muted');
         var play = videoEl.play();
@@ -3920,7 +3928,7 @@
           var call = peer.call(peerId, localStream);
           if (!call) return null;
           call.on('stream', function (incomingStream) {
-            attachObserverStream(videoEl, incomingStream);
+            attachObserverStream(videoEl, incomingStream, slot);
           });
           call.on('error', function (err) {
             console.warn('[DayO Observer] watch error', slot, err && err.type ? err.type : err);
@@ -3987,7 +3995,7 @@
           window.localMediaStream = localStream;
 
           var stage = document.getElementById('observerStage');
-          if (stage) stage.hidden = false;
+          if (stage) stage.hidden = true;
 
           var myPeerId = currentRoomId + '_observer_' + Math.floor(Math.random() * 10000);
           peer = new Peer(myPeerId, {
