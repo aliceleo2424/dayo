@@ -107,8 +107,23 @@ module.exports = async function handler(req, res) {
       }
     );
     if (!response.ok) {
-      console.warn('[DayO Word Help] Gemini request failed:', response.status);
-      json(res, 502, { error: 'generation_failed' });
+      var upstreamBody = await response.text();
+      var upstreamCode = null;
+      try {
+        var upstreamError = JSON.parse(upstreamBody);
+        upstreamCode = upstreamError && upstreamError.error &&
+          (upstreamError.error.status || upstreamError.error.code) || null;
+      } catch (e) { /* keep the raw body for server diagnostics */ }
+      console.warn('[DayO Word Help] Gemini request failed:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: upstreamBody
+      });
+      json(res, 502, {
+        error: 'generation_failed',
+        upstream_status: response.status,
+        upstream_code: upstreamCode
+      });
       return;
     }
     var payload = await response.json();
