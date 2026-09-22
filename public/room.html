@@ -3320,7 +3320,9 @@
           document.querySelector('.video-center-desc') ||
           document.getElementById('center-status-text');
         if (partnerStatusSub) {
-          partnerStatusSub.innerText = isPartnerPreview ? '파트너 화면 미리보기' : '유저와 1:1 대화 중';
+          partnerStatusSub.innerText = isPartnerPreview
+            ? window.DayOI18n.t('room.partner.previewStatus')
+            : window.DayOI18n.t('room.partner.liveStatus');
           partnerStatusSub.removeAttribute('data-i18n');
         }
 
@@ -3329,14 +3331,14 @@
         if (partnerNameNodes.length) {
           partnerNameNodes.forEach(function (el) {
             if (isPartnerPreview) {
-              el.innerText = '파트너 (Partner)';
+              el.innerText = window.DayOI18n.t('room.partner.previewName');
             } else if (el.innerText.includes('Camille') || el.innerText.includes('학습자')) {
-              el.innerText = '유저 (User)';
+              el.innerText = window.DayOI18n.t('room.partner.userName');
             }
           });
         } else if (partnerNameEl) {
-          if (isPartnerPreview) partnerNameEl.innerText = '파트너 (Partner)';
-          else if (partnerNameEl.innerText.includes('Camille') || partnerNameEl.innerText.includes('학습자')) partnerNameEl.innerText = '유저 (User)';
+          if (isPartnerPreview) partnerNameEl.innerText = window.DayOI18n.t('room.partner.previewName');
+          else if (partnerNameEl.innerText.includes('Camille') || partnerNameEl.innerText.includes('학습자')) partnerNameEl.innerText = window.DayOI18n.t('room.partner.userName');
         }
 
         var headerPartnerSub = document.querySelector('.header-partner-sub') || document.querySelector('.partner-badge-sub');
@@ -3346,7 +3348,7 @@
         }
 
         var pipLabel = document.querySelector('.pip-label');
-        if (pipLabel) pipLabel.textContent = '내 화면';
+        if (pipLabel) pipLabel.textContent = window.DayOI18n.t('room.selfPlaceholderLabel');
       };
 
       function scheduleRoleTextUpdates() {
@@ -3371,6 +3373,11 @@
       scheduleRoleTextUpdates();
 
       function enterPartner() {
+        try {
+          if (!(window.DayORoomAccess && window.DayORoomAccess.adminTest) && !localStorage.getItem('dayo_lang') && window.DayOI18n) {
+            window.DayOI18n.setLang('EN', false);
+          }
+        } catch (e) { /* keep the current locale */ }
         document.body.classList.add('is-room', 'theme-partner');
         document.body.classList.remove('theme-learner', 'theme-observer');
         document.body.style.background = 'linear-gradient(180deg, #F0F9F5 0%, #E6F4EE 100%)';
@@ -6087,7 +6094,7 @@
       var activeCards = buildActiveInstaCards();
       window.currentSelectedCard = null;
       if (!activeCards.length) {
-        container.innerHTML = '<div style="font-size: 12px; color: #88928B; line-height: 1.5;">인식된 학습자 발화가 없어 문장 카드를 저장하지 않습니다.</div>';
+        container.innerHTML = '<div style="font-size: 12px; color: #88928B; line-height: 1.5;">' + t('room.partnerReport.noCardTranscript') + '</div>';
         return;
       }
       window.activeCardPool = activeCards;
@@ -6104,7 +6111,7 @@
       var rows = collectSessionTranscriptRows();
       viewer.innerHTML = '';
       if (!rows.length) {
-        viewer.innerHTML = '<div style="font-size: 12px; color: #88928B; padding: 8px 4px; line-height: 1.5;">아직 인식된 발화가 없습니다.<br>마이크를 켜고 영어로 말해 보세요.</div>';
+        viewer.innerHTML = '<div style="font-size: 12px; color: #88928B; padding: 8px 4px; line-height: 1.5;">' + t('room.partnerReport.noTranscript') + '</div>';
         return;
       }
       rows.forEach(function (log) {
@@ -6159,13 +6166,13 @@
       if (window.isObserverRoomMode && window.isObserverRoomMode()) return;
       if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
         setPartnerReportSubmitBusy(true);
-        setPartnerReportSubmitStatus('테스트 미리보기입니다. 실제 포인트는 지급되지 않아요.', true);
+        setPartnerReportSubmitStatus(t('room.partnerReport.preview'), true);
         setTimeout(function () { window.location.href = 'index.html?mode=partner'; }, 1200);
         return;
       }
       window.dayoSessionEnded = true;
       setPartnerReportSubmitBusy(true);
-      setPartnerReportSubmitStatus('대화 기록을 저장하고 포인트 지급을 확인하고 있어요.', true);
+      setPartnerReportSubmitStatus(t('room.partnerReport.saving'), true);
 
       var cardData = window.currentSelectedCard || {
         sentence: null,
@@ -6188,7 +6195,7 @@
 
       var bookingId = window.DayORoomAccess && window.DayORoomAccess.bookingId || '';
       if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(bookingId)) {
-        setPartnerReportSubmitStatus('실제 예약 정보를 확인할 수 없어 포인트를 지급하지 않았어요. 파트너 라운지의 예약 세션으로 다시 입장해 주세요.', false);
+        setPartnerReportSubmitStatus(t('room.partnerReport.invalidBooking'), false);
         setPartnerReportSubmitBusy(false);
         return;
       }
@@ -6198,7 +6205,7 @@
         var transcriptSave = await persistTranscript();
         if (!transcriptSave || !transcriptSave.ok) {
           console.error('[DayO Partner] transcript was not saved', transcriptSave && transcriptSave.error);
-          setPartnerReportSubmitStatus('대화 기록 저장에 실패했어요. 잠시 후 다시 시도해 주세요.', false);
+          setPartnerReportSubmitStatus(t('room.partnerReport.transcriptFailed'), false);
           setPartnerReportSubmitBusy(false);
           return;
         }
@@ -6206,12 +6213,12 @@
           var reportSave = await window.persistSessionReport(cardData);
           if (!reportSave || !reportSave.ok) {
             console.error('[DayO Partner] report was not saved', reportSave && reportSave.error);
-            setPartnerReportSubmitStatus('파트너 검수 내용을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.', false);
+            setPartnerReportSubmitStatus(t('room.partnerReport.notesFailed'), false);
             setPartnerReportSubmitBusy(false);
             return;
           }
         } else {
-          setPartnerReportSubmitStatus('로그인 정보를 확인할 수 없어 검수 내용을 저장하지 못했어요.', false);
+          setPartnerReportSubmitStatus(t('room.partnerReport.authFailed'), false);
           setPartnerReportSubmitBusy(false);
           return;
         }
@@ -6221,19 +6228,19 @@
         }
       } catch (err) {
         console.warn('[DayO] partner report completion failed', err);
-        setPartnerReportSubmitStatus('대화 기록을 완료하지 못했어요. 잠시 후 다시 시도해 주세요.', false);
+        setPartnerReportSubmitStatus(t('room.partnerReport.completeFailed'), false);
         setPartnerReportSubmitBusy(false);
         return;
       }
 
       console.log('✨ 파트너 리포트 검수 완료 트리거');
       if (!rewarded) {
-        setPartnerReportSubmitStatus('포인트 지급 조건을 확인하지 못했어요. 예약 시간과 세션 상태를 확인한 뒤 다시 시도해 주세요.', false);
+        setPartnerReportSubmitStatus(t('room.partnerReport.rewardUnavailable'), false);
         setPartnerReportSubmitBusy(false);
         return;
       }
 
-      setPartnerReportSubmitStatus('오늘의 대화 기록을 전송했고 6,000P가 지급되었어요.', true);
+      setPartnerReportSubmitStatus(t('room.partnerReport.success'), true);
       try { localStorage.setItem('dayo_current_mode', 'PARTNER'); } catch (e) {}
       setTimeout(function () { window.location.href = 'partner.html'; }, 1200);
     };
@@ -6510,48 +6517,48 @@
 
       <div style="width: 35%; background: #F8FAF9; border-right: 1.5px solid #EDE4D5; padding: 20px; display: flex; flex-direction: column;">
         <div style="font-weight: 800; font-size: 13.5px; color: #4F7460; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-          <span>💬</span> 25분 대화 스크롤 로그
+          <span>💬</span> <span data-i18n="room.partnerReport.transcriptTitle">25분 대화 스크롤 로그</span>
         </div>
         <div id="popup-transcript-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 9px; font-size: 12px; padding-right: 6px;"></div>
       </div>
 
       <div style="width: 65%; padding: 24px 28px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: #FFFFFF;">
-        <div style="font-size: 17px; font-weight: 800; color: #3E4A42;">✨ 파트너 피드백 & 오늘의 대화 기록</div>
+        <div style="font-size: 17px; font-weight: 800; color: #3E4A42;" data-i18n="room.partnerReport.title">✨ 파트너 피드백 & 오늘의 대화 기록</div>
 
         <div>
-          <label style="font-size: 12.5px; font-weight: 800; color: #3E4A42; display: block; margin-bottom: 6px;">1. 파트너 다정 코멘트 (직접 입력 또는 AI 추천 칩 탭)</label>
-          <textarea id="popup-partner-comment" rows="2" style="width: 100%; border: 1.5px solid #EDE4D5; border-radius: 10px; padding: 10px; font-size: 13px; resize: none; outline: none; box-sizing: border-box;" placeholder="유저에게 따뜻한 응원의 한마디를 남겨주세요."></textarea>
+          <label style="font-size: 12.5px; font-weight: 800; color: #3E4A42; display: block; margin-bottom: 6px;" data-i18n="room.partnerReport.commentLabel">1. 파트너 다정 코멘트 (직접 입력 또는 AI 추천 칩 탭)</label>
+          <textarea id="popup-partner-comment" rows="2" style="width: 100%; border: 1.5px solid #EDE4D5; border-radius: 10px; padding: 10px; font-size: 13px; resize: none; outline: none; box-sizing: border-box;" data-i18n="room.partnerReport.commentPlaceholder" data-i18n-attr="placeholder" placeholder="유저에게 따뜻한 응원의 한마디를 남겨주세요."></textarea>
           <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
-            <button type="button" onclick="document.getElementById('popup-partner-comment').value=this.innerText;" style="font-size: 11px; background: #FFF9ED; border: 1px solid #F6D365; border-radius: 12px; padding: 4px 10px; cursor: pointer; color: #3E4A42; font-weight: 600;">성수동 서울숲 근처 카페거리를 추천해요! ☕</button>
-            <button type="button" onclick="document.getElementById('popup-partner-comment').value=this.innerText;" style="font-size: 11px; background: #FFF9ED; border: 1px solid #F6D365; border-radius: 12px; padding: 4px 10px; cursor: pointer; color: #3E4A42; font-weight: 600;">새로운 표현에 적극적인 모습이 멋져요! 🌟</button>
-            <button type="button" onclick="document.getElementById('popup-partner-comment').value=this.innerText;" style="font-size: 11px; background: #FFF9ED; border: 1px solid #F6D365; border-radius: 12px; padding: 4px 10px; cursor: pointer; color: #3E4A42; font-weight: 600;">편안하게 대화 이끌어주셔서 감사합니다! ☕</button>
+            <button type="button" onclick="document.getElementById('popup-partner-comment').value=this.innerText;" style="font-size: 11px; background: #FFF9ED; border: 1px solid #F6D365; border-radius: 12px; padding: 4px 10px; cursor: pointer; color: #3E4A42; font-weight: 600;" data-i18n="room.partnerReport.suggestion1">성수동 서울숲 근처 카페거리를 추천해요! ☕</button>
+            <button type="button" onclick="document.getElementById('popup-partner-comment').value=this.innerText;" style="font-size: 11px; background: #FFF9ED; border: 1px solid #F6D365; border-radius: 12px; padding: 4px 10px; cursor: pointer; color: #3E4A42; font-weight: 600;" data-i18n="room.partnerReport.suggestion2">새로운 표현에 적극적인 모습이 멋져요! 🌟</button>
+            <button type="button" onclick="document.getElementById('popup-partner-comment').value=this.innerText;" style="font-size: 11px; background: #FFF9ED; border: 1px solid #F6D365; border-radius: 12px; padding: 4px 10px; cursor: pointer; color: #3E4A42; font-weight: 600;" data-i18n="room.partnerReport.suggestion3">편안하게 대화 이끌어주셔서 감사합니다! ☕</button>
           </div>
         </div>
 
         <div>
-          <label style="font-size: 12.5px; font-weight: 800; color: #3E4A42; display: block; margin-bottom: 6px;">2. 유저에게 보낼 응원 스탬프</label>
+          <label style="font-size: 12.5px; font-weight: 800; color: #3E4A42; display: block; margin-bottom: 6px;" data-i18n="room.partnerReport.stampLabel">2. 유저에게 보낼 응원 스탬프</label>
           <div style="display: flex; gap: 10px;">
             <label style="flex: 1; display: flex; align-items: center; gap: 6px; font-size: 12px; background: #F8FAF9; border: 1.5px solid #B8E2C8; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-weight: 700; color: #3E4A42;">
-              <input type="radio" name="popup_stamp" value="coffee" checked> ☕ 따뜻한 수다
+              <input type="radio" name="popup_stamp" value="coffee" checked> <span data-i18n="room.partnerReport.stampCoffee">☕ 따뜻한 수다</span>
             </label>
             <label style="flex: 1; display: flex; align-items: center; gap: 6px; font-size: 12px; background: #F8FAF9; border: 1.5px solid #B8E2C8; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-weight: 700; color: #3E4A42;">
-              <input type="radio" name="popup_stamp" value="rocket"> 🚀 폭풍 성장
+              <input type="radio" name="popup_stamp" value="rocket"> <span data-i18n="room.partnerReport.stampRocket">🚀 폭풍 성장</span>
             </label>
             <label style="flex: 1; display: flex; align-items: center; gap: 6px; font-size: 12px; background: #F8FAF9; border: 1.5px solid #B8E2C8; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-weight: 700; color: #3E4A42;">
-              <input type="radio" name="popup_stamp" value="heart"> 💖 힐링 메이트
+              <input type="radio" name="popup_stamp" value="heart"> <span data-i18n="room.partnerReport.stampHeart">💖 힐링 메이트</span>
             </label>
           </div>
         </div>
 
         <div style="background: #FDFBF7; border: 1.5px solid #EDE4D5; border-radius: 12px; padding: 12px 14px;">
-          <div style="font-size: 12.5px; font-weight: 800; color: #4F7460; margin-bottom: 8px;">3. 오늘의 대화 기록 검수 (필요 시 직접 수정)</div>
+          <div style="font-size: 12.5px; font-weight: 800; color: #4F7460; margin-bottom: 8px;" data-i18n="room.partnerReport.notesReview">3. 오늘의 대화 기록 검수 (필요 시 직접 수정)</div>
           <div style="font-size: 12px; color: #3E4A42; display: flex; flex-direction: column; gap: 0;">
             <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; margin-bottom: 8px;">
-              <span style="font-size: 11.5px; font-weight: 700; color: #4F7460; white-space: nowrap; word-break: keep-all;">• 빈출 유의어:</span>
+              <span style="font-size: 11.5px; font-weight: 700; color: #4F7460; white-space: nowrap; word-break: keep-all;" data-i18n="room.partnerReport.synonyms">• 빈출 유의어:</span>
               <input type="text" value="like ➔ prefer, be fond of" style="width: 100%; box-sizing: border-box; border: 1.5px solid #EDE4D5; border-radius: 8px; padding: 7px 10px; font-size: 12px;">
             </div>
             <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; margin-bottom: 8px;">
-              <span style="font-size: 11.5px; font-weight: 700; color: #4F7460; white-space: nowrap; word-break: keep-all;">• 뉘앙스 교정:</span>
+              <span style="font-size: 11.5px; font-weight: 700; color: #4F7460; white-space: nowrap; word-break: keep-all;" data-i18n="room.partnerReport.nuance">• 뉘앙스 교정:</span>
               <input type="text" value="I am very agree ➔ I totally agree" style="width: 100%; box-sizing: border-box; border: 1.5px solid #EDE4D5; border-radius: 8px; padding: 7px 10px; font-size: 12px;">
             </div>
           </div>
@@ -6559,32 +6566,32 @@
 
         <div style="background: #FAFBF9; border: 1.5px solid #EDE4D5; border-radius: 14px; padding: 14px 16px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <label style="font-size: 12.5px; font-weight: 800; color: #3E4A42;">4. &lt;From DayO&gt; 인스타 카드 선택 & 문장 매칭</label>
-            <button type="button" onclick="regenerateInstaCard()" title="다른 카드 재생성" style="background: #FFFFFF; border: 1.5px solid #9AB89E; color: #4F7460; font-size: 15px; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
+            <label style="font-size: 12.5px; font-weight: 800; color: #3E4A42;" data-i18n="room.partnerReport.cardSection">4. &lt;From DayO&gt; 인스타 카드 선택 & 문장 매칭</label>
+            <button type="button" onclick="regenerateInstaCard()" data-i18n="room.partnerReport.regenerateAria" data-i18n-attr="title" title="다른 카드 재생성" style="background: #FFFFFF; border: 1.5px solid #9AB89E; color: #4F7460; font-size: 15px; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
               🔄
             </button>
           </div>
 
           <div class="card-section-body" style="display: flex; flex-direction: column; width: 100%; gap: 12px;">
             <div style="width: 100%; display: flex; flex-direction: column; gap: 8px;">
-              <div style="font-size: 11px; color: #55635A; font-weight: 600;">대화 속 베스트 문장 선택:</div>
+              <div style="font-size: 11px; color: #55635A; font-weight: 600;" data-i18n="room.partnerReport.bestSentence">대화 속 베스트 문장 선택:</div>
               <div id="card-sentence-options" style="display: flex; flex-direction: column; gap: 6px; width: 100%;"></div>
             </div>
 
             <div class="insta-card-export-wrap" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
               <div id="insta-card-capture" class="viral-card" style="width: 100%; max-width: 280px; aspect-ratio: 4 / 5; margin: 0 auto; border-radius: 16px; overflow: hidden; position: relative; box-shadow: 0 8px 18px rgba(0,0,0,0.12); display: flex; flex-direction: column; justify-content: space-between; padding: 14px; box-sizing: border-box; transition: background 0.3s ease, border-color 0.3s ease;"></div>
               <div style="display: flex; gap: 8px; margin-top: 14px; width: 100%; max-width: 400px;">
-                <button id="btn-save-card" class="btn-save-card" type="button" onclick="saveInstaCard()" style="flex: 1; padding: 12px; background: #635BFF; color: #fff; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; font-size: 13px;">
+                <button id="btn-save-card" class="btn-save-card" type="button" onclick="saveInstaCard()" style="flex: 1; padding: 12px; background: #635BFF; color: #fff; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; font-size: 13px;" data-i18n="room.partnerReport.saveCard">
                   📸 카드 이미지 저장하기
                 </button>
               </div>
-              <div style="font-size: 10px; color: #88928B; margin-top: 6px; text-align: center; width: 100%;">유저 마이페이지에 자동 발행</div>
+              <div style="font-size: 10px; color: #88928B; margin-top: 6px; text-align: center; width: 100%;" data-i18n="room.partnerReport.autoPublish">유저 마이페이지에 자동 발행</div>
             </div>
           </div>
         </div>
 
         <p id="partner-report-submit-status" role="status" aria-live="polite" hidden style="margin: 0; font-size: 12.5px; font-weight: 700; line-height: 1.5; text-align: center;"></p>
-        <button type="button" id="btn-final-partner-submit" onclick="executePartnerPayoutAndExit()" style="background: #4F7460; color: #FFF; border: none; border-radius: 12px; padding: 14px; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 4px; box-shadow: 0 4px 14px rgba(79, 116, 96, 0.28); transition: opacity 0.2s;">
+        <button type="button" id="btn-final-partner-submit" onclick="executePartnerPayoutAndExit()" style="background: #4F7460; color: #FFF; border: none; border-radius: 12px; padding: 14px; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 4px; box-shadow: 0 4px 14px rgba(79, 116, 96, 0.28); transition: opacity 0.2s;" data-i18n="room.partnerReport.submit">
           ✨ 검수 완료하고 6,000P 받기
         </button>
       </div>

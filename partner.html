@@ -203,6 +203,9 @@
       }
 
       function initPartnerDashboard(user, profile) {
+        try {
+          if (!localStorage.getItem('dayo_lang') && window.DayOI18n) window.DayOI18n.setLang('EN', false);
+        } catch (e) { /* keep the current locale */ }
         window.__dayoPartnerAuthUser = user || null;
         window.__dayoPartnerProfileGate = profile || null;
         var metadata = (user && user.user_metadata) || {};
@@ -216,7 +219,7 @@
         var miniName = document.getElementById('miniName');
         var badge = document.querySelector('.partner-mode-badge');
         if (miniName) miniName.textContent = nickname;
-        if (badge) badge.textContent = '🟢 파트너 활동중';
+        if (badge) badge.textContent = window.DayOI18n ? window.DayOI18n.t('partner.badge.active') : '🟢 Conversation Partner active';
         showPartnerLounge();
         if (typeof window.loadLoungeStats === 'function') {
           try { window.loadLoungeStats(); } catch (e) { /* ignore */ }
@@ -1984,7 +1987,7 @@
         </div>
       </a>
       <div class="topbar-right">
-        <span class="partner-mode-badge badge-partner partner-badge">🟢 파트너 활동중</span>
+        <span class="partner-mode-badge badge-partner partner-badge" data-i18n="partner.badge.active">🟢 파트너 활동중</span>
         <div data-mode-switch="inline"></div>
         <div data-i18n-lang="icon"></div>
         <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
@@ -2068,12 +2071,12 @@
         <p class="stat-label" data-i18n="partner.stats.monthCount">이번 달 완료한 대화</p>
         <p class="stat-value partner-stat-val" id="statMonthCount" data-i18n="partner.stats.loading">불러오는 중…</p>
       </article>
-      <article class="stat-box partner-stat-card partner-point-box is-clickable" id="stat-points-card" role="button" tabindex="0" aria-label="적립 포인트 상세 내역 보기">
+      <article class="stat-box partner-stat-card partner-point-box is-clickable" id="stat-points-card" role="button" tabindex="0" data-i18n="partner.stats.pointsAria" data-i18n-attr="aria-label" aria-label="적립 포인트 상세 내역 보기">
         <p class="stat-label" data-i18n="partner.stats.points">적립 포인트</p>
         <p class="stat-value partner-stat-val partner-point-val" id="statPointBalance" data-i18n="partner.stats.loading">불러오는 중…</p>
         <p class="stat-hint" data-i18n="partner.stats.pointsHint">30분 세션 완료 시 6,000P가 적립됩니다. 30,000P부터 출금 신청이 가능합니다. 출금은 월 정산 일정에 따라 처리됩니다.</p>
       </article>
-      <article class="stat-box partner-stat-card partner-point-box is-clickable" id="stat-settled-card" role="button" tabindex="0" aria-label="누적 정산 금액 상세 내역 보기">
+      <article class="stat-box partner-stat-card partner-point-box is-clickable" id="stat-settled-card" role="button" tabindex="0" data-i18n="partner.stats.settledAria" data-i18n-attr="aria-label" aria-label="누적 정산 금액 상세 내역 보기">
         <p class="stat-label" data-i18n="partner.stats.settled">누적 정산 완료 금액</p>
         <p class="stat-value partner-stat-val partner-point-val" id="statSettledWon" data-i18n="partner.stats.loading">불러오는 중…</p>
         <p class="stat-hint" data-i18n="partner.stats.settledHint">지난달까지 완료된 세션</p>
@@ -2146,7 +2149,7 @@
             <label class="field-label" for="partner-bio-input" data-i18n="partner.profile.intro">한 줄 소개</label>
             <textarea class="textarea" id="partner-bio-input" name="intro" rows="3"
               placeholder="예약 화면에 보일 한 줄 소개를 적어 주세요." data-i18n="partner.profile.introPlaceholder"></textarea>
-            <button class="partner-profile-save" type="button" id="partner-profile-save-btn">💾 프로필 저장</button>
+            <button class="partner-profile-save" type="button" id="partner-profile-save-btn" data-i18n="partner.profile.save">변경사항 저장하기</button>
           </div>
         </form>
       </div>
@@ -2189,7 +2192,7 @@
           </div>
 
           <div id="partnerUpcomingBookings" aria-live="polite">
-            <p class="card-subtitle">예약을 불러오는 중...</p>
+            <p class="card-subtitle" data-i18n="partner.sessions.loading">예정된 대화를 불러오는 중이에요.</p>
           </div>
         </section>
       </aside>
@@ -2276,7 +2279,7 @@
         </div>
       </div>
 
-      <button type="button" class="photo-save-btn" id="photo-save-btn">✔ 이 사진으로 저장하기</button>
+      <button type="button" class="photo-save-btn" id="photo-save-btn" data-i18n="partner.photoModal.save">✔ 이 사진으로 저장하기</button>
     </div>
   </div>
 
@@ -2284,19 +2287,19 @@
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settlementHistoryTitle">
       <div class="modal-head">
         <div>
-          <h2 class="card-title" id="settlementHistoryTitle">💰 포인트 적립 및 정산 내역</h2>
-          <p class="card-subtitle">세션 적립과 출금 내역을 한눈에 확인하세요.</p>
+          <h2 class="card-title" id="settlementHistoryTitle" data-i18n="partner.settlement.title">💰 포인트 적립 및 정산 내역</h2>
+          <p class="card-subtitle" data-i18n="partner.settlement.desc">세션 적립과 출금 내역을 한눈에 확인하세요.</p>
         </div>
-        <button class="modal-close" type="button" data-close-modal aria-label="닫기">✕</button>
+        <button class="modal-close" type="button" data-close-modal data-i18n="partner.photoModal.closeAria" data-i18n-attr="aria-label" aria-label="닫기">✕</button>
       </div>
       <div class="settlement-summary">
-        <div class="settlement-summary__item">이번 달 출금 대기<strong id="settlement-pending-points">0 P</strong></div>
-        <div class="settlement-summary__item">누적 정산 완료<strong id="settlement-settled-won">0 원</strong></div>
+        <div class="settlement-summary__item"><span data-i18n="partner.settlement.pending">이번 달 출금 대기</span><strong id="settlement-pending-points">0 P</strong></div>
+        <div class="settlement-summary__item"><span data-i18n="partner.settlement.completed">누적 정산 완료</span><strong id="settlement-settled-won">0 원</strong></div>
       </div>
       <div class="settlement-list" id="settlement-history-list">
-        <div class="settlement-item">2026.09.15 | 1:1 대화 세션 완료 (20대 K님) | +6,000 P (적립)</div>
+        <div class="settlement-item" data-i18n="partner.settlement.sample">2026.09.15 | 1:1 대화 세션 완료 (20대 K님) | +6,000 P (적립)</div>
       </div>
-      <p class="settlement-note">매월 10일 파트너 등록 계좌로 100% 자동 정산 입금됩니다 ☕</p>
+      <p class="settlement-note" data-i18n="partner.settlement.note">매월 10일 파트너 등록 계좌로 100% 자동 정산 입금됩니다 ☕</p>
     </div>
   </div>
 
@@ -2463,15 +2466,15 @@
     function paintStatusToggle() {
       if (!statusToggleBtn) return;
       if (partnerActive) {
-        statusToggleBtn.textContent = '🟢 활동중';
+        statusToggleBtn.textContent = t('partner.status.active');
         statusToggleBtn.classList.remove('is-resting');
         statusToggleBtn.setAttribute('aria-pressed', 'true');
-        statusToggleBtn.title = '대화 예약 가능';
+        statusToggleBtn.title = t('partner.status.activeTitle');
       } else {
-        statusToggleBtn.textContent = '☕ 휴식중';
+        statusToggleBtn.textContent = t('partner.status.resting');
         statusToggleBtn.classList.add('is-resting');
         statusToggleBtn.setAttribute('aria-pressed', 'false');
-        statusToggleBtn.title = '예약 일시 중단';
+        statusToggleBtn.title = t('partner.status.restingTitle');
       }
     }
 
@@ -2507,7 +2510,7 @@
           await persistPartnerStatus(next);
           partnerActive = next;
           paintStatusToggle();
-          showToast(partnerActive ? '🟢 활동중으로 전환되었습니다. 예약이 가능해요!' : '☕ 휴식중으로 전환되었습니다. 예약이 일시 중단돼요.');
+          showToast(t(partnerActive ? 'partner.toast.activated' : 'partner.toast.resting'));
         } finally {
           statusToggleBtn.disabled = false;
         }
@@ -2517,14 +2520,14 @@
     async function savePartnerProfile() {
       var client = getPartnerSupabaseClient();
       if (!client) {
-        showToast('저장 서버에 연결할 수 없습니다.');
+        showToast(t('partner.toast.serverUnavailable'));
         return;
       }
       var userRes = await client.auth.getUser();
       var user = userRes && userRes.data && userRes.data.user;
       if (userRes && userRes.error) throw userRes.error;
       if (!user) {
-        showToast('로그인이 필요합니다.');
+        showToast(t('partner.toast.loginRequired'));
         return;
       }
       var nickname = nicknameInput ? nicknameInput.value.trim() : '';
@@ -2563,7 +2566,7 @@
       partnerProfileLoadVersion += 1;
       window.__dayoPartnerProfile = Object.assign({}, window.__dayoPartnerProfile || {}, saved);
       paintPartnerProfile(window.__dayoPartnerProfile);
-      showToast('프로필이 성공적으로 저장되었습니다 ✨');
+      showToast(t('partner.toast.profileSaved'));
     }
 
     if (profileSaveBtn) {
@@ -2573,7 +2576,7 @@
           await savePartnerProfile();
         } catch (err) {
           console.error('[DayO] profile save failed', err);
-          showToast('프로필 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+          showToast(t('partner.toast.profileSaveFailed'));
         } finally {
           profileSaveBtn.disabled = false;
         }
@@ -2650,7 +2653,7 @@
         profileAvatar.classList.add('has-photo');
         profileAvatar.style.backgroundImage = 'url(' + pendingAvatarUrl + ')';
       }
-      showToast('프로필 사진이 변경되었습니다 📸');
+      showToast(t('partner.toast.photoSaved'));
       return true;
     }
 
@@ -2663,7 +2666,7 @@
           closeModal(document.getElementById('photoModal'));
         } catch (err) {
           console.warn('[DayO] avatar save failed', err);
-          showToast('사진 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.');
+          showToast(t('partner.toast.photoSaveFailed'));
         } finally {
           photoSaveBtn.disabled = false;
         }
@@ -2706,11 +2709,9 @@
       if (pendingEl) pendingEl.textContent = points.toLocaleString('ko-KR') + ' P';
       if (settledEl) settledEl.textContent = Number(stats.settledWon || 0).toLocaleString('ko-KR') + ' 원';
       if (listEl) {
-        var demo = [
-          '2026.09.15 | 1:1 대화 세션 완료 (20대 K님) | +6,000 P (적립)'
-        ];
+        var demo = [t('partner.settlement.sample')];
         if (stats.monthCount > 0) {
-          demo.unshift('이번 달 완료 세션 ' + stats.monthCount + '회 | 누적 적립 반영');
+          demo.unshift(t('partner.settlement.monthFormat', { n: stats.monthCount }));
         }
         listEl.innerHTML = demo.map(function (line) {
           return '<div class="settlement-item">' + line + '</div>';

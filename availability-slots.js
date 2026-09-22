@@ -97,9 +97,9 @@
   }
 
   function formatBookingTime(value) {
-    if (!value) return '예약 시간 확인';
+    if (!value) return window.DayOI18n.t('partner.sessions.timeUnknown');
     var date = new Date(value);
-    if (isNaN(date.getTime())) return '예약 시간 확인';
+    if (isNaN(date.getTime())) return window.DayOI18n.t('partner.sessions.timeUnknown');
     return new Intl.DateTimeFormat('ko-KR', {
       timeZone: 'Asia/Seoul', month: 'long', day: 'numeric', weekday: 'short',
       hour: '2-digit', minute: '2-digit', hour12: false
@@ -113,7 +113,7 @@
     if (!rows || !rows.length) {
       var empty = document.createElement('p');
       empty.className = 'card-subtitle';
-      empty.textContent = '예정된 대화가 없습니다.';
+      empty.textContent = window.DayOI18n.t('partner.sessions.empty');
       container.appendChild(empty);
       return;
     }
@@ -123,17 +123,19 @@
 
       var status = document.createElement('span');
       status.className = 'session-status';
-      status.textContent = '● 예약 확정';
+      status.textContent = window.DayOI18n.t('partner.sessions.confirmed');
       article.appendChild(status);
 
       var title = document.createElement('h3');
       title.className = 'session-title';
-      title.textContent = '예약된 대화';
+      title.textContent = window.DayOI18n.t('partner.sessions.bookedTitle');
       article.appendChild(title);
 
       var purpose = document.createElement('p');
       purpose.className = 'session-purpose';
-      purpose.textContent = '주제: ' + (booking.language || '글로벌 대화');
+      purpose.textContent = window.DayOI18n.tf('partner.sessions.topicFormat', {
+        topic: booking.language || window.DayOI18n.t('partner.sessions.defaultTopic')
+      });
       article.appendChild(purpose);
 
       var time = document.createElement('p');
@@ -148,7 +150,7 @@
       enter.setAttribute('data-enter-studio', '');
       enter.setAttribute('data-booking-id', booking.id);
       enter.href = 'room.html?bookingId=' + encodeURIComponent(booking.id);
-      enter.textContent = '🟢 스튜디오 입장';
+      enter.textContent = window.DayOI18n.t('partner.sessions.enter');
       actions.appendChild(enter);
       article.appendChild(actions);
       container.appendChild(article);
@@ -247,19 +249,19 @@
 
     var supabase = client();
     if (!supabase) {
-      alert('스케줄 저장 중 오류가 발생했습니다: 로그인 서버에 연결할 수 없습니다.');
+      alert(window.DayOI18n.t('partner.schedule.serverError'));
       return;
     }
 
     var original = saveBtn ? saveBtn.innerHTML : '';
     if (saveBtn) {
       saveBtn.disabled = true;
-      saveBtn.innerHTML = '⏳ 저장 중...';
+      saveBtn.textContent = window.DayOI18n.t('partner.schedule.saving');
     }
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('로그인이 필요합니다.');
+      if (!user) throw new Error(window.DayOI18n.t('partner.schedule.loginRequired'));
 
       var openSlots = collected.length ? collected : Array.from(activeSlots).map(function (el) {
         return {
@@ -339,17 +341,17 @@
         if (error) throw error;
       }
 
-      alert('✅ 주간 대화 가능 시간이 성공적으로 저장되었습니다!');
+      alert(window.DayOI18n.t('partner.schedule.saved'));
       if (typeof window.showToast === 'function') {
         /* keep existing lounge toast if present */
       }
     } catch (err) {
       console.error('스케줄 저장 오류:', err);
-      alert('스케줄 저장 중 오류가 발생했습니다: ' + (err && err.message ? err.message : err));
+      alert(window.DayOI18n.tf('partner.schedule.saveErrorFormat', { message: err && err.message ? err.message : err }));
     } finally {
       if (saveBtn) {
         saveBtn.disabled = false;
-        saveBtn.innerHTML = original || '반복 가능시간 저장';
+        saveBtn.innerHTML = original || window.DayOI18n.t('partner.schedule.save');
       }
     }
   };
