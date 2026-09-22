@@ -45,9 +45,12 @@
     isTest: true,
     initial: 'D'
   };
+  var allPartners = [];
   var livePartners = [];
   var liveSlots = [];
   var partnersLoaded = false;
+  var partnersLoading = false;
+  var slotLoadSeq = 0;
   function weekdays() {
     return window.DayOI18n ? window.DayOI18n.weekdayNames() : ['일', '월', '화', '수', '목', '금', '토'];
   }
@@ -178,6 +181,7 @@
     time: null,
     partner: null,
     slotId: null,
+    selectedSlot: null,
     viewYear: 0,
     viewMonth: 0
   };
@@ -408,6 +412,8 @@
       state.partner = partner.dataset.id;
       state.time = null;
       state.slotId = null;
+      state.selectedSlot = null;
+      liveSlots = [];
       renderPartnerCards();
       if (el.slots) el.slots.hidden = false;
       fetchPartnerSlots(state.partner, state.date);
@@ -424,6 +430,8 @@
       state.date = day.dataset.date;
       state.time = null;
       state.slotId = null;
+      state.selectedSlot = null;
+      liveSlots = [];
       renderCalendar();
       updateFooter();
       if (state.partner) fetchPartnerSlots(state.partner, state.date);
@@ -473,10 +481,24 @@
       state.language = id;
     } else if (group === 'style') {
       state.style = id;
-    } else if (group === 'time' || group === 'slot') {
+    } else if (group === 'slot') {
+      if (!ensureLoggedInForBooking()) return;
+      var slotId = chip.dataset.slotId || chip.getAttribute('data-slot-id') || '';
+      var clickedSlot = liveSlots.find(function (slot) { return String(slot.id) === String(slotId); });
+      if (!clickedSlot) return;
+      state.selectedSlot = {
+        id: clickedSlot.id,
+        slot_time: clickedSlot.slot_time,
+        partner: state.partner,
+        date: state.date
+      };
+      state.time = slotTimeLabel(clickedSlot.slot_time);
+      state.slotId = clickedSlot.id;
+    } else if (group === 'time') {
       if (!ensureLoggedInForBooking()) return;
       state.time = id;
-      state.slotId = chip.dataset.slotId || chip.getAttribute('data-slot-id') || null;
+      state.slotId = null;
+      state.selectedSlot = null;
     } else if (group === 'chatSpeed' || group === 'chatStyle' || group === 'chatRequest') {
       state[group] = id;
       persistComfortPrefs(true);
@@ -671,7 +693,8 @@
         partners = (res.data || []).map(normalizePartner);
       }
     }
-    livePartners = withTestPartnerFallback(partners);
+    allPartners = withTestPartnerFallback(partners);
+    livePartners = allPartners.slice();
     partnersLoaded = true;
     return livePartners;
   }
@@ -700,7 +723,33 @@
     return !isNaN(start.getTime()) && start.getTime() > Date.now();
   }
 
+  async function fetchAvailablePartnerIds(isoDate) {
+    var available = {};
+    var supabase = dbClient();
+    if (!supabase || !isoDate) return available;
+
+    try {
+      var result = await supabase
+        .from('availability_slots')
+        .select('partner_id, slot_time, status')
+        .eq('status', 'available')
+        .like('slot_time', isoDate + '%')
+        .order('slot_time', { ascending: true });
+      if (result.error) {
+        console.warn('파트너 가용시간 로드 실패:', result.error);
+        return available;
+      }
+      (result.data || []).filter(isFutureThirtyMinuteConcreteSlot).forEach(function (slot) {
+        if (slot.partner_id) available[String(slot.partner_id)] = true;
+      });
+    } catch (err) {
+      console.warn('파트너 가용시간 로드 실패:', err);
+    }
+    return available;
+  }
+
   async function fetchPartnerSlots(partnerId, isoDate) {
+    var requestSeq = ++slotLoadSeq;
     var container = el.slotBox || document.getElementById('partner-slots-container');
     if (!container) return [];
     if (!partnerId || !isoDate) {
@@ -754,7 +803,13 @@
       slots = [];
     }
 
+    if (requestSeq !== slotLoadSeq || state.partner !== selectedPartnerId || state.date !== isoDate) return [];
     liveSlots = (slots || []).filter(isFutureThirtyMinuteConcreteSlot);
+    if (state.selectedSlot && !liveSlots.some(function (slot) { return slot.id === state.selectedSlot.id; })) {
+      state.time = null;
+      state.slotId = null;
+      state.selectedSlot = null;
+    }
     renderSlotChips();
     return liveSlots;
   }
@@ -769,7 +824,7 @@
     }
     container.innerHTML = liveSlots.map(function (slot) {
       var label = slotTimeLabel(slot.slot_time);
-      var on = state.slotId === slot.id;
+      var on = !!(state.selectedSlot && state.selectedSlot.id === slot.id);
       return '<button type="button" class="bk-chip' + (on ? ' is-on' : '') +
         '" data-group="slot" data-id="' + label + '" data-slot-id="' + slot.id +
         '" aria-pressed="' + (on ? 'true' : 'false') + '">' + label + '</button>';
@@ -816,20 +871,45 @@
   }
 
   async function renderAvailablePartners() {
-    if (!partnersLoaded || !livePartners.length) {
-      if (el.partners) el.partners.innerHTML = '<p class="bk-hint">대화 파트너를 불러오는 중…</p>';
+    var requestedDate = state.date;
+    partnersLoading = true;
+    if (el.partners) el.partners.innerHTML = '<p class="bk-hint">대화 파트너를 불러오는 중…</p>';
+    if (!partnersLoaded || !allPartners.length) {
       await loadAvailablePartners();
     }
+    if (requestedDate !== state.date) return;
+    var availablePartnerIds = await fetchAvailablePartnerIds(requestedDate);
+    if (requestedDate !== state.date) return;
+    livePartners = allPartners.filter(function (partner) {
+      return partner.isTest || isTestPartnerId(partner.id) || !!availablePartnerIds[String(partner.id)];
+    });
+    if (state.partner && !livePartners.some(function (partner) { return partner.id === state.partner; })) {
+      state.partner = null;
+      state.time = null;
+      state.slotId = null;
+      state.selectedSlot = null;
+      liveSlots = [];
+    }
+    partnersLoading = false;
     renderPartnerCards();
     if (el.slots) el.slots.hidden = !state.partner;
     if (state.partner && state.date) await fetchPartnerSlots(state.partner, state.date);
+    updateFooter();
   }
 
   function isStepReady(step) {
     if (step === 0) return isActiveBookingLang(state.language) && state.purposes.length > 0;
     if (step === 1) return !!state.style;
     if (step === 2) return !!state.date;
-    if (step === 3) return !!state.partner && !!state.slotId;
+    if (step === 3) return !!(
+      !partnersLoading &&
+      state.partner &&
+      state.slotId &&
+      state.selectedSlot &&
+      state.selectedSlot.id === state.slotId &&
+      state.selectedSlot.partner === state.partner &&
+      state.selectedSlot.date === state.date
+    );
     return true;
   }
 
@@ -902,24 +982,30 @@
       } catch (e) { learnerId = ''; }
     }
 
-    var partner = getPartner(state.partner) || {};
-    var selectedSlot = null;
-    for (var i = 0; i < liveSlots.length; i++) {
-      if (liveSlots[i].id === state.slotId) { selectedSlot = liveSlots[i]; break; }
+    var partnerId = state.partner;
+    var partner = getPartner(partnerId) || {};
+    var selectedSlot = state.selectedSlot && {
+      id: state.selectedSlot.id,
+      slot_time: state.selectedSlot.slot_time,
+      partner: state.selectedSlot.partner,
+      date: state.selectedSlot.date
+    };
+    if (!selectedSlot || selectedSlot.id !== state.slotId || selectedSlot.partner !== partnerId || selectedSlot.date !== state.date) {
+      if (el.nextBtn) el.nextBtn.disabled = !isStepReady(state.step);
+      return;
     }
-    var scheduledAt = (selectedSlot && selectedSlot.slot_time)
-      || (state.date && state.time ? String(state.date) + 'T' + String(state.time) + ':00' : null);
+    var scheduledAt = selectedSlot.slot_time;
 
     var bookingId = null;
     if (typeof window.createPendingBooking === 'function' && learnerId) {
       bookingId = await window.createPendingBooking({
         learner_id: learnerId,
-        partner_id: state.partner,
-        partner_user_id: state.partner,
+        partner_id: partnerId,
+        partner_user_id: partnerId,
         partner_name: partner.name || '',
         language: state.language || '',
         scheduled_at: scheduledAt,
-        slot_id: state.slotId
+        slot_id: selectedSlot.id
       });
     } else if (typeof crypto !== 'undefined' && crypto.randomUUID) {
       bookingId = crypto.randomUUID();
@@ -928,8 +1014,8 @@
     var deducted = true;
     if (typeof window.handleConfirmBooking === 'function' && learnerId && bookingId) {
       deducted = await window.handleConfirmBooking(learnerId, bookingId, {
-        slotId: state.slotId,
-        partnerId: state.partner
+        slotId: selectedSlot.id,
+        partnerId: partnerId
       });
     } else if (typeof window.handleConfirmBooking === 'function') {
       deducted = false;
@@ -942,7 +1028,7 @@
     try {
       if (bookingId) localStorage.setItem('dayo_active_booking_id', bookingId);
       if (learnerId) localStorage.setItem('dayo_session_learner_id', learnerId);
-      if (state.partner) localStorage.setItem('dayo_partner_user_id', state.partner);
+      if (partnerId) localStorage.setItem('dayo_partner_user_id', partnerId);
       if (partner.name) localStorage.setItem('dayo_partner_name', partner.name);
       localStorage.setItem('dayo_next_session', JSON.stringify({
         partnerName: partner.name || '',
@@ -992,6 +1078,7 @@
       time: state.time,
       partner: state.partner,
       slotId: state.slotId,
+      selectedSlot: state.selectedSlot,
       step: state.step
     }));
   }
@@ -1021,6 +1108,16 @@
     state.time = draft.time || null;
     state.partner = draft.partner || null;
     state.slotId = draft.slotId || null;
+    state.selectedSlot = draft.selectedSlot &&
+      draft.selectedSlot.id === state.slotId &&
+      draft.selectedSlot.partner === state.partner &&
+      draft.selectedSlot.date === state.date
+      ? draft.selectedSlot
+      : null;
+    if (!state.selectedSlot) {
+      state.time = null;
+      state.slotId = null;
+    }
     if (state.date) {
       var parts = String(state.date).split('-');
       if (parts.length === 3) {
@@ -1171,6 +1268,8 @@
     state.time = null;
     state.partner = null;
     state.slotId = null;
+    state.selectedSlot = null;
+    liveSlots = [];
     state.viewYear = today.getFullYear();
     state.viewMonth = today.getMonth();
     loadComfortIntoState();
