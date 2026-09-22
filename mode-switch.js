@@ -927,7 +927,7 @@
       '    <button class="ms-social-btn ms-social-btn--kakao" type="button" data-ms-social="kakao" onclick="handleKakaoLogin()">', t('login.social.kakao'), '</button>',
       '    <button class="ms-social-btn ms-social-btn--google" type="button" data-ms-social="google" onclick="handleGoogleLogin()">', t('login.social.google'), '</button>',
       '  </div>',
-      '  <button class="ms-dismiss" type="button" data-ms-close">', t('login.dismiss'), '</button>',
+      '  <button class="ms-dismiss" type="button" data-ms-close>', t('login.dismiss'), '</button>',
       '</div>'
     ].join('');
     document.body.appendChild(overlay);
