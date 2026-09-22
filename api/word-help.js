@@ -91,7 +91,7 @@ module.exports = async function handler(req, res) {
   var timeout = setTimeout(function () { controller.abort(); }, 7000);
   try {
     var response = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + encodeURIComponent(apiKey),
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=' + encodeURIComponent(apiKey),
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
