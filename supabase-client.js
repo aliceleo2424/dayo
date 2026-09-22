@@ -362,16 +362,23 @@
     var isNewUser = createdAt && (Date.now() - createdAt < 24 * 60 * 60 * 1000);
     var wantsWelcome = !!(user.user_metadata && user.user_metadata.welcome_ticket);
     var currentTickets = profile.ticket_count != null ? Number(profile.ticket_count) : 0;
-    if ((wantsWelcome || isNewUser) && (!Number.isFinite(currentTickets) || currentTickets < 1)) {
+    var welcomeResolved = wantsWelcome && (!isNewUser || (Number.isFinite(currentTickets) && currentTickets >= 1));
+    if (wantsWelcome && isNewUser && (!Number.isFinite(currentTickets) || currentTickets < 1)) {
       try {
-        await client.from('profiles').update({ ticket_count: 1 }).eq('user_id', user.id);
-        profile.ticket_count = 1;
-        rememberLocalProfile(profile, user.email);
-        window._dayoAuthProfile = profile;
-        if (window.DayOTicketWallet && typeof window.DayOTicketWallet.setCount === 'function') {
-          window.DayOTicketWallet.setCount(1);
+        var welcomeGrant = await client.from('profiles').update({ ticket_count: 1 }).eq('user_id', user.id).select('ticket_count').maybeSingle();
+        if (!welcomeGrant.error && welcomeGrant.data) {
+          welcomeResolved = true;
+          profile.ticket_count = 1;
+          rememberLocalProfile(profile, user.email);
+          window._dayoAuthProfile = profile;
+          if (window.DayOTicketWallet && typeof window.DayOTicketWallet.setCount === 'function') {
+            window.DayOTicketWallet.setCount(1);
+          }
         }
       } catch (e) { /* ignore */ }
+    }
+    if (welcomeResolved && client.auth && typeof client.auth.updateUser === 'function') {
+      try { await client.auth.updateUser({ data: { welcome_ticket: false } }); } catch (e) { /* ignore */ }
     }
     window.DayOSendWelcomeEmail(user, profile);
     document.dispatchEvent(new CustomEvent('dayo:authprofile', { detail: { user: user, profile: profile } }));
@@ -523,9 +530,7 @@
       alert('로그인 실패: ' + error.message);
       return;
     }
-    if (data && data.user && data.user.user_metadata && data.user.user_metadata.welcome_ticket) {
-      await grantWelcomeTicket(supabase, data.user, email);
-    } else if (typeof window.fetchAuthProfile === 'function') {
+    if (typeof window.fetchAuthProfile === 'function') {
       try { await window.fetchAuthProfile(); } catch (e) { /* ignore */ }
     }
     window.location.href = '/mypage.html';
