@@ -1045,21 +1045,12 @@ async function saveSessionLog(transcript, extra) {
   extra = extra || {};
   var serialized = backupTranscriptLocal(transcript);
   var payload = {
-    client_key: getClientKey(),
     user_id: extra.userId || getAuthUserId() || null,
-    learner_id: extra.learnerId || extra.learner_id || null,
-    user_name: lsGet(USER_KEY, ''),
-    email: lsGet(EMAIL_KEY, ''),
-    room_name: extra.roomName || '',
-    booking_id: extra.bookingId || extra.booking_id || null,
-    session_id: extra.bookingId || extra.sessionId || extra.session_id || null,
-    transcript: serialized,
-    started_at: extra.startedAt || (serialized[0] && serialized[0].timestamp) || new Date().toISOString(),
-    ended_at: extra.endedAt || new Date().toISOString(),
-    partner_id: extra.partnerId || extra.partner_id || null
+    room_id: extra.roomName || '',
+    transcript: serialized
   };
-  if (!payload.partner_id && typeof document !== 'undefined' && document.body && document.body.getAttribute('data-dayo-role') === 'partner') {
-    payload.partner_id = payload.user_id || null;
+  if (Object.prototype.hasOwnProperty.call(extra, 'feedback')) {
+    payload.feedback = extra.feedback;
   }
 
   var client = getClient();
