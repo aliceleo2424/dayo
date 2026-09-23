@@ -63,6 +63,37 @@
     return latin >= 8 && latin > hangul;
   }
 
+  function segmentTranscriptText(raw) {
+    var sentences = String(raw || '').split(/[.?!]+/).map(function (part) {
+      return part.replace(/\s+/g, ' ').trim();
+    }).filter(Boolean);
+    var candidates = [];
+
+    sentences.forEach(function (sentence) {
+      var words = sentence.split(' ').filter(Boolean);
+      var clauses = [sentence];
+      if (words.length > 10) {
+        var parts = sentence.split(/\s+(?=(?:and|but|so|because|then)\b)/i);
+        clauses = [];
+        parts.forEach(function (part) {
+          var previous = clauses[clauses.length - 1];
+          var combined = previous ? previous + ' ' + part : part;
+          if (previous && combined.split(' ').filter(Boolean).length <= 10) {
+            clauses[clauses.length - 1] = combined;
+          } else {
+            clauses.push(part);
+          }
+        });
+      }
+      clauses.forEach(function (clause) {
+        clause = clause.replace(/\s+/g, ' ').trim();
+        if (clause) candidates.push(clause);
+      });
+    });
+
+    return candidates;
+  }
+
   function collectTranscriptRows() {
     if (window.DayOReviewQuiz && typeof window.DayOReviewQuiz.getTranscript === 'function') {
       try { return window.DayOReviewQuiz.getTranscript() || []; } catch (e) { /* ignore */ }
@@ -106,15 +137,20 @@
 
     function pushFrom(list) {
       var i;
+      var j;
+      var candidates;
       var text;
       var words;
       for (i = list.length - 1; i >= 0 && out.length < 3; i -= 1) {
-        text = normalizeSentence(utteranceText(list[i]));
-        words = text.split(' ').filter(Boolean);
-        if (!looksEnglish(text) || words.length < 4 || words.length > 10) continue;
-        if (seen[text.toLowerCase()]) continue;
-        seen[text.toLowerCase()] = true;
-        out.push({ en: text, kr: meaningFor(text) });
+        candidates = segmentTranscriptText(utteranceText(list[i]));
+        for (j = 0; j < candidates.length && out.length < 3; j += 1) {
+          text = normalizeSentence(candidates[j]);
+          words = text.split(' ').filter(Boolean);
+          if (!looksEnglish(text) || words.length < 3 || words.length > 10) continue;
+          if (seen[text.toLowerCase()]) continue;
+          seen[text.toLowerCase()] = true;
+          out.push({ en: text, kr: meaningFor(text) });
+        }
       }
     }
 
