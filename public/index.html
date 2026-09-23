@@ -1474,6 +1474,34 @@
     .quiz-level-emoji { font-size: 1.55rem; line-height: 1; flex: 0 0 auto; margin-top: 0.1rem; }
     .quiz-level-name { display: block; font-size: 0.98rem; font-weight: 800; margin-bottom: 0.18rem; }
     .quiz-level-desc { display: block; font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; }
+    .speaking-intro-icon { font-size: 2.7rem; line-height: 1; margin-bottom: 0.8rem; }
+    .speaking-intro-note { margin: 0.9rem 0 1.1rem; padding: 0.8rem 0.9rem; border-radius: var(--radius); background: var(--cream); color: var(--text-muted); font-size: 0.84rem; line-height: 1.55; }
+    .speaking-question { text-align: center; }
+    .speaking-step-label { display: inline-block; margin-bottom: 0.55rem; color: var(--coral); font-size: 0.75rem; font-weight: 800; letter-spacing: 0.04em; }
+    .speaking-prompt { margin: 0 auto 0.65rem; font-size: 1.35rem; font-weight: 800; line-height: 1.45; }
+    .speaking-hint { min-height: 1.5rem; margin-bottom: 0.65rem; color: var(--text-muted); font-size: 0.82rem; line-height: 1.5; }
+    .speaking-instruction { margin-bottom: 0.9rem; color: var(--text-muted); font-size: 0.86rem; line-height: 1.55; }
+    .speaking-mic {
+      display: flex; align-items: center; justify-content: center; width: 88px; height: 88px;
+      margin: 0 auto 0.7rem; border: 0; border-radius: 50%; background: var(--coral); color: #fff;
+      font-size: 2rem; cursor: pointer; box-shadow: 0 8px 24px rgba(255,107,87,0.28); transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .speaking-mic:hover { transform: translateY(-2px); }
+    .speaking-mic.is-listening { animation: speakingPulse 1.2s ease-in-out infinite; box-shadow: 0 0 0 10px rgba(255,107,87,0.14); }
+    .speaking-mic:disabled { cursor: not-allowed; opacity: 0.45; animation: none; }
+    @keyframes speakingPulse { 50% { transform: scale(1.06); } }
+    .speaking-mic-label { min-height: 1.4rem; margin-bottom: 0.65rem; color: var(--coral); font-size: 0.88rem; font-weight: 800; }
+    .speaking-status { min-height: 1.5rem; margin-bottom: 0.65rem; color: var(--text-muted); font-size: 0.82rem; line-height: 1.5; }
+    .speaking-status.is-error { color: var(--coral); font-weight: 700; }
+    .speaking-transcript { min-height: 58px; padding: 0.8rem 0.9rem; border: 1px solid var(--coral-pale); border-radius: var(--radius); background: var(--cream); text-align: left; font-size: 0.9rem; line-height: 1.55; overflow-wrap: anywhere; }
+    .speaking-transcript.is-empty { display: flex; align-items: center; justify-content: center; color: var(--text-muted); text-align: center; }
+    .speaking-actions { display: flex; gap: 0.55rem; margin-top: 0.75rem; }
+    .speaking-retry-btn { flex: 0 0 auto; padding: 0.85rem 1rem; border: 1.5px solid var(--coral-pale); border-radius: var(--radius); background: transparent; color: var(--coral); font-family: inherit; font-weight: 700; cursor: pointer; }
+    .speaking-actions .quiz-next-btn { flex: 1; margin-top: 0; }
+    .speaking-result-grid { display: grid; gap: 0.55rem; margin-bottom: 0.75rem; }
+    .speaking-result-item { display: flex; align-items: center; justify-content: space-between; gap: 0.8rem; padding: 0.8rem 0.9rem; border-radius: var(--radius); background: var(--cream); text-align: left; }
+    .speaking-result-item strong { font-size: 0.9rem; }
+    .speaking-result-item span { color: var(--coral); font-size: 0.8rem; font-weight: 800; text-align: right; }
     .quiz-feedback {
       margin-top: 0.75rem; padding: 0.7rem 0.9rem; border-radius: var(--radius);
       font-size: 0.88rem; font-weight: 700; line-height: 1.5; text-align: center;
@@ -2015,6 +2043,11 @@
       .quiz-level-card { padding: 0.75rem 0.8rem; }
       .quiz-level-name { font-size: 0.9rem; }
       .quiz-level-desc { font-size: 0.76rem; }
+      .speaking-prompt { font-size: 1.16rem; }
+      .speaking-mic { width: 76px; height: 76px; font-size: 1.75rem; }
+      .speaking-transcript { min-height: 50px; padding: 0.7rem 0.75rem; }
+      .speaking-actions { flex-direction: column; }
+      .speaking-retry-btn { width: 100%; }
       .quiz-title { font-size: 1.05rem; margin-bottom: 0.4rem; }
       .progress-wrap { height: 6px; margin-bottom: 0.2rem; }
       .progress-label { font-size: 0.68rem; }
@@ -2655,7 +2688,6 @@
           <button type="button" class="quiz-lang-tab" role="tab" aria-selected="false" data-quiz-lang="ja"><span class="quiz-lang-flag" aria-hidden="true">🇯🇵</span><span data-i18n="quiz.lang.ja">일본어</span></button>
           <button type="button" class="quiz-lang-tab" role="tab" aria-selected="false" data-quiz-lang="zh"><span class="quiz-lang-flag" aria-hidden="true">🇨🇳</span><span data-i18n="quiz.lang.zh">중국어</span></button>
           <button type="button" class="quiz-lang-tab" role="tab" aria-selected="false" data-quiz-lang="es"><span class="quiz-lang-flag" aria-hidden="true">🇪🇸</span><span data-i18n="quiz.lang.es">스페인어</span></button>
-          <button type="button" class="quiz-lang-tab" role="tab" aria-selected="false" data-quiz-lang="ko"><span class="quiz-lang-flag" aria-hidden="true">🇰🇷</span><span data-i18n="quiz.lang.ko">한국어</span></button>
         </div>
         <h2 class="quiz-title" id="quizTitle">외국인 앞 어색한 침묵 탈출, 돼요! ☕</h2>
         <div class="progress-wrap" id="quizProgressWrap" hidden><div class="progress-bar" id="progressBar"></div></div>
@@ -2790,8 +2822,8 @@
       }, 550);
     }, 2000);
 
-    /* Quiz — 6-language & level-adaptive diagnostic funnel */
-    const QUIZ_LANGS = ['en', 'fr', 'ja', 'zh', 'es', 'ko'];
+    /* Free speaking sense test — five target languages, no proficiency grading */
+    const QUIZ_LANGS = ['en', 'fr', 'ja', 'zh', 'es'];
     const QUIZ_LEVELS = ['intro', 'basic', 'challenge'];
     const QUIZ_LEVEL_META = [
       { id: 'intro', emoji: '🌱' },
@@ -2803,16 +2835,14 @@
       fr: '일주일 안에 프랑스어로 자기소개, 돼요! 🥐',
       ja: '현지 이자카야에서 막힘없이 주문, 돼요! 🍣',
       zh: '현지 카페에서 유창하게 주문, 돼요! 🧋',
-      es: '여행지에서 현지 친구 사귀기, 돼요! 💃',
-      ko: '처음 보는 사람과도 자연스럽게 대화, 돼요! 🍵'
+      es: '여행지에서 현지 친구 사귀기, 돼요! 💃'
     };
     const QUIZ_HOSTS = {
       en: { id: 'layna', name: 'Layna from UK', country: '영국', flag: '🇬🇧', initial: 'L', bio: '첫 인사부터 따뜻하게 받아주는 영국 파트너예요.' },
       fr: { id: 'emma', name: 'Emma from Belgium', country: '벨기에', flag: '🇧🇪', initial: 'E', bio: '벨기에 출신 Emma와 함께 인사부터 자기소개까지 차근차근 연습해요.' },
       ja: { id: 'yui', name: 'Yui from Japan', country: '일본', flag: '🇯🇵', initial: 'Y', bio: '천천히, 정확하게 받아주는 일본 파트너 Yui예요.' },
       zh: { id: 'mei', name: 'Mei from China', country: '중국', flag: '🇨🇳', initial: 'M', bio: '천천히 받아주는 중국 파트너 Mei와 인사부터 주문까지 연습해요.' },
-      es: { id: 'sofia', name: 'Sofia from Spain', country: '스페인', flag: '🇪🇸', initial: 'S', bio: '밝게 말을 걸어주는 스페인 파트너 Sofia와 여행 스몰토크를 연습해요.' },
-      ko: { id: 'jiwoo', name: 'Jiwoo from Seoul', country: '한국', flag: '🇰🇷', initial: 'J', bio: '편안하게 받아주는 서울 파트너 지우와 첫 인사를 연습해요.' }
+      es: { id: 'sofia', name: 'Sofia from Spain', country: '스페인', flag: '🇪🇸', initial: 'S', bio: '밝게 말을 걸어주는 스페인 파트너 Sofia와 여행 스몰토크를 연습해요.' }
     };
     const QUIZ_THEME_IMAGES = {
       fr: {
@@ -2835,12 +2865,6 @@
         shop: 'https://images.unsplash.com/photo-1583258295728-5698600ed855?auto=format&fit=crop&w=600&q=80',
         street: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80',
         hotel: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=600&q=80'
-      },
-      ko: {
-        cafe: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=600&q=80',
-        restaurant: 'https://images.unsplash.com/photo-1590301157890-4810ed352733?auto=format&fit=crop&w=600&q=80',
-        street: 'https://images.unsplash.com/photo-1517154421773-0529f29ea451?auto=format&fit=crop&w=600&q=80',
-        hotel: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=600&q=80'
       },
       es: {
         cafe: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&q=80',
@@ -2900,6 +2924,48 @@
         { theme: 'street', themeIndex: 3, question: '길에서 "지하철역이 어디예요?"를 물을 때 제일 자연스러운 한 줄은?', options: ['Subway me where.', 'I am station.', "Excuse me, where's the subway station?", 'Hotel subway please.'], answer: 2, imageUrl: quizThemeImage('en', 'street') },
         { theme: 'hotel', themeIndex: 4, question: '호텔 직원이 "Under what name is the reservation?"이라고 했어요. 뜻은?', options: ['예약하신 성함이 어떻게 되세요?', '몇 시에 체크아웃하세요?', '커피 드릴까요?', '지하철이 어디예요?'], answer: 0, imageUrl: quizThemeImage('en', 'hotel') }
       ]
+    };
+    const SPEAKING_TEST_BY_LANG = {
+      en: {
+        locale: 'en-US',
+        prompts: [
+          { text: 'How are you today?', hints: ['good', 'tired', 'happy'] },
+          { text: 'What did you do today?', hints: ['worked', 'ate', 'met'] },
+          { text: 'What are you going to do this weekend?', hints: ['weekend', 'meet', 'want', 'maybe'] }
+        ]
+      },
+      fr: {
+        locale: 'fr-FR',
+        prompts: [
+          { text: 'Comment allez-vous aujourd’hui ?', hints: ['bien', 'fatigué(e)', 'heureux / heureuse'] },
+          { text: 'Qu’avez-vous fait aujourd’hui ?', hints: ['travailler', 'manger', 'rencontrer'] },
+          { text: 'Qu’allez-vous faire ce week-end ?', hints: ['week-end', 'voir', 'vouloir', 'peut-être'] }
+        ]
+      },
+      ja: {
+        locale: 'ja-JP',
+        prompts: [
+          { text: '今日はどうですか？', hints: ['元気', '疲れた', 'うれしい'] },
+          { text: '今日は何をしましたか？', hints: ['仕事', '食べる', '会う'] },
+          { text: '今週末は何をする予定ですか？', hints: ['週末', '会う', 'したい', 'たぶん'] }
+        ]
+      },
+      zh: {
+        locale: 'zh-CN',
+        prompts: [
+          { text: '你今天怎么样？', hints: ['很好', '有点累', '很开心'] },
+          { text: '你今天做了什么？', hints: ['工作', '吃饭', '见朋友'] },
+          { text: '这个周末你打算做什么？', hints: ['周末', '见面', '想', '可能'] }
+        ]
+      },
+      es: {
+        locale: 'es-ES',
+        prompts: [
+          { text: '¿Cómo estás hoy?', hints: ['bien', 'cansado / cansada', 'feliz'] },
+          { text: '¿Qué hiciste hoy?', hints: ['trabajé', 'comí', 'vi'] },
+          { text: '¿Qué vas a hacer este fin de semana?', hints: ['fin de semana', 'ver', 'quiero', 'quizás'] }
+        ]
+      }
     };
 
     function escapeHtml(str) {
@@ -2981,26 +3047,18 @@
     const modalClose = document.getElementById('modalClose');
     const toast = document.getElementById('resultToast');
     let currentStep = 0, isTransitioning = false;
-    let quizPhase = 'level';
+    let quizPhase = 'start';
     let quizLang = 'en';
-    let quizLevel = 'basic';
-    let quizScore = 0;
-    let quizPack = packFromLangMap(FALLBACK_QUIZ_BY_LANG);
-    let quizItems = quizPack.en.levels.basic.questions;
-    let quizLoadPromise = null;
+    let speechAnswers = [null, null, null];
+    let speechRecognition = null;
+    let speechListening = false;
+    let speechDraft = '';
+    let speechStartedAt = 0;
+    let speechStopTimer = null;
+    let speechResultSaved = false;
 
-    function currentPack() {
-      return quizPack[quizLang] || quizPack.en;
-    }
-
-    function currentLevelBlock() {
-      const pack = currentPack();
-      return (pack.levels && pack.levels[quizLevel]) || pack.levels.basic;
-    }
-
-    function refreshQuizItems() {
-      const block = currentLevelBlock();
-      quizItems = (block && block.questions) || [];
+    function currentSpeakingTest() {
+      return SPEAKING_TEST_BY_LANG[quizLang] || SPEAKING_TEST_BY_LANG.en;
     }
 
     function setQuizProgressVisible(visible) {
@@ -3015,7 +3073,7 @@
     }
 
     function applyQuizHeadline() {
-      quizTitle.textContent = currentPack().headline || QUIZ_HEADLINES[quizLang];
+      quizTitle.textContent = t('quiz.speaking.title');
     }
 
     function syncQuizLangTabs() {
@@ -3026,66 +3084,43 @@
       });
     }
 
-    function derivePace(selfLevel, score) {
-      if (selfLevel === 'intro') return score >= 3 ? 'basic' : 'intro';
-      if (selfLevel === 'basic') {
-        if (score <= 1) return 'intro';
-        if (score >= 4) return 'challenge';
-        return 'basic';
-      }
-      return score <= 1 ? 'basic' : 'challenge';
+    function stopSpeakingRecognition() {
+      clearTimeout(speechStopTimer);
+      speechStopTimer = null;
+      if (!speechRecognition) return;
+      try { speechRecognition.onend = null; speechRecognition.abort(); } catch (e) { /* ignore */ }
+      speechRecognition = null;
+      speechListening = false;
     }
 
-    function goToLevelSelect() {
+    function resetSpeakingTest() {
+      stopSpeakingRecognition();
       currentStep = 0;
-      quizScore = 0;
+      speechAnswers = [null, null, null];
+      speechDraft = '';
+      speechResultSaved = false;
       isTransitioning = false;
-      quizPhase = 'level';
+      quizPhase = 'start';
       quizSlides.innerHTML = '';
       quizSlides.appendChild(renderLevelStep());
     }
 
     function applyQuizLang(lang, opts) {
       const restart = !opts || opts.restart !== false;
-      if (!quizPack[lang]) lang = 'en';
+      if (QUIZ_LANGS.indexOf(lang) < 0) lang = 'en';
       const changed = lang !== quizLang;
       quizLang = lang;
-      refreshQuizItems();
       applyQuizHeadline();
       syncQuizLangTabs();
       if (!restart || !changed || !quizModal.classList.contains('active')) return;
-      goToLevelSelect();
+      resetSpeakingTest();
     }
 
-    function loadQuizData() {
-      if (quizLoadPromise) return quizLoadPromise;
-      quizLoadPromise = fetch('quizData.json')
-        .then((res) => { if (!res.ok) throw new Error('quiz fetch failed: ' + res.status); return res.json(); })
-        .then((data) => {
-          quizPack = packFromLangMap(Array.isArray(data) ? { en: data } : data);
-          refreshQuizItems();
-          applyQuizHeadline();
-        })
-        .catch(() => {
-          quizPack = packFromLangMap(FALLBACK_QUIZ_BY_LANG);
-          refreshQuizItems();
-          applyQuizHeadline();
-        });
-      return quizLoadPromise;
-    }
-
-    function startQuizAtLevel(level) {
-      quizLevel = QUIZ_LEVELS.indexOf(level) >= 0 ? level : 'basic';
-      refreshQuizItems();
+    function startSpeakingTest() {
       currentStep = 0;
-      quizScore = 0;
-      quizPhase = 'quiz';
-      quizItems.forEach((item) => {
-        const src = item.imageUrl || item.image;
-        if (!src) return;
-        const pre = new Image();
-        pre.src = src;
-      });
+      speechAnswers = [null, null, null];
+      speechResultSaved = false;
+      quizPhase = 'speaking';
       quizSlides.innerHTML = '';
       quizSlides.appendChild(renderQuestion(0));
     }
@@ -3094,26 +3129,21 @@
       setQuizProgressVisible(false);
       const slide = document.createElement('div');
       slide.className = 'quiz-slide active';
-      const cards = QUIZ_LEVEL_META.map((meta) => (
-        `<button type="button" class="quiz-level-card" data-quiz-level="${meta.id}">` +
-          `<span class="quiz-level-emoji" aria-hidden="true">${meta.emoji}</span>` +
-          `<span><span class="quiz-level-name">${escapeHtml(t('quiz.level.' + meta.id + '.name'))}</span>` +
-          `<span class="quiz-level-desc">${escapeHtml(t('quiz.level.' + meta.id + '.desc'))}</span></span>` +
-        `</button>`
-      )).join('');
-      slide.innerHTML = `<div class="quiz-start"><p class="quiz-start-desc">${escapeHtml(t('quiz.levelHint'))}</p><div class="quiz-level-grid">${cards}</div></div>`;
-      slide.querySelectorAll('[data-quiz-level]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          if (isTransitioning) return;
-          isTransitioning = true;
-          slide.classList.add('exit-left');
-          const level = btn.getAttribute('data-quiz-level');
-          setTimeout(() => {
-            slide.remove();
-            startQuizAtLevel(level);
-            isTransitioning = false;
-          }, 350);
-        });
+      slide.innerHTML = `<div class="quiz-start">
+        <div class="speaking-intro-icon" aria-hidden="true">🎙️</div>
+        <p class="quiz-start-desc">${escapeHtml(t('quiz.speaking.intro'))}</p>
+        <p class="speaking-intro-note">${escapeHtml(t('quiz.speaking.privacy'))}</p>
+        <button class="quiz-next-btn" type="button">${escapeHtml(t('quiz.speaking.start'))}</button>
+      </div>`;
+      slide.querySelector('.quiz-next-btn').addEventListener('click', () => {
+        if (isTransitioning) return;
+        isTransitioning = true;
+        slide.classList.add('exit-left');
+        setTimeout(() => {
+          slide.remove();
+          startSpeakingTest();
+          isTransitioning = false;
+        }, 350);
       });
       return slide;
     }
@@ -3152,74 +3182,190 @@
     }
 
     function renderQuestion(index) {
-      const q = quizItems[index];
+      const test = currentSpeakingTest();
+      const q = test.prompts[index];
       setQuizProgressVisible(true);
-      setQuizProgress(index, quizItems.length);
+      setQuizProgress(index, test.prompts.length);
       const slide = document.createElement('div');
       slide.className = 'quiz-slide active';
-      const src = q.imageUrl || q.image || quizThemeImage(quizLang, q.theme);
-      const fallback = q.imageFallback || quizThemeRemoteFallback(quizLang, q.theme, src);
-      const fallbackAttr = fallback ? ` data-fallback="${escapeHtml(fallback)}"` : '';
-      const imageBlock = src
-        ? `<div class="quiz-illustration"><img src="${escapeHtml(src)}"${fallbackAttr} alt="${escapeHtml(t('quiz.theme.' + (q.theme || 'cafe')))}" decoding="async" onerror="handleQuizImageError(this)"><div class="quiz-illustration-fallback" aria-hidden="true">${quizThemeFallbackEmoji(q.theme)}</div></div>`
-        : '';
-      slide.innerHTML = `${imageBlock}<div class="situation-card"><div class="situation-tag">${escapeHtml(situationBadge(q, index, quizItems.length))}</div><p class="situation-text">${escapeHtml(q.question)}</p></div><div class="quiz-options">${q.options.map((o, i) => `<button class="quiz-option" data-index="${i}">${escapeHtml(o)}</button>`).join('')}</div><p class="quiz-feedback" hidden></p><p class="quiz-explanation" hidden></p><button class="quiz-next-btn" type="button" hidden></button>`;
-      bindQuizIllustration(slide, q, quizItems[index + 1]);
-      slide.querySelectorAll('.quiz-option').forEach(btn => btn.addEventListener('click', () => handleAnswer(slide, index, btn)));
+      const saved = speechAnswers[index];
+      const supported = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+      const hints = q.hints && q.hints.length ? q.hints.join(' · ') : '';
+      slide.innerHTML = `<div class="speaking-question">
+        <span class="speaking-step-label">STEP ${index + 1} / ${test.prompts.length}</span>
+        <h3 class="speaking-prompt" lang="${escapeHtml(test.locale)}">${escapeHtml(q.text)}</h3>
+        <p class="speaking-hint">${hints ? escapeHtml(t('quiz.speaking.hint', { hints })) : ''}</p>
+        <p class="speaking-instruction">${escapeHtml(t('quiz.speaking.instruction'))}</p>
+        <button class="speaking-mic" type="button" aria-label="${escapeHtml(t('quiz.speaking.micStart'))}"${supported ? '' : ' disabled'}>🎙️</button>
+        <p class="speaking-mic-label">${escapeHtml(t(supported ? 'quiz.speaking.micStart' : 'quiz.speaking.unsupported'))}</p>
+        <p class="speaking-status${supported ? '' : ' is-error'}" role="status">${supported ? '' : escapeHtml(t('quiz.speaking.unsupportedHelp'))}</p>
+        <div class="speaking-transcript${saved ? '' : ' is-empty'}" aria-live="polite">${escapeHtml(saved ? saved.text : t('quiz.speaking.transcriptEmpty'))}</div>
+        <div class="speaking-actions">
+          <button class="speaking-retry-btn" type="button"${saved ? '' : ' hidden'}>${escapeHtml(t('quiz.speaking.retry'))}</button>
+          <button class="quiz-next-btn" type="button"${saved ? '' : ' hidden'}>${escapeHtml(t(index + 1 >= test.prompts.length ? 'quiz.resultBtn' : 'quiz.speaking.next'))}</button>
+        </div>
+      </div>`;
+      const micBtn = slide.querySelector('.speaking-mic');
+      micBtn.addEventListener('click', () => {
+        if (speechListening) stopCurrentSpeech(slide, index);
+        else startCurrentSpeech(slide, index);
+      });
+      slide.querySelector('.speaking-retry-btn').addEventListener('click', () => {
+        speechAnswers[index] = null;
+        speechDraft = '';
+        startCurrentSpeech(slide, index);
+      });
+      slide.querySelector('.quiz-next-btn').addEventListener('click', () => advanceQuiz(slide, index));
       return slide;
     }
 
+    function speechUnits(text, lang) {
+      const value = String(text || '').trim();
+      if (!value) return 0;
+      if (lang === 'ja' || lang === 'zh') {
+        return (value.match(/[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/gu) || []).length;
+      }
+      return (value.match(/[\p{L}\p{M}]+(?:['’\-][\p{L}\p{M}]+)*/gu) || []).length;
+    }
+
+    function updateSpeakingSlide(slide, index, options) {
+      if (!slide || !slide.isConnected) return;
+      const opts = options || {};
+      const mic = slide.querySelector('.speaking-mic');
+      const micLabel = slide.querySelector('.speaking-mic-label');
+      const status = slide.querySelector('.speaking-status');
+      const transcript = slide.querySelector('.speaking-transcript');
+      const retry = slide.querySelector('.speaking-retry-btn');
+      const next = slide.querySelector('.quiz-next-btn');
+      const text = opts.text != null ? opts.text : ((speechAnswers[index] && speechAnswers[index].text) || speechDraft);
+      mic.classList.toggle('is-listening', speechListening);
+      mic.setAttribute('aria-label', t(speechListening ? 'quiz.speaking.micStop' : 'quiz.speaking.micStart'));
+      micLabel.textContent = t(speechListening ? 'quiz.speaking.listening' : 'quiz.speaking.micStart');
+      status.textContent = opts.statusKey ? t(opts.statusKey) : '';
+      status.classList.toggle('is-error', !!opts.error);
+      transcript.textContent = text || t('quiz.speaking.transcriptEmpty');
+      transcript.classList.toggle('is-empty', !text);
+      const hasAnswer = !!speechAnswers[index];
+      retry.hidden = speechListening || !hasAnswer;
+      next.hidden = speechListening || !hasAnswer;
+    }
+
+    function finishCurrentSpeech(slide, index, errorKey) {
+      clearTimeout(speechStopTimer);
+      speechStopTimer = null;
+      const durationMs = speechStartedAt ? Math.max(0, Date.now() - speechStartedAt) : 0;
+      const text = String(speechDraft || '').trim();
+      speechRecognition = null;
+      speechListening = false;
+      speechStartedAt = 0;
+      if (text && !errorKey) {
+        speechAnswers[index] = { text, units: speechUnits(text, quizLang), durationMs };
+        updateSpeakingSlide(slide, index, { text, statusKey: 'quiz.speaking.captured' });
+        return;
+      }
+      updateSpeakingSlide(slide, index, {
+        text,
+        statusKey: errorKey || 'quiz.speaking.noSpeech',
+        error: true
+      });
+    }
+
+    function startCurrentSpeech(slide, index) {
+      const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!Ctor || speechListening) return;
+      stopSpeakingRecognition();
+      speechAnswers[index] = null;
+      speechDraft = '';
+      let recognition;
+      try {
+        recognition = new Ctor();
+        recognition.lang = currentSpeakingTest().locale;
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+        recognition.onstart = function () {
+          speechListening = true;
+          speechStartedAt = Date.now();
+          clearTimeout(speechStopTimer);
+          speechStopTimer = setTimeout(function () { stopCurrentSpeech(slide, index); }, 20000);
+          updateSpeakingSlide(slide, index, { statusKey: 'quiz.speaking.speakNow' });
+        };
+        recognition.onresult = function (event) {
+          let finalText = '';
+          let interimText = '';
+          for (let i = 0; i < event.results.length; i += 1) {
+            const chunk = String((event.results[i][0] && event.results[i][0].transcript) || '').trim();
+            if (!chunk) continue;
+            if (event.results[i].isFinal) finalText += (finalText ? ' ' : '') + chunk;
+            else interimText += (interimText ? ' ' : '') + chunk;
+          }
+          speechDraft = (finalText + (interimText ? ' ' + interimText : '')).trim();
+          updateSpeakingSlide(slide, index, { text: speechDraft, statusKey: 'quiz.speaking.speakNow' });
+        };
+        recognition.onerror = function (event) {
+          const code = event && event.error;
+          if (code === 'aborted') return;
+          if (code === 'not-allowed' || code === 'service-not-allowed') {
+            finishCurrentSpeech(slide, index, 'quiz.speaking.permissionDenied');
+          } else if (code === 'no-speech') {
+            finishCurrentSpeech(slide, index, 'quiz.speaking.noSpeech');
+          } else {
+            finishCurrentSpeech(slide, index, 'quiz.speaking.error');
+          }
+        };
+        recognition.onend = function () {
+          if (speechRecognition !== recognition) return;
+          finishCurrentSpeech(slide, index, '');
+        };
+        speechRecognition = recognition;
+        speechListening = true;
+        updateSpeakingSlide(slide, index, { statusKey: 'quiz.speaking.speakNow' });
+        recognition.start();
+      } catch (err) {
+        speechRecognition = null;
+        speechListening = false;
+        updateSpeakingSlide(slide, index, { statusKey: 'quiz.speaking.error', error: true });
+      }
+    }
+
+    function stopCurrentSpeech(slide, index) {
+      if (!speechRecognition || !speechListening) return;
+      updateSpeakingSlide(slide, index, { text: speechDraft, statusKey: 'quiz.speaking.processing' });
+      try { speechRecognition.stop(); } catch (err) { finishCurrentSpeech(slide, index, 'quiz.speaking.error'); }
+    }
+
     function persistSpeakingTestResult() {
-      const pace = derivePace(quizLevel, quizScore);
-      const total = quizItems.length || 4;
-      const resultScore = Math.round((quizScore / total) * 100);
-      const resultLevel = t('quiz.pace.' + pace + '.name');
+      if (speechResultSaved) return;
+      speechResultSaved = true;
       const payload = {
-        speaking_level: resultLevel,
-        last_test_score: resultScore,
-        last_test_date: new Date().toISOString(),
-        pace: pace,
-        raw_score: quizScore,
-        total: total
+        type: 'speaking-sense',
+        language: quizLang,
+        completed_steps: speechAnswers.filter(Boolean).length,
+        utterance_units: speechAnswers.map((answer) => answer ? answer.units : 0),
+        completed_at: new Date().toISOString()
       };
       try {
         var hist = [];
-        try { hist = JSON.parse(localStorage.getItem('dayo_speaking_test_history') || '[]'); } catch (e) { hist = []; }
+        try { hist = JSON.parse(localStorage.getItem('dayo_speaking_sense_history') || '[]'); } catch (e) { hist = []; }
         if (!Array.isArray(hist)) hist = [];
         hist.unshift(payload);
-        localStorage.setItem('dayo_speaking_test_history', JSON.stringify(hist.slice(0, 20)));
+        localStorage.setItem('dayo_speaking_sense_history', JSON.stringify(hist.slice(0, 20)));
       } catch (e) { /* ignore */ }
-
-      (async function () {
-        try {
-          var supabase = window.supabaseClient;
-          if (!supabase || !supabase.auth) return;
-          var sessionRes = await supabase.auth.getSession();
-          var session = sessionRes && sessionRes.data && sessionRes.data.session;
-          if (!session || !session.user) return;
-          var update = {
-            speaking_level: payload.speaking_level,
-            last_test_score: payload.last_test_score,
-            last_test_date: payload.last_test_date
-          };
-          var res = await supabase.from('profiles').update(update).eq('user_id', session.user.id).select('user_id');
-          if (res && (res.error || !res.data || !res.data.length)) {
-            await supabase.from('profiles').update(update).eq('id', session.user.id);
-          }
-        } catch (err) {
-          console.warn('Speaking test save skipped', err);
-        }
-      })();
     }
 
     function renderResultStep() {
       persistSpeakingTestResult();
       setQuizProgressVisible(true);
-      setQuizProgress(quizItems.length, quizItems.length);
-      const pace = derivePace(quizLevel, quizScore);
-      const course = (currentLevelBlock() && currentLevelBlock().course) || { name: '', desc: '' };
-      const levelLabel = t('quiz.level.' + quizLevel + '.name');
-      const leadTitle = t('quiz.lead.title.' + quizLang, { level: levelLabel });
+      setQuizProgress(3, 3);
+      const completed = speechAnswers.filter(Boolean).length;
+      const secondUnits = speechAnswers[1] ? speechAnswers[1].units : 0;
+      const thirdUnits = speechAnswers[2] ? speechAnswers[2].units : 0;
+      const secondReady = secondUnits >= (quizLang === 'ja' || quizLang === 'zh' ? 6 : 4);
+      const thirdReady = !!speechAnswers[2] && (thirdUnits >= (quizLang === 'ja' || quizLang === 'zh' ? 10 : 7) || speechAnswers[2].durationMs >= 8000);
+      const feedbackKey = thirdReady
+        ? 'quiz.speaking.feedback.flow'
+        : (completed >= 2 ? 'quiz.speaking.feedback.pause' : 'quiz.speaking.feedback.open');
+      const leadTitle = t('quiz.speaking.leadTitle');
       const topicCards = quizTopicCardsForLang(quizLang).map((title, idx) => (
         '<article class="quiz-topic-card">' +
           '<p class="quiz-topic-card-title">' + escapeHtml(title) + '</p>' +
@@ -3231,17 +3377,16 @@
       const slide = document.createElement('div');
       slide.className = 'quiz-slide active';
       slide.innerHTML = `<div class="quiz-result">
-        <p class="quiz-result-score">${escapeHtml(t('quiz.resultScore', { score: String(quizScore), total: String(quizItems.length) }))}</p>
-        <h3 class="quiz-result-lead">${escapeHtml(t('quiz.resultLead'))}</h3>
+        <p class="quiz-result-score">${escapeHtml(t('quiz.speaking.completed', { completed: String(completed), total: '3' }))}</p>
+        <h3 class="quiz-result-lead">${escapeHtml(t('quiz.speaking.resultTitle'))}</h3>
         <div class="quiz-result-block">
-          <p class="quiz-result-label">${escapeHtml(t('quiz.paceLabel'))}</p>
-          <p class="quiz-result-course-name">${escapeHtml(t('quiz.pace.' + pace + '.name'))}</p>
-          <p class="quiz-result-course-desc">${escapeHtml(t('quiz.pace.' + pace + '.desc'))}</p>
-        </div>
-        <div class="quiz-result-block">
-          <p class="quiz-result-label">${escapeHtml(t('quiz.resultCourseLabel'))}</p>
-          <p class="quiz-result-course-name">${escapeHtml(course.name)}</p>
-          <p class="quiz-result-course-desc">${escapeHtml(course.desc)}</p>
+          <p class="quiz-result-label">${escapeHtml(t('quiz.speaking.senseLabel'))}</p>
+          <div class="speaking-result-grid">
+            <div class="speaking-result-item"><strong>${escapeHtml(t('quiz.speaking.metric.open'))}</strong><span>${escapeHtml(t(speechAnswers[0] ? 'quiz.speaking.metric.done' : 'quiz.speaking.metric.try'))}</span></div>
+            <div class="speaking-result-item"><strong>${escapeHtml(t('quiz.speaking.metric.sentence'))}</strong><span>${escapeHtml(t(secondReady ? 'quiz.speaking.metric.done' : 'quiz.speaking.metric.practice'))}</span></div>
+            <div class="speaking-result-item"><strong>${escapeHtml(t('quiz.speaking.metric.continue'))}</strong><span>${escapeHtml(t(thirdReady ? 'quiz.speaking.metric.done' : 'quiz.speaking.metric.practice'))}</span></div>
+          </div>
+          <p class="quiz-result-course-desc">${escapeHtml(t(feedbackKey))}</p>
         </div>
         <div class="quiz-result-block">
           <p class="quiz-result-label">${escapeHtml(t('quiz.resultTopicsTitle'))}</p>
@@ -3275,7 +3420,7 @@
             <a class="quiz-lead-cta" href="mypage.html" data-ms-guard data-ticket-gate data-quiz-start-cta>${escapeHtml(t('quiz.lead.startCta'))}</a>
           </div>
         </div>
-        <button class="quiz-result-retry" type="button">${escapeHtml(t('quiz.resultRetry'))}</button>
+        <button class="quiz-result-retry" type="button">${escapeHtml(t('quiz.speaking.retryAll'))}</button>
       </div>`;
       bindQuizLeadForm(slide);
       slide.querySelectorAll('[data-quiz-topic]').forEach((btn) => {
@@ -3285,7 +3430,7 @@
           try { window.localStorage.setItem('dayo_quiz_topic', topics[idx] || ''); } catch (e) { /* ignore */ }
         });
       });
-      slide.querySelector('.quiz-result-retry').addEventListener('click', goToLevelSelect);
+      slide.querySelector('.quiz-result-retry').addEventListener('click', resetSpeakingTest);
       return slide;
     }
 
@@ -3371,8 +3516,8 @@
           return store.saveQuizLead({
             email: fullEmail,
             language: quizLang || 'en',
-            level: quizLevel || 'starter',
-            score: quizScore
+            level: 'speaking-sense',
+            score: speechAnswers.filter(Boolean).length
           });
         };
 
@@ -3382,8 +3527,8 @@
           body: JSON.stringify({
             email: fullEmail,
             language: quizLang || 'en',
-            level: quizLevel || 'starter',
-            score: quizScore,
+            level: 'speaking-sense',
+            score: speechAnswers.filter(Boolean).length,
             origin: window.location.origin
           })
         }).then(function (resp) {
@@ -3413,53 +3558,15 @@
       }
     }
 
-    function handleAnswer(slide, index, btn) {
-      if (isTransitioning) return;
-      const q = quizItems[index];
-      const clickedIndex = parseInt(btn.dataset.index, 10);
-      slide.querySelectorAll('.quiz-option').forEach((b) => { b.disabled = true; });
-
-      let isCorrect = true;
-      if (typeof q.answerIndex === 'number') {
-        isCorrect = clickedIndex === q.answerIndex;
-        if (isCorrect) quizScore += 1;
-        btn.classList.add(isCorrect ? 'is-correct' : 'is-wrong');
-        if (!isCorrect) {
-          const correctBtn = slide.querySelector(`.quiz-option[data-index="${q.answerIndex}"]`);
-          if (correctBtn) correctBtn.classList.add('is-correct');
-        }
-      }
-
-      setQuizProgress(index + 1, quizItems.length);
-
-      const feedback = slide.querySelector('.quiz-feedback');
-      feedback.textContent = t(isCorrect ? 'quiz.feedback.correct' : 'quiz.feedback.wrong');
-      feedback.classList.add(isCorrect ? 'is-correct' : 'is-wrong');
-      feedback.hidden = false;
-
-      if (q.explanation) {
-        const exp = slide.querySelector('.quiz-explanation');
-        exp.textContent = '💡 ' + q.explanation;
-        exp.hidden = false;
-      }
-
-      const isLast = index + 1 >= quizItems.length;
-      const nextBtn = slide.querySelector('.quiz-next-btn');
-      nextBtn.textContent = t(isLast ? 'quiz.resultBtn' : 'quiz.nextBtn');
-      nextBtn.hidden = false;
-      nextBtn.addEventListener('click', () => advanceQuiz(slide, index), { once: true });
-      nextBtn.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-    }
-
     function advanceQuiz(slide, index) {
-      if (isTransitioning) return;
+      if (isTransitioning || !speechAnswers[index]) return;
       isTransitioning = true;
       slide.classList.add('exit-left');
       setTimeout(() => {
         slide.remove();
         currentStep = index + 1;
-        if (currentStep < quizItems.length) {
-          quizPhase = 'quiz';
+        if (currentStep < currentSpeakingTest().prompts.length) {
+          quizPhase = 'speaking';
           quizSlides.appendChild(renderQuestion(currentStep));
         } else {
           quizPhase = 'result';
@@ -3471,13 +3578,13 @@
 
     function rerenderCurrentQuizSlide() {
       if (!quizModal.classList.contains('active')) return;
-      refreshQuizItems();
+      stopSpeakingRecognition();
       applyQuizHeadline();
       syncQuizLangTabs();
       quizSlides.innerHTML = '';
-      if (quizPhase === 'level' || quizPhase === 'start') quizSlides.appendChild(renderLevelStep());
+      if (quizPhase === 'start') quizSlides.appendChild(renderLevelStep());
       else if (quizPhase === 'result') quizSlides.appendChild(renderResultStep());
-      else if (quizItems.length) quizSlides.appendChild(renderQuestion(currentStep));
+      else quizSlides.appendChild(renderQuestion(currentStep));
     }
     document.addEventListener('dayo:langchange', rerenderCurrentQuizSlide);
 
@@ -3488,10 +3595,13 @@
     });
 
     function openQuizModal() {
+      stopSpeakingRecognition();
       currentStep = 0;
-      quizScore = 0;
+      speechAnswers = [null, null, null];
+      speechDraft = '';
+      speechResultSaved = false;
       isTransitioning = false;
-      quizPhase = 'level';
+      quizPhase = 'start';
       quizSlides.innerHTML = '';
       quizModal.classList.add('active');
       applyQuizHeadline();
@@ -3499,21 +3609,18 @@
       quizSlides.appendChild(renderLevelStep());
       if (window.DayOScrollLock) window.DayOScrollLock.lock();
       else document.body.style.overflow = 'hidden';
-      loadQuizData().then(() => {
-        if (!quizModal.classList.contains('active') || quizPhase !== 'level') return;
-        applyQuizHeadline();
-      });
     }
 
     function closeQuizModal() {
       if (!quizModal.classList.contains('active')) return;
+      stopSpeakingRecognition();
       quizModal.classList.remove('active');
       if (window.DayOScrollLock) window.DayOScrollLock.unlock();
       else document.body.style.overflow = '';
       quizSlides.innerHTML = '';
-      quizPhase = 'level';
+      quizPhase = 'start';
       progressBar.style.width = '0%';
-      progressLabel.textContent = t('quiz.progressFormat', { current: '0', total: '4' });
+      progressLabel.textContent = t('quiz.progressFormat', { current: '0', total: '3' });
       setQuizProgressVisible(false);
     }
 
