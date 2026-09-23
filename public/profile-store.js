@@ -1075,7 +1075,7 @@ async function saveSessionLog(transcript, extra) {
 }
 
 function sessionEndedAt(row) {
-  var raw = row && (row.ended_at || row.endedAt);
+  var raw = row && (row.created_at || row.ended_at || row.endedAt);
   var date = raw ? new Date(raw) : null;
   return date && !isNaN(date.getTime()) ? date : null;
 }
@@ -1087,34 +1087,18 @@ function isSameMonth(date, now) {
 async function fetchPartnerSessionLogs() {
   var client = getClient();
   var uid = getAuthUserId();
-  var email = String(lsGet(EMAIL_KEY, '') || '').trim().toLowerCase();
-  var clientKey = getClientKey();
   var rows = [];
 
-  if (client) {
+  if (client && uid) {
     try {
       var result = await client
         .from('session_logs')
-        .select('id, ended_at, started_at, created_at, room_name, user_id, partner_id, email, client_key')
-        .order('ended_at', { ascending: false })
+        .select('id, user_id, room_id, created_at')
+        .eq('user_id', uid)
+        .order('created_at', { ascending: false })
         .limit(500);
-      if (result.error) {
-        result = await client
-          .from('session_logs')
-          .select('id, ended_at, started_at, created_at, room_name, user_id, email, client_key')
-          .order('ended_at', { ascending: false })
-          .limit(500);
-      }
       if (result.error) throw result.error;
-      var all = result.data || [];
-      rows = all.filter(function (row) {
-        if (!sessionEndedAt(row)) return false;
-        if (row.room_name === 'quiz-lead') return false;
-        if (uid) return row.partner_id === uid || row.user_id === uid;
-        if (email && row.email && String(row.email).toLowerCase() === email) return true;
-        if (clientKey && row.client_key === clientKey) return true;
-        return false;
-      });
+      rows = (result.data || []).filter(function (row) { return !!sessionEndedAt(row); });
     } catch (err) {
       console.warn('[DayO] partner session_logs fetch failed', err);
     }
@@ -1125,9 +1109,8 @@ async function fetchPartnerSessionLogs() {
     if (local && local.length) {
       rows.push({
         id: 'local-last',
-        ended_at: new Date().toISOString(),
-        started_at: null,
-        room_name: 'local'
+        created_at: new Date().toISOString(),
+        room_id: 'local'
       });
     }
   }

@@ -859,11 +859,12 @@
   function reportFromSessionLog(row) {
     if (!row) return null;
     return normalizeReportCard({
+      booking_id: row.room_id || '',
       partner_name: row.partner_name || 'DayO Partner',
       spoken_sentence: utteranceFromLog(row) || '오늘도 따뜻한 대화 한 잔',
       keyword: row.keyword || 'daily',
       partner_comment: row.partner_comment || '',
-      created_at: row.ended_at || row.created_at || ''
+      created_at: row.created_at || ''
     });
   }
 
@@ -1099,18 +1100,10 @@
       if (!reports.length) {
         var logQ = await client
           .from('session_logs')
-          .select('*')
+          .select('id, user_id, room_id, transcript, feedback, created_at')
           .eq('user_id', user.id)
-          .order('ended_at', { ascending: false })
+          .order('created_at', { ascending: false })
           .limit(8);
-        if (logQ.error) {
-          logQ = await client
-            .from('session_logs')
-            .select('*')
-            .eq('learner_id', user.id)
-            .order('ended_at', { ascending: false })
-            .limit(8);
-        }
         if (!logQ.error) {
           reports = (logQ.data || []).map(reportFromSessionLog).filter(Boolean);
         }
