@@ -3708,6 +3708,11 @@
       let activeCall = null;
       let hostCallTimer = 0;
       let hostCallAttempts = 0;
+      let hostCallConnecting = false;
+      let hostCallConnected = false;
+      let participantPeerId = '';
+      let participantPeerRetryTimer = 0;
+      let participantPeerRetryAttempts = 0;
       let destroyed = false;
       let observerGuestCall = null;
       let observerHostCall = null;
@@ -3715,7 +3720,6 @@
       let observerGuestPeerId = '';
       const observerOutboundCalls = {};
       let HOST_ID = '';
-      const MAX_HOST_CALL_ATTEMPTS = 12;
 
       function isObserverPeerId(peerId) {
         return /_observer/i.test(String(peerId || ''));
@@ -3829,32 +3833,60 @@
 
       function callHostPeer(hostPeerId) {
         if (destroyed || !peer || !localStream || currentRole === 'partner' || isObserver) return;
-        if (activeCall) {
-          try { activeCall.close(); } catch (e) { /* ignore */ }
-          activeCall = null;
+        if (hostCallConnecting || hostCallConnected || activeCall) return;
+        if (!peer.open) {
+          scheduleHostCall(1500);
+          return;
         }
+        hostCallConnecting = true;
         hostCallAttempts += 1;
         console.log('📞 Calling host peer:', hostPeerId, 'attempt', hostCallAttempts);
-        const call = peer.call(hostPeerId, localStream);
-        if (!call) return;
+        var call = null;
+        try {
+          call = peer.call(hostPeerId, localStream);
+        } catch (err) {
+          console.warn('Host call error:', err && err.type ? err.type : err);
+        }
+        if (!call) {
+          hostCallConnecting = false;
+          scheduleHostCall();
+          return;
+        }
         activeCall = call;
+        var receivedStream = false;
         call.on('stream', function (incomingStream) {
+          if (activeCall !== call) return;
+          receivedStream = true;
+          hostCallConnecting = false;
+          hostCallConnected = true;
+          hostCallAttempts = 0;
+          clearTimeout(hostCallTimer);
+          hostCallTimer = 0;
           attachRemoteStream(incomingStream);
         });
-        call.on('close', function () {
-          if (activeCall === call) activeCall = null;
-        });
+        var retryIfCurrent = function () {
+          if (activeCall !== call) return;
+          activeCall = null;
+          hostCallConnecting = false;
+          hostCallConnected = false;
+          if (!destroyed) scheduleHostCall(receivedStream ? 1500 : undefined);
+        };
+        call.on('close', retryIfCurrent);
         call.on('error', function (err) {
           console.warn('Host call error:', err && err.type ? err.type : err);
+          retryIfCurrent();
         });
       }
 
-      function scheduleHostCall() {
-        if (destroyed || currentRole === 'partner' || isObserver) return;
-        clearTimeout(hostCallTimer);
+      function scheduleHostCall(delay) {
+        if (destroyed || currentRole === 'partner' || isObserver || hostCallConnected || hostCallConnecting || hostCallTimer) return;
+        var retryDelay = typeof delay === 'number'
+          ? delay
+          : Math.min(1500 + (hostCallAttempts * 500), 5000);
         hostCallTimer = setTimeout(function () {
+          hostCallTimer = 0;
           callHostPeer(HOST_ID);
-        }, hostCallAttempts === 0 ? 1500 : 1500);
+        }, retryDelay);
       }
 
       function bindSessionPeerHelpers() {
@@ -4088,6 +4120,87 @@
         }
       }
 
+      function schedulePartnerPeerRetry(instance) {
+        if (destroyed || isObserver || currentRole !== 'partner' || participantPeerRetryTimer) return;
+        if (instance && peer !== instance) return;
+        if (peer === instance) peer = null;
+        try { if (instance) instance.destroy(); } catch (e) { /* ignore */ }
+        participantPeerRetryAttempts += 1;
+        var retryDelay = Math.min(1000 + ((participantPeerRetryAttempts - 1) * 1000), 5000);
+        participantPeerRetryTimer = setTimeout(function () {
+          participantPeerRetryTimer = 0;
+          if (!destroyed && currentRole === 'partner') createParticipantPeer();
+        }, retryDelay);
+      }
+
+      function createParticipantPeer() {
+        if (destroyed || isObserver || peer || !participantPeerId) return;
+        var instance = new Peer(participantPeerId, {
+          debug: 1,
+          config: {
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+          }
+        });
+        peer = instance;
+        bindSessionPeerHelpers();
+
+        instance.on('open', function (id) {
+          if (peer !== instance || destroyed) return;
+          participantPeerRetryAttempts = 0;
+          clearTimeout(participantPeerRetryTimer);
+          participantPeerRetryTimer = 0;
+          console.log('✅ My Peer ID:', id);
+          if (currentRole !== 'partner') {
+            window.__dayoGuestPeerId = id;
+          }
+          if (currentRole === 'user' || currentRole === 'learner') {
+            scheduleHostCall(1500);
+          }
+        });
+
+        instance.on('call', function (call) {
+          if (peer !== instance || destroyed || !localStream) return;
+          /* Ghost observer: answer so they receive our A/V, but never replace the live 1:1 call UI */
+          if (isObserverPeerId(call.peer)) {
+            call.answer(localStream);
+            call.on('stream', function () { /* ignore empty observer outbound */ });
+            return;
+          }
+          if (currentRole === 'partner') {
+            window.__dayoGuestPeerId = call.peer;
+          }
+          activeCall = call;
+          call.answer(localStream);
+          call.on('stream', function (incomingStream) {
+            attachRemoteStream(incomingStream);
+          });
+        });
+
+        instance.on('error', function (err) {
+          if (peer !== instance || destroyed) return;
+          var type = err && err.type;
+          console.warn('PeerJS Status:', type || err);
+          if (type === 'unavailable-id' && currentRole === 'partner') {
+            schedulePartnerPeerRetry(instance);
+            return;
+          }
+          if (type === 'peer-unavailable' && currentRole !== 'partner') {
+            scheduleHostCall();
+          }
+          if (type === 'disconnected' && typeof instance.reconnect === 'function') {
+            instance.reconnect();
+          }
+        });
+
+        instance.on('disconnected', function () {
+          if (destroyed || peer !== instance) return;
+          try { instance.reconnect(); } catch (e) { /* ignore */ }
+        });
+      }
+
       async function initWebRTC() {
         if (destroyed) return;
         const access = await window.DayORoomAccessReady;
@@ -4115,68 +4228,10 @@
             });
           bindLocalPip();
 
-          const myPeerId = (currentRole === 'partner')
+          participantPeerId = (currentRole === 'partner')
             ? HOST_ID
             : (currentRoomId + '_guest_' + Math.floor(Math.random() * 1000));
-
-          peer = new Peer(myPeerId, {
-            debug: 1,
-            config: {
-              iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
-              ]
-            }
-          });
-
-          bindSessionPeerHelpers();
-
-          peer.on('open', function (id) {
-            console.log('✅ My Peer ID:', id);
-            if (currentRole !== 'partner') {
-              window.__dayoGuestPeerId = id;
-            }
-            if (currentRole === 'user' || currentRole === 'learner') {
-              scheduleHostCall();
-            }
-          });
-
-          peer.on('call', function (call) {
-            if (!localStream) return;
-            /* Ghost observer: answer so they receive our A/V, but never replace the live 1:1 call UI */
-            if (isObserverPeerId(call.peer)) {
-              call.answer(localStream);
-              call.on('stream', function () { /* ignore empty observer outbound */ });
-              return;
-            }
-            if (currentRole === 'partner') {
-              window.__dayoGuestPeerId = call.peer;
-            }
-            activeCall = call;
-            call.answer(localStream);
-            call.on('stream', function (incomingStream) {
-              attachRemoteStream(incomingStream);
-            });
-          });
-
-          peer.on('error', function (err) {
-            var type = err && err.type;
-            console.warn('PeerJS Status:', type || err);
-            if (type === 'unavailable-id' && peer && typeof peer.reconnect === 'function') {
-              peer.reconnect();
-            }
-            if (type === 'peer-unavailable' && currentRole !== 'partner' && hostCallAttempts < MAX_HOST_CALL_ATTEMPTS) {
-              scheduleHostCall();
-            }
-            if (type === 'disconnected' && peer && typeof peer.reconnect === 'function') {
-              peer.reconnect();
-            }
-          });
-
-          peer.on('disconnected', function () {
-            if (destroyed || !peer) return;
-            try { peer.reconnect(); } catch (e) { /* ignore */ }
-          });
+          createParticipantPeer();
         } catch (err) {
           console.error('카메라/마이크 접근 오류:', err);
           alert('카메라 및 마이크 권한을 허용해 주세요.');
@@ -4186,6 +4241,7 @@
       function destroy() {
         destroyed = true;
         clearTimeout(hostCallTimer);
+        clearTimeout(participantPeerRetryTimer);
         clearInterval(observerProbeTimer);
         try { if (activeCall) activeCall.close(); } catch (e) { /* ignore */ }
         try { if (observerHostCall) observerHostCall.close(); } catch (e) { /* ignore */ }
