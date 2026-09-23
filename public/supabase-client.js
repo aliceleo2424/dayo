@@ -358,28 +358,6 @@
         }
       }
     } catch (e) { /* ignore pending speaking sync */ }
-    var createdAt = user.created_at ? new Date(user.created_at).getTime() : 0;
-    var isNewUser = createdAt && (Date.now() - createdAt < 24 * 60 * 60 * 1000);
-    var wantsWelcome = !!(user.user_metadata && user.user_metadata.welcome_ticket);
-    var currentTickets = profile.ticket_count != null ? Number(profile.ticket_count) : 0;
-    var welcomeResolved = wantsWelcome && (!isNewUser || (Number.isFinite(currentTickets) && currentTickets >= 1));
-    if (wantsWelcome && isNewUser && (!Number.isFinite(currentTickets) || currentTickets < 1)) {
-      try {
-        var welcomeGrant = await client.from('profiles').update({ ticket_count: 1 }).eq('user_id', user.id).select('ticket_count').maybeSingle();
-        if (!welcomeGrant.error && welcomeGrant.data) {
-          welcomeResolved = true;
-          profile.ticket_count = 1;
-          rememberLocalProfile(profile, user.email);
-          window._dayoAuthProfile = profile;
-          if (window.DayOTicketWallet && typeof window.DayOTicketWallet.setCount === 'function') {
-            window.DayOTicketWallet.setCount(1);
-          }
-        }
-      } catch (e) { /* ignore */ }
-    }
-    if (welcomeResolved && client.auth && typeof client.auth.updateUser === 'function') {
-      try { await client.auth.updateUser({ data: { welcome_ticket: false } }); } catch (e) { /* ignore */ }
-    }
     window.DayOSendWelcomeEmail(user, profile);
     document.dispatchEvent(new CustomEvent('dayo:authprofile', { detail: { user: user, profile: profile } }));
     document.documentElement.classList.remove('dayo-auth-pending');
@@ -436,35 +414,6 @@
     return null;
   }
 
-  async function grantWelcomeTicket(client, user, email) {
-    if (!client || !user || !user.id) return;
-    try {
-      var existing = await client
-        .from('profiles')
-        .select('id, ticket_count, user_id')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      if ((!existing.data || existing.error) && user.id) {
-        existing = await client
-          .from('profiles')
-          .select('id, ticket_count, user_id')
-          .eq('id', user.id)
-          .maybeSingle();
-      }
-      if (existing.data) {
-        if (Number(existing.data.ticket_count) < 1) {
-          await client.from('profiles').update({
-            ticket_count: 1,
-            has_welcome_coupon: true
-          }).eq('id', existing.data.id);
-        }
-      }
-    } catch (e) { /* profile creation belongs to handle_new_user */ }
-    if (typeof window.fetchAuthProfile === 'function') {
-      try { await window.fetchAuthProfile(); } catch (err) { /* ignore */ }
-    }
-  }
-
   window.handleEmailSignUp = async function (email, password) {
     var supabase = getSupabaseAuth();
     email = String(email || '').trim().toLowerCase();
@@ -484,7 +433,7 @@
       password: password,
       options: {
         emailRedirectTo: AUTH_REDIRECT,
-        data: { user_name: email.split('@')[0], welcome_ticket: true }
+        data: { user_name: email.split('@')[0] }
       }
     });
 
@@ -494,13 +443,12 @@
     }
 
     if (data.session) {
-      await grantWelcomeTicket(supabase, data.user, email);
       window.DayOSendWelcomeEmail(data.user, {
         nickname: email.split('@')[0],
         user_name: email.split('@')[0],
         welcome_email_sent: false
       });
-      alert('환영합니다! 웰컴 티켓 1장이 지급되었습니다 🎟️');
+      alert('회원가입이 완료되었습니다. DayO에 오신 것을 환영해요!');
       window.location.href = '/mypage.html';
     } else {
       alert('인증 메일이 발송되었습니다. 메일함에서 링크를 클릭해 가입을 완료해 주세요!');
@@ -585,6 +533,39 @@
     return window.supabaseClient || null;
   }
 
+  var PREOPEN_BOOKING_TEST_USERS = [
+    '131a43d2-8a90-41bb-a17a-2217b1ef283f',
+    '1bc0eab5-9399-4da8-a90c-145ab0c4409d'
+  ];
+
+  function canCreatePreopenBooking(userId) {
+    var currentUserId = String((window._dayoAuthUser && window._dayoAuthUser.id) || '');
+    var requestedUserId = String(userId || currentUserId);
+    var role = String((window._dayoAuthProfile && window._dayoAuthProfile.role) || '').trim().toLowerCase();
+    if (role === 'admin' || role === 'super_admin' || role === 'superadmin') return true;
+    return !!currentUserId && requestedUserId === currentUserId && PREOPEN_BOOKING_TEST_USERS.indexOf(currentUserId) !== -1;
+  }
+
+  function showPreopenBookingNotice() {
+    var modal = document.getElementById('demo-notice-modal');
+    if (modal) {
+      var title = modal.querySelector('.modal-title');
+      var summary = modal.querySelector('.summary-text');
+      var detail = modal.querySelector('.detail-text');
+      if (title) title.textContent = '10월 정식 오픈 준비 중이에요';
+      if (summary) summary.textContent = '현재 화상 연결과 세션 흐름을 최종 점검하고 있어요.';
+      if (detail) detail.textContent = '정식 오픈 후 1:1 대화를 예약할 수 있습니다.';
+      modal.style.display = 'flex';
+      return;
+    }
+    alert('10월 정식 오픈 준비 중이에요\n\n현재 화상 연결과 세션 흐름을 최종 점검하고 있어요.\n정식 오픈 후 1:1 대화를 예약할 수 있습니다.');
+  }
+
+  window.DayOPreopenBooking = {
+    canCreate: canCreatePreopenBooking,
+    showNotice: showPreopenBookingNotice
+  };
+
   function normalizeRpcPayload(data) {
     var payload = data;
     if (typeof payload === 'string') {
@@ -609,6 +590,10 @@
   }
 
   window.handleConfirmBooking = async function (learnerId, bookingId, extras) {
+    if (!canCreatePreopenBooking(learnerId)) {
+      showPreopenBookingNotice();
+      return false;
+    }
     var supabase = getRpcClient();
     if (!supabase || typeof supabase.rpc !== 'function') {
       alert('예약 처리 중 통신 오류가 발생했습니다.');
@@ -685,6 +670,10 @@
   window.createPendingBooking = async function (fields) {
     var supabase = getRpcClient();
     var row = fields || {};
+    if (!canCreatePreopenBooking(row.learner_id)) {
+      showPreopenBookingNotice();
+      return null;
+    }
     if (!supabase) return null;
     var insertRes = await supabase.from('bookings').insert([{
       learner_id: row.learner_id,

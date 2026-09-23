@@ -170,20 +170,20 @@
       ES: '¡Bienvenido al lounge DayO! 🎉'
     },
     'login.signupDesc': {
-      KO: '지금 가입하면 첫 1:1 대화 세션 웰컴 티켓 1장을 드려요.',
-      EN: 'Sign up now and get 1 welcome ticket for your first 1:1 session.',
-      ZH: '现在注册即可获得 1 张欢迎票，用于首次 1:1 会话。',
-      JA: '今登録すると、初回1:1セッションのウェルカムチケットを1枚プレゼント。',
-      FR: 'Inscrivez-vous et recevez 1 ticket de bienvenue pour votre première session 1:1.',
-      ES: 'Regístrate ahora y recibe 1 ticket de bienvenida para tu primera sesión 1:1.'
+      KO: '가입하고 DayO 오픈 소식을 확인해보세요.',
+      EN: 'Sign up to stay updated on the DayO launch.',
+      ZH: '注册后即可关注 DayO 的上线消息。',
+      JA: '登録してDayOのオープン情報をチェックしましょう。',
+      FR: 'Inscrivez-vous pour suivre le lancement de DayO.',
+      ES: 'Regístrate para recibir noticias sobre el lanzamiento de DayO.'
     },
     'login.signupBtn': {
-      KO: '웰컴 티켓 받고 시작하기',
-      EN: 'Get a welcome ticket and start',
-      ZH: '领取欢迎票并开始',
-      JA: 'ウェルカムチケットを受け取って始める',
-      FR: 'Recevoir le ticket et commencer',
-      ES: 'Recibir ticket y empezar'
+      KO: '가입하고 시작하기',
+      EN: 'Sign up and start',
+      ZH: '注册并开始',
+      JA: '登録して始める',
+      FR: 'S’inscrire et commencer',
+      ES: 'Registrarse y empezar'
     },
     'login.loungeBtn': {
       KO: '대화 라운지 로그인',

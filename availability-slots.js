@@ -443,6 +443,14 @@
   };
 
   window.requestBooking = async function (slotId, partnerId) {
+    if (!window.DayOPreopenBooking ||
+        typeof window.DayOPreopenBooking.canCreate !== 'function' ||
+        !window.DayOPreopenBooking.canCreate()) {
+      if (window.DayOPreopenBooking && typeof window.DayOPreopenBooking.showNotice === 'function') {
+        window.DayOPreopenBooking.showNotice();
+      }
+      return;
+    }
     if (!confirm('티켓 1장을 사용하여 이 시간대로 예약하시겠습니까?')) return;
 
     var supabase = client();
@@ -454,6 +462,10 @@
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       alert('로그인 후 예약이 가능합니다.');
+      return;
+    }
+    if (!window.DayOPreopenBooking.canCreate(user.id)) {
+      window.DayOPreopenBooking.showNotice();
       return;
     }
 
