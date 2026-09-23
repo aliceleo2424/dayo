@@ -1461,7 +1461,7 @@
     'quiz.speaking.feedback.flow': { KO: '짧은 답에서 한두 문장 더 이어가는 흐름까지 만들었어요. 실제 대화에서도 이 감각을 그대로 가져가면 돼요.', EN: 'You moved from a short answer into a longer response. Bring that same rhythm into a real conversation.', ZH: '你已经能从简短回答继续说一两句。把这个节奏带进真实对话就好。', JA: '短い答えから、もう一文二文と続ける流れを作れました。この感覚を実際の会話にも持っていきましょう。', FR: 'Vous avez prolongé une réponse courte avec une ou deux phrases. Gardez ce rythme dans une vraie conversation.', ES: 'Pasaste de una respuesta corta a una más larga. Lleva ese mismo ritmo a una conversación real.' },
     'quiz.speaking.feedback.pause': { KO: '짧게 대답하는 건 괜찮지만, 한두 문장 더 이어갈 때 잠깐 생각하는 편이에요. 천천히 덧붙이는 연습이 도움이 될 수 있어요.', EN: 'Short answers come through, while adding another sentence may take a moment. Practicing one small follow-up can help.', ZH: '简短回答没问题，但再接一两句时可能需要一点思考。练习补充一句会有帮助。', JA: '短く答えることはできていますが、もう一文続ける時に少し考えるタイプです。一言ずつ足す練習が役立ちます。', FR: 'Les réponses courtes viennent bien, mais ajouter une phrase demande parfois un moment. S’entraîner à ajouter une petite idée peut aider.', ES: 'Las respuestas cortas salen bien, pero añadir otra frase puede requerir un momento. Practicar una idea más puede ayudar.' },
     'quiz.speaking.feedback.open': { KO: '오늘은 먼저 말문을 여는 감각을 확인했어요. 짧은 한마디부터 편하게 시작하면 충분해요.', EN: 'Today you checked what it feels like to start speaking. One short response is a perfectly good beginning.', ZH: '今天你先体验了开口说话的感觉。从一句短话轻松开始就很好。', JA: '今日はまず、話し始める感覚を確かめました。短い一言から気楽に始めれば十分です。', FR: 'Aujourd’hui, vous avez testé le premier pas : commencer à parler. Une courte réponse est déjà un bon début.', ES: 'Hoy probaste la sensación de empezar a hablar. Una respuesta corta ya es un buen comienzo.' },
-    'quiz.speaking.leadTitle': { KO: '이제 실제 사람과 25분 동안 이어가 볼까요?', EN: 'Ready to keep talking with a real person for 25 minutes?', ZH: '现在要和真人继续聊25分钟吗？', JA: '次は実際の人と25分、会話を続けてみませんか？', FR: 'Prêt·e à continuer pendant 25 minutes avec une vraie personne ?', ES: '¿Quieres seguir durante 25 minutos con una persona real?' },
+    'quiz.speaking.leadTitle': { KO: 'DayO 오픈 소식을 받아보실래요?', EN: 'Would you like to hear when DayO opens?', ZH: '想第一时间收到 DayO 上线消息吗？', JA: 'DayOのオープン情報を受け取りませんか？', FR: 'Vous souhaitez être informé·e de l’ouverture de DayO ?', ES: '¿Quieres recibir noticias sobre la apertura de DayO?' },
     'quiz.speaking.retryAll': { KO: '처음부터 다시 말해보기', EN: 'Try the speaking test again', ZH: '从头再说一次', JA: '最初からもう一度話す', FR: 'Refaire le test oral', ES: 'Repetir la prueba oral' },
     'quiz.themeBadge': {
       KO: '📍 [상황 {n}/{total}] {label}',
@@ -1584,12 +1584,12 @@
       ES: 'Sin gramática difícil: empieza por una historia que ya te gusta.'
     },
     'quiz.resultTopicCta': {
-      KO: '이 주제로 첫 1:1 대화 시작하기 (9,900원)',
-      EN: 'Start a 1:1 chat on this topic (₩9,900)',
-      ZH: '用这个话题开始第一次1:1对话（9,900韩元）',
-      JA: 'このテーマで初回1:1会話を始める（9,900ウォン）',
-      FR: 'Commencer un 1:1 sur ce sujet (9 900 ₩)',
-      ES: 'Empezar un 1:1 con este tema (₩9,900)'
+      KO: '이 주제로 1:1 대화 준비하기',
+      EN: 'Prepare a 1:1 conversation on this topic',
+      ZH: '为这个话题准备1:1对话',
+      JA: 'このテーマで1:1会話を準備する',
+      FR: 'Préparer une conversation en 1:1 sur ce sujet',
+      ES: 'Preparar una conversación 1:1 sobre este tema'
     },
     'quiz.topic.ja.1': {
       KO: '🍮 일본 편의점(로손/세븐) 털기: 현지인이 인정하는 최애 푸딩 & 빵 꿀조합',
@@ -1670,20 +1670,20 @@
       ES: 'Las frases ya salen. Si se va el nervio, la charla se alarga.'
     },
     'quiz.resultCta': {
-      KO: '🎉 첫 세션 9,900원 할인권으로 시작하기',
-      EN: '🎉 Start with the ₩9,900 first-session coupon',
-      ZH: '🎉 用9,900韩元首次体验券开始',
-      JA: '🎉 初回9,900ウォンクーポンで始める',
-      FR: '🎉 Commencer avec le coupon 9 900 ₩',
-      ES: '🎉 Empezar con el cupón de 9.900 ₩'
+      KO: '🎉 DayO 오픈 소식 받기',
+      EN: '🎉 Get DayO launch updates',
+      ZH: '🎉 接收 DayO 上线消息',
+      JA: '🎉 DayOのオープン情報を受け取る',
+      FR: '🎉 Recevoir les nouvelles de l’ouverture de DayO',
+      ES: '🎉 Recibir noticias sobre la apertura de DayO'
     },
     'quiz.resultCouponHint': {
-      KO: '고른 주제로 첫 세션에 체험 할인권이 자동 적용돼요.',
-      EN: 'The trial coupon applies automatically to your first session on this topic.',
-      ZH: '用所选话题的首次会话将自动套用体验优惠券。',
-      JA: '選んだテーマの初回セッションに体験クーポンが自動適用されます。',
-      FR: 'Le coupon d’essai s’applique automatiquement à la première session sur ce sujet.',
-      ES: 'El cupón de prueba se aplica solo a la primera sesión con este tema.'
+      KO: '선택한 주제는 나중에 대화를 준비할 때 참고할 수 있어요.',
+      EN: 'We’ll remember this topic for when conversations open.',
+      ZH: '我们会保留这个话题，供开放对话时参考。',
+      JA: '会話がオープンした際に参考にできるよう、このテーマを記録します。',
+      FR: 'Nous garderons ce sujet pour l’ouverture des conversations.',
+      ES: 'Guardaremos este tema para cuando se abran las conversaciones.'
     },
     'quiz.resultRetry': {
       KO: '레벨 다시 고르기', EN: 'Pick another level', ZH: '重新选择级别', JA: 'レベルを選び直す', FR: 'Choisir un autre niveau', ES: 'Elegir otro nivel'
@@ -1783,12 +1783,12 @@
       ES: '🎁 [{level}] Chuleta de chino para tetería y restaurante PDF'
     },
     'quiz.emailDesc': {
-      KO: '이메일을 남겨주시면 맞춤 회화 자료집과 첫 세션 9,900원 체험 할인쿠폰을 즉시 보내드립니다.',
-      EN: 'Leave your email and we’ll send your tailored conversation pack plus the ₩9,900 first-session coupon right away.',
-      ZH: '留下邮箱，我们会立刻发送专属会话资料集和9,900韩元首次体验优惠券。',
-      JA: 'メールを残していただければ、あなたに合わせた会話資料集と初回セッション9,900ウォン体験クーポンをすぐにお送りします。',
-      FR: 'Laissez votre e-mail : le pack de conversation sur mesure et le coupon 9 900 ₩ partent tout de suite.',
-      ES: 'Deja tu correo y te enviamos al instante la guía de conversación a tu medida y el cupón de 9.900 ₩ para la primera sesión.'
+      KO: '이메일을 남겨주시면 10월 정식 오픈 소식과 준비 중인 회화 자료를 가장 먼저 알려드릴게요.',
+      EN: 'Leave your email to hear first about our official October launch and the conversation materials we’re preparing.',
+      ZH: '留下邮箱，即可第一时间收到10月正式上线和正在准备的会话资料消息。',
+      JA: 'メールアドレスを登録すると、10月の正式オープンと準備中の会話資料の情報をいち早くお知らせします。',
+      FR: 'Laissez votre e-mail pour recevoir en priorité les nouvelles de l’ouverture officielle en octobre et des ressources de conversation en préparation.',
+      ES: 'Deja tu correo para recibir antes que nadie las noticias de la apertura oficial en octubre y de los materiales de conversación en preparación.'
     },
     'quiz.emailPlaceholder': {
       KO: '이메일을 입력해 주세요', EN: 'Enter your email', ZH: '请输入电子邮箱', JA: 'メールアドレスを入力してください', FR: 'Entrez votre e-mail', ES: 'Ingresa tu correo'
@@ -1827,18 +1827,18 @@
       KO: '예: company.com', EN: 'e.g. company.com', ZH: '例如：company.com', JA: '例：company.com', FR: 'ex. company.com', ES: 'ej. company.com'
     },
     'quiz.emailSubmit': {
-      KO: '자료집 & 쿠폰 받기', EN: 'Get the pack & coupon', ZH: '领取资料集和优惠券', JA: '資料集とクーポンを受け取る', FR: 'Recevoir le pack et le coupon', ES: 'Recibir la guía y el cupón'
+      KO: '오픈 소식 받기', EN: 'Get launch updates', ZH: '接收上线消息', JA: 'オープン情報を受け取る', FR: 'Recevoir les nouvelles de l’ouverture', ES: 'Recibir noticias de la apertura'
     },
     'quiz.emailSending': {
-      KO: '전송 중...', EN: 'Sending…', ZH: '发送中…', JA: '送信中…', FR: 'Envoi…', ES: 'Enviando…'
+      KO: '저장 중...', EN: 'Saving…', ZH: '保存中…', JA: '保存中…', FR: 'Enregistrement…', ES: 'Guardando…'
     },
     'quiz.lead.success': {
-      KO: '🎉 입력하신 메일함({email})으로 자료가 발송되었습니다! 메일함을 확인해 주세요.',
-      EN: '🎉 The pack was sent to {email}. Please check your inbox!',
-      ZH: '🎉 资料已发到 {email}！请查看邮箱。',
-      JA: '🎉 {email} に資料を送りました。メールをご確認ください。',
-      FR: '🎉 Le pack a été envoyé à {email}. Vérifiez votre boîte mail !',
-      ES: '🎉 Enviamos el material a {email}. ¡Revisa tu bandeja de entrada!'
+      KO: '🎉 {email}로 DayO 오픈 소식을 알려드릴게요!',
+      EN: '🎉 We’ll send DayO launch updates to {email}!',
+      ZH: '🎉 我们会向 {email} 发送 DayO 上线消息！',
+      JA: '🎉 {email} にDayOのオープン情報をお届けします！',
+      FR: '🎉 Nous enverrons les nouvelles de l’ouverture de DayO à {email} !',
+      ES: '🎉 Enviaremos las noticias de la apertura de DayO a {email}!'
     },
     'quiz.lead.errorEmail': {
       KO: '올바른 이메일 주소 형식을 입력해 주세요.',
@@ -1857,20 +1857,20 @@
       ES: 'No se pudo guardar. Inténtalo de nuevo en un momento.'
     },
     'quiz.lead.errorSend': {
-      KO: '메일 전송에 실패했습니다. 이메일 주소를 다시 확인해 주세요.',
-      EN: 'We couldn’t send the email. Please check the address and try again.',
-      ZH: '邮件发送失败。请再确认邮箱地址。',
-      JA: 'メール送信に失敗しました。アドレスを確認してください。',
-      FR: 'L’envoi a échoué. Vérifiez l’adresse e-mail.',
-      ES: 'No se pudo enviar el correo. Revisa la dirección e inténtalo de nuevo.'
+      KO: '오픈 소식 신청을 저장하지 못했어요. 잠시 후 다시 시도해 주세요.',
+      EN: 'We couldn’t save your launch update request. Please try again.',
+      ZH: '无法保存上线通知申请。请稍后重试。',
+      JA: 'オープン情報の申し込みを保存できませんでした。もう一度お試しください。',
+      FR: 'Impossible d’enregistrer votre demande. Réessayez dans un instant.',
+      ES: 'No pudimos guardar tu solicitud. Inténtalo de nuevo en un momento.'
     },
     'quiz.lead.startCta': {
-      KO: '🎟️ 첫 세션 9,900원에 바로 대화 시작하기',
-      EN: '🎟️ Start chatting now for ₩9,900',
-      ZH: '🎟️ 9,900韩元立即开始对话',
-      JA: '🎟️ 初回9,900ウォンですぐ会話を始める',
-      FR: '🎟️ Commencer maintenant pour 9 900 ₩',
-      ES: '🎟️ Empieza ya por ₩9,900'
+      KO: 'DayO 둘러보기',
+      EN: 'Explore DayO',
+      ZH: '了解 DayO',
+      JA: 'DayOを見てみる',
+      FR: 'Découvrir DayO',
+      ES: 'Explorar DayO'
     },
     'quiz.lead.signupCta': {
       KO: '회원가입하고 대화 시작하기',
