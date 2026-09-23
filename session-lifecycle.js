@@ -6,6 +6,7 @@
   var quizTimer = null;
   var quizRemaining = QUIZ_SECONDS;
   var submittingSafety = false;
+  var sessionEndedEventLogged = false;
   window.__dayoWordHelpHistory = window.__dayoWordHelpHistory || [];
 
   function client() {
@@ -29,6 +30,15 @@
 
   function isObserver() {
     return !!(window.isObserverRoomMode && window.isObserverRoomMode());
+  }
+
+  function logSessionEndedEvent(reason) {
+    var access = window.DayORoomAccess;
+    if (sessionEndedEventLogged || !access || !access.allowed || access.adminTest || access.observer ||
+        (access.role !== 'user' && access.role !== 'partner') || !access.bookingId ||
+        typeof window.logSessionEvent !== 'function') return;
+    sessionEndedEventLogged = true;
+    window.logSessionEvent('session_ended', { reason: reason });
   }
 
   async function authUser() {
@@ -319,6 +329,7 @@
       return;
     }
     var ctx = context();
+    logSessionEndedEvent('personal');
     if (typeof window.closeEarlyExitModal === 'function') window.closeEarlyExitModal();
     window.isEarlyExit = false;
     var transcriptResult = await persistTranscript();
@@ -350,6 +361,7 @@
       return;
     }
     var ctx = context();
+    logSessionEndedEvent('tech_issue');
     if (typeof window.closeEarlyExitModal === 'function') window.closeEarlyExitModal();
     var transcriptResult = await persistTranscript();
     if (!transcriptResult || !transcriptResult.ok) {
@@ -403,6 +415,7 @@
   window.persistSessionReviewReport = persistReviewReport;
 
   document.addEventListener('dayo:session-ended', async function () {
+    logSessionEndedEvent('normal');
     if ((window.isPartnerRoomMode && window.isPartnerRoomMode()) ||
         (window.isObserverRoomMode && window.isObserverRoomMode())) return;
     var ctx = context();

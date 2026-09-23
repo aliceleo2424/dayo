@@ -156,6 +156,91 @@
       })();
     })();
   </script>
+  <script>
+    (function () {
+      'use strict';
+
+      var roomEnteredLogged = false;
+      var mediaConnectedLogged = false;
+
+      function participantAccess(access) {
+        return !!(access && access.allowed && !access.adminTest && !access.observer &&
+          (access.role === 'user' || access.role === 'partner') && access.bookingId);
+      }
+
+      function createSessionEventId() {
+        if (window.crypto && typeof window.crypto.randomUUID === 'function') return window.crypto.randomUUID();
+        if (window.crypto && typeof window.crypto.getRandomValues === 'function') {
+          var bytes = new Uint8Array(16);
+          window.crypto.getRandomValues(bytes);
+          bytes[6] = (bytes[6] & 15) | 64;
+          bytes[8] = (bytes[8] & 63) | 128;
+          var hex = Array.prototype.map.call(bytes, function (value) {
+            return value.toString(16).padStart(2, '0');
+          }).join('');
+          return hex.slice(0, 8) + '-' + hex.slice(8, 12) + '-' + hex.slice(12, 16) + '-' +
+            hex.slice(16, 20) + '-' + hex.slice(20);
+        }
+        return null;
+      }
+
+      window.createSessionEventId = createSessionEventId;
+      window.logSessionEvent = function (eventType, payload, eventId) {
+        var access = window.DayORoomAccess;
+        var db = window.supabaseClient;
+        var resolvedEventId = eventId || createSessionEventId();
+        if (!participantAccess(access) || !db || typeof db.rpc !== 'function' || !resolvedEventId) {
+          return Promise.resolve({ ok: false, skipped: true });
+        }
+
+        var params = {
+          p_event_id: resolvedEventId,
+          p_booking_id: access.bookingId,
+          p_event_type: eventType,
+          p_payload: payload || {}
+        };
+        function send(attempt) {
+          return Promise.resolve().then(function () {
+            return db.rpc('log_session_event', params);
+          }).then(function (result) {
+            if (result && result.error) throw result.error;
+            if (!result || !result.data || result.data.success !== true) {
+              var code = result && result.data && result.data.code || 'rejected';
+              console.warn('[DayO Session Event] log rejected', eventType, code);
+              return { ok: false, eventId: resolvedEventId };
+            }
+            return { ok: true, eventId: resolvedEventId, inserted: result.data.inserted === true };
+          }).catch(function (error) {
+            if (attempt < 1) {
+              return new Promise(function (resolve) {
+                setTimeout(resolve, 700);
+              }).then(function () { return send(attempt + 1); });
+            }
+            console.warn('[DayO Session Event] log failed', eventType,
+              error && (error.code || error.message) || 'rpc_error');
+            return { ok: false, eventId: resolvedEventId };
+          });
+        }
+        return send(0);
+      };
+
+      window.logParticipantMediaConnected = function (stream) {
+        if (mediaConnectedLogged || !participantAccess(window.DayORoomAccess) || !stream) return;
+        var liveTracks = typeof stream.getTracks === 'function' ? stream.getTracks().filter(function (track) {
+          return track && track.readyState === 'live' && (track.kind === 'audio' || track.kind === 'video');
+        }) : [];
+        if (!liveTracks.length) return;
+        mediaConnectedLogged = true;
+        window.logSessionEvent('media_connected', {});
+      };
+
+      Promise.resolve(window.DayORoomAccessReady).then(function (access) {
+        if (roomEnteredLogged || !participantAccess(access)) return;
+        roomEnteredLogged = true;
+        window.logSessionEvent('room_entered', {});
+      });
+    })();
+  </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script>
@@ -3764,6 +3849,9 @@
         if (!remoteVideo || !stream) return;
         setupVideoElement(remoteVideo, false);
         remoteVideo.srcObject = stream;
+        if (typeof window.logParticipantMediaConnected === 'function') {
+          window.logParticipantMediaConnected(stream);
+        }
         remoteVideo.classList.add('has-stream');
         remoteVideo.style.display = 'block';
         remoteVideo.style.visibility = 'visible';
@@ -5006,6 +5094,15 @@
       if (!canControlTalkCards()) return;
       talkCardState.updatedAt = Math.max(Date.now(), talkCardState.updatedAt + 1);
       broadcastCurrentTalkCard('talk_card_change');
+      if (isRealPartnerCardController() && typeof window.logSessionEvent === 'function') {
+        var card = cardsForTalkCategory(talkCardState.category)[talkCardState.index];
+        if (card) {
+          window.logSessionEvent('talk_card_shown', {
+            card_id: card.id,
+            category: card.category || talkCardState.category
+          });
+        }
+      }
     }
 
     function setTalkCategory(cat) {
@@ -5250,8 +5347,24 @@
       if (modal) modal.style.display = 'block';
       if (wordHelpRequestInFlight) return;
 
+      var wordHelpEventId = typeof window.createSessionEventId === 'function' ? window.createSessionEventId() : null;
+      var wordHelpEventLogged = false;
+      function logWordHelpResult(source, words, phrases) {
+        if (wordHelpEventLogged || typeof window.logSessionEvent !== 'function') return;
+        wordHelpEventLogged = true;
+        var items = (words || []).slice(0, 3).map(function (item) {
+          return { text: item.word, ko: item.meaning };
+        }).concat((phrases || []).slice(0, 3).map(function (item) {
+          return { text: item.text, ko: item.meaning };
+        }));
+        window.logSessionEvent('word_help_clicked', { source: source, items: items }, wordHelpEventId);
+      }
+
       var context = getHelpTranscriptText();
-      if (!context) return;
+      if (!context) {
+        logWordHelpResult('fallback', fallbackWords, fallbackPhrases);
+        return;
+      }
       wordHelpRequestInFlight = true;
       if (title) title.innerText = '도움말을 찾고 있어요…';
       var controller = new AbortController();
@@ -5273,8 +5386,10 @@
         }).filter(function (item) { return item.text && item.meaning; }) : [];
         if (!words.length || !phrases.length) throw new Error('empty-word-help');
         renderWordHelpResults(words, phrases);
+        logWordHelpResult('ai', words, phrases);
       }).catch(function () {
         renderWordHelpResults(fallbackWords, fallbackPhrases);
+        logWordHelpResult('fallback', fallbackWords, fallbackPhrases);
       }).finally(function () {
         clearTimeout(timeout);
         wordHelpRequestInFlight = false;
