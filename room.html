@@ -6239,6 +6239,12 @@
     window.currentCardIndex = 0;
     window.visibleCardStartIndex = 0;
     window.currentSelectedCard = null;
+    window.partnerCanonicalLearnerSentence = '';
+    var partnerSentencePollTimer = null;
+    var partnerSentenceRequestPending = false;
+    var partnerSentencePollAttempts = 0;
+    var PARTNER_SENTENCE_POLL_INTERVAL_MS = 2500;
+    var PARTNER_SENTENCE_MAX_ATTEMPTS = 10;
 
     window.selectCardSentence = function (sentence) {
       window.currentSelectedSentence = sentence;
@@ -6342,6 +6348,9 @@
 
     function buildActiveInstaCards() {
       var userQuotes = extractUserSpokenQuotes();
+      if (!userQuotes.length && window.partnerCanonicalLearnerSentence) {
+        userQuotes = [window.partnerCanonicalLearnerSentence];
+      }
       var activeCards = [];
       if (userQuotes.length) {
         userQuotes.slice(-3).forEach(function (sentence, idx) {
@@ -6352,6 +6361,66 @@
         });
       }
       return activeCards;
+    }
+
+    function stopPartnerSentencePolling() {
+      if (partnerSentencePollTimer) clearTimeout(partnerSentencePollTimer);
+      partnerSentencePollTimer = null;
+    }
+
+    function partnerReportPopupIsOpen() {
+      var popup = document.getElementById('partner-report-popup');
+      return !!(popup && getComputedStyle(popup).display !== 'none');
+    }
+
+    async function fetchPartnerLearnerSentence() {
+      var access = window.DayORoomAccess;
+      if (!access || !access.allowed || access.adminTest || access.observer || access.role !== 'partner' || !access.bookingId) return '';
+      if (!window.supabaseClient || partnerSentenceRequestPending) return '';
+      partnerSentenceRequestPending = true;
+      try {
+        var result = await window.supabaseClient.rpc('get_partner_learner_spoken_sentence', {
+          p_booking_id: access.bookingId
+        });
+        if (result.error || !result.data || result.data.success !== true) return '';
+        return String(result.data.spoken_sentence || '').trim();
+      } catch (e) {
+        return '';
+      } finally {
+        partnerSentenceRequestPending = false;
+      }
+    }
+
+    function startPartnerSentencePolling() {
+      stopPartnerSentencePolling();
+      partnerSentencePollAttempts = 0;
+      if (buildActiveInstaCards().length || !partnerReportPopupIsOpen()) return;
+
+      var poll = async function () {
+        if (!partnerReportPopupIsOpen()) {
+          stopPartnerSentencePolling();
+          return;
+        }
+        partnerSentencePollAttempts += 1;
+        var sentence = await fetchPartnerLearnerSentence();
+        if (!partnerReportPopupIsOpen()) {
+          stopPartnerSentencePolling();
+          return;
+        }
+        if (sentence) {
+          window.partnerCanonicalLearnerSentence = sentence;
+          stopPartnerSentencePolling();
+          window.initInstaCardSection();
+          return;
+        }
+        if (partnerSentencePollAttempts < PARTNER_SENTENCE_MAX_ATTEMPTS && partnerReportPopupIsOpen()) {
+          partnerSentencePollTimer = setTimeout(poll, PARTNER_SENTENCE_POLL_INTERVAL_MS);
+        } else {
+          stopPartnerSentencePolling();
+        }
+      };
+
+      poll();
     }
 
     function renderInstaSentenceOptions(startIndex) {
@@ -6395,9 +6464,11 @@
       var activeCards = buildActiveInstaCards();
       window.currentSelectedCard = null;
       if (!activeCards.length) {
+        window.activeCardPool = [];
         container.innerHTML = '<div style="font-size: 12px; color: #88928B; line-height: 1.5;">' + t('room.partnerReport.noCardTranscript') + '</div>';
         return;
       }
+      stopPartnerSentencePolling();
       window.activeCardPool = activeCards;
       window.currentCardIndex = 0;
       window.currentCardVariation = 0;
@@ -6446,6 +6517,7 @@
       }
       if (typeof window.hydratePopupTranscriptList === 'function') window.hydratePopupTranscriptList();
       if (typeof window.initInstaCardSection === 'function') window.initInstaCardSection();
+      startPartnerSentencePolling();
     };
 
     function setPartnerReportSubmitStatus(message, success) {
@@ -6465,6 +6537,7 @@
 
     window.executePartnerPayoutAndExit = async function () {
       if (window.isObserverRoomMode && window.isObserverRoomMode()) return;
+      stopPartnerSentencePolling();
       if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
         setPartnerReportSubmitBusy(true);
         setPartnerReportSubmitStatus(t('room.partnerReport.preview'), true);
