@@ -1095,6 +1095,19 @@
     var reports = [];
     var treatReports = [];
     if (user && client) {
+      var learnerBookingIds = [];
+      try {
+        var learnerBookingQ = await client
+          .from('bookings')
+          .select('id')
+          .eq('learner_id', user.id);
+        if (!learnerBookingQ.error) {
+          learnerBookingIds = (learnerBookingQ.data || []).map(function (row) {
+            return row && row.id ? String(row.id) : '';
+          }).filter(Boolean);
+        }
+      } catch (learnerBookingErr) { /* fail closed for fallback ownership */ }
+
       var query = await client
         .from('session_reports')
         .select('*, bookings(id, scheduled_at, partner_name, language)')
@@ -1114,11 +1127,12 @@
       reports = (query.data || []).map(normalizeReportCard).filter(Boolean);
       treatReports = reports.slice();
 
-      if (!reports.length) {
+      if (!reports.length && learnerBookingIds.length) {
         var logQ = await client
           .from('session_logs')
           .select('id, user_id, room_id, transcript, feedback, created_at')
           .eq('user_id', user.id)
+          .in('room_id', learnerBookingIds)
           .order('created_at', { ascending: false })
           .limit(8);
         if (!logQ.error) {
@@ -1131,17 +1145,9 @@
           var txQ = await client
             .from('session_transcripts')
             .select('*')
-            .eq('user_id', user.id)
+            .eq('learner_id', user.id)
             .order('created_at', { ascending: false })
             .limit(12);
-          if (txQ.error) {
-            txQ = await client
-              .from('session_transcripts')
-              .select('*')
-              .eq('learner_id', user.id)
-              .order('created_at', { ascending: false })
-              .limit(12);
-          }
           if (!txQ.error && txQ.data && txQ.data.length) {
             reports = txQ.data.map(function (row) {
               return {
@@ -1166,15 +1172,6 @@
             .in('status', ['completed', 'done', 'finished'])
             .order('scheduled_at', { ascending: false })
             .limit(20);
-          if (bookingQ.error || !bookingQ.data) {
-            bookingQ = await client
-              .from('bookings')
-              .select('id, partner_name, scheduled_at, status, created_at, completed_at, language')
-              .eq('user_id', user.id)
-              .in('status', ['completed', 'done', 'finished'])
-              .order('scheduled_at', { ascending: false })
-              .limit(20);
-          }
           if (!bookingQ.error) {
             reports = (bookingQ.data || []).map(reportFromCompletedBooking).filter(Boolean);
           }
