@@ -1203,6 +1203,36 @@
       box-shadow: 0 3px 0 #E55A45;
     }
 
+    .dayo-tea-table {
+      padding: 20px;
+      border: 1px solid #EADBC8;
+      border-radius: 20px;
+      background: linear-gradient(145deg, #FFFDF7, #FAF1E5);
+      color: #5C4638;
+      box-shadow: 0 8px 22px rgba(112, 78, 52, 0.08);
+    }
+    .dayo-tea-table__title { margin: 0 0 4px; font-size: 15px; color: #4A382F; }
+    .dayo-tea-table__subtitle { margin: 0 0 14px; font-size: 11px; line-height: 1.5; color: #8A7466; }
+    .dayo-tea-table__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+    .dayo-treat-item {
+      min-width: 0;
+      padding: 9px 5px 8px;
+      border: 1px solid #E8D8C5;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.78);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      text-align: center;
+    }
+    .dayo-treat-item.is-unearned { filter: grayscale(0.88); opacity: 0.42; }
+    .dayo-treat-art { display: block; width: 44px; height: 44px; }
+    .dayo-treat-art svg { display: block; width: 100%; height: 100%; }
+    .dayo-treat-name { width: 100%; overflow: hidden; text-overflow: ellipsis; font-size: 10px; font-weight: 800; white-space: nowrap; }
+    .dayo-treat-count { min-height: 15px; font-size: 11px; font-weight: 900; color: #A05E43; }
+    .dayo-treat-item.is-unearned .dayo-treat-count { visibility: hidden; }
+
     .pass-bar {
       height: 8px;
       margin-top: 0.7rem;
@@ -1444,6 +1474,7 @@
     @media (max-width: 620px) {
       .status-grid { grid-template-columns: 1fr; }
       .status-fortune-row { grid-template-columns: 1fr; }
+      .dayo-tea-table__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     }
 
     body.theme-partner,
@@ -1657,14 +1688,10 @@
       </div>
 
       <div id="right-column" class="mypage-col-stack">
-        <aside style="background: #FFFDF0; border: 1px solid #FEEFB3; border-radius: 20px; padding: 24px; text-align: center;" data-i18n="mypage.fortune.title" data-i18n-attr="aria-label" aria-label="오늘의 대화 포춘쿠키">
-          <h4 style="margin: 0 0 4px; font-size: 14px; color: #444;" data-i18n="mypage.fortune.title">오늘의 대화 포춘쿠키</h4>
-          <p style="margin: 0 0 12px; font-size: 11px; color: #888;" data-i18n="mypage.fortune.sub">매일 1회, 가볍게 열어보는 체크인</p>
-          <button type="button" id="dayo-cookie-trigger" class="dayo-fortune-cookie" data-i18n="mypage.fortune.openAria" data-i18n-attr="aria-label" aria-label="포춘쿠키 열기" style="margin: 0 auto;">
-            <span class="dayo-fortune-piece dayo-fortune-piece--left" aria-hidden="true">🥠</span>
-            <span class="dayo-fortune-piece dayo-fortune-piece--right" aria-hidden="true">🥠</span>
-            <span class="dayo-fortune-paper-mini" aria-hidden="true" data-i18n="mypage.fortune.todayLine">✨ 오늘의 한마디</span>
-          </button>
+        <aside class="dayo-tea-table" data-i18n="mypage.teaTable.title" data-i18n-attr="aria-label" aria-label="나의 티테이블">
+          <h4 class="dayo-tea-table__title" data-i18n="mypage.teaTable.title">나의 티테이블</h4>
+          <p class="dayo-tea-table__subtitle" data-i18n="mypage.teaTable.subtitle">대화가 쌓일수록 작은 Treat도 하나씩 모여요.</p>
+          <div id="dayo-tea-table-grid" class="dayo-tea-table__grid" aria-live="polite"></div>
         </aside>
 
         <section style="background: #fff; border: 1px solid #F1F3F5; border-radius: 20px; padding: 24px;">
@@ -1733,37 +1760,6 @@
     </div>
   </div>
 
-  <div id="dayo-fortune-modal" class="dayo-fortune-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="dayo-fortune-dear" hidden>
-    <div class="dayo-fortune-modal-card">
-      <div class="dayo-fortune-modal-head">
-        <span class="dayo-fortune-modal-icon" aria-hidden="true">🍰</span>
-        <p class="dayo-fortune-modal-dear" id="dayo-fortune-dear">Dear. ...</p>
-      </div>
-      <div class="dayo-fortune-modal-body">
-        <p class="dayo-fortune-modal-block">
-          <span class="dayo-fortune-modal-label">TODAY’S CARD</span>
-          <span class="dayo-fortune-modal-original" data-fortune-original>Your fortune is waiting to be opened.</span>
-        </p>
-        <p class="dayo-fortune-modal-block">
-          <span class="dayo-fortune-modal-label" data-i18n="mypage.fortune.koLabel">한국어</span>
-          <span class="dayo-fortune-modal-ko" data-fortune-ko>오늘의 카드가 곧 열릴 거예요.</span>
-        </p>
-        <p class="dayo-fortune-modal-block">
-          <span class="dayo-fortune-modal-label" data-i18n="mypage.fortune.cheerLabel">DayO의 응원</span>
-          <span class="dayo-fortune-modal-cheer" data-fortune-cheer>한 걸음씩, 오늘도 말문이 트일 거예요.</span>
-        </p>
-      </div>
-      <div class="dayo-fortune-save-banner" data-fortune-guest-only>
-        <p class="dayo-fortune-save-banner__text" data-i18n="mypage.fortune.saveBanner">✨ 로그인하시고, 내 닉네임을 넣은 나만의 카드를 받아보세요!</p>
-        <button type="button" class="dayo-fortune-login-btn" data-fortune-login data-i18n="mypage.fortune.login">3초 만에 로그인</button>
-      </div>
-      <div class="dayo-fortune-modal-actions">
-        <button type="button" class="dayo-fortune-btn dayo-fortune-btn-close" data-fortune-close data-i18n="common.close">닫기</button>
-        <button type="button" class="dayo-fortune-btn dayo-fortune-btn-copy" data-fortune-copy data-i18n="mypage.fortune.copy">📋 문장 복사</button>
-      </div>
-    </div>
-  </div>
-
   <script src="i18n.js?v=20260914-starter3"></script>
   <script src="materials.js"></script>
   <script src="supabase-env.js"></script>
@@ -1779,7 +1775,7 @@
   <script src="availability-slots.js"></script>
   <script src="booking-modal.js"></script>
   <script src="insta-card-export.js"></script>
-  <script src="fortune-cookie.js"></script>
+  <script src="tea-table.js"></script>
   <script src="role-switch.js"></script>
   <script src="greeting-banner.js"></script>
   <script src="mypage-dashboard.js"></script>

@@ -3036,6 +3036,11 @@
       align-items: center !important;
       padding: 20px;
     }
+    .dayo-treat-choice:has(input:checked) {
+      border-color: #B97A56 !important;
+      background: #FFF6EA !important;
+      box-shadow: 0 0 0 2px rgba(185, 122, 86, 0.12);
+    }
     .partner-report-dialog {
       width: min(960px, 100%);
       max-width: 960px;
@@ -6267,7 +6272,7 @@
         keyword: keyword,
         illustUrl: illustUrl,
         partnerComment: (document.getElementById('popup-partner-comment') || {}).value || '',
-        stamp: (document.querySelector('input[name="popup_stamp"]:checked') || {}).value || 'coffee',
+        stamp: (document.querySelector('input[name="popup_stamp"]:checked') || {}).value || null,
         createdAt: new Date().toLocaleDateString()
       };
     };
@@ -6478,7 +6483,8 @@
         stamp: (document.querySelector('input[name="popup_stamp"]:checked') || {}).value || null
       };
       cardData.partnerComment = (document.getElementById('popup-partner-comment') || {}).value || cardData.partnerComment || '';
-      cardData.stamp = (document.querySelector('input[name="popup_stamp"]:checked') || {}).value || cardData.stamp || 'coffee';
+      var selectedTreat = document.querySelector('input[name="popup_stamp"]:checked');
+      cardData.stamp = selectedTreat && selectedTreat.value ? selectedTreat.value : null;
       cardData.approvedAt = new Date().toISOString();
 
       var user = null;
@@ -6832,18 +6838,44 @@
         </div>
 
         <div>
-          <label style="font-size: 12.5px; font-weight: 800; color: #3E4A42; display: block; margin-bottom: 6px;" data-i18n="room.partnerReport.stampLabel">2. 유저에게 보낼 응원 스탬프</label>
-          <div style="display: flex; gap: 10px;">
-            <label style="flex: 1; display: flex; align-items: center; gap: 6px; font-size: 12px; background: #F8FAF9; border: 1.5px solid #B8E2C8; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-weight: 700; color: #3E4A42;">
-              <input type="radio" name="popup_stamp" value="coffee" checked> <span data-i18n="room.partnerReport.stampCoffee">☕ 따뜻한 수다</span>
+          <label style="font-size: 12.5px; font-weight: 800; color: #3E4A42; display: block; margin-bottom: 3px;" data-i18n="room.partnerReport.stampLabel">2. 오늘의 Treat</label>
+          <p style="font-size: 11px; color: #7B807C; margin: 0 0 8px;" data-i18n="room.partnerReport.stampDescription">오늘 대화를 마무리하며 작은 Treat 하나를 골라주세요.</p>
+          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px;">
+            <label class="dayo-treat-choice" style="display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; font-size: 10.5px; background: #FFFDF8; border: 1.5px solid #E8D7C2; padding: 7px 4px; border-radius: 11px; cursor: pointer; font-weight: 700; color: #5B4638; text-align: center;">
+              <input type="radio" name="popup_stamp" value="americano" style="accent-color:#A66A4A;">
+              <svg viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M15 20h32v25a8 8 0 0 1-8 8H23a8 8 0 0 1-8-8Z" fill="#F8E8D2" stroke="#8C6048" stroke-width="3"/><path d="M19 24h24v8H19z" fill="#6F4937"/><path d="M47 27h4a8 8 0 0 1 0 16h-4" fill="none" stroke="#8C6048" stroke-width="3"/></svg>
+              <span data-i18n="treat.americano">아메리카노</span>
             </label>
-            <label style="flex: 1; display: flex; align-items: center; gap: 6px; font-size: 12px; background: #F8FAF9; border: 1.5px solid #B8E2C8; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-weight: 700; color: #3E4A42;">
-              <input type="radio" name="popup_stamp" value="rocket"> <span data-i18n="room.partnerReport.stampRocket">🚀 폭풍 성장</span>
+            <label class="dayo-treat-choice" style="display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; font-size: 10.5px; background: #FFFDF8; border: 1.5px solid #E8D7C2; padding: 7px 4px; border-radius: 11px; cursor: pointer; font-weight: 700; color: #5B4638; text-align: center;">
+              <input type="radio" name="popup_stamp" value="green_tea" style="accent-color:#71845A;">
+              <svg viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M14 23h34v21a9 9 0 0 1-9 9H23a9 9 0 0 1-9-9Z" fill="#EDF3D8" stroke="#71845A" stroke-width="3"/><path d="M19 27h24v8H19z" fill="#A8BE78"/><path d="M48 29h4a7 7 0 0 1 0 14h-4" fill="none" stroke="#71845A" stroke-width="3"/></svg>
+              <span data-i18n="treat.greenTea">그린티</span>
             </label>
-            <label style="flex: 1; display: flex; align-items: center; gap: 6px; font-size: 12px; background: #F8FAF9; border: 1.5px solid #B8E2C8; padding: 8px 12px; border-radius: 10px; cursor: pointer; font-weight: 700; color: #3E4A42;">
-              <input type="radio" name="popup_stamp" value="heart"> <span data-i18n="room.partnerReport.stampHeart">💖 힐링 메이트</span>
+            <label class="dayo-treat-choice" style="display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; font-size: 10.5px; background: #FFFDF8; border: 1.5px solid #E8D7C2; padding: 7px 4px; border-radius: 11px; cursor: pointer; font-weight: 700; color: #5B4638; text-align: center;">
+              <input type="radio" name="popup_stamp" value="vanilla_latte" style="accent-color:#B9855E;">
+              <svg viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M19 12h26l-3 42H22Z" fill="#FFF4D9" stroke="#A77452" stroke-width="3"/><path d="M21 29h22l-1 13H22z" fill="#C58A63"/><path d="M22 20h21l-1 9H22z" fill="#F6D9A7"/></svg>
+              <span data-i18n="treat.vanillaLatte">바닐라라떼</span>
+            </label>
+            <label class="dayo-treat-choice" style="display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; font-size: 10.5px; background: #FFFDF8; border: 1.5px solid #E8D7C2; padding: 7px 4px; border-radius: 11px; cursor: pointer; font-weight: 700; color: #5B4638; text-align: center;">
+              <input type="radio" name="popup_stamp" value="cookie" style="accent-color:#A66A4A;">
+              <svg viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><circle cx="32" cy="33" r="21" fill="#D9A66F" stroke="#8B6043" stroke-width="3"/><circle cx="24" cy="24" r="3" fill="#75503A"/><circle cx="40" cy="29" r="3" fill="#75503A"/><circle cx="29" cy="42" r="3" fill="#75503A"/><circle cx="43" cy="44" r="2.5" fill="#75503A"/></svg>
+              <span data-i18n="treat.cookie">쿠키</span>
+            </label>
+            <label class="dayo-treat-choice" style="display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; font-size: 10.5px; background: #FFFDF8; border: 1.5px solid #E8D7C2; padding: 7px 4px; border-radius: 11px; cursor: pointer; font-weight: 700; color: #5B4638; text-align: center;">
+              <input type="radio" name="popup_stamp" value="croissant" style="accent-color:#B9855E;">
+              <svg viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M11 39c6-18 14-25 21-25s15 7 21 25c-6 10-14 14-21 14S17 49 11 39Z" fill="#E7B96C" stroke="#9A683D" stroke-width="3"/><path d="M21 21c3 8 3 18 0 27M32 15c3 11 3 27 0 38M43 21c-3 8-3 18 0 27" fill="none" stroke="#C3894E" stroke-width="2.5"/></svg>
+              <span data-i18n="treat.croissant">크루아상</span>
+            </label>
+            <label class="dayo-treat-choice" style="display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; font-size: 10.5px; background: #FFFDF8; border: 1.5px solid #E8D7C2; padding: 7px 4px; border-radius: 11px; cursor: pointer; font-weight: 700; color: #5B4638; text-align: center;">
+              <input type="radio" name="popup_stamp" value="macaron" style="accent-color:#B7798E;">
+              <svg viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M15 29c1-11 8-17 17-17s16 6 17 17Z" fill="#E8AFC0" stroke="#936276" stroke-width="3"/><path d="M15 37c1 11 8 17 17 17s16-6 17-17Z" fill="#E8AFC0" stroke="#936276" stroke-width="3"/><rect x="14" y="28" width="36" height="10" rx="5" fill="#FFF2D9" stroke="#936276" stroke-width="3"/></svg>
+              <span data-i18n="treat.macaron">마카롱</span>
             </label>
           </div>
+          <label style="display: inline-flex; align-items: center; gap: 6px; margin-top: 7px; font-size: 10.5px; color: #7B807C; cursor: pointer;">
+            <input type="radio" name="popup_stamp" value="" checked style="accent-color:#A66A4A;">
+            <span data-i18n="room.partnerReport.stampNone">선택 안 함</span>
+          </label>
         </div>
 
         <div style="background: #FDFBF7; border: 1.5px solid #EDE4D5; border-radius: 12px; padding: 12px 14px;">

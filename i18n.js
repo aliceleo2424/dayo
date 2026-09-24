@@ -518,6 +518,18 @@
     'mypage.fortune.todayLine': {
       KO: '✨ 오늘의 한마디', EN: '✨ Today’s line', ZH: '✨ 今日一句', JA: '✨ 今日のひとこと', FR: '✨ La phrase du jour', ES: '✨ La frase de hoy'
     },
+    'mypage.teaTable.title': {
+      KO: '나의 티테이블', EN: 'My Tea Table', ZH: '我的茶桌', JA: '私のティーテーブル', FR: 'Ma table à thé', ES: 'Mi mesa de té'
+    },
+    'mypage.teaTable.subtitle': {
+      KO: '대화가 쌓일수록 작은 Treat도 하나씩 모여요.', EN: 'Each conversation adds a little Treat to your table.', ZH: '每一次对话，都会为你的桌上添一份小点心。', JA: '会話を重ねるたび、小さなTreatが集まります。', FR: 'Chaque conversation ajoute une petite douceur à votre table.', ES: 'Cada conversación suma un pequeño detalle a tu mesa.'
+    },
+    'treat.americano': { KO: '아메리카노', EN: 'Americano', ZH: '美式咖啡', JA: 'アメリカーノ', FR: 'Americano', ES: 'Americano' },
+    'treat.greenTea': { KO: '그린티', EN: 'Green tea', ZH: '绿茶', JA: 'グリーンティー', FR: 'Thé vert', ES: 'Té verde' },
+    'treat.vanillaLatte': { KO: '바닐라라떼', EN: 'Vanilla latte', ZH: '香草拿铁', JA: 'バニララテ', FR: 'Latte vanille', ES: 'Latte de vainilla' },
+    'treat.cookie': { KO: '쿠키', EN: 'Cookie', ZH: '曲奇', JA: 'クッキー', FR: 'Cookie', ES: 'Galleta' },
+    'treat.croissant': { KO: '크루아상', EN: 'Croissant', ZH: '可颂', JA: 'クロワッサン', FR: 'Croissant', ES: 'Croissant' },
+    'treat.macaron': { KO: '마카롱', EN: 'Macaron', ZH: '马卡龙', JA: 'マカロン', FR: 'Macaron', ES: 'Macaron' },
     'mypage.story.title': {
       KO: '💬 이번 세션 이야기 카드', EN: '💬 Story cards for this session', ZH: '💬 本次会话话题卡', JA: '💬 今セッションの話題カード', FR: '💬 Cartes de sujet de session', ES: '💬 Tarjetas de tema de esta sesión'
     },
@@ -2246,10 +2258,9 @@
     'room.partnerReport.suggestion1': { KO: '성수동 서울숲 근처 카페거리를 추천해요! ☕', EN: 'I recommend the cafés near Seoul Forest in Seongsu! ☕' },
     'room.partnerReport.suggestion2': { KO: '새로운 표현에 적극적인 모습이 멋져요! 🌟', EN: 'You did a great job trying new expressions! 🌟' },
     'room.partnerReport.suggestion3': { KO: '편안하게 대화 이끌어주셔서 감사합니다! ☕', EN: 'Thank you for making the conversation so comfortable! ☕' },
-    'room.partnerReport.stampLabel': { KO: '2. 유저에게 보낼 응원 스탬프', EN: '2. Choose an encouragement stamp' },
-    'room.partnerReport.stampCoffee': { KO: '☕ 따뜻한 수다', EN: '☕ Warm conversation' },
-    'room.partnerReport.stampRocket': { KO: '🚀 폭풍 성장', EN: '🚀 Great progress' },
-    'room.partnerReport.stampHeart': { KO: '💖 힐링 메이트', EN: '💖 Good vibes' },
+    'room.partnerReport.stampLabel': { KO: '2. 오늘의 Treat', EN: '2. Today’s Treat' },
+    'room.partnerReport.stampDescription': { KO: '오늘 대화를 마무리하며 작은 Treat 하나를 골라주세요.', EN: 'Choose one small Treat to close today’s conversation.' },
+    'room.partnerReport.stampNone': { KO: '선택 안 함', EN: 'No Treat' },
     'room.partnerReport.notesReview': { KO: '3. 오늘의 대화 기록 검수 (필요 시 직접 수정)', EN: '3. Review Conversation Notes' },
     'room.partnerReport.synonyms': { KO: '• 빈출 유의어:', EN: '• Useful alternatives:' },
     'room.partnerReport.nuance': { KO: '• 뉘앙스 교정:', EN: '• Natural correction:' },

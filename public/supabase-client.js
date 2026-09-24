@@ -751,6 +751,7 @@
       keyword: r.keyword || 'daily',
       illust_url: r.illust_url || r.illustUrl || ('https://image.pollinations.ai/prompt/' + encodeURIComponent('cute coffee, cute 3d pastel clay illustration, warm cozy aesthetic') + '?width=400&height=400&nologo=true'),
       partner_comment: r.partner_comment || r.partnerComment || '',
+      stamp: r.stamp || '',
       summary: r.summary || '',
       key_expressions: Array.isArray(expressions) ? expressions.filter(Boolean) : [],
       quiz_score: r.quiz_score == null ? null : Number(r.quiz_score),
@@ -876,6 +877,30 @@
   function memorablePhrase(r) {
     var phrase = String((r && r.spoken_sentence) || '').replace(/^\s+|\s+$/g, '');
     return phrase || "I've been into pottery lately.";
+  }
+
+  function reportTreat(r) {
+    var key = String((r && r.stamp) || '').trim();
+    var labels = {
+      americano: 'treat.americano',
+      green_tea: 'treat.greenTea',
+      vanilla_latte: 'treat.vanillaLatte',
+      cookie: 'treat.cookie',
+      croissant: 'treat.croissant',
+      macaron: 'treat.macaron'
+    };
+    if (!labels[key]) return null;
+    return { key: key, label: i18n(labels[key]) };
+  }
+
+  function reportTreatHtml(r) {
+    var treat = reportTreat(r);
+    if (!treat) return '';
+    var isDrink = treat.key === 'americano' || treat.key === 'green_tea' || treat.key === 'vanilla_latte';
+    var icon = isDrink
+      ? '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 6h12v9a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4Z" fill="#F4DFC5" stroke="#8C6048" stroke-width="1.5"/><path d="M17 8h1a3 3 0 0 1 0 6h-1" fill="none" stroke="#8C6048" stroke-width="1.5"/></svg>'
+      : '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="#E5B875" stroke="#956342" stroke-width="1.5"/><path d="M8 12h8M10 8l4 8" stroke="#C28753" stroke-width="1.3" stroke-linecap="round"/></svg>';
+    return '<div class="report-meta-row" style="display:flex;align-items:center;gap:7px;">' + icon + '<span>오늘 받은 Treat: <strong>' + esc(treat.label) + '</strong></span></div>';
   }
 
   function formatAlbumDate(iso) {
@@ -1040,6 +1065,7 @@
           (wordHelp ? '<div class="report-meta-row">💡 단어 도움: ' + esc(wordHelp) + '</div>' : '') +
           (feedback ? '<div class="report-meta-row">📝 문장 피드백:<br>' + feedback + '</div>' : '') +
           (r.quiz_score != null ? '<div class="report-meta-row">🎯 5분 복습 퀴즈: ' + esc(r.quiz_score) + '점</div>' : '') +
+          reportTreatHtml(r) +
         '</div>' +
         '<div class="insta-card-export-wrap" style="display:flex; flex-direction:column; align-items:center;">' +
           renderViralReportCard(r, true, { bare: true }) +
@@ -1067,6 +1093,7 @@
     }
 
     var reports = [];
+    var treatReports = [];
     if (user && client) {
       var query = await client
         .from('session_reports')
@@ -1085,6 +1112,7 @@
         console.warn('[DayO] loadUserReports failed', query.error);
       }
       reports = (query.data || []).map(normalizeReportCard).filter(Boolean);
+      treatReports = reports.slice();
 
       if (!reports.length) {
         var logQ = await client
@@ -1168,7 +1196,8 @@
     reports = reports.filter(function (r) { return !isPlaceholderReport(r); });
 
     window.__dayoTalkAlbum = reports;
-    document.dispatchEvent(new CustomEvent('dayo:reportsloaded', { detail: { reports: reports } }));
+    window.__dayoTreatReports = treatReports;
+    document.dispatchEvent(new CustomEvent('dayo:reportsloaded', { detail: { reports: reports, treatReports: treatReports } }));
 
     var countEl = document.getElementById('talk-album-count');
     if (countEl) {
