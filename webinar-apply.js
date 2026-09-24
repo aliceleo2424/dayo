@@ -4,11 +4,10 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.2/+esm';
 
 var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-var PHONE_RE = /^01[016789]\d{7,8}$/;
-var SUCCESS_MSG = '🎉 웨비나 신청이 완료되었습니다! 라이브 시작 전 문자/이메일로 접속 링크를 보내드립니다.';
-var FAIL_MSG = '신청 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+var SUCCESS_MSG = '신청이 완료되었어요!\nDayO 라이브 웨비나 일정이 확정되면 이메일로 알려드릴게요.';
+var FAIL_MSG = '신청을 저장하지 못했어요. 잠시 후 다시 시도해주세요.';
 var BTN_LABEL = {
-  free: '웨비나 무료 알림 신청하기'
+  free: '웨비나 사전 신청'
 };
 
 var supabase = null;
@@ -50,17 +49,6 @@ function getSupabase() {
   return supabase;
 }
 
-function digitsOnly(value) {
-  return String(value || '').replace(/\D/g, '');
-}
-
-function formatPhone(value) {
-  var d = digitsOnly(value).slice(0, 11);
-  if (d.length <= 3) return d;
-  if (d.length <= 7) return d.slice(0, 3) + '-' + d.slice(3);
-  return d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7);
-}
-
 function showToast(message, isError) {
   var toast = document.getElementById('dayo-webinar-toast');
   if (!toast) {
@@ -93,39 +81,42 @@ function setTabs(type) {
   if (submit && !submit.disabled) submit.textContent = BTN_LABEL.free;
 }
 
-function validate(name, phone, email) {
+function validate(name, email, interestLanguage, interestLanguageOther) {
   if (!name) return '이름을 입력해 주세요.';
-  if (!phone) return '연락처를 입력해 주세요.';
-  if (!PHONE_RE.test(digitsOnly(phone))) return '휴대폰 번호를 확인해 주세요. (예: 010-0000-0000)';
   if (!email) return '이메일을 입력해 주세요.';
   if (!EMAIL_RE.test(email)) return '올바른 이메일 주소를 입력해 주세요.';
+  if (!interestLanguage) return '가장 관심 있는 언어를 선택해 주세요.';
+  if (interestLanguage === 'other' && !interestLanguageOther) return '관심 언어를 입력해 주세요.';
+  if (interestLanguageOther.length > 80) return '관심 언어는 80자 이하로 입력해 주세요.';
   return '';
 }
 
-async function submitApplication(userName, userPhone, userEmail) {
+async function submitApplication(userName, userEmail, interestLanguage, interestLanguageOther) {
   var client = getSupabase();
   if (!client) return { error: { message: 'supabase unavailable' } };
-  var { error } = await client
-    .from('webinar_applications')
-    .insert([
-      {
-        name: userName,
-        phone: userPhone,
-        email: userEmail,
-        webinar_type: 'free'
-      }
-    ]);
-  return { error: error || null };
+  var { data, error } = await client.rpc('register_webinar_lead', {
+    p_name: userName,
+    p_email: userEmail,
+    p_interest_language: interestLanguage,
+    p_interest_language_other: interestLanguageOther || null
+  });
+  if (error) return { error: error };
+  if (!data || data.success !== true) {
+    return { error: { message: data && data.code ? data.code : 'registration failed' } };
+  }
+  return { error: null };
 }
 
 function init() {
   var form = document.getElementById('webinar-form');
   var nameInput = document.getElementById('webinar-name');
-  var phoneInput = document.getElementById('webinar-phone');
   var emailInput = document.getElementById('webinar-email');
+  var languageInput = document.getElementById('webinar-interest-language');
+  var languageOtherField = document.getElementById('webinar-interest-language-other-field');
+  var languageOtherInput = document.getElementById('webinar-interest-language-other');
   var submitBtn = document.getElementById('btn-webinar-submit');
   var errorEl = document.getElementById('webinar-error');
-  if (!form || !nameInput || !phoneInput || !emailInput || !submitBtn) return;
+  if (!form || !nameInput || !emailInput || !languageInput || !languageOtherField || !languageOtherInput || !submitBtn) return;
 
   document.querySelectorAll('[data-webinar-type]').forEach(function (btn) {
     btn.addEventListener('click', function () {
@@ -134,24 +125,25 @@ function init() {
   });
   setTabs('free');
 
-  phoneInput.addEventListener('input', function () {
-    var start = phoneInput.selectionStart;
-    var before = phoneInput.value;
-    phoneInput.value = formatPhone(phoneInput.value);
-    if (typeof start === 'number' && document.activeElement === phoneInput) {
-      var diff = phoneInput.value.length - before.length;
-      phoneInput.setSelectionRange(Math.max(0, start + diff), Math.max(0, start + diff));
-    }
-  });
+  function syncOtherLanguageField() {
+    var isOther = languageInput.value === 'other';
+    languageOtherField.hidden = !isOther;
+    languageOtherInput.required = isOther;
+    if (!isOther) languageOtherInput.value = '';
+  }
+
+  languageInput.addEventListener('change', syncOtherLanguageField);
+  syncOtherLanguageField();
 
   form.addEventListener('submit', async function (e) {
     e.preventDefault();
     if (submitBtn.disabled) return;
 
-    var userName = String(nameInput.value || '').trim();
-    var userPhone = formatPhone(phoneInput.value);
-    var userEmail = String(emailInput.value || '').trim();
-    var message = validate(userName, userPhone, userEmail);
+    var userName = String(nameInput.value || '').trim().replace(/\s+/g, ' ');
+    var userEmail = String(emailInput.value || '').trim().toLowerCase();
+    var interestLanguage = String(languageInput.value || '').trim().toLowerCase();
+    var interestLanguageOther = String(languageOtherInput.value || '').trim().replace(/\s+/g, ' ');
+    var message = validate(userName, userEmail, interestLanguage, interestLanguageOther);
     setError(errorEl, message);
     if (message) {
       showToast(message, true);
@@ -163,7 +155,7 @@ function init() {
     submitBtn.textContent = '신청 중...';
 
     try {
-      var result = await submitApplication(userName, userPhone, userEmail);
+      var result = await submitApplication(userName, userEmail, interestLanguage, interestLanguageOther);
       if (result && result.error) {
         console.warn('[DayO] webinar insert failed', result.error);
         setError(errorEl, FAIL_MSG);
@@ -172,6 +164,7 @@ function init() {
       }
       setError(errorEl, '');
       form.reset();
+      syncOtherLanguageField();
       setTabs(selectedType);
       showToast(SUCCESS_MSG, false);
     } catch (err) {

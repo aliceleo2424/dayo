@@ -2171,12 +2171,14 @@
       text-align: left;
     }
     .dayo-webinar-field { display: flex; flex-direction: column; gap: 0.35rem; }
+    .dayo-webinar-field[hidden] { display: none; }
     .dayo-webinar-label {
       font-size: 0.78rem;
       font-weight: 800;
       color: var(--text);
     }
-    .dayo-webinar-form input {
+    .dayo-webinar-form input,
+    .dayo-webinar-form select {
       width: 100%;
       padding: 0.95rem 1.1rem;
       border: 1px solid var(--coral-pale);
@@ -2187,7 +2189,8 @@
       font-size: 0.95rem;
       outline: none;
     }
-    .dayo-webinar-form input:focus {
+    .dayo-webinar-form input:focus,
+    .dayo-webinar-form select:focus {
       border-color: var(--coral);
       box-shadow: 0 0 0 3px rgba(255, 107, 87, 0.12);
     }
@@ -2197,6 +2200,12 @@
       color: var(--coral);
       font-size: 0.8rem;
       font-weight: 700;
+    }
+    .dayo-webinar-privacy {
+      margin: -0.2rem 0 0;
+      color: var(--text-soft);
+      font-size: 0.75rem;
+      line-height: 1.5;
     }
     .dayo-webinar-error:empty { min-height: 0; }
     .dayo-webinar-submit {
@@ -2238,6 +2247,7 @@
       font-weight: 700;
       line-height: 1.55;
       text-align: center;
+      white-space: pre-line;
       box-shadow: 0 12px 32px var(--shadow-soft);
       transform: translateX(-50%) translateY(80px);
       opacity: 0;
@@ -2652,18 +2662,31 @@
         <form class="dayo-webinar-form" id="webinar-form" novalidate>
           <label class="dayo-webinar-field" for="webinar-name">
             <span class="dayo-webinar-label">이름</span>
-            <input type="text" id="webinar-name" name="name" placeholder="이름을 입력해 주세요" required autocomplete="name">
-          </label>
-          <label class="dayo-webinar-field" for="webinar-phone">
-            <span class="dayo-webinar-label">연락처</span>
-            <input type="tel" id="webinar-phone" name="phone" placeholder="휴대폰 번호 (010-0000-0000)" required autocomplete="tel" inputmode="numeric">
+            <input type="text" id="webinar-name" name="name" placeholder="이름을 입력해 주세요" required maxlength="80" autocomplete="name">
           </label>
           <label class="dayo-webinar-field" for="webinar-email">
             <span class="dayo-webinar-label">이메일</span>
-            <input type="email" id="webinar-email" name="email" placeholder="알림받을 이메일 주소" required autocomplete="email">
+            <input type="email" id="webinar-email" name="email" placeholder="알림받을 이메일 주소" required maxlength="254" autocomplete="email">
+          </label>
+          <label class="dayo-webinar-field" for="webinar-interest-language">
+            <span class="dayo-webinar-label">가장 관심 있는 언어</span>
+            <select id="webinar-interest-language" name="interest_language" required>
+              <option value="">언어를 선택해 주세요</option>
+              <option value="english">영어</option>
+              <option value="japanese">일본어</option>
+              <option value="chinese">중국어</option>
+              <option value="french">프랑스어</option>
+              <option value="spanish">스페인어</option>
+              <option value="other">기타</option>
+            </select>
+          </label>
+          <label class="dayo-webinar-field" id="webinar-interest-language-other-field" for="webinar-interest-language-other" hidden>
+            <span class="dayo-webinar-label">관심 언어</span>
+            <input type="text" id="webinar-interest-language-other" name="interest_language_other" placeholder="관심 언어를 입력해주세요" maxlength="80">
           </label>
           <p class="dayo-webinar-error" id="webinar-error" role="alert"></p>
-          <button type="submit" id="btn-webinar-submit" class="dayo-webinar-submit">웨비나 무료 알림 신청하기</button>
+          <p class="dayo-webinar-privacy">웨비나 일정 안내를 위해 입력한 이메일을 사용합니다.</p>
+          <button type="submit" id="btn-webinar-submit" class="dayo-webinar-submit">웨비나 사전 신청</button>
         </form>
       </div>
     </section>

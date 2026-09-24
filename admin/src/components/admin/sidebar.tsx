@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Users, Ticket, Palette, GraduationCap,
-  ChevronLeft, ChevronRight, Zap, Newspaper,
+  ChevronLeft, ChevronRight, Zap, Newspaper, Radio,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAdminStore } from "@/store/admin-store";
@@ -22,6 +22,7 @@ const navItems: {
   { href: "/admin/users", label: "회원 & CRM", icon: Users },
   { href: "/admin/users/automation", label: "CRM 자동화", icon: Zap, sub: true },
   { href: "/admin/promotions", label: "프로모션", icon: Ticket },
+  { href: "/admin/webinars", label: "웨비나 사전 신청", icon: Radio },
   { href: "/admin/cms", label: "프론트 CMS", icon: Palette },
   { href: "/admin/articles", label: "라운지 매거진", icon: Newspaper, sub: true },
   { href: PARTNERS_HREF, label: "대화 파트너 & 클래스", icon: GraduationCap },
