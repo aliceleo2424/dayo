@@ -2342,8 +2342,8 @@
       return DAY_IDS.map((id) => ({ id: id, label: t('partner.day.' + id) }));
     }
 
-    const TIMES = Array.from({ length: 29 }, (_, index) => {
-      const totalMinutes = (9 * 60) + (index * 30);
+    const TIMES = Array.from({ length: 30 }, (_, index) => {
+      const totalMinutes = (8 * 60 + 30) + (index * 30);
       const hour = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
       const minute = String(totalMinutes % 60).padStart(2, '0');
       return hour + ':' + minute;
