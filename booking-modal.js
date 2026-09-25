@@ -39,7 +39,7 @@
   var TEST_PARTNER_FALLBACK = {
     id: TEST_PARTNER_ID,
     name: 'DayO Test Partner 🤖',
-    avatar_url: 'https://api.dicebear.com/7.x/bottts/svg?seed=dayo-test',
+    avatar_url: '',
     bio: '화상 연결 테스트용 상시 파트너',
     native_lang: '',
     isTest: true,
@@ -662,7 +662,8 @@
     if (!row) return null;
     var id = row.user_id || row.id;
     if (!id) return null;
-    var name = row.full_name || row.nickname || row.user_name || 'DayO Partner';
+    var nickname = String(row.nickname || '').trim();
+    var name = (nickname && !/[@+]/.test(nickname) ? nickname : '') || 'DayO Partner';
     var initial = String(name).charAt(0).toUpperCase() || 'P';
     return {
       id: id,
@@ -691,16 +692,7 @@
     var supabase = dbClient();
     var partners = [];
     if (supabase) {
-      var res = await supabase
-        .from('profiles')
-        .select('id, full_name, avatar_url, bio, native_lang')
-        .eq('role', 'partner');
-      if (res.error) {
-        res = await supabase
-          .from('profiles')
-          .select('id, user_id, full_name, user_name, nickname, avatar_url, role')
-          .eq('role', 'partner');
-      }
+      var res = await supabase.rpc('list_public_partner_profiles');
       if (res.error) {
         console.error('파트너 로드 실패:', res.error);
       } else {

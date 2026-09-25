@@ -82,7 +82,7 @@
         if (userId) {
           var q = await supabase
             .from('bookings')
-            .select('id, partner_name, scheduled_at, status, language')
+            .select('id, partner_user_id, partner_id, scheduled_at, status, language')
             .eq('learner_id', userId)
             .eq('status', 'confirmed')
             .order('scheduled_at', { ascending: true })
@@ -97,8 +97,19 @@
           session = null;
           if (upcoming) {
             confirmedBookingId = upcoming.id;
+            var partnerName = 'DayO Partner';
+            try {
+              var partnerProfiles = await supabase.rpc('list_public_partner_profiles');
+              if (!partnerProfiles.error) {
+                var partnerProfile = (partnerProfiles.data || []).find(function (row) {
+                  return row && (row.user_id === upcoming.partner_user_id || row.id === upcoming.partner_id);
+                });
+                var nickname = String((partnerProfile && partnerProfile.nickname) || '').trim();
+                if (nickname && !/[@+]/.test(nickname)) partnerName = nickname;
+              }
+            } catch (nameError) { /* keep neutral name */ }
             session = {
-              partnerName: upcoming.partner_name || 'DayO 파트너',
+              partnerName: partnerName,
               scheduledAt: upcoming.scheduled_at,
               bookingId: upcoming.id,
               language: upcoming.language,
@@ -112,6 +123,7 @@
     }
 
     syncRoomEntryLinks(confirmedBookingId);
+    if (session && /[@+]/.test(String(session.partnerName || ''))) session.partnerName = 'DayO Partner';
 
     if (!session || !session.partnerName) {
       if (titleEl) titleEl.textContent = i18n('mypage.urgent.empty');

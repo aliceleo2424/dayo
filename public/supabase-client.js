@@ -739,6 +739,8 @@
   function normalizeReportCard(r) {
     if (!r) return null;
     var booking = Array.isArray(r.bookings) ? r.bookings[0] : (r.bookings || {});
+    var partnerName = String(r.partner_name || r.partnerName || booking.partner_name || '').trim();
+    if (!partnerName || /[@+]/.test(partnerName)) partnerName = 'DayO Partner';
     var expressions = r.key_expressions || r.keyExpressions || [];
     if (typeof expressions === 'string') {
       try { expressions = JSON.parse(expressions); } catch (e) { expressions = expressions.split(','); }
@@ -746,7 +748,7 @@
     return {
       id: r.id || '',
       booking_id: r.booking_id || booking.id || '',
-      partner_name: r.partner_name || r.partnerName || booking.partner_name || 'DayO Partner',
+      partner_name: partnerName,
       spoken_sentence: r.spoken_sentence || r.sentence || '',
       keyword: r.keyword || 'daily',
       illust_url: r.illust_url || r.illustUrl || ('https://image.pollinations.ai/prompt/' + encodeURIComponent('cute coffee, cute 3d pastel clay illustration, warm cozy aesthetic') + '?width=400&height=400&nologo=true'),
@@ -1096,13 +1098,15 @@
     var treatReports = [];
     if (user && client) {
       var learnerBookingIds = [];
+      var learnerBookings = [];
       try {
         var learnerBookingQ = await client
           .from('bookings')
-          .select('id')
+          .select('id, partner_user_id, partner_id')
           .eq('learner_id', user.id);
         if (!learnerBookingQ.error) {
-          learnerBookingIds = (learnerBookingQ.data || []).map(function (row) {
+          learnerBookings = learnerBookingQ.data || [];
+          learnerBookingIds = learnerBookings.map(function (row) {
             return row && row.id ? String(row.id) : '';
           }).filter(Boolean);
         }
@@ -1176,6 +1180,26 @@
             reports = (bookingQ.data || []).map(reportFromCompletedBooking).filter(Boolean);
           }
         } catch (bErr) { /* ignore */ }
+      }
+
+      if (reports.length || treatReports.length) {
+        var partnerProfiles = null;
+        try {
+          var partnerProfilesQ = await client.rpc('list_public_partner_profiles');
+          if (!partnerProfilesQ.error) partnerProfiles = partnerProfilesQ.data || [];
+        } catch (nameError) { /* keep neutral names */ }
+        var bookingPartnerIds = {};
+        learnerBookings.forEach(function (booking) {
+          bookingPartnerIds[String(booking.id)] = booking.partner_user_id || booking.partner_id || '';
+        });
+        reports.concat(treatReports).forEach(function (report) {
+          var partnerId = bookingPartnerIds[String(report.booking_id || '')];
+          var profile = partnerProfiles && partnerProfiles.find(function (row) {
+            return row && (row.user_id === partnerId || row.id === partnerId);
+          });
+          var nickname = String((profile && profile.nickname) || '').trim();
+          report.partner_name = nickname && !/[@+]/.test(nickname) ? nickname : 'DayO Partner';
+        });
       }
 
       window.__dayoCompletedSessionCount = reports.length;

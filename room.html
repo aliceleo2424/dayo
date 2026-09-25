@@ -140,14 +140,25 @@
           if (!internalTest && now >= startAt + 30 * 60 * 1000) {
             return showAccess({ allowed: false, title: '이 예약의 입장 가능 시간이 지났어요.', message: '마이페이지에서 다음 예약을 확인해 주세요.' });
           }
+          var partnerDisplayName = 'Conversation Partner';
+          try {
+            var partnerProfiles = await db.rpc('list_public_partner_profiles');
+            if (!partnerProfiles.error) {
+              var partnerProfile = (partnerProfiles.data || []).find(function (row) {
+                return row && (row.user_id === booking.partner_user_id || row.id === booking.partner_id);
+              });
+              var nickname = String((partnerProfile && partnerProfile.nickname) || '').trim();
+              if (nickname && !/[@+]/.test(nickname)) partnerDisplayName = nickname;
+            }
+          } catch (nameError) { /* name lookup must not block room access */ }
           if (observerRequested) {
             return showAccess({ allowed: true, adminTest: false, observer: true, internalTest: internalTest, role: 'observer', userId: user.id,
-              bookingId: null, learnerId: null, partnerId: null, partnerName: booking.partner_name || '', scheduledAt: new Date(startAt).toISOString(),
+              bookingId: null, learnerId: null, partnerId: null, partnerName: partnerDisplayName, scheduledAt: new Date(startAt).toISOString(),
               roomId: booking.id.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40) });
           }
           return showAccess({ allowed: true, adminTest: false, observer: false, internalTest: internalTest, role: booking.learner_id === user.id ? 'user' : 'partner',
             userId: user.id, bookingId: booking.id, learnerId: booking.learner_id, partnerId: booking.partner_user_id || booking.partner_id,
-            partnerName: booking.partner_name || '', scheduledAt: new Date(startAt).toISOString(),
+            partnerName: partnerDisplayName, scheduledAt: new Date(startAt).toISOString(),
             roomId: booking.id.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40) });
         } catch (e) {
           console.warn('[DayO Room] access check failed', e);
@@ -5912,15 +5923,10 @@
           ? placeHits.slice(0, 3).join(', ')
           : '인식된 추천 장소 없음';
 
-        var partnerName = '오늘의 대화 파트너';
-        try {
-          partnerName = localStorage.getItem('dayo_partner_name')
-            || localStorage.getItem('bookedPartnerName')
-            || partnerName;
-        } catch (e) { /* ignore */ }
+        var partnerName = String((window.DayORoomAccess && window.DayORoomAccess.partnerName) || '').trim() || 'Conversation Partner';
         var nameEl = document.getElementById('tutorName')
           || document.querySelector('.partner-live-name, .tutor-name, [data-partner-name]');
-        if (nameEl && nameEl.textContent && nameEl.textContent.trim()) {
+        if (!window.DayORoomAccess.partnerName && nameEl && nameEl.textContent && nameEl.textContent.trim() && !/[@+]/.test(nameEl.textContent)) {
           partnerName = nameEl.textContent.trim();
         }
 
