@@ -343,7 +343,7 @@ begin
     return pg_catalog.jsonb_build_object('success', false, 'code', 'booking_terminal');
   end if;
   if v_booking.scheduled_at is null
-     or v_now < v_booking.scheduled_at - interval '10 minutes'
+     or v_now < v_booking.scheduled_at - interval '5 minutes'
      or v_now > v_booking.scheduled_at + interval '10 minutes' then
     return pg_catalog.jsonb_build_object(
       'success', false, 'code', 'tech_issue_window_closed',
