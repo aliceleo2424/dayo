@@ -1649,9 +1649,16 @@
         <p id="urgent-session-meta" style="margin: 0; font-size: 12px; color: #777;">대화 시작 5분 전부터 라운지 입장이 가능합니다.</p>
       </div>
       <div style="display: flex; gap: 8px;">
+        <button id="urgent-session-cancel" type="button" hidden style="background: #fff; color: #555; border: 1px solid #ccc; padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap;">예약 취소</button>
         <button type="button" onclick="enterStudio()" style="background: #FF5A36; color: #fff; border: none; padding: 12px 20px; border-radius: 12px; font-weight: 700; cursor: pointer; font-family: inherit; white-space: nowrap;" data-i18n="mypage.urgent.enter">대화 스튜디오 입장</button>
       </div>
     </div>
+
+    <div id="upcoming-booking-list" hidden style="margin: -16px 0 32px;"></div>
+    <section id="recent-tech-issue-results" hidden style="margin: 0 0 24px; padding: 16px 20px; border: 1px solid #EDE4D5; border-radius: 16px; background: #fff;" aria-label="기술 문제 처리 내역">
+      <h3 style="margin: 0 0 10px; font-size: 15px;">기술 문제 처리 내역</h3>
+      <div id="recent-tech-issue-list" style="display: grid; gap: 8px;"></div>
+    </section>
 
     <div class="mypage-main-grid">
       <div class="mypage-col-stack">

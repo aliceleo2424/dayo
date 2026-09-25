@@ -6,6 +6,7 @@
   var quizTimer = null;
   var quizRemaining = QUIZ_SECONDS;
   var submittingSafety = false;
+  var submittingTechIssue = false;
   var sessionEndedEventLogged = false;
   window.__dayoWordHelpHistory = window.__dayoWordHelpHistory || [];
 
@@ -354,28 +355,77 @@
     }
   }
 
-  async function techIssueExit() {
+  async function submitTechIssueReport() {
     if (isObserver()) return;
     if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
       toast('테스트룸에서는 예약 관련 종료를 사용할 수 없어요.');
       return;
     }
+    if (submittingTechIssue) return;
+    var type = document.getElementById('tech-issue-type');
+    var detail = document.getElementById('tech-issue-detail');
+    var status = document.getElementById('tech-issue-submit-status');
+    var button = document.getElementById('tech-issue-submit');
+    if (!type || !type.value) {
+      if (type && typeof type.reportValidity === 'function') type.reportValidity();
+      return;
+    }
+    var detailText = String(detail && detail.value || '').trim();
+    if (detailText.length > 300) {
+      if (status) status.textContent = '상세 내용은 300자 이내로 입력해 주세요.';
+      return;
+    }
     var ctx = context();
-    logSessionEndedEvent('tech_issue');
-    if (typeof window.closeEarlyExitModal === 'function') window.closeEarlyExitModal();
-    var transcriptResult = await persistTranscript();
-    if (!transcriptResult || !transcriptResult.ok) {
-      console.error('[DayO Session] tech-exit transcript was not stored remotely', transcriptResult && transcriptResult.error);
-      toast('대화 기록을 서버에 저장하지 못해 이 기기에 임시 보관했어요.');
+    if (!ctx.bookingId || !client()) {
+      if (status) status.textContent = '예약을 확인하지 못했어요. 잠시 후 다시 시도해 주세요.';
+      return;
     }
-    if (ctx.bookingId && client()) {
-      var result = await client().rpc('report_session_tech_issue', { p_booking_id: ctx.bookingId });
-      if (result && result.data) syncTicketCount(result.data.ticket_count);
-      if (result.error) console.warn('[DayO] tech issue report failed', result.error);
+    submittingTechIssue = true;
+    if (button) button.disabled = true;
+    if (status) status.textContent = '신고 내용을 저장하고 있어요…';
+    try {
+      var result = await client().rpc('report_session_tech_issue', {
+        p_booking_id: ctx.bookingId,
+        p_issue_type: type.value,
+        p_detail: detailText || null
+      });
+      var data = result && result.data || {};
+      if (result.error || !data.success) {
+        if (result.error) console.warn('[DayO] tech issue report failed', result.error);
+        var rejected = data.code === 'tech_issue_window_closed' ||
+          data.code === 'booking_cancelled' || data.code === 'booking_terminal' ||
+          data.code === 'already_refunded';
+        if (status) status.textContent = rejected
+          ? '자동 환불 가능 시간이 지났거나 환불 조건에 해당하지 않습니다. 도움이 필요하면 문의해 주세요.'
+          : '신고를 저장하지 못했어요. 잠시 후 다시 시도해 주세요.';
+        return;
+      }
+      if (data.refunded === true && typeof data.ticket_count === 'number') {
+        syncTicketCount(data.ticket_count);
+      }
+      logSessionEndedEvent('tech_issue');
+      var transcriptResult = await persistTranscript();
+      if (!transcriptResult || !transcriptResult.ok) {
+        console.warn('[DayO Session] tech-exit transcript was not stored remotely');
+      }
+      if (typeof window.closeTechIssueModal === 'function') window.closeTechIssueModal();
+      window.dayoSessionEnded = true;
+      window.__dayoSessionEndRouted = true;
+      stopMedia();
+      var message = data.decision === 'approved' && data.refunded === true
+        ? '기술 문제로 종료되었습니다. 티켓이 반환되었습니다.'
+        : data.no_show_candidate || data.issue_type === 'counterpart_absent'
+          ? '미입장 신고가 접수되었습니다. 노쇼 여부를 확인 후 안내드릴게요.'
+          : '기술 문제 신고가 접수되었습니다. 확인 후 처리 결과를 안내드릴게요.';
+      toast(message);
+      setTimeout(function () { window.location.href = 'mypage.html'; }, 2800);
+    } catch (error) {
+      console.warn('[DayO] tech issue report failed', error);
+      if (status) status.textContent = '신고를 저장하지 못했어요. 잠시 후 다시 시도해 주세요.';
+    } finally {
+      submittingTechIssue = false;
+      if (button) button.disabled = false;
     }
-    stopMedia();
-    toast('기술 오류가 접수되었습니다. 확인 후 이용권이 보존됩니다.');
-    setTimeout(function () { window.location.href = 'mypage.html'; }, 1100);
   }
 
   var originalStart = window.startMultiMemoryGame;
@@ -408,7 +458,8 @@
     if (modal) modal.style.setProperty('display', 'none', 'important');
   };
   window.confirmEarlyExit = personalExit;
-  window.handleTechIssueExit = techIssueExit;
+  window.submitTechIssueReport = submitTechIssueReport;
+  window.handleTechIssueExit = window.openTechIssueModal;
   window.handleReportExit = showSafetyModal;
   window.closeSafetyReportModal = closeSafetyModal;
   window.submitSafetyReport = submitSafetyReport;

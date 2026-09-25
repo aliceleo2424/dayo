@@ -45,18 +45,16 @@
       body: [
         '<p class="terms-mini-section">[세션 취소/환불 기준]</p>',
         '<ul>',
-        '<li>세션 시작 <strong>24시간 전</strong>: 결제 금액 <strong>100% 전액 환불</strong></li>',
-        '<li><strong>24시간 이내 ~ 1시간 전</strong>: 결제 금액 <strong>50% 환불</strong> (파트너 스케줄 보전)</li>',
-        '<li><strong>1시간 이내 취소</strong> 또는 당일 노쇼(No-Show): <strong>환불 불가</strong> (티켓 1회 차감)</li>',
+        '<li>대화 시작 <strong>6시간 전까지</strong> 취소: 사용한 티켓을 <strong>원래 유효기간으로 반환</strong></li>',
+        '<li>대화 시작까지 <strong>6시간 미만</strong> 남았을 때 취소: <strong>티켓 미반환</strong></li>',
         '</ul>',
         '<p class="terms-mini-section">[플랫폼 / 파트너 귀책사유]</p>',
         '<ul>',
-        '<li>파트너 노쇼 또는 10분 이상 지각: <strong>100% 전액 환불</strong> 및 세션 무료 보상 티켓 지급</li>',
-        '<li>시스템 서버 장애로 진행 불가 시: 세션 <strong>100% 재부여</strong></li>',
+        '<li>DayO 또는 파트너 사정으로 대화가 진행되지 못한 경우: 별도 환불 기준에 따라 <strong>티켓 반환</strong></li>',
         '</ul>',
         '<p class="terms-mini-section">[유효기간 및 기타]</p>',
         '<ul>',
-        '<li>결제일로부터 <strong>90일 내</strong> 사용 권장</li>',
+        '<li>티켓은 발급일로부터 <strong>90일 내</strong> 사용</li>',
         '<li>디지털 콘텐츠(PDF 등) 다운로드 완료 후 청약철회 불가</li>',
         '</ul>'
       ].join('')

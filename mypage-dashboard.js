@@ -61,14 +61,91 @@
     if (link) link.setAttribute('href', bookingId ? roomUrl(bookingId) : 'index.html?booking=open');
   }
 
+  var cancellationPending = false;
+  async function cancelUpcomingBooking(bookingId, scheduledAt, userId, button) {
+    if (cancellationPending || !bookingId || !userId) return;
+    var remaining = new Date(scheduledAt).getTime() - Date.now();
+    if (!isFinite(remaining) || remaining <= 0) return;
+    var message = remaining >= 6 * 60 * 60 * 1000
+      ? '지금 취소하면 사용한 티켓이 원래 유효기간 그대로 돌아와요. 예약을 취소할까요?'
+      : '대화 시작까지 6시간 미만 남았을 때는 티켓이 반환되지 않아요. 파트너가 이 시간을 비워둔 만큼, 취소 시 티켓은 사용 처리됩니다. 그래도 취소할까요?';
+    if (!window.confirm(message)) return;
+    cancellationPending = true;
+    button.disabled = true;
+    try {
+      var result = await window.supabaseClient.rpc('cancel_my_booking', { p_booking_id: bookingId });
+      if (result.error || !result.data || result.data.success !== true) {
+        throw result.error || new Error((result.data && result.data.message) || '예약 취소에 실패했습니다.');
+      }
+      try {
+        if (window.localStorage.getItem('dayo_active_booking_id') === bookingId) {
+          window.localStorage.removeItem('dayo_active_booking_id');
+        }
+        var localSession = readLocalNextSession();
+        if (localSession && localSession.bookingId === bookingId) {
+          window.localStorage.removeItem('dayo_next_session');
+          window.localStorage.removeItem('dayo_next_session_soon');
+        }
+      } catch (storageError) { /* server state is authoritative */ }
+      await loadUrgentSessionBanner();
+      if (window.DayOTicketWallet && window.DayOTicketWallet.loadUserTicketBalance) {
+        try {
+          await window.DayOTicketWallet.loadUserTicketBalance(userId, 0);
+        } catch (walletError) {
+          console.warn('[DayO] ticket balance refresh failed', walletError);
+        }
+      }
+      window.alert(result.data.cancellation_type === 'early'
+        ? '예약이 취소되었어요. 티켓은 원래 유효기간으로 반환됩니다.'
+        : '예약이 취소되었어요. 시작까지 6시간 미만 남았을 때 취소하여 티켓은 반환되지 않습니다.');
+    } catch (error) {
+      console.warn('[DayO] booking cancellation failed', error);
+      window.alert('예약을 취소하지 못했어요. 예약 상태를 확인한 뒤 다시 시도해주세요.');
+    } finally {
+      cancellationPending = false;
+      button.disabled = false;
+    }
+  }
+
+  function renderAdditionalBookingList(rows, primaryId, userId) {
+    var list = document.getElementById('upcoming-booking-list');
+    if (!list) return;
+    list.replaceChildren();
+    var additional = (rows || []).filter(function (row) { return row.id !== primaryId; });
+    list.hidden = additional.length === 0;
+    additional.forEach(function (booking) {
+      var row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px;margin-top:8px;border:1px solid #eee;border-radius:12px;background:#fff;';
+      var label = document.createElement('span');
+      label.textContent = '추가 예약 · ' + formatSessionWhen(booking.scheduled_at)
+        + (booking.language ? ' · ' + booking.language : '');
+      row.appendChild(label);
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = '예약 취소';
+      button.style.cssText = 'padding:8px 14px;border:1px solid #ccc;border-radius:10px;background:#fff;cursor:pointer;font-family:inherit;';
+      button.onclick = function () {
+        cancelUpcomingBooking(booking.id, booking.scheduled_at, userId, button);
+      };
+      row.appendChild(button);
+      list.appendChild(row);
+    });
+  }
+
   async function loadUrgentSessionBanner() {
     var urgent = document.getElementById('urgent-session-banner');
     if (!urgent) return;
     var titleEl = document.getElementById('urgent-session-title');
     var metaEl = document.getElementById('urgent-session-meta');
     var badgeEl = document.getElementById('urgent-session-badge');
+    var cancelButton = document.getElementById('urgent-session-cancel');
+    if (cancelButton) {
+      cancelButton.hidden = true;
+      cancelButton.onclick = null;
+    }
 
     var session = readLocalNextSession();
+    var futureBookings = [];
     var confirmedBookingId = '';
     syncRoomEntryLinks('');
     var supabase = window.supabaseClient;
@@ -85,8 +162,8 @@
             .select('id, partner_user_id, partner_id, scheduled_at, status, language')
             .eq('learner_id', userId)
             .eq('status', 'confirmed')
-            .order('scheduled_at', { ascending: true })
-            .limit(5);
+            .gte('scheduled_at', new Date(Date.now() - 30 * 60000).toISOString())
+            .order('scheduled_at', { ascending: true });
           if (q.error) throw q.error;
           var now = Date.now();
           var upcoming = (q.data || []).filter(function (row) {
@@ -94,6 +171,9 @@
             var at = new Date(row.scheduled_at).getTime();
             return !isNaN(at) && at + 30 * 60000 >= now;
           })[0];
+          futureBookings = (q.data || []).filter(function (row) {
+            return row.scheduled_at && new Date(row.scheduled_at).getTime() > now;
+          });
           session = null;
           if (upcoming) {
             confirmedBookingId = upcoming.id;
@@ -123,6 +203,7 @@
     }
 
     syncRoomEntryLinks(confirmedBookingId);
+    renderAdditionalBookingList(futureBookings, confirmedBookingId, userId);
     if (session && /[@+]/.test(String(session.partnerName || ''))) session.partnerName = 'DayO Partner';
 
     if (!session || !session.partnerName) {
@@ -147,6 +228,62 @@
       metaEl.textContent = (purpose ? i18n('mypage.urgent.purposePrefix', { purpose: purpose }) : '') + i18n('mypage.urgent.meta');
     }
     urgent.hidden = false;
+    if (cancelButton && confirmedBookingId && session.scheduledAt
+        && new Date(session.scheduledAt).getTime() > Date.now()) {
+      cancelButton.hidden = false;
+      cancelButton.onclick = function () {
+        cancelUpcomingBooking(confirmedBookingId, session.scheduledAt, userId, cancelButton);
+      };
+    }
+  }
+
+  async function loadRecentTechIssueResults() {
+    var section = document.getElementById('recent-tech-issue-results');
+    var list = document.getElementById('recent-tech-issue-list');
+    var db = window.supabaseClient;
+    if (!section || !list || !db) return;
+    section.hidden = true;
+    list.replaceChildren();
+    try {
+      var userId = window._dayoAuthUser && window._dayoAuthUser.id;
+      if (!userId) {
+        var auth = await db.auth.getUser();
+        userId = auth && auth.data && auth.data.user && auth.data.user.id;
+      }
+      if (!userId) return;
+      var result = await db.from('bookings')
+        .select('id,scheduled_at,ended_at,end_reason,ticket_refunded')
+        .eq('learner_id', userId)
+        .in('end_reason', [
+          'tech_issue_review', 'partner_no_show_review', 'learner_no_show_review',
+          'tech_issue_approved', 'tech_issue_rejected',
+          'partner_no_show_resolved', 'learner_no_show_resolved'
+        ])
+        .order('ended_at', { ascending: false })
+        .limit(5);
+      if (result.error) throw result.error;
+      (result.data || []).forEach(function (booking) {
+        var row = document.createElement('p');
+        row.style.cssText = 'margin:0;font-size:12px;line-height:1.5;color:#5C5C5C;';
+        var reason = String(booking.end_reason || '');
+        var label = reason.indexOf('no_show') >= 0 ? '미입장 신고' : '기술 문제 신고';
+        var outcome = /_review$/.test(reason)
+          ? '확인 중 · 티켓 반환 여부 검토 중'
+          : booking.ticket_refunded
+            ? '처리 완료 · 사용한 티켓을 원래 유효기간으로 반환'
+            : '처리 완료 · 티켓 미반환';
+        var when = booking.scheduled_at
+          ? new Intl.DateTimeFormat('ko-KR', {
+            timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+          }).format(new Date(booking.scheduled_at)) : '예약 시간 확인';
+        row.textContent = when + ' · ' + label + ' · ' + outcome;
+        list.appendChild(row);
+      });
+      section.hidden = !list.children.length;
+    } catch (error) {
+      console.warn('[DayO] technical incident history unavailable', error);
+    }
   }
 
   function hasActiveBooking() {
@@ -570,6 +707,7 @@
     bindStoryTopics();
     bindNicknameEditor();
     loadUrgentSessionBanner();
+    loadRecentTechIssueResults();
     renderSpeakingGrowth();
     renderLearningLanguageBadge();
     document.addEventListener('keydown', onKeydown);
@@ -588,6 +726,7 @@
   document.addEventListener('dayo:authchange', function () {
     syncMainAction();
     loadUrgentSessionBanner();
+    loadRecentTechIssueResults();
     renderSpeakingGrowth();
     renderLearningLanguageBadge();
   });
@@ -600,6 +739,7 @@
   document.addEventListener('dayo:langchange', function () {
     syncMainAction();
     loadUrgentSessionBanner();
+    loadRecentTechIssueResults();
     renderSpeakingGrowth();
     renderLearningLanguageBadge();
   });

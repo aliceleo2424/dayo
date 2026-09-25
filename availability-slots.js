@@ -106,11 +106,12 @@
     }).format(date);
   }
 
-  function renderPartnerBookings(rows) {
+  function renderPartnerBookings(rows, recentCancellations, recentTechIssues) {
     var container = document.getElementById('partnerUpcomingBookings');
     if (!container) return;
     container.innerHTML = '';
-    if (!rows || !rows.length) {
+    if ((!rows || !rows.length) && (!recentCancellations || !recentCancellations.length) &&
+        (!recentTechIssues || !recentTechIssues.length)) {
       var empty = document.createElement('p');
       empty.className = 'card-subtitle';
       empty.textContent = window.DayOI18n.t('partner.sessions.empty');
@@ -155,6 +156,55 @@
       article.appendChild(actions);
       container.appendChild(article);
     });
+    (recentCancellations || []).forEach(function (booking) {
+      var article = document.createElement('article');
+      article.className = 'session';
+      var status = document.createElement('span');
+      status.className = 'session-status';
+      status.textContent = 'User cancelled · less than 6 hours before start';
+      article.appendChild(status);
+      var title = document.createElement('h3');
+      title.className = 'session-title';
+      title.textContent = '6,000P compensation paid';
+      article.appendChild(title);
+      var time = document.createElement('p');
+      time.className = 'session-time';
+      time.textContent = formatBookingTime(booking.scheduled_at);
+      article.appendChild(time);
+      container.appendChild(article);
+    });
+    (recentTechIssues || []).forEach(function (booking) {
+      var article = document.createElement('article');
+      article.className = 'session';
+      var status = document.createElement('span');
+      status.className = 'session-status';
+      var reviewing = /_review$/.test(String(booking.end_reason || ''));
+      status.textContent = booking.end_reason === 'partner_no_show_review'
+        ? '파트너 미입장 신고 · 확인 중'
+        : booking.end_reason === 'learner_no_show_review'
+          ? '유저 미입장 신고 · 확인 중'
+          : booking.end_reason === 'partner_no_show_resolved'
+            ? '파트너 미입장 신고 · 처리 완료'
+            : booking.end_reason === 'learner_no_show_resolved'
+              ? '유저 미입장 신고 · 처리 완료'
+              : reviewing
+                ? '기술 문제 신고 · 확인 중'
+                : booking.end_reason === 'tech_issue_rejected'
+                  ? '기술 문제 처리 완료'
+                  : '기술 문제로 종료 · 노쇼 처리 아님';
+      article.appendChild(status);
+      var title = document.createElement('h3');
+      title.className = 'session-title';
+      title.textContent = booking.partner_rewarded
+        ? '보상 6,000P 지급'
+        : reviewing ? '보상 여부 확인 중' : '보상 미지급';
+      article.appendChild(title);
+      var time = document.createElement('p');
+      time.className = 'session-time';
+      time.textContent = formatBookingTime(booking.scheduled_at);
+      article.appendChild(time);
+      container.appendChild(article);
+    });
   }
 
   window.loadPartnerBookings = async function () {
@@ -182,7 +232,42 @@
         var at = new Date(booking.scheduled_at).getTime();
         return !isNaN(at) && at + 30 * 60000 >= now;
       });
-      renderPartnerBookings(upcoming);
+      var recentCancellations = [];
+      var cancelledResult = await supabase
+        .from('bookings')
+        .select('id, scheduled_at, ended_at, status, end_reason, partner_rewarded')
+        .eq('partner_user_id', user.id)
+        .eq('status', 'cancelled')
+        .eq('end_reason', 'user_cancelled_late')
+        .eq('partner_rewarded', true)
+        .gte('ended_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+        .order('ended_at', { ascending: false })
+        .limit(5);
+      if (cancelledResult.error) {
+        console.warn('[DayO] recent cancellations unavailable', cancelledResult.error);
+      } else {
+        recentCancellations = cancelledResult.data || [];
+      }
+      var recentTechIssues = [];
+      var techResult = await supabase
+        .from('bookings')
+        .select('id, scheduled_at, ended_at, status, end_reason, partner_rewarded')
+        .eq('partner_user_id', user.id)
+        .in('end_reason', [
+          'tech_issue', 'tech_issue_review',
+          'partner_no_show_review', 'learner_no_show_review',
+          'tech_issue_approved', 'tech_issue_rejected',
+          'partner_no_show_resolved', 'learner_no_show_resolved'
+        ])
+        .gte('ended_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+        .order('ended_at', { ascending: false })
+        .limit(5);
+      if (techResult.error) {
+        console.warn('[DayO] recent technical incidents unavailable', techResult.error);
+      } else {
+        recentTechIssues = techResult.data || [];
+      }
+      renderPartnerBookings(upcoming, recentCancellations, recentTechIssues);
       return upcoming;
     } catch (err) {
       console.warn('[DayO] loadPartnerBookings failed', err);

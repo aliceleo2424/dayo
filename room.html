@@ -6680,11 +6680,25 @@
       }
     };
 
-    window.handleTechIssueExit = function () {
+    window.openTechIssueModal = function () {
       window.closeEarlyExitModal();
-      alert('연결 문제로 인한 종료가 접수되었습니다. 이용권 차감 여부 확인 후 복구 처리됩니다.');
-      window.location.href = 'index.html?view=mypage';
+      var modal = document.getElementById('tech-issue-modal');
+      if (!modal) return;
+      var form = document.getElementById('tech-issue-form');
+      if (form) form.reset();
+      var status = document.getElementById('tech-issue-submit-status');
+      if (status) status.textContent = '';
+      modal.hidden = false;
+      modal.style.setProperty('display', 'flex', 'important');
     };
+    window.closeTechIssueModal = function () {
+      var modal = document.getElementById('tech-issue-modal');
+      if (modal) {
+        modal.hidden = true;
+        modal.style.setProperty('display', 'none', 'important');
+      }
+    };
+    window.handleTechIssueExit = window.openTechIssueModal;
 
     window.handleReportExit = function () {
       window.closeEarlyExitModal();
@@ -7023,9 +7037,33 @@
     </div>
 
     <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed #EDE4D5; display: flex; justify-content: center; font-size: 11.5px;">
-      <a href="javascript:void(0)" onclick="handleTechIssueExit()" style="color: #4F7460; font-weight: 700; text-decoration: underline;">🛠️ 음성/연결 오류로 종료</a>
+      <a href="javascript:void(0)" onclick="openTechIssueModal()" style="color: #4F7460; font-weight: 700; text-decoration: underline;">🛠️ 음성/연결 오류로 종료</a>
     </div>
   </div>
+</div>
+<div id="tech-issue-modal" hidden style="display: none; position: fixed; inset: 0; z-index: 100000000; align-items: center; justify-content: center; padding: 20px; background: rgba(0,0,0,0.75);" role="dialog" aria-modal="true" aria-labelledby="tech-issue-title">
+  <form id="tech-issue-form" style="width: min(420px, 100%); max-height: 80vh; overflow-y: auto; background: #fff; border-radius: 20px; padding: 22px; display: grid; gap: 12px;" onsubmit="event.preventDefault(); submitTechIssueReport();">
+    <h2 id="tech-issue-title" style="margin: 0; font-size: 18px;">기술 문제로 종료</h2>
+    <p style="margin: 0; font-size: 13px; line-height: 1.5;">대화방 입장 후 발생한 문제를 알려주세요. 신고 내용은 확인 후 처리됩니다.</p>
+    <label for="tech-issue-type" style="font-size: 13px; font-weight: 700;">문제 유형 (필수)</label>
+    <select id="tech-issue-type" required style="width: 100%; min-height: 44px; border-radius: 10px; border: 1px solid #cbd5ce; padding: 8px;">
+      <option value="">선택해 주세요</option>
+      <option value="cannot_hear_partner">상대방의 소리가 들리지 않아요</option>
+      <option value="partner_cannot_hear_me">제 소리가 상대방에게 전달되지 않아요</option>
+      <option value="cannot_see_partner">상대방의 화면이 보이지 않아요</option>
+      <option value="partner_cannot_see_me">제 화면이 상대방에게 보이지 않아요</option>
+      <option value="connection_unstable">연결이 계속 끊겨요</option>
+      <option value="counterpart_absent">상대방이 들어오지 않았어요</option>
+      <option value="other">기타</option>
+    </select>
+    <label for="tech-issue-detail" style="font-size: 13px; font-weight: 700;">문제를 조금 더 알려주세요. (선택)</label>
+    <textarea id="tech-issue-detail" maxlength="300" rows="3" style="width: 100%; box-sizing: border-box; border-radius: 10px; border: 1px solid #cbd5ce; padding: 10px;"></textarea>
+    <p id="tech-issue-submit-status" role="status" aria-live="polite" style="margin: 0; font-size: 12px;"></p>
+    <div style="display: flex; gap: 8px;">
+      <button type="button" onclick="closeTechIssueModal()" style="flex: 1; min-height: 44px; border: 1px solid #cbd5ce; background: #fff; border-radius: 10px;">돌아가기</button>
+      <button type="submit" id="tech-issue-submit" style="flex: 1; min-height: 44px; border: 0; background: #4F7460; color: #fff; border-radius: 10px; font-weight: 700;">신고하고 종료</button>
+    </div>
+  </form>
 </div>
 <div id="safety-report-modal" hidden style="display: none; position: fixed; inset: 0; z-index: 100000000; align-items: center; justify-content: center; padding: 20px; background: rgba(20,20,20,0.82); backdrop-filter: blur(10px);" role="dialog" aria-modal="true" aria-labelledby="safety-report-title">
   <div style="width: min(460px, 100%); max-height: 90vh; overflow-y: auto; border-radius: 22px; background: #FFFFFF; padding: 24px; box-shadow: 0 24px 70px rgba(0,0,0,0.38); text-align: left;">

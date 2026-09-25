@@ -715,12 +715,12 @@
       KO: '📅 내 예약 세션', EN: '📅 Upcoming Sessions', ZH: '📅 我的预约', JA: '📅 予約セッション', FR: '📅 Sessions à venir', ES: '📅 Próximas sesiones'
     },
     'mypage.sessions.sub': {
-      KO: '세션 시작 1시간 전까지 요일·시간 변경/취소가 가능해요.',
-      EN: 'You can change or cancel the day/time until 1 hour before the session.',
-      ZH: '会话开始1小时前可更改或取消星期和时间。',
-      JA: 'セッション開始1時間前まで曜日・時間の変更/キャンセルが可能です。',
-      FR: 'Changement ou annulation du jour/heure possible jusqu’à 1 h avant la session.',
-      ES: 'Puedes cambiar o cancelar día/hora hasta 1 hora antes de la sesión.'
+      KO: '대화 시작 6시간 전까지 취소하면 티켓이 원래 유효기간으로 반환돼요. 6시간 미만 남으면 반환되지 않아요.',
+      EN: 'Cancel at least 6 hours before the session to get your ticket back with its original expiration date. With less than 6 hours left, it is not returned.',
+      ZH: '对话开始至少6小时前取消，票券按原有效期返还。剩余不足6小时取消则不返还。',
+      JA: '会話開始の6時間前までにキャンセルすると、元の有効期限のままチケットが戻ります。残り6時間未満のキャンセルでは戻りません。',
+      FR: 'Annulez au moins 6 heures avant la conversation pour récupérer votre ticket avec sa date d’expiration initiale. À moins de 6 heures, il ne sera pas rendu.',
+      ES: 'Cancela al menos 6 horas antes de la conversación para recuperar tu ticket con su vencimiento original. Con menos de 6 horas, no se devuelve.'
     },
     'mypage.sessions.enter': {
       KO: '☕ 대화 스튜디오 입장', EN: '☕ Enter Studio', ZH: '☕ 进入对话工作室', JA: '☕ スタジオ入室', FR: '☕ Entrer au Studio', ES: '☕ Entrar al Estudio'
@@ -1984,20 +1984,20 @@
       ES: '¡Sí, la prueba de speaking es completamente gratis! Revisa tu nivel de habla sin presión.'
     },
     'chatbot.q.policy': {
-      KO: '취소·일정 변경 규정은 어떻게 되나요?',
-      EN: 'What are the cancel and reschedule rules?',
-      ZH: '取消和改期规定是怎样的？',
-      JA: 'キャンセル・日程変更のルールは？',
-      FR: 'Quelles sont les règles d’annulation et de report ?',
-      ES: '¿Cuáles son las reglas de cancelación y cambio?'
+      KO: '예약 취소와 티켓 반환 기준은 어떻게 되나요?',
+      EN: 'When is a ticket returned after cancellation?',
+      ZH: '取消预约后何时返还票券？',
+      JA: '予約キャンセル時にチケットはいつ戻りますか？',
+      FR: 'Quand le ticket est-il rendu après une annulation ?',
+      ES: '¿Cuándo se devuelve el ticket tras cancelar?'
     },
     'chatbot.a.policy': {
-      KO: '📌 유효기간: 모든 이용권은 결제 후 90일 내 소진 필수, 이후 사라지니 꼭 90일 안에 사용해주세요. (메일/ 카카오톡으로 소진 알림을 보내드려요!) 🔄 변경/취소: 세션 요일 및 시간 변경/취소는 세션 시작 1시간 전까지 가능해요. 💌 노쇼: 세션 시작 1시간 이내 취소 및 노쇼 발생 시 티켓이 차감되며 ‘토닥토닥 리포트’가 발송됩니다.',
-      EN: 'All passes must be used within 90 days of payment. You can change or cancel the day/time until 1 hour before the session. If you cancel within 1 hour of start or no-show, a ticket is deducted and a “Todaktodak Report” is sent.',
-      ZH: '所有次数券须在付款后90天内用完。会话开始1小时前可更改/取消星期和时间。会话开始1小时内取消或未到，将扣除次数并发送“托达克托达克报告”。',
-      JA: 'すべての利用券は決済後90日以内に使い切る必要があります。セッションの曜日・時間の変更/キャンセルは開始1時間前まで可能です。開始1時間以内のキャンセルやノーショー時はチケットが消化され、「トダクトダクレポート」が送られます。',
-      FR: 'Tous les tickets doivent être utilisés dans les 90 jours après paiement. Changement/annulation du jour et de l’heure possibles jusqu’à 1 h avant la session. Annulation dans l’heure ou absence : un ticket est débité et un « Todaktodak Report » est envoyé.',
-      ES: 'Todos los pases deben usarse en 90 días tras el pago. Puedes cambiar/cancelar día y hora hasta 1 hora antes. Si cancelas en esa hora o no asistes, se descuenta un ticket y se envía el “Todaktodak Report”.'
+      KO: '📌 티켓은 발급일로부터 90일 동안 사용할 수 있어요. 대화 시작 6시간 전까지 취소하면 사용한 티켓이 원래 유효기간으로 반환됩니다. 6시간 미만 남았을 때 취소하면 반환되지 않습니다. DayO 또는 파트너 사정으로 대화가 진행되지 못한 경우에는 별도 환불 기준에 따라 티켓이 반환됩니다.',
+      EN: 'Tickets are valid for 90 days from issuance. Cancel at least 6 hours before the session to have your ticket returned with its original expiration date. With less than 6 hours left, the ticket is not returned. If DayO or the partner prevents the session, a separate refund policy applies.',
+      ZH: '票券自发放日起有效期为90天。对话开始至少6小时前取消，已使用的票券按原有效期返还；剩余不足6小时取消则不返还。若因DayO或伙伴原因无法进行对话，将按另行适用的退款标准返还票券。',
+      JA: 'チケットは発行日から90日間有効です。会話開始の6時間前までにキャンセルすると、使用したチケットが元の有効期限のまま戻ります。残り6時間未満のキャンセルでは戻りません。DayOまたはパートナーの事情で会話できなかった場合は、別途返還基準に従います。',
+      FR: 'Les tickets sont valables 90 jours après leur émission. Annulez au moins 6 heures avant la conversation pour récupérer le ticket avec sa date d’expiration initiale. À moins de 6 heures, il ne sera pas rendu. Si DayO ou le partenaire empêche la conversation, une politique de remboursement distincte s’applique.',
+      ES: 'Los tickets son válidos durante 90 días desde su emisión. Cancela al menos 6 horas antes para recuperar el ticket con su vencimiento original. Con menos de 6 horas, no se devuelve. Si DayO o el partner impiden la conversación, se aplica una política de reembolso aparte.'
     },
 
     /* ===== Booking modal (booking-modal.js) ===== */
@@ -2053,12 +2053,12 @@
       KO: '이렇게 예약할게요 🎉', EN: "Here's your booking 🎉", ZH: '将这样为您预约 🎉', JA: 'このように予約します 🎉', FR: 'Voici votre réservation 🎉', ES: 'Así queda tu reserva 🎉'
     },
     'book.policyNote': {
-      KO: '세션 요일 및 시간 변경/취소는 세션 시작 1시간 전까지 가능해요. 1시간 이내 취소·노쇼 시 티켓이 차감되며 ‘토닥토닥 리포트’가 발송돼요.',
-      EN: 'You can change or cancel the day/time until 1 hour before the session. Cancel within 1 hour or no-show: a ticket is deducted and a “Todaktodak Report” is sent.',
-      ZH: '会话开始1小时前可更改/取消星期和时间。会话开始1小时内取消或未到，将扣除次数并发送“托达克托达克报告”。',
-      JA: 'セッションの曜日・時間の変更/キャンセルは開始1時間前まで可能です。開始1時間以内のキャンセルやノーショー時はチケットが消化され、「トダクトダクレポート」が送られます。',
-      FR: 'Changement/annulation du jour et de l’heure jusqu’à 1 h avant. Annulation dans l’heure ou absence : un ticket est débité et un « Todaktodak Report » est envoyé.',
-      ES: 'Puedes cambiar/cancelar día y hora hasta 1 hora antes. Si cancelas en esa hora o no asistes, se descuenta un ticket y se envía el “Todaktodak Report”.'
+      KO: '대화 시작 6시간 전까지 취소하면 사용한 티켓이 원래 유효기간으로 반환됩니다. 6시간 미만 남았을 때 취소하면 반환되지 않습니다. DayO 또는 파트너 사정으로 진행되지 못한 경우에는 별도 환불 기준에 따라 반환됩니다.',
+      EN: 'Cancel at least 6 hours before the session to have your ticket returned with its original expiration date. With less than 6 hours left, it is not returned. If DayO or the partner prevents the session, a separate refund policy applies.',
+      ZH: '对话开始至少6小时前取消，已使用的票券按原有效期返还；剩余不足6小时取消则不返还。若因DayO或伙伴原因无法进行，将按另行适用的退款标准返还。',
+      JA: '会話開始の6時間前までにキャンセルすると、使用したチケットが元の有効期限のまま戻ります。残り6時間未満では戻りません。DayOまたはパートナーの事情で実施できなかった場合は、別途返還基準に従います。',
+      FR: 'Annulez au moins 6 heures avant la conversation pour récupérer le ticket avec sa date d’expiration initiale. À moins de 6 heures, il ne sera pas rendu. Si DayO ou le partenaire empêche la session, une politique distincte s’applique.',
+      ES: 'Cancela al menos 6 horas antes para recuperar el ticket con su vencimiento original. Con menos de 6 horas, no se devuelve. Si DayO o el partner impiden la sesión, se aplica una política aparte.'
     },
     'book.summaryLanguage': { KO: '언어', EN: 'Language', ZH: '语言', JA: '言語', FR: 'Langue', ES: 'Idioma' },
     'book.summaryPurpose': { KO: '목적', EN: 'Purpose', ZH: '目的', JA: '目的', FR: 'Objectif', ES: 'Propósito' },
