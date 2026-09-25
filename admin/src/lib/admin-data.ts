@@ -57,7 +57,6 @@ export type MemberIdentity = {
 };
 
 export function detectMemberProvider(row: MemberIdentity): AuthProvider {
-  if (String(row.kakao_id || "").trim()) return "kakao";
   const provider = String(row.provider || "").trim().toLowerCase();
   if (provider === "kakao") return "kakao";
   if (provider === "google") return "google";
