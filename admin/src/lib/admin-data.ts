@@ -597,6 +597,25 @@ export async function adjustProfileTicketsWithLedger(
   return saved;
 }
 
+export async function grantAdminTickets(
+  row: { id: string },
+  quantity: number,
+  reason: string,
+  sourceId: string
+): Promise<{ ticketCount: number; duplicate: boolean }> {
+  const result = await supabase.rpc("admin_grant_tickets", {
+    p_user_id: row.id,
+    p_quantity: quantity,
+    p_reason: reason,
+    p_source_id: sourceId,
+  });
+  if (result.error) throw new Error(result.error.message || "티켓 지급에 실패했습니다.");
+  const data = result.data as { success?: boolean; ticket_count?: number; duplicate?: boolean } | null;
+  const ticketCount = Number(data?.ticket_count);
+  if (!data?.success || !Number.isFinite(ticketCount)) throw new Error("티켓 지급 결과를 확인하지 못했습니다.");
+  return { ticketCount, duplicate: !!data.duplicate };
+}
+
 export async function fetchMemberOrders(userId: string): Promise<MemberOrder[]> {
   if (!userId) return [];
   const selects = [

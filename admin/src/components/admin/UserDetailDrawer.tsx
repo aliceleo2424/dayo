@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { FileText, Mail, Minus, Plus, Ticket, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ProviderBadge, KakaoPrivateEmailHint } from "@/components/admin/provider-badge";
 import { SessionTranscriptModal } from "@/components/admin/SessionTranscriptModal";
 import {
-  adjustProfileTicketsWithLedger,
+  grantAdminTickets,
   bookingStatusLabel,
   detectMemberProvider,
   fetchAdminMemo,
@@ -54,9 +54,10 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
   const [memoNotice, setMemoNotice] = useState("");
   const [memoError, setMemoError] = useState("");
   const [reasonOpen, setReasonOpen] = useState(false);
-  const [pendingDelta, setPendingDelta] = useState<1 | -1>(1);
+  const [grantAttempt, setGrantAttempt] = useState<{ userId: string; sourceId: string; reason: string } | null>(null);
   const [reasonText, setReasonText] = useState("");
   const [selectedSession, setSelectedSession] = useState<SessionTranscriptContext | null>(null);
+  const grantInFlightRef = useRef(false);
 
   useEffect(() => {
     if (!open || !user) return;
@@ -68,6 +69,15 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
     setOrders([]);
     setLedgers([]);
     setSessions([]);
+    try {
+      const stored = window.sessionStorage.getItem(`dayo_admin_grant_pending:${user.id}`);
+      const attempt = stored ? JSON.parse(stored) as { userId?: string; sourceId?: string; reason?: string } : null;
+      setGrantAttempt(attempt?.userId === user.id && attempt.sourceId && attempt.reason
+        ? { userId: user.id, sourceId: attempt.sourceId, reason: attempt.reason }
+        : null);
+    } catch {
+      setGrantAttempt(null);
+    }
 
     let cancelled = false;
     setLoading(true);
@@ -115,53 +125,71 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
   const kakaoId = String(user?.kakao_id || "").trim()
     || (provider === "kakao" ? String(user?.client_key || user?.id || "").slice(0, 12) : "");
 
-  function openReasonModal(delta: 1 | -1) {
+  function openReasonModal() {
     if (!user || busyTickets) return;
-    if (delta < 0 && ticketCount <= 0) {
-      window.alert("차감할 티켓이 없습니다.");
-      return;
-    }
-    setPendingDelta(delta);
-    setReasonText(delta > 0 ? "관리자 CS 보상 지급" : "관리자 수동 차감");
+    setReasonText(grantAttempt?.userId === user.id ? grantAttempt.reason : "관리자 CS 보상 지급");
     setReasonOpen(true);
   }
 
   async function confirmTicketChange() {
-    if (!user || busyTickets) return;
-    const next = Math.max(0, ticketCount + pendingDelta);
+    if (!user || busyTickets || grantInFlightRef.current) return;
     const reason = String(reasonText || "").trim();
     if (!reason) {
       window.alert("변동 사유를 입력해 주세요.");
       return;
     }
+    if (reason.length > 500) {
+      window.alert("변동 사유는 500자 이내로 입력해 주세요.");
+      return;
+    }
+    if (grantAttempt?.userId === user.id && grantAttempt.reason !== reason) {
+      window.alert("진행 중인 지급 요청은 사유를 변경할 수 없습니다. 같은 요청으로 재시도해 주세요.");
+      return;
+    }
+    const attempt = grantAttempt?.userId === user.id
+      ? grantAttempt
+      : { userId: user.id, sourceId: crypto.randomUUID(), reason };
+    if (!grantAttempt || grantAttempt.userId !== user.id) {
+      setGrantAttempt(attempt);
+      try {
+        window.sessionStorage.setItem(`dayo_admin_grant_pending:${user.id}`, JSON.stringify(attempt));
+      } catch {
+        /* Keep the same event ID for retries while this drawer remains open. */
+      }
+    }
 
+    grantInFlightRef.current = true;
     setBusyTickets(true);
     setNotice("");
-    const prev = ticketCount;
-    setTicketCount(next);
-    onTicketChange?.(user.id, next);
     try {
-      const saved = await adjustProfileTicketsWithLedger(user, next, pendingDelta, reason);
-      setTicketCount(saved);
-      onTicketChange?.(user.id, saved);
-      setLedgers((cur) => [
-        {
-          id: `local-${Date.now()}`,
-          created_at: new Date().toISOString(),
-          delta: pendingDelta,
-          reason,
-          source: "admin_cs",
-          balance_after: saved,
-        },
-        ...cur,
-      ]);
-      setNotice(pendingDelta > 0 ? "보상 티켓이 지급되었습니다." : "티켓이 차감되었습니다.");
+      const result = await grantAdminTickets(user, 1, reason, attempt.sourceId);
+      setTicketCount(result.ticketCount);
+      onTicketChange?.(user.id, result.ticketCount);
+      if (!result.duplicate) {
+        setLedgers((cur) => [
+          {
+            id: attempt.sourceId,
+            created_at: new Date().toISOString(),
+            delta: 1,
+            reason,
+            source: "admin_grant",
+            balance_after: result.ticketCount,
+          },
+          ...cur,
+        ]);
+      }
+      try {
+        window.sessionStorage.removeItem(`dayo_admin_grant_pending:${user.id}`);
+      } catch {
+        /* A successful grant is already idempotent on the server. */
+      }
+      setGrantAttempt(null);
+      setNotice(result.duplicate ? "이미 처리된 보상 지급 요청입니다." : "보상 티켓이 지급되었습니다.");
       setReasonOpen(false);
     } catch (err) {
-      setTicketCount(prev);
-      onTicketChange?.(user.id, prev);
-      setNotice(err instanceof Error ? err.message : "티켓 변경에 실패했습니다.");
+      setNotice(err instanceof Error ? err.message : "티켓 지급에 실패했습니다.");
     } finally {
+      grantInFlightRef.current = false;
       setBusyTickets(false);
     }
   }
@@ -304,10 +332,10 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
                     </p>
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="outline" disabled={busyTickets || !user} onClick={() => openReasonModal(-1)}>
-                      <Minus className="mr-1 h-3.5 w-3.5" />-1 수동 차감
+                    <Button size="sm" variant="outline" disabled title="티켓 lot 차감 전환 후 사용할 수 있어요">
+                      <Minus className="mr-1 h-3.5 w-3.5" />-1 수동 차감 준비 중
                     </Button>
-                    <Button size="sm" variant="coral" disabled={busyTickets || !user} onClick={() => openReasonModal(1)}>
+                    <Button size="sm" variant="coral" disabled={busyTickets || !user} onClick={openReasonModal}>
                       <Plus className="mr-1 h-3.5 w-3.5" />+1 보상 지급
                     </Button>
                   </div>
@@ -463,9 +491,9 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
       {reasonOpen ? (
         <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/45 p-4">
           <div className="w-full max-w-md rounded-xl border bg-white p-5 shadow-xl">
-            <h3 className="text-lg font-semibold">{pendingDelta > 0 ? "+1 보상 지급" : "-1 수동 차감"}</h3>
+            <h3 className="text-lg font-semibold">+1 보상 지급</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              {displayName}님 티켓 {ticketCount}장 → {Math.max(0, ticketCount + pendingDelta)}장
+              {displayName}님에게 티켓 1장을 지급합니다. 지급 후 잔액은 유효한 티켓 기준으로 다시 계산됩니다.
             </p>
             <div className="mt-3">
               <Label htmlFor="ticket-reason">변동 사유</Label>
@@ -474,7 +502,8 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
                 className="mt-1 min-h-[100px]"
                 value={reasonText}
                 onChange={(e) => setReasonText(e.target.value)}
-                placeholder="예: 세션 장애 보상 / 중복 결제 수동 차감"
+                disabled={!!grantAttempt && grantAttempt.userId === user?.id}
+                placeholder="예: 세션 장애 보상"
               />
             </div>
             <div className="mt-4 flex gap-2">
