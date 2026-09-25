@@ -648,39 +648,28 @@ export async function fetchMemberOrders(userId: string): Promise<MemberOrder[]> 
 }
 
 export async function fetchCreditLedgers(userId: string, profileId?: string | null): Promise<CreditLedgerRow[]> {
-  if (!userId && !profileId) return [];
-  const selects = [
-    "id, created_at, delta, reason, source, balance_after",
-    "id, created_at, delta, reason, source",
-    "*",
-  ];
-  for (const columns of selects) {
-    let result = await supabase
-      .from("credit_ledgers")
-      .select(columns)
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(50);
-    if (result.error && profileId) {
-      result = await supabase
-        .from("credit_ledgers")
-        .select(columns)
-        .eq("profile_id", profileId)
-        .order("created_at", { ascending: false })
-        .limit(50);
-    }
-    if (result.error) continue;
-    const rows = (result.data || []) as unknown as Record<string, unknown>[];
-    return rows.map((row) => ({
+  const ledgerUserId = userId || profileId;
+  if (!ledgerUserId) return [];
+  const result = await supabase
+    .from("credit_ledgers")
+    .select("id, user_id, change_amount, ledger_type, balance_after, created_at")
+    .eq("user_id", ledgerUserId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+  if (result.error) return [];
+  const rows = (result.data || []) as unknown as Record<string, unknown>[];
+  return rows.map((row) => {
+    const ledgerType = String(row.ledger_type || "").trim();
+    return {
       id: String(row.id || crypto.randomUUID()),
       created_at: (row.created_at as string | null) || null,
-      delta: Number(row.delta || 0),
-      reason: (row.reason as string | null) || null,
-      source: (row.source as string | null) || null,
+      delta: Number(row.change_amount || 0),
+      reason: ledgerType === "admin_grant" ? "관리자 티켓 지급 (사유 미저장)"
+        : ledgerType === "purchase" ? "티켓 구매" : null,
+      source: ledgerType || null,
       balance_after: row.balance_after == null ? null : Number(row.balance_after),
-    }));
-  }
-  return [];
+    };
+  });
 }
 
 export async function saveAdminMemo(

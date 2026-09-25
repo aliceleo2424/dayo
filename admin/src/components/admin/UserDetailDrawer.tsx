@@ -171,7 +171,7 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
             id: attempt.sourceId,
             created_at: new Date().toISOString(),
             delta: 1,
-            reason,
+            reason: "관리자 티켓 지급 (사유 미저장)",
             source: "admin_grant",
             balance_after: result.ticketCount,
           },
@@ -505,6 +505,9 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
                 disabled={!!grantAttempt && grantAttempt.userId === user?.id}
                 placeholder="예: 세션 장애 보상"
               />
+              <p className="mt-1 text-xs text-muted-foreground">
+                현재 지급 사유는 티켓 이력에 저장되지 않습니다. 필요하면 CS 특이사항에 별도로 기록해 주세요.
+              </p>
             </div>
             <div className="mt-4 flex gap-2">
               <Button variant="outline" className="flex-1" onClick={() => setReasonOpen(false)}>취소</Button>
