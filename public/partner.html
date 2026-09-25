@@ -580,6 +580,41 @@
       box-shadow: var(--shadow);
     }
 
+    .partner-upcoming-hero {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(120deg, #fffaf6, #fff0ed);
+    }
+    .partner-upcoming-hero [hidden] { display: none !important; }
+    .partner-upcoming-hero-label { color: var(--coral-dark); font-weight: 800; }
+    .partner-upcoming-hero-day { margin-top: 0.75rem; color: var(--muted); font-weight: 700; }
+    .partner-upcoming-hero-time { font-size: clamp(2.5rem, 6vw, 4rem); line-height: 1.1; font-weight: 900; letter-spacing: -0.05em; }
+    .partner-upcoming-hero-name { margin-top: 0.5rem; font-size: 1.08rem; font-weight: 700; }
+    .partner-upcoming-hero-brief { margin-top: 1.25rem; }
+    .partner-upcoming-hero-brief-title { margin-bottom: 0.55rem; color: var(--coral-dark); font-size: 0.88rem; font-weight: 800; }
+    .partner-upcoming-hero-language { margin-bottom: 0.45rem; font-weight: 700; }
+    .partner-upcoming-hero-details { display: grid; gap: 0.3rem; margin: 0; }
+    .partner-upcoming-hero-detail { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); gap: 0.5rem; font-size: 0.86rem; line-height: 1.5; }
+    .partner-upcoming-hero-detail dt { color: var(--muted); font-weight: 700; }
+    .partner-upcoming-hero-detail dd { margin: 0; }
+    .partner-upcoming-hero-action { min-width: 12rem; padding: 0.8rem 1rem; border: 0; border-radius: 999px; background: var(--coral); color: #fff; font-weight: 800; cursor: pointer; }
+    .partner-upcoming-hero-action:disabled { background: #e8dcd7; color: #776e6a; cursor: not-allowed; }
+    .partner-upcoming-hero-hint { margin-top: 0.5rem; color: var(--muted); font-size: 0.82rem; text-align: center; }
+    .session[data-booking-prep] { cursor: pointer; }
+    .session[data-booking-prep]:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
+    .booking-prep-modal [hidden] { display: none !important; }
+    .booking-prep-time { margin: 0.25rem 0; font-size: 1.8rem; font-weight: 900; }
+    .booking-prep-name { margin: 0 0 1rem; font-weight: 700; }
+    .booking-prep-action { width: 100%; margin-top: 1.25rem; }
+    @media (max-width: 600px) {
+      .partner-upcoming-hero { align-items: stretch; flex-direction: column; padding: 1.25rem; }
+      .partner-upcoming-hero-action { width: 100%; }
+    }
+
     .card-head {
       display: flex;
       align-items: flex-start;
@@ -1368,6 +1403,19 @@
       font-size: 0.72rem;
     }
 
+    .schedule-bulk-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.75rem 0; }
+    .schedule-bulk-actions button {
+      min-height: 40px;
+      padding: 0.5rem 0.9rem;
+      border: 1px solid var(--partner-mint);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--partner-mint-deep);
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
     .guide-item { display: inline-flex; align-items: center; gap: 0.35rem; }
     .guide-dot { width: 9px; height: 9px; border-radius: 50%; background: #D8D0CC; }
     .guide-dot.open { background: var(--coral); }
@@ -2060,6 +2108,36 @@
       <p class="heading-desc" data-i18n="partner.headingDesc">이번 달 활동비와 세션 현황을 확인하고, 프로필·가능 시간을 관리해 보세요.</p>
     </div>
 
+    <section class="card partner-upcoming-hero" aria-labelledby="partner-upcoming-hero-title">
+      <div>
+        <p class="partner-upcoming-hero-label" id="partner-upcoming-hero-title">다가오는 대화</p>
+        <div id="partner-upcoming-hero-booking" hidden>
+          <p class="partner-upcoming-hero-day" id="partner-upcoming-hero-day"></p>
+          <p class="partner-upcoming-hero-time" id="partner-upcoming-hero-time"></p>
+          <p class="partner-upcoming-hero-name" id="partner-upcoming-hero-name"></p>
+          <div class="partner-upcoming-hero-brief" id="partner-upcoming-hero-brief" hidden>
+            <p class="partner-upcoming-hero-brief-title">대화 브리핑</p>
+            <p class="partner-upcoming-hero-language" id="partner-upcoming-hero-language" hidden></p>
+            <dl class="partner-upcoming-hero-details">
+              <div class="partner-upcoming-hero-detail" data-brief-field="purposes" hidden><dt>대화 목적</dt><dd></dd></div>
+              <div class="partner-upcoming-hero-detail" data-brief-field="interests" hidden><dt>최근 관심사</dt><dd></dd></div>
+              <div class="partner-upcoming-hero-detail" data-brief-field="chat_style" hidden><dt>대화 스타일</dt><dd></dd></div>
+              <div class="partner-upcoming-hero-detail" data-brief-field="chat_request" hidden><dt>요청사항</dt><dd></dd></div>
+              <div class="partner-upcoming-hero-detail" data-brief-field="partner_preference" hidden><dt>파트너 조건</dt><dd></dd></div>
+            </dl>
+          </div>
+        </div>
+        <div id="partner-upcoming-hero-empty">
+          <p class="partner-upcoming-hero-name">다가오는 대화가 없어요.</p>
+          <p class="heading-desc">가능한 시간을 열어두면 새로운 대화가 여기 표시돼요.</p>
+        </div>
+      </div>
+      <div id="partner-upcoming-hero-cta" hidden>
+        <button class="partner-upcoming-hero-action" id="partner-upcoming-hero-enter" type="button" disabled>대화 준비하기</button>
+        <p class="partner-upcoming-hero-hint" id="partner-upcoming-hero-hint">5분 전부터 입장 가능</p>
+      </div>
+    </section>
+
     <div class="lounge-promos" aria-label="Event & Promotion">
       <article class="promo-card">
         <span class="promo-mark" aria-hidden="true">🎉</span>
@@ -2186,6 +2264,10 @@
         </button>
 
         <div class="day-tabs" role="tablist" data-i18n="partner.schedule.tabsAria" data-i18n-attr="aria-label" aria-label="요일 선택" id="dayTabs"></div>
+        <div class="schedule-bulk-actions">
+          <button type="button" id="selectAllSchedule">전체 선택</button>
+          <button type="button" id="clearAllSchedule">전체 지우기</button>
+        </div>
         <div class="schedule-guide" aria-hidden="true">
           <span class="guide-item"><span class="guide-dot open"></span><span data-i18n="partner.schedule.guideOpen">가능</span></span>
           <span class="guide-item"><span class="guide-dot"></span><span data-i18n="partner.schedule.guideClosed">불가능</span></span>
@@ -2266,6 +2348,27 @@
       </div>
     </section>
   </main>
+
+  <div class="modal-overlay" id="bookingPrepModal">
+    <div class="modal booking-prep-modal" role="dialog" aria-modal="true" aria-labelledby="bookingPrepTitle">
+      <div class="modal-head">
+        <h2 class="card-title" id="bookingPrepTitle">대화 준비</h2>
+        <button class="modal-close" type="button" data-close-modal aria-label="닫기">✕</button>
+      </div>
+      <p class="booking-prep-time" id="booking-prep-time"></p>
+      <p class="booking-prep-name" id="booking-prep-name"></p>
+      <div class="partner-upcoming-hero-brief" id="booking-prep-brief" hidden>
+        <dl class="partner-upcoming-hero-details">
+          <div class="partner-upcoming-hero-detail" data-brief-field="purposes" hidden><dt>대화 목적</dt><dd></dd></div>
+          <div class="partner-upcoming-hero-detail" data-brief-field="interests" hidden><dt>최근 관심사</dt><dd></dd></div>
+          <div class="partner-upcoming-hero-detail" data-brief-field="chat_style" hidden><dt>대화 스타일</dt><dd></dd></div>
+          <div class="partner-upcoming-hero-detail" data-brief-field="chat_request" hidden><dt>요청사항</dt><dd></dd></div>
+          <div class="partner-upcoming-hero-detail" data-brief-field="partner_preference" hidden><dt>파트너 조건</dt><dd></dd></div>
+        </dl>
+      </div>
+      <button class="partner-upcoming-hero-action booking-prep-action" id="booking-prep-enter" type="button" disabled>5분 전부터 입장 가능</button>
+    </div>
+  </div>
 
   <div class="modal-overlay" id="photoModal">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="photoModalTitle">
@@ -2419,6 +2522,16 @@
       const time = chip.dataset.time;
       if (schedule[activeDay].has(time)) schedule[activeDay].delete(time);
       else schedule[activeDay].add(time);
+      renderTimes();
+    });
+
+    document.getElementById('selectAllSchedule').addEventListener('click', () => {
+      DAY_IDS.forEach((dayId) => TIMES.forEach((time) => schedule[dayId].add(time)));
+      renderTimes();
+    });
+
+    document.getElementById('clearAllSchedule').addEventListener('click', () => {
+      DAY_IDS.forEach((dayId) => schedule[dayId].clear());
       renderTimes();
     });
 

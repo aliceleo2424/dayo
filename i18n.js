@@ -2020,6 +2020,9 @@
     'book.purposeHint': {
       KO: '여러 개를 골라도 좋아요', EN: "You can choose more than one", ZH: '可以选择多个', JA: '複数選んでも大丈夫です', FR: 'Vous pouvez en choisir plusieurs', ES: 'Puedes elegir varios'
     },
+    'book.interestsQuestion': { KO: '최근 관심사를 선택해주세요', EN: 'Choose your recent interests', ZH: '选择最近感兴趣的话题', JA: '最近の関心ごとを選んでください', FR: 'Choisissez vos centres d’intérêt récents', ES: 'Elige tus intereses recientes' },
+    'book.interestsHint': { KO: '대화가 막힐 때 함께 이야기하기 좋은 주제예요. 최대 4개까지 골라요.', EN: 'Good topics for when conversation slows down. Choose up to four.', ZH: '对话停顿时可以聊的话题，最多选四项。', JA: '会話に迷ったときの話題です。最大4つ選べます。', FR: 'Des sujets pour relancer la conversation. Choisissez-en quatre au plus.', ES: 'Temas para seguir conversando. Elige hasta cuatro.' },
+    'book.interestsMax': { KO: '관심사는 최대 4개까지 선택할 수 있어요.', EN: 'You can choose up to four interests.', ZH: '最多可选四个兴趣。', JA: '関心ごとは最大4つまで選べます。', FR: 'Vous pouvez choisir jusqu’à quatre centres d’intérêt.', ES: 'Puedes elegir hasta cuatro intereses.' },
     'book.styleQuestion': {
       KO: '어떤 대화 스타일이 좋으세요?', EN: 'What conversation style do you prefer?', ZH: '喜欢哪种对话风格？', JA: 'どんな会話スタイルがいいですか？', FR: 'Quel style de conversation préférez-vous ?', ES: '¿Qué estilo de charla prefieres?'
     },
@@ -2100,6 +2103,18 @@
     'book.purpose.opic': { KO: '☕️ 요즘 나의 일상', EN: '☕️ My everyday lately', ZH: '☕️ 最近的日常', JA: '☕️ 最近の日常', FR: '☕️ Mon quotidien', ES: '☕️ Mi día a día' },
     'book.purpose.abroad': { KO: '💼 워홀/유학 준비', EN: '💼 Working Holiday/Study Abroad', ZH: '💼 打工度假/留学准备', JA: '💼 ワーホリ・留学準備', FR: '💼 PVT/Études à l\'étranger', ES: '💼 Working Holiday/Estudios' },
     'book.purpose.casual': { KO: '☕ 자유 수다', EN: '☕ Casual Chat', ZH: '☕ 自由聊天', JA: '☕ 自由なおしゃべり', FR: '☕ Discussion libre', ES: '☕ Charla libre' },
+    'book.interest.drama': { KO: '🎬 드라마 보기', EN: '🎬 TV series', ZH: '🎬 看剧', JA: '🎬 ドラマ', FR: '🎬 Séries', ES: '🎬 Series' },
+    'book.interest.movies': { KO: '🍿 영화 보기', EN: '🍿 Movies', ZH: '🍿 电影', JA: '🍿 映画', FR: '🍿 Films', ES: '🍿 Películas' },
+    'book.interest.youtube': { KO: '📱 유튜브/숏폼', EN: '📱 YouTube/short videos', ZH: '📱 视频/短视频', JA: '📱 動画/ショート', FR: '📱 YouTube/vidéos courtes', ES: '📱 YouTube/videos cortos' },
+    'book.interest.music': { KO: '🎧 음악 듣기', EN: '🎧 Music', ZH: '🎧 音乐', JA: '🎧 音楽', FR: '🎧 Musique', ES: '🎧 Música' },
+    'book.interest.travel': { KO: '✈️ 여행', EN: '✈️ Travel', ZH: '✈️ 旅行', JA: '✈️ 旅行', FR: '✈️ Voyage', ES: '✈️ Viajes' },
+    'book.interest.food_cafe': { KO: '☕ 맛집/카페', EN: '☕ Food/cafés', ZH: '☕ 美食/咖啡馆', JA: '☕ グルメ/カフェ', FR: '☕ Restaurants/cafés', ES: '☕ Comida/cafés' },
+    'book.interest.exercise': { KO: '🏃 운동', EN: '🏃 Exercise', ZH: '🏃 运动', JA: '🏃 運動', FR: '🏃 Sport', ES: '🏃 Ejercicio' },
+    'book.interest.games': { KO: '🎮 게임', EN: '🎮 Games', ZH: '🎮 游戏', JA: '🎮 ゲーム', FR: '🎮 Jeux vidéo', ES: '🎮 Videojuegos' },
+    'book.interest.fashion_beauty': { KO: '✨ 패션/뷰티', EN: '✨ Fashion/beauty', ZH: '✨ 时尚/美妆', JA: '✨ ファッション/美容', FR: '✨ Mode/beauté', ES: '✨ Moda/belleza' },
+    'book.interest.pets': { KO: '🐾 반려동물', EN: '🐾 Pets', ZH: '🐾 宠物', JA: '🐾 ペット', FR: '🐾 Animaux', ES: '🐾 Mascotas' },
+    'book.interest.books_webtoon': { KO: '📚 책/웹툰', EN: '📚 Books/webtoons', ZH: '📚 图书/网漫', JA: '📚 本/ウェブ漫画', FR: '📚 Livres/webtoons', ES: '📚 Libros/webtoons' },
+    'book.interest.work_school': { KO: '💼 요즘 일/학교', EN: '💼 Work/school lately', ZH: '💼 最近的工作/学校', JA: '💼 最近の仕事/学校', FR: '💼 Travail/études', ES: '💼 Trabajo/estudios' },
     'book.style.slow': {
       KO: '🐢 말을 천천히 들어주고 리액션 잘해주는 파트너', EN: '🐢 A partner who listens slowly with warm reactions', ZH: '🐢 慢慢倾听且反应热情的伙伴', JA: '🐢 ゆっくり聞いて反応してくれるパートナー', FR: '🐢 Un partenaire patient et réactif', ES: '🐢 Un compañero paciente y atento'
     },

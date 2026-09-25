@@ -96,6 +96,21 @@
     }
   }
 
+  async function fetchPartnerAvailabilityRows(supabase, partnerId, columns) {
+    var rows = [];
+    for (var offset = 0; ; offset += 500) {
+      var result = await supabase.from('availability_slots')
+        .select(columns)
+        .eq('partner_id', partnerId)
+        .order('id', { ascending: true })
+        .range(offset, offset + 499);
+      if (result.error) throw result.error;
+      var page = result.data || [];
+      rows.push.apply(rows, page);
+      if (page.length < 500) return rows;
+    }
+  }
+
   function formatBookingTime(value) {
     if (!value) return window.DayOI18n.t('partner.sessions.timeUnknown');
     var date = new Date(value);
@@ -106,7 +121,226 @@
     }).format(date);
   }
 
-  function renderPartnerBookings(rows, recentCancellations, recentTechIssues) {
+  var partnerHeroTimer = null;
+  var partnerHeroRequest = 0;
+  var partnerBriefCache = new Map();
+  var partnerBriefUserId = '';
+  var partnerPrepTimer = null;
+  var partnerPrepOpenTimer = null;
+  var partnerPrepCloseTimer = null;
+  var partnerPrepRequest = 0;
+
+  function getPartnerBookingBrief(supabase, bookingId) {
+    if (!partnerBriefCache.has(bookingId)) {
+      var pending = Promise.resolve(supabase.rpc('get_partner_booking_brief', { p_booking_id: bookingId }))
+        .then(function (result) {
+          if (result.error) throw result.error;
+          return result.data;
+        }).catch(function (error) {
+          partnerBriefCache.delete(bookingId);
+          throw error;
+        });
+      partnerBriefCache.set(bookingId, pending);
+    }
+    return partnerBriefCache.get(bookingId);
+  }
+
+  function bookingOptionLabel(prefix, id, allowed) {
+    if (allowed.indexOf(id) < 0 || !window.DayOI18n) return '';
+    var key = prefix + id;
+    var label = window.DayOI18n.t(key);
+    return label && label !== key ? label : '';
+  }
+
+  function partnerBriefLabels(data) {
+    var display = String((data && data.learner_display_name) || '').trim();
+    if (!display || /[@+]/.test(display) || /^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(display)) display = 'DayO User';
+    var languageId = data && data.language;
+    var language = bookingOptionLabel('book.lang.', languageId, ['en', 'es', 'fr', 'ko', 'ja', 'zh', 'vi', 'de', 'it', 'ru']);
+    var brief = data && data.conversation_brief;
+    if (!brief || typeof brief !== 'object' || Array.isArray(brief)) brief = {};
+    var purposes = Array.isArray(brief.purposes) ? brief.purposes.map(function (id) {
+      return bookingOptionLabel('book.purpose.', id, ['travel', 'opic', 'abroad', 'casual']);
+    }).filter(Boolean).join(' · ') : '';
+    var interests = Array.isArray(brief.interests) ? brief.interests.map(function (id) {
+      return bookingOptionLabel('book.interest.', id, [
+        'drama', 'movies', 'youtube', 'music', 'travel', 'food_cafe',
+        'exercise', 'games', 'fashion_beauty', 'pets', 'books_webtoon', 'work_school'
+      ]);
+    }).filter(Boolean).join(' · ') : '';
+    return { display: display, language: language, languageId: languageId, values: {
+      purposes: purposes,
+      interests: interests,
+      chat_style: bookingOptionLabel('chatPrefs.style.', brief.chat_style, ['casual', 'correct', 'interview']),
+      chat_request: bookingOptionLabel('chatPrefs.request.', brief.chat_request, ['praise', 'gentle', 'encourage']),
+      partner_preference: bookingOptionLabel('book.style.', brief.partner_preference, ['slow', 'fast', 'correct', 'korean'])
+    } };
+  }
+
+  function renderBriefRows(briefView, values) {
+    if (!briefView) return;
+    var visible = false;
+    Object.keys(values).forEach(function (key) {
+      var row = briefView.querySelector('[data-brief-field="' + key + '"]');
+      if (!row) return;
+      row.hidden = !values[key];
+      if (values[key]) {
+        row.querySelector('dd').textContent = values[key];
+        visible = true;
+      }
+    });
+    briefView.hidden = !visible;
+  }
+
+  function renderPartnerHeroBrief(data, name) {
+    var labels = partnerBriefLabels(data);
+    name.textContent = labels.display + (labels.language ? ' 님과의 ' + labels.language + ' 대화' : ' 님과의 대화');
+    var languageView = document.getElementById('partner-upcoming-hero-language');
+    if (languageView) {
+      var flag = window.DayOI18n && typeof window.DayOI18n.langFlag === 'function'
+        ? window.DayOI18n.langFlag(labels.languageId) : '';
+      languageView.textContent = labels.language ? (flag ? flag + ' ' : '') + labels.language : '';
+      languageView.hidden = !labels.language;
+    }
+    var briefView = document.getElementById('partner-upcoming-hero-brief');
+    renderBriefRows(briefView, labels.values);
+    if (briefView && labels.language) briefView.hidden = false;
+  }
+
+  function closePartnerBookingPrep() {
+    var modal = document.getElementById('bookingPrepModal');
+    if (!modal || !modal.classList.contains('is-open')) return;
+    modal.classList.remove('is-open');
+    partnerPrepRequest += 1;
+    if (partnerPrepTimer) clearInterval(partnerPrepTimer);
+    partnerPrepTimer = null;
+    if (partnerPrepOpenTimer) clearTimeout(partnerPrepOpenTimer);
+    if (partnerPrepCloseTimer) clearTimeout(partnerPrepCloseTimer);
+    partnerPrepOpenTimer = null;
+    partnerPrepCloseTimer = null;
+    if (window.DayOScrollLock) window.DayOScrollLock.unlock();
+    else document.body.style.overflow = '';
+  }
+
+  function openPartnerBookingPrep(booking, supabase) {
+    var modal = document.getElementById('bookingPrepModal');
+    var enter = document.getElementById('booking-prep-enter');
+    if (!modal || !enter) return;
+    closePartnerBookingPrep();
+    var request = ++partnerPrepRequest;
+    var start = new Date(booking.scheduled_at);
+    var day = toIsoDate(start) === toIsoDate(new Date()) ? '오늘' :
+      new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' }).format(start);
+    document.getElementById('booking-prep-time').textContent = day + ' ' + pad(start.getHours()) + ':' + pad(start.getMinutes());
+    var name = document.getElementById('booking-prep-name');
+    var language = bookingOptionLabel('book.lang.', booking.language, ['en', 'es', 'fr', 'ko', 'ja', 'zh', 'vi', 'de', 'it', 'ru']);
+    name.textContent = 'DayO User 님과의 ' + (language ? language + ' ' : '') + '대화';
+    var briefView = document.getElementById('booking-prep-brief');
+    renderBriefRows(briefView, { purposes: '', interests: '', chat_style: '', chat_request: '', partner_preference: '' });
+    function updateEntry() {
+      var now = Date.now();
+      var canEnter = now >= start.getTime() - 5 * 60000 && now < start.getTime() + 30 * 60000;
+      enter.disabled = !canEnter;
+      enter.textContent = canEnter ? '대화방 입장' :
+        now >= start.getTime() + 30 * 60000 ? '입장 시간이 지났어요' : '5분 전부터 입장 가능';
+    }
+    enter.onclick = function () {
+      var now = Date.now();
+      updateEntry();
+      if (now >= start.getTime() - 5 * 60000 && now < start.getTime() + 30 * 60000) {
+        window.location.href = 'room.html?bookingId=' + encodeURIComponent(booking.id);
+      }
+    };
+    updateEntry();
+    partnerPrepTimer = setInterval(updateEntry, 1000);
+    var untilOpen = start.getTime() - 5 * 60000 - Date.now();
+    var untilClose = start.getTime() + 30 * 60000 - Date.now();
+    if (untilOpen > 0) partnerPrepOpenTimer = setTimeout(updateEntry, untilOpen);
+    if (untilClose > 0) partnerPrepCloseTimer = setTimeout(updateEntry, untilClose);
+    modal.classList.add('is-open');
+    if (window.DayOScrollLock) window.DayOScrollLock.lock();
+    else document.body.style.overflow = 'hidden';
+    var close = modal.querySelector('[data-close-modal]');
+    if (close) close.focus();
+    getPartnerBookingBrief(supabase, booking.id).then(function (data) {
+      if (request !== partnerPrepRequest || !data || typeof data !== 'object') return;
+      var labels = partnerBriefLabels(data);
+      name.textContent = labels.display + (labels.language ? ' 님과의 ' + labels.language + ' 대화' : ' 님과의 대화');
+      renderBriefRows(briefView, labels.values);
+    }).catch(function (error) {
+      if (request === partnerPrepRequest) console.warn('[DayO] booking brief unavailable', error);
+    });
+  }
+
+  var partnerPrepModal = document.getElementById('bookingPrepModal');
+  if (partnerPrepModal) {
+    partnerPrepModal.addEventListener('click', function (event) {
+      if (event.target === partnerPrepModal || event.target.closest('[data-close-modal]')) closePartnerBookingPrep();
+    });
+    document.addEventListener('keydown', function (event) {
+      if (event.key === 'Escape') closePartnerBookingPrep();
+    });
+  }
+
+  function renderPartnerUpcomingHero(rows, supabase) {
+    var bookingView = document.getElementById('partner-upcoming-hero-booking');
+    var emptyView = document.getElementById('partner-upcoming-hero-empty');
+    var ctaView = document.getElementById('partner-upcoming-hero-cta');
+    var enter = document.getElementById('partner-upcoming-hero-enter');
+    if (!bookingView || !emptyView || !ctaView || !enter) return;
+
+    partnerHeroRequest += 1;
+    var request = partnerHeroRequest;
+    if (partnerHeroTimer) clearInterval(partnerHeroTimer);
+    partnerHeroTimer = null;
+    var booking = (rows || []).find(function (row) {
+      var at = new Date(row.scheduled_at).getTime();
+      return row.status === 'confirmed' && Number.isFinite(at) && at + 30 * 60000 > Date.now();
+    });
+    bookingView.hidden = !booking;
+    ctaView.hidden = !booking;
+    emptyView.hidden = !!booking;
+    if (!booking) return;
+
+    var start = new Date(booking.scheduled_at);
+    document.getElementById('partner-upcoming-hero-day').textContent =
+      toIsoDate(start) === toIsoDate(new Date()) ? '오늘' :
+        new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric', weekday: 'short' }).format(start);
+    document.getElementById('partner-upcoming-hero-time').textContent = pad(start.getHours()) + ':' + pad(start.getMinutes());
+    var name = document.getElementById('partner-upcoming-hero-name');
+    name.textContent = 'DayO User 님과의 대화';
+    document.getElementById('partner-upcoming-hero-brief').hidden = true;
+
+    function updateEntry() {
+      var now = Date.now();
+      if (now >= start.getTime() + 30 * 60000) {
+        clearInterval(partnerHeroTimer);
+        partnerHeroTimer = null;
+        window.loadPartnerBookings();
+        return;
+      }
+      var canEnter = now >= start.getTime() - 5 * 60000 && now < start.getTime() + 30 * 60000;
+      enter.disabled = false;
+      enter.textContent = '대화 준비하기';
+      document.getElementById('partner-upcoming-hero-hint').hidden = canEnter;
+    }
+    enter.onclick = function () {
+      openPartnerBookingPrep(booking, supabase);
+    };
+    updateEntry();
+    partnerHeroTimer = setInterval(updateEntry, 10000);
+
+    getPartnerBookingBrief(supabase, booking.id)
+      .then(function (data) {
+        if (request !== partnerHeroRequest) return;
+        if (data && typeof data === 'object') renderPartnerHeroBrief(data, name);
+      })
+      .catch(function (error) {
+        console.warn('[DayO] learner display unavailable', error);
+      });
+  }
+
+  function renderPartnerBookings(rows, recentCancellations, recentTechIssues, supabase) {
     var container = document.getElementById('partnerUpcomingBookings');
     if (!container) return;
     container.innerHTML = '';
@@ -121,6 +355,17 @@
     rows.forEach(function (booking) {
       var article = document.createElement('article');
       article.className = 'session';
+      article.setAttribute('data-booking-prep', '');
+      article.setAttribute('role', 'button');
+      article.tabIndex = 0;
+      article.setAttribute('aria-label', '대화 준비하기');
+      article.addEventListener('click', function () { openPartnerBookingPrep(booking, supabase); });
+      article.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openPartnerBookingPrep(booking, supabase);
+        }
+      });
 
       var status = document.createElement('span');
       status.className = 'session-status';
@@ -146,13 +391,10 @@
 
       var actions = document.createElement('div');
       actions.className = 'session-actions';
-      var enter = document.createElement('a');
-      enter.className = 'studio-link btn-partner-mint';
-      enter.setAttribute('data-enter-studio', '');
-      enter.setAttribute('data-booking-id', booking.id);
-      enter.href = 'room.html?bookingId=' + encodeURIComponent(booking.id);
-      enter.textContent = window.DayOI18n.t('partner.sessions.enter');
-      actions.appendChild(enter);
+      var detail = document.createElement('span');
+      detail.className = 'studio-link btn-partner-mint';
+      detail.textContent = '대화 준비하기';
+      actions.appendChild(detail);
       article.appendChild(actions);
       container.appendChild(article);
     });
@@ -216,8 +458,13 @@
       var auth = await supabase.auth.getUser();
       var user = auth && auth.data && auth.data.user;
       if (!user || auth.error) {
+        renderPartnerUpcomingHero([], supabase);
         renderPartnerBookings([]);
         return [];
+      }
+      if (partnerBriefUserId !== user.id) {
+        partnerBriefCache.clear();
+        partnerBriefUserId = user.id;
       }
       var result = await supabase
         .from('bookings')
@@ -232,6 +479,7 @@
         var at = new Date(booking.scheduled_at).getTime();
         return !isNaN(at) && at + 30 * 60000 >= now;
       });
+      renderPartnerUpcomingHero(upcoming, supabase);
       var recentCancellations = [];
       var cancelledResult = await supabase
         .from('bookings')
@@ -267,10 +515,11 @@
       } else {
         recentTechIssues = techResult.data || [];
       }
-      renderPartnerBookings(upcoming, recentCancellations, recentTechIssues);
+      renderPartnerBookings(upcoming, recentCancellations, recentTechIssues, supabase);
       return upcoming;
     } catch (err) {
       console.warn('[DayO] loadPartnerBookings failed', err);
+      renderPartnerUpcomingHero([], supabase);
       renderPartnerBookings([]);
       return [];
     }
@@ -292,7 +541,7 @@
         });
       });
     }
-    if (!slots.length) {
+    if (!schedule && !slots.length) {
       document.querySelectorAll('.time-chip.open, .time-chip.selected, .slot-open, .slot-btn.active').forEach(function (el) {
         var time = el.getAttribute('data-time') || String(el.textContent || '').trim().slice(0, 5);
         var dayId = el.getAttribute('data-day') || (window.__dayoPartnerActiveDay || 'mon');
@@ -348,7 +597,7 @@
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error(window.DayOI18n.t('partner.schedule.loginRequired'));
 
-      var openSlots = collected.length ? collected : Array.from(activeSlots).map(function (el) {
+      var openSlots = window.__dayoPartnerSchedule ? collected : Array.from(activeSlots).map(function (el) {
         return {
           dayId: el.getAttribute('data-day') || (window.__dayoPartnerActiveDay || 'mon'),
           time: el.dataset.time || String(el.innerText || '').trim().slice(0, 5)
@@ -367,15 +616,11 @@
         keepWeeklyTimes[row.slot_time] = true;
       });
 
-      var existingRes = await supabase
-        .from('availability_slots')
-        .select('id, slot_time, status')
-        .eq('partner_id', user.id);
-      if (existingRes.error) throw existingRes.error;
+      var existingRows = await fetchPartnerAvailabilityRows(supabase, user.id, 'id, slot_time, status');
 
       var booked = {};
       var bookedStarts = {};
-      (existingRes.data || []).forEach(function (row) {
+      existingRows.forEach(function (row) {
         if (row.status !== 'booked') return;
         booked[row.slot_time] = true;
         var bookedStart = parseDatedSlotStart(row.slot_time);
@@ -390,7 +635,7 @@
         if (error) throw error;
       }
 
-      var staleIds = (existingRes.data || [])
+      var staleIds = existingRows
         .filter(function (row) {
           var slotTime = String(row.slot_time || '');
           return row.status === 'available'
@@ -404,7 +649,7 @@
 
       var windowDates = materializationDateSet();
       var nowMs = Date.now();
-      var staleDatedIds = (existingRes.data || [])
+      var staleDatedIds = existingRows
         .filter(function (row) {
           if (row.status !== 'available') return false;
           var start = parseDatedSlotStart(row.slot_time);
@@ -448,17 +693,14 @@
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      var res = await supabase
-        .from('availability_slots')
-        .select('slot_time, status')
-        .eq('partner_id', user.id);
-      if (res.error || !res.data || !res.data.length) return;
+      var rows = await fetchPartnerAvailabilityRows(supabase, user.id, 'id, slot_time, status');
+      if (!rows.length) return;
 
       DAY_IDS.forEach(function (dayId) {
         if (schedule[dayId] && schedule[dayId].clear) schedule[dayId] = new Set();
       });
 
-      res.data.forEach(function (row) {
+      rows.forEach(function (row) {
         var raw = String(row.slot_time || '');
         if (raw.indexOf('weekly:') === 0) {
           var parts = raw.slice(7).split('|');

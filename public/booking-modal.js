@@ -10,6 +10,7 @@
   var LANG_IDS = ['en', 'es', 'fr', 'ja', 'zh', 'vi', 'de', 'it', 'ru', 'ko'];
   var ACTIVE_LANG_IDS = ['en', 'es', 'fr', 'ko'];
   var PURPOSE_IDS = ['travel', 'opic', 'abroad', 'casual'];
+  var INTEREST_IDS = ['drama', 'movies', 'youtube', 'music', 'travel', 'food_cafe', 'exercise', 'games', 'fashion_beauty', 'pets', 'books_webtoon', 'work_school'];
   var STYLE_IDS = ['slow', 'fast', 'correct', 'korean'];
 
   function isActiveBookingLang(id) {
@@ -29,6 +30,10 @@
 
   function PURPOSES() {
     return PURPOSE_IDS.map(function (id) { return { id: id, label: t('book.purpose.' + id) }; });
+  }
+
+  function INTERESTS() {
+    return INTEREST_IDS.map(function (id) { return { id: id, label: t('book.interest.' + id) }; });
   }
 
   function STYLES() {
@@ -173,8 +178,8 @@
     step: 0,
     language: null,
     purposes: [],
+    interests: [],
     style: null,
-    chatSpeed: 'slow',
     chatStyle: 'casual',
     chatRequest: 'praise',
     date: null,
@@ -256,10 +261,6 @@
             '<div class="bk-comfort" id="bkComfort">' +
               '<p class="bk-label">' + t('book.comfortTitle') + '</p>' +
               '<div class="bk-group">' +
-                '<p class="bk-hint">' + t('chatPrefs.speedLabel') + '</p>' +
-                '<div class="bk-chips" id="bkChatSpeeds"></div>' +
-              '</div>' +
-              '<div class="bk-group">' +
                 '<p class="bk-hint">' + t('chatPrefs.styleLabel') + '</p>' +
                 '<div class="bk-chips" id="bkChatStyles"></div>' +
               '</div>' +
@@ -267,6 +268,11 @@
                 '<p class="bk-hint">' + t('chatPrefs.requestLabel') + '</p>' +
                 '<div class="bk-chips bk-chips--stack" id="bkChatRequests"></div>' +
               '</div>' +
+            '</div>' +
+            '<div class="bk-group">' +
+              '<p class="bk-label">' + t('book.interestsQuestion') + '</p>' +
+              '<p class="bk-hint">' + t('book.interestsHint') + '</p>' +
+              '<div class="bk-chips" id="bkInterests">' + chipsMarkup(INTERESTS(), 'interest') + '</div>' +
             '</div>' +
             '<div class="bk-group">' +
               '<p class="bk-label">' + t('book.styleQuestion') + '</p>' +
@@ -354,7 +360,6 @@
     el.partnerHint = el.overlay.querySelector('#bkPartnerHint');
     el.summary = el.overlay.querySelector('#bkSummary');
     el.firstTip = el.overlay.querySelector('#bkFirstTip');
-    el.chatSpeeds = el.overlay.querySelector('#bkChatSpeeds');
     el.chatStyles = el.overlay.querySelector('#bkChatStyles');
     el.chatRequests = el.overlay.querySelector('#bkChatRequests');
 
@@ -375,11 +380,9 @@
 
   function renderComfortChips() {
     var api = prefsApi();
-    if (!el.chatSpeeds || !api) return;
-    el.chatSpeeds.innerHTML = comfortChipHtml(api.SPEED_IDS, 'chatSpeed', api.speedLabel);
+    if (!el.chatStyles || !el.chatRequests || !api) return;
     el.chatStyles.innerHTML = comfortChipHtml(api.STYLE_IDS, 'chatStyle', api.styleLabel);
     el.chatRequests.innerHTML = comfortChipHtml(api.REQUEST_IDS, 'chatRequest', api.requestLabel);
-    syncChips('chatSpeed');
     syncChips('chatStyle');
     syncChips('chatRequest');
     updateFirstTip();
@@ -468,7 +471,7 @@
   function refreshOnLangChange() {
     var wasOpen = el.overlay.classList.contains('is-open');
     renderMarkup();
-    ['language', 'purpose', 'style', 'time', 'chatSpeed', 'chatStyle', 'chatRequest'].forEach(syncChips);
+    ['language', 'purpose', 'interest', 'style', 'time', 'chatStyle', 'chatRequest'].forEach(syncChips);
     el.slots.hidden = !state.partner;
     renderCalendar();
     Array.prototype.forEach.call(el.steps, function (section, i) {
@@ -490,6 +493,13 @@
       var at = state.purposes.indexOf(id);
       if (at > -1) state.purposes.splice(at, 1);
       else state.purposes.push(id);
+    } else if (group === 'interest') {
+      var interestAt = state.interests.indexOf(id);
+      if (interestAt > -1) state.interests.splice(interestAt, 1);
+      else if (state.interests.length >= 4) {
+        showToast(t('book.interestsMax'));
+        return;
+      } else state.interests.push(id);
     } else if (group === 'language') {
       if (!isActiveBookingLang(id)) return;
       state.language = id;
@@ -513,7 +523,7 @@
       state.time = id;
       state.slotId = null;
       state.selectedSlot = null;
-    } else if (group === 'chatSpeed' || group === 'chatStyle' || group === 'chatRequest') {
+    } else if (group === 'chatStyle' || group === 'chatRequest') {
       state[group] = id;
       persistComfortPrefs(true);
     } else {
@@ -529,7 +539,6 @@
     var api = prefsApi();
     if (!api) return;
     api.setPrefs({
-      speed: state.chatSpeed,
       style: state.chatStyle,
       request: state.chatRequest
     }, { clearFirstUser: !!clearFirst });
@@ -539,8 +548,8 @@
   function syncChips(group) {
     var chips = el.overlay.querySelectorAll('.bk-chip[data-group="' + group + '"]');
     Array.prototype.forEach.call(chips, function (chip) {
-      var on = group === 'purpose'
-        ? state.purposes.indexOf(chip.dataset.id) > -1
+      var on = group === 'purpose' || group === 'interest'
+        ? state[group === 'purpose' ? 'purposes' : 'interests'].indexOf(chip.dataset.id) > -1
         : state[group] === chip.dataset.id;
       chip.classList.toggle('is-on', on);
       chip.setAttribute('aria-pressed', on ? 'true' : 'false');
@@ -660,7 +669,7 @@
 
   function normalizePartner(row) {
     if (!row) return null;
-    var id = row.user_id || row.id;
+    var id = row.id || row.user_id;
     if (!id) return null;
     var nickname = String(row.nickname || '').trim();
     var name = (nickname && !/[@+]/.test(nickname) ? nickname : '') || 'DayO Partner';
@@ -743,13 +752,14 @@
         .order('slot_time', { ascending: true });
       if (result.error) {
         console.warn('파트너 가용시간 로드 실패:', result.error);
-        return available;
+        throw result.error;
       }
       (result.data || []).filter(isFutureThirtyMinuteConcreteSlot).forEach(function (slot) {
         if (slot.partner_id) available[String(slot.partner_id)] = true;
       });
     } catch (err) {
       console.warn('파트너 가용시간 로드 실패:', err);
+      throw err;
     }
     return available;
   }
@@ -772,8 +782,6 @@
       return liveSlots;
     }
 
-    var startOfSelectedDate = isoDate + ' 00:00:00';
-    var endOfSelectedDate = isoDate + ' 23:59:59';
     var selectedPartnerId = partnerId;
     var slots = [];
 
@@ -783,34 +791,25 @@
         .select('id, slot_time, status')
         .eq('partner_id', selectedPartnerId)
         .eq('status', 'available')
-        .gte('slot_time', startOfSelectedDate)
-        .lte('slot_time', endOfSelectedDate)
+        .like('slot_time', isoDate + '%')
         .order('slot_time', { ascending: true });
-
-      if (res.error) {
-        console.warn('슬롯 로드 실패, 날짜 접두 재시도:', res.error);
-      } else {
-        slots = res.data || [];
-      }
-
-      if (!slots.length) {
-        var likeRes = await supabase
-          .from('availability_slots')
-          .select('id, slot_time, status')
-          .eq('partner_id', selectedPartnerId)
-          .eq('status', 'available')
-          .like('slot_time', isoDate + '%')
-          .order('slot_time', { ascending: true });
-        if (!likeRes.error) slots = likeRes.data || [];
-      }
-
+      if (res.error) throw res.error;
+      slots = res.data || [];
     } catch (err) {
       console.error('슬롯 로드 실패:', err);
-      slots = [];
+      if (requestSeq === slotLoadSeq && state.partner === selectedPartnerId && state.date === isoDate) {
+        liveSlots = [];
+        container.innerHTML = '<div class="bk-slot-empty">가능한 시간을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</div>';
+        updateFooter();
+      }
+      return [];
     }
 
     if (requestSeq !== slotLoadSeq || state.partner !== selectedPartnerId || state.date !== isoDate) return [];
-    liveSlots = (slots || []).filter(isFutureThirtyMinuteConcreteSlot);
+    liveSlots = slots.filter(function (slot) {
+      return slot.status === 'available' && String(slot.slot_time || '').indexOf(isoDate) === 0 &&
+        isFutureThirtyMinuteConcreteSlot(slot);
+    });
     if (state.selectedSlot && !liveSlots.some(function (slot) { return slot.id === state.selectedSlot.id; })) {
       state.time = null;
       state.slotId = null;
@@ -884,7 +883,16 @@
       await loadAvailablePartners();
     }
     if (requestedDate !== state.date) return;
-    var availablePartnerIds = await fetchAvailablePartnerIds(requestedDate);
+    var availablePartnerIds;
+    try {
+      availablePartnerIds = await fetchAvailablePartnerIds(requestedDate);
+    } catch (err) {
+      if (requestedDate !== state.date) return;
+      partnersLoading = false;
+      if (el.partners) el.partners.innerHTML = '<p class="bk-hint">가능한 시간을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</p>';
+      updateFooter();
+      return;
+    }
     if (requestedDate !== state.date) return;
     livePartners = allPartners.filter(function (partner) {
       return partner.isTest || isTestPartnerId(partner.id) || !!availablePartnerIds[String(partner.id)];
@@ -924,11 +932,14 @@
     var purposeText = state.purposes.map(function (id) {
       return labelOf(PURPOSES, id);
     }).join(', ');
+    var interestText = state.interests.map(function (id) {
+      return labelOf(INTERESTS, id);
+    }).join(', ');
 
     el.summary.innerHTML = '' +
       row(t('book.summaryLanguage'), labelOf(LANGUAGES, state.language)) +
       row(t('book.summaryPurpose'), purposeText) +
-      row(t('chatPrefs.speedLabel'), api ? api.speedLabel(state.chatSpeed) : state.chatSpeed) +
+      (interestText ? row(t('book.interestsQuestion'), interestText) : '') +
       row(t('chatPrefs.styleLabel'), api ? api.styleLabel(state.chatStyle) : state.chatStyle) +
       row(t('chatPrefs.requestLabel'), api ? api.requestLabel(state.chatRequest) : state.chatRequest) +
       row(t('book.summaryStyle'), labelOf(STYLES, state.style)) +
@@ -1016,6 +1027,13 @@
         partner_user_id: partnerId,
         partner_name: partner.name || '',
         language: state.language || '',
+        conversation_brief: {
+          purposes: state.purposes.slice(),
+          interests: state.interests.slice(),
+          chat_style: state.chatStyle,
+          chat_request: state.chatRequest,
+          partner_preference: state.style
+        },
         scheduled_at: scheduledAt,
         slot_id: selectedSlot.id
       });
@@ -1082,8 +1100,8 @@
     storageSet(DRAFT_KEY, JSON.stringify({
       language: state.language,
       purposes: state.purposes.slice(),
+      interests: state.interests.slice(),
       style: state.style,
-      chatSpeed: state.chatSpeed,
       chatStyle: state.chatStyle,
       chatRequest: state.chatRequest,
       date: state.date,
@@ -1112,8 +1130,10 @@
     if (!draft) return;
     state.language = isActiveBookingLang(draft.language) ? draft.language : null;
     state.purposes = Array.isArray(draft.purposes) ? draft.purposes.slice() : [];
+    state.interests = Array.isArray(draft.interests) ? draft.interests.filter(function (id, index, all) {
+      return INTEREST_IDS.indexOf(id) > -1 && all.indexOf(id) === index;
+    }).slice(0, 4) : [];
     state.style = draft.style || null;
-    if (draft.chatSpeed) state.chatSpeed = draft.chatSpeed;
     if (draft.chatStyle) state.chatStyle = draft.chatStyle;
     if (draft.chatRequest) state.chatRequest = draft.chatRequest;
     state.date = draft.date || null;
@@ -1137,7 +1157,7 @@
         state.viewMonth = Number(parts[1]) - 1;
       }
     }
-    ['language', 'purpose', 'style', 'time', 'chatSpeed', 'chatStyle', 'chatRequest'].forEach(syncChips);
+    ['language', 'purpose', 'interest', 'style', 'time', 'chatStyle', 'chatRequest'].forEach(syncChips);
     updateFirstTip();
     el.slots.hidden = !state.partner;
     renderCalendar();
@@ -1265,8 +1285,7 @@
   function loadComfortIntoState() {
     var api = prefsApi();
     if (api) api.applyFirstUserPresetIfNeeded();
-    var prefs = api ? api.getPrefs() : { speed: 'slow', style: 'casual', request: 'praise' };
-    state.chatSpeed = prefs.speed;
+    var prefs = api ? api.getPrefs() : { style: 'casual', request: 'praise' };
     state.chatStyle = prefs.style;
     state.chatRequest = prefs.request;
   }
@@ -1275,6 +1294,7 @@
     var today = startOfToday();
     state.language = null;
     state.purposes = [];
+    state.interests = [];
     state.style = null;
     state.date = null;
     state.time = null;
@@ -1286,7 +1306,7 @@
     state.viewMonth = today.getMonth();
     loadComfortIntoState();
 
-    ['language', 'purpose', 'style', 'time', 'chatSpeed', 'chatStyle', 'chatRequest'].forEach(syncChips);
+    ['language', 'purpose', 'interest', 'style', 'time', 'chatStyle', 'chatRequest'].forEach(syncChips);
     updateFirstTip();
     el.slots.hidden = true;
     renderCalendar();

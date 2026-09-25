@@ -681,6 +681,7 @@
       partner_id: row.partner_id || row.partner_user_id || null,
       partner_name: row.partner_name || '',
       language: row.language || '',
+      conversation_brief: row.conversation_brief || null,
       scheduled_at: row.scheduled_at || null,
       slot_id: row.slot_id || null,
       status: 'pending'

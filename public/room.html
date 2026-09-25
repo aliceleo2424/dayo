@@ -562,6 +562,15 @@
       justify-content: center;
       flex-wrap: wrap;
     }
+    #partner-room-interests {
+      margin-top: 8px;
+      color: #47665a;
+      font-size: 12px;
+      line-height: 1.45;
+      text-align: center;
+    }
+    #partner-room-interests[hidden] { display: none !important; }
+    #partner-room-interests strong { margin-right: 6px; }
 
     #btn-partner-ask:disabled,
     #btn-partner-topic:disabled {
@@ -3592,6 +3601,7 @@
                 🔄 새 대화 주제 전환
               </button>
             </div>
+            <div id="partner-room-interests" hidden><strong>최근 관심사</strong><span id="partner-room-interests-list"></span></div>
             <div id="partner-topic-card" style="display: none; background: #FFF9E8; border: 1.5px solid #FFEAA7; border-radius: 14px; padding: 14px; margin-top: 10px;">
               <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px;">
                 <div style="font-size: 11px; font-weight: 800; color: #966914;">✨ Host Guide Prompt</div>
@@ -3787,6 +3797,38 @@
   <script src="talk-cards-data.js"></script>
   <script>window.__dayoUsePeerJS = true;</script>
   <script src="room-live.js?v=20260921-session-persistence"></script>
+  <script>
+    (function () {
+      var view = document.getElementById('partner-room-interests');
+      var list = document.getElementById('partner-room-interests-list');
+      if (!view || !list || !window.DayORoomAccessReady) return;
+      var allowed = [
+        'drama', 'movies', 'youtube', 'music', 'travel', 'food_cafe',
+        'exercise', 'games', 'fashion_beauty', 'pets', 'books_webtoon', 'work_school'
+      ];
+      window.DayORoomAccessReady.then(function (access) {
+        if (!access || !access.allowed || access.adminTest || access.observer ||
+            access.role !== 'partner' || !access.bookingId || !window.supabaseClient) return;
+        return window.supabaseClient.rpc('get_partner_booking_brief', { p_booking_id: access.bookingId })
+          .then(function (result) {
+            if (result.error) throw result.error;
+            var brief = result.data && result.data.conversation_brief;
+            var interests = brief && Array.isArray(brief.interests) ? brief.interests : [];
+            var labels = interests.filter(function (id) { return allowed.indexOf(id) !== -1; })
+              .map(function (id) {
+                var key = 'book.interest.' + id;
+                var label = window.DayOI18n && window.DayOI18n.t(key);
+                return label && label !== key ? label : '';
+              }).filter(Boolean);
+            if (!labels.length) return;
+            list.textContent = labels.join(' · ');
+            view.hidden = false;
+          });
+      }).catch(function (error) {
+        console.warn('[DayO Room] partner interests unavailable', error);
+      });
+    })();
+  </script>
   <script>
     /* 1:1 WebRTC (PeerJS) — Partner = host/receiver, User = guest/caller
      * Observer = receive-only ghost (empty outbound stream); never replaces activeCall */
