@@ -51,11 +51,13 @@ export type MemberIdentity = {
   user_name?: string | null;
   email?: string | null;
   provider?: string | null;
+  kakao_id?: string | null;
   avatar_url?: string | null;
   client_key?: string | null;
 };
 
 export function detectMemberProvider(row: MemberIdentity): AuthProvider {
+  if (String(row.kakao_id || "").trim()) return "kakao";
   const provider = String(row.provider || "").trim().toLowerCase();
   if (provider === "kakao") return "kakao";
   if (provider === "google") return "google";
