@@ -638,8 +638,8 @@
     .profile-card {
       display: grid;
       grid-template-columns: 200px minmax(0, 1fr);
-      gap: 1.7rem;
-      padding: 1.6rem;
+      gap: 1.1rem;
+      padding: 1.2rem;
     }
 
     .avatar-panel {
@@ -647,8 +647,8 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 235px;
-      padding: 1rem;
+      min-height: 170px;
+      padding: 0.7rem;
       border-radius: 22px;
       background: linear-gradient(145deg, var(--pink-soft), var(--peach));
       text-align: center;
@@ -658,8 +658,8 @@
       position: relative;
       display: grid;
       place-items: center;
-      width: 104px;
-      height: 104px;
+      width: 82px;
+      height: 82px;
       overflow: hidden;
       border: 4px solid rgba(255,255,255,0.95);
       border-radius: 50%;
@@ -675,13 +675,13 @@
     }
 
     .avatar-name {
-      margin-top: 0.75rem;
+      margin-top: 0.4rem;
       font-weight: 800;
     }
 
     .avatar-intro {
-      margin-top: 0.5rem;
-      padding: 0.6rem 0.7rem;
+      margin-top: 0.35rem;
+      padding: 0.4rem 0.6rem;
       border-radius: 14px;
       background: rgba(255, 255, 255, 0.72);
       color: var(--text);
@@ -698,7 +698,7 @@
     }
 
     .photo-btn {
-      margin-top: 0.75rem;
+      margin-top: 0.45rem;
       padding: 0.5rem 0.85rem;
       border: 1px solid rgba(255, 255, 255, 0.9);
       border-radius: 999px;
@@ -920,9 +920,8 @@
 
     .profile-form {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      column-gap: 1rem;
-      row-gap: 1.25rem;
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: 0.7rem;
       align-content: center;
     }
 
@@ -932,8 +931,13 @@
     .profile-form .label-row { min-height: 2rem; }
 
     .profile-form .input,
-    .profile-form .select-input {
+    .profile-form .select-input,
+    .profile-form .textarea {
       box-sizing: border-box;
+    }
+
+    .profile-form .input,
+    .profile-form .select-input {
       height: 44px;
       padding: 0 0.9rem;
       border-radius: 14px;
@@ -1057,82 +1061,84 @@
 
     .gcal-arrow { color: #7C93BE; font-size: 1.2rem; }
 
-    .lounge-promos {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.9rem;
-      margin-bottom: 1.15rem;
-    }
+    .partner-utility-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: stretch; gap: 0.55rem; margin-bottom: 0.95rem; }
+    .lounge-promos { display: flex; min-width: 0; gap: 0.55rem; }
 
     .promo-card {
       display: flex;
-      align-items: flex-start;
-      gap: 0.75rem;
-      padding: 1.05rem 1.15rem;
+      flex: 1 1 0;
+      align-items: center;
+      min-width: 0;
+      height: 60px;
+      box-sizing: border-box;
+      gap: 0.5rem;
+      padding: 0.4rem 0.65rem;
       border: 1px solid rgba(255, 107, 87, 0.18);
-      border-radius: 22px;
-      background: linear-gradient(145deg, #FFF7FB, #FFE9D8 70%, #FFF6C7);
-      box-shadow: 0 10px 28px rgba(113, 83, 72, 0.08);
+      border-radius: 12px;
+      background: #fff9f5;
     }
+    .promo-card > div { min-width: 0; }
 
     .promo-card:nth-child(2) {
-      background: linear-gradient(145deg, #FFF9F0, #FFE5C4 55%, #FFD6DF);
+      background: #f8fcf9;
     }
 
     .promo-mark {
-      flex: 0 0 42px;
-      width: 42px;
-      height: 42px;
+      flex: 0 0 28px;
+      width: 28px;
+      height: 28px;
       display: grid;
       place-items: center;
-      border-radius: 14px;
+      border-radius: 9px;
       background: rgba(255, 255, 255, 0.78);
-      font-size: 1.2rem;
+      font-size: 0.95rem;
     }
 
-    .promo-kicker {
-      color: var(--coral-dark);
-      font-size: 0.68rem;
-      font-weight: 800;
-      letter-spacing: 0.08em;
-    }
+    .promo-title { overflow: hidden; color: var(--coral-dark); font-size: 0.74rem; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
 
     .promo-copy {
-      margin-top: 0.28rem;
-      font-size: 0.9rem;
-      font-weight: 800;
-      line-height: 1.5;
-      letter-spacing: -0.02em;
+      overflow: hidden;
+      margin-top: 0.1rem;
+      color: var(--muted);
+      font-size: 0.66rem;
+      font-weight: 600;
+      line-height: 1.25;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .lounge-stats {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.9rem;
-      margin-bottom: 1.25rem;
+      display: flex;
+      gap: 0.55rem;
     }
 
     .stat-box {
-      padding: 1.15rem 1.2rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-width: 8.5rem;
+      height: 60px;
+      box-sizing: border-box;
+      gap: 0.45rem;
+      padding: 0.45rem 0.7rem;
       border: 1px solid rgba(255, 214, 223, 0.8);
-      border-radius: 22px;
+      border-radius: 12px;
       background: var(--card);
-      box-shadow: var(--shadow);
+      box-shadow: none;
     }
 
-    .stat-box:nth-child(1) { background: linear-gradient(180deg, #FFFCF8, #FFF0F3); }
-    .stat-box:nth-child(2) { background: linear-gradient(180deg, #FFFCF8, #FFE5C4); }
-    .stat-box:nth-child(3) { background: linear-gradient(180deg, #FFFCF8, #FFF6C7); }
+    .stat-box:nth-child(1) { background: #fffaf5; }
+    .stat-box:nth-child(2) { background: #fffaf0; }
 
     .stat-label {
       color: var(--muted);
-      font-size: 0.76rem;
+      font-size: 0.7rem;
       font-weight: 800;
     }
 
     .stat-value {
-      margin-top: 0.45rem;
-      font-size: 1.55rem;
+      margin-top: 0;
+      font-size: 1.05rem;
       font-weight: 900;
       letter-spacing: -0.04em;
       line-height: 1.15;
@@ -1626,8 +1632,12 @@
       .profile-card { grid-template-columns: 170px minmax(0, 1fr); }
       .dashboard-grid { grid-template-columns: 1fr; }
       .side-column { grid-template-columns: 1fr; }
-      .lounge-promos,
-      .lounge-stats { grid-template-columns: 1fr; }
+      .partner-utility-row { grid-template-columns: 1fr; gap: 0.4rem; }
+      .lounge-promos { overflow-x: auto; scrollbar-width: none; }
+      .lounge-promos::-webkit-scrollbar { display: none; }
+      .promo-card { flex: 0 0 13.5rem; }
+      .lounge-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .stat-box { min-width: 0; height: 48px; }
       .convert-banner { flex-direction: column; align-items: stretch; }
       .convert-actions { width: 100%; }
       .studio-link.convert-cta { width: 100%; }
@@ -1765,7 +1775,12 @@
 
       .ms-opt { padding: 0.4rem 0.55rem; font-size: 0.7rem; }
       .profile-card { grid-template-columns: 1fr; padding: 1rem; }
-      .avatar-panel { min-height: 195px; }
+      .avatar-panel { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; align-items: center; gap: 0.4rem; min-height: 0; text-align: left; }
+      .avatar-panel .avatar { grid-row: 1 / 3; width: 64px; height: 64px; border-width: 3px; }
+      .avatar-panel .avatar-meta { grid-column: 2; grid-row: 1; align-items: flex-start; gap: 0.1rem; }
+      .avatar-panel .avatar-name { margin-top: 0; }
+      .avatar-panel .avatar-intro { grid-column: 2 / 4; grid-row: 2; margin: 0; padding: 0.25rem 0.4rem; font-size: 0.7rem; line-height: 1.3; }
+      .avatar-panel .photo-btn { grid-column: 3; grid-row: 1; margin: 0; padding: 0.35rem 0.5rem; font-size: 0.72rem; }
       .profile-form { grid-template-columns: 1fr; }
       .field--wide { grid-column: auto; }
       .schedule-card, .sessions-card, .report-card, .tips-card { padding: 1rem; }
@@ -1836,6 +1851,7 @@
       border-radius: 16px;
       padding: 18px;
     }
+    body.theme-partner .partner-utility-row .stat-box { padding: 0.45rem 0.7rem !important; border-radius: 12px; box-shadow: none; }
 
     .partner-point-val,
     .partner-stat-val,
@@ -2138,40 +2154,34 @@
       </div>
     </section>
 
-    <div class="lounge-promos" aria-label="Event & Promotion">
-      <article class="promo-card">
-        <span class="promo-mark" aria-hidden="true">🎉</span>
-        <div>
-          <p class="promo-kicker" data-i18n="partner.promo.eyebrow">EVENT & PROMOTION</p>
-          <p class="promo-copy" data-i18n="partner.promo.referral">🎉 [친구 추천 보너스] 이번 달 유학생 친구 5명 소개 시 +50,000원 추가 정산!</p>
-        </div>
-      </article>
-      <article class="promo-card">
-        <span class="promo-mark" aria-hidden="true">⭐</span>
-        <div>
-          <p class="promo-kicker" data-i18n="partner.promo.eyebrow">EVENT & PROMOTION</p>
-          <p class="promo-copy" data-i18n="partner.promo.best">⭐ [베스트 파트너 리워드] 월간 세션 만족도 우수 파트너 특별 인센티브 지급</p>
-        </div>
-      </article>
+    <div class="partner-utility-row">
+      <div class="lounge-promos" aria-label="Event & Promotion">
+        <article class="promo-card">
+          <span class="promo-mark" aria-hidden="true">🎉</span>
+          <div>
+            <p class="promo-title">Referral bonus</p>
+            <p class="promo-copy">+₩50,000 for 5 invited partners</p>
+          </div>
+        </article>
+        <article class="promo-card">
+          <span class="promo-mark" aria-hidden="true">⭐</span>
+          <div>
+            <p class="promo-title">Best Partner Reward</p>
+            <p class="promo-copy">Monthly performance bonus</p>
+          </div>
+        </article>
+      </div>
+      <section class="lounge-stats" aria-label="Activity">
+        <article class="stat-box partner-stat-card">
+          <p class="stat-label">Completed</p>
+          <p class="stat-value partner-stat-val" id="statMonthCount">…</p>
+        </article>
+        <article class="stat-box partner-stat-card partner-point-box is-clickable" id="stat-points-card" role="button" tabindex="0" aria-label="Points and payouts 상세 내역 보기">
+          <p class="stat-label">Points</p>
+          <p class="stat-value partner-stat-val partner-point-val" id="statPointBalance">…</p>
+        </article>
+      </section>
     </div>
-
-    <section class="lounge-stats" aria-labelledby="loungeStatsTitle">
-      <h2 class="visually-hidden" id="loungeStatsTitle" data-i18n="partner.stats.section">활동비 현황</h2>
-      <article class="stat-box partner-stat-card">
-        <p class="stat-label" data-i18n="partner.stats.monthCount">이번 달 완료한 대화</p>
-        <p class="stat-value partner-stat-val" id="statMonthCount" data-i18n="partner.stats.loading">불러오는 중…</p>
-      </article>
-      <article class="stat-box partner-stat-card partner-point-box is-clickable" id="stat-points-card" role="button" tabindex="0" data-i18n="partner.stats.pointsAria" data-i18n-attr="aria-label" aria-label="적립 포인트 상세 내역 보기">
-        <p class="stat-label" data-i18n="partner.stats.points">적립 포인트</p>
-        <p class="stat-value partner-stat-val partner-point-val" id="statPointBalance" data-i18n="partner.stats.loading">불러오는 중…</p>
-        <p class="stat-hint" data-i18n="partner.stats.pointsHint">30분 세션 완료 시 6,000P가 적립됩니다. 30,000P부터 출금 신청이 가능합니다. 출금은 월 정산 일정에 따라 처리됩니다.</p>
-      </article>
-      <article class="stat-box partner-stat-card partner-point-box is-clickable" id="stat-settled-card" role="button" tabindex="0" data-i18n="partner.stats.settledAria" data-i18n-attr="aria-label" aria-label="누적 정산 금액 상세 내역 보기">
-        <p class="stat-label" data-i18n="partner.stats.settled">누적 정산 완료 금액</p>
-        <p class="stat-value partner-stat-val partner-point-val" id="statSettledWon" data-i18n="partner.stats.loading">불러오는 중…</p>
-        <p class="stat-hint" data-i18n="partner.stats.settledHint">지난달까지 완료된 세션</p>
-      </article>
-    </section>
 
     <section class="card profile-card" aria-labelledby="profileTitle">
       <div class="avatar-panel">
@@ -2201,39 +2211,6 @@
               <button class="mini-btn" type="button" id="historyBtn" data-i18n="partner.profile.history">📜 변경 이력</button>
             </div>
             <input class="input" id="nickname" name="nickname" value="" placeholder="DayO 파트너" autocomplete="nickname" data-i18n="partner.profile.nicknamePlaceholder">
-          </div>
-          <div class="field">
-            <div class="label-row">
-              <label class="field-label" for="origin" data-i18n="partner.profile.origin">대표 출신 국가 (Passport Origin)</label>
-            </div>
-            <select class="select-input" id="origin" name="origin">
-              <option value="fr" selected data-i18n="partner.origin.fr">🇫🇷 프랑스</option>
-              <option value="ca" data-i18n="partner.origin.ca">🇨🇦 캐나다</option>
-              <option value="be" data-i18n="partner.origin.be">🇧🇪 벨기에</option>
-              <option value="us" data-i18n="partner.origin.us">🇺🇸 미국</option>
-              <option value="gb" data-i18n="partner.origin.gb">🇬🇧 영국</option>
-              <option value="es" data-i18n="partner.origin.es">🇪🇸 스페인</option>
-              <option value="de" data-i18n="partner.origin.de">🇩🇪 독일</option>
-              <option value="it" data-i18n="partner.origin.it">🇮🇹 이탈리아</option>
-              <option value="jp" data-i18n="partner.origin.jp">🇯🇵 일본</option>
-              <option value="cn" data-i18n="partner.origin.cn">🇨🇳 중국</option>
-              <option value="vn" data-i18n="partner.origin.vn">🇻🇳 베트남</option>
-              <option value="ru" data-i18n="partner.origin.ru">🇷🇺 러시아</option>
-              <option value="kr" data-i18n="partner.origin.kr">🇰🇷 대한민국</option>
-            </select>
-          </div>
-          <div class="field field--wide">
-            <div class="label-row">
-              <span class="field-label" data-i18n="partner.profile.languages">가능 언어</span>
-              <span class="field-guide" data-i18n="partner.profile.langGuide">💡 선택하신 언어만 유저 대화 예약 서비스에 반영됩니다.</span>
-            </div>
-            <div class="chip-row" data-multi-select>
-              <button class="select-chip active" type="button" aria-pressed="true" data-language="fr">🇫🇷 <span data-i18n="book.lang.fr">프랑스어</span></button>
-              <button class="select-chip active" type="button" aria-pressed="true" data-language="en">🇺🇸 <span data-i18n="book.lang.en">영어</span></button>
-              <button class="select-chip" type="button" aria-pressed="false" data-language="ko">🇰🇷 <span data-i18n="book.lang.ko">한국어</span></button>
-              <button class="select-chip" type="button" aria-pressed="false" data-language="es">🇪🇸 <span data-i18n="book.lang.es">스페인어</span></button>
-              <button class="select-chip" type="button" aria-pressed="false" data-language="it">🇮🇹 <span data-i18n="book.lang.it">이탈리아어</span></button>
-            </div>
           </div>
           <div class="field field--wide">
             <label class="field-label" for="partner-bio-input" data-i18n="partner.profile.intro">한 줄 소개</label>
@@ -2535,15 +2512,6 @@
       renderTimes();
     });
 
-    document.querySelectorAll('[data-multi-select]').forEach((group) => {
-      group.addEventListener('click', (event) => {
-        const chip = event.target.closest('.select-chip');
-        if (!chip) return;
-        const active = chip.classList.toggle('active');
-        chip.setAttribute('aria-pressed', String(active));
-      });
-    });
-
     document.getElementById('saveSchedule').addEventListener('click', () => {
       if (typeof window.savePartnerSchedule === 'function') {
         window.savePartnerSchedule();
@@ -2559,8 +2527,6 @@
     /* 프로필 미니 카드 실시간 반영 */
     const nicknameInput = document.getElementById('nickname');
     const introInput = document.getElementById('partner-bio-input') || document.getElementById('intro');
-    const originInput = document.getElementById('origin');
-    const languageChips = Array.from(document.querySelectorAll('[data-multi-select] [data-language]'));
     const miniName = document.getElementById('miniName');
     const miniIntro = document.getElementById('partner-bio-preview') || document.getElementById('miniIntro');
     const profileSaveBtn = document.getElementById('partner-profile-save-btn');
@@ -2657,22 +2623,15 @@
       }
       var nickname = nicknameInput ? nicknameInput.value.trim() : '';
       var bio = introInput ? introInput.value.trim() : '';
-      var languages = languageChips.filter(function (chip) {
-        return chip.classList.contains('active');
-      }).map(function (chip) {
-        return chip.getAttribute('data-language');
-      }).filter(Boolean).join(',');
       var payload = {
         nickname: nickname || defaultPartnerName(),
-        bio: bio,
-        country_code: originInput ? originInput.value : null,
-        learning_languages: languages
+        bio: bio
       };
       var res = await client
         .from('profiles')
         .update(payload)
         .eq('id', user.id)
-        .select('id,nickname,bio,country_code,learning_languages,avatar_url')
+        .select('id,nickname,bio,avatar_url')
         .single();
       if (res.error) {
         console.error('[DayO] profiles update failed', res.error);
@@ -2681,9 +2640,7 @@
       var saved = res.data;
       var fieldsMatch = saved
         && String(saved.nickname || '').trim() === payload.nickname
-        && String(saved.bio || '') === payload.bio
-        && String(saved.country_code || '').toLowerCase() === String(payload.country_code || '').toLowerCase()
-        && String(saved.learning_languages || '') === payload.learning_languages;
+        && String(saved.bio || '') === payload.bio;
       if (!fieldsMatch) {
         console.error('[DayO] profiles update verification failed', { expected: payload, received: saved });
         throw new Error('저장된 프로필 값이 요청한 값과 일치하지 않습니다.');
@@ -2849,7 +2806,7 @@
       openModal(settlementModal);
     }
 
-    ['stat-points-card', 'stat-settled-card'].forEach(function (id) {
+    ['stat-points-card'].forEach(function (id) {
       var card = document.getElementById(id);
       if (!card) return;
       card.addEventListener('click', openSettlementModal);
@@ -2925,19 +2882,6 @@
         photoPreview.classList.remove('has-photo');
         photoPreview.style.backgroundImage = '';
       }
-      if (originInput && profile && profile.country_code) {
-        originInput.value = String(profile.country_code).toLowerCase();
-      }
-      if (profile && profile.learning_languages != null) {
-        var savedLanguages = String(profile.learning_languages).split(',').map(function (value) {
-          return value.trim().toLowerCase();
-        }).filter(Boolean);
-        languageChips.forEach(function (chip) {
-          var selected = savedLanguages.indexOf(String(chip.getAttribute('data-language') || '').toLowerCase()) !== -1;
-          chip.classList.toggle('active', selected);
-          chip.setAttribute('aria-pressed', String(selected));
-        });
-      }
       if (profile && (profile.is_available === false || profile.partner_status === 'resting')) {
         partnerActive = false;
       } else if (profile && (profile.is_available === true || profile.partner_status === 'active')) {
@@ -2990,22 +2934,15 @@
       if (typeof window.loadLoungeStats === 'function') window.loadLoungeStats();
     });
 
-    function formatWon(amount) {
-      return t('partner.stats.wonFormat', { amount: Number(amount || 0).toLocaleString('ko-KR') });
-    }
-
     function paintLoungeStats(summary) {
       var stats = summary || window.__dayoPartnerEarnings;
       var countEl = document.getElementById('statMonthCount');
-      var settledEl = document.getElementById('statSettledWon');
-      if (!countEl || !settledEl) return;
+      if (!countEl) return;
       if (!stats) {
         countEl.textContent = t('partner.stats.loading');
-        settledEl.textContent = t('partner.stats.loading');
         return;
       }
-      countEl.textContent = t('partner.stats.countFormat', { n: stats.monthCount || 0 });
-      settledEl.textContent = formatWon(stats.settledWon);
+      countEl.textContent = Number(stats.monthCount || 0).toLocaleString('ko-KR');
     }
 
     window.loadLoungeStats = function loadLoungeStats() {
