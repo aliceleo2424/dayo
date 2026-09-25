@@ -11,14 +11,13 @@
 
   function formatSessionWhen(iso) {
     if (!iso) return '';
-    var raw = String(iso);
-    var timeMatch = raw.match(/T(\d{2}:\d{2})/) || raw.match(/\s(\d{2}:\d{2})/);
-    var dateMatch = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
-    var timeLabel = timeMatch ? timeMatch[1] : '';
-    if (!dateMatch) return timeLabel;
-    var y = Number(dateMatch[1]);
-    var m = Number(dateMatch[2]);
-    var d = Number(dateMatch[3]);
+    var date = new Date(iso);
+    if (isNaN(date.getTime())) return '';
+    var timeLabel = String(date.getHours()).padStart(2, '0') + ':'
+      + String(date.getMinutes()).padStart(2, '0');
+    var y = date.getFullYear();
+    var m = date.getMonth() + 1;
+    var d = date.getDate();
     var now = new Date();
     if (now.getFullYear() === y && now.getMonth() + 1 === m && now.getDate() === d) {
       return i18n('mypage.session.todayTime', { time: timeLabel });
@@ -181,8 +180,14 @@
             try {
               var partnerProfiles = await supabase.rpc('list_public_partner_profiles');
               if (!partnerProfiles.error) {
-                var partnerProfile = (partnerProfiles.data || []).find(function (row) {
-                  return row && (row.user_id === upcoming.partner_user_id || row.id === upcoming.partner_id);
+                var profiles = partnerProfiles.data || [];
+                var partnerUserId = String(upcoming.partner_user_id || '');
+                var partnerProfile = profiles.find(function (row) {
+                  return row && partnerUserId && String(row.id) === partnerUserId;
+                }) || profiles.find(function (row) {
+                  return row && partnerUserId && String(row.user_id) === partnerUserId;
+                }) || profiles.find(function (row) {
+                  return row && upcoming.partner_id && String(row.id) === String(upcoming.partner_id);
                 });
                 var nickname = String((partnerProfile && partnerProfile.nickname) || '').trim();
                 if (nickname && !/[@+]/.test(nickname)) partnerName = nickname;
