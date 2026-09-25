@@ -702,6 +702,13 @@
     var partners = [];
     if (supabase) {
       var res = await supabase.rpc('list_public_partner_profiles');
+      if (res.error && res.error.code === 'PGRST202') {
+        // Older production schemas may not expose the public partner-list RPC yet.
+        // Read only display fields through the existing profiles SELECT policy.
+        res = await supabase.from('profiles')
+          .select('id, user_id, nickname, avatar_url, bio, role')
+          .eq('role', 'partner');
+      }
       if (res.error) {
         console.error('파트너 로드 실패:', res.error);
       } else {
