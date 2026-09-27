@@ -420,6 +420,47 @@ export type SessionTranscriptContext = {
   review?: string | null;
 };
 
+export async function fetchSessionDetailContext(bookingId: string): Promise<SessionTranscriptContext> {
+  const bookingResult = await supabase.from("bookings").select("*").eq("id", bookingId).single();
+  if (bookingResult.error || !bookingResult.data) {
+    throw new Error(bookingResult.error?.message || "예약 정보를 불러오지 못했습니다.");
+  }
+  const booking = bookingResult.data as Record<string, unknown>;
+  const learnerId = String(booking.learner_id || "");
+  const partnerId = String(booking.partner_user_id || booking.partner_id || "");
+  const ids = Array.from(new Set([learnerId, partnerId].filter(Boolean)));
+  const names = new Map<string, string>();
+  if (ids.length) {
+    const byId = await supabase.from("profiles").select("id, user_id, nickname, user_name").in("id", ids);
+    if (!byId.error) {
+      for (const profile of byId.data || []) {
+        const name = String(profile.nickname || profile.user_name || "").trim();
+        if (name) names.set(String(profile.id), name);
+      }
+    }
+    const missing = ids.filter((id) => !names.has(id));
+    if (missing.length) {
+      const byUserId = await supabase.from("profiles").select("id, user_id, nickname, user_name").in("user_id", missing);
+      if (!byUserId.error) {
+        for (const profile of byUserId.data || []) {
+          const name = String(profile.nickname || profile.user_name || "").trim();
+          if (profile.user_id && name) names.set(String(profile.user_id), name);
+        }
+      }
+    }
+  }
+  return {
+    id: bookingId,
+    scheduled_at: typeof booking.scheduled_at === "string" ? booking.scheduled_at : null,
+    status: typeof booking.status === "string" ? booking.status : null,
+    learnerId: learnerId || null,
+    learnerName: names.get(learnerId) || "학습자",
+    partnerName: names.get(partnerId) || String(booking.partner_name || "파트너 미정"),
+    rating: booking.rating == null ? null : Number(booking.rating),
+    review: String(booking.review || booking.feedback || booking.comment || booking.review_text || "").trim() || null,
+  };
+}
+
 export type SessionTranscriptBundle = {
   utterances: SessionUtterance[];
   report: SessionCsReport;
@@ -721,6 +762,76 @@ export async function saveBookingCsNote(bookingId: string, note: string): Promis
     throw new Error("예약별 CS 메모 저장 결과를 확인하지 못했습니다.");
   }
   return { note: data.note, updated_at: data.updated_at || null };
+}
+
+export type AdminNoteEntry = {
+  id: string;
+  note: string;
+  created_at: string;
+};
+
+export type AdminNoteTimeline = {
+  entries: AdminNoteEntry[];
+  legacyNote: string;
+};
+
+function parseAdminNoteEntry(value: unknown): AdminNoteEntry {
+  const row = value as Record<string, unknown> | null;
+  if (!row || typeof row.id !== "string" || typeof row.note !== "string" || typeof row.created_at !== "string") {
+    throw new Error("메모 기록의 형식을 확인하지 못했습니다.");
+  }
+  return { id: row.id, note: row.note, created_at: row.created_at };
+}
+
+function parseAdminNoteTimeline(value: unknown): AdminNoteTimeline {
+  const data = value as { success?: boolean; entries?: unknown; legacy_note?: unknown } | null;
+  if (!data?.success || !Array.isArray(data.entries)) {
+    throw new Error("메모 목록의 형식을 확인하지 못했습니다.");
+  }
+  return {
+    entries: data.entries.map(parseAdminNoteEntry),
+    legacyNote: typeof data.legacy_note === "string" ? data.legacy_note : "",
+  };
+}
+
+export async function listMemberAdminNotes(profileId: string): Promise<AdminNoteTimeline> {
+  const result = await supabase.rpc("list_member_admin_notes", { p_profile_id: profileId });
+  if (result.error) throw new Error(result.error.message || "회원 메모를 불러오지 못했습니다.");
+  return parseAdminNoteTimeline(result.data);
+}
+
+export async function addMemberAdminNote(profileId: string, note: string): Promise<AdminNoteEntry> {
+  const result = await supabase.rpc("add_member_admin_note", { p_profile_id: profileId, p_note: note });
+  if (result.error) throw new Error(result.error.message || "회원 메모를 추가하지 못했습니다.");
+  const data = result.data as { success?: boolean; entry?: unknown } | null;
+  if (!data?.success) throw new Error("회원 메모 추가 결과를 확인하지 못했습니다.");
+  return parseAdminNoteEntry(data.entry);
+}
+
+export async function listBookingCsNotes(bookingId: string): Promise<AdminNoteTimeline> {
+  const result = await supabase.rpc("list_booking_cs_notes", { p_booking_id: bookingId });
+  if (result.error) throw new Error(result.error.message || "예약별 CS 메모를 불러오지 못했습니다.");
+  return parseAdminNoteTimeline(result.data);
+}
+
+export async function addBookingCsNote(bookingId: string, note: string): Promise<AdminNoteEntry> {
+  const result = await supabase.rpc("add_booking_cs_note", { p_booking_id: bookingId, p_note: note });
+  if (result.error) throw new Error(result.error.message || "예약별 CS 메모를 추가하지 못했습니다.");
+  const data = result.data as { success?: boolean; entry?: unknown } | null;
+  if (!data?.success) throw new Error("예약별 CS 메모 추가 결과를 확인하지 못했습니다.");
+  return parseAdminNoteEntry(data.entry);
+}
+
+export async function deleteMemberAdminNote(entryId: string): Promise<void> {
+  const result = await supabase.rpc("delete_member_admin_note", { p_entry_id: entryId });
+  if (result.error) throw new Error(result.error.message || "회원 메모를 삭제하지 못했습니다.");
+  if (!(result.data as { success?: boolean } | null)?.success) throw new Error("회원 메모 삭제 결과를 확인하지 못했습니다.");
+}
+
+export async function deleteBookingCsNote(entryId: string): Promise<void> {
+  const result = await supabase.rpc("delete_booking_cs_note", { p_entry_id: entryId });
+  if (result.error) throw new Error(result.error.message || "예약별 CS 메모를 삭제하지 못했습니다.");
+  if (!(result.data as { success?: boolean } | null)?.success) throw new Error("예약별 CS 메모 삭제 결과를 확인하지 못했습니다.");
 }
 
 export async function fetchMemberBookings(learnerId: string): Promise<MemberBookingSession[]> {

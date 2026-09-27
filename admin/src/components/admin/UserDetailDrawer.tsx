@@ -10,21 +10,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { ProviderBadge, KakaoPrivateEmailHint } from "@/components/admin/provider-badge";
 import { SessionTranscriptModal } from "@/components/admin/SessionTranscriptModal";
 import {
+  addMemberAdminNote,
+  deleteMemberAdminNote,
   grantAdminTickets,
   bookingStatusLabel,
   detectMemberProvider,
-  fetchAdminMemo,
   fetchCreditLedgers,
   fetchMemberBookings,
   fetchMemberOrders,
   formatSessionDateTime,
   formatWon,
+  listMemberAdminNotes,
   nearestTicketExpiry,
   normalizeCrmRole,
   orderStatusBadge,
   paymentMethodLabel,
   profileDisplayName,
-  saveAdminMemo,
+  type AdminNoteEntry,
   type CreditLedgerRow,
   type DrawerMember,
   type MemberBookingSession,
@@ -45,7 +47,12 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
   const [orders, setOrders] = useState<MemberOrder[]>([]);
   const [ledgers, setLedgers] = useState<CreditLedgerRow[]>([]);
   const [sessions, setSessions] = useState<MemberBookingSession[]>([]);
-  const [memo, setMemo] = useState("");
+  const [memoDraft, setMemoDraft] = useState("");
+  const [memoEntries, setMemoEntries] = useState<AdminNoteEntry[]>([]);
+  const [legacyMemo, setLegacyMemo] = useState("");
+  const [memoLoadedProfileId, setMemoLoadedProfileId] = useState<string | null>(null);
+  const [memoLoading, setMemoLoading] = useState(false);
+  const [memoRetryCount, setMemoRetryCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [busyTickets, setBusyTickets] = useState(false);
   const [busyMemo, setBusyMemo] = useState(false);
@@ -53,19 +60,24 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
   const [notice, setNotice] = useState("");
   const [memoNotice, setMemoNotice] = useState("");
   const [memoError, setMemoError] = useState("");
+  const [memoLoadError, setMemoLoadError] = useState("");
+  const [memoDeleteId, setMemoDeleteId] = useState<string | null>(null);
+  const [memoDeletingId, setMemoDeletingId] = useState<string | null>(null);
+  const [memoDeleteError, setMemoDeleteError] = useState("");
   const [reasonOpen, setReasonOpen] = useState(false);
   const [grantAttempt, setGrantAttempt] = useState<{ userId: string; sourceId: string; reason: string } | null>(null);
   const [reasonText, setReasonText] = useState("");
   const [selectedSession, setSelectedSession] = useState<SessionTranscriptContext | null>(null);
   const grantInFlightRef = useRef(false);
+  const memoAddInFlightRef = useRef<string | null>(null);
+  const memoDeleteInFlightRef = useRef(false);
+  const activeMemoProfileRef = useRef<string | null>(null);
+  const memoEpochRef = useRef(0);
 
   useEffect(() => {
     if (!open || !user) return;
     setTicketCount(Number(user.ticket_count || 0));
-    setMemo(String(user.admin_memo || ""));
     setNotice("");
-    setMemoNotice("");
-    setMemoError("");
     setOrders([]);
     setLedgers([]);
     setSessions([]);
@@ -85,20 +97,15 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
 
     void (async () => {
       try {
-        const [orderRows, ledgerRows, bookingRows, memoResult] = await Promise.all([
+        const [orderRows, ledgerRows, bookingRows] = await Promise.all([
           fetchMemberOrders(authId).catch(() => [] as MemberOrder[]),
           fetchCreditLedgers(authId, user.id).catch(() => [] as CreditLedgerRow[]),
           fetchMemberBookings(authId).catch(() => [] as MemberBookingSession[]),
-          fetchAdminMemo(user.id)
-            .then((value) => ({ value, error: "" }))
-            .catch((err) => ({ value: "", error: err instanceof Error ? err.message : "CS 메모를 불러오지 못했습니다." })),
         ]);
         if (cancelled) return;
         setOrders(orderRows);
         setLedgers(ledgerRows);
         setSessions(bookingRows);
-        if (memoResult.error) setMemoError(memoResult.error);
-        else setMemo(memoResult.value);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -110,18 +117,68 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
   }, [open, user]);
 
   useEffect(() => {
+    if (!open || !user) {
+      activeMemoProfileRef.current = null;
+      return;
+    }
+    const profileId = user.id;
+    activeMemoProfileRef.current = profileId;
+    const epoch = ++memoEpochRef.current;
+    let cancelled = false;
+    setMemoDraft("");
+    setMemoEntries([]);
+    setLegacyMemo("");
+    setMemoLoadedProfileId(null);
+    setMemoNotice("");
+    setMemoError("");
+    setMemoLoadError("");
+    setMemoDeleteId(null);
+    setMemoDeletingId(null);
+    setMemoDeleteError("");
+    setBusyMemo(false);
+    setMemoLoading(true);
+    void listMemberAdminNotes(profileId)
+      .then((timeline) => {
+        if (cancelled || memoEpochRef.current !== epoch) return;
+        setMemoEntries(timeline.entries);
+        setLegacyMemo(timeline.legacyNote);
+        setMemoLoadedProfileId(profileId);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled && memoEpochRef.current === epoch) {
+          setMemoLoadError(err instanceof Error ? err.message : "회원 메모를 불러오지 못했습니다.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled && memoEpochRef.current === epoch) setMemoLoading(false);
+      });
+    return () => {
+      cancelled = true;
+      memoEpochRef.current += 1;
+      if (activeMemoProfileRef.current === profileId) activeMemoProfileRef.current = null;
+    };
+  }, [open, user?.id, memoRetryCount]);
+
+  useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        if (memoDeleteId) {
+          if (!memoDeletingId) { setMemoDeleteId(null); setMemoDeleteError(""); }
+          return;
+        }
+        onClose();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  }, [open, onClose, memoDeleteId, memoDeletingId]);
 
   const expiry = useMemo(() => nearestTicketExpiry(orders), [orders]);
   const provider = user ? detectMemberProvider(user) : "email";
   const role = normalizeCrmRole(user?.role);
   const displayName = user ? profileDisplayName(user) : "";
+  const memberMemoReady = !!user && memoLoadedProfileId === user.id;
   const kakaoId = String(user?.kakao_id || "").trim()
     || (provider === "kakao" ? String(user?.client_key || user?.id || "").slice(0, 12) : "");
 
@@ -194,23 +251,55 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
     }
   }
 
-  async function handleSaveMemo() {
-    if (!user || busyMemo) return;
+  async function handleAddMemo() {
+    if (!user || !memberMemoReady || busyMemo || memoLoading || memoLoadError || memoAddInFlightRef.current === user.id) return;
+    const profileId = user.id;
+    const epoch = memoEpochRef.current;
+    const note = memoDraft.trim();
+    if (!note || note.length > 2000) {
+      setMemoError("회원 메모는 1~2,000자로 입력해 주세요.");
+      return;
+    }
+    memoAddInFlightRef.current = profileId;
     setBusyMemo(true);
     setMemoNotice("");
     setMemoError("");
     try {
-      const savedMemo = await saveAdminMemo(user, memo);
-      setMemo(savedMemo);
-      const success = "✅ 회원 전체 메모가 저장되었습니다.";
+      const entry = await addMemberAdminNote(profileId, note);
+      if (activeMemoProfileRef.current !== profileId || memoEpochRef.current !== epoch) return;
+      setMemoEntries((current) => [entry, ...current]);
+      setMemoDraft("");
+      const success = "✅ 회원 메모가 추가되었습니다.";
       setMemoNotice(success);
-      window.setTimeout(() => setMemoNotice((current) => current === success ? "" : current), 4500);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "CS 메모 저장에 실패했습니다.";
-      setMemoError(message);
-      window.alert(`CS 메모를 저장하지 못했습니다.\n${message}`);
+      if (activeMemoProfileRef.current === profileId && memoEpochRef.current === epoch) {
+        setMemoError(err instanceof Error ? err.message : "회원 메모 추가에 실패했습니다.");
+      }
     } finally {
-      setBusyMemo(false);
+      if (memoAddInFlightRef.current === profileId) memoAddInFlightRef.current = null;
+      if (activeMemoProfileRef.current === profileId && memoEpochRef.current === epoch) setBusyMemo(false);
+    }
+  }
+
+  async function handleDeleteMemo(entryId: string) {
+    if (!user || !memberMemoReady || memoDeleteInFlightRef.current || memoDeleteId !== entryId) return;
+    const profileId = user.id;
+    const epoch = memoEpochRef.current;
+    memoDeleteInFlightRef.current = true;
+    setMemoDeletingId(entryId);
+    setMemoDeleteError("");
+    try {
+      await deleteMemberAdminNote(entryId);
+      if (activeMemoProfileRef.current !== profileId || memoEpochRef.current !== epoch) return;
+      setMemoEntries((current) => current.filter((entry) => entry.id !== entryId));
+      setMemoDeleteId(null);
+    } catch (err) {
+      if (activeMemoProfileRef.current === profileId && memoEpochRef.current === epoch) {
+        setMemoDeleteError(err instanceof Error ? err.message : "회원 메모 삭제에 실패했습니다.");
+      }
+    } finally {
+      memoDeleteInFlightRef.current = false;
+      if (activeMemoProfileRef.current === profileId && memoEpochRef.current === epoch) setMemoDeletingId(null);
     }
   }
 
@@ -301,8 +390,6 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
         </header>
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
-          {memoNotice ? <div className="fixed right-6 top-6 z-[100] rounded-xl bg-emerald-600 px-5 py-4 text-sm font-semibold text-white shadow-xl">{memoNotice}</div> : null}
-          {memoError ? <p className="mb-3 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{memoError}</p> : null}
           {notice ? <p className="mb-3 text-xs text-muted-foreground">{notice}</p> : null}
 
           <Tabs defaultValue="billing" className="w-full">
@@ -473,16 +560,56 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
 
             <TabsContent value="memo" className="space-y-3">
               <Label htmlFor="admin-cs-memo">회원 전체 메모</Label>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                회원 전체에 적용되는 내부 메모입니다. 특정 예약 관련 내용은 대화 세션의 CS 특이사항에 기록해 주세요.
+              </p>
               <Textarea
                 id="admin-cs-memo"
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-                placeholder="특정 예약이 아닌 회원 전체에 적용되는 내부 메모를 남겨 주세요."
-                className="min-h-[220px]"
+                value={memberMemoReady ? memoDraft : ""}
+                onChange={(e) => {
+                  setMemoDraft(e.target.value);
+                  setMemoError("");
+                  setMemoNotice("");
+                }}
+                placeholder="새 회원 메모를 입력해 주세요. 잘못 작성했다면 새 정정 메모를 추가할 수 있어요."
+                maxLength={2000}
+                disabled={!memberMemoReady || memoLoading || !!memoLoadError || busyMemo}
+                className="min-h-[100px]"
               />
-              <Button variant="coral" disabled={busyMemo || !user} onClick={() => void handleSaveMemo()}>
-                {busyMemo ? "저장 중…" : "회원 메모 저장"}
+              <Button variant="coral" disabled={busyMemo || memoLoading || !!memoLoadError || !memberMemoReady} onClick={() => void handleAddMemo()}>
+                {busyMemo ? "추가 중…" : "메모 추가"}
               </Button>
+              {(memoLoading || (!memberMemoReady && !memoLoadError)) ? <p className="text-xs text-muted-foreground">회원 메모를 불러오는 중…</p> : null}
+              {memoLoadError ? (
+                <div>
+                  <p className="text-xs text-red-700" role="alert">{memoLoadError}</p>
+                  <Button className="mt-2" size="sm" variant="outline" onClick={() => setMemoRetryCount((count) => count + 1)}>다시 불러오기</Button>
+                </div>
+              ) : null}
+              {memberMemoReady && memoError ? <p className="text-xs text-red-700" role="alert">{memoError}</p> : null}
+              {memberMemoReady && memoNotice ? <p className="text-xs text-emerald-700" role="status">{memoNotice}</p> : null}
+              {memberMemoReady && !memoLoading && !memoLoadError ? (
+                <div className="space-y-2 border-t pt-3">
+                  {memoEntries.length === 0 && !legacyMemo ? <p className="text-xs text-muted-foreground">등록된 회원 메모가 없습니다.</p> : null}
+                  {memoEntries.map((entry) => (
+                    <article key={entry.id} className="rounded-xl border bg-white p-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-xs text-muted-foreground">{formatSessionDateTime(entry.created_at)} · 운영자</p>
+                        <Button type="button" size="icon" variant="ghost" className="h-6 w-6" aria-label="회원 메모 삭제" disabled={!!memoDeletingId} onClick={() => { setMemoDeleteId(entry.id); setMemoDeleteError(""); }}>
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                      <p className="mt-2 whitespace-pre-wrap break-words text-sm text-[#44403C]">{entry.note}</p>
+                    </article>
+                  ))}
+                  {legacyMemo ? (
+                    <article className="rounded-xl border border-dashed bg-[#FAFAF9] p-3">
+                      <p className="text-xs text-muted-foreground">기존 회원 메모 · 작성일 미상</p>
+                      <p className="mt-2 whitespace-pre-wrap break-words text-sm text-[#44403C]">{legacyMemo}</p>
+                    </article>
+                  ) : null}
+                </div>
+              ) : null}
             </TabsContent>
           </Tabs>
         </div>
@@ -514,6 +641,20 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
               <Button variant="coral" className="flex-1" disabled={busyTickets} onClick={() => void confirmTicketChange()}>
                 확인 및 반영
               </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {memoDeleteId && memberMemoReady ? (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 p-4" role="presentation" onClick={() => { if (!memoDeletingId) { setMemoDeleteId(null); setMemoDeleteError(""); } }}>
+          <div className="w-full max-w-sm rounded-xl border bg-white p-5 shadow-xl" role="dialog" aria-modal="true" aria-labelledby="member-note-delete-title" onClick={(event) => event.stopPropagation()}>
+            <h3 id="member-note-delete-title" className="text-lg font-semibold">이 메모를 삭제할까요?</h3>
+            <p className="mt-2 text-sm text-muted-foreground">삭제한 메모는 운영 화면에서 보이지 않습니다.</p>
+            {memoDeleteError ? <p className="mt-3 text-sm text-red-700" role="alert">{memoDeleteError}</p> : null}
+            <div className="mt-5 flex justify-end gap-2">
+              <Button type="button" variant="outline" disabled={!!memoDeletingId} onClick={() => { setMemoDeleteId(null); setMemoDeleteError(""); }}>취소</Button>
+              <Button type="button" variant="outline" className="border-red-300 text-red-700 hover:bg-red-100" disabled={!!memoDeletingId} onClick={() => void handleDeleteMemo(memoDeleteId)}>{memoDeletingId ? "삭제 중…" : "삭제"}</Button>
             </div>
           </div>
         </div>
