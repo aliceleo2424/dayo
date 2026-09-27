@@ -45,8 +45,9 @@
       body: [
         '<p class="terms-mini-section">[세션 취소/환불 기준]</p>',
         '<ul>',
-        '<li>대화 시작 <strong>6시간 전까지</strong> 취소: 사용한 티켓을 <strong>원래 유효기간으로 반환</strong></li>',
-        '<li>대화 시작까지 <strong>6시간 미만</strong> 남았을 때 취소: <strong>티켓 미반환</strong></li>',
+        '<li>대화 시작까지 <strong>6시간 초과</strong> 남았을 때 취소: 사용한 티켓을 <strong>원래 유효기간으로 반환</strong></li>',
+        '<li>대화 시작까지 <strong>6시간 이하</strong> 남았을 때 취소: 취소 가능, <strong>티켓 미반환</strong></li>',
+        '<li>신규 예약은 대화 시작 <strong>4시간 전까지</strong> 가능합니다.</li>',
         '</ul>',
         '<p class="terms-mini-section">[플랫폼 / 파트너 귀책사유]</p>',
         '<ul>',

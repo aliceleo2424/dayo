@@ -538,12 +538,16 @@
     '1bc0eab5-9399-4da8-a90c-145ab0c4409d'
   ];
 
-  function canCreatePreopenBooking(userId) {
+  function isInternalBookingTest(userId) {
     var currentUserId = String((window._dayoAuthUser && window._dayoAuthUser.id) || '');
     var requestedUserId = String(userId || currentUserId);
     var role = String((window._dayoAuthProfile && window._dayoAuthProfile.role) || '').trim().toLowerCase();
     if (role === 'admin' || role === 'super_admin' || role === 'superadmin') return true;
     return !!currentUserId && requestedUserId === currentUserId && PREOPEN_BOOKING_TEST_USERS.indexOf(currentUserId) !== -1;
+  }
+
+  function canCreatePreopenBooking(userId) {
+    return isInternalBookingTest(userId);
   }
 
   function showPreopenBookingNotice() {
@@ -563,6 +567,7 @@
 
   window.DayOPreopenBooking = {
     canCreate: canCreatePreopenBooking,
+    isInternalTest: isInternalBookingTest,
     showNotice: showPreopenBookingNotice
   };
 
@@ -599,28 +604,20 @@
       alert('예약 처리 중 통신 오류가 발생했습니다.');
       return false;
     }
-    extras = extras || {};
     var params = {
       p_learner_id: learnerId,
       p_booking_id: bookingId
     };
-    if (extras.slotId) params.p_slot_id = extras.slotId;
-    if (extras.partnerId) params.p_partner_id = extras.partnerId;
 
     try {
-      var result = await supabase.rpc('deduct_ticket_and_confirm_booking', params);
-      if (result.error && (params.p_slot_id || params.p_partner_id)) {
-        result = await supabase.rpc('deduct_ticket_and_confirm_booking', {
-          p_learner_id: learnerId,
-          p_booking_id: bookingId
-        });
-      }
-
+      var result = await supabase.rpc('confirm_booking_with_cutoff_cleanup', params);
       if (result.error) throw result.error;
 
       var payload = normalizeRpcPayload(result.data);
       if (!payload.success) {
-        if (String(payload.message || '').includes('부족')) {
+        if (payload.code === 'booking_window_closed') {
+          alert(window.DayOI18n ? window.DayOI18n.t('book.bookingCutoffPassed') : payload.message);
+        } else if (String(payload.message || '').includes('부족')) {
           alert('보유하신 티켓이 없습니다. 단건 체험권을 충전해 주세요!');
           if (typeof openPaymentModal === 'function') openPaymentModal();
         } else {
@@ -688,7 +685,6 @@
     }]).select('id').single();
     if (insertRes.error) {
       console.warn('[DayO] booking insert failed', insertRes.error);
-      if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
       return null;
     }
     return insertRes.data && insertRes.data.id;

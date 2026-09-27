@@ -41,6 +41,9 @@
   }
 
   var TEST_PARTNER_ID = '00000000-0000-0000-0000-000000000001';
+  var BOOKING_MIN_LEAD_MS = 4 * 60 * 60 * 1000;
+  var REFUND_CUTOFF_MS = 6 * 60 * 60 * 1000;
+  var bookingSubmitting = false;
   var TEST_PARTNER_FALLBACK = {
     id: TEST_PARTNER_ID,
     name: 'DayO Test Partner 🤖',
@@ -204,6 +207,18 @@
     return !!(window.DayOPreopenBooking &&
       typeof window.DayOPreopenBooking.canCreate === 'function' &&
       window.DayOPreopenBooking.canCreate(userId));
+  }
+
+  function isInternalBookingTest() {
+    return !!(window.DayOPreopenBooking &&
+      typeof window.DayOPreopenBooking.isInternalTest === 'function' &&
+      window.DayOPreopenBooking.isInternalTest());
+  }
+
+  function isBookableStart(startMs) {
+    var nowMs = Date.now();
+    return isFinite(startMs) && startMs > nowMs &&
+      (isInternalBookingTest() || startMs - nowMs >= BOOKING_MIN_LEAD_MS);
   }
 
   function showPreopenBookingNotice() {
@@ -731,18 +746,23 @@
     return match ? match[1] : raw;
   }
 
+  function bookingSlotStartMs(slotTime) {
+    var raw = String(slotTime || '').trim().replace(' ', 'T');
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(raw)) return NaN;
+    var normalized = raw;
+    if (/[+-]\d{2}$/.test(normalized)) normalized += ':00';
+    else if (/[+-]\d{4}$/.test(normalized)) normalized = normalized.slice(0, -2) + ':' + normalized.slice(-2);
+    else if (!/(?:Z|[+-]\d{2}:\d{2})$/i.test(normalized)) normalized += '+09:00';
+    return new Date(normalized).getTime();
+  }
+
   function isFutureThirtyMinuteConcreteSlot(slot) {
     var raw = String(slot && slot.slot_time || '');
     if (raw.indexOf('weekly:') === 0) return false;
     var match = raw.match(/^\d{4}-\d{2}-\d{2}[T ]\d{2}:(\d{2})/);
     if (!match || (match[1] !== '00' && match[1] !== '30')) return false;
-    var normalized = raw.replace(' ', 'T');
-    if (/[+-]\d{2}$/.test(normalized)) normalized += ':00';
-    else if (/[+-]\d{4}$/.test(normalized)) {
-      normalized = normalized.slice(0, -2) + ':' + normalized.slice(-2);
-    }
-    var start = new Date(normalized);
-    return !isNaN(start.getTime()) && start.getTime() > Date.now();
+    var startMs = bookingSlotStartMs(raw);
+    return isBookableStart(startMs);
   }
 
   async function fetchAvailablePartnerIds(isoDate) {
@@ -929,7 +949,8 @@
       state.selectedSlot &&
       state.selectedSlot.id === state.slotId &&
       state.selectedSlot.partner === state.partner &&
-      state.selectedSlot.date === state.date
+      state.selectedSlot.date === state.date &&
+      isBookableStart(bookingSlotStartMs(state.selectedSlot.slot_time))
     );
     return true;
   }
@@ -991,9 +1012,17 @@
   }
 
   function confirmBooking() {
-    if (!isStepReady(3)) return;
+    if (bookingSubmitting) return;
+    if (!isStepReady(3)) {
+      showToast(t('book.bookingWindowClosed'));
+      return;
+    }
+    bookingSubmitting = true;
     persistComfortPrefs(true);
-    settleConfirmedBooking();
+    settleConfirmedBooking().finally(function () {
+      bookingSubmitting = false;
+      if (el.nextBtn) el.nextBtn.disabled = !isStepReady(state.step);
+    });
   }
 
   async function settleConfirmedBooking() {
@@ -1026,6 +1055,25 @@
     }
     var scheduledAt = selectedSlot.slot_time;
 
+    var remaining = bookingSlotStartMs(scheduledAt) - Date.now();
+    if (!isBookableStart(bookingSlotStartMs(scheduledAt))) {
+      if (el.nextBtn) el.nextBtn.disabled = !isStepReady(state.step);
+      showToast(t('book.bookingWindowClosed'));
+      return;
+    }
+    if (!isInternalBookingTest() && remaining <= REFUND_CUTOFF_MS) {
+      if (!window.DayOBookingWindow || !(await window.DayOBookingWindow.confirmNoRefund())) {
+        goTo(3);
+        return;
+      }
+    }
+    if (!isBookableStart(bookingSlotStartMs(scheduledAt))) {
+      if (el.nextBtn) el.nextBtn.disabled = !isStepReady(state.step);
+      showToast(t('book.bookingWindowClosed'));
+      goTo(3);
+      return;
+    }
+
     var bookingId = null;
     if (typeof window.createPendingBooking === 'function' && learnerId) {
       bookingId = await window.createPendingBooking({
@@ -1044,18 +1092,15 @@
         scheduled_at: scheduledAt,
         slot_id: selectedSlot.id
       });
-    } else if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-      bookingId = crypto.randomUUID();
     }
 
-    var deducted = true;
+    var deducted = false;
     if (typeof window.handleConfirmBooking === 'function' && learnerId && bookingId) {
       deducted = await window.handleConfirmBooking(learnerId, bookingId, {
         slotId: selectedSlot.id,
         partnerId: partnerId
       });
-    } else if (typeof window.handleConfirmBooking === 'function') {
-      deducted = false;
+    } else {
       alert('예약 처리 중 통신 오류가 발생했습니다.');
     }
 

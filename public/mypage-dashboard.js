@@ -65,9 +65,9 @@
     if (cancellationPending || !bookingId || !userId) return;
     var remaining = new Date(scheduledAt).getTime() - Date.now();
     if (!isFinite(remaining) || remaining <= 0) return;
-    var message = remaining >= 6 * 60 * 60 * 1000
+    var message = remaining > 6 * 60 * 60 * 1000
       ? '지금 취소하면 사용한 티켓이 원래 유효기간 그대로 돌아와요. 예약을 취소할까요?'
-      : '대화 시작까지 6시간 미만 남았을 때는 티켓이 반환되지 않아요. 파트너가 이 시간을 비워둔 만큼, 취소 시 티켓은 사용 처리됩니다. 그래도 취소할까요?';
+      : '대화 시작까지 6시간 이하 남았을 때도 취소할 수 있지만 티켓은 반환되지 않아요. 파트너가 이 시간을 비워둔 만큼, 티켓은 사용 처리됩니다. 그래도 취소할까요?';
     if (!window.confirm(message)) return;
     cancellationPending = true;
     button.disabled = true;
@@ -96,7 +96,7 @@
       }
       window.alert(result.data.cancellation_type === 'early'
         ? '예약이 취소되었어요. 티켓은 원래 유효기간으로 반환됩니다.'
-        : '예약이 취소되었어요. 시작까지 6시간 미만 남았을 때 취소하여 티켓은 반환되지 않습니다.');
+        : '예약이 취소되었어요. 시작까지 6시간 이하 남았을 때 취소하여 티켓은 반환되지 않습니다.');
     } catch (error) {
       console.warn('[DayO] booking cancellation failed', error);
       window.alert('예약을 취소하지 못했어요. 예약 상태를 확인한 뒤 다시 시도해주세요.');

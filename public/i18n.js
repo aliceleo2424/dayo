@@ -715,12 +715,12 @@
       KO: '📅 내 예약 세션', EN: '📅 Upcoming Sessions', ZH: '📅 我的预约', JA: '📅 予約セッション', FR: '📅 Sessions à venir', ES: '📅 Próximas sesiones'
     },
     'mypage.sessions.sub': {
-      KO: '대화 시작 6시간 전까지 취소하면 티켓이 원래 유효기간으로 반환돼요. 6시간 미만 남으면 반환되지 않아요.',
-      EN: 'Cancel at least 6 hours before the session to get your ticket back with its original expiration date. With less than 6 hours left, it is not returned.',
-      ZH: '对话开始至少6小时前取消，票券按原有效期返还。剩余不足6小时取消则不返还。',
-      JA: '会話開始の6時間前までにキャンセルすると、元の有効期限のままチケットが戻ります。残り6時間未満のキャンセルでは戻りません。',
-      FR: 'Annulez au moins 6 heures avant la conversation pour récupérer votre ticket avec sa date d’expiration initiale. À moins de 6 heures, il ne sera pas rendu.',
-      ES: 'Cancela al menos 6 horas antes de la conversación para recuperar tu ticket con su vencimiento original. Con menos de 6 horas, no se devuelve.'
+      KO: '대화 시작까지 6시간 초과 남았을 때 취소하면 티켓이 원래 유효기간으로 반환돼요. 6시간 이하 남아도 취소는 가능하지만 티켓은 반환되지 않아요.',
+      EN: 'Cancel with more than 6 hours remaining to get your ticket back with its original expiration date. With 6 hours or less remaining, you can still cancel, but the ticket is not returned.',
+      ZH: '对话开始前剩余超过6小时时取消，票券按原有效期返还。剩余6小时或更少时仍可取消，但票券不返还。',
+      JA: '会話開始まで6時間より多く残っている場合のキャンセルは、元の有効期限のままチケットが戻ります。残り6時間以下でもキャンセルできますが、チケットは戻りません。',
+      FR: 'Annulez avec plus de 6 heures avant la conversation pour récupérer votre ticket avec sa date d’expiration initiale. À 6 heures ou moins, vous pouvez encore annuler, mais le ticket ne sera pas rendu.',
+      ES: 'Cancela cuando falten más de 6 horas para recuperar tu ticket con su vencimiento original. Con 6 horas o menos, aún puedes cancelar, pero el ticket no se devuelve.'
     },
     'mypage.sessions.enter': {
       KO: '☕ 대화 스튜디오 입장', EN: '☕ Enter Studio', ZH: '☕ 进入对话工作室', JA: '☕ スタジオ入室', FR: '☕ Entrer au Studio', ES: '☕ Entrar al Estudio'
@@ -1992,12 +1992,12 @@
       ES: '¿Cuándo se devuelve el ticket tras cancelar?'
     },
     'chatbot.a.policy': {
-      KO: '📌 티켓은 발급일로부터 90일 동안 사용할 수 있어요. 대화 시작 6시간 전까지 취소하면 사용한 티켓이 원래 유효기간으로 반환됩니다. 6시간 미만 남았을 때 취소하면 반환되지 않습니다. DayO 또는 파트너 사정으로 대화가 진행되지 못한 경우에는 별도 환불 기준에 따라 티켓이 반환됩니다.',
-      EN: 'Tickets are valid for 90 days from issuance. Cancel at least 6 hours before the session to have your ticket returned with its original expiration date. With less than 6 hours left, the ticket is not returned. If DayO or the partner prevents the session, a separate refund policy applies.',
-      ZH: '票券自发放日起有效期为90天。对话开始至少6小时前取消，已使用的票券按原有效期返还；剩余不足6小时取消则不返还。若因DayO或伙伴原因无法进行对话，将按另行适用的退款标准返还票券。',
-      JA: 'チケットは発行日から90日間有効です。会話開始の6時間前までにキャンセルすると、使用したチケットが元の有効期限のまま戻ります。残り6時間未満のキャンセルでは戻りません。DayOまたはパートナーの事情で会話できなかった場合は、別途返還基準に従います。',
-      FR: 'Les tickets sont valables 90 jours après leur émission. Annulez au moins 6 heures avant la conversation pour récupérer le ticket avec sa date d’expiration initiale. À moins de 6 heures, il ne sera pas rendu. Si DayO ou le partenaire empêche la conversation, une politique de remboursement distincte s’applique.',
-      ES: 'Los tickets son válidos durante 90 días desde su emisión. Cancela al menos 6 horas antes para recuperar el ticket con su vencimiento original. Con menos de 6 horas, no se devuelve. Si DayO o el partner impiden la conversación, se aplica una política de reembolso aparte.'
+      KO: '📌 티켓은 발급일로부터 90일 동안 사용할 수 있어요. 대화 시작까지 6시간 초과 남았을 때 취소하면 사용한 티켓이 원래 유효기간으로 반환됩니다. 6시간 이하 남아도 취소는 가능하지만 티켓은 반환되지 않습니다. DayO 또는 파트너 사정으로 대화가 진행되지 못한 경우에는 별도 환불 기준에 따라 티켓이 반환됩니다.',
+      EN: 'Tickets are valid for 90 days from issuance. Cancel with more than 6 hours remaining to have your ticket returned with its original expiration date. With 6 hours or less remaining, you can still cancel, but the ticket is not returned. If DayO or the partner prevents the session, a separate refund policy applies.',
+      ZH: '票券自发放日起有效期为90天。对话开始前剩余超过6小时时取消，已使用的票券按原有效期返还；剩余6小时或更少时仍可取消，但票券不返还。若因DayO或伙伴原因无法进行对话，将按另行适用的退款标准返还票券。',
+      JA: 'チケットは発行日から90日間有効です。会話開始まで6時間より多く残っている場合のキャンセルは、使用したチケットが元の有効期限のまま戻ります。残り6時間以下でもキャンセルできますが、チケットは戻りません。DayOまたはパートナーの事情で会話できなかった場合は、別途返還基準に従います。',
+      FR: 'Les tickets sont valables 90 jours après leur émission. Annulez avec plus de 6 heures avant la conversation pour récupérer le ticket avec sa date d’expiration initiale. À 6 heures ou moins, vous pouvez encore annuler, mais le ticket ne sera pas rendu. Si DayO ou le partenaire empêche la conversation, une politique de remboursement distincte s’applique.',
+      ES: 'Los tickets son válidos durante 90 días desde su emisión. Cancela cuando falten más de 6 horas para recuperar el ticket con su vencimiento original. Con 6 horas o menos, aún puedes cancelar, pero el ticket no se devuelve. Si DayO o el partner impiden la conversación, se aplica una política de reembolso aparte.'
     },
 
     /* ===== Booking modal (booking-modal.js) ===== */
@@ -2056,12 +2056,12 @@
       KO: '이렇게 예약할게요 🎉', EN: "Here's your booking 🎉", ZH: '将这样为您预约 🎉', JA: 'このように予約します 🎉', FR: 'Voici votre réservation 🎉', ES: 'Así queda tu reserva 🎉'
     },
     'book.policyNote': {
-      KO: '대화 시작 6시간 전까지 취소하면 사용한 티켓이 원래 유효기간으로 반환됩니다. 6시간 미만 남았을 때 취소하면 반환되지 않습니다. DayO 또는 파트너 사정으로 진행되지 못한 경우에는 별도 환불 기준에 따라 반환됩니다.',
-      EN: 'Cancel at least 6 hours before the session to have your ticket returned with its original expiration date. With less than 6 hours left, it is not returned. If DayO or the partner prevents the session, a separate refund policy applies.',
-      ZH: '对话开始至少6小时前取消，已使用的票券按原有效期返还；剩余不足6小时取消则不返还。若因DayO或伙伴原因无法进行，将按另行适用的退款标准返还。',
-      JA: '会話開始の6時間前までにキャンセルすると、使用したチケットが元の有効期限のまま戻ります。残り6時間未満では戻りません。DayOまたはパートナーの事情で実施できなかった場合は、別途返還基準に従います。',
-      FR: 'Annulez au moins 6 heures avant la conversation pour récupérer le ticket avec sa date d’expiration initiale. À moins de 6 heures, il ne sera pas rendu. Si DayO ou le partenaire empêche la session, une politique distincte s’applique.',
-      ES: 'Cancela al menos 6 horas antes para recuperar el ticket con su vencimiento original. Con menos de 6 horas, no se devuelve. Si DayO o el partner impiden la sesión, se aplica una política aparte.'
+      KO: '대화 시작까지 6시간 초과 남았을 때 취소하면 사용한 티켓이 원래 유효기간으로 반환됩니다. 6시간 이하 남아도 취소는 가능하지만 티켓은 반환되지 않습니다. DayO 또는 파트너 사정으로 진행되지 못한 경우에는 별도 환불 기준에 따라 반환됩니다.',
+      EN: 'Cancel with more than 6 hours remaining to have your ticket returned with its original expiration date. With 6 hours or less remaining, you can still cancel, but the ticket is not returned. If DayO or the partner prevents the session, a separate refund policy applies.',
+      ZH: '对话开始前剩余超过6小时时取消，已使用的票券按原有效期返还；剩余6小时或更少时仍可取消，但票券不返还。若因DayO或伙伴原因无法进行，将按另行适用的退款标准返还。',
+      JA: '会話開始まで6時間より多く残っている場合のキャンセルは、使用したチケットが元の有効期限のまま戻ります。残り6時間以下でもキャンセルできますが、チケットは戻りません。DayOまたはパートナーの事情で実施できなかった場合は、別途返還基準に従います。',
+      FR: 'Annulez avec plus de 6 heures avant la conversation pour récupérer le ticket avec sa date d’expiration initiale. À 6 heures ou moins, vous pouvez encore annuler, mais le ticket ne sera pas rendu. Si DayO ou le partenaire empêche la session, une politique distincte s’applique.',
+      ES: 'Cancela cuando falten más de 6 horas para recuperar el ticket con su vencimiento original. Con 6 horas o menos, aún puedes cancelar, pero el ticket no se devuelve. Si DayO o el partner impiden la sesión, se aplica una política aparte.'
     },
     'book.summaryLanguage': { KO: '언어', EN: 'Language', ZH: '语言', JA: '言語', FR: 'Langue', ES: 'Idioma' },
     'book.summaryPurpose': { KO: '목적', EN: 'Purpose', ZH: '目的', JA: '目的', FR: 'Objectif', ES: 'Propósito' },
@@ -2079,6 +2079,29 @@
       ZH: '预约成功完成！与{partner}伙伴见面吧 💖',
       JA: '予約が完了しました！{partner}パートナーと会いましょう 💖',
       FR: 'Réservation confirmée ! À bientôt avec {partner} 💖',
+    'book.bookingWindowClosed': {
+      KO: '이 시간은 예약 마감되었습니다. 다른 시간을 선택해 주세요.',
+      EN: 'This time is no longer available for booking. Please choose another time.'
+    },
+    'book.bookingCutoffPassed': {
+      KO: '예약 가능 시간이 지났어요. 다른 시간을 선택해 주세요.',
+      EN: 'The booking window has passed. Please choose another time.'
+    },
+    'book.nonRefundWarningTitle': {
+      KO: '이 예약은 취소해도 티켓이 환불되지 않아요',
+      EN: 'This booking is non-refundable if cancelled'
+    },
+    'book.nonRefundWarningBody': {
+      KO: '세션 시작까지 6시간 이내이므로, 예약 후 취소하더라도 티켓은 환불되지 않습니다. 예약 시간을 다시 한 번 확인해 주세요.',
+      EN: 'Because the session starts within 6 hours, your ticket will not be refunded if you cancel after booking. Please check the time once more before confirming.'
+    },
+    'book.nonRefundWarningConfirm': { KO: '확인하고 예약하기', EN: 'Confirm booking' },
+    'book.nonRefundWarningBack': { KO: '다른 시간 보기', EN: 'Choose another time' },
+    'book.nonRefundWarningClose': { KO: '닫기', EN: 'Close' },
+    'book.regularConfirmTitle': { KO: '이 시간으로 예약할까요?', EN: 'Book this time?' },
+    'book.regularConfirmBody': { KO: '티켓 1장을 사용해 이 시간으로 예약합니다.', EN: 'Use one ticket to book this time.' },
+    'book.regularConfirmConfirm': { KO: '예약하기', EN: 'Book now' },
+    'book.regularConfirmBack': { KO: '다른 시간 보기', EN: 'Choose another time' },
       ES: '¡Reserva confirmada! Nos vemos con {partner} 💖'
     },
     'book.needTicketsToast': {

@@ -6,6 +6,96 @@
   var DAY_LABELS = { mon: '월', tue: '화', wed: '수', thu: '목', fri: '금', sat: '토', sun: '일' };
   var DAY_INDEX = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
   var WEEKS_AHEAD = 6;
+  var BOOKING_MIN_LEAD_MS = 4 * 60 * 60 * 1000;
+  var REFUND_CUTOFF_MS = 6 * 60 * 60 * 1000;
+  var bookingWarningPromise = null;
+  var legacyBookingSubmitting = false;
+
+  function t(key, vars) {
+    if (!window.DayOI18n) return key;
+    return vars ? window.DayOI18n.tf(key, vars) : window.DayOI18n.t(key);
+  }
+
+  function isInternalBookingTest() {
+    return !!(window.DayOPreopenBooking &&
+      typeof window.DayOPreopenBooking.isInternalTest === 'function' &&
+      window.DayOPreopenBooking.isInternalTest());
+  }
+
+  function isBookableStart(startMs, nowMs) {
+    return isFinite(startMs) && startMs > nowMs &&
+      (isInternalBookingTest() || startMs - nowMs >= BOOKING_MIN_LEAD_MS);
+  }
+
+  function confirmBookingWindow(kind) {
+    if (bookingWarningPromise) return bookingWarningPromise;
+    var regular = kind === 'regular';
+    bookingWarningPromise = new Promise(function (resolve) {
+      var previousFocus = document.activeElement;
+      var overlay = document.createElement('div');
+      overlay.className = 'dayo-booking-window-overlay';
+      overlay.innerHTML = '<div class="dayo-booking-window-dialog" role="dialog" aria-modal="true" aria-labelledby="dayo-booking-window-title" aria-describedby="dayo-booking-window-body">' +
+        '<button type="button" class="dayo-booking-window-close" data-action="cancel" aria-label="Close">×</button>' +
+        '<h2 id="dayo-booking-window-title"></h2><p id="dayo-booking-window-body"></p>' +
+        '<div class="dayo-booking-window-actions"><button type="button" class="dayo-booking-window-back" data-action="cancel"></button>' +
+        '<button type="button" class="dayo-booking-window-confirm" data-action="confirm"></button></div></div>';
+      if (!document.getElementById('dayo-booking-window-style')) {
+        var style = document.createElement('style');
+        style.id = 'dayo-booking-window-style';
+        style.textContent = '.dayo-booking-window-overlay{position:fixed;inset:0;z-index:980;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(70,52,48,.48);box-sizing:border-box}' +
+          '.dayo-booking-window-dialog{position:relative;width:min(100%,440px);padding:28px;border:1px solid #ffe8e3;border-radius:22px;background:#fffcfa;box-shadow:0 24px 64px rgba(70,52,48,.2);color:#5c4a42;box-sizing:border-box}' +
+          '.dayo-booking-window-dialog h2{margin:0 32px 12px 0;font-size:1.18rem;line-height:1.4}' +
+          '.dayo-booking-window-dialog p{margin:0 0 24px;font-size:.9rem;line-height:1.6}' +
+          '.dayo-booking-window-close{position:absolute;top:12px;right:14px;border:0;background:none;font-size:1.5rem;color:#9a8580;cursor:pointer}' +
+          '.dayo-booking-window-actions{display:flex;gap:10px}.dayo-booking-window-actions button{flex:1;min-height:44px;padding:10px;border-radius:12px;font:inherit;font-weight:700;cursor:pointer}' +
+          '.dayo-booking-window-back{border:1px solid #ffe8e3;background:#fff8f5;color:#5c4a42}' +
+          '.dayo-booking-window-confirm{border:0;background:#ff6b57;color:#fff}' +
+          '@media(max-width:480px){.dayo-booking-window-dialog{padding:24px 20px}.dayo-booking-window-actions{flex-direction:column-reverse}}';
+        document.head.appendChild(style);
+      }
+      function render() {
+        overlay.querySelector('#dayo-booking-window-title').textContent = t(regular ? 'book.regularConfirmTitle' : 'book.nonRefundWarningTitle');
+        overlay.querySelector('#dayo-booking-window-body').textContent = t(regular ? 'book.regularConfirmBody' : 'book.nonRefundWarningBody');
+        overlay.querySelector('.dayo-booking-window-confirm').textContent = t(regular ? 'book.regularConfirmConfirm' : 'book.nonRefundWarningConfirm');
+        overlay.querySelector('.dayo-booking-window-back').textContent = t(regular ? 'book.regularConfirmBack' : 'book.nonRefundWarningBack');
+        overlay.querySelector('.dayo-booking-window-close').setAttribute('aria-label', t('book.nonRefundWarningClose'));
+      }
+      function finish(confirmed) {
+        document.removeEventListener('keydown', onKey, true);
+        document.removeEventListener('dayo:langchange', render);
+        overlay.remove();
+        if (window.DayOScrollLock) window.DayOScrollLock.unlock();
+        if (previousFocus && previousFocus.focus) previousFocus.focus();
+        bookingWarningPromise = null;
+        resolve(confirmed);
+      }
+      function onKey(event) {
+        if (event.key !== 'Escape') return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        finish(false);
+      }
+      overlay.addEventListener('click', function (event) {
+        var action = event.target.closest('[data-action]');
+        if (action) finish(action.dataset.action === 'confirm');
+        else if (event.target === overlay) finish(false);
+      });
+      render();
+      document.body.appendChild(overlay);
+      if (window.DayOScrollLock) window.DayOScrollLock.lock();
+      document.addEventListener('keydown', onKey, true);
+      document.addEventListener('dayo:langchange', render);
+      overlay.querySelector('.dayo-booking-window-confirm').focus();
+    });
+    return bookingWarningPromise;
+  }
+
+  window.DayOBookingWindow = {
+    isInternalTest: isInternalBookingTest,
+    isBookableStart: isBookableStart,
+    confirmNoRefund: function () { return confirmBookingWindow('late'); },
+    confirmRegular: function () { return confirmBookingWindow('regular'); }
+  };
 
   function client() {
     return window.supabaseClient || null;
@@ -74,9 +164,18 @@
     return !!match && isThirtyMinuteStart(match[1]);
   }
 
+  function bookingSlotStartMs(value) {
+    var raw = String(value || '').trim().replace(' ', 'T');
+    if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(raw)) return NaN;
+    if (/[+-]\d{2}$/.test(raw)) raw += ':00';
+    else if (/[+-]\d{4}$/.test(raw)) raw = raw.slice(0, -2) + ':' + raw.slice(-2);
+    else if (!/(?:Z|[+-]\d{2}:\d{2})$/i.test(raw)) raw += '+09:00';
+    return new Date(raw).getTime();
+  }
+
   function isFutureBookableDatedSlot(value, nowMs) {
-    var start = parseDatedSlotStart(value);
-    return !!start && isThirtyMinuteDatedSlot(value) && start.getTime() > nowMs;
+    var startMs = bookingSlotStartMs(value);
+    return isThirtyMinuteDatedSlot(value) && isBookableStart(startMs, nowMs);
   }
 
   function materializationDateSet() {
@@ -770,6 +869,9 @@
   };
 
   window.requestBooking = async function (slotId, partnerId) {
+    if (legacyBookingSubmitting) return;
+    legacyBookingSubmitting = true;
+    try {
     if (!window.DayOPreopenBooking ||
         typeof window.DayOPreopenBooking.canCreate !== 'function' ||
         !window.DayOPreopenBooking.canCreate()) {
@@ -778,8 +880,6 @@
       }
       return;
     }
-    if (!confirm('티켓 1장을 사용하여 이 시간대로 예약하시겠습니까?')) return;
-
     var supabase = client();
     if (!supabase) {
       alert('예약 처리 중 통신 오류가 발생했습니다.');
@@ -794,6 +894,35 @@
     if (!window.DayOPreopenBooking.canCreate(user.id)) {
       window.DayOPreopenBooking.showNotice();
       return;
+    }
+
+    var slotResult = await supabase.from('availability_slots')
+      .select('id, partner_id, slot_time, status').eq('id', slotId).single();
+    var selectedSlot = slotResult.data;
+    if (slotResult.error || !selectedSlot || selectedSlot.status !== 'available' ||
+        String(selectedSlot.partner_id) !== String(partnerId)) {
+      alert('이 예약 시간은 더 이상 선택할 수 없습니다.');
+      return;
+    }
+    var remaining = bookingSlotStartMs(selectedSlot.slot_time) - Date.now();
+    if (!isBookableStart(bookingSlotStartMs(selectedSlot.slot_time), Date.now())) {
+      alert(t('book.bookingWindowClosed'));
+      return;
+    }
+    if (!isInternalBookingTest() && remaining <= REFUND_CUTOFF_MS) {
+      if (!(await confirmBookingWindow('late'))) return;
+    } else if (!(await confirmBookingWindow('regular'))) return;
+    if (!isBookableStart(bookingSlotStartMs(selectedSlot.slot_time), Date.now())) {
+      alert(t('book.bookingWindowClosed'));
+      return;
+    }
+    if (!isInternalBookingTest() && remaining > REFUND_CUTOFF_MS &&
+        bookingSlotStartMs(selectedSlot.slot_time) - Date.now() <= REFUND_CUTOFF_MS) {
+      if (!(await confirmBookingWindow('late'))) return;
+      if (!isBookableStart(bookingSlotStartMs(selectedSlot.slot_time), Date.now())) {
+        alert(t('book.bookingWindowClosed'));
+        return;
+      }
     }
 
     const { data: booking, error } = await supabase
@@ -827,6 +956,9 @@
       await supabase.from('availability_slots').update({ status: 'booked' }).eq('id', slotId);
       alert('🎉 예약이 확정되었습니다! 마이페이지에서 입장 링크를 확인하세요.');
       location.reload();
+    }
+    } finally {
+      legacyBookingSubmitting = false;
     }
   };
 
