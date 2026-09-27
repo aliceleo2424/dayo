@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   addBookingCsNote,
   bookingStatusLabel,
+  clearLegacyBookingCsNote,
   deleteBookingCsNote,
   fetchSessionDetailContext,
   fetchSessionTranscriptBundle,
@@ -27,6 +28,8 @@ type Props = {
   session: SessionTranscriptContext | null;
   onClose: () => void;
 };
+
+const LEGACY_CS_NOTE_DELETE_ID = "legacy";
 
 function formatClock(value: string | null | undefined) {
   if (!value) return "";
@@ -248,9 +251,17 @@ function BookingCsNoteEditor({ session }: { session: SessionTranscriptContext })
     setDeletingId(entryId);
     setDeleteError("");
     try {
-      await deleteBookingCsNote(entryId);
+      if (entryId === LEGACY_CS_NOTE_DELETE_ID) {
+        await clearLegacyBookingCsNote(session.id);
+      } else {
+        await deleteBookingCsNote(entryId);
+      }
       if (!activeRef.current || requestEpochRef.current !== epoch) return;
-      setEntries((current) => current.filter((entry) => entry.id !== entryId));
+      if (entryId === LEGACY_CS_NOTE_DELETE_ID) {
+        setLegacyNote("");
+      } else {
+        setEntries((current) => current.filter((entry) => entry.id !== entryId));
+      }
       setDeleteId(null);
     } catch (err) {
       if (activeRef.current && requestEpochRef.current === epoch) {
@@ -311,7 +322,12 @@ function BookingCsNoteEditor({ session }: { session: SessionTranscriptContext })
           ))}
           {legacyNote ? (
             <article className="rounded-xl border border-dashed bg-[#FAFAF9] p-3">
-              <p className="text-xs text-muted-foreground">기존 예약별 CS 메모 · 작성일 미상</p>
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-xs text-muted-foreground">기존 예약별 CS 메모 · 작성일 미상</p>
+                <Button type="button" size="icon" variant="ghost" className="h-6 w-6" aria-label="기존 예약 메모 삭제" disabled={!!deletingId} onClick={() => { setDeleteId(LEGACY_CS_NOTE_DELETE_ID); setDeleteError(""); }}>
+                  <X className="h-3.5 w-3.5" />
+                </Button>
+              </div>
               <p className="mt-2 whitespace-pre-wrap break-words text-sm text-[#44403C]">{legacyNote}</p>
             </article>
           ) : null}
@@ -320,8 +336,8 @@ function BookingCsNoteEditor({ session }: { session: SessionTranscriptContext })
       {deleteId ? (
         <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4" role="presentation" onClick={(event) => { event.stopPropagation(); if (!deletingId) { setDeleteId(null); setDeleteError(""); } }}>
           <div className="w-full max-w-sm rounded-xl border bg-white p-5 shadow-xl" role="dialog" aria-modal="true" aria-labelledby="booking-note-delete-title" onClick={(event) => event.stopPropagation()}>
-            <h3 id="booking-note-delete-title" className="text-lg font-semibold">이 메모를 삭제할까요?</h3>
-            <p className="mt-2 text-sm text-muted-foreground">삭제한 메모는 운영 화면에서 보이지 않습니다.</p>
+            <h3 id="booking-note-delete-title" className="text-lg font-semibold">{deleteId === LEGACY_CS_NOTE_DELETE_ID ? "기존 예약 메모를 삭제할까요?" : "이 메모를 삭제할까요?"}</h3>
+            <p className="mt-2 text-sm text-muted-foreground">{deleteId === LEGACY_CS_NOTE_DELETE_ID ? "이 기존 메모는 삭제 후 운영 화면에서 복구할 수 없습니다." : "삭제한 메모는 운영 화면에서 보이지 않습니다."}</p>
             {deleteError ? <p className="mt-3 text-sm text-red-700" role="alert">{deleteError}</p> : null}
             <div className="mt-5 flex justify-end gap-2">
               <Button type="button" variant="outline" disabled={!!deletingId} onClick={() => { setDeleteId(null); setDeleteError(""); }}>취소</Button>

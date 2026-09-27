@@ -834,6 +834,18 @@ export async function deleteBookingCsNote(entryId: string): Promise<void> {
   if (!(result.data as { success?: boolean } | null)?.success) throw new Error("예약별 CS 메모 삭제 결과를 확인하지 못했습니다.");
 }
 
+export async function clearLegacyMemberAdminMemo(profileId: string): Promise<void> {
+  const result = await supabase.rpc("clear_legacy_member_admin_memo", { p_profile_id: profileId });
+  if (result.error) throw new Error(result.error.message || "기존 회원 메모를 삭제하지 못했습니다.");
+  if (!(result.data as { success?: boolean } | null)?.success) throw new Error("기존 회원 메모 삭제 결과를 확인하지 못했습니다.");
+}
+
+export async function clearLegacyBookingCsNote(bookingId: string): Promise<void> {
+  const result = await supabase.rpc("clear_legacy_booking_cs_note", { p_booking_id: bookingId });
+  if (result.error) throw new Error(result.error.message || "기존 예약 메모를 삭제하지 못했습니다.");
+  if (!(result.data as { success?: boolean } | null)?.success) throw new Error("기존 예약 메모 삭제 결과를 확인하지 못했습니다.");
+}
+
 export async function fetchMemberBookings(learnerId: string): Promise<MemberBookingSession[]> {
   if (!learnerId) return [];
   const selects = [

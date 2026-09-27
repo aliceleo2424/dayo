@@ -11,6 +11,7 @@ import { ProviderBadge, KakaoPrivateEmailHint } from "@/components/admin/provide
 import { SessionTranscriptModal } from "@/components/admin/SessionTranscriptModal";
 import {
   addMemberAdminNote,
+  clearLegacyMemberAdminMemo,
   deleteMemberAdminNote,
   grantAdminTickets,
   bookingStatusLabel,
@@ -34,6 +35,8 @@ import {
   type SessionTranscriptContext,
 } from "@/lib/admin-data";
 import { cn } from "@/lib/utils";
+
+const LEGACY_MEMO_DELETE_ID = "legacy";
 
 type Props = {
   open: boolean;
@@ -289,9 +292,17 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
     setMemoDeletingId(entryId);
     setMemoDeleteError("");
     try {
-      await deleteMemberAdminNote(entryId);
+      if (entryId === LEGACY_MEMO_DELETE_ID) {
+        await clearLegacyMemberAdminMemo(profileId);
+      } else {
+        await deleteMemberAdminNote(entryId);
+      }
       if (activeMemoProfileRef.current !== profileId || memoEpochRef.current !== epoch) return;
-      setMemoEntries((current) => current.filter((entry) => entry.id !== entryId));
+      if (entryId === LEGACY_MEMO_DELETE_ID) {
+        setLegacyMemo("");
+      } else {
+        setMemoEntries((current) => current.filter((entry) => entry.id !== entryId));
+      }
       setMemoDeleteId(null);
     } catch (err) {
       if (activeMemoProfileRef.current === profileId && memoEpochRef.current === epoch) {
@@ -604,7 +615,12 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
                   ))}
                   {legacyMemo ? (
                     <article className="rounded-xl border border-dashed bg-[#FAFAF9] p-3">
-                      <p className="text-xs text-muted-foreground">기존 회원 메모 · 작성일 미상</p>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-xs text-muted-foreground">기존 회원 메모 · 작성일 미상</p>
+                        <Button type="button" size="icon" variant="ghost" className="h-6 w-6" aria-label="기존 회원 메모 삭제" disabled={!!memoDeletingId} onClick={() => { setMemoDeleteId(LEGACY_MEMO_DELETE_ID); setMemoDeleteError(""); }}>
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
                       <p className="mt-2 whitespace-pre-wrap break-words text-sm text-[#44403C]">{legacyMemo}</p>
                     </article>
                   ) : null}
@@ -649,8 +665,8 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
       {memoDeleteId && memberMemoReady ? (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 p-4" role="presentation" onClick={() => { if (!memoDeletingId) { setMemoDeleteId(null); setMemoDeleteError(""); } }}>
           <div className="w-full max-w-sm rounded-xl border bg-white p-5 shadow-xl" role="dialog" aria-modal="true" aria-labelledby="member-note-delete-title" onClick={(event) => event.stopPropagation()}>
-            <h3 id="member-note-delete-title" className="text-lg font-semibold">이 메모를 삭제할까요?</h3>
-            <p className="mt-2 text-sm text-muted-foreground">삭제한 메모는 운영 화면에서 보이지 않습니다.</p>
+            <h3 id="member-note-delete-title" className="text-lg font-semibold">{memoDeleteId === LEGACY_MEMO_DELETE_ID ? "기존 회원 메모를 삭제할까요?" : "이 메모를 삭제할까요?"}</h3>
+            <p className="mt-2 text-sm text-muted-foreground">{memoDeleteId === LEGACY_MEMO_DELETE_ID ? "이 기존 메모는 삭제 후 운영 화면에서 복구할 수 없습니다." : "삭제한 메모는 운영 화면에서 보이지 않습니다."}</p>
             {memoDeleteError ? <p className="mt-3 text-sm text-red-700" role="alert">{memoDeleteError}</p> : null}
             <div className="mt-5 flex justify-end gap-2">
               <Button type="button" variant="outline" disabled={!!memoDeletingId} onClick={() => { setMemoDeleteId(null); setMemoDeleteError(""); }}>취소</Button>
