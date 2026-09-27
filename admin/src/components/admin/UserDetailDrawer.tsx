@@ -202,7 +202,7 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
     try {
       const savedMemo = await saveAdminMemo(user, memo);
       setMemo(savedMemo);
-      const success = "✅ CS 특이사항 메모가 저장되었습니다.";
+      const success = "✅ 회원 전체 메모가 저장되었습니다.";
       setMemoNotice(success);
       window.setTimeout(() => setMemoNotice((current) => current === success ? "" : current), 4500);
     } catch (err) {
@@ -309,7 +309,7 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
             <TabsList className="mb-4 grid h-auto w-full grid-cols-3 gap-1">
               <TabsTrigger value="billing" className="text-xs sm:text-sm">💳 결제 및 티켓</TabsTrigger>
               <TabsTrigger value="sessions" className="text-xs sm:text-sm">☕ 대화 세션</TabsTrigger>
-              <TabsTrigger value="memo" className="text-xs sm:text-sm">📝 CS 메모</TabsTrigger>
+              <TabsTrigger value="memo" className="text-xs sm:text-sm">📝 회원 메모</TabsTrigger>
             </TabsList>
 
             <TabsContent value="billing" className="space-y-5">
@@ -463,7 +463,7 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
                         }
                       >
                         <FileText className="mr-1 h-3.5 w-3.5" />
-                        대화록 & AI 리포트 전문 확인
+                        대화록 · 리포트 · CS 특이사항
                       </Button>
                     </div>
                   );
@@ -472,16 +472,16 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
             </TabsContent>
 
             <TabsContent value="memo" className="space-y-3">
-              <Label htmlFor="admin-cs-memo">CS 특이사항</Label>
+              <Label htmlFor="admin-cs-memo">회원 전체 메모</Label>
               <Textarea
                 id="admin-cs-memo"
                 value={memo}
                 onChange={(e) => setMemo(e.target.value)}
-                placeholder="환불 요청, 노쇼 이력, 보상 지급 사유 등 내부 메모를 남겨 주세요."
+                placeholder="특정 예약이 아닌 회원 전체에 적용되는 내부 메모를 남겨 주세요."
                 className="min-h-[220px]"
               />
               <Button variant="coral" disabled={busyMemo || !user} onClick={() => void handleSaveMemo()}>
-                {busyMemo ? "저장 중…" : "메모 저장"}
+                {busyMemo ? "저장 중…" : "회원 메모 저장"}
               </Button>
             </TabsContent>
           </Tabs>

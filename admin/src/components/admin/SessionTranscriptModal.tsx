@@ -1,13 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   bookingStatusLabel,
+  fetchBookingCsNote,
   fetchSessionTranscriptBundle,
   formatSessionDateTime,
+  saveBookingCsNote,
   type SessionCsReport,
   type SessionTranscriptBundle,
   type SessionTranscriptContext,
@@ -141,6 +145,99 @@ function ReportPanel({ report }: { report: SessionCsReport }) {
   );
 }
 
+function BookingCsNoteEditor({ session }: { session: SessionTranscriptContext }) {
+  const [note, setNote] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [saveError, setSaveError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [retryCount, setRetryCount] = useState(0);
+  const activeRef = useRef(true);
+
+  useEffect(() => {
+    activeRef.current = true;
+    let cancelled = false;
+    setNote("");
+    setLoading(true);
+    setLoadError("");
+    setSaveError("");
+    setNotice("");
+    void fetchBookingCsNote(session.id)
+      .then((result) => {
+        if (!cancelled) setNote(result.note);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) setLoadError(err instanceof Error ? err.message : "예약별 CS 메모를 불러오지 못했습니다.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+      activeRef.current = false;
+    };
+  }, [session.id, retryCount]);
+
+  async function handleSave() {
+    if (loading || saving || loadError) return;
+    const trimmed = note.trim();
+    if (trimmed.length > 2000) {
+      setSaveError("CS 특이사항은 2,000자 이내로 입력해 주세요.");
+      return;
+    }
+    setSaving(true);
+    setNotice("");
+    setSaveError("");
+    try {
+      const saved = await saveBookingCsNote(session.id, trimmed);
+      if (!activeRef.current) return;
+      setNote(saved.note);
+      setNotice("예약별 CS 특이사항이 저장되었습니다.");
+    } catch (err) {
+      if (activeRef.current) setSaveError(err instanceof Error ? err.message : "예약별 CS 메모 저장에 실패했습니다.");
+    } finally {
+      if (activeRef.current) setSaving(false);
+    }
+  }
+
+  return (
+    <section className="mb-4 rounded-2xl border bg-white p-4 shadow-sm">
+      <p className="mb-2 text-xs text-[#78716C]">
+        {formatSessionDateTime(session.scheduled_at)} · {session.partnerName || "파트너 미정"}
+      </p>
+      <Label htmlFor={`booking-cs-note-${session.id}`}>예약별 CS 특이사항</Label>
+      <Textarea
+        id={`booking-cs-note-${session.id}`}
+        className="mt-2 min-h-[120px]"
+        value={note}
+        onChange={(event) => {
+          setNote(event.target.value);
+          setNotice("");
+          setSaveError("");
+        }}
+        placeholder="이 예약에서 발생한 문의나 처리 내용을 기록해 주세요."
+        maxLength={2000}
+        disabled={loading || saving || !!loadError}
+      />
+      {loading ? <p className="mt-2 text-xs text-muted-foreground">예약 메모를 불러오는 중…</p> : null}
+      {loadError ? (
+        <div className="mt-2">
+          <p className="text-xs text-red-700" role="alert">{loadError}</p>
+          <Button className="mt-2" size="sm" variant="outline" onClick={() => setRetryCount((count) => count + 1)}>
+            다시 불러오기
+          </Button>
+        </div>
+      ) : null}
+      {saveError ? <p className="mt-2 text-xs text-red-700" role="alert">{saveError}</p> : null}
+      {notice ? <p className="mt-2 text-xs text-emerald-700" role="status">{notice}</p> : null}
+      <Button className="mt-3" size="sm" variant="coral" disabled={loading || saving || !!loadError} onClick={() => void handleSave()}>
+        {saving ? "저장 중…" : "예약 메모 저장"}
+      </Button>
+    </section>
+  );
+}
+
 export function SessionTranscriptModal({ open, session, onClose }: Props) {
   const [loading, setLoading] = useState(false);
   const [bundle, setBundle] = useState<SessionTranscriptBundle | null>(null);
@@ -252,6 +349,7 @@ export function SessionTranscriptModal({ open, session, onClose }: Props) {
           </section>
 
           <aside className="min-h-0 overflow-y-auto bg-[#FAFAF9] p-4">
+            <BookingCsNoteEditor key={session.id} session={session} />
             <h3 className="mb-3 text-sm font-semibold text-[#44403C]">AI 분석 요약 & 세션 리포트</h3>
             {loading ? (
               <div className="h-40 animate-pulse rounded-xl bg-muted" />

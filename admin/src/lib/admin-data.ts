@@ -693,6 +693,36 @@ export async function fetchAdminMemo(profileId: string) {
   return String(result.data?.admin_memo || "");
 }
 
+export type BookingCsNote = {
+  note: string;
+  updated_at: string | null;
+};
+
+export async function fetchBookingCsNote(bookingId: string): Promise<BookingCsNote> {
+  const result = await supabase.rpc("get_booking_cs_note", {
+    p_booking_id: bookingId,
+  });
+  if (result.error) throw new Error(result.error.message || "예약별 CS 메모를 불러오지 못했습니다.");
+  const data = result.data as { success?: boolean; note?: unknown; updated_at?: string | null } | null;
+  if (!data?.success || typeof data.note !== "string") {
+    throw new Error("예약별 CS 메모 조회 결과를 확인하지 못했습니다.");
+  }
+  return { note: data.note, updated_at: data.updated_at || null };
+}
+
+export async function saveBookingCsNote(bookingId: string, note: string): Promise<BookingCsNote> {
+  const result = await supabase.rpc("set_booking_cs_note", {
+    p_booking_id: bookingId,
+    p_note: note,
+  });
+  if (result.error) throw new Error(result.error.message || "예약별 CS 메모를 저장하지 못했습니다.");
+  const data = result.data as { success?: boolean; note?: unknown; updated_at?: string | null } | null;
+  if (!data?.success || typeof data.note !== "string") {
+    throw new Error("예약별 CS 메모 저장 결과를 확인하지 못했습니다.");
+  }
+  return { note: data.note, updated_at: data.updated_at || null };
+}
+
 export async function fetchMemberBookings(learnerId: string): Promise<MemberBookingSession[]> {
   if (!learnerId) return [];
   const selects = [
