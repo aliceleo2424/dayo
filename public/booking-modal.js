@@ -56,9 +56,10 @@
   var allPartners = [];
   var livePartners = [];
   var liveSlots = [];
+  var liveTimes = [];
   var partnersLoaded = false;
   var partnersLoading = false;
-  var slotLoadSeq = 0;
+  var availabilityLoadSeq = 0;
   function weekdays() {
     return window.DayOI18n ? window.DayOI18n.weekdayNames() : ['일', '월', '화', '수', '목', '금', '토'];
   }
@@ -148,6 +149,8 @@
     '.bk-partner-meta{display:block;margin-top:.2rem;font-size:.72rem;color:var(--text-muted,#9A8580);line-height:1.45;}',
     '.bk-partner-check{font-size:1rem;color:var(--coral,#FF6B57);opacity:0;}.bk-partner.is-on .bk-partner-check{opacity:1;}',
     '.bk-slot-empty{font-size:.78rem;color:var(--text-muted,#9A8580);padding:.35rem 0;}',
+    '.bk-inline-action{display:block;margin-top:.65rem;padding:.55rem .75rem;border:1px solid var(--coral-pale,#FFE8E3);',
+    'border-radius:999px;background:#fff;color:var(--coral,#FF6B57);font:inherit;font-weight:700;cursor:pointer;}',
     '.bk-summary{padding:1.1rem 1.25rem;border-radius:var(--radius,18px);',
     'background:linear-gradient(135deg,var(--pink,#FFD1DC),var(--peach,#FFE5B4));}',
     '.bk-row{display:flex;gap:.75rem;padding:.5rem 0;font-size:.86rem;line-height:1.5;}',
@@ -180,6 +183,7 @@
   var state = {
     step: 0,
     language: null,
+    koreanHelp: 'any',
     purposes: [],
     interests: [],
     style: null,
@@ -187,6 +191,7 @@
     chatRequest: 'praise',
     date: null,
     time: null,
+    timeKey: null,
     partner: null,
     slotId: null,
     selectedSlot: null,
@@ -219,6 +224,11 @@
     var nowMs = Date.now();
     return isFinite(startMs) && startMs > nowMs &&
       (isInternalBookingTest() || startMs - nowMs >= BOOKING_MIN_LEAD_MS);
+  }
+
+  function requiresNoRefundWarning(startMs) {
+    var remaining = startMs - Date.now();
+    return !isInternalBookingTest() && isFinite(startMs) && remaining > 0 && remaining <= REFUND_CUTOFF_MS;
   }
 
   function showPreopenBookingNotice() {
@@ -266,13 +276,43 @@
               '<div class="bk-chips" id="bkLanguages">' + chipsMarkup(LANGUAGES(), 'language') + '</div>' +
             '</div>' +
             '<div class="bk-group">' +
+              '<p class="bk-label">' + t('book.koreanHelpQuestion') + '</p>' +
+              '<div class="bk-chips bk-chips--stack" id="bkKoreanHelp">' +
+                '<button type="button" class="bk-chip" data-group="koreanHelp" data-id="needed" aria-pressed="false">' + t('book.koreanHelpNeeded') + '</button>' +
+                '<button type="button" class="bk-chip" data-group="koreanHelp" data-id="any" aria-pressed="true">' + t('book.koreanHelpAny') + '</button>' +
+              '</div>' +
+            '</div>' +
+          '</section>' +
+          '<section class="bk-step" data-step="1">' +
+            '<div class="bk-group">' +
+              '<p class="bk-label">' + t('book.dateQuestion') + '</p>' +
+              '<p class="bk-hint">' + t('book.dateHint') + '</p>' +
+              '<div class="bk-cal-head">' +
+                '<button type="button" class="bk-cal-nav" id="bkPrevMonth" aria-label="' + t('book.prevMonthAria') + '">‹</button>' +
+                '<span class="bk-cal-title" id="bkCalTitle" aria-live="polite"></span>' +
+                '<button type="button" class="bk-cal-nav" id="bkNextMonth" aria-label="' + t('book.nextMonthAria') + '">›</button>' +
+              '</div>' +
+              '<div class="bk-cal-grid" id="bkCalGrid"></div>' +
+            '</div>' +
+            '<div class="bk-slots" id="bkSlots" hidden>' +
+              '<p class="bk-label">' + t('book.slotsLabel') + '</p>' +
+              '<div id="partner-slots-container" class="bk-live-slots bk-chips"></div>' +
+            '</div>' +
+          '</section>' +
+          '<section class="bk-step" data-step="2">' +
+            '<div class="bk-group">' +
+              '<p class="bk-label">' + t('book.partnerQuestion') + '</p>' +
+              '<p class="bk-hint" id="bkPartnerHint"></p>' +
+              '<div class="bk-partners" id="bkPartners"></div>' +
+            '</div>' +
+          '</section>' +
+          '<section class="bk-step" data-step="3">' +
+            '<div class="bk-first-tip" id="bkFirstTip" hidden></div>' +
+            '<div class="bk-group">' +
               '<p class="bk-label">' + t('book.purposeQuestion') + '</p>' +
               '<p class="bk-hint">' + t('book.purposeHint') + '</p>' +
               '<div class="bk-chips" id="bkPurposes">' + chipsMarkup(PURPOSES(), 'purpose') + '</div>' +
             '</div>' +
-          '</section>' +
-          '<section class="bk-step" data-step="1">' +
-            '<div class="bk-first-tip" id="bkFirstTip" hidden></div>' +
             '<div class="bk-comfort" id="bkComfort">' +
               '<p class="bk-label">' + t('book.comfortTitle') + '</p>' +
               '<div class="bk-group">' +
@@ -293,29 +333,6 @@
               '<p class="bk-label">' + t('book.styleQuestion') + '</p>' +
               '<p class="bk-hint">' + t('book.styleHint') + '</p>' +
               '<div class="bk-chips bk-chips--stack" id="bkStyles">' + chipsMarkup(STYLES(), 'style') + '</div>' +
-            '</div>' +
-          '</section>' +
-          '<section class="bk-step" data-step="2">' +
-            '<div class="bk-group">' +
-              '<p class="bk-label">' + t('book.dateQuestion') + '</p>' +
-              '<p class="bk-hint">' + t('book.dateHint') + '</p>' +
-              '<div class="bk-cal-head">' +
-                '<button type="button" class="bk-cal-nav" id="bkPrevMonth" aria-label="' + t('book.prevMonthAria') + '">‹</button>' +
-                '<span class="bk-cal-title" id="bkCalTitle" aria-live="polite"></span>' +
-                '<button type="button" class="bk-cal-nav" id="bkNextMonth" aria-label="' + t('book.nextMonthAria') + '">›</button>' +
-              '</div>' +
-              '<div class="bk-cal-grid" id="bkCalGrid"></div>' +
-            '</div>' +
-          '</section>' +
-          '<section class="bk-step" data-step="3">' +
-            '<div class="bk-group">' +
-              '<p class="bk-label">' + t('book.partnerQuestion') + '</p>' +
-              '<p class="bk-hint" id="bkPartnerHint"></p>' +
-              '<div class="bk-partners" id="bkPartners"></div>' +
-            '</div>' +
-            '<div class="bk-slots" id="bkSlots" hidden>' +
-              '<p class="bk-label">' + t('book.slotsLabel') + '</p>' +
-              '<div id="partner-slots-container" class="bk-live-slots bk-chips"></div>' +
             '</div>' +
           '</section>' +
           '<section class="bk-step" data-step="4">' +
@@ -442,13 +459,17 @@
       var partner = e.target.closest('.bk-partner');
       if (!partner) return;
       state.partner = partner.dataset.id;
-      state.time = null;
-      state.slotId = null;
-      state.selectedSlot = null;
-      liveSlots = [];
+      var matchingSlot = liveSlots.find(function (slot) {
+        return String(slot.partner_id) === String(state.partner) && slotStartKey(slot.slot_time) === state.timeKey;
+      });
+      state.slotId = matchingSlot ? matchingSlot.id : null;
+      state.selectedSlot = matchingSlot ? {
+        id: matchingSlot.id,
+        slot_time: matchingSlot.slot_time,
+        partner: state.partner,
+        date: state.date
+      } : null;
       renderPartnerCards();
-      if (el.slots) el.slots.hidden = false;
-      fetchPartnerSlots(state.partner, state.date);
       updateFooter();
     });
 
@@ -461,12 +482,25 @@
       if (!ensureLoggedInForBooking()) return;
       state.date = day.dataset.date;
       state.time = null;
+      state.timeKey = null;
+      state.partner = null;
       state.slotId = null;
       state.selectedSlot = null;
       liveSlots = [];
+      liveTimes = [];
+      livePartners = [];
       renderCalendar();
       updateFooter();
-      if (state.partner) fetchPartnerSlots(state.partner, state.date);
+      loadDateAvailability();
+    });
+
+    el.overlay.addEventListener('click', function (e) {
+      var relax = e.target.closest('[data-relax-korean]');
+      if (!relax) return;
+      state.koreanHelp = 'any';
+      resetAfterCriteriaChange(false);
+      syncChips('koreanHelp');
+      loadDateAvailability();
     });
 
     el.prevBtn.addEventListener('click', function () { goTo(state.step - 1); });
@@ -486,13 +520,14 @@
   function refreshOnLangChange() {
     var wasOpen = el.overlay.classList.contains('is-open');
     renderMarkup();
-    ['language', 'purpose', 'interest', 'style', 'time', 'chatStyle', 'chatRequest'].forEach(syncChips);
-    el.slots.hidden = !state.partner;
+    ['language', 'koreanHelp', 'purpose', 'interest', 'style', 'time', 'chatStyle', 'chatRequest'].forEach(syncChips);
+    el.slots.hidden = !state.date;
     renderCalendar();
     Array.prototype.forEach.call(el.steps, function (section, i) {
       section.classList.toggle('is-active', i === state.step);
     });
-    if (state.step === 3) renderAvailablePartners();
+    if (state.step === 1 && state.date) loadDateAvailability();
+    if (state.step === 2) renderAvailablePartners();
     if (state.step === 4) renderSummary();
     el.progressBar.style.width = ((state.step + 1) / 5 * 100) + '%';
     el.progressLabel.textContent = t('book.progressFormat', { step: state.step + 1, label: stepLabel(state.step) });
@@ -517,27 +552,24 @@
       } else state.interests.push(id);
     } else if (group === 'language') {
       if (!isActiveBookingLang(id)) return;
+      if (state.language !== id) resetAfterCriteriaChange(false);
       state.language = id;
+    } else if (group === 'koreanHelp') {
+      if (id !== 'needed' && id !== 'any') return;
+      if (state.koreanHelp !== id) resetAfterCriteriaChange(false);
+      state.koreanHelp = id;
     } else if (group === 'style') {
       state.style = id;
-    } else if (group === 'slot') {
-      if (!ensureLoggedInForBooking()) return;
-      var slotId = chip.dataset.slotId || chip.getAttribute('data-slot-id') || '';
-      var clickedSlot = liveSlots.find(function (slot) { return String(slot.id) === String(slotId); });
-      if (!clickedSlot) return;
-      state.selectedSlot = {
-        id: clickedSlot.id,
-        slot_time: clickedSlot.slot_time,
-        partner: state.partner,
-        date: state.date
-      };
-      state.time = slotTimeLabel(clickedSlot.slot_time);
-      state.slotId = clickedSlot.id;
     } else if (group === 'time') {
       if (!ensureLoggedInForBooking()) return;
-      state.time = id;
+      var selectedTime = liveTimes.find(function (time) { return time.key === id; });
+      if (!selectedTime) return;
+      state.timeKey = selectedTime.key;
+      state.time = selectedTime.label;
+      state.partner = null;
       state.slotId = null;
       state.selectedSlot = null;
+      derivePartnersForSelectedTime();
     } else if (group === 'chatStyle' || group === 'chatRequest') {
       state[group] = id;
       persistComfortPrefs(true);
@@ -546,8 +578,21 @@
     }
 
     syncChips(group);
-    if (group === 'slot') renderSlotChips();
+    if (group === 'time') renderTimeChips();
     updateFooter();
+  }
+
+  function resetAfterCriteriaChange(clearDate) {
+    availabilityLoadSeq += 1;
+    state.time = null;
+    state.timeKey = null;
+    state.partner = null;
+    state.slotId = null;
+    state.selectedSlot = null;
+    liveSlots = [];
+    liveTimes = [];
+    livePartners = [];
+    if (clearDate) state.date = null;
   }
 
   function persistComfortPrefs(clearFirst) {
@@ -565,7 +610,9 @@
     Array.prototype.forEach.call(chips, function (chip) {
       var on = group === 'purpose' || group === 'interest'
         ? state[group === 'purpose' ? 'purposes' : 'interests'].indexOf(chip.dataset.id) > -1
-        : state[group] === chip.dataset.id;
+        : group === 'time'
+          ? state.timeKey === chip.dataset.id
+          : state[group] === chip.dataset.id;
       chip.classList.toggle('is-on', on);
       chip.setAttribute('aria-pressed', on ? 'true' : 'false');
     });
@@ -684,18 +731,22 @@
 
   function normalizePartner(row) {
     if (!row) return null;
-    var id = row.id || row.user_id;
+    var id = row.id;
     if (!id) return null;
     var nickname = String(row.nickname || '').trim();
     var name = (nickname && !/[@+]/.test(nickname) ? nickname : '') || 'DayO Partner';
     var initial = String(name).charAt(0).toUpperCase() || 'P';
     return {
       id: id,
-      profileId: row.id || id,
+      profileId: id,
       name: name,
       avatar_url: row.avatar_url || '',
       bio: row.bio || '',
       native_lang: row.native_lang || '',
+      conversation_languages: Array.isArray(row.conversation_languages)
+        ? row.conversation_languages.filter(isActiveBookingLang)
+        : [],
+      korean_support_level: typeof row.korean_support_level === 'string' ? row.korean_support_level : null,
       isTest: isTestPartnerId(id) || String(name).indexOf('DayO Test Partner') === 0,
       initial: initial
     };
@@ -730,7 +781,7 @@
         partners = (res.data || []).map(normalizePartner);
       }
     }
-    allPartners = withTestPartnerFallback(partners);
+    allPartners = partners.filter(Boolean);
     livePartners = allPartners.slice();
     partnersLoaded = true;
     return livePartners;
@@ -765,101 +816,153 @@
     return isBookableStart(startMs);
   }
 
-  async function fetchAvailablePartnerIds(isoDate) {
-    var available = {};
+  function supportsKoreanHelp(partner) {
+    return partner && (partner.korean_support_level === 'conversational' || partner.korean_support_level === 'fluent');
+  }
+
+  function partnerMatchesCriteria(partner, language, koreanHelp) {
+    if (!partner || partner.isTest || !Array.isArray(partner.conversation_languages)) return false;
+    if (partner.conversation_languages.indexOf(language) === -1) return false;
+    return koreanHelp !== 'needed' || supportsKoreanHelp(partner);
+  }
+
+  function slotStartKey(slotTime) {
+    var startMs = bookingSlotStartMs(slotTime);
+    return isFinite(startMs) ? String(startMs) : '';
+  }
+
+  function buildUniqueTimes(slots) {
+    var seen = {};
+    return (slots || []).slice().sort(function (a, b) {
+      return bookingSlotStartMs(a.slot_time) - bookingSlotStartMs(b.slot_time);
+    }).reduce(function (times, slot) {
+      var key = slotStartKey(slot.slot_time);
+      if (!key || seen[key]) return times;
+      seen[key] = true;
+      times.push({ key: key, label: slotTimeLabel(slot.slot_time), slot_time: slot.slot_time });
+      return times;
+    }, []);
+  }
+
+  async function fetchDateAvailability(isoDate, eligiblePartnerIds) {
     var supabase = dbClient();
-    if (!supabase || !isoDate) return available;
+    if (!supabase || !isoDate || !eligiblePartnerIds.length) return [];
 
     try {
       var result = await supabase
         .from('availability_slots')
-        .select('partner_id, slot_time, status')
+        .select('id, partner_id, slot_time, status')
         .eq('status', 'available')
+        .in('partner_id', eligiblePartnerIds)
         .like('slot_time', isoDate + '%')
         .order('slot_time', { ascending: true });
       if (result.error) {
         console.warn('파트너 가용시간 로드 실패:', result.error);
         throw result.error;
       }
-      (result.data || []).filter(isFutureThirtyMinuteConcreteSlot).forEach(function (slot) {
-        if (slot.partner_id) available[String(slot.partner_id)] = true;
+      var allowed = {};
+      eligiblePartnerIds.forEach(function (id) { allowed[String(id)] = true; });
+      return (result.data || []).filter(function (slot) {
+        return slot.status === 'available' && allowed[String(slot.partner_id)] &&
+          String(slot.slot_time || '').indexOf(isoDate) === 0 && isFutureThirtyMinuteConcreteSlot(slot);
       });
     } catch (err) {
       console.warn('파트너 가용시간 로드 실패:', err);
       throw err;
     }
-    return available;
   }
 
-  async function fetchPartnerSlots(partnerId, isoDate) {
-    var requestSeq = ++slotLoadSeq;
+  async function loadDateAvailability() {
+    var requestSeq = ++availabilityLoadSeq;
+    var requestedDate = state.date;
+    var requestedLanguage = state.language;
+    var requestedKoreanHelp = state.koreanHelp;
     var container = el.slotBox || document.getElementById('partner-slots-container');
     if (!container) return [];
-    if (!partnerId || !isoDate) {
-      container.innerHTML = '<div class="bk-slot-empty">날짜와 파트너를 먼저 선택해 주세요.</div>';
+    if (!requestedDate || !isActiveBookingLang(requestedLanguage)) {
       liveSlots = [];
+      liveTimes = [];
       return liveSlots;
     }
 
-    container.innerHTML = '<div class="bk-slot-empty">가능한 시간을 불러오는 중…</div>';
-    var supabase = dbClient();
-    if (!supabase) {
-      container.innerHTML = '<div class="bk-slot-empty">현재 예약 가능한 시간대가 없습니다.</div>';
-      liveSlots = [];
-      return liveSlots;
-    }
-
-    var selectedPartnerId = partnerId;
-    var slots = [];
-
+    partnersLoading = true;
+    el.slots.hidden = false;
+    container.innerHTML = '<div class="bk-slot-empty">' + t('book.slotsLoading') + '</div>';
     try {
-      var res = await supabase
-        .from('availability_slots')
-        .select('id, slot_time, status')
-        .eq('partner_id', selectedPartnerId)
-        .eq('status', 'available')
-        .like('slot_time', isoDate + '%')
-        .order('slot_time', { ascending: true });
-      if (res.error) throw res.error;
-      slots = res.data || [];
+      if (!partnersLoaded) await loadAvailablePartners();
+      var eligiblePartnerIds = allPartners.filter(function (partner) {
+        return partnerMatchesCriteria(partner, requestedLanguage, requestedKoreanHelp);
+      }).map(function (partner) { return String(partner.id); });
+      var slots = await fetchDateAvailability(requestedDate, eligiblePartnerIds);
+      if (requestSeq !== availabilityLoadSeq || requestedDate !== state.date ||
+          requestedLanguage !== state.language || requestedKoreanHelp !== state.koreanHelp) return [];
+      liveSlots = slots;
+      liveTimes = buildUniqueTimes(slots);
+      if (state.timeKey && !liveTimes.some(function (time) { return time.key === state.timeKey; })) {
+        state.time = null;
+        state.timeKey = null;
+        state.partner = null;
+        state.slotId = null;
+        state.selectedSlot = null;
+      }
+      derivePartnersForSelectedTime();
+      partnersLoading = false;
+      renderTimeChips();
+      updateFooter();
+      return liveSlots;
     } catch (err) {
-      console.error('슬롯 로드 실패:', err);
-      if (requestSeq === slotLoadSeq && state.partner === selectedPartnerId && state.date === isoDate) {
+      if (requestSeq === availabilityLoadSeq && requestedDate === state.date &&
+          requestedLanguage === state.language && requestedKoreanHelp === state.koreanHelp) {
+        partnersLoading = false;
         liveSlots = [];
-        container.innerHTML = '<div class="bk-slot-empty">가능한 시간을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</div>';
+        liveTimes = [];
+        livePartners = [];
+        container.innerHTML = '<div class="bk-slot-empty">' + t('book.slotsLoadError') + '</div>';
         updateFooter();
       }
       return [];
     }
+  }
 
-    if (requestSeq !== slotLoadSeq || state.partner !== selectedPartnerId || state.date !== isoDate) return [];
-    liveSlots = slots.filter(function (slot) {
-      return slot.status === 'available' && String(slot.slot_time || '').indexOf(isoDate) === 0 &&
-        isFutureThirtyMinuteConcreteSlot(slot);
-    });
-    if (state.selectedSlot && !liveSlots.some(function (slot) { return slot.id === state.selectedSlot.id; })) {
-      state.time = null;
+  function derivePartnersForSelectedTime() {
+    if (!state.timeKey) {
+      livePartners = [];
+      return livePartners;
+    }
+    livePartners = partnersForTime(liveSlots, allPartners, state.timeKey);
+    if (state.partner && !livePartners.some(function (partner) { return String(partner.id) === String(state.partner); })) {
+      state.partner = null;
       state.slotId = null;
       state.selectedSlot = null;
     }
-    renderSlotChips();
-    return liveSlots;
+    return livePartners;
   }
 
-  function renderSlotChips() {
+  function partnersForTime(slots, partners, timeKey) {
+    var partnerIds = {};
+    (slots || []).forEach(function (slot) {
+      if (slotStartKey(slot.slot_time) === timeKey) partnerIds[String(slot.partner_id)] = true;
+    });
+    return (partners || []).filter(function (partner) { return !!partnerIds[String(partner.id)]; });
+  }
+
+  function renderTimeChips() {
     var container = el.slotBox || document.getElementById('partner-slots-container');
     if (!container) return;
-    if (!liveSlots.length) {
-      container.innerHTML = '<div class="bk-slot-empty">현재 예약 가능한 시간대가 없습니다.</div>';
+    if (!liveTimes.length) {
+      var message = state.koreanHelp === 'needed' ? t('book.noKoreanHelpSlots') : t('book.noSlotsOnDate');
+      var action = state.koreanHelp === 'needed'
+        ? '<button type="button" class="bk-inline-action" data-relax-korean>' + t('book.relaxKoreanHelp') + '</button>'
+        : '';
+      container.innerHTML = '<div class="bk-slot-empty">' + message + action + '</div>';
       updateFooter();
       return;
     }
-    container.innerHTML = liveSlots.map(function (slot) {
-      var label = slotTimeLabel(slot.slot_time);
-      var on = !!(state.selectedSlot && state.selectedSlot.id === slot.id);
+    container.innerHTML = liveTimes.map(function (time) {
+      var on = state.timeKey === time.key;
       return '<button type="button" class="bk-chip' + (on ? ' is-on' : '') +
-        '" data-group="slot" data-id="' + label + '" data-slot-id="' + slot.id +
-        '" aria-pressed="' + (on ? 'true' : 'false') + '">' + label + '</button>';
+        '" data-group="time" data-id="' + time.key +
+        '" aria-pressed="' + (on ? 'true' : 'false') + '">' + time.label + '</button>';
     }).join('');
     updateFooter();
   }
@@ -868,7 +971,6 @@
     for (var i = 0; i < livePartners.length; i++) {
       if (livePartners[i].id === id) return livePartners[i];
     }
-    if (isTestPartnerId(id)) return TEST_PARTNER_FALLBACK;
     return null;
   }
 
@@ -876,11 +978,11 @@
     if (!el.partners) return;
     var language = labelOf(LANGUAGES, state.language);
     var dateLabel = state.date ? formatDate(state.date) : '';
-    el.partnerHint.textContent = dateLabel
-      ? (language ? dateLabel + ' · ' + language : dateLabel)
+    el.partnerHint.textContent = dateLabel && state.time
+      ? t('book.partnerHintFormat', { date: dateLabel, time: state.time, language: language })
       : t('book.partnerQuestion');
     if (!livePartners.length) {
-      el.partners.innerHTML = '<p class="bk-hint">대화 파트너를 불러오는 중…</p>';
+      el.partners.innerHTML = '<p class="bk-hint">' + t('book.partnerAvailabilityChanged') + '</p>';
       return;
     }
     el.partners.innerHTML = livePartners.map(function (partner) {
@@ -903,46 +1005,15 @@
   }
 
   async function renderAvailablePartners() {
-    var requestedDate = state.date;
-    partnersLoading = true;
-    if (el.partners) el.partners.innerHTML = '<p class="bk-hint">대화 파트너를 불러오는 중…</p>';
-    if (!partnersLoaded || !allPartners.length) {
-      await loadAvailablePartners();
-    }
-    if (requestedDate !== state.date) return;
-    var availablePartnerIds;
-    try {
-      availablePartnerIds = await fetchAvailablePartnerIds(requestedDate);
-    } catch (err) {
-      if (requestedDate !== state.date) return;
-      partnersLoading = false;
-      if (el.partners) el.partners.innerHTML = '<p class="bk-hint">가능한 시간을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</p>';
-      updateFooter();
-      return;
-    }
-    if (requestedDate !== state.date) return;
-    livePartners = allPartners.filter(function (partner) {
-      return partner.isTest || isTestPartnerId(partner.id) || !!availablePartnerIds[String(partner.id)];
-    });
-    if (state.partner && !livePartners.some(function (partner) { return partner.id === state.partner; })) {
-      state.partner = null;
-      state.time = null;
-      state.slotId = null;
-      state.selectedSlot = null;
-      liveSlots = [];
-    }
-    partnersLoading = false;
+    derivePartnersForSelectedTime();
     renderPartnerCards();
-    if (el.slots) el.slots.hidden = !state.partner;
-    if (state.partner && state.date) await fetchPartnerSlots(state.partner, state.date);
     updateFooter();
   }
 
   function isStepReady(step) {
-    if (step === 0) return isActiveBookingLang(state.language) && state.purposes.length > 0;
-    if (step === 1) return !!state.style;
-    if (step === 2) return !!state.date;
-    if (step === 3) return !!(
+    if (step === 0) return isActiveBookingLang(state.language) && (state.koreanHelp === 'any' || state.koreanHelp === 'needed');
+    if (step === 1) return !!(!partnersLoading && state.date && state.timeKey && liveTimes.some(function (time) { return time.key === state.timeKey; }));
+    if (step === 2) return !!(
       !partnersLoading &&
       state.partner &&
       state.slotId &&
@@ -952,6 +1023,7 @@
       state.selectedSlot.date === state.date &&
       isBookableStart(bookingSlotStartMs(state.selectedSlot.slot_time))
     );
+    if (step === 3) return state.purposes.length > 0 && !!state.style;
     return true;
   }
 
@@ -966,6 +1038,7 @@
 
     el.summary.innerHTML = '' +
       row(t('book.summaryLanguage'), labelOf(LANGUAGES, state.language)) +
+      row(t('book.summaryKoreanHelp'), state.koreanHelp === 'needed' ? t('book.koreanHelpNeeded') : t('book.koreanHelpAny')) +
       row(t('book.summaryPurpose'), purposeText) +
       (interestText ? row(t('book.interestsQuestion'), interestText) : '') +
       row(t('chatPrefs.styleLabel'), api ? api.styleLabel(state.chatStyle) : state.chatStyle) +
@@ -987,7 +1060,8 @@
     Array.prototype.forEach.call(el.steps, function (section, i) {
       section.classList.toggle('is-active', i === step);
     });
-    if (step === 3) renderAvailablePartners();
+    if (step === 1 && state.date) loadDateAvailability();
+    if (step === 2) renderAvailablePartners();
     if (step === 4) renderSummary();
 
     el.progressBar.style.width = ((step + 1) / 5 * 100) + '%';
@@ -1055,22 +1129,21 @@
     }
     var scheduledAt = selectedSlot.slot_time;
 
-    var remaining = bookingSlotStartMs(scheduledAt) - Date.now();
     if (!isBookableStart(bookingSlotStartMs(scheduledAt))) {
       if (el.nextBtn) el.nextBtn.disabled = !isStepReady(state.step);
       showToast(t('book.bookingWindowClosed'));
       return;
     }
-    if (!isInternalBookingTest() && remaining <= REFUND_CUTOFF_MS) {
+    if (requiresNoRefundWarning(bookingSlotStartMs(scheduledAt))) {
       if (!window.DayOBookingWindow || !(await window.DayOBookingWindow.confirmNoRefund())) {
-        goTo(3);
+        goTo(1);
         return;
       }
     }
     if (!isBookableStart(bookingSlotStartMs(scheduledAt))) {
       if (el.nextBtn) el.nextBtn.disabled = !isStepReady(state.step);
       showToast(t('book.bookingWindowClosed'));
-      goTo(3);
+      goTo(1);
       return;
     }
 
@@ -1151,6 +1224,7 @@
   function saveDraft() {
     storageSet(DRAFT_KEY, JSON.stringify({
       language: state.language,
+      koreanHelp: state.koreanHelp,
       purposes: state.purposes.slice(),
       interests: state.interests.slice(),
       style: state.style,
@@ -1158,6 +1232,7 @@
       chatRequest: state.chatRequest,
       date: state.date,
       time: state.time,
+      timeKey: state.timeKey,
       partner: state.partner,
       slotId: state.slotId,
       selectedSlot: state.selectedSlot,
@@ -1181,6 +1256,7 @@
   function applyDraft(draft) {
     if (!draft) return;
     state.language = isActiveBookingLang(draft.language) ? draft.language : null;
+    state.koreanHelp = draft.koreanHelp === 'needed' ? 'needed' : 'any';
     state.purposes = Array.isArray(draft.purposes) ? draft.purposes.slice() : [];
     state.interests = Array.isArray(draft.interests) ? draft.interests.filter(function (id, index, all) {
       return INTEREST_IDS.indexOf(id) > -1 && all.indexOf(id) === index;
@@ -1190,16 +1266,19 @@
     if (draft.chatRequest) state.chatRequest = draft.chatRequest;
     state.date = draft.date || null;
     state.time = draft.time || null;
+    state.timeKey = draft.timeKey || null;
     state.partner = draft.partner || null;
     state.slotId = draft.slotId || null;
     state.selectedSlot = draft.selectedSlot &&
       draft.selectedSlot.id === state.slotId &&
       draft.selectedSlot.partner === state.partner &&
-      draft.selectedSlot.date === state.date
+      draft.selectedSlot.date === state.date &&
+      slotStartKey(draft.selectedSlot.slot_time) === state.timeKey
       ? draft.selectedSlot
       : null;
     if (!state.selectedSlot) {
       state.time = null;
+      state.timeKey = null;
       state.slotId = null;
     }
     if (state.date) {
@@ -1209,9 +1288,9 @@
         state.viewMonth = Number(parts[1]) - 1;
       }
     }
-    ['language', 'purpose', 'interest', 'style', 'time', 'chatStyle', 'chatRequest'].forEach(syncChips);
+    ['language', 'koreanHelp', 'purpose', 'interest', 'style', 'time', 'chatStyle', 'chatRequest'].forEach(syncChips);
     updateFirstTip();
-    el.slots.hidden = !state.partner;
+    el.slots.hidden = !state.date;
     renderCalendar();
     goTo(typeof draft.step === 'number' ? draft.step : 0);
   }
@@ -1345,20 +1424,24 @@
   function reset() {
     var today = startOfToday();
     state.language = null;
+    state.koreanHelp = 'any';
     state.purposes = [];
     state.interests = [];
     state.style = null;
     state.date = null;
     state.time = null;
+    state.timeKey = null;
     state.partner = null;
     state.slotId = null;
     state.selectedSlot = null;
     liveSlots = [];
+    liveTimes = [];
+    livePartners = [];
     state.viewYear = today.getFullYear();
     state.viewMonth = today.getMonth();
     loadComfortIntoState();
 
-    ['language', 'purpose', 'interest', 'style', 'time', 'chatStyle', 'chatRequest'].forEach(syncChips);
+    ['language', 'koreanHelp', 'purpose', 'interest', 'style', 'time', 'chatStyle', 'chatRequest'].forEach(syncChips);
     updateFirstTip();
     el.slots.hidden = true;
     renderCalendar();
@@ -1460,9 +1543,20 @@
     });
     window.DayOBooking = { open: open, close: close, requestOpen: requestOpen };
     window.loadAvailablePartners = loadAvailablePartners;
-    window.fetchPartnerSlots = fetchPartnerSlots;
     openFromQuery();
     if (isLoggedIn()) tryOpenPendingBooking();
+  }
+
+  if (window.__DAYO_SMART_BOOKING_TEST__) {
+    window.__DAYO_SMART_BOOKING_TEST__.api = {
+      partnerMatchesCriteria: partnerMatchesCriteria,
+      buildUniqueTimes: buildUniqueTimes,
+      partnersForTime: partnersForTime,
+      isFutureThirtyMinuteConcreteSlot: isFutureThirtyMinuteConcreteSlot,
+      isBookableStart: isBookableStart,
+      requiresNoRefundWarning: requiresNoRefundWarning,
+      slotStartKey: slotStartKey
+    };
   }
 
   if (document.readyState === 'loading') {

@@ -2003,17 +2003,20 @@
     /* ===== Booking modal (booking-modal.js) ===== */
     'book.title': { KO: '☕ 오늘의 대화, 예약해요', EN: "☕ Let's book today's chat", ZH: '☕ 预约今天的对话', JA: '☕ 今日の会話を予約しましょう', FR: "☕ Réservons votre conversation", ES: '☕ Reservemos tu charla' },
     'book.closeAria': { KO: '예약 닫기', EN: 'Close booking', ZH: '关闭预约', JA: '予約を閉じる', FR: 'Fermer la réservation', ES: 'Cerrar reserva' },
-    'book.step0': { KO: '언어와 목적', EN: 'Language & Purpose', ZH: '语言与目的', JA: '言語と目的', FR: 'Langue et objectif', ES: 'Idioma y objetivo' },
-    'book.step1': { KO: '대화 스타일', EN: 'Chat Style', ZH: '对话风格', JA: '会話スタイル', FR: 'Style de conversation', ES: 'Estilo de charla' },
-    'book.step2': { KO: '날짜와 시간', EN: 'Date & Time', ZH: '日期与时间', JA: '日付と時間', FR: 'Date et heure', ES: 'Fecha y hora' },
-    'book.step3': { KO: '파트너 선택', EN: 'Choose Partner', ZH: '选择伙伴', JA: 'パートナー選択', FR: 'Choisir un partenaire', ES: 'Elegir compañero' },
-    'book.step4': { KO: '예약 확인', EN: 'Confirm Booking', ZH: '确认预约', JA: '予約確認', FR: 'Confirmer', ES: 'Confirmar reserva' },
+    'book.step0': { KO: '언어', EN: 'Language', ZH: '语言', JA: '言語', FR: 'Langue', ES: 'Idioma' },
+    'book.step1': { KO: '시간', EN: 'Time', ZH: '时间', JA: '時間', FR: 'Horaire', ES: 'Horario' },
+    'book.step2': { KO: '파트너', EN: 'Partner', ZH: '伙伴', JA: 'パートナー', FR: 'Partenaire', ES: 'Compañero' },
+    'book.step3': { KO: '대화 준비', EN: 'Conversation prep', ZH: '对话准备', JA: '会話の準備', FR: 'Préparation', ES: 'Preparación' },
+    'book.step4': { KO: '예약', EN: 'Booking', ZH: '预约', JA: '予約', FR: 'Réservation', ES: 'Reserva' },
     'book.progressFormat': {
-      KO: 'STEP {step}/5 · {label}', EN: 'STEP {step}/5 · {label}', ZH: '第{step}/5步 · {label}', JA: 'STEP {step}/5 · {label}', FR: 'ÉTAPE {step}/5 · {label}', ES: 'PASO {step}/5 · {label}'
+      KO: '{label}', EN: '{label}', ZH: '{label}', JA: '{label}', FR: '{label}', ES: '{label}'
     },
     'book.languageQuestion': {
       KO: '어떤 언어로 대화할까요?', EN: 'Which language would you like to speak?', ZH: '想用哪种语言对话呢？', JA: 'どの言語で会話しますか？', FR: 'Dans quelle langue souhaitez-vous parler ?', ES: '¿En qué idioma quieres conversar?'
     },
+    'book.koreanHelpQuestion': { KO: '막힐 때 한국어로 도움받고 싶나요?', EN: 'Would you like help in Korean if you get stuck?', ZH: '遇到困难时想获得韩语帮助吗？', JA: '困ったときに韓国語で助けてほしいですか？', FR: 'Souhaitez-vous de l’aide en coréen si vous bloquez ?', ES: '¿Quieres ayuda en coreano si te atascas?' },
+    'book.koreanHelpNeeded': { KO: '네, 한국어 가능한 파트너가 좋아요', EN: 'Yes, I prefer a partner who can help in Korean', ZH: '是的，我希望伙伴能用韩语帮助', JA: 'はい、韓国語で助けられるパートナーがいいです', FR: 'Oui, je préfère un partenaire qui peut aider en coréen', ES: 'Sí, prefiero un compañero que pueda ayudar en coreano' },
+    'book.koreanHelpAny': { KO: '상관없어요', EN: 'No preference', ZH: '都可以', JA: 'どちらでもいいです', FR: 'Sans préférence', ES: 'Sin preferencia' },
     'book.purposeQuestion': {
       KO: '대화 목적을 알려주세요', EN: "Tell us the purpose of your chat", ZH: '请告诉我们对话目的', JA: '会話の目的を教えてください', FR: "Quel est l'objectif de votre conversation ?", ES: 'Cuéntanos el propósito de tu charla'
     },
@@ -2033,11 +2036,17 @@
       KO: '언제 만날까요?', EN: 'When would you like to meet?', ZH: '什么时候见面呢？', JA: 'いつ会いましょうか？', FR: 'Quand souhaitez-vous vous rencontrer ?', ES: '¿Cuándo te gustaría reunirte?'
     },
     'book.dateHint': {
-      KO: '내일부터 예약할 수 있어요', EN: 'You can book starting tomorrow', ZH: '从明天开始可以预约', JA: '明日から予約できます', FR: 'Réservation possible dès demain', ES: 'Puedes reservar desde mañana'
+      KO: '일반 예약은 시작 4시간 전까지 가능해요', EN: 'Regular bookings are available until 4 hours before start', ZH: '普通预约可在开始前4小时之前进行', JA: '通常予約は開始4時間前まで可能です', FR: 'Les réservations sont possibles jusqu’à 4 heures avant le début', ES: 'Las reservas están disponibles hasta 4 horas antes del inicio'
     },
     'book.slotsLabel': {
       KO: '가능한 시간대예요', EN: 'Available time slots', ZH: '可选时段', JA: '選べる時間帯です', FR: 'Créneaux disponibles', ES: 'Horarios disponibles'
     },
+    'book.slotsLoading': { KO: '예약 가능한 시간을 불러오는 중…', EN: 'Loading available times…', ZH: '正在加载可预约时间…', JA: '予約可能な時間を読み込み中…', FR: 'Chargement des horaires…', ES: 'Cargando horarios disponibles…' },
+    'book.slotsLoadError': { KO: '가능한 시간을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.', EN: 'Could not load available times. Please try again shortly.', ZH: '无法加载可预约时间，请稍后再试。', JA: '予約可能な時間を読み込めませんでした。しばらくしてから再試行してください。', FR: 'Impossible de charger les horaires. Réessayez bientôt.', ES: 'No se pudieron cargar los horarios. Inténtalo de nuevo.' },
+    'book.noSlotsOnDate': { KO: '이 날짜에는 예약 가능한 시간이 없어요.', EN: 'There are no available times on this date.', ZH: '该日期没有可预约时间。', JA: 'この日には予約可能な時間がありません。', FR: 'Aucun horaire n’est disponible à cette date.', ES: 'No hay horarios disponibles en esta fecha.' },
+    'book.noKoreanHelpSlots': { KO: '이 날짜에는 한국어로 도움 가능한 파트너의 시간이 없어요.', EN: 'No partner who can help in Korean is available on this date.', ZH: '该日期没有能用韩语提供帮助的伙伴。', JA: 'この日には韓国語でサポートできるパートナーの空きがありません。', FR: 'Aucun partenaire pouvant aider en coréen n’est disponible à cette date.', ES: 'No hay un compañero disponible que pueda ayudar en coreano en esta fecha.' },
+    'book.relaxKoreanHelp': { KO: '한국어 도움 상관없음으로 보기', EN: 'Show without Korean-help preference', ZH: '查看不限韩语帮助的时间', JA: '韓国語サポートを問わず表示', FR: 'Afficher sans préférence pour le coréen', ES: 'Ver sin preferencia de ayuda en coreano' },
+    'book.partnerAvailabilityChanged': { KO: '선택한 시간의 예약 가능 상태가 변경되었어요.\n다른 시간을 선택해 주세요.', EN: 'Availability for the selected time has changed. Please choose another time.', ZH: '所选时间的可预约状态已更改，请选择其他时间。', JA: '選択した時間の予約状況が変わりました。別の時間を選んでください。', FR: 'La disponibilité a changé. Choisissez un autre horaire.', ES: 'La disponibilidad cambió. Elige otro horario.' },
     'book.prevMonthAria': { KO: '이전 달', EN: 'Previous month', ZH: '上个月', JA: '前の月', FR: 'Mois précédent', ES: 'Mes anterior' },
     'book.nextMonthAria': { KO: '다음 달', EN: 'Next month', ZH: '下个月', JA: '次の月', FR: 'Mois suivant', ES: 'Mes siguiente' },
     'book.partnerQuestion': {
@@ -2064,6 +2073,7 @@
       ES: 'Cancela cuando falten más de 6 horas para recuperar el ticket con su vencimiento original. Con 6 horas o menos, aún puedes cancelar, pero el ticket no se devuelve. Si DayO o el partner impiden la sesión, se aplica una política aparte.'
     },
     'book.summaryLanguage': { KO: '언어', EN: 'Language', ZH: '语言', JA: '言語', FR: 'Langue', ES: 'Idioma' },
+    'book.summaryKoreanHelp': { KO: '한국어 도움', EN: 'Korean help', ZH: '韩语帮助', JA: '韓国語サポート', FR: 'Aide en coréen', ES: 'Ayuda en coreano' },
     'book.summaryPurpose': { KO: '목적', EN: 'Purpose', ZH: '目的', JA: '目的', FR: 'Objectif', ES: 'Propósito' },
     'book.summaryStyle': { KO: '스타일', EN: 'Style', ZH: '风格', JA: 'スタイル', FR: 'Style', ES: 'Estilo' },
     'book.summaryDatetime': { KO: '일시', EN: 'Date/Time', ZH: '日期/时间', JA: '日時', FR: 'Date/heure', ES: 'Fecha/hora' },

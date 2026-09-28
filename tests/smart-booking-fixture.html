@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Booking Fixture</title>
+  <style>
+    body { margin: 0; padding: 2rem; font-family: Arial, sans-serif; background: #fff8f5; color: #5c4a42; }
+    button[data-booking-open] { padding: 0.8rem 1rem; }
+  </style>
+</head>
+<body>
+  <button type="button" data-booking-open>Smart Booking 열기</button>
+  <script>
+    window._dayoAuthUser = { id: 'fixture-learner' };
+    window.DayOPreopenBooking = {
+      canCreate: function () { return true; },
+      isInternalTest: function () { return false; }
+    };
+    localStorage.setItem('dayo_ticket_count', '1');
+
+    var fixturePartners = [
+      { id: 'jen', nickname: 'Jen', avatar_url: '', bio: 'Fluent Korean help', conversation_languages: ['en', 'es', 'fr', 'ko'], korean_support_level: 'fluent' },
+      { id: 'alex', nickname: 'Alex', avatar_url: '', bio: 'Conversational Korean help', conversation_languages: ['en'], korean_support_level: 'conversational' },
+      { id: 'unset', nickname: 'Unset', avatar_url: '', bio: 'Unconfigured', conversation_languages: null, korean_support_level: null }
+    ];
+
+    function availabilityQuery() {
+      var datePrefix = '';
+      return {
+        select: function () { return this; },
+        eq: function () { return this; },
+        in: function () { return this; },
+        like: function (_, value) { datePrefix = String(value || '').replace('%', ''); return this; },
+        order: function () {
+          return Promise.resolve({ data: [
+            { id: 'jen-1800', partner_id: 'jen', slot_time: datePrefix + 'T18:00:00+09:00', status: 'available' },
+            { id: 'alex-1800', partner_id: 'alex', slot_time: datePrefix + 'T18:00:00+09:00', status: 'available' },
+            { id: 'unset-1800', partner_id: 'unset', slot_time: datePrefix + 'T18:00:00+09:00', status: 'available' },
+            { id: 'weekly', partner_id: 'jen', slot_time: 'weekly:mon|18:00', status: 'available' }
+          ], error: null });
+        }
+      };
+    }
+
+    window.supabaseClient = {
+      rpc: function (name) {
+        return Promise.resolve(name === 'list_public_partner_profiles'
+          ? { data: fixturePartners, error: null }
+          : { data: null, error: null });
+      },
+      from: function (table) {
+        if (table === 'availability_slots') return availabilityQuery();
+        return { update: function () { return { eq: function () { return { select: function () { return Promise.resolve({ data: [], error: null }); } }; } }; } };
+      },
+      auth: {
+        getSession: function () { return Promise.resolve({ data: { session: { user: window._dayoAuthUser } } }); },
+        getUser: function () { return Promise.resolve({ data: { user: window._dayoAuthUser } }); }
+      }
+    };
+    window.createPendingBooking = function (payload) {
+      window.__fixturePendingBooking = payload;
+      return Promise.resolve('fixture-booking');
+    };
+    window.handleConfirmBooking = function (learnerId, bookingId, options) {
+      window.__fixtureConfirmedBooking = { learnerId: learnerId, bookingId: bookingId, options: options };
+      return Promise.resolve(true);
+    };
+  </script>
+  <script src="../public/i18n.js"></script>
+  <script src="../public/booking-modal.js"></script>
+</body>
+</html>
