@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DayO Partner Lounge layout fixture</title>
+  <style>
+    :root { --text:#493f3a; --muted:#83736b; --coral:#ff6b57; --coral-dark:#d85847; --line:#eadfd9; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:linear-gradient(180deg,#f0f9f5,#e6f4ee); color:var(--text); font-family:Arial,"Noto Sans KR",sans-serif; }
+    button,input,textarea { font:inherit; }
+    .page { width:100%; max-width:1280px; margin:auto; padding:20px 24px 64px; }
+    .heading { margin-bottom:14px; }
+    .eyebrow { margin:0 0 6px; color:var(--coral); font-size:12px; font-weight:800; letter-spacing:.08em; }
+    h1 { margin:0; font-size:32px; line-height:1.3; letter-spacing:-.04em; }
+    .desc { margin:5px 0 0; color:var(--muted); font-size:14px; line-height:1.45; }
+    .card { border:1px solid rgba(255,214,223,.65); border-radius:22px; background:rgba(255,252,250,.94); box-shadow:0 10px 28px rgba(83,72,66,.07); }
+    .upcoming { padding:14px 16px; margin-bottom:12px; }
+    .upcoming-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:11px; }
+    .upcoming-head h2 { margin:0; font-size:16px; }
+    .count { color:var(--muted); font-size:12px; font-weight:700; }
+    .upcoming-list { display:flex; align-items:stretch; gap:9px; overflow-x:auto; padding:2px 2px 4px; }
+    .booking { display:grid; grid-template-columns:max-content minmax(0,1fr) max-content; align-items:center; flex:0 0 min(560px,calc(50% - 5px)); min-width:0; gap:11px; padding:10px 12px; border:1px solid #ffd6df; border-radius:14px; background:#fff7f3; }
+    .booking:only-child { flex-basis:100%; }
+    .kind { color:var(--coral-dark); font-size:11px; font-weight:900; }
+    .booking-main { display:grid; grid-template-columns:minmax(106px,.55fr) minmax(0,1.45fr); align-items:center; min-width:0; gap:12px; }
+    .when { display:grid; gap:1px; white-space:nowrap; }
+    .day { color:var(--muted); font-size:11px; font-weight:700; }
+    .time { font-size:19px; line-height:1.2; font-weight:900; }
+    .name { display:block; overflow:hidden; font-size:13px; font-weight:800; text-overflow:ellipsis; white-space:nowrap; }
+    .meta { display:block; overflow:hidden; color:var(--muted); font-size:12px; text-overflow:ellipsis; white-space:nowrap; }
+    .brief { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:3px 10px; margin-top:4px; color:var(--muted); font-size:11px; }
+    .brief-item { display:flex; min-width:0; gap:4px; }
+    .brief-item strong { flex:none; color:var(--coral-dark); }
+    .brief-item span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .prepare,.save { padding:7px 11px; border:0; border-radius:9px; background:var(--coral); color:#fff; font-size:12px; font-weight:800; }
+    .utility { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:9px; margin-bottom:15px; }
+    .promos,.stats { display:flex; gap:9px; }
+    .promo,.stat { height:60px; padding:9px 11px; border:1px solid #f2ded5; border-radius:12px; background:#fff9f5; }
+    .promo { flex:1; min-width:0; }
+    .promo strong,.promo span { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .promo strong { font-size:12px; }.promo span { margin-top:3px; color:var(--muted); font-size:11px; }
+    .stat { display:flex; align-items:center; min-width:136px; gap:12px; }.stat span { color:var(--muted); font-size:11px; }.stat strong { font-size:17px; }
+    .profile { display:grid; grid-template-columns:180px minmax(0,1fr); gap:14px; padding:14px; }
+    .avatar-panel { display:grid; grid-template-columns:58px minmax(0,1fr); align-items:center; gap:5px 8px; padding:10px; border-radius:22px; background:linear-gradient(145deg,#fff0f2,#fff2df); }
+    .avatar { grid-row:1/3; display:grid; place-items:center; width:58px; height:58px; border:3px solid white; border-radius:50%; background:#fff; }
+    .avatar-panel p { margin:0; }.avatar-name { font-size:13px; font-weight:800; }.avatar-intro { grid-column:1/-1; padding:5px 7px; border-radius:12px; background:#ffffffb8; font-size:11px; line-height:1.4; }
+    .photo { grid-column:1/-1; padding:6px; border:1px solid white; border-radius:999px; background:#ffffffc7; color:var(--coral-dark); font-size:11px; font-weight:800; }
+    .profile-copy h2 { margin:0; font-size:17px; }.profile-copy>p { margin:4px 0 9px; color:var(--muted); font-size:12px; }
+    .form { display:grid; grid-template-columns:minmax(176px,.7fr) minmax(0,1.3fr); align-items:end; gap:9px 11px; }
+    label { display:block; margin-bottom:6px; font-size:12px; font-weight:800; }
+    input,textarea { width:100%; border:1px solid var(--line); border-radius:14px; background:#fffaf6; color:var(--text); }
+    input { height:44px; padding:0 12px; } textarea { min-height:54px; padding:9px 12px; resize:none; }
+    .save { display:block; min-width:152px; margin:7px 0 0 auto; }
+    .baseline { position:absolute; left:-10000px; top:0; width:1184px; visibility:hidden; }
+    .baseline-upcoming { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:24px 28px; }
+    .baseline-time { font-size:64px; line-height:1.1; font-weight:900; }.baseline-brief { margin-top:20px; }.baseline-action { min-width:192px; padding:13px 16px; }
+    .baseline-profile { display:grid; grid-template-columns:200px 1fr; gap:18px; padding:19px; }.baseline-avatar { min-height:170px; }.baseline-form { min-height:202px; }
+    @media(max-width:820px){ .utility{grid-template-columns:1fr}.stats{display:grid;grid-template-columns:1fr 1fr}.stat{min-width:0;height:48px}.profile{grid-template-columns:170px 1fr} }
+    @media(max-width:600px){
+      .page{padding:20px 16px 48px}.heading{margin-bottom:18px}h1{font-size:26px}.upcoming{padding:14px}.booking{grid-template-columns:minmax(0,1fr) max-content;flex:0 0 min(288px,calc(100vw - 64px));gap:7px 10px}.booking:only-child{flex-basis:100%}.kind{grid-column:1;grid-row:1}.booking-main{grid-column:1/-1;grid-row:2;grid-template-columns:94px minmax(0,1fr);gap:9px}.prepare{grid-column:2;grid-row:1}.brief{grid-template-columns:1fr}.promos{overflow-x:auto}.promo{flex:0 0 216px}.profile{grid-template-columns:1fr;padding:16px}.avatar-panel{grid-template-columns:64px minmax(0,1fr) auto}.avatar{width:64px;height:64px}.form{grid-template-columns:1fr}.save{width:100%;margin-left:0}
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="heading"><p class="eyebrow" data-ko="파트너 라운지" data-en="PARTNER LOUNGE">파트너 라운지</p><h1 data-ko="오늘도 다정한 대화를 준비해 볼까요? 🍰" data-en="Ready for warm conversations today? 🍰">오늘도 다정한 대화를 준비해 볼까요? 🍰</h1><p class="desc" data-ko="세션 현황을 확인하고 프로필과 가능한 시간을 관리해 보세요." data-en="Check sessions, then manage your profile and availability.">세션 현황을 확인하고 프로필과 가능한 시간을 관리해 보세요.</p></header>
+    <section class="card upcoming" id="afterUpcoming"><div class="upcoming-head"><h2 data-ko="다가오는 대화" data-en="Upcoming conversations">다가오는 대화</h2><span class="count" data-ko="1건" data-en="1 booking">1건</span></div><div class="upcoming-list" id="bookingList"></div></section>
+    <div class="utility"><div class="promos"><div class="promo"><strong data-ko="친구 초대 보너스" data-en="Referral bonus">친구 초대 보너스</strong><span data-ko="파트너 5명 초대 시 +₩50,000" data-en="+₩50,000 for 5 invited partners">파트너 5명 초대 시 +₩50,000</span></div><div class="promo"><strong data-ko="베스트 파트너 리워드" data-en="Best Partner Reward">베스트 파트너 리워드</strong><span data-ko="월간 활동 보너스" data-en="Monthly performance bonus">월간 활동 보너스</span></div></div><div class="stats"><div class="stat"><span data-ko="완료" data-en="Completed">완료</span><strong>4</strong></div><div class="stat"><span data-ko="포인트" data-en="Points">포인트</span><strong>24,000P</strong></div></div></div>
+    <section class="card profile" id="afterProfile"><div class="avatar-panel"><div class="avatar">🌿</div><p class="avatar-name">Jen</p><p class="avatar-intro" data-ko="따뜻한 일상 대화를 함께해요." data-en="Let’s share warm everyday stories.">따뜻한 일상 대화를 함께해요.</p><button class="photo" data-ko="사진 변경" data-en="Change photo">사진 변경</button></div><div class="profile-copy"><h2 data-ko="대화 파트너 프로필" data-en="Partner Profile">대화 파트너 프로필</h2><p data-ko="예약 화면에 표시될 정보를 다듬어 보세요." data-en="Edit the details shown during booking.">예약 화면에 표시될 정보를 다듬어 보세요.</p><div class="form"><div><label data-ko="닉네임" data-en="Nickname">닉네임</label><input value="Jen"></div><div><label data-ko="한 줄 소개" data-en="Short intro">한 줄 소개</label><textarea>따뜻한 일상 대화를 함께해요.</textarea><button class="save" data-ko="변경사항 저장" data-en="Save changes">변경사항 저장</button></div></div></div></section>
+  </main>
+  <div class="baseline"><section class="card baseline-upcoming" id="beforeUpcoming"><div><div>다음 대화</div><div>9월 28일</div><div class="baseline-time">18:30</div><div>Judy · 영어</div><div class="baseline-brief">대화 목적 · 관심사 · 원하는 대화 스타일</div></div><button class="baseline-action">대화 준비하기</button></section><section class="card baseline-profile" id="beforeProfile"><div class="baseline-avatar"></div><div class="baseline-form"></div></section></div>
+  <script>
+    const bookingMarkup = () => '<article class="booking"><span class="kind" data-ko="다음 대화" data-en="NEXT">다음 대화</span><div class="booking-main"><span class="when"><span class="day">9월 28일 (월)</span><strong class="time">18:30</strong></span><span><span class="name" data-ko="Judy 님" data-en="Judy">Judy 님</span><span class="meta" data-ko="대화 언어 · 영어" data-en="Language · English">대화 언어 · 영어</span><span class="brief"><span class="brief-item"><strong data-ko="목적" data-en="Purpose">목적</strong><span data-ko="친구처럼 편하게 대화" data-en="A relaxed conversation">친구처럼 편하게 대화</span></span><span class="brief-item"><strong data-ko="관심사" data-en="Interests">관심사</strong><span data-ko="여행, 카페" data-en="Travel, cafés">여행, 카페</span></span></span></span></div><button class="prepare" data-ko="대화 준비하기" data-en="Prepare">대화 준비하기</button></article>';
+    window.setFixtureLocale = function (lang) { document.documentElement.lang=lang.toLowerCase(); document.querySelectorAll('[data-'+lang.toLowerCase()+']').forEach(el=>{el.textContent=el.dataset[lang.toLowerCase()]}); };
+    window.setFixtureBookings = function (count) { document.getElementById('bookingList').innerHTML=Array.from({length:count},bookingMarkup).join(''); };
+    const fixtureParams = new URLSearchParams(location.search);
+    window.setFixtureBookings(Math.max(1, Math.min(4, Number(fixtureParams.get('count')) || 1)));
+    window.setFixtureLocale(String(fixtureParams.get('lang') || 'KO').toUpperCase() === 'EN' ? 'EN' : 'KO');
+    requestAnimationFrame(function(){ window.__partnerLoungeFixtureMetrics={beforeUpcoming:document.getElementById('beforeUpcoming').getBoundingClientRect().height,afterUpcoming:document.getElementById('afterUpcoming').getBoundingClientRect().height,beforeProfile:document.getElementById('beforeProfile').getBoundingClientRect().height,afterProfile:document.getElementById('afterProfile').getBoundingClientRect().height,profileTop:document.getElementById('afterProfile').getBoundingClientRect().top}; });
+  </script>
+</body>
+</html>

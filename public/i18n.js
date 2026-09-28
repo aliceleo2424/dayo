@@ -776,7 +776,7 @@
       KO: 'DayO Partner Lounge', EN: 'DayO Partner Lounge', ZH: 'DayO Partner Lounge', JA: 'DayO Partner Lounge', FR: 'DayO Partner Lounge', ES: 'DayO Partner Lounge'
     },
     'partner.brandSub': {
-      KO: 'PARTNER LOUNGE', EN: 'PARTNER LOUNGE', ZH: 'PARTNER LOUNGE', JA: 'PARTNER LOUNGE', FR: 'PARTNER LOUNGE', ES: 'PARTNER LOUNGE'
+      KO: '파트너 라운지', EN: 'PARTNER LOUNGE', ZH: 'PARTNER LOUNGE', JA: 'PARTNER LOUNGE', FR: 'PARTNER LOUNGE', ES: 'PARTNER LOUNGE'
     },
     'partner.welcome': {
       KO: '{name} 님, 반갑습니다! ☕', EN: 'Welcome, {name}! ☕', ZH: '欢迎，{name}！☕', JA: '{name}さん、こんにちは！☕', FR: 'Bonjour {name} ! ☕', ES: '¡Hola {name}! ☕'
@@ -785,7 +785,7 @@
       KO: '{name} 님, 반갑습니다! ☕', EN: 'Welcome, {name}! ☕', ZH: '欢迎，{name}！☕', JA: '{name}さん、こんにちは！☕', FR: 'Bonjour {name} ! ☕', ES: '¡Hola {name}! ☕'
     },
     'partner.eyebrow': {
-      KO: 'PARTNER LOUNGE', EN: 'PARTNER LOUNGE', ZH: 'PARTNER LOUNGE', JA: 'PARTNER LOUNGE', FR: 'PARTNER LOUNGE', ES: 'PARTNER LOUNGE'
+      KO: '파트너 라운지', EN: 'PARTNER LOUNGE', ZH: 'PARTNER LOUNGE', JA: 'PARTNER LOUNGE', FR: 'PARTNER LOUNGE', ES: 'PARTNER LOUNGE'
     },
     'partner.heading': {
       KO: '오늘도 다정한 대화를 준비해 볼까요? 🍰', EN: 'Ready for warm conversations today? 🍰', ZH: '今天也准备好温暖的对话吧？🍰', JA: '今日も温かい会話の準備を 🍰', FR: 'Prêt(e) pour des échanges chaleureux ? 🍰', ES: '¿Listo para conversaciones cálidas? 🍰'
@@ -897,7 +897,7 @@
       KO: '반복 가능시간 저장', EN: 'Save weekly availability', ZH: '保存每周可用时间', JA: '繰り返し可能時間を保存', FR: 'Enregistrer les disponibilités récurrentes', ES: 'Guardar disponibilidad semanal'
     },
     'partner.sessions.title': {
-      KO: '⏰ 다가오는 대화', EN: '⏰ Upcoming conversations', ZH: '⏰ 即将开始的对话', JA: '⏰ 予定の会話', FR: '⏰ Sessions à venir', ES: '⏰ Próximas charlas'
+      KO: '다가오는 대화', EN: 'Upcoming conversations', ZH: '即将开始的对话', JA: '予定の会話', FR: 'Sessions à venir', ES: 'Próximas charlas'
     },
     'partner.sessions.sub': {
       KO: '곧 시작할 세션을 확인하세요.', EN: 'Check conversations starting soon.', ZH: '查看即将开始的会话。', JA: 'まもなく始まるセッションを確認。', FR: 'Vérifiez les sessions imminentes.', ES: 'Revisa las sesiones próximas.'
@@ -959,7 +959,7 @@
       KO: '{amount}P (원)', EN: '{amount}P (KRW)', ZH: '{amount}P (韩元)', JA: '{amount}P (円相当)', FR: '{amount}P (KRW)', ES: '{amount}P (KRW)'
     },
     'partner.promo.eyebrow': {
-      KO: 'EVENT & PROMOTION', EN: 'EVENT & PROMOTION', ZH: 'EVENT & PROMOTION', JA: 'EVENT & PROMOTION', FR: 'EVENT & PROMOTION', ES: 'EVENT & PROMOTION'
+      KO: '이벤트 & 프로모션', EN: 'Event & Promotion', ZH: '活动与优惠', JA: 'イベント＆プロモーション', FR: 'Événements et promotions', ES: 'Eventos y promociones'
     },
     'partner.promo.referral': {
       KO: '🎉 [친구 추천 보너스] 이번 달 유학생 친구 5명 소개 시 +50,000원 추가 정산!',
@@ -2401,7 +2401,7 @@
     'partner.toast.photoSaved': { KO: '프로필 사진이 변경되었습니다 📸', EN: 'Profile photo saved 📸' },
     'partner.toast.photoSaveFailed': { KO: '사진 저장에 실패했습니다. 잠시 후 다시 시도해 주세요.', EN: 'Could not save the photo. Please try again.' },
     'partner.profile.save': { KO: '변경사항 저장하기', EN: 'Save changes' },
-    'partner.stats.pointsAria': { KO: '적립 포인트 상세 내역 보기', EN: 'View points history' },
+    'partner.stats.pointsAria': { KO: '포인트 및 정산 내역 보기', EN: 'View points and payouts' },
     'partner.stats.settledAria': { KO: '누적 정산 금액 상세 내역 보기', EN: 'View payout history' },
     'partner.sessions.loading': { KO: '예정된 대화를 불러오는 중이에요.', EN: 'Loading upcoming conversations.' },
     'partner.sessions.empty': { KO: '예정된 대화가 없습니다.', EN: 'No upcoming conversations.' },
@@ -2422,6 +2422,52 @@
     'partner.settlement.sample': { KO: '2026.09.15 | 1:1 대화 세션 완료 (20대 K님) | +6,000 P (적립)', EN: '2026.09.15 | Conversation completed | +6,000P reward' },
     'partner.settlement.monthFormat': { KO: '이번 달 완료 세션 {n}회 | 누적 적립 반영', EN: '{n} conversations completed this month | Rewards added' },
     'partner.settlement.note': { KO: '매월 10일 파트너 등록 계좌로 100% 자동 정산 입금됩니다 ☕', EN: 'Payouts are sent to your registered account on the 10th of each month. ☕' },
+    'partner.stats.completedCompact': { KO: '완료한 대화', EN: 'Completed sessions' },
+    'partner.promo.referralTitle': { KO: '친구 추천 보너스', EN: 'Referral bonus' },
+    'partner.promo.referralCopy': { KO: '파트너 5명 초대 시 +₩50,000', EN: '+₩50,000 for 5 invited partners' },
+    'partner.promo.bestTitle': { KO: '베스트 파트너 리워드', EN: 'Best Partner Reward' },
+    'partner.promo.bestCopy': { KO: '월간 활동 성과 보너스', EN: 'Monthly performance bonus' },
+    'partner.upcoming.empty': { KO: '다가오는 대화가 없어요. 가능한 시간을 열어두면 새로운 대화가 여기 표시돼요.', EN: 'No upcoming conversations. Open your availability to see new bookings here.' },
+    'partner.upcoming.loadError': { KO: '예약을 불러오지 못했어요. 잠시 후 다시 확인해 주세요.', EN: 'Could not load bookings. Please try again shortly.' },
+    'partner.upcoming.next': { KO: '다음 대화', EN: 'Next conversation' },
+    'partner.upcoming.label': { KO: '다가오는 대화', EN: 'Upcoming' },
+    'partner.upcoming.today': { KO: '오늘', EN: 'Today' },
+    'partner.upcoming.countFormat': { KO: '{count}건', EN: '{count} bookings' },
+    'partner.upcoming.countOne': { KO: '1건', EN: '1 booking' },
+    'partner.upcoming.userFallback': { KO: 'DayO 유저', EN: 'DayO User' },
+    'partner.upcoming.nameFormat': { KO: '{name} 님', EN: '{name}' },
+    'partner.upcoming.conversationFormat': { KO: '{name} 님과의 {language} 대화', EN: '{language} conversation with {name}' },
+    'partner.upcoming.conversationNoLanguage': { KO: '{name} 님과의 대화', EN: 'Conversation with {name}' },
+    'partner.upcoming.languageFormat': { KO: '{language} 대화', EN: '{language} conversation' },
+    'partner.upcoming.prepare': { KO: '대화 준비하기', EN: 'Prepare' },
+    'partner.upcoming.prepareShort': { KO: '준비', EN: 'Prepare' },
+    'partner.upcoming.viewAllFormat': { KO: '+{count}건 · 전체보기', EN: '+{count} more · View all' },
+    'partner.upcoming.allTitle': { KO: '전체 다가오는 대화', EN: 'All upcoming conversations' },
+    'partner.upcoming.prepTitle': { KO: '대화 준비', EN: 'Conversation prep' },
+    'partner.upcoming.purposes': { KO: '대화 목적', EN: 'Conversation goals' },
+    'partner.upcoming.interests': { KO: '최근 관심사', EN: 'Recent interests' },
+    'partner.upcoming.chatStyle': { KO: '대화 스타일', EN: 'Conversation style' },
+    'partner.upcoming.chatRequest': { KO: '요청사항', EN: 'Requests' },
+    'partner.upcoming.partnerPreference': { KO: '파트너 조건', EN: 'Partner preference' },
+    'partner.upcoming.enter': { KO: '대화방 입장', EN: 'Enter conversation' },
+    'partner.upcoming.enterEarly': { KO: '5분 전부터 입장 가능', EN: 'Entry opens 5 minutes before start' },
+    'partner.upcoming.enterClosed': { KO: '입장 시간이 지났어요', EN: 'Entry time has passed' },
+    'partner.alerts.title': { KO: '최근 세션 알림', EN: 'Recent session updates' },
+    'partner.alerts.sub': { KO: '취소·기술 문제 처리 내역을 확인하세요.', EN: 'Review cancellations and technical issue outcomes.' },
+    'partner.alerts.loading': { KO: '최근 알림을 불러오는 중이에요.', EN: 'Loading recent updates.' },
+    'partner.alerts.empty': { KO: '최근 세션 알림이 없어요.', EN: 'No recent session updates.' },
+    'partner.alerts.loadError': { KO: '최근 세션 알림을 불러오지 못했어요.', EN: 'Could not load recent session updates.' },
+    'partner.alerts.lateCancellation': { KO: '유저 취소 · 시작까지 6시간 이하', EN: 'User cancelled · 6 hours or less before start' },
+    'partner.alerts.lateCompensation': { KO: '보상 6,000P 지급', EN: '6,000P compensation paid' },
+    'partner.alerts.partnerNoShowReview': { KO: '파트너 미입장 신고 · 확인 중', EN: 'Partner no-show report · Under review' },
+    'partner.alerts.learnerNoShowReview': { KO: '유저 미입장 신고 · 확인 중', EN: 'User no-show report · Under review' },
+    'partner.alerts.partnerNoShowResolved': { KO: '파트너 미입장 신고 · 처리 완료', EN: 'Partner no-show report · Resolved' },
+    'partner.alerts.learnerNoShowResolved': { KO: '유저 미입장 신고 · 처리 완료', EN: 'User no-show report · Resolved' },
+    'partner.alerts.techReview': { KO: '기술 문제 신고 · 확인 중', EN: 'Technical issue report · Under review' },
+    'partner.alerts.techResolved': { KO: '기술 문제 처리 완료', EN: 'Technical issue review complete' },
+    'partner.alerts.techEnded': { KO: '기술 문제로 종료 · 노쇼 처리 아님', EN: 'Ended for a technical issue · Not a no-show' },
+    'partner.alerts.rewardReview': { KO: '보상 여부 확인 중', EN: 'Compensation under review' },
+    'partner.alerts.rewardUnpaid': { KO: '보상 미지급', EN: 'No compensation paid' },
     'partner.profile.avatarAria': { KO: '파트너 프로필 사진', EN: 'Partner profile photo', ZH: '伙伴资料照片', JA: 'パートナーのプロフィール写真', FR: 'Photo de profil du partenaire', ES: 'Foto de perfil del partner' },
     'partner.profile.nicknamePlaceholder': { KO: '이름을 입력해 주세요', EN: 'Please enter a name', ZH: '请输入姓名', JA: '名前を入力してください', FR: 'Veuillez entrer un nom', ES: 'Por favor ingresa un nombre' },
     'partner.profile.defaultName': { KO: 'DayO 파트너', EN: 'DayO Partner', ZH: 'DayO伙伴', JA: 'DayOパートナー', FR: 'Partenaire DayO', ES: 'Compañero DayO' },
