@@ -533,8 +533,8 @@ export function PartnerDetailModal({
                       <p><span className="text-muted-foreground">거래 은행</span><br /><strong>{dash(partner.bank_name)}</strong></p>
                       <p><span className="text-muted-foreground">계좌번호</span><br /><strong>{maskAccount(partner.bank_account)}</strong></p>
                       <p><span className="text-muted-foreground">주민/외국인등록번호</span><br /><strong>{maskIdentity(partner.identity_number_masked)}</strong></p>
-                      <p><span className="text-muted-foreground">신분증 등록</span><br /><Badge variant={partner.id_document_url ? "success" : "warning"}>{partner.id_document_url ? "등록 완료" : "미등록"}</Badge></p>
-                      <p><span className="text-muted-foreground">통장사본 등록</span><br /><Badge variant={partner.bank_document_url ? "success" : "warning"}>{partner.bank_document_url ? "등록 완료" : "미등록"}</Badge></p>
+                      <div><span className="text-muted-foreground">신분증 등록</span><br /><Badge variant={partner.id_document_url ? "success" : "warning"}>{partner.id_document_url ? "등록 완료" : "미등록"}</Badge></div>
+                      <div><span className="text-muted-foreground">통장사본 등록</span><br /><Badge variant={partner.bank_document_url ? "success" : "warning"}>{partner.bank_document_url ? "등록 완료" : "미등록"}</Badge></div>
                     </CardContent>
                   </Card>
                 </TabsContent>
