@@ -196,7 +196,7 @@
         ? '오늘 대화에서 실제로 말한 표현을 기록했어요.'
         : hasLearnerTranscript
           ? '대화 기록은 저장됐지만 영어 학습 표현은 충분하지 않았어요.'
-          : '이번 대화에서는 저장된 learner 발화가 충분하지 않았어요.';
+          : '이번 대화에서는 저장된 표현이 충분하지 않았어요.';
     return {
       summary: summary,
       key_expressions: expressions,

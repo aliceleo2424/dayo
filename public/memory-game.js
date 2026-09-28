@@ -112,11 +112,19 @@
     window.__dayoQuizClockTimer = null;
   }
 
+  function hideQuizClock() {
+    var node = document.getElementById('review-quiz-timer');
+    if (!node) return;
+    node.hidden = true;
+    node.style.display = 'none';
+  }
+
   function renderQuizClock() {
     var node = document.getElementById('review-quiz-timer');
     if (!node || !quizState || !quizState.startedAt) return;
     var remaining = window.DayOLearnerExpressions.quizRemainingSeconds(quizState.startedAt, Date.now(), QUIZ_SECONDS);
     node.hidden = false;
+    node.style.display = 'inline-block';
     node.textContent = '⏱️ ' + String(Math.floor(remaining / 60)).padStart(2, '0') + ':' + String(remaining % 60).padStart(2, '0');
     if (remaining <= 0 && !quizState.ended) finishQuiz('timeout');
   }
@@ -168,6 +176,7 @@
   }
 
   function showFinished() {
+    hideQuizClock();
     var skip = document.getElementById('quiz-skip-btn');
     if (skip) skip.hidden = true;
     var total = quizState.total;
@@ -186,6 +195,7 @@
   function finishQuiz(reason, retry) {
     if (!quizState || (window.__dayoQuizFinalizing && !retry)) return;
     stopQuizClock();
+    hideQuizClock();
     quizState.ended = true;
     quizState.endReason = reason || 'completed';
     writeRecovery();
@@ -350,6 +360,7 @@
     quizState = window.DayOLearnerExpressions.normalizeQuizState(recovered, gameSentenceQueue.length);
     writeRecovery();
     showMemoryModal();
+    hideQuizClock();
     if (!gameSentenceQueue.length) {
       finishQuiz('insufficient');
       return;
@@ -367,8 +378,6 @@
     renderPanel('5분 대화 퀴즈', '최대 ' + gameSentenceQueue.length + '문제 · 5분', '방금 나눈 대화에서 표현을 다시 떠올려봐요.');
     var skip = document.getElementById('quiz-skip-btn');
     if (skip) skip.hidden = false;
-    var timerNode = document.getElementById('review-quiz-timer');
-    if (timerNode) timerNode.hidden = true;
     stateButton('시작하기', function () {
       quizState.startedAt = Date.now();
       writeRecovery();

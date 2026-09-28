@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>DayO room mobile regression fixture</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; font-family: sans-serif; background: #fff8f5; color: #5c4a42; }
+    .studio { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+    header, footer { flex: 0 0 auto; min-height: 64px; display: flex; align-items: center; justify-content: center; background: #fff; }
+    .main-stage { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 6px; padding: 6px 12px 0; overflow: hidden; }
+    .video-column { flex: 1 1 auto; min-height: 0; overflow: hidden; border-radius: 18px; background: linear-gradient(160deg, #f7d6de, #ffe2c8); }
+    .side-drawer { width: 100%; height: min(50dvh, 340px); max-height: min(50vh, 340px); min-height: 0; flex: none; display: flex; flex-direction: column; overflow: hidden; }
+    #talk-card-panel { height: 100%; min-height: 0; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #ffd1dc; border-radius: 18px; background: #fff; }
+    .talk-card-head { flex: 0 0 auto; padding: 12px; font-weight: 800; }
+    .talk-card-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; padding: 12px; }
+    .card { min-height: 118px; margin-bottom: 12px; padding: 16px; border-radius: 14px; background: #fff4ed; }
+    @media (max-width: 767px) and (max-height: 700px) {
+      .side-drawer { height: min(46dvh, 270px); max-height: min(46dvh, 270px); }
+    }
+  </style>
+</head>
+<body>
+  <div class="studio">
+    <header>DayO LIVE · 모바일 Talk Card</header>
+    <main class="main-stage talk-open">
+      <div class="video-column" aria-label="video area"></div>
+      <div class="side-drawer">
+        <section id="talk-card-panel" aria-label="대화카드 fixture">
+          <div class="talk-card-head">대화카드</div>
+          <div class="talk-card-body" id="fixtureScroll">
+            <div class="card">첫 번째 질문<br>What made you smile today?</div>
+            <div class="card">두 번째 질문<br>Tell me about your favorite place.</div>
+            <div class="card">세 번째 질문<br>What would you recommend?</div>
+            <div class="card" id="fixtureEnd">마지막 내용이 잘리지 않고 스크롤되어야 합니다.</div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer>마이크 · 카메라 · 단어도움 · 대화카드</footer>
+  </div>
+</body>
+</html>

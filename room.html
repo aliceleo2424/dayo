@@ -1158,6 +1158,32 @@
     }
     .tutor-video.has-stream .tutor-placeholder { display: none; }
 
+    .remote-connection-state {
+      position: absolute;
+      left: 50%;
+      bottom: 1.1rem;
+      z-index: 4;
+      width: min(88%, 360px);
+      transform: translateX(-50%);
+      padding: 0.7rem 0.9rem;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 14px;
+      background: rgba(255, 252, 250, 0.9);
+      box-shadow: 0 8px 22px rgba(62, 50, 45, 0.14);
+      color: var(--text, #5C4A42);
+      text-align: center;
+      pointer-events: none;
+      backdrop-filter: blur(10px);
+    }
+
+    .remote-connection-state[hidden],
+    .tutor-video.has-stream .remote-connection-state { display: none !important; }
+
+    .remote-connection-state strong,
+    .remote-connection-state span { display: block; }
+    .remote-connection-state strong { font-size: 0.86rem; line-height: 1.4; }
+    .remote-connection-state span { margin-top: 0.15rem; color: var(--text-muted, #9A8580); font-size: 0.74rem; line-height: 1.4; }
+
     .tutor-placeholder {
       display: flex;
       flex-direction: column;
@@ -1514,7 +1540,10 @@
       flex: 1 1 auto;
       min-height: 0;
       overflow-y: auto;
-      overscroll-behavior: contain;
+      overflow-x: hidden;
+      overscroll-behavior-y: contain;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
       padding: 0.75rem 0.85rem 0.9rem;
       display: flex;
       flex-direction: column;
@@ -2946,10 +2975,19 @@
       .chat-panel,
       .side-drawer {
         width: 100%;
+        height: min(50dvh, 340px);
         max-height: min(50vh, 340px);
         flex: none;
         order: 2;
       }
+
+      .main-stage.talk-open .side-drawer,
+      .main-stage.talk-open #talk-card-panel {
+        min-height: 0;
+        overflow: hidden;
+      }
+
+      .main-stage.talk-open #talk-card-panel { height: 100%; }
 
       .main-stage.chat-collapsed .chat-panel,
       .main-stage.chat-collapsed .side-drawer {
@@ -3043,6 +3081,14 @@
       .ctrl-divider { display: none; }
 
       .bottom-sheet { max-height: 45vh; }
+    }
+
+    @media (max-width: 767px) and (max-height: 700px) {
+      .chat-panel,
+      .side-drawer {
+        height: min(46dvh, 270px);
+        max-height: min(46dvh, 270px);
+      }
     }
 
     /* Partner report review popup (same overlay pattern as user star modal) */
@@ -3568,6 +3614,10 @@
               <div class="tutor-placeholder-name partner-name" id="center-target-name">Conversation Partner</div>
               <div class="tutor-placeholder-sub partner-status-sub video-center-desc" id="center-status-text" data-i18n="room.chatting">원어민 대화 파트너와 대화 중</div>
             </div>
+            <div class="remote-connection-state" id="remoteConnectionState" role="status" aria-live="polite" hidden>
+              <strong id="remoteConnectionTitle">상대방과 연결 중이에요</strong>
+              <span id="remoteConnectionDetail">잠시만 기다려 주세요.</span>
+            </div>
           </div>
 
           <div class="self-pip" id="selfPip" title="클릭하여 화면 맞바꾸기" role="button" tabindex="0" aria-label="내 화면 — 클릭하여 화면 맞바꾸기">
@@ -3749,7 +3799,7 @@
       <div id="game-round-badge" style="display: inline-block; background: #EEF2FF; color: #635BFF; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 10px;">
         조각 수집 1 / 3
       </div>
-      <div id="review-quiz-timer" style="display: inline-block; margin-left: 6px; color: #E85B48; font-size: 12px; font-weight: 800;">⏱️ 05:00</div>
+      <div id="review-quiz-timer" hidden style="display: none; margin-left: 6px; color: #E85B48; font-size: 12px; font-weight: 800;">⏱️ 05:00</div>
       <p style="margin: 0 0 20px; font-size: 13px; color: #777;">파트너와 나눈 이야기 속 조각을 이어서 완성해 보세요!</p>
       <div id="game-kr-meaning" style="background: #F8F9FA; padding: 10px 14px; border-radius: 12px; font-size: 13px; color: #555; font-weight: 600; margin-bottom: 20px;">
         "난 요즘 도예에 푹 빠져 있어"
@@ -3846,6 +3896,8 @@
         || document.querySelector('.remote-stream-video');
       const observerPartnerVideo = remoteVideo;
       const observerUserVideo = localVideo;
+      const remoteConnectionState = document.getElementById('remoteConnectionState');
+      const remoteConnectionDetail = document.getElementById('remoteConnectionDetail');
 
       let localStream = null;
       let peer = null;
@@ -3864,6 +3916,11 @@
       let observerGuestPeerId = '';
       const observerOutboundCalls = {};
       let HOST_ID = '';
+      let remoteConnectionDelayTimer = 0;
+      let remoteHealthTimer = 0;
+      let remoteUnlockBound = false;
+      let currentRemoteStream = null;
+      const boundRemoteTracks = typeof WeakSet === 'function' ? new WeakSet() : null;
 
       function isObserverPeerId(peerId) {
         return /_observer/i.test(String(peerId || ''));
@@ -3890,6 +3947,141 @@
       setupVideoElement(localVideo, true);
       setupVideoElement(remoteVideo, false);
 
+      function waitingDetail() {
+        return currentRole === 'partner'
+          ? '상대방의 입장을 기다리고 있어요.'
+          : '잠시만 기다려 주세요.';
+      }
+
+      function showRemotePending(detail) {
+        if (!remoteConnectionState || isObserver) return;
+        remoteConnectionState.hidden = false;
+        if (remoteConnectionDetail) remoteConnectionDetail.textContent = detail || waitingDetail();
+        clearTimeout(remoteConnectionDelayTimer);
+        remoteConnectionDelayTimer = setTimeout(function () {
+          if (!remoteConnectionState.hidden && remoteConnectionDetail) {
+            remoteConnectionDetail.textContent = '연결이 늦어지고 있어요. 잠시 더 기다려 주세요.';
+          }
+        }, 12000);
+      }
+
+      function hideRemotePending() {
+        clearTimeout(remoteConnectionDelayTimer);
+        remoteConnectionDelayTimer = 0;
+        if (remoteConnectionState) remoteConnectionState.hidden = true;
+      }
+
+      function clearRemotePresentation() {
+        currentRemoteStream = null;
+        if (remoteVideo) {
+          remoteVideo.classList.remove('has-stream');
+          remoteVideo.srcObject = null;
+        }
+        var box = document.getElementById('tutorVideoBox') || (remoteVideo && remoteVideo.closest('.tutor-video'));
+        if (box) box.classList.remove('has-stream');
+      }
+
+      function remoteAudioHealthy() {
+        if (!currentRemoteStream || typeof currentRemoteStream.getAudioTracks !== 'function') return false;
+        var tracks = currentRemoteStream.getAudioTracks();
+        return tracks.some(function (track) { return track.readyState === 'live' && !track.muted; });
+      }
+
+      function participantCallNeedsRecovery(call, reason) {
+        var pc = call && call.peerConnection;
+        if (reason === 'peer-failed') return !!pc && pc.connectionState === 'failed';
+        if (reason === 'peer-disconnected') {
+          return !!pc && (pc.connectionState === 'disconnected' || pc.connectionState === 'failed');
+        }
+        return !remoteAudioHealthy();
+      }
+
+      function endParticipantCall(call, delay) {
+        if (!call || activeCall !== call) return;
+        activeCall = null;
+        hostCallConnecting = false;
+        hostCallConnected = false;
+        clearTimeout(remoteHealthTimer);
+        remoteHealthTimer = 0;
+        clearRemotePresentation();
+        showRemotePending(waitingDetail());
+        try { call.close(); } catch (e) { /* ignore */ }
+        if (!destroyed && currentRole !== 'partner') scheduleHostCall(typeof delay === 'number' ? delay : 1500);
+      }
+
+      function scheduleRemoteRecovery(call, reason) {
+        if (!call || activeCall !== call || destroyed) return;
+        clearTimeout(remoteHealthTimer);
+        showRemotePending('연결을 다시 안정화하고 있어요.');
+        remoteHealthTimer = setTimeout(function () {
+          if (participantCallNeedsRecovery(call, reason)) {
+            console.warn('[DayO Media] restarting participant call:', reason);
+            endParticipantCall(call, 800);
+          } else {
+            hideRemotePending();
+          }
+        }, 3500);
+      }
+
+      function bindParticipantCallHealth(call, stream) {
+        if (!call || !stream) return;
+        Array.prototype.forEach.call(stream.getTracks(), function (track) {
+          if (boundRemoteTracks && boundRemoteTracks.has(track)) return;
+          if (boundRemoteTracks) boundRemoteTracks.add(track);
+          track.addEventListener('mute', function () {
+            if (track.kind === 'audio') scheduleRemoteRecovery(call, 'audio-muted');
+          });
+          track.addEventListener('unmute', function () {
+            if (activeCall !== call) return;
+            clearTimeout(remoteHealthTimer);
+            remoteHealthTimer = 0;
+            hideRemotePending();
+            resumeRemotePlayback();
+          });
+          track.addEventListener('ended', function () {
+            if (track.kind === 'audio') scheduleRemoteRecovery(call, 'audio-ended');
+          });
+        });
+        var pc = call.peerConnection;
+        if (!pc || pc.__dayoHealthBound) return;
+        pc.__dayoHealthBound = true;
+        pc.addEventListener('connectionstatechange', function () {
+          if (activeCall !== call) return;
+          if (pc.connectionState === 'failed') scheduleRemoteRecovery(call, 'peer-failed');
+          else if (pc.connectionState === 'disconnected') scheduleRemoteRecovery(call, 'peer-disconnected');
+          else if (pc.connectionState === 'connected' && remoteAudioHealthy()) {
+            clearTimeout(remoteHealthTimer);
+            remoteHealthTimer = 0;
+            hideRemotePending();
+          }
+        });
+      }
+
+      function resumeRemotePlayback() {
+        if (!remoteVideo || !remoteVideo.srcObject) return;
+        setupVideoElement(remoteVideo, false);
+        var attempt = remoteVideo.play();
+        if (!attempt || typeof attempt.catch !== 'function') return;
+        attempt.catch(function (e) {
+          console.log('Autoplay waiting for touch gesture:', e);
+          remoteVideo.muted = true;
+          remoteVideo.play().catch(function () { /* ignore */ });
+          if (remoteUnlockBound) return;
+          remoteUnlockBound = true;
+          var unlockPlay = function () {
+            remoteUnlockBound = false;
+            setupVideoElement(remoteVideo, false);
+            remoteVideo.play().catch(function () { /* ignore */ });
+            document.removeEventListener('pointerdown', unlockPlay, true);
+            document.removeEventListener('touchstart', unlockPlay, true);
+            document.removeEventListener('click', unlockPlay, true);
+          };
+          document.addEventListener('pointerdown', unlockPlay, { capture: true, once: true });
+          document.addEventListener('touchstart', unlockPlay, { capture: true, once: true, passive: true });
+          document.addEventListener('click', unlockPlay, { capture: true, once: true });
+        });
+      }
+
       function bindLocalPip() {
         if (isObserver) return;
         var pipBox = document.getElementById('selfPip') || document.querySelector('.self-pip');
@@ -3904,10 +4096,11 @@
         window.localMediaStream = localStream;
       }
 
-      function attachRemoteStream(stream) {
+      function attachRemoteStream(stream, call) {
         if (!remoteVideo || !stream) return;
         setupVideoElement(remoteVideo, false);
-        remoteVideo.srcObject = stream;
+        currentRemoteStream = stream;
+        if (remoteVideo.srcObject !== stream) remoteVideo.srcObject = stream;
         if (typeof window.logParticipantMediaConnected === 'function') {
           window.logParticipantMediaConnected(stream);
         }
@@ -3918,30 +4111,10 @@
         var box = document.getElementById('tutorVideoBox') || remoteVideo.closest('.tutor-video');
         if (box) box.classList.add('has-stream');
 
-        var playRemote = function () {
-          var attempt = remoteVideo.play();
-          if (attempt && typeof attempt.catch === 'function') {
-            attempt.catch(function (e) {
-              console.log('Autoplay waiting for touch gesture:', e);
-              remoteVideo.muted = true;
-              remoteVideo.play().catch(function () { /* ignore */ });
-              var unlockPlay = function () {
-                setupVideoElement(remoteVideo, false);
-                remoteVideo.play().catch(function () { /* ignore */ });
-                document.removeEventListener('pointerdown', unlockPlay, true);
-                document.removeEventListener('touchstart', unlockPlay, true);
-                document.removeEventListener('click', unlockPlay, true);
-              };
-              document.addEventListener('pointerdown', unlockPlay, { capture: true, once: true });
-              document.addEventListener('touchstart', unlockPlay, { capture: true, once: true, passive: true });
-              document.addEventListener('click', unlockPlay, { capture: true, once: true });
-            });
-          }
-        };
-        playRemote();
-        Array.prototype.forEach.call(stream.getTracks(), function (track) {
-          track.addEventListener('unmute', playRemote);
-        });
+        hideRemotePending();
+        resumeRemotePlayback();
+        bindParticipantCallHealth(call, stream);
+        if (!remoteAudioHealthy()) scheduleRemoteRecovery(call, 'initial-audio-muted');
       }
 
       function attachObserverStream(videoEl, stream, slot) {
@@ -4009,14 +4182,11 @@
           hostCallAttempts = 0;
           clearTimeout(hostCallTimer);
           hostCallTimer = 0;
-          attachRemoteStream(incomingStream);
+          attachRemoteStream(incomingStream, call);
         });
         var retryIfCurrent = function () {
           if (activeCall !== call) return;
-          activeCall = null;
-          hostCallConnecting = false;
-          hostCallConnected = false;
-          if (!destroyed) scheduleHostCall(receivedStream ? 1500 : undefined);
+          endParticipantCall(call, receivedStream ? 1500 : undefined);
         };
         call.on('close', retryIfCurrent);
         call.on('error', function (err) {
@@ -4319,11 +4489,19 @@
           if (currentRole === 'partner') {
             window.__dayoGuestPeerId = call.peer;
           }
+          var previousCall = activeCall;
           activeCall = call;
+          if (previousCall && previousCall !== call) {
+            try { previousCall.close(); } catch (e) { /* ignore */ }
+          }
           call.answer(localStream);
           call.on('stream', function (incomingStream) {
-            attachRemoteStream(incomingStream);
+            if (activeCall !== call) return;
+            hostCallConnected = true;
+            attachRemoteStream(incomingStream, call);
           });
+          call.on('close', function () { endParticipantCall(call, 1200); });
+          call.on('error', function () { endParticipantCall(call, 1200); });
         });
 
         instance.on('error', function (err) {
@@ -4335,6 +4513,7 @@
             return;
           }
           if (type === 'peer-unavailable' && currentRole !== 'partner') {
+            showRemotePending('상대방의 입장을 기다리고 있어요.');
             scheduleHostCall();
           }
           if (type === 'disconnected' && typeof instance.reconnect === 'function') {
@@ -4367,11 +4546,13 @@
             return;
           }
 
+          showRemotePending(waitingDetail());
+
           localStream = (window.localMediaStream && window.localMediaStream.getVideoTracks && window.localMediaStream.getVideoTracks().length)
             ? window.localMediaStream
             : await navigator.mediaDevices.getUserMedia({
               video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
-              audio: true
+              audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
             });
           bindLocalPip();
 
@@ -4389,6 +4570,8 @@
         destroyed = true;
         clearTimeout(hostCallTimer);
         clearTimeout(participantPeerRetryTimer);
+        clearTimeout(remoteConnectionDelayTimer);
+        clearTimeout(remoteHealthTimer);
         clearInterval(observerProbeTimer);
         try { if (activeCall) activeCall.close(); } catch (e) { /* ignore */ }
         try { if (observerHostCall) observerHostCall.close(); } catch (e) { /* ignore */ }
@@ -4407,6 +4590,12 @@
         }
         localStream = null;
       }
+
+      document.addEventListener('visibilitychange', function () {
+        if (destroyed || document.visibilityState !== 'visible' || !currentRemoteStream) return;
+        resumeRemotePlayback();
+        if (!remoteAudioHealthy() && activeCall) scheduleRemoteRecovery(activeCall, 'foreground-audio-muted');
+      });
 
       window.DayOPeerVideo = {
         init: initWebRTC,
@@ -5347,22 +5536,41 @@
       }
     };
 
-    function helpChipMarkup(copyText, titleHtml, meaningHtml) {
+    window.useHelpHint = function (node) {
+      if (!node) return;
+      var text = String(node.getAttribute('data-text') || '').trim();
+      var meaning = String(node.getAttribute('data-help-meaning') || '').trim();
+      var source = String(node.getAttribute('data-help-source') || 'fallback').trim();
+      if (text && typeof window.logSessionEvent === 'function') {
+        var eventId = typeof window.createSessionEventId === 'function' ? window.createSessionEventId() : null;
+        window.logSessionEvent('word_help_clicked', {
+          source: source,
+          items: [{ text: text, ko: meaning }]
+        }, eventId);
+      }
+      if (typeof window.copyHelpText === 'function') window.copyHelpText(text);
+    };
+
+    function helpChipMarkup(copyText, titleHtml, meaningHtml, meaning, source) {
       var safeCopy = escapeHelpHtml(copyText);
+      var safeMeaning = escapeHelpHtml(meaning || '');
+      var safeSource = escapeHelpHtml(source || 'fallback');
       return '<div class="help-copy-chip" data-text="' + safeCopy + '" data-copy="' + safeCopy +
-        '" onclick="copyHelpText(this.getAttribute(\'data-text\') || this.innerText)" style="background: #FFFDF9; border: 1px solid #EDE4D5; border-radius: 8px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; cursor: pointer;">' +
+        '" data-help-meaning="' + safeMeaning + '" data-help-source="' + safeSource +
+        '" onclick="useHelpHint(this)" style="background: #FFFDF9; border: 1px solid #EDE4D5; border-radius: 8px; padding: 8px 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; cursor: pointer;">' +
         titleHtml + meaningHtml +
       '</div>';
     }
 
-    function fillSheetCards(containerId, items, isSentence) {
+    function fillSheetCards(containerId, items, isSentence, source) {
       var box = document.getElementById(containerId);
       if (!box) return;
       box.innerHTML = items.map(function (item, i) {
         var copyText = isSentence ? item.text : item.word;
         var label = isSentence ? item.text : item.word;
         return '<button type="button" class="word-card help-copy-chip" data-text="' + escapeHelpHtml(copyText) +
-          '" onclick="copyHelpText(this.getAttribute(\'data-text\') || this.innerText)">' +
+          '" data-help-meaning="' + escapeHelpHtml(item.meaning || '') + '" data-help-source="' + escapeHelpHtml(source || 'fallback') +
+          '" onclick="useHelpHint(this)">' +
           '<div class="word-card-num">' + (i + 1) + '</div>' +
           '<div class="word-card-text' + (isSentence ? ' word-card-text--sentence' : '') + '">' + escapeHelpHtml(label) + '</div>' +
           '<div class="word-card-meaning">' + escapeHelpHtml(item.meaning || '') + '</div>' +
@@ -5371,10 +5579,10 @@
       }).join('');
     }
 
-    function renderWordHelpResults(words, phrases) {
+    function renderWordHelpResults(words, phrases, source) {
       var safeWords = (words || []).slice(0, 3);
       var safePhrases = (phrases || []).slice(0, 3);
-      fillSheetCards('wordCards', safeWords, false);
+      fillSheetCards('wordCards', safeWords, false, source);
       var content = document.getElementById('help-modal-content');
       if (!content) return;
       content.innerHTML =
@@ -5383,7 +5591,9 @@
           return helpChipMarkup(
             item.word,
             '<strong style="color:#3E4A42;font-size:12.5px;">' + escapeHelpHtml(item.word) + '</strong>',
-            '<span style="color:#6E7A72;font-size:11.5px;margin-left:8px;">' + escapeHelpHtml(item.meaning) + '</span>'
+            '<span style="color:#6E7A72;font-size:11.5px;margin-left:8px;">' + escapeHelpHtml(item.meaning) + '</span>',
+            item.meaning,
+            source
           );
         }).join('') +
         '<div style="font-size:10.5px;font-weight:800;color:#4F7460;margin-top:4px;">바로 말하기</div>' +
@@ -5391,7 +5601,9 @@
           return helpChipMarkup(
             item.text,
             '<strong style="color:#3E4A42;font-size:12px;line-height:1.3;">' + escapeHelpHtml(item.text) + '</strong>',
-            '<span style="color:#6E7A72;font-size:11px;margin-left:8px;">' + escapeHelpHtml(item.meaning) + '</span>'
+            '<span style="color:#6E7A72;font-size:11px;margin-left:8px;">' + escapeHelpHtml(item.meaning) + '</span>',
+            item.meaning,
+            source
           );
         }).join('');
     }
@@ -5401,27 +5613,13 @@
       var title = document.getElementById('help-modal-title');
       var fallbackWords = buildWordHints();
       var fallbackPhrases = buildSentenceHints();
-      renderWordHelpResults(fallbackWords, fallbackPhrases);
+      renderWordHelpResults(fallbackWords, fallbackPhrases, 'fallback');
       if (title) title.innerText = '💡 단어도움';
       if (modal) modal.style.display = 'block';
       if (wordHelpRequestInFlight) return;
 
-      var wordHelpEventId = typeof window.createSessionEventId === 'function' ? window.createSessionEventId() : null;
-      var wordHelpEventLogged = false;
-      function logWordHelpResult(source, words, phrases) {
-        if (wordHelpEventLogged || typeof window.logSessionEvent !== 'function') return;
-        wordHelpEventLogged = true;
-        var items = (words || []).slice(0, 3).map(function (item) {
-          return { text: item.word, ko: item.meaning };
-        }).concat((phrases || []).slice(0, 3).map(function (item) {
-          return { text: item.text, ko: item.meaning };
-        }));
-        window.logSessionEvent('word_help_clicked', { source: source, items: items }, wordHelpEventId);
-      }
-
       var context = getHelpTranscriptText();
       if (!context) {
-        logWordHelpResult('fallback', fallbackWords, fallbackPhrases);
         return;
       }
       wordHelpRequestInFlight = true;
@@ -5444,11 +5642,9 @@
           return { text: String(item && item.text || '').trim(), meaning: String(item && item.ko || '').trim() };
         }).filter(function (item) { return item.text && item.meaning; }) : [];
         if (!words.length || !phrases.length) throw new Error('empty-word-help');
-        renderWordHelpResults(words, phrases);
-        logWordHelpResult('ai', words, phrases);
+        renderWordHelpResults(words, phrases, 'ai');
       }).catch(function () {
-        renderWordHelpResults(fallbackWords, fallbackPhrases);
-        logWordHelpResult('fallback', fallbackWords, fallbackPhrases);
+        renderWordHelpResults(fallbackWords, fallbackPhrases, 'fallback');
       }).finally(function () {
         clearTimeout(timeout);
         wordHelpRequestInFlight = false;
@@ -5461,14 +5657,16 @@
       var title = document.getElementById('help-modal-title');
       var content = document.getElementById('help-modal-content');
       var hints = buildSentenceHints();
-      fillSheetCards('sentenceCards', hints, true);
+      fillSheetCards('sentenceCards', hints, true, 'sentence-static');
       if (title) title.innerText = '📝 추천 문장 힌트 (티키타카 이어가기)';
       if (content) {
         content.innerHTML = hints.map(function (item) {
           return helpChipMarkup(
             item.text,
             '<div style="color: #3E4A42; font-size: 12px; font-weight: 700; line-height: 1.3;">"' + escapeHelpHtml(item.text) + '"</div>',
-            '<div style="color: #55635A; font-size: 10.5px; margin-top: 2px;">' + escapeHelpHtml(item.meaning) + '</div>'
+            '<div style="color: #55635A; font-size: 10.5px; margin-top: 2px;">' + escapeHelpHtml(item.meaning) + '</div>',
+            item.meaning,
+            'sentence-static'
           );
         }).join('');
       }

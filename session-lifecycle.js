@@ -5,7 +5,8 @@
   var submittingSafety = false;
   var submittingTechIssue = false;
   var sessionEndedEventLogged = false;
-  window.__dayoWordHelpHistory = window.__dayoWordHelpHistory || [];
+  window.__dayoWordHelpHistory = [];
+  window.__dayoWordHelpBookingId = '';
 
   function client() {
     return window.supabaseClient || null;
@@ -24,6 +25,16 @@
     var access = window.DayORoomAccess;
     if (!access || !access.allowed || access.adminTest || access.observer) return { bookingId: null, partnerId: null, learnerId: null };
     return { bookingId: uuidOrNull(access.bookingId), partnerId: uuidOrNull(access.partnerId), learnerId: uuidOrNull(access.learnerId) };
+  }
+
+  function wordHelpHistory() {
+    var bookingId = context().bookingId || '';
+    if (window.__dayoWordHelpBookingId !== bookingId) {
+      window.__dayoWordHelpBookingId = bookingId;
+      window.__dayoWordHelpHistory = [];
+    }
+    if (!Array.isArray(window.__dayoWordHelpHistory)) window.__dayoWordHelpHistory = [];
+    return window.__dayoWordHelpHistory;
   }
 
   function isObserver() {
@@ -246,7 +257,7 @@
     if (!api) return null;
     return api.buildReviewData(transcriptRows(), {
       quizScore: window.__dayoQuizScore,
-      wordHelp: window.__dayoWordHelpHistory,
+      wordHelp: wordHelpHistory(),
       feedback: selectedFeedback()
     });
   }
@@ -399,7 +410,13 @@
             ko: String(item && item.ko || '').trim()
           };
         }).filter(function (item) { return item.text; });
-        window.__dayoWordHelpHistory = window.__dayoWordHelpHistory.concat(finalItems).slice(-12);
+        var combined = wordHelpHistory().concat(finalItems);
+        window.__dayoWordHelpHistory = combined.filter(function (item, index, rows) {
+          var key = item.text.toLowerCase() + '\n' + item.ko.toLowerCase();
+          return rows.findIndex(function (candidate) {
+            return candidate.text.toLowerCase() + '\n' + candidate.ko.toLowerCase() === key;
+          }) === index;
+        }).slice(-12);
       }
       return originalSessionEventLogger.apply(this, arguments);
     };
