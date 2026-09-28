@@ -43,8 +43,12 @@ function parseGeminiJson(raw) {
   var parsed = JSON.parse(text);
   return {
     words: cleanItems(parsed.words, 3),
-    phrases: cleanItems(parsed.phrases, 3)
+    phrases: cleanItems(parsed.phrases, 1)
   };
+}
+
+function cleanText(value, limit) {
+  return String(value || '').replace(/\s+/g, ' ').trim().slice(0, limit);
 }
 
 module.exports = async function handler(req, res) {
@@ -65,30 +69,35 @@ module.exports = async function handler(req, res) {
   }
 
   var body = await readBody(req);
-  if (!body || typeof body.context !== 'string') {
-    json(res, 400, { error: 'invalid_context' });
+  var input = cleanText(body && (body.input || body.context), 300);
+  if (!input) {
+    json(res, 400, { error: 'empty_input' });
     return;
   }
-  var context = body.context.replace(/\s+/g, ' ').trim().slice(-1200);
-  if (!context) {
-    json(res, 400, { error: 'empty_context' });
-    return;
-  }
+  var language = ['en', 'es', 'fr', 'ko'].indexOf(body && body.language) !== -1 ? body.language : 'en';
+  var languageName = { en: 'English', es: 'Spanish', fr: 'French', ko: 'Korean' }[language];
+  var talkCard = body && body.talk_card && typeof body.talk_card === 'object' ? body.talk_card : {};
+  var cardQuestionEn = cleanText(talkCard.question_en, 240);
+  var cardQuestionKo = cleanText(talkCard.question_ko, 240);
 
   var prompt = [
-    'You help a Korean beginner continue a friendly English travel conversation.',
-    'Use CEFR A1-A2 English only.',
-    'Suggest exactly 3 easy words and exactly 3 short phrases connected to the recent context.',
-    'Every item must be immediately useful in spoken conversation.',
-    'Do not explain grammar, evaluate, correct, or use long sentences.',
+    'You help a Korean beginner say one idea naturally during a friendly live conversation.',
+    'Target conversation language: ' + languageName + ' (' + language + ').',
+    'The learner may write their intent in Korean or the target language.',
+    'Return 2 or 3 immediately useful target-language words or short expressions, plus exactly 1 short ready-to-say sentence.',
+    'Give a concise Korean meaning for every item.',
+    'Do not explain grammar, evaluate the learner, add study advice, or invent conversation facts.',
+    'Keep the ready sentence easy to say and no longer than 18 words.',
     'Return JSON only with this shape:',
-    '{"words":[{"text":"beautiful","ko":"아름다운"}],"phrases":[{"text":"I liked the food.","ko":"음식이 좋았어요."}]}',
-    'Recent conversation:',
-    context
+    '{"words":[{"text":"beautiful scenery","ko":"아름다운 경치"}],"phrases":[{"text":"The scenery was beautiful.","ko":"경치가 아름다웠어요."}]}',
+    'What the learner wants to say:',
+    input,
+    'Current Talk Card (optional, use only as supporting context):',
+    cardQuestionEn || cardQuestionKo ? [cardQuestionEn, cardQuestionKo].filter(Boolean).join(' / ') : '(none)'
   ].join('\n');
 
   var controller = new AbortController();
-  var timeout = setTimeout(function () { controller.abort(); }, 7000);
+  var timeout = setTimeout(function () { controller.abort(); }, 4500);
   try {
     var response = await fetch(
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=' + encodeURIComponent(apiKey),
