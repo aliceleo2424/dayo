@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
 import { bookingStatusLabel, formatSessionDateTime, type SessionTranscriptContext } from "@/lib/admin-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
@@ -52,6 +52,21 @@ type LedgerEntry = {
   note: string;
 };
 
+const CONVERSATION_LANGUAGES = [
+  { id: "en", label: "영어" },
+  { id: "es", label: "스페인어" },
+  { id: "fr", label: "프랑스어" },
+  { id: "ko", label: "한국어" },
+] as const;
+
+const KOREAN_SUPPORT_LEVELS = [
+  { id: "", label: "미설정" },
+  { id: "none", label: "도움 어려움" },
+  { id: "basic", label: "기초적인 도움 가능" },
+  { id: "conversational", label: "간단한 설명 가능" },
+  { id: "fluent", label: "원활한 설명 가능" },
+] as const;
+
 function dash(value: string | null | undefined) {
   return String(value || "").trim() || "미등록";
 }
@@ -102,6 +117,15 @@ export function PartnerDetailModal({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [selectedSession, setSelectedSession] = useState<SessionTranscriptContext | null>(null);
+  const [capabilityLanguages, setCapabilityLanguages] = useState<string[]>([]);
+  const [koreanSupportLevel, setKoreanSupportLevel] = useState("");
+  const [capabilityLoadedId, setCapabilityLoadedId] = useState<string | null>(null);
+  const [capabilityLoading, setCapabilityLoading] = useState(false);
+  const [capabilitySaving, setCapabilitySaving] = useState(false);
+  const [capabilityError, setCapabilityError] = useState("");
+  const [capabilityNotice, setCapabilityNotice] = useState("");
+  const capabilityEpochRef = useRef(0);
+  const capabilitySaveRef = useRef(new Set<string>());
 
   const points = Number(partner?.point_balance || 0);
 
@@ -210,6 +234,41 @@ export function PartnerDetailModal({
     return () => { cancelled = true; };
   }, [open, partner]);
 
+  useEffect(() => {
+    const epoch = ++capabilityEpochRef.current;
+    if (!open || !partner || partner.role !== "partner") return;
+    const partnerId = partner.id;
+    setCapabilityLanguages([]);
+    setKoreanSupportLevel("");
+    setCapabilityLoadedId(null);
+    setCapabilityLoading(true);
+    setCapabilitySaving(false);
+    setCapabilityError("");
+    setCapabilityNotice("");
+    void (async () => {
+      try {
+        const { data, error } = await supabase.rpc("get_admin_partner_capabilities", { p_partner_id: partnerId });
+        if (capabilityEpochRef.current !== epoch) return;
+        if (error) throw error;
+        const result = data as { success?: boolean; conversation_languages?: unknown; korean_support_level?: unknown } | null;
+        if (!result?.success || !Array.isArray(result.conversation_languages)) {
+          throw new Error("파트너 예약 정보를 확인하지 못했습니다.");
+        }
+        setCapabilityLanguages(result.conversation_languages.filter((id): id is string =>
+          typeof id === "string" && CONVERSATION_LANGUAGES.some((language) => language.id === id)));
+        setKoreanSupportLevel(typeof result.korean_support_level === "string" ? result.korean_support_level : "");
+        setCapabilityLoadedId(partnerId);
+      } catch (error) {
+        if (capabilityEpochRef.current === epoch) {
+          setCapabilityError(error instanceof Error ? error.message : "파트너 예약 정보를 불러오지 못했습니다.");
+        }
+      } finally {
+        if (capabilityEpochRef.current === epoch) setCapabilityLoading(false);
+      }
+    })();
+    return () => { capabilityEpochRef.current += 1; };
+  }, [open, partner?.id, partner?.role]);
+
   const metrics = useMemo(() => {
     const now = new Date();
     const thisMonth = sessions.filter((session) => {
@@ -248,6 +307,37 @@ export function PartnerDetailModal({
     setMessage(nextStatus === "withdrawn"
       ? "탈퇴 상태로 보존했습니다. 세션·정산·리포트 데이터는 삭제되지 않습니다."
       : "파트너 상태가 변경되었습니다.");
+  }
+
+  async function saveCapabilities() {
+    if (!partner || capabilityLoadedId !== partner.id || capabilityLoading || capabilitySaveRef.current.has(partner.id)) return;
+    if (!capabilityLanguages.length) {
+      setCapabilityError("대화 가능 언어를 하나 이상 선택해 주세요.");
+      return;
+    }
+    const partnerId = partner.id;
+    const epoch = capabilityEpochRef.current;
+    capabilitySaveRef.current.add(partnerId);
+    setCapabilitySaving(true);
+    setCapabilityError("");
+    setCapabilityNotice("");
+    try {
+      const { data, error } = await supabase.rpc("admin_set_partner_capabilities", {
+        p_partner_id: partnerId,
+        p_conversation_languages: capabilityLanguages,
+        p_korean_support_level: koreanSupportLevel || null,
+      });
+      if (error) throw error;
+      if (!(data as { success?: boolean } | null)?.success) throw new Error("파트너 예약 정보 저장 결과를 확인하지 못했습니다.");
+      if (capabilityEpochRef.current === epoch) setCapabilityNotice("파트너 예약 정보가 저장되었습니다.");
+    } catch (error) {
+      if (capabilityEpochRef.current === epoch) {
+        setCapabilityError(error instanceof Error ? error.message : "파트너 예약 정보 저장에 실패했습니다.");
+      }
+    } finally {
+      capabilitySaveRef.current.delete(partnerId);
+      if (capabilityEpochRef.current === epoch) setCapabilitySaving(false);
+    }
   }
 
   async function settle() {
@@ -298,6 +388,47 @@ export function PartnerDetailModal({
                   </select>
                 </label>
               </section>
+
+              {partner.role === "partner" ? <section className="space-y-3 rounded-xl border bg-white p-4">
+                <div>
+                  <h3 className="text-sm font-semibold">예약용 파트너 정보</h3>
+                  <p className="mt-1 text-xs text-muted-foreground">신청 내용을 확인한 운영자가 설정합니다. 기존 자유 텍스트 담당 언어와 별개입니다.</p>
+                </div>
+                {capabilityLoading ? <p className="text-xs text-muted-foreground">예약 정보를 불러오는 중…</p> : null}
+                {!capabilityLoading && capabilityLoadedId === partner.id ? (
+                  <>
+                    {(!capabilityLanguages.length || !koreanSupportLevel) ? (
+                      <p className="text-xs font-medium text-amber-700">예약 정보 미설정 · 대화 가능 언어와 한국어 도움 수준을 확인해 주세요.</p>
+                    ) : null}
+                    <fieldset disabled={capabilitySaving}>
+                      <legend className="mb-2 text-xs font-semibold">대화 가능 언어</legend>
+                      <div className="flex flex-wrap gap-3">
+                        {CONVERSATION_LANGUAGES.map((language) => (
+                          <label key={language.id} className="flex items-center gap-1.5 text-sm">
+                            <input type="checkbox" checked={capabilityLanguages.includes(language.id)} onChange={(event) => {
+                              setCapabilityLanguages((current) => event.target.checked
+                                ? [...current, language.id]
+                                : current.filter((id) => id !== language.id));
+                              setCapabilityNotice("");
+                            }} />
+                            {language.label}
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
+                    <label className="block text-xs font-semibold">
+                      한국어 도움 수준
+                      <select className="mt-2 block w-full max-w-xs rounded-md border bg-white px-3 py-2 text-sm font-normal" value={koreanSupportLevel} disabled={capabilitySaving} onChange={(event) => { setKoreanSupportLevel(event.target.value); setCapabilityNotice(""); }}>
+                        {KOREAN_SUPPORT_LEVELS.map((level) => <option key={level.id} value={level.id}>{level.label}</option>)}
+                      </select>
+                    </label>
+                    <p className="text-xs text-muted-foreground">외국어 대화 중 사용자가 막혔을 때 한국어로 어느 정도 도울 수 있는지 설정합니다.</p>
+                    <Button type="button" size="sm" variant="outline" disabled={capabilitySaving} onClick={() => void saveCapabilities()}>{capabilitySaving ? "저장 중…" : "예약 정보 저장"}</Button>
+                  </>
+                ) : null}
+                {capabilityError ? <p className="text-xs text-red-700" role="alert">{capabilityError}</p> : null}
+                {capabilityNotice ? <p className="text-xs text-emerald-700" role="status">{capabilityNotice}</p> : null}
+              </section> : null}
 
               <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {[
