@@ -3742,8 +3742,8 @@
     </div>
   </div>
 
-  <div id="memory-game-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px);" role="dialog" aria-modal="true" aria-labelledby="memory-game-title" hidden>
-    <div style="background: #FFFFFF; border-radius: 24px; max-width: 420px; width: 100%; padding: 28px 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; position: relative;">
+  <div id="memory-game-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(4px); overflow-y: auto;" role="dialog" aria-modal="true" aria-labelledby="memory-game-title" hidden>
+    <div style="background: #FFFFFF; border-radius: 24px; max-width: 420px; width: 100%; max-height: calc(100dvh - 32px); overflow-y: auto; padding: 28px 24px; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.15); text-align: center; position: relative;">
       <div style="font-size: 28px; margin-bottom: 8px;" aria-hidden="true">🧩</div>
       <h3 id="memory-game-title" style="margin: 0 0 6px; font-size: 18px; font-weight: 800; color: #222;">오늘의 기억 조각 맞추기</h3>
       <div id="game-round-badge" style="display: inline-block; background: #EEF2FF; color: #635BFF; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-bottom: 10px;">
@@ -3756,7 +3756,7 @@
       </div>
       <div id="answer-slot-container" style="min-height: 52px; border-bottom: 2px dashed #E2E8F0; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; padding-bottom: 12px; margin-bottom: 24px;"></div>
       <div id="word-pool-container" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 24px;"></div>
-      <button type="button" onclick="skipToRecordCard()" style="background: transparent; border: none; font-size: 12px; color: #999; text-decoration: underline; cursor: pointer; font-family: inherit;">
+      <button type="button" id="quiz-skip-btn" onclick="skipToRecordCard()" style="background: transparent; border: none; font-size: 12px; color: #999; text-decoration: underline; cursor: pointer; font-family: inherit;">
         건너뛰고 바로 대화 카드 보기
       </button>
     </div>
@@ -3797,6 +3797,7 @@
   <script src="talk-cards-data.js"></script>
   <script>window.__dayoUsePeerJS = true;</script>
   <script src="room-live.js?v=20260921-session-persistence"></script>
+  <script src="learner-expressions.js?v=20260928-learner-only-quiz"></script>
   <script>
     (function () {
       var view = document.getElementById('partner-room-interests');
@@ -5816,25 +5817,11 @@
         return Array.isArray(transcripts) ? transcripts : [];
       }
 
-      function isUserUtterance(t) {
-        if (!t) return false;
-        var role = String(t.role || '').toLowerCase();
-        var speaker = String(t.speaker || '').toLowerCase();
-        if (role === 'partner' || speaker === 'partner' || role === 'host' || speaker === 'host' || role === 'tutor' || speaker === 'tutor') {
-          return false;
-        }
-        return role === 'user' || speaker === 'user' || !role;
-      }
-
       window.generateDynamicReviewQuiz = function generateDynamicReviewQuiz() {
-        const transcripts = collectSessionTranscripts();
-        const userSentences = transcripts
-          .filter(function (t) {
-            return isUserUtterance(t) && t.text && t.text.trim().split(' ').length >= 3;
-          })
-          .map(function (t) { return t.text.trim(); });
-
-        const baseSentences = userSentences;
+        const api = window.DayOLearnerExpressions;
+        const baseSentences = api
+          ? api.extractExpressions(collectSessionTranscripts(), { limit: 3, quizQuality: true })
+          : [];
 
         const quizList = [];
         const dummyDistractors = ['coffee', 'yesterday', 'happy', 'together', 'important', 'delicious', 'travel', 'morning'];
@@ -5927,79 +5914,29 @@
         const quizContainer = document.getElementById('quiz-content-box');
         if (!quizModal || !quizContainer) return;
 
-        function utteranceText(row) {
-          if (!row) return '';
-          if (typeof row === 'string') return row.trim();
-          return String(row.text || row.transcript || row.message || '').trim();
+        var report = typeof window.getLearnerReviewSnapshot === 'function'
+          ? window.getLearnerReviewSnapshot()
+          : null;
+        if (!report) return;
+        var expressions = Array.isArray(report.key_expressions) ? report.key_expressions : [];
+        var wordHelp = Array.isArray(report.word_help) ? report.word_help : [];
+        var feedback = Array.isArray(report.feedback) ? report.feedback : [];
+        var rowsHtml = '';
+        rowsHtml += '<div class="talk-record-row"><div class="talk-record-label">📝 오늘의 기록</div><div class="talk-record-value">' + escapeQuizHtml(report.summary || '') + '</div></div>';
+        if (report.spoken_sentence) {
+          rowsHtml += '<div class="talk-record-row"><div class="talk-record-label">🗣️ 내가 말한 대표 문장</div><div class="talk-record-value">“' + escapeQuizHtml(report.spoken_sentence) + '”</div></div>';
         }
-
-        var rows = collectSessionTranscripts();
-        var memorable = rows
-          .map(utteranceText)
-          .filter(function (text) { return text && text.length >= 8; })
-          .sort(function (a, b) { return b.length - a.length; })
-          .filter(function (text, i, arr) { return arr.indexOf(text) === i; })
-          .slice(0, 2);
-        if (!memorable.length) {
-          memorable = ['오늘 나눈 이야기가 여기에 남을 거예요.'];
+        if (expressions.length) {
+          rowsHtml += '<div class="talk-record-row"><div class="talk-record-label">💡 핵심 표현</div><div class="talk-record-value">' + expressions.map(function (line) { return '“' + escapeQuizHtml(line) + '”'; }).join('<br>') + '</div></div>';
         }
-        if (window.__dayoMemorySentence) {
-          var memoryLine = String(window.__dayoMemorySentence).trim();
-          if (memoryLine) {
-            memorable = [memoryLine].concat(memorable.filter(function (line) {
-              return line !== memoryLine;
-            })).slice(0, 2);
-          }
+        rowsHtml += '<div class="talk-record-row"><div class="talk-record-label">🎯 5분 대화 퀴즈</div><div class="talk-record-value">' + (report.quiz_score == null ? '문항을 만들 수 없었어요' : escapeQuizHtml(report.quiz_score) + '점') + '</div></div>';
+        if (wordHelp.length) {
+          rowsHtml += '<div class="talk-record-row"><div class="talk-record-label">🌿 사용한 단어 도움</div><div class="talk-record-value">' + wordHelp.map(function (item) { return escapeQuizHtml(item.text || '') + (item.ko ? ' · ' + escapeQuizHtml(item.ko) : ''); }).join('<br>') + '</div></div>';
         }
-
-        var placeRe = /(망원|한강|성수|홍대|이태원|해운대|광장시장|남산|북촌|연남|합정|공원|카페|맛집|소품숍|시장|골목)/g;
-        var placeHits = [];
-        rows.forEach(function (row) {
-          var text = utteranceText(row);
-          var match;
-          while ((match = placeRe.exec(text))) {
-            if (placeHits.indexOf(match[1]) === -1) placeHits.push(match[1]);
-          }
-        });
-        var places = placeHits.length
-          ? placeHits.slice(0, 3).join(', ')
-          : '인식된 추천 장소 없음';
-
-        var partnerName = String((window.DayORoomAccess && window.DayORoomAccess.partnerName) || '').trim() || 'Conversation Partner';
-        var nameEl = document.getElementById('tutorName')
-          || document.querySelector('.partner-live-name, .tutor-name, [data-partner-name]');
-        if (!window.DayORoomAccess.partnerName && nameEl && nameEl.textContent && nameEl.textContent.trim() && !/[@+]/.test(nameEl.textContent)) {
-          partnerName = nameEl.textContent.trim();
+        if (feedback.length) {
+          rowsHtml += '<div class="talk-record-row"><div class="talk-record-label">💬 남긴 피드백</div><div class="talk-record-value">' + feedback.map(escapeQuizHtml).join('<br>') + '</div></div>';
         }
-
-        var topicLabel = '관심사 · 이야기 주제';
-        try {
-          var draftRaw = localStorage.getItem('dayo_booking_draft')
-            || localStorage.getItem('dayo_last_booking')
-            || localStorage.getItem('chatPrefs');
-          if (draftRaw) {
-            var draft = JSON.parse(draftRaw);
-            var purposeMap = {
-              travel: '한국에서 발견한 것들',
-              opic: '요즘 나의 일상',
-              abroad: '우리의 취향 비교',
-              casual: '자유 수다'
-            };
-            var ids = draft.purposes || draft.purpose || [];
-            if (!Array.isArray(ids) && ids) ids = [ids];
-            if (ids.length) {
-              topicLabel = ids.map(function (id) { return purposeMap[id] || id; }).join(' · ');
-            } else if (draft.topic) {
-              topicLabel = String(draft.topic);
-            }
-          }
-        } catch (e) { /* ignore */ }
-
-        quizContainer.innerHTML =
-          '<div class="talk-record-row"><div class="talk-record-label">🗣️ 오늘 함께한 파트너</div><div class="talk-record-value">' + escapeQuizHtml(partnerName) + '</div></div>' +
-          '<div class="talk-record-row"><div class="talk-record-label">💬 우리가 나눈 주제</div><div class="talk-record-value">' + escapeQuizHtml(topicLabel) + '</div></div>' +
-          '<div class="talk-record-row"><div class="talk-record-label">💡 기억하고 싶은 표현</div><div class="talk-record-value">' + memorable.map(function (line) { return '“' + escapeQuizHtml(line) + '”'; }).join('<br>') + '</div></div>' +
-          '<div class="talk-record-row"><div class="talk-record-label">📍 서로 추천한 것</div><div class="talk-record-value">' + escapeQuizHtml(places) + '</div></div>';
+        quizContainer.innerHTML = rowsHtml;
 
         var titleEl = document.getElementById('quizModalTitle');
         if (titleEl) titleEl.textContent = "Today's Talk Record";

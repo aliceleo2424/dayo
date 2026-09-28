@@ -2,9 +2,6 @@
 (function () {
   'use strict';
 
-  var QUIZ_SECONDS = 5 * 60;
-  var quizTimer = null;
-  var quizRemaining = QUIZ_SECONDS;
   var submittingSafety = false;
   var submittingTechIssue = false;
   var sessionEndedEventLogged = false;
@@ -238,22 +235,20 @@
     }
   }
 
-  function expressionList() {
-    var seen = {};
-    return transcriptRows().map(function (row) {
-      return String(typeof row === 'string' ? row : (row && (row.text || row.message || row.transcript)) || '').trim();
-    }).filter(function (text) {
-      var key = text.toLowerCase();
-      if (!text || text.length < 5 || seen[key]) return false;
-      seen[key] = true;
-      return true;
-    }).slice(-5);
-  }
-
   function selectedFeedback() {
     return Array.from(document.querySelectorAll('.feedback-chip.selected')).map(function (node) {
       return String(node.textContent || '').trim();
     }).filter(Boolean);
+  }
+
+  function buildReviewSnapshot() {
+    var api = window.DayOLearnerExpressions;
+    if (!api) return null;
+    return api.buildReviewData(transcriptRows(), {
+      quizScore: window.__dayoQuizScore,
+      wordHelp: window.__dayoWordHelpHistory,
+      feedback: selectedFeedback()
+    });
   }
 
   async function persistReviewReport() {
@@ -263,23 +258,12 @@
     var user = await authUser();
     var ctx = context();
     if (!db || !user || !ctx.bookingId) return false;
-    var expressions = expressionList();
-    var summary = expressions.length
-      ? '오늘 대화에서 ' + expressions.length + '개의 핵심 표현을 복습했어요.'
-      : '인식된 대화 내용이 없어 핵심 표현을 생성하지 않았어요.';
+    var payload = buildReviewSnapshot();
+    if (!payload) return false;
     if (!ctx.learnerId || user.id !== ctx.learnerId) {
       console.error('[DayO Session] learner report identity mismatch');
       return false;
     }
-    var payload = {
-      summary: summary,
-      key_expressions: expressions,
-      quiz_score: Number(window.__dayoQuizScore || 0),
-      word_help: window.__dayoWordHelpHistory.slice(-12),
-      feedback: selectedFeedback(),
-      spoken_sentence: expressions[0] || null,
-      keyword: 'session-review'
-    };
     var rating = document.querySelectorAll('.star-btn.active').length;
     if (rating > 0) payload.rating = rating;
     var result = await db.rpc('merge_learner_session_report', {
@@ -295,31 +279,8 @@
       await db.from('bookings').update({ rating: rating }).eq('id', ctx.bookingId).eq('learner_id', ctx.learnerId);
     }
     window.__dayoReviewReportSaved = true;
+    window.__dayoLearnerReportPayload = payload;
     return true;
-  }
-
-  function renderQuizTimer() {
-    var node = document.getElementById('review-quiz-timer');
-    if (!node) return;
-    var min = Math.floor(quizRemaining / 60);
-    var sec = quizRemaining % 60;
-    node.textContent = '⏱️ ' + String(min).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
-  }
-
-  function startQuizClock() {
-    clearInterval(quizTimer);
-    quizRemaining = QUIZ_SECONDS;
-    renderQuizTimer();
-    quizTimer = setInterval(function () {
-      quizRemaining -= 1;
-      renderQuizTimer();
-      if (quizRemaining <= 0) {
-        clearInterval(quizTimer);
-        quizTimer = null;
-        window.__dayoQuizScore = Number(window.__dayoQuizScore || 0);
-        if (typeof window.skipToRecordCard === 'function') window.skipToRecordCard();
-      }
-    }, 1000);
   }
 
   async function personalExit() {
@@ -428,29 +389,20 @@
     }
   }
 
-  var originalStart = window.startMultiMemoryGame;
-  if (typeof originalStart === 'function') {
-    window.startMultiMemoryGame = function (sentences) {
-      startQuizClock();
-      return originalStart(sentences);
+  var originalSessionEventLogger = window.logSessionEvent;
+  if (typeof originalSessionEventLogger === 'function') {
+    window.logSessionEvent = function (eventType, payload) {
+      if (eventType === 'word_help_clicked' && payload && Array.isArray(payload.items)) {
+        var finalItems = payload.items.slice(0, 6).map(function (item) {
+          return {
+            text: String(item && item.text || '').trim(),
+            ko: String(item && item.ko || '').trim()
+          };
+        }).filter(function (item) { return item.text; });
+        window.__dayoWordHelpHistory = window.__dayoWordHelpHistory.concat(finalItems).slice(-12);
+      }
+      return originalSessionEventLogger.apply(this, arguments);
     };
-  }
-
-  var originalWordHelp = window.openWordHelp;
-  if (typeof originalWordHelp === 'function') {
-    window.openWordHelp = function () {
-      var result = originalWordHelp.apply(this, arguments);
-      setTimeout(function () {
-        var content = document.getElementById('help-modal-content') || document.getElementById('wordCards');
-        var labels = content ? Array.from(content.querySelectorAll('button, [class*="card"]')).map(function (node) {
-          return String(node.textContent || '').replace(/\s+/g, ' ').trim();
-        }).filter(Boolean) : [];
-        window.__dayoWordHelpHistory = window.__dayoWordHelpHistory.concat(labels).slice(-12);
-      }, 50);
-      return result;
-    };
-    var wordButton = document.getElementById('wordHelpBtn');
-    if (wordButton) wordButton.onclick = window.openWordHelp;
   }
 
   window.closeEarlyExitModal = window.closeEarlyExitModal || function () {
@@ -464,6 +416,17 @@
   window.closeSafetyReportModal = closeSafetyModal;
   window.submitSafetyReport = submitSafetyReport;
   window.persistSessionReviewReport = persistReviewReport;
+  window.getLearnerReviewSnapshot = function () {
+    return window.__dayoLearnerReportPayload || buildReviewSnapshot();
+  };
+  window.finalizeLearnerQuiz = async function () {
+    if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
+      window.__dayoLearnerReportPayload = buildReviewSnapshot();
+      window.__dayoReviewReportSaved = true;
+      return true;
+    }
+    return persistReviewReport();
+  };
 
   document.addEventListener('dayo:session-ended', async function () {
     logSessionEndedEvent('normal');
@@ -483,16 +446,14 @@
     if (isObserver()) return;
     if (window._dayoUserQuizCompleteNavigating) return;
     window._dayoUserQuizCompleteNavigating = true;
-    clearInterval(quizTimer);
     if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
       window.location.href = 'index.html?view=mypage';
       return;
     }
-    var saved = false;
-    try {
-      saved = await persistReviewReport();
-    } catch (e) {
-      console.error('[DayO Session] report persistence failed', e);
+    var saved = window.__dayoReviewReportSaved === true;
+    if (!saved) {
+      try { saved = await persistReviewReport(); }
+      catch (e) { console.error('[DayO Session] report persistence failed', e); }
     }
     if (!saved) {
       console.error('[DayO Session] report was not saved; navigation paused');

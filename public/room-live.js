@@ -139,6 +139,20 @@
     return serialized;
   }
 
+  function recoverTranscriptForQuiz() {
+    var access = window.DayORoomAccess;
+    var bookingId = access && access.bookingId ? String(access.bookingId) : '';
+    if (!bookingId) return [];
+    try {
+      var state = JSON.parse(sessionStorage.getItem('dayo_quiz_state:' + bookingId) || 'null');
+      if (!state || typeof state !== 'object') return [];
+      var rows = JSON.parse(localStorage.getItem('last_session_transcript') || '[]');
+      return Array.isArray(rows) ? serializeTranscript(rows) : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
   function shouldKeepSttAlive() {
     return wantListen && micOn && !hungUp && !window.dayoSessionEnded;
   }
@@ -997,8 +1011,8 @@
     try {
       window.dayoSessionEnded = false;
       sessionStartedAt = new Date().toISOString();
-      sessionTranscript = [];
-      window.sessionTranscript = [];
+      sessionTranscript = recoverTranscriptForQuiz();
+      window.sessionTranscript = sessionTranscript.slice();
       utteranceSeq = 0;
       backupTranscriptLocal();
       bindMobileSttBootstrap();

@@ -1,4 +1,4 @@
-/* DayO session-end memory block tap game — 3-round, no score, no penalty */
+/* DayO learner-only session review quiz. */
 (function () {
   'use strict';
 
@@ -9,6 +9,8 @@
   var remainingPool = [];
   var completing = false;
   var roundTimer = null;
+  var quizState = null;
+  var QUIZ_SECONDS = 5 * 60;
 
   function isPartner() {
     try {
@@ -39,61 +41,6 @@
       .trim();
   }
 
-  function topicKey() {
-    try {
-      var draftRaw = localStorage.getItem('dayo_booking_draft')
-        || localStorage.getItem('dayo_last_booking')
-        || localStorage.getItem('chatPrefs')
-        || '';
-      var draft = draftRaw ? JSON.parse(draftRaw) : {};
-      var ids = draft.purposes || draft.purpose || draft.topic || [];
-      if (!Array.isArray(ids) && ids) ids = [ids];
-      var joined = ids.join(' ').toLowerCase();
-      if (/korea|travel|한국/.test(joined)) return 'korea';
-      if (/taste|abroad|취향/.test(joined)) return 'taste';
-      if (/opic|daily|casual|일상/.test(joined)) return 'daily';
-    } catch (e) { /* ignore */ }
-    return 'daily';
-  }
-
-  function looksEnglish(text) {
-    var s = String(text || '');
-    var latin = (s.match(/[A-Za-z]/g) || []).length;
-    var hangul = (s.match(/[\uAC00-\uD7A3]/g) || []).length;
-    return latin >= 8 && latin > hangul;
-  }
-
-  function segmentTranscriptText(raw) {
-    var sentences = String(raw || '').split(/[.?!]+/).map(function (part) {
-      return part.replace(/\s+/g, ' ').trim();
-    }).filter(Boolean);
-    var candidates = [];
-
-    sentences.forEach(function (sentence) {
-      var words = sentence.split(' ').filter(Boolean);
-      var clauses = [sentence];
-      if (words.length > 10) {
-        var parts = sentence.split(/\s+(?=(?:and|but|so|because|then)\b)/i);
-        clauses = [];
-        parts.forEach(function (part) {
-          var previous = clauses[clauses.length - 1];
-          var combined = previous ? previous + ' ' + part : part;
-          if (previous && combined.split(' ').filter(Boolean).length <= 10) {
-            clauses[clauses.length - 1] = combined;
-          } else {
-            clauses.push(part);
-          }
-        });
-      }
-      clauses.forEach(function (clause) {
-        clause = clause.replace(/\s+/g, ' ').trim();
-        if (clause) candidates.push(clause);
-      });
-    });
-
-    return candidates;
-  }
-
   function collectTranscriptRows() {
     if (window.DayOReviewQuiz && typeof window.DayOReviewQuiz.getTranscript === 'function') {
       try { return window.DayOReviewQuiz.getTranscript() || []; } catch (e) { /* ignore */ }
@@ -112,60 +59,159 @@
     }
   }
 
-  function utteranceText(row) {
-    if (!row) return '';
-    if (typeof row === 'string') return row.trim();
-    return String(row.text || row.transcript || row.message || '').trim();
-  }
-
-  function isUserUtterance(row) {
-    if (!row || typeof row === 'string') return true;
-    var role = String(row.role || '').toLowerCase();
-    var speaker = String(row.speaker || '').toLowerCase();
-    if (role === 'partner' || speaker === 'partner' || role === 'host' || speaker === 'host') {
-      return false;
-    }
-    return role === 'user' || speaker === 'user' || !role;
-  }
-
   function extractSessionSentences() {
-    var rows = collectTranscriptRows();
-    var partnerRows = rows.filter(function (row) { return !isUserUtterance(row); });
-    var userRows = rows.filter(isUserUtterance);
-    var seen = {};
-    var out = [];
-
-    function pushFrom(list) {
-      var i;
-      var j;
-      var candidates;
-      var text;
-      var words;
-      for (i = list.length - 1; i >= 0 && out.length < 3; i -= 1) {
-        candidates = segmentTranscriptText(utteranceText(list[i]));
-        for (j = 0; j < candidates.length && out.length < 3; j += 1) {
-          text = normalizeSentence(candidates[j]);
-          words = text.split(' ').filter(Boolean);
-          if (!looksEnglish(text) || words.length < 3 || words.length > 10) continue;
-          if (seen[text.toLowerCase()]) continue;
-          seen[text.toLowerCase()] = true;
-          out.push({ en: text, kr: meaningFor(text) });
-        }
-      }
-    }
-
-    pushFrom(partnerRows);
-    pushFrom(userRows);
-    return out;
-  }
-
-  function extractSessionSentence() {
-    var list = extractSessionSentences();
-    return list.length ? list[0].en : '';
+    var api = window.DayOLearnerExpressions;
+    if (!api) return [];
+    return api.extractExpressions(collectTranscriptRows(), { limit: 3, quizQuality: true }).map(function (text) {
+      return { en: text, kr: meaningFor(text) };
+    });
   }
 
   function meaningFor(en) {
     return '오늘 대화에서 나온 표현이에요';
+  }
+
+  function bookingId() {
+    var access = window.DayORoomAccess;
+    return access && access.bookingId ? String(access.bookingId) : '';
+  }
+
+  function recoveryKey() {
+    var id = bookingId();
+    return id ? 'dayo_quiz_state:' + id : '';
+  }
+
+  function readRecovery() {
+    var key = recoveryKey();
+    if (!key) return null;
+    try {
+      var parsed = JSON.parse(sessionStorage.getItem(key) || 'null');
+      return parsed && typeof parsed === 'object' ? parsed : null;
+    } catch (e) { return null; }
+  }
+
+  function writeRecovery() {
+    var key = recoveryKey();
+    if (!key || !quizState) return;
+    try { sessionStorage.setItem(key, JSON.stringify(quizState)); } catch (e) { /* ignore */ }
+  }
+
+  function clearRecovery() {
+    var key = recoveryKey();
+    if (!key) return;
+    try { sessionStorage.removeItem(key); } catch (e) { /* ignore */ }
+  }
+
+  function scoreForState() {
+    var api = window.DayOLearnerExpressions;
+    return api ? api.quizScore(quizState && quizState.completed, quizState && quizState.total) : null;
+  }
+
+  function stopQuizClock() {
+    if (window.__dayoQuizClockTimer) clearInterval(window.__dayoQuizClockTimer);
+    window.__dayoQuizClockTimer = null;
+  }
+
+  function renderQuizClock() {
+    var node = document.getElementById('review-quiz-timer');
+    if (!node || !quizState || !quizState.startedAt) return;
+    var remaining = window.DayOLearnerExpressions.quizRemainingSeconds(quizState.startedAt, Date.now(), QUIZ_SECONDS);
+    node.hidden = false;
+    node.textContent = '⏱️ ' + String(Math.floor(remaining / 60)).padStart(2, '0') + ':' + String(remaining % 60).padStart(2, '0');
+    if (remaining <= 0 && !quizState.ended) finishQuiz('timeout');
+  }
+
+  function startQuizClock() {
+    stopQuizClock();
+    renderQuizClock();
+    if (quizState && !quizState.ended) window.__dayoQuizClockTimer = setInterval(renderQuizClock, 1000);
+  }
+
+  function stateButton(label, handler) {
+    var pool = document.getElementById('word-pool-container');
+    if (!pool) return;
+    pool.innerHTML = '';
+    var button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'rq-cta';
+    button.textContent = label;
+    button.addEventListener('click', handler);
+    pool.appendChild(button);
+  }
+
+  function renderPanel(title, badgeText, message) {
+    var titleNode = document.getElementById('memory-game-title');
+    var badge = document.getElementById('game-round-badge');
+    var hint = document.getElementById('game-kr-meaning');
+    var slots = document.getElementById('answer-slot-container');
+    if (titleNode) titleNode.textContent = title;
+    if (badge) badge.textContent = badgeText;
+    if (hint) {
+      hint.textContent = message;
+      hint.style.whiteSpace = 'pre-line';
+    }
+    if (slots) slots.innerHTML = '';
+  }
+
+  function openTalkRecord() {
+    stopQuizClock();
+    window.__dayoMemoryGameDone = true;
+    hideMemoryModal();
+    if (typeof origOpenTalkRecord === 'function') origOpenTalkRecord();
+  }
+
+  function showSaveFailure(reason) {
+    var skip = document.getElementById('quiz-skip-btn');
+    if (skip) skip.hidden = true;
+    renderPanel('대화 기록 저장을 다시 시도해 주세요', '저장 대기', '네트워크 상태를 확인한 뒤 다시 시도할 수 있어요.');
+    stateButton('다시 저장하기', function () { finishQuiz(reason, true); });
+  }
+
+  function showFinished() {
+    var skip = document.getElementById('quiz-skip-btn');
+    if (skip) skip.hidden = true;
+    var total = quizState.total;
+    var completed = quizState.completed;
+    var score = scoreForState();
+    renderPanel(
+      total ? '5분 대화 퀴즈 완료' : '이번 퀴즈는 건너뛸게요',
+      total ? completed + ' / ' + total + ' 완료' : '표현 부족',
+      total
+        ? total + '문제 중 ' + completed + '문제 완료 · ' + score + '점'
+        : '이번 세션에서는 퀴즈로 만들 수 있는 영어 표현이 충분하지 않았어요.\n대화 기록은 그대로 확인할 수 있어요.'
+    );
+    stateButton('대화 기록 확인하기', openTalkRecord);
+  }
+
+  function finishQuiz(reason, retry) {
+    if (!quizState || (window.__dayoQuizFinalizing && !retry)) return;
+    stopQuizClock();
+    quizState.ended = true;
+    quizState.endReason = reason || 'completed';
+    writeRecovery();
+    window.__dayoQuizScore = scoreForState();
+    window.__dayoQuizProgress = { completed: quizState.completed, total: quizState.total, reason: quizState.endReason };
+    var skip = document.getElementById('quiz-skip-btn');
+    if (skip) skip.hidden = true;
+    renderPanel(
+      quizState.total ? '퀴즈 결과를 저장하고 있어요' : '이번 세션의 대화 기록을 준비하고 있어요',
+      quizState.total ? quizState.completed + ' / ' + quizState.total + ' 완료' : '표현 부족',
+      quizState.total
+        ? quizState.total + '문제 중 ' + quizState.completed + '문제 완료 · ' + scoreForState() + '점'
+        : '이번 세션에서는 퀴즈로 만들 수 있는 영어 표현이 충분하지 않았어요.\n대화 기록은 그대로 확인할 수 있어요.'
+    );
+    stateButton('저장 중…', function () {});
+    window.__dayoQuizFinalizing = true;
+    var saver = typeof window.finalizeLearnerQuiz === 'function' ? window.finalizeLearnerQuiz() : Promise.resolve(false);
+    Promise.resolve(saver).then(function (saved) {
+      window.__dayoQuizFinalizing = false;
+      if (!saved) return showSaveFailure(reason);
+      clearRecovery();
+      showFinished();
+    }).catch(function () {
+      window.__dayoQuizFinalizing = false;
+      showSaveFailure(reason);
+    });
   }
 
   function showMemoryModal() {
@@ -182,19 +228,6 @@
     modal.hidden = true;
     modal.style.display = 'none';
     if (window.DayOScrollLock) window.DayOScrollLock.unlock();
-  }
-
-  function showTalkRecord() {
-    window.__dayoMemoryGameDone = true;
-    window.__dayoMemorySentence = (gameSentenceQueue[0] && gameSentenceQueue[0].en) || '';
-    hideMemoryModal();
-    if (typeof origOpenTalkRecord === 'function') {
-      origOpenTalkRecord();
-      return;
-    }
-    if (typeof window.openQuizModalImmediately === 'function') {
-      window.openQuizModalImmediately();
-    }
   }
 
   function renderGameUI(availableWords) {
@@ -234,6 +267,9 @@
     if (isMatch) {
       completing = true;
       if (slotContainer) slotContainer.style.borderColor = '#10B981';
+      quizState.completed += 1;
+      quizState.currentIndex = Math.min(currentRoundIndex + 1, quizState.total);
+      writeRecovery();
       if (currentRoundIndex + 1 < gameSentenceQueue.length) {
         if (typeof window.confetti === 'function') {
           window.confetti({ particleCount: 50, spread: 50, origin: { y: 0.6 } });
@@ -250,15 +286,7 @@
       }
       clearTimeout(roundTimer);
       roundTimer = setTimeout(function () {
-        hideMemoryModal();
-        window.__dayoQuizScore = 100;
-        window.__dayoMemoryGameDone = true;
-        window.__dayoMemorySentence = (gameSentenceQueue[0] && gameSentenceQueue[0].en) || '';
-        if (typeof window.openCardDetailModal === 'function') {
-          window.openCardDetailModal(gameSentenceQueue[0] && gameSentenceQueue[0].en);
-        } else {
-          showTalkRecord();
-        }
+        finishQuiz('completed');
       }, 900);
       return;
     }
@@ -277,7 +305,7 @@
   function loadRound(index) {
     var data = gameSentenceQueue[index];
     if (!data) {
-      showTalkRecord();
+      finishQuiz('completed');
       return;
     }
     var cleanEn = normalizeSentence(data.en);
@@ -285,6 +313,8 @@
     userPickedWords = [];
     remainingPool = shuffle(currentCorrectWords);
     completing = false;
+    var skip = document.getElementById('quiz-skip-btn');
+    if (skip) skip.hidden = false;
 
     var badge = document.getElementById('game-round-badge');
     if (badge) badge.innerText = '조각 수집 ' + (index + 1) + ' / ' + gameSentenceQueue.length;
@@ -303,7 +333,8 @@
       var en = typeof item === 'string' ? item : (item.en || item.text || '');
       var kr = typeof item === 'string' ? meaningFor(item) : (item.kr || item.meaning || meaningFor(en));
       var key = normalizeSentence(en).toLowerCase();
-      if (!key || seen[key]) return;
+      var api = window.DayOLearnerExpressions;
+      if (!key || !api || !api.isQuizQualityCandidate(key) || seen[key]) return;
       seen[key] = true;
       out.push({ en: en, kr: kr });
     }
@@ -315,13 +346,36 @@
     if (isPartner()) return;
     window.__dayoMemoryGameDone = false;
     gameSentenceQueue = normalizeQueue(sentenceList);
+    var recovered = readRecovery();
+    quizState = window.DayOLearnerExpressions.normalizeQuizState(recovered, gameSentenceQueue.length);
+    writeRecovery();
+    showMemoryModal();
     if (!gameSentenceQueue.length) {
-      showTalkRecord();
+      finishQuiz('insufficient');
       return;
     }
-    currentRoundIndex = 0;
-    loadRound(currentRoundIndex);
-    showMemoryModal();
+    if (quizState.ended) {
+      finishQuiz(quizState.endReason || 'completed', true);
+      return;
+    }
+    currentRoundIndex = quizState.currentIndex;
+    if (quizState.startedAt) {
+      loadRound(currentRoundIndex);
+      startQuizClock();
+      return;
+    }
+    renderPanel('5분 대화 퀴즈', '최대 ' + gameSentenceQueue.length + '문제 · 5분', '방금 나눈 대화에서 표현을 다시 떠올려봐요.');
+    var skip = document.getElementById('quiz-skip-btn');
+    if (skip) skip.hidden = false;
+    var timerNode = document.getElementById('review-quiz-timer');
+    if (timerNode) timerNode.hidden = true;
+    stateButton('시작하기', function () {
+      quizState.startedAt = Date.now();
+      writeRecovery();
+      currentRoundIndex = quizState.currentIndex;
+      loadRound(currentRoundIndex);
+      startQuizClock();
+    });
   };
 
   window.startMemoryGame = function (extractedSentence, meaningKr) {
@@ -337,7 +391,7 @@
   window.startMemoryGameFromSession = function () {
     if (isPartner()) return;
     if (window.__dayoMemoryGameDone) {
-      showTalkRecord();
+      openTalkRecord();
       return;
     }
     window.startMultiMemoryGame(extractSessionSentences());
@@ -365,15 +419,11 @@
   };
 
   window.skipToRecordCard = function () {
-    window.__dayoQuizScore = Number(window.__dayoQuizScore || 0);
-    showTalkRecord();
+    if (quizState) finishQuiz('skip');
   };
 
   window.openCardDetailModal = function (sentence) {
-    if (sentence) {
-      window.__dayoMemorySentence = normalizeSentence(sentence);
-    }
-    showTalkRecord();
+    finishQuiz('completed');
   };
 
   var origOpenTalkRecord = window.openQuizModalImmediately;
@@ -391,5 +441,15 @@
       return;
     }
     if (typeof origOpenTalkRecord === 'function') origOpenTalkRecord();
+  };
+
+  window.__DAYO_QUIZ_TEST__ = {
+    extractSessionSentences: function (rows) {
+      var api = window.DayOLearnerExpressions;
+      return api ? api.extractExpressions(rows, { limit: 3, quizQuality: true }) : [];
+    },
+    score: function (completed, total) {
+      return window.DayOLearnerExpressions.quizScore(completed, total);
+    }
   };
 })();
