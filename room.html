@@ -13,6 +13,11 @@
     #room-access-screen p { margin: 0 0 22px; font-size: 15px; line-height: 1.6; }
     #room-access-screen a { display: inline-block; padding: 11px 20px; border-radius: 12px; background: #FF6B57; color: white; text-decoration: none; font-weight: 700; }
     body.room-access-granted #room-access-screen { display: none; }
+    .dayo-inapp-blocker { position: fixed; inset: 0; z-index: 2147483647; display: grid; place-items: center; padding: 24px; background: #FFF8F5; color: #5C4A42; text-align: center; font-family: 'Gowun Dodum', sans-serif; }
+    .dayo-inapp-blocker__box { width: min(100%, 380px); padding: 26px 22px; border: 1px solid #FFD1DC; border-radius: 22px; background: #fff; box-shadow: 0 18px 48px rgba(92,74,66,.14); }
+    .dayo-inapp-blocker h1 { margin: 0 0 12px; font-size: 21px; }
+    .dayo-inapp-blocker p { margin: 0; font-size: 14px; line-height: 1.7; }
+    .dayo-inapp-blocker strong { color: #E55A45; }
   </style>
   <script>
     (function () {
@@ -61,7 +66,7 @@
       function showAccess(state) {
         window.DayORoomAccess = state;
         var render = function () {
-          if (state.allowed) {
+          if (state.allowed && !window.__dayoInAppBlocked) {
             document.body.classList.add('room-access-granted');
             if (typeof window.dayoApplyRoomRole === 'function') window.dayoApplyRoomRole();
             return;
@@ -310,33 +315,29 @@
   <script>
     (function checkInApp() {
       const ua = navigator.userAgent.toLowerCase();
-      const isKakao = ua.indexOf('kakaotalk') !== -1;
-      const isLine = ua.indexOf('line') !== -1;
-      const isInstagram = ua.indexOf('instagram') !== -1;
-      const isInApp = isKakao || isLine || isInstagram;
+      const isInApp = /kakaotalk|line|inapp|naver|snapchat|instagram/i.test(ua);
 
       if (!isInApp) return;
+      window.__dayoInAppBlocked = true;
 
-      // 1) 안드로이드: 크롬 브라우저 자동 실행
+      window.addEventListener('DOMContentLoaded', () => {
+        const blocker = document.createElement('div');
+        blocker.id = 'dayo-inapp-blocker';
+        blocker.className = 'dayo-inapp-blocker';
+        blocker.setAttribute('role', 'alert');
+        blocker.innerHTML = `
+          <div class="dayo-inapp-blocker__box">
+            <h1>외부 브라우저에서 열어주세요</h1>
+            <p>인앱 브라우저에서는 영상 연결과 음성 인식이 불안정할 수 있어요.<br><strong>${ua.indexOf('android') !== -1 ? 'Chrome' : 'Safari'}</strong>에서 이 링크를 다시 열어주세요.</p>
+          </div>
+        `;
+        document.body.appendChild(blocker);
+      }, { once: true });
+
+      // Android는 Chrome 전환을 먼저 시도하고, 실패하면 위 안내를 유지한다.
       if (ua.indexOf('android') !== -1) {
         const cleanUrl = location.href.replace(/https?:\/\//i, '');
         location.href = `intent://${cleanUrl}#Intent;scheme=https;package=com.android.chrome;end`;
-        return;
-      }
-
-      // 2) iOS (아이폰): 사파리 전환 유도 상단 고정 배너 표시
-      if (ua.indexOf('iphone') !== -1 || ua.indexOf('ipad') !== -1) {
-        window.addEventListener('DOMContentLoaded', () => {
-          const banner = document.createElement('div');
-          banner.id = 'inapp-safari-banner';
-          banner.innerHTML = `
-            <div style="position:fixed; top:0; left:0; width:100%; background:#FF6B57; color:#fff; padding:12px 14px; font-size:13px; font-weight:700; text-align:center; z-index:999999; box-shadow:0 4px 12px rgba(0,0,0,0.2); display:flex; justify-content:space-between; align-items:center;">
-              <span>🎙️ 마이크/음성 인식을 위해 <strong>우측 하단 [공유] ➔ [Safari로 열기]</strong>를 눌러주세요!</span>
-              <button onclick="this.parentElement.remove()" style="background:none; border:none; color:#fff; font-size:16px; font-weight:bold; cursor:pointer; margin-left:8px;">✕</button>
-            </div>
-          `;
-          document.body.prepend(banner);
-        });
       }
     })();
   </script>
@@ -1172,17 +1173,35 @@
       box-shadow: 0 8px 22px rgba(62, 50, 45, 0.14);
       color: var(--text, #5C4A42);
       text-align: center;
-      pointer-events: none;
+      pointer-events: auto;
       backdrop-filter: blur(10px);
     }
 
-    .remote-connection-state[hidden],
-    .tutor-video.has-stream .remote-connection-state { display: none !important; }
+    .remote-connection-state[hidden] { display: none !important; }
 
     .remote-connection-state strong,
     .remote-connection-state span { display: block; }
     .remote-connection-state strong { font-size: 0.86rem; line-height: 1.4; }
     .remote-connection-state span { margin-top: 0.15rem; color: var(--text-muted, #9A8580); font-size: 0.74rem; line-height: 1.4; }
+    .remote-connection-state button { margin-top: 0.6rem; padding: 0.48rem 0.8rem; border: 0; border-radius: 999px; background: var(--coral, #FF6B57); color: #fff; font: inherit; font-size: 0.76rem; font-weight: 700; cursor: pointer; }
+    .remote-connection-state button[hidden] { display: none; }
+
+    .device-preflight { position: fixed; inset: 0; z-index: 1000000; display: grid; place-items: center; padding: 16px; background: rgba(40,31,28,.66); backdrop-filter: blur(10px); }
+    .device-preflight[hidden] { display: none; }
+    .device-preflight__card { width: min(100%, 420px); max-height: calc(100dvh - 32px); overflow-y: auto; padding: 20px; border: 1px solid rgba(255,255,255,.75); border-radius: 22px; background: #FFFCFA; box-shadow: 0 22px 60px rgba(38,27,24,.26); color: var(--text, #5C4A42); }
+    .device-preflight h2 { margin: 0 0 6px; font-size: 1.18rem; }
+    .device-preflight__lead { margin: 0 0 14px; color: var(--text-muted, #9A8580); font-size: .86rem; line-height: 1.55; }
+    .device-preflight__video { width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; background: #1E1A19; object-fit: cover; transform: scaleX(-1); }
+    .device-preflight__checks { display: grid; gap: 7px; margin: 13px 0; }
+    .device-preflight__check { padding: 9px 11px; border-radius: 11px; background: #F5F0ED; font-size: .8rem; line-height: 1.45; }
+    .device-preflight__check.is-ok { background: #E8F7EF; color: #176B45; }
+    .device-preflight__check.is-warn { background: #FFF0E8; color: #9A3C20; }
+    .device-preflight__phrase { margin: 10px 0 14px; padding: 11px; border: 1px solid #FFD1DC; border-radius: 12px; background: #FFF6F3; text-align: center; font-weight: 700; }
+    .device-preflight__actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .device-preflight__actions button { min-height: 44px; border: 0; border-radius: 12px; font: inherit; font-size: .82rem; font-weight: 700; cursor: pointer; }
+    #devicePreflightStart { background: var(--coral, #FF6B57); color: #fff; }
+    #devicePreflightContinue { background: #EEE7E3; color: var(--text, #5C4A42); }
+    @media (max-height: 640px) { .device-preflight__card { padding: 14px; } .device-preflight__video { max-height: 150px; } .device-preflight__lead { margin-bottom: 9px; } }
 
     .tutor-placeholder {
       display: flex;
@@ -3407,6 +3426,23 @@
   <div id="room-access-screen" role="status" aria-live="polite">
     <div class="room-access-box"><h1 id="room-access-title">대화방 입장 확인 중</h1><p id="room-access-message">로그인과 예약 정보를 확인하고 있어요.</p><a href="index.html">메인으로 돌아가기</a></div>
   </div>
+  <section class="device-preflight" id="devicePreflight" role="dialog" aria-modal="true" aria-labelledby="devicePreflightTitle" hidden>
+    <div class="device-preflight__card">
+      <h2 id="devicePreflightTitle">15초 연결 확인</h2>
+      <p class="device-preflight__lead">영상·마이크 권한과 음성 인식은 서로 별개예요. 대화 전에 각각 확인해 주세요.</p>
+      <video class="device-preflight__video" id="devicePreflightVideo" playsinline muted autoplay aria-label="내 카메라 미리보기"></video>
+      <div class="device-preflight__checks" aria-live="polite">
+        <div class="device-preflight__check" id="devicePreflightCamera">카메라 연결 확인 중…</div>
+        <div class="device-preflight__check" id="devicePreflightMic">마이크 연결 확인 중…</div>
+        <div class="device-preflight__check" id="devicePreflightStt">음성 인식 테스트를 시작해 주세요.</div>
+      </div>
+      <div class="device-preflight__phrase">“Hello, nice to meet you.”</div>
+      <div class="device-preflight__actions">
+        <button type="button" id="devicePreflightStart">15초 테스트 시작</button>
+        <button type="button" id="devicePreflightContinue">확인 후 대화 시작</button>
+      </div>
+    </div>
+  </section>
   <script>
     (function applyPartnerTheme() {
       window.isObserverRoomMode = function () {
@@ -3617,6 +3653,7 @@
             <div class="remote-connection-state" id="remoteConnectionState" role="status" aria-live="polite" hidden>
               <strong id="remoteConnectionTitle">상대방과 연결 중이에요</strong>
               <span id="remoteConnectionDetail">잠시만 기다려 주세요.</span>
+              <button type="button" id="remoteReconnectButton" hidden>다시 연결하기</button>
             </div>
           </div>
 
@@ -3846,7 +3883,7 @@
   <script src="chat-prefs.js"></script>
   <script src="talk-cards-data.js"></script>
   <script>window.__dayoUsePeerJS = true;</script>
-  <script src="room-live.js?v=20260921-session-persistence"></script>
+  <script src="room-live.js?v=20260929-mobile-stt-recovery"></script>
   <script src="learner-expressions.js?v=20260928-learner-only-quiz"></script>
   <script>
     (function () {
@@ -3898,6 +3935,7 @@
       const observerUserVideo = localVideo;
       const remoteConnectionState = document.getElementById('remoteConnectionState');
       const remoteConnectionDetail = document.getElementById('remoteConnectionDetail');
+      const remoteReconnectButton = document.getElementById('remoteReconnectButton');
 
       let localStream = null;
       let peer = null;
@@ -3917,6 +3955,8 @@
       const observerOutboundCalls = {};
       let HOST_ID = '';
       let remoteConnectionDelayTimer = 0;
+      let remoteRetryActionTimer = 0;
+      let remotePendingSince = 0;
       let remoteHealthTimer = 0;
       let remoteUnlockBound = false;
       let currentRemoteStream = null;
@@ -3955,20 +3995,46 @@
 
       function showRemotePending(detail) {
         if (!remoteConnectionState || isObserver) return;
+        if (!remotePendingSince) remotePendingSince = Date.now();
         remoteConnectionState.hidden = false;
         if (remoteConnectionDetail) remoteConnectionDetail.textContent = detail || waitingDetail();
         clearTimeout(remoteConnectionDelayTimer);
+        clearTimeout(remoteRetryActionTimer);
+        var pendingFor = Date.now() - remotePendingSince;
         remoteConnectionDelayTimer = setTimeout(function () {
           if (!remoteConnectionState.hidden && remoteConnectionDetail) {
             remoteConnectionDetail.textContent = '연결이 늦어지고 있어요. 잠시 더 기다려 주세요.';
           }
-        }, 12000);
+        }, Math.max(0, 12000 - pendingFor));
+        remoteRetryActionTimer = setTimeout(function () {
+          if (!remoteConnectionState.hidden && remoteReconnectButton) {
+            remoteReconnectButton.hidden = false;
+            remoteReconnectButton.dataset.action = 'reconnect';
+            remoteReconnectButton.textContent = '다시 연결하기';
+          }
+        }, Math.max(0, 25000 - pendingFor));
       }
 
       function hideRemotePending() {
         clearTimeout(remoteConnectionDelayTimer);
+        clearTimeout(remoteRetryActionTimer);
         remoteConnectionDelayTimer = 0;
+        remoteRetryActionTimer = 0;
+        remotePendingSince = 0;
+        if (remoteReconnectButton) remoteReconnectButton.hidden = true;
         if (remoteConnectionState) remoteConnectionState.hidden = true;
+      }
+
+      function showRemoteAudioUnlock() {
+        if (!remoteConnectionState || !remoteReconnectButton || isObserver) return;
+        clearTimeout(remoteConnectionDelayTimer);
+        clearTimeout(remoteRetryActionTimer);
+        remotePendingSince = 0;
+        remoteConnectionState.hidden = false;
+        if (remoteConnectionDetail) remoteConnectionDetail.textContent = '화면을 한 번 눌러 상대방 소리를 켜주세요.';
+        remoteReconnectButton.hidden = false;
+        remoteReconnectButton.dataset.action = 'audio';
+        remoteReconnectButton.textContent = '소리 켜기';
       }
 
       function clearRemotePresentation() {
@@ -4023,6 +4089,27 @@
         }, 3500);
       }
 
+      function retryParticipantConnection() {
+        hideRemotePending();
+        showRemotePending('연결을 다시 시도하고 있어요.');
+        if (activeCall) {
+          endParticipantCall(activeCall, 0);
+          return;
+        }
+        hostCallConnecting = false;
+        hostCallConnected = false;
+        if (currentRole !== 'partner') {
+          scheduleHostCall(0);
+          return;
+        }
+        var previousPeer = peer;
+        peer = null;
+        try { if (previousPeer) previousPeer.destroy(); } catch (e) { /* ignore */ }
+        setTimeout(function () {
+          if (!destroyed && !peer) createParticipantPeer();
+        }, 400);
+      }
+
       function bindParticipantCallHealth(call, stream) {
         if (!call || !stream) return;
         Array.prototype.forEach.call(stream.getTracks(), function (track) {
@@ -4061,17 +4148,21 @@
         if (!remoteVideo || !remoteVideo.srcObject) return;
         setupVideoElement(remoteVideo, false);
         var attempt = remoteVideo.play();
-        if (!attempt || typeof attempt.catch !== 'function') return;
-        attempt.catch(function (e) {
+        if (!attempt || typeof attempt.catch !== 'function') {
+          hideRemotePending();
+          return;
+        }
+        attempt.then(hideRemotePending).catch(function (e) {
           console.log('Autoplay waiting for touch gesture:', e);
           remoteVideo.muted = true;
           remoteVideo.play().catch(function () { /* ignore */ });
+          showRemoteAudioUnlock();
           if (remoteUnlockBound) return;
           remoteUnlockBound = true;
           var unlockPlay = function () {
             remoteUnlockBound = false;
             setupVideoElement(remoteVideo, false);
-            remoteVideo.play().catch(function () { /* ignore */ });
+            remoteVideo.play().then(hideRemotePending).catch(showRemoteAudioUnlock);
             document.removeEventListener('pointerdown', unlockPlay, true);
             document.removeEventListener('touchstart', unlockPlay, true);
             document.removeEventListener('click', unlockPlay, true);
@@ -4079,6 +4170,18 @@
           document.addEventListener('pointerdown', unlockPlay, { capture: true, once: true });
           document.addEventListener('touchstart', unlockPlay, { capture: true, once: true, passive: true });
           document.addEventListener('click', unlockPlay, { capture: true, once: true });
+        });
+      }
+
+      if (remoteReconnectButton) {
+        remoteReconnectButton.addEventListener('click', function (event) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (remoteReconnectButton.dataset.action === 'audio') {
+            resumeRemotePlayback();
+          } else {
+            retryParticipantConnection();
+          }
         });
       }
 
@@ -4094,6 +4197,7 @@
         window.__localCamBound = true;
         window.__localCamStream = localStream;
         window.localMediaStream = localStream;
+        document.dispatchEvent(new CustomEvent('dayo:local-stream', { detail: { stream: localStream } }));
       }
 
       function attachRemoteStream(stream, call) {
@@ -4528,7 +4632,7 @@
       }
 
       async function initWebRTC() {
-        if (destroyed) return;
+        if (destroyed || window.__dayoInAppBlocked) return;
         const access = await window.DayORoomAccessReady;
         if (!access.allowed || destroyed) return;
         isObserver = !!access.observer;
@@ -4571,6 +4675,7 @@
         clearTimeout(hostCallTimer);
         clearTimeout(participantPeerRetryTimer);
         clearTimeout(remoteConnectionDelayTimer);
+        clearTimeout(remoteRetryActionTimer);
         clearTimeout(remoteHealthTimer);
         clearInterval(observerProbeTimer);
         try { if (activeCall) activeCall.close(); } catch (e) { /* ignore */ }

@@ -5,11 +5,13 @@ const vm = require('node:vm');
 
 const root = path.join(__dirname, '..');
 const room = fs.readFileSync(path.join(root, 'public', 'room.html'), 'utf8');
+const roomLive = fs.readFileSync(path.join(root, 'public', 'room-live.js'), 'utf8');
 const lifecycle = fs.readFileSync(path.join(root, 'public', 'session-lifecycle.js'), 'utf8');
 const memory = fs.readFileSync(path.join(root, 'public', 'memory-game.js'), 'utf8');
 const expressions = require('../public/learner-expressions.js');
 
 assert.equal(room, fs.readFileSync(path.join(root, 'room.html'), 'utf8'));
+assert.equal(roomLive, fs.readFileSync(path.join(root, 'room-live.js'), 'utf8'));
 assert.equal(lifecycle, fs.readFileSync(path.join(root, 'session-lifecycle.js'), 'utf8'));
 assert.equal(memory, fs.readFileSync(path.join(root, 'memory-game.js'), 'utf8'));
 
@@ -21,6 +23,42 @@ assert.match(room, /participantCallNeedsRecovery\(call, reason\)/);
 assert.match(room, /initial-audio-muted/);
 assert.match(room, /visibilitychange[\s\S]*resumeRemotePlayback/);
 assert.match(room, /echoCancellation: true, noiseSuppression: true, autoGainControl: true/);
+
+const recoveryBlock = room.slice(room.indexOf('function participantCallNeedsRecovery'), room.indexOf('function bindParticipantCallHealth'));
+assert.match(recoveryBlock, /return !remoteAudioHealthy\(\)/);
+assert.match(recoveryBlock, /setTimeout\(function \(\) \{[\s\S]*participantCallNeedsRecovery\(call, reason\)[\s\S]*3500/);
+assert.match(room, /track\.addEventListener\('unmute'[\s\S]*clearTimeout\(remoteHealthTimer\)/);
+assert.match(room, /id="remoteReconnectButton"[\s\S]*다시 연결하기/);
+assert.match(room, /25000 - pendingFor/);
+assert.match(room, /function retryParticipantConnection\(\)[\s\S]*endParticipantCall\(activeCall, 0\)[\s\S]*scheduleHostCall\(0\)/);
+assert.match(room, /showRemoteAudioUnlock\(\)[\s\S]*소리 켜기/);
+assert.match(room, /function resumeRemotePlayback\(\)[\s\S]*attempt\.then\(hideRemotePending\)\.catch\(function/);
+
+assert.match(roomLive, /recognition\.lang = 'en-US'/);
+assert.match(roomLive, /recognition\.continuous = true/);
+assert.match(roomLive, /recognition\.interimResults = false/);
+['onstart', 'onaudiostart', 'onspeechstart', 'onresult', 'onerror', 'onend'].forEach((handler) => {
+  assert.match(roomLive, new RegExp('recognition\\.' + handler + ' = function'));
+});
+['stt_start', 'stt_audio_start', 'stt_speech_start', 'stt_result_final', 'stt_error', 'stt_end', 'stt_restart'].forEach((eventType) => {
+  assert.match(roomLive, new RegExp(eventType));
+});
+assert.match(roomLive, /dayo_stt_telemetry:/);
+assert.match(roomLive, /rows\.slice\(-80\)/);
+assert.match(roomLive, /char_count: finalText\.length/);
+assert.doesNotMatch(roomLive, /recordSttState\('stt_result_final', \{[^}]*text:/);
+assert.match(roomLive, /visibilitychange[\s\S]*scheduleSttRestart\(180, 'foreground'\)/);
+assert.match(roomLive, /pagehide[\s\S]*pageshow[\s\S]*scheduleSttRestart\(180, 'pageshow'\)/);
+assert.match(roomLive, /mic_track_muted[\s\S]*mic-track-unmuted[\s\S]*mic_track_ended/);
+
+assert.match(room, /id="devicePreflight"[\s\S]*15초 연결 확인/);
+assert.match(room, /id="devicePreflightVideo"[\s\S]*Hello, nice to meet you\./);
+assert.match(roomLive, /마이크는 연결됐지만 음성 인식이 시작되지 않았어요/);
+assert.match(roomLive, /브라우저에서 음성 인식을 사용할 수 없어요/);
+assert.match(roomLive, /window\.__dayoPreflightActive === true[\s\S]*if \(!isPreflight\)[\s\S]*pushTranscript/);
+assert.match(room, /kakaotalk\|line\|inapp\|naver\|snapchat\|instagram/);
+assert.match(room, /window\.__dayoInAppBlocked = true/);
+assert.match(room, /외부 브라우저에서 열어주세요/);
 
 assert.match(room, /\.talk-card-body\s*\{[\s\S]*overflow-y: auto;[\s\S]*-webkit-overflow-scrolling: touch;[\s\S]*touch-action: pan-y;/);
 assert.match(room, /@media \(max-width: 767px\)[\s\S]*height: min\(50dvh, 340px\)/);
@@ -124,5 +162,5 @@ async function verifyInsufficientQuizHidesClock() {
 
 verifyBookingScopedWordHelp();
 verifyInsufficientQuizHidesClock().then(() => {
-  console.log('Production room regression fixtures passed: connection state, media recovery, mobile Talk Card scroll, evidence-only Word Help, booking isolation, and zero-candidate quiz UX.');
+  console.log('Production room regression fixtures passed: STT lifecycle/telemetry/preflight, connection retry/audio recovery, mobile Talk Card scroll, evidence-only Word Help, booking isolation, and zero-candidate quiz UX.');
 });

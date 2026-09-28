@@ -33,6 +33,18 @@
   var sessionStartedAt = new Date().toISOString();
   var utteranceSeq = 0;
   var sttRestartTimer = 0;
+  var sttStartWatchdog = 0;
+  var sttStarting = false;
+  var sttPermissionBlocked = false;
+  var sttResumePending = false;
+  var sttMicAvailable = true;
+  var sttGestureStartHandler = null;
+  var boundLocalAudioTracks = typeof WeakSet === 'function' ? new WeakSet() : null;
+  var preflightTimer = 0;
+  var preflightMeterTimer = 0;
+  var preflightAudioContext = null;
+  var preflightMicDetected = false;
+  var preflightFinalDetected = false;
   var transcriptSavePromise = null;
 
   window.sessionTranscript = window.sessionTranscript || [];
@@ -154,19 +166,91 @@
   }
 
   function shouldKeepSttAlive() {
-    return wantListen && micOn && !hungUp && !window.dayoSessionEnded;
+    return wantListen && micOn && sttMicAvailable && !hungUp && !window.dayoSessionEnded;
   }
 
-  function scheduleSttRestart(delayMs) {
-    if (!shouldKeepSttAlive()) return;
+  function sttTelemetryKey() {
+    var access = window.DayORoomAccess;
+    return access && access.bookingId ? 'dayo_stt_telemetry:' + String(access.bookingId) : '';
+  }
+
+  function recordSttState(type, detail) {
+    var allowed = {
+      stt_start: true,
+      stt_audio_start: true,
+      stt_speech_start: true,
+      stt_result_final: true,
+      stt_error: true,
+      stt_end: true,
+      stt_restart: true
+    };
+    if (!allowed[type]) return;
+    var access = window.DayORoomAccess || {};
+    var entry = {
+      event: type,
+      at: new Date().toISOString(),
+      role: access.role === 'partner' ? 'partner' : 'learner'
+    };
+    var safe = detail || {};
+    if (safe.code) entry.code = String(safe.code).slice(0, 80);
+    if (safe.reason) entry.reason = String(safe.reason).slice(0, 80);
+    if (Number.isFinite(Number(safe.char_count))) entry.char_count = Math.max(0, Number(safe.char_count));
+    if (safe.preflight === true) entry.preflight = true;
+    var key = sttTelemetryKey();
+    if (key) {
+      try {
+        var rows = JSON.parse(sessionStorage.getItem(key) || '[]');
+        if (!Array.isArray(rows)) rows = [];
+        rows.push(entry);
+        sessionStorage.setItem(key, JSON.stringify(rows.slice(-80)));
+      } catch (e) { /* private mode / quota */ }
+    }
+    try {
+      document.dispatchEvent(new CustomEvent('dayo:stt-state', { detail: entry }));
+    } catch (e) { /* older browser */ }
+  }
+
+  function clearSttStartWatchdog() {
+    clearTimeout(sttStartWatchdog);
+    sttStartWatchdog = 0;
+  }
+
+  function attemptSttStart(reason) {
+    if (!recognition || !shouldKeepSttAlive() || sttOn || sttStarting) return;
+    if (document.visibilityState === 'hidden') {
+      sttResumePending = true;
+      return;
+    }
+    sttStarting = true;
+    sttResumePending = false;
+    if (reason && reason !== 'initial') recordSttState('stt_restart', { reason: reason });
+    try {
+      recognition.start();
+      clearSttStartWatchdog();
+      sttStartWatchdog = setTimeout(function () {
+        if (!sttStarting || sttOn) return;
+        sttStarting = false;
+        recordSttState('stt_error', { code: 'start_timeout' });
+        scheduleSttRestart(800, 'start-timeout');
+      }, 4000);
+    } catch (error) {
+      sttStarting = false;
+      clearSttStartWatchdog();
+      recordSttState('stt_error', { code: (error && error.name) || 'start_failed' });
+      if (shouldKeepSttAlive() && !sttPermissionBlocked) scheduleSttRestart(800, 'start-failed');
+    }
+  }
+
+  function scheduleSttRestart(delayMs, reason) {
+    if (!shouldKeepSttAlive() || sttPermissionBlocked) return;
+    if (document.visibilityState === 'hidden') {
+      sttResumePending = true;
+      return;
+    }
     clearTimeout(sttRestartTimer);
     sttRestartTimer = setTimeout(function () {
       if (!shouldKeepSttAlive() || !recognition) return;
-      try {
-        recognition.start();
-        sttOn = true;
-        setStatus(t('room.copilotListening'), true);
-      } catch (e) { /* already started */ }
+      attemptSttStart(reason || 'scheduled');
     }, delayMs || 300);
   }
 
@@ -192,17 +276,216 @@
     var bootStart = function () {
       if (window.dayoSessionEnded) return;
       wantListen = true;
-      if (!recognition) startSpeech();
-      else if (micOn) resumeSpeech();
+      if (window.__dayoPreflightActive && !window.__dayoPreflightStarted) return;
+      sttPermissionBlocked = false;
+      if (!recognition) startSpeech(true);
+      else if (micOn) resumeSpeech('user-gesture');
     };
-    var startSTT = function () {
+    sttGestureStartHandler = function () {
       bootStart();
-      console.log('🚀 STT 엔진 가동 완료');
-      document.removeEventListener('click', startSTT, true);
-      document.removeEventListener('touchstart', startSTT, true);
     };
-    document.addEventListener('click', startSTT, { once: true, capture: true });
-    document.addEventListener('touchstart', startSTT, { once: true, capture: true, passive: true });
+    document.addEventListener('click', sttGestureStartHandler, true);
+    document.addEventListener('touchstart', sttGestureStartHandler, { capture: true, passive: true });
+  }
+
+  function preflightNode(id) {
+    return document.getElementById(id);
+  }
+
+  function setPreflightCheck(id, text, state) {
+    var node = preflightNode(id);
+    if (!node) return;
+    node.textContent = text;
+    node.classList.remove('is-ok', 'is-warn');
+    if (state) node.classList.add(state);
+  }
+
+  function stopPreflightMeter() {
+    clearInterval(preflightMeterTimer);
+    preflightMeterTimer = 0;
+    if (preflightAudioContext && typeof preflightAudioContext.close === 'function') {
+      try { preflightAudioContext.close(); } catch (e) { /* ignore */ }
+    }
+    preflightAudioContext = null;
+  }
+
+  function startPreflightMeter(stream) {
+    stopPreflightMeter();
+    if (!stream || typeof stream.getAudioTracks !== 'function' || !stream.getAudioTracks().length) return;
+    var AudioContextCtor = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextCtor) return;
+    try {
+      preflightAudioContext = new AudioContextCtor();
+      var source = preflightAudioContext.createMediaStreamSource(stream);
+      var analyser = preflightAudioContext.createAnalyser();
+      analyser.fftSize = 512;
+      source.connect(analyser);
+      var data = new Uint8Array(analyser.fftSize);
+      var resumeAttempt = preflightAudioContext.resume();
+      if (resumeAttempt && typeof resumeAttempt.catch === 'function') {
+        resumeAttempt.catch(function () { /* user gesture may be required */ });
+      }
+      preflightMeterTimer = setInterval(function () {
+        analyser.getByteTimeDomainData(data);
+        var energy = 0;
+        for (var i = 0; i < data.length; i += 1) {
+          var sample = (data[i] - 128) / 128;
+          energy += sample * sample;
+        }
+        if (Math.sqrt(energy / data.length) > 0.018) {
+          preflightMicDetected = true;
+          setPreflightCheck('devicePreflightMic', '마이크 입력이 감지됐어요.', 'is-ok');
+        }
+      }, 120);
+    } catch (error) {
+      setPreflightCheck('devicePreflightMic', '마이크 입력을 확인하지 못했어요.', 'is-warn');
+    }
+  }
+
+  function bindLocalAudioTrack(stream) {
+    if (!stream || typeof stream.getAudioTracks !== 'function') return;
+    var track = stream.getAudioTracks()[0];
+    if (!track || (boundLocalAudioTracks && boundLocalAudioTracks.has(track))) return;
+    if (boundLocalAudioTracks) boundLocalAudioTracks.add(track);
+    sttMicAvailable = track.readyState === 'live' && !track.muted;
+    track.addEventListener('mute', function () {
+      sttMicAvailable = false;
+      sttResumePending = true;
+      recordSttState('stt_error', { code: 'mic_track_muted' });
+      pauseSpeech();
+    });
+    track.addEventListener('unmute', function () {
+      sttMicAvailable = track.readyState === 'live';
+      if (sttMicAvailable && shouldKeepSttAlive()) scheduleSttRestart(180, 'mic-track-unmuted');
+    });
+    track.addEventListener('ended', function () {
+      sttMicAvailable = false;
+      sttResumePending = false;
+      clearTimeout(sttRestartTimer);
+      recordSttState('stt_error', { code: 'mic_track_ended' });
+      pauseSpeech();
+    });
+  }
+
+  function attachPreflightStream(stream) {
+    if (!stream) return;
+    bindLocalAudioTrack(stream);
+    var video = preflightNode('devicePreflightVideo');
+    var videoTrack = typeof stream.getVideoTracks === 'function' ? stream.getVideoTracks()[0] : null;
+    var audioTrack = typeof stream.getAudioTracks === 'function' ? stream.getAudioTracks()[0] : null;
+    if (video && video.srcObject !== stream) {
+      video.srcObject = stream;
+      var previewPlay = video.play();
+      if (previewPlay && typeof previewPlay.catch === 'function') {
+        previewPlay.catch(function () { /* muted preview */ });
+      }
+    }
+    setPreflightCheck('devicePreflightCamera',
+      videoTrack && videoTrack.readyState === 'live' ? '카메라 미리보기가 준비됐어요.' : '카메라를 확인하지 못했어요.',
+      videoTrack && videoTrack.readyState === 'live' ? 'is-ok' : 'is-warn');
+    setPreflightCheck('devicePreflightMic',
+      audioTrack && audioTrack.readyState === 'live' ? '마이크 연결됨 · 한 문장 말해보세요.' : '마이크를 확인하지 못했어요.',
+      audioTrack && audioTrack.readyState === 'live' ? '' : 'is-warn');
+    if (window.__dayoPreflightStarted && preflightTimer) startPreflightMeter(stream);
+  }
+
+  function currentLocalStream() {
+    return window.localMediaStream || window.__localCamStream || localStream || null;
+  }
+
+  function finishDevicePreflight() {
+    window.__dayoPreflightActive = false;
+    clearInterval(preflightTimer);
+    preflightTimer = 0;
+    stopPreflightMeter();
+    var overlay = preflightNode('devicePreflight');
+    if (overlay) overlay.hidden = true;
+    if (shouldKeepSttAlive()) {
+      sttPermissionBlocked = false;
+      if (!recognition) startSpeech(true);
+      else resumeSpeech('preflight-finished');
+    }
+  }
+
+  function startDevicePreflight() {
+    window.__dayoPreflightStarted = true;
+    preflightMicDetected = false;
+    preflightFinalDetected = false;
+    var stream = currentLocalStream();
+    if (stream) {
+      attachPreflightStream(stream);
+      startPreflightMeter(stream);
+    }
+    sttPermissionBlocked = false;
+    if (!recognition) startSpeech(true);
+    else resumeSpeech('preflight');
+    var remaining = 15;
+    var button = preflightNode('devicePreflightStart');
+    if (button) button.textContent = remaining + '초 동안 말해보세요';
+    clearInterval(preflightTimer);
+    preflightTimer = setInterval(function () {
+      remaining -= 1;
+      if (button) button.textContent = remaining > 0 ? remaining + '초 동안 말해보세요' : '다시 테스트';
+      if (remaining > 0) return;
+      clearInterval(preflightTimer);
+      preflightTimer = 0;
+      if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+        setPreflightCheck('devicePreflightStt', '브라우저에서 음성 인식을 사용할 수 없어요.', 'is-warn');
+      } else if (preflightMicDetected && !sttOn) {
+        setPreflightCheck('devicePreflightStt', '마이크는 연결됐지만 음성 인식이 시작되지 않았어요.', 'is-warn');
+      } else if (!preflightFinalDetected) {
+        setPreflightCheck('devicePreflightStt', '문장이 인식되지 않았어요. 다시 테스트해 주세요.', 'is-warn');
+      }
+    }, 1000);
+  }
+
+  function handlePreflightSttState(event) {
+    if (!window.__dayoPreflightActive) return;
+    var state = event && event.detail || {};
+    if (state.event === 'stt_start') {
+      setPreflightCheck('devicePreflightStt', '음성 인식이 시작됐어요. 한 문장 말해보세요.', '');
+    } else if (state.event === 'stt_audio_start') {
+      setPreflightCheck('devicePreflightStt', '음성을 듣고 있어요.', '');
+    } else if (state.event === 'stt_speech_start') {
+      setPreflightCheck('devicePreflightStt', '말소리를 감지했어요.', '');
+    } else if (state.event === 'stt_result_final') {
+      preflightFinalDetected = true;
+      setPreflightCheck('devicePreflightStt', '마이크와 음성 인식이 준비됐어요.', 'is-ok');
+      var button = preflightNode('devicePreflightStart');
+      if (button) button.textContent = '준비 완료';
+    } else if (state.event === 'stt_error' && state.code !== 'no-speech') {
+      setPreflightCheck('devicePreflightStt',
+        state.code === 'not-allowed' || state.code === 'service-not-allowed'
+          ? '브라우저에서 음성 인식 권한을 허용해 주세요.'
+          : '음성 인식이 시작되지 않았어요. 다시 테스트해 주세요.', 'is-warn');
+    }
+  }
+
+  function initDevicePreflight() {
+    var overlay = preflightNode('devicePreflight');
+    var access = window.DayORoomAccess;
+    if (!overlay || window.__dayoInAppBlocked || !access || !access.allowed || access.observer) return;
+    window.__dayoPreflightActive = true;
+    window.__dayoPreflightStarted = false;
+    overlay.hidden = false;
+    var startButton = preflightNode('devicePreflightStart');
+    var continueButton = preflightNode('devicePreflightContinue');
+    if (startButton) startButton.addEventListener('click', startDevicePreflight);
+    if (continueButton) continueButton.addEventListener('click', finishDevicePreflight);
+    document.addEventListener('dayo:stt-state', handlePreflightSttState);
+    var attempts = 0;
+    var streamWait = setInterval(function () {
+      attempts += 1;
+      var stream = currentLocalStream();
+      if (stream) {
+        clearInterval(streamWait);
+        attachPreflightStream(stream);
+      } else if (attempts >= 40) {
+        clearInterval(streamWait);
+        setPreflightCheck('devicePreflightCamera', '카메라 권한을 확인해 주세요.', 'is-warn');
+        setPreflightCheck('devicePreflightMic', '마이크 권한을 확인해 주세요.', 'is-warn');
+      }
+    }, 250);
   }
 
   function pushTranscript(text, speaker) {
@@ -826,11 +1109,12 @@
     });
   }
 
-  function startSpeech() {
+  function startSpeech(userInitiated) {
     if (isObserverRoomMode()) return;
     var Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!Ctor) {
       console.warn('이 브라우저는 Web Speech API를 지원하지 않습니다 (사파리/크롬 권장).');
+      recordSttState('stt_error', { code: 'unsupported' });
       setStatus(t('room.copilotListening'), false);
       return;
     }
@@ -849,40 +1133,70 @@
       recognition.lang = 'en-US';
       recognition.maxAlternatives = 1;
 
+      recognition.onstart = function () {
+        clearSttStartWatchdog();
+        sttStarting = false;
+        sttOn = true;
+        sttResumePending = false;
+        sttPermissionBlocked = false;
+        recordSttState('stt_start');
+        setStatus(t('room.copilotListening'), true);
+      };
+
+      recognition.onaudiostart = function () {
+        recordSttState('stt_audio_start');
+      };
+
+      recognition.onspeechstart = function () {
+        recordSttState('stt_speech_start');
+      };
+
       recognition.onresult = function (event) {
         for (var i = event.resultIndex; i < event.results.length; i++) {
           if (!event.results[i].isFinal) continue;
           var chunk = event.results[i][0] && event.results[i][0].transcript;
           var finalText = String(chunk || '').trim();
           if (finalText) {
-            pushTranscript(finalText, localTranscriptSpeaker());
-            scheduleCopilot(finalText);
+            var isPreflight = window.__dayoPreflightActive === true;
+            recordSttState('stt_result_final', { char_count: finalText.length, preflight: isPreflight });
+            if (!isPreflight) {
+              pushTranscript(finalText, localTranscriptSpeaker());
+              scheduleCopilot(finalText);
+            }
           }
         }
       };
 
       recognition.onerror = function (event) {
         var err = event && event.error;
+        clearSttStartWatchdog();
+        sttStarting = false;
+        sttOn = false;
+        recordSttState('stt_error', { code: err || 'unknown' });
         console.warn('STT 일시 오류 (재시작 시도):', err);
         if (err === 'not-allowed' || err === 'service-not-allowed') {
-          sttOn = false;
+          sttPermissionBlocked = true;
           setStatus(t('room.copilotListening'), false);
           return;
         }
-        if (shouldKeepSttAlive()) scheduleSttRestart(500);
+        if (shouldKeepSttAlive()) scheduleSttRestart(500, 'recognition-error');
       };
 
       recognition.onend = function () {
-        if (shouldKeepSttAlive()) scheduleSttRestart(120);
+        clearSttStartWatchdog();
+        sttStarting = false;
+        sttOn = false;
+        recordSttState('stt_end');
+        if (shouldKeepSttAlive()) scheduleSttRestart(250, 'recognition-ended');
       };
 
-      if (micOn && shouldKeepSttAlive()) {
-        recognition.start();
-        sttOn = true;
-        setStatus(t('room.copilotListening'), true);
+      if (micOn && shouldKeepSttAlive() && (!window.__dayoPreflightActive || userInitiated)) {
+        attemptSttStart('initial');
       }
     } catch (err) {
+      sttStarting = false;
       sttOn = false;
+      recordSttState('stt_error', { code: (err && err.name) || 'setup_failed' });
       setStatus(t('room.copilotListening'), false);
     }
   }
@@ -890,26 +1204,27 @@
   function stopSpeech() {
     wantListen = false;
     sttOn = false;
+    sttStarting = false;
     clearTimeout(sttRestartTimer);
+    clearSttStartWatchdog();
     if (!recognition) return;
+    recordSttState('stt_end', { reason: 'session-stop' });
     try { recognition.onend = null; recognition.stop(); } catch (e) { /* ignore */ }
   }
 
   function pauseSpeech() {
     sttOn = false;
+    sttStarting = false;
+    clearSttStartWatchdog();
     if (!recognition) return;
     try { recognition.stop(); } catch (e) { /* ignore */ }
     setStatus(geminiOk ? t('room.copilotListening') : t('room.copilotListening'), false);
   }
 
-  function resumeSpeech() {
+  function resumeSpeech(reason) {
     if (!recognition || hungUp) return;
     wantListen = true;
-    try {
-      recognition.start();
-      sttOn = true;
-      setStatus(t('room.copilotListening'), true);
-    } catch (e) { /* already started */ }
+    attemptSttStart(reason || 'resume');
   }
 
   function toggleMic() {
@@ -1016,6 +1331,7 @@
       utteranceSeq = 0;
       backupTranscriptLocal();
       bindMobileSttBootstrap();
+      initDevicePreflight();
       renderHints(demoHints(''));
       setStatus(t('room.copilotListening'), false);
       bindCopilotClicks();
@@ -1069,10 +1385,19 @@
     hangUp: hangUp,
     startSpeech: function () {
       wantListen = true;
-      startSpeech();
-      if (micOn) resumeSpeech();
+      sttPermissionBlocked = false;
+      startSpeech(true);
+      if (micOn) resumeSpeech('manual');
     },
     getTranscript: function () { return serializeTranscript(sessionTranscript); },
+    getSttTelemetry: function () {
+      var key = sttTelemetryKey();
+      if (!key) return [];
+      try {
+        var rows = JSON.parse(sessionStorage.getItem(key) || '[]');
+        return Array.isArray(rows) ? rows : [];
+      } catch (e) { return []; }
+    },
     suggestWords: suggestWords,
     suggestSentences: suggestSentences,
     saveTranscript: saveTranscript
@@ -1088,8 +1413,33 @@
     if (!lastHintsKey) renderHints(demoHints(''));
   });
 
+  document.addEventListener('dayo:local-stream', function (event) {
+    var stream = event && event.detail && event.detail.stream;
+    if (!stream) return;
+    bindLocalAudioTrack(stream);
+    if (window.__dayoPreflightActive) attachPreflightStream(stream);
+  });
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') {
+      sttResumePending = shouldKeepSttAlive();
+      clearTimeout(sttRestartTimer);
+      return;
+    }
+    if (shouldKeepSttAlive() && (sttResumePending || !sttOn)) scheduleSttRestart(180, 'foreground');
+  });
+
+  window.addEventListener('pagehide', function () {
+    sttResumePending = shouldKeepSttAlive();
+    clearTimeout(sttRestartTimer);
+  });
+
+  window.addEventListener('pageshow', function () {
+    if (shouldKeepSttAlive() && (sttResumePending || !sttOn)) scheduleSttRestart(180, 'pageshow');
+  });
+
   window.DayORoomAccessReady.then(function (access) {
-    if (!access.allowed) return;
+    if (!access.allowed || window.__dayoInAppBlocked) return;
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start, { once: true });
     else start();
   });
