@@ -3,38 +3,58 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>DayO conversation assist mobile fixture</title>
+  <title>DayO mobile assist layout fixture</title>
   <style>
     * { box-sizing: border-box; }
-    html, body { width: 100%; min-height: 100%; margin: 0; font-family: sans-serif; background: linear-gradient(160deg,#332b28,#695750); color: #5c4a42; }
-    .panel { position: fixed; left: 0; right: 0; bottom: 0; max-height: min(68dvh,540px); overflow-y: auto; padding: 10px 18px calc(18px + env(safe-area-inset-bottom)); border-radius: 24px 24px 0 0; background: #fffcfa; box-shadow: 0 -12px 40px rgba(0,0,0,.2); }
-    .handle { width: 40px; height: 4px; margin: 0 auto 12px; border-radius: 99px; background: #d9ccc6; }
-    h1 { margin: 0 0 8px; font-size: 18px; }
-    p { margin: 0 0 12px; color: #8b7770; font-size: 13px; line-height: 1.5; }
-    textarea { width: 100%; min-height: 72px; padding: 12px; border: 1px solid #ffd1dc; border-radius: 14px; background: #fff8f5; font: inherit; resize: vertical; }
-    .primary { width: 100%; min-height: 46px; margin-top: 9px; border: 0; border-radius: 13px; background: #ff6b57; color: #fff; font-weight: 800; }
-    .results { display: grid; gap: 8px; margin-top: 12px; }
-    .result { padding: 11px 12px; border: 1px solid #ffd1dc; border-radius: 13px; background: #fff8f5; }
-    .result strong, .result span { display: block; }
-    .result span { margin-top: 3px; color: #8b7770; font-size: 12px; }
-    .partner { max-width: 360px; margin: 18px auto; padding: 16px; border-radius: 18px; background: #fff9e8; }
-    .partner button { min-height: 42px; border: 1px solid #247552; border-radius: 11px; background: #fff; color: #247552; font-weight: 800; }
-    .partner .primary-question { width: 100%; background: #b8e2c8; }
-    .questions { display: grid; gap: 8px; margin: 12px 0; font-size: 14px; line-height: 1.45; }
-    [data-view="word"] .partner, [data-view="partner"] .word { display: none; }
+    :root { --vvh: 100dvh; --panel: min(40%, 300px); }
+    html, body { width: 100%; height: var(--vvh); margin: 0; overflow: hidden; font-family: sans-serif; color: #5c4a42; background: #fff8f5; }
+    .app { height: var(--vvh); display: flex; flex-direction: column; overflow: hidden; }
+    header { flex: 0 0 46px; display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #fff; }
+    main { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 6px; padding: 6px 10px; overflow: hidden; }
+    .video { position: relative; flex: 1 1 auto; min-height: clamp(132px, 38%, 320px); border-radius: 18px; overflow: hidden; background: linear-gradient(155deg,#3b3431,#8f7770); color: #fff; }
+    .video::after { content: 'REMOTE VIDEO · ALWAYS VISIBLE'; position: absolute; left: 12px; bottom: 10px; font-size: 11px; font-weight: 800; }
+    .pip { position: absolute; right: 10px; top: 10px; width: 76px; aspect-ratio: 4/3; border: 2px solid #fff; border-radius: 10px; background: #d8b9b0; }
+    .assist { display: none; flex: 0 0 var(--panel); max-height: var(--panel); overflow: hidden; border: 1px solid #ffd1dc; border-radius: 18px 18px 0 0; background: #fff; }
+    body[data-state="chat"] .chat,
+    body[data-state^="word"] .word,
+    body[data-state="partner"] .partner,
+    body[data-state="talk"] .talk { display: flex; flex-direction: column; }
+    .handle { flex: 0 0 auto; width: 38px; height: 4px; margin: 7px auto 3px; border-radius: 99px; background: #d9ccc6; }
+    .head { flex: 0 0 auto; display: flex; justify-content: space-between; padding: 6px 11px; font-size: 13px; font-weight: 800; }
+    .scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 5px 11px; }
+    .input { position: sticky; bottom: 0; flex: 0 0 auto; display: flex; gap: 6px; padding: 7px 10px; background: #fff; }
+    input, textarea { min-width: 0; flex: 1; padding: 8px; border: 1px solid #ffd1dc; border-radius: 10px; font: inherit; }
+    textarea { min-height: 42px; max-height: 54px; resize: none; }
+    button { min-height: 36px; border: 0; border-radius: 10px; padding: 6px 10px; background: #ff6b57; color: #fff; font-weight: 800; }
+    .row { padding: 6px 8px; border-bottom: 1px solid #f5e8e3; font-size: 12px; line-height: 1.35; }
+    .row small { display: block; color: #8b7770; }
+    .word .scroll { display: none; }
+    body[data-state="word-result"] .word .scroll { display: block; }
+    .partner { --panel: min(35%, 250px); }
+    .talk { --panel: min(40%, 280px); }
+    nav { flex: 0 0 58px; display: flex; align-items: center; justify-content: space-around; background: #fff; font-size: 11px; }
+    body.keyboard { --vvh: 430px; --panel: min(34%, 170px); }
+    body.keyboard nav { display: none; }
+    body.keyboard .word .scroll { max-height: 54px; }
   </style>
 </head>
 <body>
-  <section class="panel word">
-    <div class="handle"></div><h1>단어 도움</h1><p>무슨 말을 하고 싶나요?<br>한국어로 입력해도 괜찮아요.</p>
-    <textarea>경치가 아름다웠지만 사람이 많았어요.</textarea><button class="primary">도움받기</button>
-    <div class="results"><div class="result"><strong>beautiful scenery</strong><span>아름다운 경치</span></div><div class="result"><strong>crowded</strong><span>붐비는</span></div><div class="result"><strong>The scenery was beautiful, but it was crowded.</strong><span>경치는 아름다웠지만 붐볐어요.</span></div></div>
-  </section>
-  <section class="partner">
-    <button class="primary-question">💡 다음 질문 추천</button>
-    <div class="questions"><div>1. Do you prefer cities or nature?</div><div>2. What place do you remember most?</div><div>3. Where would you like to go next?</div></div>
-    <button>다시 추천</button>
-  </section>
-  <script>document.body.dataset.view = new URLSearchParams(location.search).get('view') === 'partner' ? 'partner' : 'word';</script>
+  <div class="app">
+    <header><strong>DayO LIVE</strong><span>24:18</span></header>
+    <main>
+      <section class="video" id="remoteVideo"><div class="pip"></div></section>
+      <section class="assist chat"><div class="handle"></div><div class="head">💬 라이브 채팅 <span>✕</span></div><div class="scroll"><div class="row">Hi! Nice to meet you.</div><div class="row">What did you do today?</div><div class="row">I went to a cafe.</div></div><div class="input"><input value="메시지를 입력하세요"><button>전송</button></div></section>
+      <section class="assist word"><div class="handle"></div><div class="head">단어 도움 <span>✕</span></div><div class="input"><textarea>경치가 아름다웠지만 사람이 많았어요.</textarea><button>도움받기</button></div><div class="scroll"><div class="row"><strong>beautiful scenery</strong><small>아름다운 경치</small></div><div class="row"><strong>crowded</strong><small>붐비는</small></div><div class="row"><strong>The scenery was beautiful, but it was crowded.</strong><small>경치는 아름다웠지만 붐볐어요.</small></div></div></section>
+      <section class="assist partner"><div class="handle"></div><div class="head">✨ 다음 질문 추천 <span>✕</span></div><div class="scroll"><div class="row">1. Do you prefer cities or nature?</div><div class="row">2. What place do you remember most?</div><div class="row">3. Where would you like to go next?</div></div><div class="input"><button>다시 추천</button></div></section>
+      <section class="assist talk"><div class="handle"></div><div class="head">🌐 DayO 대화카드 <span>✕</span></div><div class="scroll"><div class="row"><strong>What kind of places do you like to visit?</strong><small>어떤 장소를 여행하고 싶나요?</small></div><div class="row">Do you prefer cities or nature?</div><div class="row">Where would you like to go next?</div></div></section>
+    </main>
+    <nav><span>마이크</span><span>카메라</span><span>단어 도움</span><span>대화카드</span><span>채팅</span></nav>
+  </div>
+  <script>
+    var params = new URLSearchParams(location.search);
+    var state = params.get('state') || 'chat';
+    document.body.dataset.state = state === 'keyboard' ? 'word-input' : state;
+    document.body.classList.toggle('keyboard', state === 'keyboard');
+  </script>
 </body>
 </html>

@@ -594,6 +594,8 @@
       color: #7A6A62;
     }
 
+    .mobile-assist-handle { display: none; }
+
     body.theme-partner .self-pip {
       background: linear-gradient(135deg, #EAF8F2 0%, #B8E2C8 100%) !important;
       border: 1.5px solid #91BFA0 !important;
@@ -2859,19 +2861,25 @@
     }
 
     @media (max-width: 767px) {
-      :root { --chat-w: 100%; --bottom-h: 64px; }
+      :root {
+        --chat-w: 100%;
+        --bottom-h: 64px;
+        --dayo-visual-height: 100dvh;
+        --dayo-keyboard-bottom: 0px;
+        --dayo-video-min-height: clamp(132px, calc(var(--dayo-visual-height) * 0.38), 320px);
+      }
 
       html, body,
       body.is-room {
-        height: 100dvh;
-        max-height: 100dvh;
+        height: var(--dayo-visual-height);
+        max-height: var(--dayo-visual-height);
         min-height: 0;
         overflow: hidden;
       }
 
       .studio {
-        height: 100dvh;
-        max-height: 100dvh;
+        height: var(--dayo-visual-height);
+        max-height: var(--dayo-visual-height);
         min-height: 0;
         display: flex;
         flex-direction: column;
@@ -2991,7 +2999,7 @@
       .video-stage {
         width: 100%;
         flex: 1 1 auto;
-        min-height: 0;
+        min-height: var(--dayo-video-min-height);
         max-height: none;
         aspect-ratio: unset;
         height: auto;
@@ -3000,10 +3008,34 @@
       .chat-panel,
       .side-drawer {
         width: 100%;
-        height: min(50dvh, 340px);
-        max-height: min(50vh, 340px);
+        height: min(calc(var(--dayo-visual-height) * 0.42), 300px);
+        max-height: min(calc(var(--dayo-visual-height) * 0.42), 300px);
         flex: none;
         order: 2;
+      }
+
+      .chat-panel::before,
+      #talk-card-panel::before {
+        content: '';
+        width: 38px;
+        height: 4px;
+        margin: 7px auto 2px;
+        border-radius: 999px;
+        background: rgba(154, 133, 128, 0.35);
+        flex: 0 0 auto;
+      }
+
+      .chat-messages,
+      .talk-card-body {
+        overscroll-behavior: contain;
+      }
+
+      .chat-input-row {
+        position: sticky;
+        bottom: 0;
+        z-index: 2;
+        background: var(--bg-card);
+        padding-bottom: max(0.7rem, env(safe-area-inset-bottom, 0px));
       }
 
       .main-stage.talk-open .side-drawer,
@@ -3054,6 +3086,34 @@
         flex: 0 0 auto;
         margin: 0;
         padding: 0.45rem 0.6rem 0.5rem;
+        max-height: min(calc(var(--dayo-visual-height) * 0.35), 250px);
+        overflow: hidden;
+      }
+
+      #partner-topic-card {
+        max-height: min(calc(var(--dayo-visual-height) * 0.35), 250px);
+        padding: 9px 11px !important;
+        overflow: hidden;
+      }
+
+      #partner-topic-content {
+        max-height: min(calc(var(--dayo-visual-height) * 0.22), 150px);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+      }
+
+      .partner-topic-item { margin-bottom: 5px; font-size: 12px; line-height: 1.35; }
+      .partner-topic-ko { font-size: 10.5px; line-height: 1.3; }
+      .partner-question-actions { margin-top: 6px; }
+      #partner-question-refresh { min-height: 34px; padding: 6px 10px; }
+
+      .mobile-assist-handle {
+        display: block;
+        width: 38px;
+        height: 4px;
+        margin: 0 auto 7px;
+        border-radius: 999px;
+        background: rgba(154, 133, 128, 0.35);
       }
 
       .bottom-bar {
@@ -3105,14 +3165,60 @@
 
       .ctrl-divider { display: none; }
 
-      .bottom-sheet { max-height: 45vh; }
+      .sheet-overlay {
+        bottom: var(--dayo-keyboard-bottom);
+        background: rgba(92, 74, 66, 0.16);
+      }
+
+      .bottom-sheet {
+        bottom: var(--dayo-keyboard-bottom);
+        max-height: min(calc(var(--dayo-visual-height) * 0.4), 340px);
+      }
+
+      #wordSheet { max-height: min(calc(var(--dayo-visual-height) * 0.4), 340px); }
+      #wordSheet .sheet-header { padding-bottom: 0.35rem; }
+      #wordSheet .sheet-body {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        padding-bottom: max(0.7rem, env(safe-area-inset-bottom, 0px));
+      }
+      #wordSheet .sheet-desc { margin-bottom: 0.45rem; line-height: 1.35; }
+      #wordSheet .word-help-form { flex: 0 0 auto; gap: 0.4rem; }
+      #wordSheet .sheet-input { min-height: 42px; max-height: 58px; margin-bottom: 0; padding: 0.55rem 0.7rem; }
+      #wordSheet .sheet-submit { padding: 0.62rem; }
+      #wordSheet .word-help-status { flex: 0 0 auto; margin: 0.4rem 0 0; font-size: 0.74rem; }
+      #wordHelpResults {
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        margin-top: 0.45rem;
+      }
+      #wordHelpResults .word-card { padding: 0.48rem 0.65rem; border-radius: 10px; }
+      #wordHelpResults .word-card-num { display: none; }
+      #wordHelpResults .word-card-text,
+      #wordHelpResults .word-card-text--sentence { font-size: 0.82rem; line-height: 1.3; }
+      #wordHelpResults .word-card-meaning { margin-top: 0.1rem; font-size: 0.7rem; line-height: 1.25; }
+      #wordHelpResults .word-card-hint { display: none; }
+
+      body.dayo-keyboard-open .bottom-bar { display: none; }
+      body.dayo-keyboard-open .top-bar { padding-top: 5px; padding-bottom: 5px; }
+      body.dayo-keyboard-open .chat-panel,
+      body.dayo-keyboard-open .side-drawer {
+        height: min(calc(var(--dayo-visual-height) * 0.34), 170px);
+        max-height: min(calc(var(--dayo-visual-height) * 0.34), 170px);
+      }
+      body.dayo-keyboard-open #wordSheet {
+        max-height: min(calc(var(--dayo-visual-height) * 0.38), 210px);
+      }
+      body.dayo-keyboard-open #wordHelpResults { max-height: 54px; }
     }
 
     @media (max-width: 767px) and (max-height: 700px) {
       .chat-panel,
       .side-drawer {
-        height: min(46dvh, 270px);
-        max-height: min(46dvh, 270px);
+        height: min(calc(var(--dayo-visual-height) * 0.4), 240px);
+        max-height: min(calc(var(--dayo-visual-height) * 0.4), 240px);
       }
     }
 
@@ -3693,6 +3799,7 @@
             </div>
             <div id="partner-room-interests" hidden><strong>최근 관심사</strong><span id="partner-room-interests-list"></span></div>
             <div id="partner-topic-card" style="display: none; background: #FFF9E8; border: 1.5px solid #FFEAA7; border-radius: 14px; padding: 14px; margin-top: 10px;">
+              <div class="mobile-assist-handle" aria-hidden="true"></div>
               <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px;">
                 <div style="font-size: 11px; font-weight: 800; color: #966914;">✨ 다음 질문 추천</div>
                 <button type="button" onclick="closePartnerTopicHint()" aria-label="추천 패널 닫기" style="border: 0; background: transparent; color: #966914; font-size: 16px; line-height: 1; cursor: pointer; padding: 2px 4px;">✕</button>
@@ -5092,6 +5199,34 @@
     const talkCardClose = document.getElementById('talkCardClose');
     const talkCardsBtn = document.getElementById('btn-talk-cards');
 
+    var largestMobileViewportHeight = Math.max(window.innerHeight || 0, window.visualViewport ? window.visualViewport.height : 0);
+
+    function isMobileRoomLayout() {
+      return !!(window.matchMedia && window.matchMedia('(max-width: 767px)').matches);
+    }
+
+    function syncMobileVisualViewport() {
+      if (!isMobileRoomLayout()) return;
+      var viewport = window.visualViewport;
+      var visualHeight = Math.max(1, Math.round(viewport ? viewport.height : window.innerHeight));
+      var viewportTop = Math.max(0, Math.round(viewport ? viewport.offsetTop : 0));
+      largestMobileViewportHeight = Math.max(largestMobileViewportHeight, visualHeight);
+      var keyboardBottom = viewport
+        ? Math.max(0, Math.round((window.innerHeight || visualHeight) - visualHeight - viewportTop))
+        : 0;
+      var keyboardOpen = largestMobileViewportHeight - visualHeight > 120;
+      document.documentElement.style.setProperty('--dayo-visual-height', visualHeight + 'px');
+      document.documentElement.style.setProperty('--dayo-keyboard-bottom', keyboardBottom + 'px');
+      document.body.classList.toggle('dayo-keyboard-open', keyboardOpen);
+    }
+
+    syncMobileVisualViewport();
+    window.addEventListener('resize', syncMobileVisualViewport, { passive: true });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', syncMobileVisualViewport, { passive: true });
+      window.visualViewport.addEventListener('scroll', syncMobileVisualViewport, { passive: true });
+    }
+
     var chatChannel = null;
     var chatChannelReady = false;
     var pendingCardRequestId = '';
@@ -5172,6 +5307,7 @@
 
     function openChat() {
       if (!mainStage) return;
+      closeMobileAssistPanels('chat');
       mainStage.classList.remove('talk-open');
       mainStage.classList.remove('chat-collapsed');
       if (chatToggle) {
@@ -5183,6 +5319,7 @@
 
     function closeChat() {
       if (!mainStage) return;
+      if (chatPanel && chatPanel.contains(document.activeElement) && document.activeElement.blur) document.activeElement.blur();
       if (!mainStage.classList.contains('talk-open')) {
         mainStage.classList.add('chat-collapsed');
       } else {
@@ -5193,16 +5330,19 @@
         chatToggle.classList.remove('is-active');
         chatToggle.setAttribute('aria-pressed', 'false');
       }
+      if (document.body.dataset.mobileAssist === 'chat') delete document.body.dataset.mobileAssist;
     }
 
     function closeTalkCardPanel() {
       if (!mainStage) return;
       mainStage.classList.remove('talk-open');
       mainStage.classList.add('chat-collapsed');
+      if (document.body.dataset.mobileAssist === 'talk') delete document.body.dataset.mobileAssist;
     }
 
     function openTalkCardPanel() {
       if (!mainStage) return;
+      closeMobileAssistPanels('talk');
       mainStage.classList.remove('chat-collapsed');
       mainStage.classList.add('talk-open');
       if (chatToggle) {
@@ -5211,6 +5351,22 @@
       }
       if (canControlTalkCards() || talkCardState.updatedAt) renderTalkCardQuestion(false);
     }
+
+    function closeMobileAssistPanels(except) {
+      if (!isMobileRoomLayout()) return;
+      if (except !== 'chat') closeChat();
+      if (except !== 'talk') closeTalkCardPanel();
+      if (except !== 'word') {
+        var wordOverlay = document.getElementById('wordSheetOverlay');
+        if (wordOverlay && wordOverlay.classList.contains('active')) closeSheet('word');
+      }
+      if (except !== 'partner' && typeof window.closePartnerTopicHint === 'function') {
+        window.closePartnerTopicHint();
+      }
+      document.body.dataset.mobileAssist = except || '';
+    }
+
+    window.DayOCloseMobileAssistPanels = closeMobileAssistPanels;
 
     window.toggleTalkCardPanel = function () {
       if (!mainStage) return;
@@ -5516,6 +5672,7 @@
     function openSheet(name) {
       const overlay = document.getElementById(name + 'SheetOverlay');
       const sheet = document.getElementById(name + 'Sheet');
+      if (name === 'word') closeMobileAssistPanels('word');
       overlay.classList.add('active');
       sheet.classList.add('open');
       if (window.DayOScrollLock) window.DayOScrollLock.lock();
@@ -5525,9 +5682,11 @@
       const overlay = document.getElementById(name + 'SheetOverlay');
       const sheet = document.getElementById(name + 'Sheet');
       const wasOpen = overlay.classList.contains('active');
+      if (sheet.contains(document.activeElement) && document.activeElement.blur) document.activeElement.blur();
       overlay.classList.remove('active');
       sheet.classList.remove('open');
       if (wasOpen && window.DayOScrollLock) window.DayOScrollLock.unlock();
+      if (document.body.dataset.mobileAssist === name) delete document.body.dataset.mobileAssist;
     }
 
     document.querySelectorAll('[data-close-sheet]').forEach((btn) => {
@@ -5649,6 +5808,7 @@
         if (words.length < 2 || !phrases.length) throw new Error('empty-word-help');
         renderWordHelpResults(words, phrases);
         setWordHelpStatus('필요한 표현을 탭하면 복사돼요.', false);
+        if (isMobileRoomLayout() && inputNode) inputNode.blur();
       }).catch(function () {
         if (requestId !== wordHelpRequestSequence) return;
         if (results) results.replaceChildren();
@@ -6303,10 +6463,12 @@
         if (activeController) activeController.abort();
         activeController = null;
         setBusy(false);
+        if (document.body.dataset.mobileAssist === 'partner') delete document.body.dataset.mobileAssist;
       };
 
       window.generatePartnerQuestionSuggestions = function () {
         if (busy) return;
+        closeMobileAssistPanels('partner');
         var content = document.getElementById('partner-topic-content');
         var card = document.getElementById('partner-topic-card');
         var requestId = ++requestSequence;

@@ -61,8 +61,8 @@ assert.match(room, /window\.__dayoInAppBlocked = true/);
 assert.match(room, /외부 브라우저에서 열어주세요/);
 
 assert.match(room, /\.talk-card-body\s*\{[\s\S]*overflow-y: auto;[\s\S]*-webkit-overflow-scrolling: touch;[\s\S]*touch-action: pan-y;/);
-assert.match(room, /@media \(max-width: 767px\)[\s\S]*height: min\(50dvh, 340px\)/);
-assert.match(room, /@media \(max-width: 767px\) and \(max-height: 700px\)[\s\S]*height: min\(46dvh, 270px\)/);
+assert.match(room, /@media \(max-width: 767px\)[\s\S]*height: min\(calc\(var\(--dayo-visual-height\) \* 0\.42\), 300px\)/);
+assert.match(room, /@media \(max-width: 767px\) and \(max-height: 700px\)[\s\S]*height: min\(calc\(var\(--dayo-visual-height\) \* 0\.4\), 240px\)/);
 
 const openHelpBlock = room.slice(room.indexOf('window.openWordHelp = function'), room.indexOf('window.openSentenceHelp = function'));
 assert.doesNotMatch(openHelpBlock, /logSessionEvent\('word_help_clicked'/);
