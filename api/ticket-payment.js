@@ -532,45 +532,46 @@ function merchantUid(productKey) {
   return 'dayo_' + productKey + '_' + Date.now() + '_' + crypto.randomUUID().replace(/-/g, '').slice(0, 12);
 }
 
-// PRE-OPEN temporary gate: remove or replace this restriction before the official launch.
-// It currently blocks ordinary users from calling the payment API directly; only a
-// payment_test=1 request from an authenticated, verified admin may run the payment E2E flow.
+// The real ticket products are available to authenticated customers during pre-open.
+// The temporary 1,000 KRW E2E product remains restricted to verified admins.
 async function prepare(service, user, body) {
   console.log('[DayO PAYMENT TEST DEBUG]', 'PREPARE_REQUEST', {
     payment_test: body.payment_test,
     payment_test_type: typeof body.payment_test,
     auth_user_id: shortDebugId(user && user.id)
   });
-  if (body.payment_test !== true) {
-    return { status: 403, body: { ok: false, error: 'payment-preopen' } };
-  }
-  var profileResult = await service
-    .from('profiles')
-    .select('id,role')
-    .eq('id', user.id)
-    .maybeSingle();
-  var profileRole = profileResult.data
-    ? String(profileResult.data.role || '').trim().toLowerCase()
-    : '';
-  var allowPaymentTest = !profileResult.error && !!profileResult.data && profileRole === 'admin';
-  console.log('[DayO PAYMENT TEST DEBUG]', 'SERVER_ADMIN_CHECK', {
-    query_success: !profileResult.error,
-    error_code: profileResult.error && profileResult.error.code ? profileResult.error.code : null,
-    error_message: profileResult.error && profileResult.error.message
-      ? String(profileResult.error.message).slice(0, 200)
-      : null,
-    profile_found: !!profileResult.data,
-    auth_user_id: shortDebugId(user && user.id),
-    profile_id: shortDebugId(profileResult.data && profileResult.data.id),
-    profile_role: profileRole || null,
-    allow_payment_test: allowPaymentTest
-  });
-  if (!allowPaymentTest) {
-    return { status: 403, body: { ok: false, error: 'admin-payment-test-required' } };
-  }
-
   var productKey = validTokenPart(body.product_id, 40);
   if (!productKey) return { status: 400, body: { ok: false, error: 'invalid-product' } };
+
+  if (productKey === 'admin_test_1000') {
+    if (body.payment_test !== true) {
+      return { status: 403, body: { ok: false, error: 'admin-payment-test-required' } };
+    }
+    var profileResult = await service
+      .from('profiles')
+      .select('id,role')
+      .eq('id', user.id)
+      .maybeSingle();
+    var profileRole = profileResult.data
+      ? String(profileResult.data.role || '').trim().toLowerCase()
+      : '';
+    var allowPaymentTest = !profileResult.error && !!profileResult.data && profileRole === 'admin';
+    console.log('[DayO PAYMENT TEST DEBUG]', 'SERVER_ADMIN_CHECK', {
+      query_success: !profileResult.error,
+      error_code: profileResult.error && profileResult.error.code ? profileResult.error.code : null,
+      error_message: profileResult.error && profileResult.error.message
+        ? String(profileResult.error.message).slice(0, 200)
+        : null,
+      profile_found: !!profileResult.data,
+      auth_user_id: shortDebugId(user && user.id),
+      profile_id: shortDebugId(profileResult.data && profileResult.data.id),
+      profile_role: profileRole || null,
+      allow_payment_test: allowPaymentTest
+    });
+    if (!allowPaymentTest) {
+      return { status: 403, body: { ok: false, error: 'admin-payment-test-required' } };
+    }
+  }
 
   var result = await service.rpc('prepare_verified_ticket_purchase', {
     p_user_id: user.id,

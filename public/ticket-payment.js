@@ -253,7 +253,8 @@
   }
 
   async function preparePayment(session, productId) {
-    var body = { action: 'prepare', product_id: productId, payment_test: true };
+    var body = { action: 'prepare', product_id: productId };
+    if (productId === 'admin_test_1000') body.payment_test = true;
     preopenDebug('PREPARE_REQUEST', {
       payment_test: body.payment_test,
       payment_test_type: typeof body.payment_test
@@ -341,11 +342,13 @@
         return;
       }
 
-      var paymentTestAccess = await hasAdminPaymentTestAccess();
-      if (!paymentTestAccess) {
-        showPreopenPaymentNotice('admin-payment-test-access-denied');
-        paying = false;
-        return;
+      if (selectedProduct.id === 'admin_test_1000') {
+        var paymentTestAccess = await hasAdminPaymentTestAccess();
+        if (!paymentTestAccess) {
+          showPreopenPaymentNotice('admin-payment-test-access-denied');
+          paying = false;
+          return;
+        }
       }
 
       var IMP = ensureImp();
