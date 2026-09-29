@@ -21,8 +21,6 @@
       '.dayo-legal-footer__sep{color:#D6D3D1;user-select:none;}',
       '.dayo-legal-footer__biz{max-width:920px;margin:0 auto 14px;display:grid;gap:4px;}',
       '.dayo-legal-footer__biz p{margin:0;}',
-      '.dayo-legal-footer__note{max-width:920px;margin:0 auto;display:grid;gap:8px;color:#8A827B;}',
-      '.dayo-legal-footer__note p{margin:0;}',
       '@media (max-width:640px){.dayo-legal-footer{padding:28px 16px;text-align:left;}.dayo-legal-footer__links{justify-content:flex-start;}}'
     ].join('');
     document.head.appendChild(style);
@@ -39,14 +37,13 @@
       '    <a href="/refund">취소 및 환불규정</a>',
       '  </nav>',
       '  <div class="dayo-legal-footer__biz">',
-      '    <p>상호명: DayO(돼요) | 대표자: 여승현 | 사업자등록번호: 등록 준비 중</p>',
-      '    <p>통신판매업신고번호: 통신판매업 신고 준비 중 | 사업장 소재지: 서울특별시 강동구 [상세주소 입력 대기]</p>',
-      '    <p>고객센터 이메일: <a href="mailto:dayo.speak@gmail.com">dayo.speak@gmail.com</a> | 실시간 상담: 카카오톡 채널 ‘DayO 돼요’</p>',
+      '    <p>서비스명: DayO(돼요) | 상호: 88드래곤즈 | 대표자: 여승현</p>',
+      '    <p>사업자등록번호: 687-79-00609</p>',
+      '    <p>사업장 소재지: 서울특별시 강동구 고덕로 262, 720호<br>(명일동, 고덕역효성해링턴타워 더퍼스트)</p>',
+      '    <p>통신판매업신고번호: 신고 준비 중</p>',
+      '    <p>고객센터 이메일: <a href="mailto:dayo.speak@gmail.com">dayo.speak@gmail.com</a></p>',
+      '    <p>실시간 상담: 카카오톡 채널 ‘DayO 돼요’</p>',
       '    <p>호스팅 서비스 제공자: Vercel Inc.</p>',
-      '  </div>',
-      '  <div class="dayo-legal-footer__note">',
-      '    <p>DayO는 통신판매중개자로서 거래 당사자가 아니며, 대화 파트너와 유저 간의 대화 세션 및 자율적 상호작용에 관한 의무와 책임은 각 당사자에게 있습니다.</p>',
-      '    <p>안전거래를 위해 토스페이먼츠 구매안전(에스크로) 서비스를 적용할 예정입니다.</p>',
       '  </div>',
       '</footer>'
     ].join('');
