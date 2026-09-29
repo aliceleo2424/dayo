@@ -30,7 +30,8 @@
   var recentLines = [];
   var lastHintsKey = '';
   var sessionTranscript = [];
-  var sessionStartedAt = new Date().toISOString();
+  var sessionStartedAt = null;
+  var sessionEndedAt = null;
   var utteranceSeq = 0;
   var sttRestartTimer = 0;
   var sttStartWatchdog = 0;
@@ -131,20 +132,81 @@
     return (Array.isArray(rows) ? rows : []).map(function (row, i) {
       var ts = row && row.timestamp;
       if (ts instanceof Date) ts = ts.toISOString();
-      else if (!ts) ts = new Date().toISOString();
+      else if (typeof ts !== 'string' || !ts.trim()) ts = null;
       return {
         id: (row && row.id) || ('t-' + i),
-        speaker: (row && row.speaker) || 'learner',
+        speaker: String((row && row.speaker) || '').trim().toLowerCase(),
         text: String((row && row.text) || '').trim(),
         timestamp: ts
       };
     }).filter(function (row) { return row.text; });
   }
 
+  function canonicalParticipantRole(access) {
+    if (!access || !access.allowed || access.adminTest || access.observer) return '';
+    if (access.role === 'user') return 'learner';
+    if (access.role === 'partner') return 'partner';
+    return '';
+  }
+
+  function transcriptStorageKey(access) {
+    var role = canonicalParticipantRole(access);
+    return role && access.bookingId ? 'dayo_session_transcript:' + String(access.bookingId) + ':' + role : '';
+  }
+
+  function timingStorageKey(access) {
+    var role = canonicalParticipantRole(access);
+    return role && access.bookingId ? 'dayo_session_timing:' + String(access.bookingId) + ':' + role : '';
+  }
+
+  function canonicalTranscriptSnapshot(rows, access) {
+    var role = canonicalParticipantRole(access);
+    if (!role) return [];
+    return serializeTranscript(rows).filter(function (row) {
+      return row.speaker === role && typeof row.timestamp === 'string' &&
+        row.timestamp.trim() && Number.isFinite(Date.parse(row.timestamp));
+    });
+  }
+
+  function restoreSessionTiming(access) {
+    var key = timingStorageKey(access);
+    var scheduled = access && access.scheduledAt ? Date.parse(access.scheduledAt) : NaN;
+    var windowStart = Number.isFinite(scheduled) ? scheduled - 5 * 60 * 1000 : NaN;
+    var windowEnd = Number.isFinite(scheduled) ? scheduled + 35 * 60 * 1000 : NaN;
+    var storedState = null;
+    if (key) {
+      try { storedState = JSON.parse(sessionStorage.getItem(key) || 'null'); } catch (e) { storedState = null; }
+    }
+    var storedStart = storedState && typeof storedState.startedAt === 'string'
+      ? Date.parse(storedState.startedAt) : NaN;
+    var storedEnd = storedState && typeof storedState.endedAt === 'string'
+      ? Date.parse(storedState.endedAt) : NaN;
+    var validStart = Number.isFinite(storedStart) && Number.isFinite(windowStart) &&
+      storedStart >= windowStart && storedStart <= windowEnd;
+    sessionStartedAt = validStart ? new Date(storedStart).toISOString() : new Date().toISOString();
+    var validEnd = Number.isFinite(storedEnd) && Number.isFinite(windowStart) &&
+      storedEnd >= windowStart && storedEnd <= windowEnd && storedEnd >= Date.parse(sessionStartedAt);
+    sessionEndedAt = validEnd ? new Date(storedEnd).toISOString() : null;
+    if (key) {
+      try { sessionStorage.setItem(key, JSON.stringify({ startedAt: sessionStartedAt, endedAt: sessionEndedAt })); } catch (e) { /* ignore */ }
+    }
+  }
+
+  function markSessionEnded(access) {
+    if (!sessionEndedAt) sessionEndedAt = new Date().toISOString();
+    var key = timingStorageKey(access);
+    if (key) {
+      try { sessionStorage.setItem(key, JSON.stringify({ startedAt: sessionStartedAt, endedAt: sessionEndedAt })); } catch (e) { /* ignore */ }
+    }
+    return sessionEndedAt;
+  }
+
   function backupTranscriptLocal() {
     var serialized = serializeTranscript(sessionTranscript);
     try {
       window.localStorage.setItem('last_session_transcript', JSON.stringify(serialized));
+      var key = transcriptStorageKey(window.DayORoomAccess);
+      if (key) window.localStorage.setItem(key, JSON.stringify(canonicalTranscriptSnapshot(serialized, window.DayORoomAccess)));
     } catch (e) { /* quota / private mode */ }
     window.DayOLastTranscript = serialized;
     window.sessionTranscript = serialized.slice();
@@ -153,13 +215,11 @@
 
   function recoverTranscriptForQuiz() {
     var access = window.DayORoomAccess;
-    var bookingId = access && access.bookingId ? String(access.bookingId) : '';
-    if (!bookingId) return [];
+    var key = transcriptStorageKey(access);
+    if (!key) return [];
     try {
-      var state = JSON.parse(sessionStorage.getItem('dayo_quiz_state:' + bookingId) || 'null');
-      if (!state || typeof state !== 'object') return [];
-      var rows = JSON.parse(localStorage.getItem('last_session_transcript') || '[]');
-      return Array.isArray(rows) ? serializeTranscript(rows) : [];
+      var rows = JSON.parse(localStorage.getItem(key) || '[]');
+      return Array.isArray(rows) ? canonicalTranscriptSnapshot(rows, access) : [];
     } catch (e) {
       return [];
     }
@@ -525,17 +585,12 @@
     if (!access || !access.allowed || access.adminTest || access.observer) {
       return Promise.resolve({ ok: false, local: true, transcript: serialized, skipped: true });
     }
+    var canonicalTranscript = canonicalTranscriptSnapshot(serialized, access);
     var extra = {
-      roomName: roomName(),
       startedAt: sessionStartedAt,
-      endedAt: new Date().toISOString(),
-      bookingId: access.bookingId,
-      learnerId: access.learnerId,
-      userId: access.userId
+      endedAt: markSessionEnded(access),
+      bookingId: access.bookingId
     };
-    if (access.role === 'partner') {
-      extra.partnerId = access.partnerId;
-    }
     var store = window.DayOProfileStore;
     var done = function (result) {
       var payload = result || { ok: false, local: true, transcript: serialized };
@@ -543,7 +598,7 @@
       return payload;
     };
     if (store && typeof store.saveSessionLog === 'function') {
-      transcriptSavePromise = store.saveSessionLog(sessionTranscript, extra).then(done).catch(function (err) {
+      transcriptSavePromise = store.saveSessionLog(canonicalTranscript, extra).then(done).catch(function (err) {
         return done({ ok: false, local: true, transcript: serialized, error: err });
       }).then(function (result) {
         if (!result || !result.ok) transcriptSavePromise = null;
@@ -1325,7 +1380,7 @@
   function start() {
     try {
       window.dayoSessionEnded = false;
-      sessionStartedAt = new Date().toISOString();
+      restoreSessionTiming(window.DayORoomAccess);
       sessionTranscript = recoverTranscriptForQuiz();
       window.sessionTranscript = sessionTranscript.slice();
       utteranceSeq = 0;

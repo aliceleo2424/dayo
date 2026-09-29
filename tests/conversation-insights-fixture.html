@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DayO Conversation Story Fixture</title>
+  <link rel="stylesheet" href="../public/conversation-insights.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 28px; color: #3e4a42; background: #fff8f5; font-family: Arial, sans-serif; }
+    main { display: grid; grid-template-columns: minmax(0, 440px) minmax(0, 720px); gap: 28px; align-items: start; max-width: 1220px; margin: 0 auto; }
+    .fixture-panel { min-width: 0; }
+    .fixture-label { margin: 0 0 10px; color: #786b64; font-size: 12px; font-weight: 800; }
+    @media (max-width: 760px) { body { padding: 12px; } main { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="fixture-panel">
+      <p class="fixture-label">Talk Record · learner-only</p>
+      <div id="session-fixture"></div>
+    </div>
+    <div class="fixture-panel">
+      <p class="fixture-label">My Page · monthly conversation</p>
+      <div id="month-fixture"></div>
+    </div>
+  </main>
+  <script src="../public/conversation-insights.js"></script>
+  <script>
+    (function () {
+      var api = window.DayOConversationInsights;
+      var start = Date.parse('2026-09-28T10:00:00+09:00');
+      var phrases = [
+        'I visited a small cafe near the river today',
+        'The owner recommended a warm seasonal drink',
+        'We talked about our favorite places in Seoul',
+        'I would like to visit that neighborhood again',
+        'It was a calm and lovely conversation'
+      ];
+      var rows = phrases.map(function (text, index) {
+        return { speaker: 'learner', text: text, timestamp: new Date(start + (index * 5 + 1) * 60000).toISOString() };
+      });
+      rows.push({ speaker: 'partner', text: 'This partner sentence is excluded completely', timestamp: new Date(start + 7 * 60000).toISOString() });
+      var metrics = api.analyzeSession(rows, '2026-09-28T10:00:00+09:00');
+      document.getElementById('session-fixture').innerHTML = api.sessionCardHtml(metrics) +
+        '<div class="talk-record-row" style="background:#fff;border:1px solid #ede4d5;border-radius:14px;padding:14px;margin-top:10px"><strong>💡 내가 실제로 말한 표현</strong><p style="margin:8px 0 0">“I visited a small cafe near the river today.”</p></div>';
+      var sessions = [4, 9, 15, 21, 28].map(function (day, index) {
+        return { id: String(day), date: '2026-09-' + String(day).padStart(2, '0') + 'T10:00:00+09:00', metrics: { totalWords: [92, 116, 103, 138, 151][index], hasLearnerEvidence: true } };
+      });
+      document.getElementById('month-fixture').innerHTML = api.monthlyHeroHtml(api.summarizeMonth(sessions, new Date('2026-09-28T20:00:00+09:00')));
+      api.bindChartInteractions(document.body);
+      if (new URLSearchParams(location.search).get('tooltip') === '1') {
+        var firstBar = document.querySelector('.dayo-story-bar');
+        if (firstBar) {
+          firstBar.classList.add('is-detail-open');
+          firstBar.setAttribute('aria-expanded', 'true');
+        }
+      }
+    })();
+  </script>
+</body>
+</html>

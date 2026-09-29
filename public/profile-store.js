@@ -1014,14 +1014,31 @@ function serializeTranscript(rows) {
   return rows.map(function (row, i) {
     var ts = row && row.timestamp;
     if (ts instanceof Date) ts = ts.toISOString();
-    else if (ts == null) ts = new Date().toISOString();
+    else if (typeof ts !== 'string' || !ts.trim()) ts = null;
     return {
       id: (row && row.id) || ('t-' + i),
-      speaker: (row && row.speaker) || 'learner',
+      speaker: String((row && row.speaker) || '').trim().toLowerCase(),
       text: String((row && row.text) || '').trim(),
       timestamp: ts
     };
   }).filter(function (row) { return row.text; });
+}
+
+function canonicalTranscriptRole() {
+  var access = window.DayORoomAccess;
+  if (!access || !access.allowed || access.adminTest || access.observer) return '';
+  if (access.role === 'user') return 'learner';
+  if (access.role === 'partner') return 'partner';
+  return '';
+}
+
+function canonicalTranscriptSnapshot(rows) {
+  var role = canonicalTranscriptRole();
+  if (!role) return [];
+  return serializeTranscript(rows).filter(function (row) {
+    return row.speaker === role && typeof row.timestamp === 'string' &&
+      row.timestamp.trim() && Number.isFinite(Date.parse(row.timestamp));
+  });
 }
 
 function backupTranscriptLocal(rows) {
@@ -1043,33 +1060,41 @@ function getLastTranscript() {
 
 async function saveSessionLog(transcript, extra) {
   extra = extra || {};
-  var serialized = backupTranscriptLocal(transcript);
+  var serialized = backupTranscriptLocal(canonicalTranscriptSnapshot(transcript));
   var payload = {
-    user_id: extra.userId || getAuthUserId() || null,
-    room_id: extra.roomName || '',
-    transcript: serialized
+    p_booking_id: extra.bookingId || null,
+    p_transcript: serialized,
+    p_started_at: extra.startedAt || null,
+    p_ended_at: extra.endedAt || null
   };
-  if (Object.prototype.hasOwnProperty.call(extra, 'feedback')) {
-    payload.feedback = extra.feedback;
-  }
 
   var client = getClient();
   if (!client) {
     return { ok: false, local: true, transcript: serialized, payload: payload };
   }
+  if (!payload.p_booking_id) {
+    return { ok: false, local: true, transcript: serialized, payload: payload, code: 'missing_booking_id' };
+  }
 
   try {
-    var result = await client.from('session_logs').insert(payload).select('id').single();
+    var result = await client.rpc('upsert_session_transcript', payload);
     if (result.error) throw result.error;
+    var data = result.data || {};
+    if (data.success !== true) {
+      var rejected = new Error(data.message || 'Transcript save was rejected');
+      rejected.code = data.code || 'transcript_save_rejected';
+      throw rejected;
+    }
     return {
       ok: true,
       local: true,
-      id: result.data && result.data.id,
+      id: data.session_log_id,
       transcript: serialized,
-      payload: payload
+      payload: payload,
+      participantRole: data.participant_role
     };
   } catch (err) {
-    console.error('[DayO] session_logs insert failed — localStorage kept', err);
+    console.error('[DayO] transcript RPC failed — localStorage kept', err);
     return { ok: false, local: true, transcript: serialized, payload: payload, error: err };
   }
 }

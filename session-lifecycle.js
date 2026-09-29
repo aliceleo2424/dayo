@@ -305,11 +305,14 @@
     logSessionEndedEvent('personal');
     if (typeof window.closeEarlyExitModal === 'function') window.closeEarlyExitModal();
     window.isEarlyExit = false;
-    var transcriptResult = await persistTranscript();
-    if (!transcriptResult || !transcriptResult.ok) {
-      console.error('[DayO Session] early-exit transcript was not stored remotely', transcriptResult && transcriptResult.error);
-      toast('대화 기록을 서버에 저장하지 못해 이 기기에 임시 보관했어요.');
-    }
+    persistTranscript().then(function (transcriptResult) {
+      if (!transcriptResult || !transcriptResult.ok) {
+        console.error('[DayO Session] early-exit transcript was not stored remotely', transcriptResult && transcriptResult.error);
+        toast('대화 기록을 서버에 저장하지 못해 이 기기에 임시 보관했어요.');
+      }
+    }).catch(function (error) {
+      console.error('[DayO Session] early-exit transcript save failed', error);
+    });
     if (ctx.bookingId && client()) {
       var result = await client().rpc('complete_learner_session', {
         p_booking_id: ctx.bookingId,

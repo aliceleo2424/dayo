@@ -5,6 +5,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-env.js"></script>
   <script src="supabase-client.js?v=20260921-session-persistence"></script>
+  <link rel="stylesheet" href="conversation-insights.css?v=20260928-conversation-story">
   <style>
     body:not(.room-access-granted) .studio { visibility: hidden; }
     #room-access-screen { position: fixed; inset: 0; z-index: 2147483647; display: grid; place-items: center; padding: 24px; background: #FFF8F5; color: #5C4A42; text-align: center; font-family: 'Gowun Dodum', sans-serif; }
@@ -3975,11 +3976,11 @@
 
   <script crossorigin src="https://unpkg.com/@daily-co/daily-js"></script>
   <script src="supabase-env.js"></script>
-  <script type="module" src="profile-store.js?v=20260921-session-persistence"></script>
+  <script type="module" src="profile-store.js?v=20260928-transcript-rpc"></script>
   <script src="chat-prefs.js"></script>
   <script src="talk-cards-data.js"></script>
   <script>window.__dayoUsePeerJS = true;</script>
-  <script src="room-live.js?v=20260929-mobile-stt-recovery"></script>
+  <script src="room-live.js?v=20260928-transcript-rpc"></script>
   <script src="learner-expressions.js?v=20260928-learner-only-quiz"></script>
   <script>
     (function () {
@@ -5996,7 +5997,7 @@
       openReviewFromTranscript(result, { autoStart: true });
     };
 
-    async function handleSessionEndRouting(result) {
+    function handleSessionEndRouting(result) {
       if (window.__dayoSessionEndRouted) return;
       window.__dayoSessionEndRouted = true;
       window.dayoSessionEnded = true;
@@ -6016,16 +6017,14 @@
         return;
       }
 
-      var transcriptResult = null;
-      try {
-        transcriptResult = await persistTranscript();
-      } catch (e) {
-        console.error('[DayO Session] transcript persistence failed', e);
-      }
-      if (!(window.DayORoomAccess && window.DayORoomAccess.adminTest) && (!transcriptResult || !transcriptResult.ok)) {
-        console.error('[DayO Session] transcript was not stored remotely', transcriptResult && transcriptResult.error);
-        showToast('대화 기록을 서버에 저장하지 못했어요. 이 기기에 임시 보관했어요.');
-      }
+      persistTranscript().then(function (transcriptResult) {
+        if (!(window.DayORoomAccess && window.DayORoomAccess.adminTest) && (!transcriptResult || !transcriptResult.ok)) {
+          console.error('[DayO Session] transcript was not stored remotely', transcriptResult && transcriptResult.error);
+          showToast('대화 기록을 서버에 저장하지 못했어요. 이 기기에 임시 보관했어요.');
+        }
+      }).catch(function (error) {
+        console.error('[DayO Session] transcript persistence failed', error);
+      });
 
       // 1) 파트너인 경우: 유저용 모달 차단 및 파트너 리포트 검수 팝업만 오픈
       if (isPartner) {
@@ -6114,8 +6113,8 @@
       }
     });
 
-    document.addEventListener('dayo:session-ended', async () => {
-      await handleSessionEndRouting(null);
+    document.addEventListener('dayo:session-ended', () => {
+      handleSessionEndRouting(null);
     });
 
     starButtons.forEach((btn) => {
@@ -6131,7 +6130,7 @@
       chip.addEventListener('click', () => chip.classList.toggle('selected'));
     });
 
-    document.getElementById('feedbackSubmit').addEventListener('click', async () => {
+    document.getElementById('feedbackSubmit').addEventListener('click', () => {
       closeRatingModal();
       if (window.isEarlyExit) {
         goToMypage();
@@ -6139,11 +6138,14 @@
       }
       showToast(t('room.toastFeedbackSent'));
       stopAllMedia();
-      var transcriptResult = await persistTranscript();
-      if (!transcriptResult || !transcriptResult.ok) {
-        console.error('[DayO Session] transcript save failed before review', transcriptResult && transcriptResult.error);
-        showToast('대화 기록을 서버에 저장하지 못했어요. 이 기기에 임시 보관했어요.');
-      }
+      persistTranscript().then(function (transcriptResult) {
+        if (!transcriptResult || !transcriptResult.ok) {
+          console.error('[DayO Session] transcript save failed before review', transcriptResult && transcriptResult.error);
+          showToast('대화 기록을 서버에 저장하지 못했어요. 이 기기에 임시 보관했어요.');
+        }
+      }).catch(function (error) {
+        console.error('[DayO Session] transcript save failed before review', error);
+      });
       if (typeof window.openQuizModalImmediately === 'function') {
         window.openQuizModalImmediately();
       } else {
@@ -7380,6 +7382,7 @@
     <button id="safety-report-submit" type="button" onclick="submitSafetyReport()" style="width:100%;margin-top:16px;padding:13px;border:0;border-radius:12px;background:#E11D48;color:#FFFFFF;font-size:14px;font-weight:800;cursor:pointer;">신고 전송하기</button>
   </div>
 </div>
-<script src="session-lifecycle.js?v=20260921-session-persistence"></script>
+<script src="session-lifecycle.js?v=20260928-transcript-rpc"></script>
+<script src="conversation-insights.js?v=20260928-transcript-rpc"></script>
 </body>
 </html>
