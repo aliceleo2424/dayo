@@ -18,13 +18,17 @@
 
   var sdk = window.supabase;
   if (!window.supabaseClient && sdk && typeof sdk.createClient === 'function' && url && key) {
+    var authOptions = {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      storage: window.localStorage
+    };
+    if (document.documentElement && document.documentElement.hasAttribute('data-password-recovery')) {
+      authOptions.storageKey = 'dayo-password-recovery-auth';
+    }
     window.supabaseClient = sdk.createClient(url, key, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-        storage: window.localStorage
-      }
+      auth: authOptions
     });
   }
 
