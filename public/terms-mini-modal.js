@@ -62,6 +62,66 @@
     }
   };
 
+  var CONTENTS_EN = {
+    terms: {
+      title: '📋 Terms of Service Summary',
+      body: [
+        '<p class="terms-mini-translation-note">This English translation is provided for convenience. If there is any discrepancy, the Korean version will prevail.</p>',
+        '<p class="terms-mini-section">[Purpose of the Service]</p>',
+        '<ul>',
+        '<li>DayO is a platform where learners and global conversation partners have one-to-one everyday conversations by video.</li>',
+        '</ul>',
+        '<p class="terms-mini-section">[Escrow Payment]</p>',
+        '<ul>',
+        '<li>Pass payments are held securely until the session is completed and are used to settle the partner’s activity fee after completion.</li>',
+        '</ul>',
+        '<p class="terms-mini-section">[Sanctions for Misconduct]</p>',
+        '<ul>',
+        '<li>False reservations, repeated no-shows without notice, abusive language or harassment, and fraudulent payment activity may result in usage restrictions, refusal of refunds, or account suspension.</li>',
+        '</ul>'
+      ].join('')
+    },
+    privacy: {
+      title: '📋 Personal Information Collection and Use Summary',
+      body: [
+        '<p class="terms-mini-translation-note">This English translation is provided for convenience. If there is any discrepancy, the Korean version will prevail.</p>',
+        '<p class="terms-mini-section">[Information Collected]</p>',
+        '<ul>',
+        '<li>Email, nickname, login identifier, payment and refund records, session usage records, and service usage logs</li>',
+        '</ul>',
+        '<p class="terms-mini-section">[Purposes of Use]</p>',
+        '<ul>',
+        '<li>Membership management, reservation and video session provision, payment and settlement, customer inquiry handling, and service improvement</li>',
+        '</ul>',
+        '<p class="terms-mini-section">[Retention Period]</p>',
+        '<ul>',
+        '<li>Information is destroyed without delay when membership is withdrawn. Payment and transaction records required by applicable law are retained for the statutory period.</li>',
+        '</ul>'
+      ].join('')
+    },
+    refund: {
+      title: '📋 Cancellation and Refund Policy Summary',
+      body: [
+        '<p class="terms-mini-translation-note">This English translation is provided for convenience. If there is any discrepancy, the Korean version will prevail.</p>',
+        '<p class="terms-mini-section">[Session Cancellation and Refund Standards]</p>',
+        '<ul>',
+        '<li>Cancellation with <strong>more than 6 hours</strong> remaining: the used ticket is <strong>returned with its original validity period</strong>.</li>',
+        '<li>Cancellation with <strong>6 hours or less</strong> remaining: cancellation is allowed, but the <strong>ticket is not returned</strong>.</li>',
+        '<li>New reservations can be made until <strong>4 hours before</strong> the conversation.</li>',
+        '</ul>',
+        '<p class="terms-mini-section">[Causes Attributable to the Platform or Partner]</p>',
+        '<ul>',
+        '<li>If the conversation cannot proceed due to circumstances attributable to DayO or the partner, the <strong>ticket is returned</strong> under separate refund standards.</li>',
+        '</ul>',
+        '<p class="terms-mini-section">[Validity Period and Other Terms]</p>',
+        '<ul>',
+        '<li>Tickets must be used within <strong>90 days of issuance</strong>.</li>',
+        '<li>Withdrawal from a digital content purchase, including a PDF, is unavailable after the download is completed.</li>',
+        '</ul>'
+      ].join('')
+    }
+  };
+
   var modal = null;
   var activeType = null;
   var activeCheckbox = null;
@@ -86,6 +146,7 @@
       'font-size:.9rem;line-height:1;cursor:pointer;flex:0 0 auto;}',
       '.terms-mini-body{flex:1 1 auto;min-height:0;overflow-y:auto;font-size:12.5px;line-height:1.55;color:#5C4A42;}',
       '.terms-mini-body p{margin:0 0 .45rem;}',
+      '.terms-mini-translation-note{padding:.65rem .75rem;border-left:3px solid #E85B48;background:#FFF5F2;color:#685953;}',
       '.terms-mini-section{margin:0.85rem 0 0.35rem !important;font-weight:800;color:#3E322D;}',
       '.terms-mini-section:first-child{margin-top:0 !important;}',
       '.terms-mini-body ul{margin:0 0 .55rem;padding-left:1.1rem;}',
@@ -103,6 +164,29 @@
 
   function modalIdFor(type) {
     return type === 'refund' ? 'refund-mini-modal' : 'terms-mini-modal';
+  }
+
+  function currentLang() {
+    var value = 'ko';
+    try {
+      value = window.DayOI18n && typeof window.DayOI18n.getLang === 'function'
+        ? window.DayOI18n.getLang()
+        : window.localStorage.getItem('dayo_lang');
+    } catch (error) { /* keep Korean default */ }
+    return String(value || '').toLowerCase() === 'en' ? 'en' : 'ko';
+  }
+
+  function contentFor(type) {
+    return currentLang() === 'en' ? CONTENTS_EN[type] : CONTENTS[type];
+  }
+
+  function applyModalControls(root) {
+    if (!root) return;
+    var english = currentLang() === 'en';
+    var closeButton = root.querySelector('[data-terms-mini-close]');
+    var confirmButton = root.querySelector('[data-terms-mini-confirm]');
+    if (closeButton) closeButton.setAttribute('aria-label', english ? 'Close' : '닫기');
+    if (confirmButton) confirmButton.textContent = english ? 'Confirm and agree' : '확인 및 동의';
   }
 
   function ensureModal(type) {
@@ -131,6 +215,7 @@
       '</div>'
     ].join('');
     document.body.appendChild(modal);
+    applyModalControls(modal);
 
     modal.addEventListener('click', function (e) {
       if (e.target === modal || e.target.closest('[data-terms-mini-close]')) {
@@ -154,7 +239,7 @@
   }
 
   function open(type, checkboxOrSelector) {
-    var conf = CONTENTS[type];
+    var conf = contentFor(type);
     if (!conf) return;
     var root = ensureModal(type);
     activeType = type;
@@ -163,6 +248,7 @@
     var body = root.querySelector('[data-terms-mini-body]');
     if (title) title.textContent = conf.title;
     if (body) body.innerHTML = conf.body;
+    applyModalControls(root);
     root.classList.add('is-open');
     root.style.display = 'flex';
     root.setAttribute('aria-hidden', 'false');
@@ -202,6 +288,16 @@
 
   function openRefundMiniModal(checkboxOrSelector) {
     open('refund', checkboxOrSelector || '#tkRefundAgree');
+  }
+
+  function refreshOpenModal() {
+    if (!activeType || !modal || !modal.classList.contains('is-open')) return;
+    var conf = contentFor(activeType);
+    var title = modal.querySelector('h3');
+    var body = modal.querySelector('[data-terms-mini-body]');
+    if (title) title.textContent = conf.title;
+    if (body) body.innerHTML = conf.body;
+    applyModalControls(modal);
   }
 
   function bindDelegatedClicks(root) {
@@ -260,6 +356,8 @@
       close();
     }
   }, true);
+
+  document.addEventListener('dayo:langchange', refreshOpenModal);
 
   window.DayOTermsMini = {
     open: open,

@@ -169,7 +169,7 @@
       '.dayo-password-status.is-reset-helper{margin-top:3px!important;line-height:1.55;color:#746b66}',
       '.dayo-password-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}.dayo-password-actions button,.dayo-account-password-btn{border:0;border-radius:12px;padding:11px 15px;font:inherit;font-size:13px;font-weight:800;cursor:pointer}',
       '.dayo-password-primary{background:#ff6b57;color:#fff}.dayo-password-secondary{background:#f4f1ed;color:#5c4a42}.dayo-password-actions button:disabled{opacity:.6;cursor:wait}',
-      '.dayo-account-settings{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:0;background:#fffdfb;border:1px solid #f1e8e3;border-radius:14px;padding:12px 14px;box-shadow:none}.dayo-account-settings[hidden]{display:none}.dayo-account-provider{margin:0!important;color:#746b66!important;font-size:12px;line-height:1.4}.dayo-account-password-btn{flex:0 0 auto;padding:8px 11px;border:1px solid #e5d9d2;background:#fff;color:#5c4a42;font-size:12px}',
+      '.dayo-account-settings{display:flex;flex:0 0 auto;align-items:center;justify-content:space-between;gap:12px;height:auto;min-height:0;background:#fffdfb;border:1px solid #f1e8e3;border-radius:14px;padding:12px 14px;box-shadow:none}.dayo-account-settings[hidden]{display:none}.dayo-account-copy{min-width:0}.dayo-account-desc,.dayo-account-provider{margin:3px 0 0!important;color:#746b66!important;font-size:12px;line-height:1.4}.dayo-account-password-btn{flex:0 0 auto;padding:8px 11px;border:1px solid #e5d9d2;background:#fff;color:#5c4a42;font-size:12px;box-shadow:none}',
       '@media(max-width:600px){.dayo-password-card{padding:20px;border-radius:18px}.dayo-password-actions{flex-direction:column-reverse}.dayo-password-actions button{width:100%}.dayo-account-settings{padding:10px 12px;flex-wrap:wrap}}'
     ].join('');
     document.head.appendChild(style);
@@ -365,8 +365,9 @@
     section.className = 'dayo-account-settings';
     section.hidden = true;
     section.innerHTML = [
-      '<h3 data-dp-text="accountTitle"></h3>',
-      '<p class="dayo-account-provider" id="dayoAccountProvider"></p>',
+      '<div class="dayo-account-copy"><h3 data-dp-text="accountTitle"></h3>',
+      '<p class="dayo-account-desc" data-dp-text="accountDesc"></p>',
+      '<p class="dayo-account-provider" id="dayoAccountProvider"></p></div>',
       '<button type="button" class="dayo-account-password-btn" id="dayoPasswordChangeButton" data-dp-text="change" hidden></button>'
     ].join('');
     column.insertBefore(section, column.firstChild);

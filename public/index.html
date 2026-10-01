@@ -55,11 +55,12 @@
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="naver-site-verification" content="559d32ddb9c5810352a97509510e1e9030ff4c85" />
-  <title data-i18n="page.title.index">DayO 돼요 — 1:1 Global Chat Lounge</title>
+  <title data-i18n="landing.meta.title">DayO 돼요 — 1:1 글로벌 대화 라운지</title>
+  <meta name="description" data-i18n="landing.meta.description" data-i18n-attr="content" content="외국인 파트너와 취향과 일상을 나누고, 필요한 순간 AI 언어 도움을 받는 1:1 글로벌 대화 서비스 DayO를 만나보세요.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="mobile-nav.css?v=20260916-gnb-minimal">
+  <link rel="stylesheet" href="mobile-nav.css?v=20261001-drawer-support">
   <script src="scroll-lock.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -212,7 +213,7 @@
     .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--text); flex-shrink: 0; background: transparent; }
     .logo-img {
       display: block;
-      height: 32px;
+      height: 40px;
       width: auto;
       max-width: 160px;
       object-fit: contain;
@@ -220,25 +221,9 @@
       background: transparent;
       background-color: unset;
     }
-    .logo-sub-slogan {
-      display: inline-flex;
-      flex-direction: column;
-      justify-content: center;
-      line-height: 1.2;
-      text-align: left;
-      margin-left: 8px;
-      padding-left: 8px;
-      border-left: 1px solid #EDE4D5;
-      white-space: nowrap;
-    }
-    .logo-sub-slogan > span:first-child { font-size: 10px; font-weight: 600; color: #57534E; letter-spacing: -0.2px; }
-    .logo-sub-slogan > span:last-child { font-size: 10px; font-weight: 500; color: #78716C; letter-spacing: -0.2px; }
     @media (max-width: 480px) {
       .logo { gap: 4px; }
-      .logo-img { height: 32px; max-width: 120px; }
-      .logo-sub-slogan { margin-left: 4px; padding-left: 6px; }
-      .logo-sub-slogan > span:first-child,
-      .logo-sub-slogan > span:last-child { font-size: 10px; }
+      .logo-img { height: 36px; max-width: 120px; }
     }
 
     .nav-desktop {
@@ -251,6 +236,8 @@
       min-width: 0;
       white-space: nowrap;
     }
+
+    .nav-mobile-quick { display: none; }
 
     .nav-desktop a {
       display: inline-flex;
@@ -308,25 +295,25 @@
     .header-cta {
       display: inline-flex; align-items: center; gap: 0.35rem;
       padding: 0.7rem 1.2rem;
-      background: linear-gradient(135deg, #FF7A68 0%, var(--coral) 55%, #FF8A4C 100%);
+      background: var(--coral);
       color: #fff;
       text-decoration: none;
       font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
       font-size: 0.9rem;
       font-weight: 700;
       border-radius: 999px;
-      box-shadow: 0 4px 0 var(--coral-dark), 0 8px 20px rgba(255, 107, 87, 0.26);
+      box-shadow: 0 3px 10px rgba(255, 107, 87, 0.16);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .header-cta:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 0 var(--coral-dark), 0 12px 24px rgba(255, 107, 87, 0.3);
+      box-shadow: 0 4px 12px rgba(255, 107, 87, 0.2);
     }
 
     .header-cta:active {
       transform: translateY(1px);
-      box-shadow: 0 2px 0 var(--coral-dark), 0 4px 12px rgba(255, 107, 87, 0.22);
+      box-shadow: 0 2px 7px rgba(255, 107, 87, 0.14);
     }
 
     .cms-announcement {
@@ -391,14 +378,238 @@
     .section-title {
       font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
       font-size: clamp(1.5rem, 3.5vw, 1.85rem); font-weight: 700;
-      line-height: 1.35; margin-bottom: 2.5rem;
+      line-height: 1.35; margin-bottom: 1.75rem;
     }
+
+    .landing-preopen-banner {
+      position: relative;
+      z-index: 3;
+      margin-top: 64px;
+      padding: 0.62rem 1rem;
+      background: #FFF3CF;
+      border-bottom: 1px solid rgba(150, 105, 20, 0.16);
+      color: #725316;
+      font-size: 0.82rem;
+      font-weight: 800;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 0.38rem 0.72rem;
+      border: 1px solid rgba(255, 107, 87, 0.2);
+      border-radius: 999px;
+      background: rgba(255, 232, 227, 0.72);
+      color: var(--coral-dark);
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+
+    .hero-product {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      width: fit-content;
+      margin: -0.65rem 0 1.7rem;
+      padding: 0.8rem 1rem;
+      border-left: 3px solid var(--coral);
+      border-radius: 0 14px 14px 0;
+      background: rgba(255, 252, 250, 0.78);
+      color: var(--text);
+    }
+    .hero-product strong { font-size: 0.95rem; }
+    .hero-product span { color: var(--text-muted); font-size: 0.82rem; font-weight: 700; }
+    .hero-keyline {
+      margin: -0.75rem 0 1.3rem;
+      color: var(--coral-dark);
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .landing-lead {
+      max-width: 46rem;
+      margin: -1.35rem 0 2rem;
+      color: var(--text-muted);
+      font-size: 1rem;
+      line-height: 1.8;
+      word-break: keep-all;
+    }
+
+    .empathy-grid,
+    .session-timeline {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.9rem;
+    }
+    .empathy-item,
+    .session-timeline li {
+      padding: 1rem 1.15rem;
+      border: 1px solid rgba(255, 209, 220, 0.55);
+      border-radius: 18px;
+      background: var(--bg-card);
+      box-shadow: 0 7px 22px var(--shadow-warm);
+      color: var(--text);
+      font-size: 0.92rem;
+      font-weight: 700;
+      line-height: 1.65;
+      list-style: none;
+    }
+    .empathy-closing {
+      margin: 1.6rem 0 0;
+      padding: 1.15rem 1.3rem;
+      border-radius: 18px;
+      background: var(--coral-pale);
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 800;
+      line-height: 1.75;
+      word-break: keep-all;
+    }
+
+    .flow-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+    .flow-grid .journey-card { min-height: 180px; }
+    .landing-subsection { margin-top: 3.5rem; }
+    .landing-subsection h3 {
+      margin: 0 0 0.65rem;
+      font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
+      font-size: clamp(1.2rem, 3vw, 1.5rem);
+      line-height: 1.4;
+    }
+    .landing-subsection > p {
+      max-width: 48rem;
+      margin: 0 0 1.35rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      word-break: keep-all;
+    }
+    .secondary-tool {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 2rem;
+      padding: 1rem 1.15rem;
+      border: 1px dashed rgba(255, 107, 87, 0.35);
+      border-radius: 18px;
+      background: rgba(255, 252, 250, 0.72);
+    }
+    .secondary-tool p { margin: 0; color: var(--text-muted); line-height: 1.6; }
+    .secondary-tool button {
+      flex: 0 0 auto;
+      border: 0;
+      background: transparent;
+      color: var(--coral-dark);
+      font-family: inherit;
+      font-weight: 800;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
+    }
+
+    .session-timeline {
+      margin: 0;
+      padding: 0;
+    }
+    .session-timeline strong { display: block; margin-bottom: 0.25rem; color: var(--coral-dark); }
+
+    .ticket-price-card--trial {
+      border-color: rgba(255, 107, 87, 0.55);
+      background: linear-gradient(160deg, #FFFCFA 0%, #FFF0EB 100%);
+      box-shadow: 0 12px 30px rgba(255, 107, 87, 0.14);
+    }
+    .ticket-price-card .ticket-session-copy { color: var(--text); font-weight: 700; }
+    .ticket-policy-note {
+      margin: 1rem auto 1.4rem;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      font-weight: 700;
+    }
+
+    .faq-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.8rem;
+    }
+    .faq-list details {
+      align-self: start;
+      border: 1px solid rgba(255, 209, 220, 0.55);
+      border-radius: 16px;
+      background: var(--bg-card);
+      box-shadow: 0 7px 20px var(--shadow-warm);
+      overflow: hidden;
+    }
+    .faq-list summary {
+      padding: 1rem 1.1rem;
+      color: var(--text);
+      font-size: 0.92rem;
+      font-weight: 800;
+      line-height: 1.5;
+      cursor: pointer;
+    }
+    .faq-list details p {
+      margin: 0;
+      padding: 0 1.1rem 1.05rem;
+      color: var(--text-muted);
+      font-size: 0.86rem;
+      line-height: 1.7;
+      word-break: keep-all;
+    }
+    .faq-list a { color: var(--coral-dark); font-weight: 800; }
+    .faq-contact {
+      display: flex;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+    .faq-actions {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    .faq-all-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0.75rem 1.2rem;
+      border: 1px solid rgba(255, 107, 87, 0.35);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--coral-dark);
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .kakao-inquiry-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      max-width: 100%;
+      padding: 0.75rem 1.2rem;
+      border-radius: 999px;
+      background: #FEE500;
+      color: #3C1E1E;
+      font-weight: 800;
+      text-decoration: none;
+      box-sizing: border-box;
+    }
+
+    [data-landing-hidden] { display: none !important; }
+    body[data-landing-auto-popup="off"] .cms-popup-overlay { display: none !important; }
 
     /* Hero — guest landing (original 2-column). Logged-in overrides below. */
     .hero {
-      min-height: 100vh;
-      display: flex; align-items: center;
-      padding: 6.5rem 0 4rem;
+      min-height: auto;
+      display: flex; align-items: flex-start;
+      padding: 1.5rem 0 2.25rem;
     }
 
     .home-stage-inner {
@@ -408,47 +619,62 @@
     .hero-grid {
       display: flex;
       flex-direction: row;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
-      gap: 48px;
+      gap: 2rem;
     }
 
-    .hero-copy { flex: 1 1 0; min-width: 0; text-align: left; }
+    .hero-copy { flex: 0 1 820px; min-width: 0; text-align: center; }
 
     .hero-title {
       font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
-      font-size: clamp(1.55rem, 4.2vw, 2.55rem);
-      font-weight: 700; line-height: 1.28; margin-bottom: 1.25rem;
+      font-size: clamp(1.7rem, 3.7vw, 2.55rem);
+      font-weight: 700; line-height: 1.3; margin-bottom: 1rem;
       letter-spacing: -0.02em;
       word-break: keep-all;
-      white-space: pre-line;
     }
 
-    .title-rotator { transition: opacity 0.55s ease; }
-    .title-rotator.fade-out { opacity: 0; }
-    .hero-title em { font-style: normal; color: var(--coral); }
+    .hero-title-visible { display: block; }
+    .hero-title-rotator { display: inline-grid; text-align: center; white-space: nowrap; color: var(--coral); }
+    .hero-title-rotator > span { grid-area: 1 / 1; }
+    .hero-title-rotator-size { visibility: hidden; }
+    [data-hero-rotator] { transition: opacity 0.22s ease, transform 0.22s ease; }
+    [data-hero-rotator].is-changing { opacity: 0; transform: translateY(3px); }
+    .hero-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    @media (prefers-reduced-motion: reduce) { [data-hero-rotator] { transition: none; } }
 
     .hero-subtitle {
       font-size: clamp(0.98rem, 2vw, 1.1rem);
       color: var(--text-muted); line-height: 1.8;
-      margin-bottom: 2rem; max-width: 36rem;
+      margin: 0 auto 1.5rem; max-width: 36rem;
       word-break: keep-all;
-      white-space: pre-line;
     }
 
     .cta-wrap {
-      display: flex; flex-direction: column; align-items: flex-start; gap: 0.75rem;
+      display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
     }
 
-    .hero-visual {
+    .hero-test-note {
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+    .hero-secondary-actions {
       display: flex;
-      flex-direction: column;
+      flex-wrap: wrap;
       align-items: center;
-      justify-content: center;
-      flex: 1 1 0;
-      min-width: 0;
-      padding: 0 1rem;
-      box-sizing: border-box;
+      gap: 0.45rem 1rem;
+    }
+    .hero-trial-link {
+      border: 0;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      cursor: pointer;
     }
 
     .cta-badge { display: none; }
@@ -461,20 +687,20 @@
       font-weight: 700;
       color: #fff;
       text-decoration: none;
-      background: linear-gradient(135deg, #FF7A68 0%, var(--coral) 55%, #FF8A4C 100%);
+      background: var(--coral);
       border: none;
       border-radius: var(--radius-lg);
       cursor: pointer;
-      box-shadow: 0 5px 0 var(--coral-dark), 0 10px 28px rgba(255, 107, 87, 0.26);
+      box-shadow: 0 3px 10px rgba(255, 107, 87, 0.16);
       transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
     .home-cta-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 7px 0 var(--coral-dark), 0 14px 32px rgba(255, 107, 87, 0.3);
+      box-shadow: 0 4px 12px rgba(255, 107, 87, 0.2);
     }
     .home-cta-btn:active {
-      transform: translateY(3px);
-      box-shadow: 0 2px 0 var(--coral-dark), 0 6px 16px rgba(255, 107, 87, 0.2);
+      transform: translateY(1px);
+      box-shadow: 0 2px 7px rgba(255, 107, 87, 0.14);
     }
 
     .cta-btn, .home-quiz-link {
@@ -515,7 +741,7 @@
     }
     .lounge-grid {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 0.75rem;
     }
     .lounge-card {
@@ -1172,7 +1398,78 @@
     }
 
     /* Journey section */
-    .journey { padding: var(--section-gap) 0; }
+    .journey { padding: 4.5rem 0; }
+
+    .conversation-overview {
+      padding: 4rem 0;
+      background: rgba(255, 255, 255, 0.56);
+    }
+    .conversation-overview .flow-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      align-items: stretch;
+    }
+    .conversation-overview .flow-grid .journey-card {
+      min-height: 0;
+      padding: 1.5rem 1.35rem;
+    }
+    .conversation-overview .landing-lead,
+    .conversation-overview .journey-desc { color: #6D5A53; }
+    @media (max-width: 1024px) {
+      .conversation-overview .flow-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+    .journey-card__head,
+    .partner-card__head {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+      margin-bottom: 0.7rem;
+      min-width: 0;
+    }
+    .journey-card__head .journey-step,
+    .journey-card__head .journey-icon,
+    .journey-card__head .journey-title,
+    .partner-card__head .journey-icon,
+    .partner-card__head .journey-title { margin: 0; }
+    .journey-card__head .journey-step,
+    .journey-card__head .journey-icon,
+    .partner-card__head .journey-icon { flex: 0 0 auto; }
+    .journey-card__head .journey-title,
+    .partner-card__head .journey-title { min-width: 0; }
+    .topic-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      margin-top: 1rem;
+    }
+    .topic-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.7rem 0.9rem;
+      border: 1px solid rgba(255, 107, 87, 0.2);
+      border-radius: 999px;
+      background: rgba(255, 252, 250, 0.9);
+      color: var(--text);
+      font-size: 0.88rem;
+      font-weight: 800;
+    }
+    .session-ribbon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.45rem 0.7rem;
+      margin-top: 2rem;
+      padding: 0.95rem 1.2rem;
+      border-radius: 18px;
+      background: var(--coral-pale);
+      color: var(--text);
+      font-size: 0.94rem;
+      font-weight: 800;
+    }
+    .session-ribbon span[aria-hidden="true"] { color: var(--coral-dark); }
 
     .journey-grid {
       display: grid;
@@ -1195,9 +1492,10 @@
       flex-direction: column;
       flex: 1;
       height: 100%;
-      min-height: 280px;
+      min-height: 0;
+      padding: 1.5rem 1.35rem;
     }
-    #partners .journey-title { min-height: 2.9rem; }
+    #partners .journey-title { min-height: 0; }
     #partners .journey-desc { flex: 1; }
 
     .journey-card[data-open-quiz] {
@@ -1404,13 +1702,19 @@
 
     /* Scroll reveal */
     .reveal {
-      opacity: 0; transform: translateY(28px);
-      transition: opacity 0.65s ease, transform 0.65s ease;
+      opacity: 1;
+      transform: none;
     }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
-    .reveal-delay-1 { transition-delay: 0.1s; }
-    .reveal-delay-2 { transition-delay: 0.2s; }
-    .reveal-delay-3 { transition-delay: 0.3s; }
+    @media (prefers-reduced-motion: no-preference) {
+      .reveal.visible { animation: reveal-enter 0.45s ease both; }
+      .reveal-delay-1 { animation-delay: 0.1s; }
+      .reveal-delay-2 { animation-delay: 0.2s; }
+      .reveal-delay-3 { animation-delay: 0.3s; }
+      @keyframes reveal-enter {
+        from { transform: translateY(12px); }
+        to { transform: none; }
+      }
+    }
 
     /* Modal, Quiz, Chat — preserved styles */
     .modal-overlay {
@@ -1847,17 +2151,25 @@
     body.is-logged-in .nav-drawer a.nav-auth-only.nav-drawer__cta {
       display: inline-flex;
     }
+    .nav-drawer a.nav-auth-only.nav-drawer__cta {
+      background: #fff;
+      color: var(--text);
+      border: 1px solid rgba(92, 74, 66, 0.2);
+      box-shadow: none;
+    }
+    .nav-drawer > .btn-logout { width: auto; margin: 0.35rem auto 0; padding: 0.45rem; font-size: 0.82rem; text-decoration: underline; }
     .nav-drawer > .btn-logout { display: none; }
     body.is-logged-in .nav-drawer > .btn-logout { display: flex; }
     .header-mypage-cta {
       font-weight: 800;
     }
+    body.nav-drawer-open .header-mypage-cta { visibility: hidden; }
     #service-intro, #partners, #pricing, #about, #tutors, #booking, #reviews,
-    #topics, #how, #ai-help, #tickets {
+    #topics, #how, #session, #faq, #ai-help, #tickets {
       scroll-margin-top: 5.75rem;
     }
 
-    /* Mobile / tablet (md 미만): compact header — logo · profile · quick action */
+    /* Mobile / tablet (md 미만): logo · quick links · account · menu */
     @media (max-width: 767px) {
       header {
         width: 100%;
@@ -1884,9 +2196,25 @@
       }
 
       .logo-img {
-        height: 32px;
+        height: 36px;
         width: auto;
         max-width: 140px;
+      }
+
+      .nav-mobile-quick {
+        display: flex;
+        align-items: center;
+        gap: clamp(10px, calc(2vw + 4px), 14px);
+        min-width: 0;
+        white-space: nowrap;
+      }
+
+      .nav-mobile-quick a {
+        color: var(--text);
+        font-size: clamp(0.72rem, 3.2vw, 0.82rem);
+        font-weight: 700;
+        text-decoration: none;
+        white-space: nowrap;
       }
 
       .logo-sub-slogan {
@@ -1897,7 +2225,7 @@
       .nav-desktop { display: none; }
 
       .header-actions {
-        flex: 1;
+        flex: 0 0 auto;
         min-width: 0;
         display: flex;
         align-items: center;
@@ -1906,13 +2234,38 @@
       }
 
       .header-mode.user-badge {
-        flex: 1;
-        min-width: 0;
-        max-width: 220px;
+        flex: 0 0 44px;
+        width: 44px;
+        height: 44px;
         display: flex;
         align-items: center;
         justify-content: center;
       }
+
+      .header-mode[data-mode-switch="inline"] .ms-login-trigger,
+      .header-mode .header-mypage-cta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 44px;
+        width: 44px;
+        min-width: 44px;
+        height: 44px;
+        min-height: 44px;
+        padding: 0;
+        border: 1px solid #EDE4D5;
+        border-radius: 11px;
+        background: #FFFCFA;
+        box-shadow: none;
+      }
+
+      .header-mode .ms-login-trigger > span[aria-hidden="true"],
+      .header-mode .header-mypage-cta > span[aria-hidden="true"] {
+        font-size: 18px;
+        line-height: 1;
+      }
+
+      .header-mode .header-mypage-cta > span:not([aria-hidden="true"]) { display: none; }
 
       .header-mode .ms-profile,
       .header-mode .ms-btn,
@@ -1955,6 +2308,9 @@
         display: none !important;
       }
 
+      #mobileNav .admin-dash-link { display: none !important; }
+      #mobileNav .nav-drawer__cta { min-height: 44px; padding: 0.55rem 0.85rem; }
+
       .header-actions .header-cta {
         display: inline-flex;
         flex-shrink: 0;
@@ -1963,31 +2319,24 @@
         font-weight: 700;
         white-space: nowrap;
         border-radius: 12px;
-        box-shadow: 0 3px 0 var(--coral-dark), 0 6px 14px rgba(255, 107, 87, 0.22);
+        box-shadow: 0 3px 10px rgba(255, 107, 87, 0.16);
       }
 
+      .header-actions .landing-header-cta { display: none; }
+
       .menu-toggle {
-        width: 34px;
-        height: 34px;
-        font-size: 1rem;
-        border-radius: 10px;
+        width: 44px;
+        height: 44px;
+        font-size: 1.1rem;
+        border-radius: 11px;
       }
     }
 
     @media (max-width: 767px) {
-      .hero-grid { flex-direction: column; text-align: center; gap: 3rem; }
-      .hero-copy { text-align: center; }
+      .hero-grid { flex-direction: column; text-align: center; gap: 1.5rem; }
+      .hero-copy { flex: 0 1 auto; width: 100%; text-align: center; }
       .hero-subtitle { margin-left: auto; margin-right: auto; }
       .cta-wrap { align-items: center; }
-      .hero-visual {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        padding: 0 1rem;
-        box-sizing: border-box;
-      }
       .visual-card {
         width: 100%;
         max-width: 340px;
@@ -1997,19 +2346,74 @@
     }
 
     @media (min-width: 768px) {
-      .hero-copy { text-align: left; }
-      .hero-visual { align-items: flex-end; }
-      .cta-wrap { align-items: flex-start; }
+      .hero-copy { text-align: center; }
+      .cta-wrap { align-items: center; }
     }
 
     @media (max-width: 860px) {
       .journey-grid { grid-template-columns: 1fr; max-width: 420px; margin: 0 auto; }
+      .flow-grid,
+      .faq-list { grid-template-columns: 1fr; }
+      .conversation-overview .flow-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .review-card { transform: none !important; }
       .cms-magazine-grid { grid-template-columns: 1fr; max-width: 430px; margin: 0 auto; }
     }
 
     @media (max-width: 600px) {
       .section-inner { padding: 0 1rem; }
+      .landing-preopen-banner { margin-top: 58px; padding: 0.55rem 0.8rem; font-size: 0.76rem; }
+      .hero { min-height: auto; padding: 1.5rem 0 2.5rem; }
+      .hero-eyebrow { font-size: 0.72rem; }
+      .hero-product { width: 100%; box-sizing: border-box; text-align: left; }
+      .empathy-grid,
+      .session-timeline { grid-template-columns: 1fr; }
+      .secondary-tool { align-items: flex-start; flex-direction: column; }
+      .hero-grid { gap: 1.25rem; }
+      .hero-title { font-size: clamp(1.65rem, 8.2vw, 2.15rem); }
+      .hero-subtitle { margin-bottom: 1.35rem; }
+      .home-cta-btn { width: 100%; padding: 1rem 1.1rem; }
+      .hero-secondary-actions { justify-content: center; }
+      .journey { padding: 3.25rem 0; }
+      .conversation-overview { padding: 3rem 0; }
+      .conversation-overview .flow-grid { grid-template-columns: 1fr; }
+      .landing-subsection { margin-top: 2.25rem; }
+      .topic-chips { gap: 0.5rem; }
+      .topic-chip { padding: 0.62rem 0.78rem; font-size: 0.8rem; }
+      .session-ribbon { padding: 0.85rem 0.75rem; font-size: 0.82rem; }
+      .dayo-video-wrapper { margin-top: 1.75rem; }
+      #partners .journey-grid {
+        display: flex;
+        max-width: none;
+        overflow-x: auto;
+        gap: 0.8rem;
+        margin: 0 -1rem;
+        padding: 0.1rem 1rem 0.75rem;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      #partners .journey-grid::-webkit-scrollbar { display: none; width: 0; height: 0; }
+      #partners .journey-card {
+        flex: 0 0 min(82vw, 310px);
+        scroll-snap-align: start;
+      }
+      .ticket-price-row {
+        display: flex;
+        overflow-x: auto;
+        gap: 0.75rem;
+        margin: 0 -1rem 1.2rem;
+        padding: 0.1rem 1rem 0.75rem;
+        scroll-snap-type: x mandatory;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      .ticket-price-row::-webkit-scrollbar { display: none; width: 0; height: 0; }
+      .ticket-price-card {
+        flex: 0 0 min(82vw, 310px);
+        padding: 1rem;
+        scroll-snap-align: start;
+      }
+      .kakao-inquiry-btn { width: 100%; }
       .chat-fab { bottom: 1.25rem; right: 1.25rem; }
       .chat-fab::after {
         right: 50%;
@@ -2276,7 +2680,7 @@
     }
   </style>
 </head>
-<body class="theme-learner" data-dayo-role="learner">
+<body class="theme-learner" data-dayo-role="learner" data-landing-auto-popup="off">
   <script>
     (function applyPartnerTheme() {
       function enterPartner() {
@@ -2315,7 +2719,7 @@
       } catch (e) {}
     })();
   </script>
-  <script src="i18n.js?v=20260916-cta-swap"></script>
+  <script src="i18n.js?v=20261001-nav-tickets"></script>
 
   <div class="mesh-bg" aria-hidden="true">
     <div class="mesh-bg__layer mesh-bg__layer--1"></div>
@@ -2328,182 +2732,110 @@
     <div class="header-inner">
       <a href="/" class="logo" data-i18n="nav.homeAria" data-i18n-attr="aria-label" aria-label="DayO 메인으로 이동">
         <img src="/images/logo.png" alt="DayO" class="logo-img">
-        <div class="logo-sub-slogan">
-          <span>1:1 Global Culture</span>
-          <span>Conversation Lounge</span>
-        </div>
       </a>
 
       <nav class="nav-desktop" data-i18n="nav.mainMenuAria" data-i18n-attr="aria-label" aria-label="주요 메뉴">
-        <a href="#topics" data-i18n="nav.topics">대화 주제</a>
-        <a href="#partners" data-i18n="nav.partners">대화 파트너</a>
-        <a href="#how" data-i18n="nav.how">진행 방식</a>
-        <a href="#tickets" data-i18n="nav.tickets">세션 티켓</a>
+        <a href="#how" data-i18n="landing.nav.how">이용 방법</a>
+        <a href="#pricing" data-i18n="landing.nav.pricing">티켓</a>
+        <a href="/faq.html" data-i18n="landing.nav.faq">FAQ</a>
+      </nav>
+
+      <nav class="nav-mobile-quick" data-i18n="nav.mainMenuAria" data-i18n-attr="aria-label" aria-label="주요 메뉴">
+        <a href="#how" data-i18n="landing.nav.how">이용 방법</a>
+        <a href="#pricing" data-i18n="landing.nav.pricing">티켓</a>
       </nav>
 
       <div class="header-actions">
         <div class="header-mode user-badge" data-mode-switch="inline"></div>
         <a href="https://dayo-sufk.vercel.app/admin/dashboard" class="admin-dash-link" data-admin-dashboard-link target="_blank" rel="noopener noreferrer" hidden aria-hidden="true">관리자 대시보드</a>
-        <div data-i18n-lang="icon"></div>
-        <button class="menu-toggle" id="menuToggle" type="button" data-i18n="nav.menuOpen" data-i18n-attr="aria-label" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
+        <div class="landing-language-control" data-i18n-lang="icon" data-i18n-languages="KO,EN"></div>
+        <button type="button" class="header-cta landing-header-cta" style="border: 0; cursor: pointer;" data-booking-open data-i18n="landing.nav.start">첫 대화 시작하기</button>
+        <button class="menu-toggle" id="menuToggle" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button>
       </div>
     </div>
   </header>
-  <div class="cms-announcement" id="cmsAnnouncement" hidden>
+  <div class="cms-announcement" id="cmsAnnouncement" data-landing-hidden hidden aria-hidden="true">
     <a id="cmsAnnouncementLink" href="#"></a>
   </div>
   <div class="nav-drawer-backdrop" id="mobileNavBackdrop"></div>
   <nav class="nav-drawer" id="mobileNav" data-i18n="nav.mobileMenuAria" data-i18n-attr="aria-label" aria-label="모바일 메뉴">
-    <div class="nav-drawer__head">DayO 메뉴</div>
-    <div data-i18n-lang="drawer"></div>
-    <a href="#topics" data-i18n="nav.topics">대화 주제</a>
-    <a href="#partners" data-i18n="nav.partners">대화 파트너</a>
-    <a href="#how" data-i18n="nav.how">진행 방식</a>
-    <a href="#tickets" data-i18n="nav.tickets">세션 티켓</a>
-    <a href="/mypage.html" class="header-cta nav-drawer__cta nav-auth-only" data-nav-close>👤 마이페이지</a>
+    <div class="nav-drawer__head" data-i18n="landing.nav.menuTitle">DayO 메뉴</div>
+    <a href="/faq.html" data-i18n="landing.nav.faq">FAQ</a>
+    <div class="landing-language-control" data-i18n-lang="drawer" data-i18n-languages="KO,EN"></div>
+    <button type="button" class="header-cta nav-drawer__cta" style="border: 0; cursor: pointer;" data-booking-open data-i18n="landing.nav.start">첫 대화 시작하기</button>
     <a href="https://dayo-sufk.vercel.app/admin/dashboard" class="admin-dash-link" data-admin-dashboard-link target="_blank" rel="noopener noreferrer" hidden aria-hidden="true">관리자 대시보드</a>
-    <button type="button" onclick="handleLogout(event)" class="btn-logout" style="cursor: pointer;">로그아웃</button>
+    <button type="button" onclick="handleLogout(event)" class="btn-logout" style="cursor: pointer;" data-i18n="landing.nav.logout">로그아웃</button>
   </nav>
 
   <div class="page">
+    <div class="landing-preopen-banner" role="status" data-i18n="landing.banner">10월 정식 오픈 준비 중 · DayO 대화 세션을 준비하고 있어요</div>
 
     <!-- ===== Landing hero (always visible) ===== -->
-    <section class="hero home-stage" data-landing-hero>
+    <section class="hero home-stage" id="about" data-landing-hero-static>
       <div class="section-inner home-stage-inner">
         <div class="hero-grid">
           <div class="hero-copy">
-            <h1 class="hero-title" data-i18n="hero.title">외국인과 이야기해보고 싶지만, 어디서 어떻게 시작할지 몰랐다면</h1>
-            <p class="hero-subtitle" data-i18n="hero.subtitle">관심사가 맞는 사람과 준비된 이야기로 가볍게 만나보세요. 단어가 생각나지 않을 때에는 AI 매니저가 함께해요.</p>
+            <h1 class="hero-title">
+              <span class="hero-sr-only" data-i18n="landing.hero.title">외국인과 눈을 맞추며 대화가 돼요.</span>
+              <span class="hero-title-visible" aria-hidden="true">
+                <span data-i18n="landing.hero.titlePrefix">외국인과</span>
+                <span class="hero-title-rotator"><span class="hero-title-rotator-size" data-i18n="landing.hero.longest">눈을 맞추며</span><span data-hero-rotator>눈을 맞추며</span></span>
+                <span data-i18n="landing.hero.titleSuffix">대화가 돼요.</span>
+              </span>
+            </h1>
+            <p class="hero-subtitle" data-i18n="landing.hero.description">막히면 한국어로 말해도 괜찮은, 외국인 파트너와의 1:1 화상 대화</p>
             <div class="cta-wrap">
-              <a href="#quiz" class="home-cta-btn" id="startQuizBtn" data-i18n="hero.quizCta">내 스피킹 감각 알아보기 ✨</a>
-              <a href="#topics" class="home-quiz-link cta-btn" id="scrollToTopicsBtn" data-i18n="hero.cta">어떤 대화를 나누나요? 👉</a>
-            </div>
-          </div>
-
-          <div class="hero-visual">
-            <div class="visual-card">
-              <span class="live-badge" data-i18n="hero.liveBadge">AI 코파일럿 실시간 지원 중</span>
-              <div class="phone-frame">
-                <div class="partner-profile" id="partnerProfile">
-                  <div class="partner-avatar" id="partnerAvatar" data-hair="bob"
-                       role="img" aria-label="미소 짓는 Linh 파스텔 아바타">
-                    <span class="avatar-body"></span>
-                    <span class="avatar-neck"></span>
-                    <span class="avatar-hair"></span>
-                    <span class="avatar-face">
-                      <span class="avatar-eye avatar-eye--left"></span>
-                      <span class="avatar-eye avatar-eye--right"></span>
-                      <span class="avatar-blush avatar-blush--left"></span>
-                      <span class="avatar-blush avatar-blush--right"></span>
-                      <span class="avatar-smile"></span>
-                    </span>
-                    <span class="avatar-fringe"></span>
-                  </div>
-                  <div class="partner-name" id="partnerName">Linh from Vietnam</div>
-                </div>
-                <div class="speech-bubble" id="partnerGreeting">Xin chào! Bạn khỏe không? 🌿</div>
+              <button type="button" class="home-cta-btn" data-open-quiz data-i18n="landing.hero.testCta">무료로 스피킹 감각 확인하기</button>
+              <div class="hero-secondary-actions">
+                <button type="button" class="home-quiz-link cta-btn" data-booking-open data-i18n="landing.nav.start">첫 대화 시작하기</button>
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </section>
 
-    <!-- 3Step Journey: 내 스피킹 감각 알아보기 -->
-    <section class="journey" id="service-intro" data-landing-only>
+    <!-- Integrated conversation flow -->
+    <section class="journey conversation-overview" id="how" data-landing-only>
       <div class="section-inner">
-        <p class="section-label reveal" data-i18n="journey.eyebrow">How it works</p>
-        <h2 class="section-title reveal" data-i18n="journey.title">3단계로 완성하는 나만의 회화 여정</h2>
-        <div class="journey-grid">
-          <article class="journey-card reveal reveal-delay-1" data-open-quiz role="button" tabindex="0">
-            <span class="journey-step" data-i18n="journey.step1.tag">STEP 01</span>
-            <span class="journey-icon">🍰</span>
-            <h3 class="journey-title" data-i18n="journey.step1.title">내 스피킹 감각 알아보기</h3>
-            <p class="journey-desc" data-i18n="journey.step1.desc">부담 없이 확인하는 내 스피킹 위치</p>
-          </article>
-          <article class="journey-card reveal reveal-delay-2">
-            <span class="journey-step" data-i18n="journey.step2.tag">STEP 02</span>
-            <span class="journey-icon">🎙️</span>
-            <h3 class="journey-title" data-i18n="journey.step2.title">AI 실시간 코칭</h3>
-            <p class="journey-desc" data-i18n="journey.step2.desc">대화 중 막혀도 AI가 실시간으로 단어와 문장 지원</p>
-          </article>
-          <article class="journey-card reveal reveal-delay-3">
-            <span class="journey-step" data-i18n="journey.step3.tag">STEP 03</span>
-            <span class="journey-icon">💬</span>
-            <h3 class="journey-title" data-i18n="journey.step3.title">1:1 원어민 눈맞춤 대화</h3>
-            <p class="journey-desc" data-i18n="journey.step3.desc">울렁증 없이 친구처럼 다정하게 트이는 실전 회화</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- MVP Topics -->
-    <section class="journey" id="topics" data-landing-only>
-      <div class="section-inner">
-        <p class="section-label reveal" data-i18n="topics.eyebrow">Talk Topics</p>
-        <h2 class="section-title reveal" data-i18n="topics.title">관심사·이야기 주제로 가볍게 만나보세요</h2>
-        <div class="journey-grid">
+        <p class="section-label reveal" data-i18n="landing.how.label">이용 방법</p>
+        <h2 class="section-title reveal" data-i18n="landing.how.title">DayO에서는 이렇게 대화해요</h2>
+        <p class="landing-lead reveal" data-i18n="landing.how.lead">시작할 이야기부터 막히는 순간의 표현, 대화 후 리캡까지 필요한 만큼만 가볍게 도움받아요.</p>
+        <div class="flow-grid">
           <article class="journey-card reveal reveal-delay-1">
-            <span class="journey-step">TOPIC 01</span>
-            <span class="journey-icon">☕️</span>
-            <h3 class="journey-title" data-i18n="topics.card1.title">요즘 나의 일상</h3>
-            <ul class="topic-list">
-              <li data-i18n="topics.card1.a">푹 빠진 취미</li>
-              <li data-i18n="topics.card1.b">쉬는 날 보내기</li>
-              <li data-i18n="topics.card1.c">동네 맛집</li>
-            </ul>
+            <div class="journey-card__head"><span class="journey-step">01</span><span class="journey-icon">🃏</span><h3 class="journey-title" data-i18n="landing.how.step1.title">이야기 카드</h3></div>
+            <p class="journey-desc" data-i18n="landing.how.step1.desc">처음부터 대화 주제를 고민하지 않아도 돼요. 관심사에 맞는 질문 카드로 가볍게 시작해요.</p>
           </article>
           <article class="journey-card reveal reveal-delay-2">
-            <span class="journey-step">TOPIC 02</span>
-            <span class="journey-icon">🇰🇷</span>
-            <h3 class="journey-title" data-i18n="topics.card2.title">한국에서 발견한 것들</h3>
-            <ul class="topic-list">
-              <li data-i18n="topics.card2.a">놀라웠던 문화</li>
-              <li data-i18n="topics.card2.b">좋아하는 한국 음식</li>
-              <li data-i18n="topics.card2.c">추천 장소</li>
-            </ul>
+            <div class="journey-card__head"><span class="journey-step">02</span><span class="journey-icon">💬</span><h3 class="journey-title" data-i18n="landing.how.step2.title">외국인 파트너와 1:1 영어 대화</h3></div>
+            <p class="journey-desc" data-i18n="landing.how.step2.desc">세계 여러 나라에서 온 파트너와 서로의 일상과 취향을 나눠요.</p>
           </article>
           <article class="journey-card reveal reveal-delay-3">
-            <span class="journey-step">TOPIC 03</span>
-            <span class="journey-icon">🎵</span>
-            <h3 class="journey-title" data-i18n="topics.card3.title">우리의 취향 비교</h3>
-            <ul class="topic-list">
-              <li data-i18n="topics.card3.a">집순이 vs 밖순이</li>
-              <li data-i18n="topics.card3.b">계획 여행 vs 즉흥 여행</li>
-              <li data-i18n="topics.card3.c">영화 / 음악</li>
-            </ul>
+            <div class="journey-card__head"><span class="journey-step">03</span><span class="journey-icon">✨</span><h3 class="journey-title" data-i18n="landing.how.step3.title">AI 대화 도움</h3></div>
+            <p class="journey-desc" data-i18n="landing.how.step3.desc">필요한 순간 표현을 확인해요.</p>
+          </article>
+          <article class="journey-card reveal reveal-delay-3">
+            <div class="journey-card__head"><span class="journey-step">04</span><span class="journey-icon">📝</span><h3 class="journey-title" data-i18n="landing.how.step4.title">5분 AI 대화 리캡</h3></div>
+            <p class="journey-desc" data-i18n="landing.how.step4.desc">방금 나눈 대화는 짧은 후속 활동으로 돌아봐요.</p>
           </article>
         </div>
-      </div>
-    </section>
 
-    <!-- How it works: story cards + 25 min -->
-    <section class="journey" id="how" data-landing-only>
-      <div class="section-inner">
-        <p class="section-label reveal" data-i18n="how.eyebrow">How it works</p>
-        <h2 class="section-title reveal" data-i18n="how.title">가르치거나 평가하지 않아요</h2>
-        <p class="how-lead reveal" data-i18n="how.lead">준비된 이야기 카드로 서로 질문하고 경험을 나눕니다.</p>
-        <div class="journey-grid">
-          <article class="journey-card reveal reveal-delay-1">
-            <span class="journey-step">STEP 01</span>
-            <span class="journey-icon">🃏</span>
-            <h3 class="journey-title" data-i18n="how.step1.title">이야기 카드</h3>
-            <p class="journey-desc" data-i18n="how.step1.desc">관심사에 맞는 질문 카드가 대화를 열어 줘요. 정답은 없고, 서로의 경험을 나누면 충분해요.</p>
-          </article>
-          <article class="journey-card reveal reveal-delay-2">
-            <span class="journey-step">STEP 02</span>
-            <span class="journey-icon">💬</span>
-            <h3 class="journey-title" data-i18n="how.step2.title">1:1 글로벌 대화</h3>
-            <p class="journey-desc" data-i18n="how.step2.desc">평가하거나 고쳐 주는 시험관이 아니라, 디저트 카페에서 수다 떨듯 편안한 1:1 글로벌 대화예요. 하고 싶은 말이 떠오르지 않거나 막힐 때만 화면 속 AI 언어 도우미가 끊기지 않게 곁에서 부드럽게 이어줍니다.</p>
-          </article>
-          <article class="journey-card reveal reveal-delay-3">
-            <span class="journey-step">STEP 03</span>
-            <span class="journey-icon">🎟️</span>
-            <h3 class="journey-title" data-i18n="how.step3.title">1회 세션 티켓</h3>
-            <p class="journey-desc" data-i18n="how.step3.desc">정기결제나 장기등록 없이, 필요할 때 티켓 한 장으로 참여해요.</p>
-          </article>
+        <div class="landing-subsection reveal" id="topics">
+          <h3 data-i18n="landing.topics.title">오늘은 어떤 이야기를 나눌까요?</h3>
+          <div class="topic-chips" aria-label="대화 주제 예시" data-i18n="landing.topics.aria" data-i18n-attr="aria-label">
+            <span class="topic-chip" data-i18n="landing.topics.daily">☕ 요즘 나의 일상</span>
+            <span class="topic-chip" data-i18n="landing.topics.korea">🇰🇷 한국에서 발견한 것들</span>
+            <span class="topic-chip" data-i18n="landing.topics.tastes">🎵 우리의 취향 비교</span>
+          </div>
         </div>
-        <p class="how-note reveal" data-i18n="how.note">1회 대화 세션은 25분이에요. 부담 없는 1회권 중심으로 언제든 다시 만날 수 있어요.</p>
+
+        <div class="session-ribbon reveal" aria-label="DayO 세션 구성" data-i18n="landing.session.aria" data-i18n-attr="aria-label">
+          <span data-i18n="landing.session.interests">관심사 선택</span><span aria-hidden="true">→</span>
+          <span data-i18n="landing.session.conversation">25분 대화</span><span aria-hidden="true">→</span>
+          <span data-i18n="landing.session.recap">5분 AI 리캡</span>
+        </div>
+
         <div class="dayo-video-wrapper reveal">
           <div class="dayo-video-wrapper__label">
             <span class="dayo-video-wrapper__badge" data-i18n="journey.videoLabel">🎬 DayO 1:1 글로벌 대화 라운지 소개</span>
@@ -2529,37 +2861,35 @@
     <!-- Partners -->
     <section class="journey" id="partners" style="padding-top: 0;" data-landing-only>
       <div class="section-inner">
-        <p class="section-label reveal" data-i18n="partnersTeaser.eyebrow">Partners</p>
-        <h2 class="section-title reveal" data-i18n="partnersTeaser.title">한국에서 일상을 사는 대화 파트너</h2>
+        <p class="section-label reveal" data-i18n="landing.partners.label">대화 파트너</p>
+        <h2 class="section-title reveal" data-i18n="landing.partners.title">세계 여러 나라에서 온 DayO 대화 파트너</h2>
+        <p class="landing-lead reveal" data-i18n="landing.partners.lead">한국 생활과 문화에 관심이 있고, 처음 만나는 사람의 속도에도 맞춰 대화를 이어갈 수 있는 파트너를 만나요.</p>
         <div class="journey-grid">
           <article class="journey-card reveal reveal-delay-1">
-            <span class="journey-icon">🥐</span>
-            <h3 class="journey-title">Clara from France 🇫🇷</h3>
-            <p class="journey-desc" data-i18n="partnersTeaser.card1.desc">서울 골목 카페와 주말 마켓을 좋아하는 프랑스 파트너. 취미와 일상을 천천히 나눠 줘요.</p>
-            <div class="partner-tags" aria-label="Clara 관심사">
-              <span class="tag">#골목카페 ☕</span>
-              <span class="tag">#주말마켓 🥐</span>
-              <span class="tag">#프랑스 🇫🇷</span>
+            <div class="partner-card__head"><span class="journey-icon">🥐</span><h3 class="journey-title">Clara from France 🇫🇷</h3></div>
+            <p class="journey-desc" data-i18n="landing.partners.claraDesc">서울 골목 카페와 주말 마켓을 좋아하는 프랑스 파트너. 취미와 일상을 천천히 나눠 줘요.</p>
+            <div class="partner-tags" aria-label="Clara 관심사" data-i18n="landing.partners.claraAria" data-i18n-attr="aria-label">
+              <span class="tag" data-i18n="landing.partners.tagDaily">#일상 대화</span>
+              <span class="tag" data-i18n="landing.partners.tagCafe">#골목카페 ☕</span>
+              <span class="tag" data-i18n="landing.partners.tagMarket">#주말마켓 🥐</span>
             </div>
           </article>
           <article class="journey-card reveal reveal-delay-2">
-            <span class="journey-icon">🍵</span>
-            <h3 class="journey-title">Kate from USA 🇺🇸</h3>
-            <p class="journey-desc" data-i18n="partnersTeaser.card2.desc">한국 음식과 즉흥 산책을 좋아하는 미국 파트너. 취향을 비교하며 이야기를 이어 가요.</p>
-            <div class="partner-tags" aria-label="Kate 관심사">
-              <span class="tag">#K푸드 🍲</span>
-              <span class="tag">#즉흥산책 🌿</span>
-              <span class="tag">#미국 🇺🇸</span>
+            <div class="partner-card__head"><span class="journey-icon">🍵</span><h3 class="journey-title">Kate from USA 🇺🇸</h3></div>
+            <p class="journey-desc" data-i18n="landing.partners.kateDesc">한국 음식과 즉흥 산책을 좋아하는 미국 파트너. 취향을 비교하며 이야기를 이어 가요.</p>
+            <div class="partner-tags" aria-label="Kate 관심사" data-i18n="landing.partners.kateAria" data-i18n-attr="aria-label">
+              <span class="tag" data-i18n="landing.partners.tagTastes">#취향 대화</span>
+              <span class="tag" data-i18n="landing.partners.tagKFood">#K푸드 🍲</span>
+              <span class="tag" data-i18n="landing.partners.tagWalk">#즉흥산책 🌿</span>
             </div>
           </article>
           <article class="journey-card reveal reveal-delay-3">
-            <span class="journey-icon">🧇</span>
-            <h3 class="journey-title">Emma from Belgium 🇧🇪</h3>
-            <p class="journey-desc" data-i18n="partnersTeaser.card3.desc">부산 여행을 좋아하는 벨기에 파트너, '찐찐찐찐 찐이야~' 트로트 부르기를 엄청 좋아해요!</p>
-            <div class="partner-tags" aria-label="Emma 관심사">
-              <span class="tag">#부산여행 🌊</span>
-              <span class="tag">#K트로트 🎤</span>
-              <span class="tag">#벨기에 🇧🇪</span>
+            <div class="partner-card__head"><span class="journey-icon">🧇</span><h3 class="journey-title">Emma from Belgium 🇧🇪</h3></div>
+            <p class="journey-desc" data-i18n="landing.partners.emmaDesc">부산 여행과 K-트로트를 좋아하는 벨기에 파트너. 여행과 음악 취향을 편하게 나눠요.</p>
+            <div class="partner-tags" aria-label="Emma 관심사" data-i18n="landing.partners.emmaAria" data-i18n-attr="aria-label">
+              <span class="tag" data-i18n="landing.partners.tagTravel">#여행 대화</span>
+              <span class="tag" data-i18n="landing.partners.tagBusan">#부산여행 🌊</span>
+              <span class="tag" data-i18n="landing.partners.tagTrot">#K트로트 🎤</span>
             </div>
           </article>
         </div>
@@ -2568,41 +2898,57 @@
 
     <!-- Tickets + CTA -->
     <div id="booking" hidden></div>
-    <section class="journey" id="tickets" style="padding-top: 0; padding-bottom: var(--section-gap);" data-landing-only>
+    <section class="journey" id="pricing" style="padding-top: 0; padding-bottom: var(--section-gap);" data-landing-only>
       <div class="section-inner" style="text-align: center;">
-        <p class="section-label reveal" data-i18n="tickets.eyebrow">Session Ticket</p>
-        <h2 class="section-title reveal" style="margin-bottom: 1.25rem;" data-i18n="tickets.title">가볍게 이어가는 세션 이용권</h2>
-        <p class="reveal" style="color: var(--text-muted); margin-bottom: 1.75rem; line-height: 1.7; max-width: 44rem; margin-left: auto; margin-right: auto;" data-i18n="tickets.desc">첫 체험 9,900원부터 깔끔한 1회 티켓, 산뜻한 3회, 11·33 패키지까지, 약정 없이 필요한 만큼만 충전해요.</p>
+        <p class="section-label reveal" data-i18n="landing.pricing.label">세션 티켓</p>
+        <h2 class="section-title reveal" style="margin-bottom: 1.25rem;" data-i18n="landing.pricing.title">필요할 때 선택하는 티켓</h2>
+        <p class="reveal" style="color: var(--text-muted); margin-bottom: 1.75rem; line-height: 1.7; max-width: 44rem; margin-left: auto; margin-right: auto;" data-i18n="landing.pricing.description">25분 1:1 영어 대화 + 5분 AI 대화 리캡, 정기결제 없이 필요할 때 한 번씩 이용할 수 있어요.</p>
         <div class="ticket-price-row reveal">
-          <div class="ticket-price-card">
-            <strong data-i18n="tickets.first.title">첫 세션 체험 할인권</strong>
-            <span data-i18n="tickets.first.price">9,900원 · 1회 30분</span>
-            <small data-i18n="tickets.first.note">1회 한정 특별 혜택</small>
+          <div class="ticket-price-card ticket-price-card--trial">
+            <strong data-i18n="landing.pricing.trialName">첫 세션 체험 할인권</strong>
+            <span data-i18n="landing.pricing.trialPrice">9,900원 · 1회</span>
+            <small data-i18n="landing.pricing.trialBenefit">1회 한정 특별 혜택</small>
           </div>
           <div class="ticket-price-card">
-            <strong data-i18n="tickets.single.title">깔끔한 1회 티켓</strong>
-            <span data-i18n="tickets.single.price">19,900원 · 1회 30분</span>
-            <small data-i18n="tickets.single.note">약정 없이 필요할 때 딱 한 번</small>
+            <strong data-i18n="landing.pricing.singleName">깔끔한 1회 티켓</strong>
+            <span data-i18n="landing.pricing.singlePrice">19,900원 · 1회</span>
+            <small data-i18n="landing.pricing.singleBenefit">약정 없이 필요할 때 딱 한 번</small>
           </div>
           <div class="ticket-price-card">
-            <strong data-i18n="tickets.starter.title">산뜻한 3회 패키지</strong>
-            <span data-i18n="tickets.starter.price">54,900원 · 회당 약 18,300원</span>
-            <small data-i18n="tickets.starter.note">부담 없는 3주 루틴</small>
+            <strong data-i18n="landing.pricing.threeName">산뜻한 3회 패키지</strong>
+            <span data-i18n="landing.pricing.threePrice">54,900원 · 회당 약 18,300원</span>
+            <small data-i18n="landing.pricing.threeBenefit">부담 없는 3주 루틴</small>
           </div>
           <div class="ticket-price-card">
-            <strong data-i18n="tickets.best.title">가벼운 11 패키지</strong>
-            <span data-i18n="tickets.best.price">179,000원 · BEST 1회 보너스</span>
-            <small data-i18n="tickets.best.note">회당 약 16,270원 (10+1회)</small>
+            <strong data-i18n="landing.pricing.elevenName">가벼운 11 패키지</strong>
+            <span data-i18n="landing.pricing.elevenPrice">179,000원 · BEST 1회 보너스</span>
+            <small data-i18n="landing.pricing.elevenBenefit">회당 약 16,270원 (10+1회)</small>
           </div>
         </div>
         <div class="reveal" style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center;">
-          <button type="button" class="header-cta" style="display: inline-flex; border: none; font-family: inherit; cursor: pointer;" data-booking-open data-i18n="tickets.cta">📅 대화 세션 예약하기</button>
-          <button type="button" class="header-cta" style="display: inline-flex; border: none; font-family: inherit; cursor: pointer;" data-tickets-open data-i18n="tickets.chargeCta">세션 티켓 충전하기 💳</button>
+          <button type="button" class="header-cta" style="display: inline-flex; border: none; font-family: inherit; cursor: pointer;" data-booking-open data-i18n="landing.pricing.book">📅 대화 세션 예약하기</button>
+          <button type="button" class="header-cta" style="display: inline-flex; border: none; font-family: inherit; cursor: pointer;" data-tickets-open data-i18n="landing.pricing.buy">세션 티켓 충전하기 💳</button>
         </div>
       </div>
     </section>
 
-    <section class="cms-magazine" id="magazine" data-landing-only>
+    <section class="journey" id="faq" style="padding-top: 0;" data-landing-only>
+      <div class="section-inner">
+        <p class="section-label reveal">FAQ</p>
+        <h2 class="section-title reveal" data-i18n="landing.faq.title">첫 대화 전에 많이 묻는 질문</h2>
+        <div class="faq-list reveal">
+          <details><summary data-i18n="landing.faq.q1">외국어로 문장을 잘 만들지 못해도 괜찮나요?</summary><p data-i18n="landing.faq.a1">네. 완벽한 문장을 만드는 수업이 아니라, 준비된 이야기 카드와 필요한 순간의 AI 도움을 활용해 실제 대화를 이어가는 세션이에요.</p></details>
+          <details><summary data-i18n="landing.faq.q2">대화 중 아무 말도 생각나지 않으면 어떻게 하나요?</summary><p data-i18n="landing.faq.a2">이야기 카드로 다음 질문을 확인하거나, 단어 도움에 한국어 또는 영어로 말하고 싶은 내용을 짧게 입력할 수 있어요.</p></details>
+          <details><summary data-i18n="landing.faq.q3">한 번만 이용해도 되나요?</summary><p data-i18n="landing.faq.a3">네. 정기결제나 장기 등록 없이 첫 체험권 또는 1회 티켓으로 이용할 수 있어요.</p></details>
+        </div>
+        <div class="faq-actions reveal">
+          <a class="faq-all-link" href="/faq.html" data-i18n="landing.faq.all">전체 FAQ 보기</a>
+          <a class="kakao-inquiry-btn" href="https://pf.kakao.com/_hpxkJX/chat" target="_blank" rel="noopener noreferrer" aria-label="카카오톡으로 문의하기" data-i18n="landing.faq.kakao">카카오톡으로 문의하기</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="cms-magazine" id="magazine" data-landing-only data-landing-hidden hidden aria-hidden="true">
       <div class="section-inner">
         <p class="section-label reveal">Lounge Magazine</p>
         <h2 class="section-title reveal">DayO 라운지 매거진</h2>
@@ -2624,7 +2970,7 @@
     </section>
 
     <!-- Social Proof -->
-    <section class="reviews" id="reviews" data-landing-only>
+    <section class="reviews" id="reviews" data-landing-only data-landing-hidden hidden aria-hidden="true">
       <div class="section-inner">
         <p class="section-label reveal" data-i18n="reviews.eyebrow">Real Stories</p>
         <h2 class="section-title reveal" data-i18n="reviews.title">DayO에서 나눈 실제 대화 이야기</h2>
@@ -2655,7 +3001,7 @@
       </div>
     </section>
 
-    <section class="dayo-webinar-section" id="webinar" aria-labelledby="dayo-webinar-title">
+    <section class="dayo-webinar-section" id="webinar" aria-labelledby="dayo-webinar-title" data-landing-hidden hidden aria-hidden="true">
       <div class="dayo-webinar-inner">
         <p class="dayo-webinar-eyebrow">Live Webinar</p>
         <h2 class="dayo-webinar-title" id="dayo-webinar-title">🎙️ DayO 라이브 웨비나 사전 신청</h2>
@@ -2751,7 +3097,7 @@
   <div class="result-toast" id="resultToast"></div>
   <div class="dayo-webinar-toast" id="dayo-webinar-toast" role="status" aria-live="polite" hidden></div>
 
-  <script src="mobile-nav.js"></script>
+  <script src="mobile-nav.js?v=20261001-nav-tickets"></script>
   <script>
     (function initCursorGlow() {
       const glow = document.getElementById('cursorGlow');
@@ -2770,80 +3116,41 @@
     }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
     document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-    /* Title rotator synced with live partner card */
+    /* Landing title rotator */
     function t(key, vars) {
       if (!window.DayOI18n) return key;
       return vars ? window.DayOI18n.tf(key, vars) : window.DayOI18n.t(key);
     }
-    function langName(id) {
-      return window.DayOI18n ? window.DayOI18n.langName(id) : id;
+    const heroRotator = document.querySelector('[data-hero-rotator]');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let heroPhraseIndex = 0;
+    let heroFadeTimer = null;
+    function renderHeroPhrase() {
+      if (heroRotator && window.DayOI18n) heroRotator.textContent = t('landing.hero.rotate.' + heroPhraseIndex);
     }
-
-    const partners = [
-      { langId: 'vi', name: 'Linh from Vietnam', greeting: 'Xin chào! Bạn khỏe không? 🌿',
-        avatar: { hair: 'bob', hairColor: '#211713', skin: '#F1C7A2', bg: '#FFD1DC' } },
-      { langId: 'es', name: 'Elena from Spain', greeting: '¡Hola! ¿Cómo estás? 💃',
-        avatar: { hair: 'wave', hairColor: '#4A2C24', skin: '#E8B78D', bg: '#FFE5B4' } },
-      { langId: 'ru', name: 'Sasha from Russia', greeting: 'Привет! Как дела? ❄️',
-        avatar: { hair: 'wave', hairColor: '#C79D62', skin: '#F3D8C1', bg: '#FFF9C4' } },
-      { langId: 'en', name: 'Kate from USA', greeting: 'Hi there! Ready to chat? ☕',
-        avatar: { hair: 'bun', hairColor: '#C98E52', skin: '#F2CDB1', bg: '#FFE8E3' } },
-      { langId: 'zh', name: 'Mei from China', greeting: '你好！今天过得怎么样？ 🧋',
-        avatar: { hair: 'bob', hairColor: '#181311', skin: '#F0C9A8', bg: '#FFD1DC' } },
-      { langId: 'ja', name: 'Yui from Japan', greeting: 'こんにちは！今日もお疲れ様です✨',
-        avatar: { hair: 'bun', hairColor: '#261B18', skin: '#F2D2B7', bg: '#FFE5B4' } },
-      { langId: 'it', name: 'Marco from Italy', greeting: 'Ciao! Come stai? 🍕',
-        avatar: { hair: 'short', hairColor: '#342119', skin: '#DFAB82', bg: '#FFF9C4' } },
-      { langId: 'fr', name: 'Clara from France', greeting: 'Bonjour! Comment ça va? ☕',
-        avatar: { hair: 'wave', hairColor: '#8B5C3D', skin: '#F0CFB2', bg: '#FFE8E3' } },
-      { langId: 'de', name: 'Anna from Germany', greeting: "Guten Tag! Wie geht's? 🥨",
-        avatar: { hair: 'bob', hairColor: '#D3A05E', skin: '#F3D6BD', bg: '#FFD1DC' } }
-    ];
-
-    const titleRotator = document.getElementById('titleRotator');
-    const titleEm = document.getElementById('titleEm');
-    const partnerProfile = document.getElementById('partnerProfile');
-    const partnerAvatar = document.getElementById('partnerAvatar');
-    const partnerName = document.getElementById('partnerName');
-    const partnerGreeting = document.getElementById('partnerGreeting');
-    let langIndex = 0;
-
-    function renderPartner(index) {
-      const partner = partners[index];
-      if (titleRotator) titleRotator.textContent = t('hero.titleLead', { lang: langName(partner.langId) });
-      if (titleEm) titleEm.textContent = t('hero.titleEm');
-      partnerAvatar.dataset.hair = partner.avatar.hair;
-      partnerAvatar.style.setProperty('--avatar-bg', partner.avatar.bg);
-      partnerAvatar.style.setProperty('--avatar-skin', partner.avatar.skin);
-      partnerAvatar.style.setProperty('--avatar-hair', partner.avatar.hairColor);
-      partnerAvatar.setAttribute('aria-label', t('hero.avatarAriaFormat', { name: partner.name }));
-      partnerName.textContent = partner.name;
-      partnerGreeting.textContent = partner.greeting;
+    renderHeroPhrase();
+    document.addEventListener('dayo:langchange', () => {
+      clearTimeout(heroFadeTimer);
+      if (heroRotator) heroRotator.classList.remove('is-changing');
+      renderHeroPhrase();
+    });
+    function syncReducedMotion() {
+      if (!reducedMotion.matches) return;
+      clearTimeout(heroFadeTimer);
+      heroPhraseIndex = 0;
+      if (heroRotator) heroRotator.classList.remove('is-changing');
+      renderHeroPhrase();
     }
-
-    renderPartner(langIndex);
-
-    document.addEventListener('dayo:langchange', () => renderPartner(langIndex));
-
+    if (reducedMotion.addEventListener) reducedMotion.addEventListener('change', syncReducedMotion);
+    else if (reducedMotion.addListener) reducedMotion.addListener(syncReducedMotion);
     setInterval(() => {
-      if (window.__dayoCmsHeroActive) return;
-      if (titleRotator) titleRotator.classList.add('fade-out');
-      partnerProfile.classList.add('fade-out');
-      partnerGreeting.classList.add('fade-out');
-
-      setTimeout(() => {
-        if (window.__dayoCmsHeroActive) {
-          if (titleRotator) titleRotator.classList.remove('fade-out');
-          partnerProfile.classList.remove('fade-out');
-          partnerGreeting.classList.remove('fade-out');
-          return;
-        }
-        langIndex = (langIndex + 1) % partners.length;
-        renderPartner(langIndex);
-        if (titleRotator) titleRotator.classList.remove('fade-out');
-        partnerProfile.classList.remove('fade-out');
-        partnerGreeting.classList.remove('fade-out');
-      }, 550);
+      if (!heroRotator || reducedMotion.matches) return;
+      heroRotator.classList.add('is-changing');
+      heroFadeTimer = setTimeout(() => {
+        heroPhraseIndex = (heroPhraseIndex + 1) % 4;
+        renderHeroPhrase();
+        heroRotator.classList.remove('is-changing');
+      }, 220);
     }, 2000);
 
     /* Free speaking sense test — five target languages, no proficiency grading */
@@ -3693,7 +4000,7 @@
     syncChatFabTitle();
     document.addEventListener('dayo:langchange', syncChatFabTitle);
 
-    document.querySelectorAll('[data-chat-open], a[href="#faq"]').forEach((link) => {
+    document.querySelectorAll('[data-chat-open]').forEach((link) => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
         openChat();
@@ -3764,7 +4071,7 @@
   <script src="terms-mini-modal.js"></script>
   <script src="tickets-modal.js?v=20260921-admin-test-1000"></script>
   <script src="auth.js?v=20260916-auth-strict"></script>
-  <script src="mode-switch.js?v=20260916-gnb-minimal"></script>
+  <script src="mode-switch.js?v=20261001-nav-icons"></script>
   <script type="module" src="webinar-apply.js"></script>
   <script src="greeting-banner.js"></script>
   <script src="logged-in-home.js"></script>
@@ -3772,7 +4079,7 @@
   <script src="insta-card-export.js"></script>
 
 <!-- DayO 시범 운영 안내 모달 -->
-<div id="demo-notice-modal" class="dayo-modal-dim" style="display: none;">
+<div id="demo-notice-modal" class="dayo-modal-dim" data-auto-open="false" style="display: none;">
   <div class="dayo-modal-card">
     <!-- 상단 안내 태그 -->
     <div class="modal-top-tag">
@@ -3997,6 +4304,10 @@
   (async function initDayODemoNotice() {
     const modal = document.getElementById('demo-notice-modal');
     if (!modal) return;
+    if (modal.dataset.autoOpen !== 'true') {
+      modal.style.display = 'none';
+      return;
+    }
 
     const debugPrefix = '[DayO PREOPEN DEBUG]';
     const paymentTestValue = new URLSearchParams(window.location.search).get('paymentTest');

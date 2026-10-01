@@ -26,46 +26,98 @@
     document.head.appendChild(style);
   }
 
-  function footerHtml() {
+  function currentLang() {
+    var value = 'ko';
+    try {
+      value = window.DayOI18n && typeof window.DayOI18n.getLang === 'function'
+        ? window.DayOI18n.getLang()
+        : window.localStorage.getItem('dayo_lang');
+    } catch (error) { /* keep Korean default */ }
+    return String(value || '').toLowerCase() === 'en' ? 'en' : 'ko';
+  }
+
+  function copyFor(lang) {
+    if (lang === 'en') {
+      return {
+        nav: 'Terms and policies', terms: 'Terms of Service', privacy: 'Privacy Policy', refund: 'Cancellation and Refund Policy',
+        service: 'Service', business: 'Business name', representative: 'Representative', registration: 'Business Registration No.',
+        address: 'Address', mailOrder: 'Mail-order business registration', pending: 'Registration pending',
+        email: 'Customer support email', phone: 'Customer support phone', live: 'Live support', liveChannel: 'KakaoTalk Channel', hosting: 'Hosting service provider'
+      };
+    }
+    return {
+      nav: '약관 및 정책', terms: '이용약관', privacy: '개인정보처리방침', refund: '취소 및 환불규정',
+      service: '서비스명', business: '상호', representative: '대표자', registration: '사업자등록번호',
+      address: '사업장 소재지', mailOrder: '통신판매업신고번호', pending: '신고 준비 중',
+      email: '고객센터 이메일', phone: '고객센터 전화', live: '실시간 상담', liveChannel: '카카오톡 채널', hosting: '호스팅 서비스 제공자'
+    };
+  }
+
+  function footerHtml(lang) {
+    var copy = copyFor(lang);
     return [
       '<footer class="dayo-legal-footer" role="contentinfo">',
-      '  <nav class="dayo-legal-footer__links" aria-label="약관 및 정책">',
-      '    <a href="/terms">이용약관</a>',
+      '  <nav class="dayo-legal-footer__links" aria-label="' + copy.nav + '">',
+      '    <a href="/terms">' + copy.terms + '</a>',
       '    <span class="dayo-legal-footer__sep" aria-hidden="true">|</span>',
-      '    <a href="/privacy">개인정보처리방침</a>',
+      '    <a href="/privacy">' + copy.privacy + '</a>',
       '    <span class="dayo-legal-footer__sep" aria-hidden="true">|</span>',
-      '    <a href="/refund">취소 및 환불규정</a>',
+      '    <a href="/refund">' + copy.refund + '</a>',
       '  </nav>',
       '  <div class="dayo-legal-footer__biz">',
-      '    <p>서비스명: DayO(돼요) | 상호: 88드래곤즈 | 대표자: 여승현</p>',
-      '    <p>사업자등록번호: 687-79-00609</p>',
-      '    <p>사업장 소재지: 서울특별시 강동구 고덕로 262, 720호<br>(명일동, 고덕역효성해링턴타워 더퍼스트)</p>',
-      '    <p>통신판매업신고번호: 신고 준비 중</p>',
-      '    <p>고객센터 이메일: <a href="mailto:dayo.speak@gmail.com">dayo.speak@gmail.com</a></p>',
-      '    <p>고객센터 전화: <a href="tel:07080951988">070-8095-1988</a></p>',
-      '    <p>실시간 상담: 카카오톡 채널 ‘DayO 돼요’</p>',
-      '    <p>호스팅 서비스 제공자: Vercel Inc.</p>',
+      '    <p>' + copy.service + ': DayO(돼요) | ' + copy.business + ': 88드래곤즈 | ' + copy.representative + ': 여승현</p>',
+      '    <p>' + copy.registration + ': 687-79-00609</p>',
+      '    <p>' + copy.address + ': 서울특별시 강동구 고덕로 262, 720호<br>(명일동, 고덕역효성해링턴타워 더퍼스트)</p>',
+      '    <p>' + copy.mailOrder + ': ' + copy.pending + '</p>',
+      '    <p>' + copy.email + ': <a href="mailto:dayo.speak@gmail.com">dayo.speak@gmail.com</a></p>',
+      '    <p>' + copy.phone + ': <a href="tel:07080951988">070-8095-1988</a></p>',
+      '    <p>' + copy.live + ': ' + copy.liveChannel + ' ‘DayO 돼요’</p>',
+      '    <p>' + copy.hosting + ': Vercel Inc.</p>',
       '  </div>',
       '</footer>'
     ].join('');
   }
 
+  function applyLegalPageLanguage(lang) {
+    Array.prototype.forEach.call(document.querySelectorAll('[data-legal-lang]'), function (node) {
+      node.hidden = node.getAttribute('data-legal-lang') !== lang;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('[data-legal-aria-ko]'), function (node) {
+      node.setAttribute('aria-label', node.getAttribute(lang === 'en' ? 'data-legal-aria-en' : 'data-legal-aria-ko'));
+    });
+    if (!document.body || !document.body.classList.contains('legal-page')) return;
+    document.documentElement.lang = lang;
+    var title = document.body.getAttribute(lang === 'en' ? 'data-legal-title-en' : 'data-legal-title-ko');
+    var description = document.body.getAttribute(lang === 'en' ? 'data-legal-description-en' : 'data-legal-description-ko');
+    if (title) document.title = title;
+    var meta = document.querySelector('meta[name="description"]');
+    if (meta && description) meta.setAttribute('content', description);
+  }
+
   function mount() {
     if (shouldSkip()) return;
-    if (document.querySelector('.dayo-legal-footer')) return;
     ensureStyles();
+    var lang = currentLang();
+    applyLegalPageLanguage(lang);
+    var existing = document.querySelector('.dayo-legal-footer');
+    if (existing) {
+      existing.outerHTML = footerHtml(lang);
+      return;
+    }
     var root = document.getElementById('dayo-legal-footer-root');
     if (root) {
-      root.innerHTML = footerHtml();
+      root.innerHTML = footerHtml(lang);
       return;
     }
     var old = document.querySelector('footer.site-footer');
     if (old) {
-      old.outerHTML = footerHtml();
+      old.outerHTML = footerHtml(lang);
       return;
     }
-    document.body.insertAdjacentHTML('beforeend', footerHtml());
+    document.body.insertAdjacentHTML('beforeend', footerHtml(lang));
   }
+
+  document.addEventListener('dayo:langchange', mount);
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', mount);

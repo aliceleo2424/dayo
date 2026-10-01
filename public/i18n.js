@@ -62,6 +62,131 @@
     'auth.confirmPage.errorDesc': { KO: '링크를 다시 확인하거나 로그인해 주세요.', EN: 'Check the link or try logging in.' },
     'auth.confirmPage.mypage': { KO: '마이페이지로 가기', EN: 'Go to My Page' },
     'auth.confirmPage.home': { KO: '홈으로 돌아가기', EN: 'Back to home' },
+    'landing.meta.title': { KO: 'DayO 돼요 — 1:1 글로벌 대화 라운지', EN: 'DayO — 1:1 Global Conversation Lounge' },
+    'landing.meta.description': { KO: '외국인 파트너와 취향과 일상을 나누고, 필요한 순간 AI 언어 도움을 받는 1:1 글로벌 대화 서비스 DayO를 만나보세요.', EN: 'Meet people from around the world for relaxed 1:1 conversations, with AI language help whenever you need it.' },
+    'landing.nav.about': { KO: 'DayO 소개', EN: 'About DayO' },
+    'landing.nav.how': { KO: '이용 방법', EN: 'How it works' },
+    'landing.nav.pricing': { KO: '티켓', EN: 'Tickets' },
+    'landing.nav.faq': { KO: 'FAQ', EN: 'FAQ' },
+    'landing.nav.menuTitle': { KO: 'DayO 메뉴', EN: 'DayO menu' },
+    'landing.nav.start': { KO: '첫 대화 시작하기', EN: 'Start your first conversation' },
+    'landing.nav.mypage': { KO: '👤 마이페이지', EN: '👤 My Page' },
+    'landing.nav.logout': { KO: '로그아웃', EN: 'Log out' },
+    'landing.banner': { KO: '10월 정식 오픈 준비 중 · DayO 대화 세션을 준비하고 있어요', EN: 'Preparing for our official October launch · DayO conversation sessions are coming soon' },
+    'landing.hero.eyebrow': { KO: '무료 스피킹 감각 테스트', EN: 'Free speaking check' },
+    'landing.hero.title': { KO: '외국인과 눈을 맞추며 대화가 돼요.', EN: 'Talk face to face with people from around the world.' },
+    'landing.hero.titlePrefix': { KO: '외국인과', EN: 'Talk' },
+    'landing.hero.titleSuffix': { KO: '대화가 돼요.', EN: 'with people from around the world.' },
+    'landing.hero.longest': { KO: '눈을 맞추며', EN: 'with confidence' },
+    'landing.hero.rotate.0': { KO: '눈을 맞추며', EN: 'face to face' },
+    'landing.hero.rotate.1': { KO: '편안하게', EN: 'comfortably' },
+    'landing.hero.rotate.2': { KO: '자신 있게', EN: 'with confidence' },
+    'landing.hero.rotate.3': { KO: '자연스럽게', EN: 'naturally' },
+    'landing.hero.description': { KO: '막히면 한국어로 말해도 괜찮은, 외국인 파트너와의 1:1 화상 대화', EN: 'A one-on-one video conversation where it’s okay to use Korean when you get stuck.' },
+    'landing.hero.imageAlt': { KO: '노트북을 보며 웃고 손을 흔드는 사람', EN: 'A person smiling and waving while looking at a laptop' },
+    'landing.hero.testCta': { KO: '무료로 스피킹 감각 확인하기', EN: 'Take the free speaking check' },
+    'landing.hero.testLanguages': { KO: '5개 언어 스피킹 테스트 제공', EN: 'Speaking checks available in 5 languages' },
+    'landing.hero.sessionLink': { KO: 'DayO 대화 세션 알아보기', EN: 'See how DayO conversations work' },
+    'landing.hero.helpBadge': { KO: '말이 막히면 AI에게 물어보세요', EN: 'Ask AI for help when you get stuck' },
+    'landing.hero.avatarAria': { KO: '미소 짓는 Clara 파스텔 아바타', EN: 'Pastel avatar of Clara smiling' },
+    'landing.how.label': { KO: '이용 방법', EN: 'How it works' },
+    'landing.how.title': { KO: 'DayO에서는 이렇게 대화해요', EN: 'How a DayO conversation works' },
+    'landing.how.lead': { KO: '시작할 이야기부터 막히는 순간의 표현, 대화 후 리캡까지 필요한 만큼만 가볍게 도움받아요.', EN: 'Get just the right amount of support—from choosing a topic to finding a phrase and reviewing the conversation afterward.' },
+    'landing.how.step1.title': { KO: '이야기 카드', EN: 'Conversation cards' },
+    'landing.how.step1.desc': { KO: '처음부터 대화 주제를 고민하지 않아도 돼요. 관심사에 맞는 질문 카드로 가볍게 시작해요.', EN: 'No need to invent a topic from scratch. Start naturally with a question card based on your interests.' },
+    'landing.how.step2.title': { KO: '외국인 파트너와 1:1 영어 대화', EN: '1:1 English conversation with an international partner' },
+    'landing.how.step2.desc': { KO: '세계 여러 나라에서 온 파트너와 서로의 일상과 취향을 나눠요.', EN: 'Share everyday stories and interests with a partner from another country.' },
+    'landing.how.step3.title': { KO: 'AI 대화 도움', EN: 'AI conversation help' },
+    'landing.how.step3.desc': { KO: '필요한 순간 표현을 확인해요.', EN: 'Check a useful word or phrase whenever you need it.' },
+    'landing.how.step4.title': { KO: '5분 AI 대화 리캡', EN: '5-minute AI conversation recap' },
+    'landing.how.step4.desc': { KO: '방금 나눈 대화는 짧은 후속 활동으로 돌아봐요.', EN: 'Review the conversation you just had with a short follow-up activity.' },
+    'landing.topics.title': { KO: '오늘은 어떤 이야기를 나눌까요?', EN: 'What would you like to talk about today?' },
+    'landing.topics.aria': { KO: '대화 주제 예시', EN: 'Example conversation topics' },
+    'landing.topics.daily': { KO: '☕ 요즘 나의 일상', EN: '☕ Life lately' },
+    'landing.topics.korea': { KO: '🇰🇷 한국에서 발견한 것들', EN: '🇰🇷 Things discovered in Korea' },
+    'landing.topics.tastes': { KO: '🎵 우리의 취향 비교', EN: '🎵 Comparing our tastes' },
+    'landing.session.aria': { KO: 'DayO 세션 구성', EN: 'DayO session format' },
+    'landing.session.interests': { KO: '관심사 선택', EN: 'Choose interests' },
+    'landing.session.conversation': { KO: '25분 대화', EN: '25-minute conversation' },
+    'landing.session.recap': { KO: '5분 AI 리캡', EN: '5-minute AI recap' },
+    'landing.partners.label': { KO: '대화 파트너', EN: 'Conversation partners' },
+    'landing.partners.title': { KO: '세계 여러 나라에서 온 DayO 대화 파트너', EN: 'Meet DayO conversation partners from around the world' },
+    'landing.partners.lead': { KO: '한국 생활과 문화에 관심이 있고, 처음 만나는 사람의 속도에도 맞춰 대화를 이어갈 수 있는 파트너를 만나요.', EN: 'Meet partners who are curious about life in Korea and know how to keep a first conversation comfortable.' },
+    'landing.partners.claraDesc': { KO: '서울 골목 카페와 주말 마켓을 좋아하는 프랑스 파트너. 취미와 일상을 천천히 나눠 줘요.', EN: 'A French partner who loves Seoul alley cafés and weekend markets, and enjoys sharing everyday stories at an easy pace.' },
+    'landing.partners.kateDesc': { KO: '한국 음식과 즉흥 산책을 좋아하는 미국 파트너. 취향을 비교하며 이야기를 이어 가요.', EN: 'An American partner who enjoys Korean food and spontaneous walks, and keeps conversations going through shared tastes.' },
+    'landing.partners.emmaDesc': { KO: '부산 여행과 K-트로트를 좋아하는 벨기에 파트너. 여행과 음악 취향을 편하게 나눠요.', EN: 'A Belgian partner who loves trips to Busan and K-trot, and enjoys relaxed chats about travel and music.' },
+    'landing.partners.claraAria': { KO: 'Clara 관심사', EN: "Clara's interests" },
+    'landing.partners.kateAria': { KO: 'Kate 관심사', EN: "Kate's interests" },
+    'landing.partners.emmaAria': { KO: 'Emma 관심사', EN: "Emma's interests" },
+    'landing.partners.tagDaily': { KO: '#일상 대화', EN: '#EverydayTalk' },
+    'landing.partners.tagCafe': { KO: '#골목카페 ☕', EN: '#AlleyCafés ☕' },
+    'landing.partners.tagMarket': { KO: '#주말마켓 🥐', EN: '#WeekendMarkets 🥐' },
+    'landing.partners.tagTastes': { KO: '#취향 대화', EN: '#SharedTastes' },
+    'landing.partners.tagKFood': { KO: '#K푸드 🍲', EN: '#KFood 🍲' },
+    'landing.partners.tagWalk': { KO: '#즉흥산책 🌿', EN: '#SpontaneousWalks 🌿' },
+    'landing.partners.tagTravel': { KO: '#여행 대화', EN: '#TravelTalk' },
+    'landing.partners.tagBusan': { KO: '#부산여행 🌊', EN: '#BusanTrips 🌊' },
+    'landing.partners.tagTrot': { KO: '#K트로트 🎤', EN: '#KTrot 🎤' },
+    'landing.pricing.label': { KO: '티켓', EN: 'Tickets' },
+    'landing.pricing.title': { KO: '필요할 때 선택하는 티켓', EN: 'Tickets when you need them' },
+    'landing.pricing.description': { KO: '25분 1:1 영어 대화 + 5분 AI 대화 리캡, 정기결제 없이 필요할 때 한 번씩 이용할 수 있어요.', EN: '25 minutes of 1:1 English conversation plus a 5-minute AI conversation recap. No subscription—book one whenever you need it.' },
+    'landing.pricing.trialName': { KO: '첫 세션 체험 할인권', EN: 'First-session trial' },
+    'landing.pricing.trialPrice': { KO: '9,900원 · 1회', EN: '₩9,900 · 1 session' },
+    'landing.pricing.trialBenefit': { KO: '1회 한정 특별 혜택', EN: 'One-time introductory offer' },
+    'landing.pricing.singleName': { KO: '깔끔한 1회 티켓', EN: 'Single-session ticket' },
+    'landing.pricing.singlePrice': { KO: '19,900원 · 1회', EN: '₩19,900 · 1 session' },
+    'landing.pricing.singleBenefit': { KO: '약정 없이 필요할 때 딱 한 번', EN: 'One conversation whenever you need it' },
+    'landing.pricing.threeName': { KO: '산뜻한 3회 패키지', EN: '3-session package' },
+    'landing.pricing.threePrice': { KO: '54,900원 · 회당 약 18,300원', EN: '₩54,900 · about ₩18,300 per session' },
+    'landing.pricing.threeBenefit': { KO: '부담 없는 3주 루틴', EN: 'An easy three-week routine' },
+    'landing.pricing.elevenName': { KO: '가벼운 11 패키지', EN: '11-session package' },
+    'landing.pricing.elevenPrice': { KO: '179,000원 · BEST 1회 보너스', EN: '₩179,000 · BEST · 1 bonus session' },
+    'landing.pricing.elevenBenefit': { KO: '회당 약 16,270원 (10+1회)', EN: 'About ₩16,270 per session (10+1)' },
+    'landing.pricing.book': { KO: '📅 대화 세션 예약하기', EN: '📅 Book a conversation' },
+    'landing.pricing.buy': { KO: '세션 티켓 충전하기 💳', EN: 'Buy session tickets 💳' },
+    'landing.faq.title': { KO: '첫 대화 전에 많이 묻는 질문', EN: 'Questions before your first conversation' },
+    'landing.faq.q1': { KO: '외국어로 문장을 잘 만들지 못해도 괜찮나요?', EN: 'Is it okay if I cannot form sentences well yet?' },
+    'landing.faq.a1': { KO: '네. 완벽한 문장을 만드는 수업이 아니라, 준비된 이야기 카드와 필요한 순간의 AI 도움을 활용해 실제 대화를 이어가는 세션이에요.', EN: 'Yes. This is not a class focused on perfect sentences. Conversation cards and optional AI help support you as you keep a real conversation going.' },
+    'landing.faq.q2': { KO: '대화 중 아무 말도 생각나지 않으면 어떻게 하나요?', EN: 'What if I cannot think of anything to say?' },
+    'landing.faq.a2': { KO: '이야기 카드로 다음 질문을 확인하거나, 단어 도움에 한국어 또는 영어로 말하고 싶은 내용을 짧게 입력할 수 있어요.', EN: 'Check the next prompt on your conversation card, or type what you want to say in Korean or English into Word Help.' },
+    'landing.faq.q3': { KO: '한 번만 이용해도 되나요?', EN: 'Can I book just one session?' },
+    'landing.faq.a3': { KO: '네. 정기결제나 장기 등록 없이 첫 체험권 또는 1회 티켓으로 이용할 수 있어요.', EN: 'Yes. You can use a trial or single-session ticket without a subscription or long-term enrollment.' },
+    'landing.faq.all': { KO: '전체 FAQ 보기', EN: 'View all FAQs' },
+    'landing.faq.kakao': { KO: '카카오톡으로 문의하기', EN: 'Ask us on KakaoTalk' },
+    'faq.meta.title': { KO: '자주 묻는 질문 | DayO', EN: 'Frequently Asked Questions | DayO' },
+    'faq.meta.description': { KO: 'DayO 대화 세션 이용 전에 자주 묻는 질문을 확인하세요.', EN: 'Find answers to common questions before your DayO conversation session.' },
+    'faq.homeAria': { KO: 'DayO 홈으로', EN: 'Go to the DayO home page' },
+    'faq.home': { KO: '메인으로 돌아가기', EN: 'Back to home' },
+    'faq.title': { KO: '자주 묻는 질문', EN: 'Frequently asked questions' },
+    'faq.lead': { KO: '첫 대화 전 궁금한 내용을 한곳에서 확인해 보세요.', EN: 'Find everything you may want to know before your first conversation.' },
+    'faq.q1': { KO: '영어로 문장을 잘 만들지 못해도 괜찮나요?', EN: 'Is it okay if I cannot form English sentences well yet?' },
+    'faq.a1': { KO: '네. 완벽한 문장을 만드는 수업이 아니라, 준비된 이야기 카드와 필요한 순간의 AI 도움을 활용해 실제 대화를 이어가는 세션이에요.', EN: 'Yes. This is not a class focused on perfect sentences. Conversation cards and optional AI help support you as you keep a real conversation going.' },
+    'faq.q2': { KO: '25분 동안 무슨 말을 해야 하나요?', EN: 'What will we talk about for 25 minutes?' },
+    'faq.a2': { KO: '예약할 때 고른 관심사와 대화 준비 내용을 바탕으로 이야기 카드를 확인하고, 일상과 취향에 관한 질문으로 시작해요.', EN: 'Your conversation card uses the interests and preferences you selected when booking, so you can begin with simple questions about daily life and personal tastes.' },
+    'faq.q3': { KO: '아무 말도 생각나지 않으면 어떻게 하나요?', EN: 'What if I cannot think of anything to say?' },
+    'faq.a3': { KO: '이야기 카드로 다음 질문을 확인하거나, 단어 도움에 한국어 또는 영어로 말하고 싶은 내용을 짧게 입력할 수 있어요.', EN: 'Check the next prompt on your conversation card, or type what you want to say in Korean or English into Word Help.' },
+    'faq.q4': { KO: 'AI 도움은 대화 중 어떻게 사용하나요?', EN: 'How do I use AI help during the conversation?' },
+    'faq.a4': { KO: '단어나 문장이 생각나지 않을 때 직접 단어 도움을 열어 필요한 표현을 확인해요. AI가 대화를 대신하거나 모든 문장을 실시간으로 교정하지는 않아요.', EN: 'Open Word Help when you need a word or sentence. AI does not speak for you or correct every sentence in real time.' },
+    'faq.q5': { KO: '외국인 파트너는 직접 선택할 수 있나요?', EN: 'Can I choose my conversation partner?' },
+    'faq.a5': { KO: '네. 날짜와 시간을 고른 뒤, 그 시간에 실제 예약 가능한 영어 대화 파트너 중에서 선택할 수 있어요.', EN: 'Yes. After choosing a date and time, you can select from the English conversation partners who are actually available then.' },
+    'faq.q6': { KO: '같은 파트너를 다시 예약할 수 있나요?', EN: 'Can I book the same partner again?' },
+    'faq.a6': { KO: '해당 파트너가 원하는 날짜와 시간에 예약 가능한 슬롯을 열어 두었다면 다시 선택할 수 있어요.', EN: 'Yes, if that partner has opened an available slot at the date and time you want.' },
+    'faq.q7': { KO: '한 번만 이용해도 되나요?', EN: 'Can I book just one session?' },
+    'faq.a7': { KO: '네. 정기결제나 장기 등록 없이 첫 체험권 또는 1회 티켓으로 이용할 수 있어요.', EN: 'Yes. You can use a trial or single-session ticket without a subscription or long-term enrollment.' },
+    'faq.q8': { KO: '불편한 상황에서는 대화를 종료할 수 있나요?', EN: 'Can I end a conversation if I feel uncomfortable?' },
+    'faq.a8': { KO: '네. 라이브룸에서 대화를 종료하거나 불편한 상황을 신고할 수 있어요.', EN: 'Yes. You can end the conversation or report an uncomfortable situation from the live room.' },
+    'faq.q9': { KO: '예약 변경과 취소는 언제까지 가능한가요?', EN: 'When can I book or cancel a session?' },
+    'faq.a9.before': { KO: '신규 예약은 시작 4시간 전까지 가능해요. 시작까지 6시간 초과 남았을 때 취소하면 티켓이 반환되고, 정확히 6시간 전부터는 취소해도 티켓이 반환되지 않아요. 자세한 내용은 ', EN: 'New bookings are available until 4 hours before the start. Cancel more than 6 hours beforehand for a ticket refund; from exactly 6 hours before the session, the ticket is not refunded. See the ' },
+    'faq.a9.link': { KO: '취소 및 환불규정', EN: 'cancellation and refund policy' },
+    'faq.a9.after': { KO: '을 확인해 주세요.', EN: ' for details.' },
+    'faq.q10': { KO: '화상 대화는 녹화되나요?', EN: 'Are video conversations recorded?' },
+    'faq.a10': { KO: 'DayO는 현재 화상 대화를 녹화하는 기능을 제공하지 않아요. 이용약관상 상대방의 동의 없는 녹화·녹음과 외부 공유도 금지됩니다.', EN: 'DayO does not currently provide a video recording feature. Our terms also prohibit recording or sharing a conversation without the other person’s consent.' },
+    'faq.q11': { KO: 'DayO 대화 파트너로 참여하고 싶어요.', EN: 'I would like to become a DayO conversation partner.' },
+    'faq.a11.before': { KO: 'DayO는 한국에 거주하며 영어로 편안한 대화를 나눌 수 있는 외국인 파트너를 모집하고 있어요. 자세한 지원 조건과 진행 방법은 ', EN: 'DayO is recruiting international partners who live in Korea and can hold a comfortable conversation in English. Check the ' },
+    'faq.a11.link': { KO: '파트너 지원 페이지', EN: 'partner application page' },
+    'faq.a11.after': { KO: '에서 확인해 주세요.', EN: ' for eligibility and application details.' },
+    'faq.main': { KO: 'DayO 메인 보기', EN: 'Visit the DayO home page' },
+    'faq.kakao': { KO: '카카오톡으로 문의하기', EN: 'Ask us on KakaoTalk' },
     'nav.about': {
       KO: '대화 주제', EN: 'Topics', ZH: '话题', JA: '話題', FR: 'Sujets', ES: 'Temas'
     },
@@ -573,6 +698,15 @@
     'mypage.lounge.sub': {
       KO: '글로벌 문화 이야기 & 실전 대화 꿀팁', EN: 'Global culture stories & live conversation tips', ZH: '全球文化故事与实战对话技巧', JA: 'グローバル文化の話＆実践会話ヒント', FR: 'Récits culturels & astuces de conversation', ES: 'Historias culturales y tips de conversación'
     },
+    'mypage.lounge.card1.label': { KO: '디저트 팁', EN: 'Dessert tip' },
+    'mypage.lounge.card1.title': { KO: '카페에서 자연스럽게 이어가는 한 줄', EN: 'A natural line to keep a café conversation going' },
+    'mypage.lounge.card1.summary': { KO: '“This smells amazing — what’s your favorite here?” 향과 취향으로 대화를 열면 부담이 덜해요.', EN: '“This smells amazing — what’s your favorite here?” Start with scents and tastes to keep things easy.' },
+    'mypage.lounge.card2.label': { KO: '실전 꿀팁', EN: 'Conversation tip' },
+    'mypage.lounge.card2.title': { KO: '말이 막혔을 때 쓰는 여유 문장', EN: 'A phrase for when you need a moment' },
+    'mypage.lounge.card2.summary': { KO: '“Give me a second, I’m finding the word.” 한 템포 쉬어도 대화는 이어져요.', EN: '“Give me a second, I’m finding the word.” A short pause does not stop the conversation.' },
+    'mypage.lounge.card3.label': { KO: '문화 한 조각', EN: 'A bit of culture' },
+    'mypage.lounge.card3.title': { KO: '디저트로 알아보는 취향 비교', EN: 'Compare tastes through desserts' },
+    'mypage.lounge.card3.summary': { KO: '티라미수 vs 말차 케이크처럼 가벼운 취향 질문이면 서로 이야기가 금방 늘어요.', EN: 'An easy question like tiramisu or matcha cake can quickly open up a conversation.' },
     'mypage.lounge.aria': {
       KO: 'DayO 라운지 매거진', EN: 'DayO lounge magazine', ZH: 'DayO休息室杂志', JA: 'DayOラウンジマガジン', FR: 'Magazine du lounge DayO', ES: 'Revista del lounge DayO'
     },
@@ -727,6 +861,25 @@
       FR: '🎉 Coupon d’essai 9 900 KRW (19 900 ➔ 9 900)',
       ES: '🎉 Cupón de prueba 9.900 KRW (19.900 ➔ 9.900)'
     },
+    'mypage.welcomeBenefit.title': { KO: '🎉 첫 세션 9,900원 체험 할인권 (19,900원 ➔ 9,900원)', EN: '🎉 First-session trial offer: ₩9,900' },
+    'mypage.welcomeBenefit.cta': { KO: '9,900원으로 첫 대화 시작하기', EN: 'Start your first conversation for ₩9,900' },
+    'mypage.monthly.loading': { KO: '이번 달의 대화를 불러오고 있어요…', EN: 'Loading this month’s conversations…' },
+    'mypage.monthly.eyebrow': { KO: '이번 달의 대화', EN: 'This month’s conversations' },
+    'mypage.monthly.emptyTitle': { KO: '첫 대화를 기다리고 있어요.', EN: 'Your first conversation is waiting.' },
+    'mypage.monthly.emptyDesc': { KO: '첫 대화를 시작하면 나만의 대화 흐름이 여기에 쌓여요.', EN: 'Start your first conversation to see your conversation journey here.' },
+    'mypage.monthly.unmeasuredTitle': { KO: '대화 경험이 차곡차곡 쌓이고 있어요.', EN: 'Your conversation experiences are adding up.' },
+    'mypage.monthly.unmeasuredDesc': { KO: '저장된 대화는 있지만 learner 발화량을 계산할 수 있는 기록이 없어요.', EN: 'You have saved conversations, but no learner speech record that can be measured yet.' },
+    'mypage.monthly.book': { KO: '첫 대화 예약하기', EN: 'Book your first conversation' },
+    'mypage.monthly.titlePrefix': { KO: '{month}월에는', EN: 'In {month}, you spoke ' },
+    'mypage.monthly.titleSuffix': { KO: '를 이야기했어요.', EN: '.' },
+    'mypage.monthly.words': { KO: '{n}단어', EN: '{n} words' },
+    'mypage.monthly.support': { KO: '이번 달 {n}번의 대화를 실제 사람들과 쌓았어요.', EN: 'You shared {n} conversations with real people this month.' },
+    'mypage.monthly.chartAria': { KO: '이번 달 최근 대화의 단어 흐름', EN: 'Word flow across recent conversations this month' },
+    'mypage.monthly.insightOne': { KO: '한 번의 대화가 소중하게 쌓였어요. 조금 더 쌓이면 나만의 흐름을 볼 수 있어요.', EN: 'One conversation is a great start. Keep going to see your own pattern.' },
+    'mypage.monthly.insightFew': { KO: '대화를 조금 더 쌓으면 나만의 흐름을 볼 수 있어요.', EN: 'A few more conversations will reveal your own pattern.' },
+    'mypage.monthly.insightMore': { KO: '요즘 조금 더 많은 이야기를 나누고 있어요.', EN: 'You’ve been sharing a little more lately.' },
+    'mypage.monthly.insightLess': { KO: '이번 달은 조금 차분한 흐름이에요. 대화량은 파트너와 주제에 따라 달라질 수 있어요.', EN: 'It’s been a quieter month. How much you speak can vary by partner and topic.' },
+    'mypage.monthly.insightSteady': { KO: '대화량은 매번 달라도, 경험은 계속 쌓이고 있어요.', EN: 'The amount you speak may vary, but every conversation adds experience.' },
     'mypage.sessions.title': {
       KO: '📅 내 예약 세션', EN: '📅 Upcoming Sessions', ZH: '📅 我的预约', JA: '📅 予約セッション', FR: '📅 Sessions à venir', ES: '📅 Próximas sesiones'
     },
@@ -2789,6 +2942,7 @@
     Array.prototype.forEach.call(triggers, function (btn) {
       var meta = LANG_META[currentLang];
       if (!meta) return;
+      btn.setAttribute('aria-label', t('lang.select'));
       var flag = btn.querySelector('.i18n-flag');
       var label = btn.querySelector('.i18n-label');
       if (btn.classList.contains('i18n-btn--icon')) {
@@ -2814,9 +2968,10 @@
     return false;
   }
 
-  function buildSwitcher(variant, accordion) {
+  function buildSwitcher(variant, accordion, languages) {
     var isIcon = variant === 'icon';
-    var options = SUPPORTED.map(function (code) {
+    var visibleLanguages = languages && languages.length ? languages : SUPPORTED;
+    var options = visibleLanguages.map(function (code) {
       var meta = LANG_META[code];
       return '<button class="i18n-opt" type="button" role="option" data-lang="' + code + '">' +
         '<span aria-hidden="true">' + meta.flag + '</span>' + meta.label + '</button>';
@@ -2849,9 +3004,23 @@
       });
       return;
     }
+    var restricted = null;
+    Array.prototype.forEach.call(slots, function (slot) {
+      var configured = String(slot.getAttribute('data-i18n-languages') || '').split(',').map(function (code) {
+        return String(code || '').trim().toUpperCase();
+      }).filter(function (code) { return SUPPORTED.indexOf(code) > -1; });
+      if (configured.length && !restricted) restricted = configured;
+    });
+    if (restricted && restricted.indexOf(currentLang) === -1) {
+      currentLang = restricted.indexOf('KO') > -1 ? 'KO' : restricted[0];
+      try { localStorage.setItem(STORAGE_KEY, currentLang); } catch (e) { /* ignore */ }
+    }
     Array.prototype.forEach.call(slots, function (slot) {
       var variant = slot.getAttribute('data-i18n-lang');
-      slot.innerHTML = buildSwitcher(variant, isAccordionSlot(slot, variant));
+      var configured = String(slot.getAttribute('data-i18n-languages') || '').split(',').map(function (code) {
+        return String(code || '').trim().toUpperCase();
+      }).filter(function (code) { return SUPPORTED.indexOf(code) > -1; });
+      slot.innerHTML = buildSwitcher(variant, isAccordionSlot(slot, variant), configured);
     });
 
     document.addEventListener('click', function (e) {

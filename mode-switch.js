@@ -538,7 +538,7 @@
       return {
         href: '#',
         icon: '🔑',
-        label: '로그인',
+        label: t('login.tabLogin'),
         openLogin: true
       };
     }
@@ -582,11 +582,11 @@
       : '<span data-i18n="' + config.i18n + '">' + t(config.i18n) + '</span>';
 
     if (config.openLogin) {
-      return '<button class="ms-btn ms-login-trigger" type="button" data-ms-open-login aria-label="로그인">' + lead + label + '</button>';
+      return '<button class="ms-btn ms-login-trigger" type="button" data-ms-open-login aria-label="' + escapeHtml(config.label || t('login.tabLogin')) + '">' + lead + label + '</button>';
     }
 
     if (config.landingMypage) {
-      return '<a class="ms-btn header-mypage-cta" href="/mypage.html">' + lead + label + '</a>';
+      return '<a class="ms-btn header-mypage-cta" href="/mypage.html" data-i18n="nav.mypage" data-i18n-attr="aria-label" aria-label="' + escapeHtml(t('nav.mypage')) + '">' + lead + label + '</a>';
     }
 
     if (config.loggedIn) {

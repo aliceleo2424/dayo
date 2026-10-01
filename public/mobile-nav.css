@@ -132,6 +132,12 @@ body.dayo-scroll-locked {
 
 .nav-drawer > .btn-logout {
   display: none;
+  align-self: flex-start;
+  width: auto;
+  padding: 0.45rem 0.35rem;
+  border-radius: 0;
+  font-size: 0.82rem;
+  text-decoration: underline;
 }
 
 body.is-logged-in .nav-drawer > .btn-logout {
@@ -161,6 +167,11 @@ body.nav-drawer-open .top-bar {
 
 @media (max-width: 767px) {
   .menu-toggle { display: inline-flex; }
+
+  body.nav-drawer-open #chatFab {
+    display: none !important;
+    pointer-events: none;
+  }
 
   .header-inner,
   .topbar-inner,

@@ -49,6 +49,7 @@
   }
 
   function resolveNavTarget(id) {
+    if (id === 'pricing' && document.getElementById('pricing')) return document.getElementById('pricing');
     var mapped = HASH_ALIASES[id] || id;
     return document.getElementById(mapped) || document.getElementById(id);
   }

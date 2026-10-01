@@ -9,6 +9,112 @@
     return key;
   }
 
+  var monthlyOriginalText = new WeakMap();
+  var monthlyOriginalAria = new WeakMap();
+  var loungeOriginalText = new WeakMap();
+  var loungeTextKeys = {
+    '디저트 팁': 'card1.label',
+    '카페에서 자연스럽게 이어가는 한 줄': 'card1.title',
+    '“This smells amazing — what’s your favorite here?” 향과 취향으로 대화를 열면 부담이 덜해요.': 'card1.summary',
+    '실전 꿀팁': 'card2.label',
+    '말이 막혔을 때 쓰는 여유 문장': 'card2.title',
+    '“Give me a second, I’m finding the word.” 한 템포 쉬어도 대화는 이어져요.': 'card2.summary',
+    '문화 한 조각': 'card3.label',
+    '디저트로 알아보는 취향 비교': 'card3.title',
+    '티라미수 vs 말차 케이크처럼 가벼운 취향 질문이면 서로 이야기가 금방 늘어요.': 'card3.summary'
+  };
+  var monthlyTextKeys = {
+    '이번 달의 대화를 불러오고 있어요…': 'loading',
+    '이번 달의 대화': 'eyebrow',
+    '첫 대화를 기다리고 있어요.': 'emptyTitle',
+    '첫 대화를 시작하면 나만의 대화 흐름이 여기에 쌓여요.': 'emptyDesc',
+    '대화 경험이 차곡차곡 쌓이고 있어요.': 'unmeasuredTitle',
+    '저장된 대화는 있지만 learner 발화량을 계산할 수 있는 기록이 없어요.': 'unmeasuredDesc',
+    '첫 대화 예약하기': 'book',
+    '를 이야기했어요.': 'titleSuffix',
+    '이번 달 최근 대화의 단어 흐름': 'chartAria',
+    '한 번의 대화가 소중하게 쌓였어요. 조금 더 쌓이면 나만의 흐름을 볼 수 있어요.': 'insightOne',
+    '대화를 조금 더 쌓으면 나만의 흐름을 볼 수 있어요.': 'insightFew',
+    '요즘 조금 더 많은 이야기를 나누고 있어요.': 'insightMore',
+    '이번 달은 조금 차분한 흐름이에요. 대화량은 파트너와 주제에 따라 달라질 수 있어요.': 'insightLess',
+    '대화량은 매번 달라도, 경험은 계속 쌓이고 있어요.': 'insightSteady'
+  };
+
+  function monthlyDisplayText(original) {
+    if (!window.DayOI18n || window.DayOI18n.getLang() !== 'EN') return original;
+    if (monthlyTextKeys[original]) return i18n('mypage.monthly.' + monthlyTextKeys[original]);
+    var match = /^(\d{1,2})월에는$/.exec(original);
+    if (match) {
+      var month = new Date(2026, Number(match[1]) - 1, 1).toLocaleString('en-US', { month: 'long' });
+      return i18n('mypage.monthly.titlePrefix', { month: month });
+    }
+    match = /^([\d,]+)단어$/.exec(original);
+    if (match) return i18n('mypage.monthly.words', { n: match[1] });
+    match = /^이번 달 (\d+)번의 대화를 실제 사람들과 쌓았어요\.$/.exec(original);
+    if (match) return i18n('mypage.monthly.support', { n: match[1] });
+    match = /^(.* · )([\d,]+)단어$/.exec(original);
+    if (match) return match[1] + i18n('mypage.monthly.words', { n: match[2] });
+    return original;
+  }
+
+  function localizeGeneratedCopy() {
+    var unit = document.getElementById('mypage-ticket-unit');
+    if (unit) {
+      var unitText = window.DayOI18n && window.DayOI18n.getLang() === 'EN' ? '' : '장';
+      if (unit.textContent !== unitText) unit.textContent = unitText;
+    }
+
+    var benefit = document.querySelector('[data-coupon-wallet] [data-coupon-code="WELCOME_9900"]');
+    if (benefit) {
+      var title = benefit.querySelector('.coupon-item__title');
+      var button = benefit.querySelector('.primary-btn');
+      var titleText = i18n('mypage.welcomeBenefit.title');
+      var buttonText = i18n('mypage.welcomeBenefit.cta');
+      if (title && title.textContent !== titleText) title.textContent = titleText;
+      if (button && button.textContent !== buttonText) button.textContent = buttonText;
+    }
+
+    var monthly = document.getElementById('dayo-monthly-story-host');
+    if (monthly) {
+      var walker = document.createTreeWalker(monthly, NodeFilter.SHOW_TEXT);
+      var node;
+      while ((node = walker.nextNode())) {
+        if (!monthlyOriginalText.has(node)) monthlyOriginalText.set(node, node.nodeValue);
+        var next = monthlyDisplayText(monthlyOriginalText.get(node));
+        if (node.nodeValue !== next) node.nodeValue = next;
+      }
+      monthly.querySelectorAll('[aria-label]').forEach(function (element) {
+        if (!monthlyOriginalAria.has(element)) monthlyOriginalAria.set(element, element.getAttribute('aria-label'));
+        var next = monthlyDisplayText(monthlyOriginalAria.get(element));
+        if (element.getAttribute('aria-label') !== next) element.setAttribute('aria-label', next);
+      });
+    }
+
+    document.querySelectorAll('#loungeCarousel .lounge-card').forEach(function (card) {
+      ['label', 'body', 'summary'].forEach(function (part) {
+        var element = card.querySelector('.lounge-card__' + part);
+        if (!element || !element.firstChild) return;
+        var node = element.firstChild;
+        if (!loungeOriginalText.has(node)) loungeOriginalText.set(node, node.nodeValue);
+        var original = loungeOriginalText.get(node);
+        var key = loungeTextKeys[original];
+        var next = key && window.DayOI18n && window.DayOI18n.getLang() === 'EN' ? i18n('mypage.lounge.' + key) : original;
+        if (node.nodeValue !== next) node.nodeValue = next;
+      });
+    });
+  }
+
+  function observeGeneratedCopy() {
+    var observer = new MutationObserver(localizeGeneratedCopy);
+    var wallet = document.querySelector('[data-coupon-wallet]');
+    var grid = document.querySelector('.mypage-main-grid');
+    var lounge = document.getElementById('loungeCarousel');
+    if (wallet) observer.observe(wallet, { childList: true, subtree: true });
+    if (grid) observer.observe(grid, { childList: true, subtree: true });
+    if (lounge) observer.observe(lounge, { childList: true, subtree: true });
+    localizeGeneratedCopy();
+  }
+
   function formatSessionWhen(iso) {
     if (!iso) return '';
     var date = new Date(iso);
@@ -708,6 +814,7 @@
   }
 
   function init() {
+    observeGeneratedCopy();
     syncMainAction();
     bindStoryTopics();
     bindNicknameEditor();
@@ -742,6 +849,7 @@
   document.addEventListener('dayo:reportsloaded', renderSpeakingGrowth);
   document.addEventListener('dayo:ticketchange', syncMainAction);
   document.addEventListener('dayo:langchange', function () {
+    localizeGeneratedCopy();
     syncMainAction();
     loadUrgentSessionBanner();
     loadRecentTechIssueResults();

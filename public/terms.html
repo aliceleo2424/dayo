@@ -7,15 +7,19 @@
   <meta name="description" content="DayO 온라인 1:1 화상 대화 매칭 플랫폼 서비스 이용약관">
   <link rel="stylesheet" href="legal-pages.css">
 </head>
-<body class="legal-page">
+<body class="legal-page"
+  data-legal-title-ko="DayO 서비스 이용약관"
+  data-legal-title-en="DayO Terms of Service"
+  data-legal-description-ko="DayO 온라인 1:1 화상 대화 매칭 플랫폼 서비스 이용약관"
+  data-legal-description-en="Terms of Service for the DayO online one-to-one video conversation matching platform">
   <header class="legal-header">
-    <a class="legal-brand" href="/" aria-label="DayO 홈으로">
+    <a class="legal-brand" href="/" aria-label="DayO 홈으로" data-legal-aria-ko="DayO 홈으로" data-legal-aria-en="Back to DayO home">
       <img src="/images/logo.png" alt="DayO" class="legal-logo">
     </a>
-    <a class="legal-home-btn" href="/">메인으로 돌아가기</a>
+    <a class="legal-home-btn" href="/"><span data-legal-lang="ko">메인으로 돌아가기</span><span data-legal-lang="en" hidden>Back to home</span></a>
   </header>
 
-  <main class="legal-main">
+  <main class="legal-main" data-legal-lang="ko">
     <p class="legal-kicker">LEGAL</p>
     <h1>서비스 이용약관</h1>
     <p class="legal-lead">따뜻한 한 잔의 대화가 이어질 수 있도록, DayO 이용에 관한 권리와 의무를 안내드려요.</p>
@@ -63,7 +67,57 @@
     </section>
   </main>
 
+  <main class="legal-main" data-legal-lang="en" hidden>
+    <p class="legal-kicker">LEGAL</p>
+    <h1>Terms of Service</h1>
+    <p class="legal-lead">These terms explain your rights and obligations when using DayO so that every conversation can continue warmly and safely.</p>
+    <p class="legal-updated">Last updated: September 15, 2026</p>
+    <p class="legal-translation-note">This English translation is provided for convenience. If there is any discrepancy, the Korean version will prevail.</p>
+
+    <section>
+      <h2>Article 1 (Purpose)</h2>
+      <p>These Terms are intended to prescribe the rights, obligations, and responsibilities between the Company and Members, and other necessary matters, concerning the use of services provided by DayO (돼요; hereinafter the “Company” or “DayO”), an online one-to-one video conversation matching platform.</p>
+    </section>
+
+    <section>
+      <h2>Article 2 (Nature of the Service and Limitation of Company Liability)</h2>
+      <ol>
+        <li>DayO provides a <strong>mail-order brokerage</strong> service that connects users with conversation partners. The Company is not a party to the mail-order transaction, and each party bears final responsibility for the content, quality, and satisfaction of an individual conversation session.</li>
+        <li>The Company does not guarantee the accuracy, completeness, or legality of conversations between users and, unless caused by intent or gross negligence, is not liable for conflicts of opinion, emotional discomfort, or unmet expectations arising during a conversation.</li>
+        <li>The Company may be exempt from liability when it cannot provide the service due to force majeure, including natural disasters, war, service interruption by a telecommunications carrier, hacking, or distributed denial-of-service attacks.</li>
+        <li>The Company may support mediation within a reasonable scope for disputes between Members or between a Member and a third party, but it does not become a party to the legal dispute.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Article 3 (Prohibited Conduct and Permanent Sanctions)</h2>
+      <p>Members must not engage in any of the following conduct. If such conduct is detected, the account may be permanently suspended without prior notice and any remaining passes may become non-refundable.</p>
+      <ol>
+        <li>Obscene conduct, remarks that cause sexual humiliation, sexual harassment, or attempts to induce contact for sexual purposes</li>
+        <li>Recording audio or video without the other party’s consent, or distributing, posting, or selling such recordings externally</li>
+        <li>Attempting to bypass the payment system by inducing direct transactions or the exchange of personal contact details outside the service</li>
+        <li>Hateful, discriminatory, violent, or threatening remarks, or conduct that infringes another person’s rights</li>
+        <li>Interfering with service operation or using the service improperly through false information</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Article 4 (Payment and Settlement)</h2>
+      <ol>
+        <li>Paid passes must, in principle, be purchased electronically through a payment gateway designated by the Company.</li>
+        <li>For secure transactions, the Company may hold payments through a purchase-safety escrow arrangement and settles activity fees with conversation partners after a session is completed normally.</li>
+        <li>Detailed standards for refunds and cancellations are governed by the <a href="/refund">Cancellation and Refund Policy</a>.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Addendum</h2>
+      <p>These Terms take effect on September 15, 2026. Contact: <a href="mailto:dayo.speak@gmail.com">dayo.speak@gmail.com</a></p>
+    </section>
+  </main>
+
   <div id="dayo-legal-footer-root"></div>
+  <script src="i18n.js"></script>
   <script src="legal-footer.js"></script>
 </body>
 </html>

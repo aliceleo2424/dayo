@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="faq.meta.title">자주 묻는 질문 | DayO</title>
+  <meta name="description" data-i18n="faq.meta.description" data-i18n-attr="content" content="DayO 대화 세션 이용 전에 자주 묻는 질문을 확인하세요.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="legal-pages.css">
+  <style>
+    .faq-header { gap: 1rem; font-family: 'Gowun Dodum', 'Quicksand', -apple-system, sans-serif; }
+    .faq-nav { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
+    .faq-nav a { color: #5b443d; font-size: .84rem; font-weight: 600; text-decoration: none; }
+    .faq-header .legal-home-btn { font-family: inherit; }
+    .faq-language { display: flex; flex: 0 0 auto; margin-left: .15rem; }
+    .faq-main { width: min(860px, calc(100% - 2rem)); margin: 0 auto; padding: 3rem 0 4.5rem; }
+    .faq-kicker { margin: 0 0 .65rem; color: #ff6b57; font-size: .78rem; font-weight: 800; letter-spacing: .08em; }
+    .faq-main h1 { margin: 0; color: #3f302b; font-size: clamp(2rem, 5vw, 3rem); line-height: 1.25; }
+    .faq-lead { margin: .9rem 0 2rem; color: #76635d; line-height: 1.75; }
+    .faq-list { display: grid; gap: .75rem; }
+    .faq-list details { border: 1px solid rgba(255, 107, 87, .2); border-radius: 16px; background: #fffdfa; box-shadow: 0 8px 24px rgba(92, 65, 55, .06); overflow: hidden; }
+    .faq-list summary { padding: 1rem 1.1rem; color: #3f302b; font-weight: 800; line-height: 1.55; cursor: pointer; }
+    .faq-list p { margin: 0; padding: 0 1.1rem 1.1rem; color: #76635d; line-height: 1.75; word-break: keep-all; }
+    .faq-list a { color: #df5847; font-weight: 800; }
+    .faq-support { display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem; margin-top: 2rem; }
+    .faq-support a { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: .75rem 1.15rem; border-radius: 999px; font-weight: 800; text-decoration: none; }
+    .faq-support__home { border: 1px solid rgba(255, 107, 87, .35); background: #fff; color: #df5847; }
+    .faq-support__kakao { background: #ff6b57; color: #fff; box-shadow: 0 3px 10px rgba(255, 107, 87, .16); }
+    @media (max-width: 720px) {
+      .faq-header { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; }
+      .faq-nav { order: 3; width: 100%; justify-content: center; gap: .8rem; padding-top: .65rem; border-top: 1px solid rgba(255, 107, 87, .12); }
+      .faq-nav a { font-size: .8rem; }
+      .faq-language { margin-left: auto; }
+      .faq-main { padding-top: 2rem; }
+      .faq-list summary { padding: .9rem 1rem; font-size: .92rem; }
+      .faq-list p { padding: 0 1rem 1rem; font-size: .86rem; }
+      .faq-support { align-items: stretch; flex-direction: column; }
+      .faq-support a { width: 100%; box-sizing: border-box; }
+    }
+  </style>
+</head>
+<body class="legal-page">
+  <header class="legal-header faq-header">
+    <a class="legal-brand" href="/" aria-label="DayO 홈으로" data-i18n="faq.homeAria" data-i18n-attr="aria-label">
+      <img src="/images/logo.png" alt="DayO" class="legal-logo">
+    </a>
+    <nav class="faq-nav" aria-label="주요 메뉴" data-i18n="nav.mainMenuAria" data-i18n-attr="aria-label">
+      <a href="/#how" data-i18n="landing.nav.how">이용 방법</a>
+      <a href="/#pricing" data-i18n="landing.nav.pricing">티켓</a>
+      <a href="/faq.html" aria-current="page" data-i18n="landing.nav.faq">FAQ</a>
+    </nav>
+    <div class="faq-language" data-i18n-lang="icon" data-i18n-languages="KO,EN"></div>
+    <a class="legal-home-btn" href="/" data-i18n="faq.home">메인으로 돌아가기</a>
+  </header>
+
+  <main class="faq-main">
+    <p class="faq-kicker">FAQ</p>
+    <h1 data-i18n="faq.title">자주 묻는 질문</h1>
+    <p class="faq-lead" data-i18n="faq.lead">첫 대화 전 궁금한 내용을 한곳에서 확인해 보세요.</p>
+
+    <div class="faq-list">
+      <details><summary data-i18n="faq.q1">영어로 문장을 잘 만들지 못해도 괜찮나요?</summary><p data-i18n="faq.a1">네. 완벽한 문장을 만드는 수업이 아니라, 준비된 이야기 카드와 필요한 순간의 AI 도움을 활용해 실제 대화를 이어가는 세션이에요.</p></details>
+      <details><summary data-i18n="faq.q2">25분 동안 무슨 말을 해야 하나요?</summary><p data-i18n="faq.a2">예약할 때 고른 관심사와 대화 준비 내용을 바탕으로 이야기 카드를 확인하고, 일상과 취향에 관한 질문으로 시작해요.</p></details>
+      <details><summary data-i18n="faq.q3">아무 말도 생각나지 않으면 어떻게 하나요?</summary><p data-i18n="faq.a3">이야기 카드로 다음 질문을 확인하거나, 단어 도움에 한국어 또는 영어로 말하고 싶은 내용을 짧게 입력할 수 있어요.</p></details>
+      <details><summary data-i18n="faq.q4">AI 도움은 대화 중 어떻게 사용하나요?</summary><p data-i18n="faq.a4">단어나 문장이 생각나지 않을 때 직접 단어 도움을 열어 필요한 표현을 확인해요. AI가 대화를 대신하거나 모든 문장을 실시간으로 교정하지는 않아요.</p></details>
+      <details><summary data-i18n="faq.q5">외국인 파트너는 직접 선택할 수 있나요?</summary><p data-i18n="faq.a5">네. 날짜와 시간을 고른 뒤, 그 시간에 실제 예약 가능한 영어 대화 파트너 중에서 선택할 수 있어요.</p></details>
+      <details><summary data-i18n="faq.q6">같은 파트너를 다시 예약할 수 있나요?</summary><p data-i18n="faq.a6">해당 파트너가 원하는 날짜와 시간에 예약 가능한 슬롯을 열어 두었다면 다시 선택할 수 있어요.</p></details>
+      <details><summary data-i18n="faq.q7">한 번만 이용해도 되나요?</summary><p data-i18n="faq.a7">네. 정기결제나 장기 등록 없이 첫 체험권 또는 1회 티켓으로 이용할 수 있어요.</p></details>
+      <details><summary data-i18n="faq.q8">불편한 상황에서는 대화를 종료할 수 있나요?</summary><p data-i18n="faq.a8">네. 라이브룸에서 대화를 종료하거나 불편한 상황을 신고할 수 있어요.</p></details>
+      <details><summary data-i18n="faq.q9">예약 변경과 취소는 언제까지 가능한가요?</summary><p><span data-i18n="faq.a9.before">신규 예약은 시작 4시간 전까지 가능해요. 시작까지 6시간 초과 남았을 때 취소하면 티켓이 반환되고, 정확히 6시간 전부터는 취소해도 티켓이 반환되지 않아요. 자세한 내용은 </span><a href="/refund" data-i18n="faq.a9.link">취소 및 환불규정</a><span data-i18n="faq.a9.after">을 확인해 주세요.</span></p></details>
+      <details><summary data-i18n="faq.q10">화상 대화는 녹화되나요?</summary><p data-i18n="faq.a10">DayO는 현재 화상 대화를 녹화하는 기능을 제공하지 않아요. 이용약관상 상대방의 동의 없는 녹화·녹음과 외부 공유도 금지됩니다.</p></details>
+      <details><summary data-i18n="faq.q11">DayO 대화 파트너로 참여하고 싶어요.</summary><p><span data-i18n="faq.a11.before">DayO는 한국에 거주하며 영어로 편안한 대화를 나눌 수 있는 외국인 파트너를 모집하고 있어요. 자세한 지원 조건과 진행 방법은 </span><a href="https://docs.google.com/forms/d/e/1FAIpQLScBTytUfVL4uyxv3R95dFfcs5rV-UBMnvujJ5GsK4ZNzh_1ZQ/viewform" target="_blank" rel="noopener noreferrer" data-i18n="faq.a11.link">파트너 지원 페이지</a><span data-i18n="faq.a11.after">에서 확인해 주세요.</span></p></details>
+    </div>
+
+    <div class="faq-support">
+      <a class="faq-support__home" href="/" data-i18n="faq.main">DayO 메인 보기</a>
+      <a class="faq-support__kakao" href="https://pf.kakao.com/_hpxkJX/chat" target="_blank" rel="noopener noreferrer" data-i18n="faq.kakao">카카오톡으로 문의하기</a>
+    </div>
+  </main>
+
+  <div id="dayo-legal-footer-root"></div>
+  <script src="i18n.js?v=20261001-nav-tickets"></script>
+  <script src="legal-footer.js"></script>
+</body>
+</html>
