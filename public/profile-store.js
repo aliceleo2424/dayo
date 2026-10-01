@@ -827,6 +827,7 @@ function isMissingUserError(error) {
 function classifyAuthError(error) {
   var msg = String((error && (error.message || error.error_description || error.msg)) || '').trim();
   var lower = msg.toLowerCase();
+  if (error && error.code === 'email_not_confirmed') return authError('confirm_email', '');
   if (/at least 6|minimum 6|6 characters|password.*short|weak password/i.test(lower)) {
     return authError('password_length', msg);
   }
@@ -880,9 +881,20 @@ async function signInWithEmail(email, password) {
     };
   }
 
-  if (signedIn.error && !isMissingUserError(signedIn.error)) {
-    throw classifyAuthError(signedIn.error);
+  if (signedIn.error || !signedIn.data || !signedIn.data.session) {
+    var signInError = classifyAuthError(signedIn.error);
+    if (signInError.code === 'rate_limit' || signInError.code === 'confirm_email') throw signInError;
+    throw authError('credentials', '');
   }
+}
+
+async function signUpWithEmail(email, password) {
+  var client = getClient();
+  var cleanedEmail = String(email || '').trim().toLowerCase();
+  var cleanedPass = String(password || '');
+  if (!client) throw authError('auth', 'supabase unavailable');
+  if (!cleanedEmail || !cleanedPass) throw authError('missing', '');
+  if (cleanedPass.length < 6) throw authError('password_length', '');
 
   var signedUp;
   try {
@@ -890,8 +902,8 @@ async function signInWithEmail(email, password) {
       email: cleanedEmail,
       password: cleanedPass,
       options: {
-        data: { user_name: nameFromEmail(cleanedEmail) },
-        emailRedirectTo: 'https://www.dayotalk.com/mypage.html'
+        data: { user_name: nameFromEmail(cleanedEmail), dayo_email_signup: true },
+        emailRedirectTo: 'https://www.dayotalk.com/auth-confirmed.html'
       }
     });
   } catch (signUpErr) {
@@ -901,7 +913,15 @@ async function signInWithEmail(email, password) {
   if (signedUp.error) {
     var classified = classifyAuthError(signedUp.error);
     if (classified.code === 'password' || /already registered|already exists/i.test(String(signedUp.error.message || ''))) {
-      throw authError('password', signedUp.error.message);
+      return {
+        isNew: false,
+        needsEmail: true,
+        signupNotice: true,
+        user: null,
+        profile: null,
+        name: nameFromEmail(cleanedEmail),
+        email: cleanedEmail
+      };
     }
     throw classified;
   }
@@ -909,7 +929,15 @@ async function signInWithEmail(email, password) {
   var signupUser = signedUp.data && signedUp.data.user;
   var identities = signupUser && signupUser.identities;
   if (signupUser && !signedUp.data.session && Array.isArray(identities) && identities.length === 0) {
-    throw authError('password', '');
+    return {
+      isNew: false,
+      needsEmail: true,
+      signupNotice: true,
+      user: null,
+      profile: null,
+      name: nameFromEmail(cleanedEmail),
+      email: cleanedEmail
+    };
   }
 
   if (signedUp.data && signedUp.data.session && signupUser) {
@@ -941,6 +969,7 @@ async function signInWithEmail(email, password) {
   return {
     isNew: true,
     needsEmail: true,
+    signupNotice: true,
     user: signedUp.data && signedUp.data.user,
     profile: null,
     name: nameFromEmail(cleanedEmail),
@@ -1309,6 +1338,7 @@ window.DayOProfileStore = {
   getCachedProfile: function () { return profileCache; },
   isSignedIn: isSignedIn,
   signInWithEmail: signInWithEmail,
+  signUpWithEmail: signUpWithEmail,
   signInWithGoogle: signInWithGoogle,
   signOut: signOutAuth,
   saveSessionLog: saveSessionLog,

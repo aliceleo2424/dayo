@@ -54,6 +54,14 @@
   }
 
   var DICT = {
+    'auth.confirmPage.loadingTitle': { KO: '이메일을 확인하고 있어요.', EN: 'Confirming your email…' },
+    'auth.confirmPage.loadingDesc': { KO: '잠시만 기다려 주세요.', EN: 'Just a moment.' },
+    'auth.confirmPage.successTitle': { KO: '이메일 확인이 완료됐어요.', EN: 'Your email is confirmed.' },
+    'auth.confirmPage.successDesc': { KO: '이제 DayO를 시작할 수 있어요.', EN: 'You can now start using DayO.' },
+    'auth.confirmPage.errorTitle': { KO: '확인 링크를 처리하지 못했어요.', EN: 'We could not confirm this link.' },
+    'auth.confirmPage.errorDesc': { KO: '링크를 다시 확인하거나 로그인해 주세요.', EN: 'Check the link or try logging in.' },
+    'auth.confirmPage.mypage': { KO: '마이페이지로 가기', EN: 'Go to My Page' },
+    'auth.confirmPage.home': { KO: '홈으로 돌아가기', EN: 'Back to home' },
     'nav.about': {
       KO: '대화 주제', EN: 'Topics', ZH: '话题', JA: '話題', FR: 'Sujets', ES: 'Temas'
     },

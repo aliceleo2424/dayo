@@ -202,12 +202,14 @@
     if (!user || !user.id) return;
     try { window.localStorage.setItem(welcomeEmailSentKey(user.id), '1'); } catch (e) { /* ignore */ }
     if (client) {
-      client.from('profiles').update({ welcome_email_sent: true }).eq('user_id', user.id).then(function () {}, function () {});
+      client.from('profiles').update({ welcome_email_sent: true }).eq('id', user.id).then(function () {}, function () {});
     }
   }
 
   function isRecentSignup(user) {
     if (!user) return false;
+    // New email signups can confirm long after the 48-hour welcome window.
+    if (user.user_metadata && user.user_metadata.dayo_email_signup === true && user.email_confirmed_at) return true;
     if (user.user_metadata && user.user_metadata.welcome_ticket) return true;
     var createdAt = user.created_at ? new Date(user.created_at).getTime() : 0;
     if (!createdAt) return false;
@@ -409,6 +411,7 @@
   };
 
   var AUTH_REDIRECT = 'https://www.dayotalk.com/mypage.html';
+  var SIGNUP_CONFIRM_REDIRECT = 'https://www.dayotalk.com/auth-confirmed.html';
 
   function getSupabaseAuth() {
     if (window.supabaseClient && window.supabaseClient.auth) return window.supabaseClient;
@@ -436,14 +439,16 @@
       email: email,
       password: password,
       options: {
-        emailRedirectTo: AUTH_REDIRECT,
-        data: { user_name: email.split('@')[0] }
+        emailRedirectTo: SIGNUP_CONFIRM_REDIRECT,
+        data: { user_name: email.split('@')[0], dayo_email_signup: true }
       }
     });
 
     if (error) {
-      alert('회원가입 오류: ' + error.message);
-      return;
+      if (error.code === 'user_already_exists' || /already registered|already exists/i.test(String(error.message || ''))) {
+        return { needsEmail: true };
+      }
+      throw new Error('signup-unavailable');
     }
 
     if (data.session) {
@@ -455,7 +460,7 @@
       alert('회원가입이 완료되었습니다. DayO에 오신 것을 환영해요!');
       window.location.href = '/mypage.html';
     } else {
-      alert('인증 메일이 발송되었습니다. 메일함에서 링크를 클릭해 가입을 완료해 주세요!');
+      return { needsEmail: true };
     }
   };
 
@@ -479,7 +484,8 @@
     });
 
     if (error) {
-      alert('로그인 실패: ' + error.message);
+      if (error.code === 'email_not_confirmed') return { needsConfirmation: true };
+      alert('이메일 또는 비밀번호를 확인해 주세요.');
       return;
     }
     if (typeof window.fetchAuthProfile === 'function') {

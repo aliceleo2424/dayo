@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex,nofollow">
+  <title>이메일 확인 | DayO</title>
+  <script>
+    // Capture the signup callback before Supabase consumes the URL fragment.
+    window.__dayoSignupCallbackToken = (function () {
+      var params = new URLSearchParams(window.location.hash.slice(1));
+      return params.get('type') === 'signup' ? params.get('access_token') : null;
+    })();
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-env.js"></script>
+  <script src="supabase-client.js?v=20261001-confirm-email"></script>
+  <script src="i18n.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100dvh; display: grid; place-items: center; padding: 24px; background: #FFF8F5; color: #2F2926; font-family: Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif; }
+    .confirm-shell { width: min(100%, 430px); }
+    .confirm-brand { display: flex; justify-content: center; margin-bottom: 18px; }
+    .confirm-brand img { width: auto; height: 52px; object-fit: contain; }
+    .confirm-card { padding: 28px; border: 1px solid #FFE0D7; border-radius: 24px; background: #fff; box-shadow: 0 20px 55px rgba(62,50,45,.12); }
+    .confirm-card h1 { margin: 0 0 9px; font-size: 23px; }
+    .confirm-card p { margin: 0 0 20px; color: #746B66; font-size: 14px; line-height: 1.6; }
+    .confirm-links { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; }
+    .confirm-links a { color: #9A4638; font-size: 13px; font-weight: 700; text-underline-offset: 3px; }
+    .confirm-links a:first-child { display: inline-block; border-radius: 12px; padding: 11px 16px; background: #FF6B57; color: #fff; text-decoration: none; }
+    .confirm-links a[hidden] { display: none; }
+    @media (max-width: 480px) { body { padding: 16px; } .confirm-card { padding: 22px 19px; border-radius: 20px; } }
+  </style>
+</head>
+<body>
+  <main class="confirm-shell">
+    <a class="confirm-brand" href="/" aria-label="DayO 홈으로"><img src="/images/logo.png" alt="DayO"></a>
+    <section class="confirm-card" aria-labelledby="confirmTitle">
+      <h1 id="confirmTitle" data-i18n="auth.confirmPage.loadingTitle">이메일을 확인하고 있어요.</h1>
+      <p id="confirmMessage" role="status" aria-live="polite" data-i18n="auth.confirmPage.loadingDesc">잠시만 기다려 주세요.</p>
+      <div class="confirm-links">
+        <a id="confirmMypage" href="/mypage.html" data-i18n="auth.confirmPage.mypage">마이페이지로 가기</a>
+        <a href="/" data-i18n="auth.confirmPage.home">홈으로 돌아가기</a>
+      </div>
+    </section>
+  </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function () {
+      var title = document.getElementById('confirmTitle');
+      var message = document.getElementById('confirmMessage');
+      var token = window.__dayoSignupCallbackToken;
+      window.__dayoSignupCallbackToken = null;
+      var confirmed = false;
+      try {
+        var client = window.supabaseClient;
+        if (token && client && client.auth) {
+          var sessionResult = await client.auth.getSession();
+          var session = sessionResult && sessionResult.data && sessionResult.data.session;
+          if (session && session.access_token === token) {
+            var userResult = await client.auth.getUser();
+            confirmed = !userResult.error && !!(userResult.data && userResult.data.user && userResult.data.user.email_confirmed_at);
+          }
+        }
+      } catch (error) { /* an invalid or expired link is shown as a generic failure */ }
+      try { history.replaceState(null, '', window.location.pathname); } catch (error) { /* ignore */ }
+      var titleKey = confirmed ? 'auth.confirmPage.successTitle' : 'auth.confirmPage.errorTitle';
+      var messageKey = confirmed ? 'auth.confirmPage.successDesc' : 'auth.confirmPage.errorDesc';
+      var mypage = document.getElementById('confirmMypage');
+      if (mypage) mypage.hidden = !confirmed;
+      if (title) { title.setAttribute('data-i18n', titleKey); title.textContent = window.DayOI18n ? window.DayOI18n.t(titleKey) : (confirmed ? '이메일 확인이 완료됐어요.' : '확인 링크를 처리하지 못했어요.'); }
+      if (message) { message.setAttribute('data-i18n', messageKey); message.textContent = window.DayOI18n ? window.DayOI18n.t(messageKey) : (confirmed ? '이제 DayO를 시작할 수 있어요.' : '링크를 다시 확인하거나 로그인해 주세요.'); }
+    });
+  </script>
+</body>
+</html>

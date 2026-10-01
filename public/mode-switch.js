@@ -81,6 +81,10 @@
     '.ms-consent{display:none;gap:.45rem;margin:.15rem 0 .35rem;padding:.75rem .85rem;',
     'border:1px solid #EDE4D5;border-radius:14px;background:#FFFCFA;text-align:left;}',
     '.ms-overlay[data-auth-tab="signup"] .ms-consent{display:grid;}',
+    '.ms-overlay.is-confirmation-pending .ms-tabs,.ms-overlay.is-confirmation-pending .ms-form,',
+    '.ms-overlay.is-confirmation-pending .ms-divider,.ms-overlay.is-confirmation-pending .ms-social{display:none;}',
+    '.ms-signup-confirmation{display:none;margin-top:1rem;color:var(--muted,#9A8580);font-size:.84rem;line-height:1.65;}',
+    '.ms-overlay.is-confirmation-pending .ms-signup-confirmation{display:block;}',
     '.ms-consent label{display:flex;align-items:flex-start;gap:.45rem;margin:0;color:#5C4A42;',
     'font-size:.74rem;font-weight:650;line-height:1.45;cursor:pointer;}',
     '.ms-consent input{margin-top:.15rem;flex:0 0 auto;accent-color:#FF6B57;}',
@@ -161,6 +165,10 @@
       signupTitle: 'DayO 라운지 첫 방문을 환영해요! 🎉',
       signupDesc: '가입하고 DayO 오픈 소식을 확인해보세요.',
       signupBtn: '가입하고 시작하기',
+      confirmPendingTitle: '가입 확인 메일을 보냈어요.',
+      confirmPendingDesc: '이메일에서 확인을 완료하면 DayO를 시작할 수 있어요.',
+      confirmPendingHelp: '메일이 보이지 않으면 스팸함도 확인해 주세요.',
+      emailNotConfirmed: '이메일 확인이 아직 완료되지 않았어요. 가입할 때 받은 메일을 확인해 주세요.',
       loungeBtn: '대화 라운지 로그인',
       emailPlaceholder: '이메일 주소 입력',
       passwordPlaceholder: '비밀번호 입력',
@@ -178,6 +186,10 @@
       signupTitle: 'Welcome to the DayO lounge! 🎉',
       signupDesc: 'Sign up to stay updated on the DayO launch.',
       signupBtn: 'Sign up and start',
+      confirmPendingTitle: 'Check your email to finish signing up.',
+      confirmPendingDesc: 'Confirm your email address to start using DayO.',
+      confirmPendingHelp: 'If you do not see the email, check your spam folder.',
+      emailNotConfirmed: 'Please confirm your email address using the message we sent when you signed up.',
       loungeBtn: 'Lounge login',
       emailPlaceholder: 'Enter your email',
       passwordPlaceholder: 'Enter your password',
@@ -477,12 +489,8 @@
   function authToastMessage(err) {
     var code = err && err.code;
     if (code === 'password_length') return t('login.passwordTooShort');
-    if (code === 'password') return t('login.passwordMismatch');
-    if (code === 'confirm_email') return t('login.confirmEmail');
-    var raw = String((err && (err.userMessage || err.message)) || '').trim();
-    if (raw && raw !== 'unavailable' && raw !== 'supabase unavailable' && raw !== 'missing credentials' && raw !== 'missing') {
-      return raw;
-    }
+    if (code === 'confirm_email') return t('login.emailNotConfirmed');
+    if (code === 'password' || code === 'credentials') return t('login.passwordMismatch');
     return t('login.authError');
   }
 
@@ -686,6 +694,7 @@
   function setAuthTab(tab) {
     authTab = tab === 'signup' ? 'signup' : 'login';
     if (!overlay) return;
+    overlay.classList.remove('is-confirmation-pending');
     overlay.setAttribute('data-auth-tab', authTab);
     var tabs = overlay.querySelectorAll('[data-ms-tab]');
     Array.prototype.forEach.call(tabs, function (btn) {
@@ -746,6 +755,17 @@
     closeAuthModal();
   }
 
+  function showSignupConfirmation() {
+    if (!overlay) return;
+    pendingHref = null;
+    var password = overlay.querySelector('#msPassword');
+    if (password) password.value = '';
+    overlay.classList.add('is-confirmation-pending');
+    syncLoginI18n();
+    var title = overlay.querySelector('#msLoginTitle');
+    if (title) title.focus();
+  }
+
   function openWelcome(name) {
     if (!welcomeOverlay) return;
     var title = welcomeOverlay.querySelector('#msWelcomeTitle');
@@ -784,47 +804,53 @@
   function handleEmailAuth(email, password) {
     var cleanedEmail = String(email || '').trim().toLowerCase();
     var cleanedPass = String(password || '');
+    var authAction = authTab;
     if (!cleanedEmail || !cleanedPass) return;
     if (cleanedPass.length < 6) {
       showToast(t('login.passwordTooShort'));
       return;
     }
-    if (authTab === 'signup' && !requiredConsentsChecked()) {
+    if (authAction === 'signup' && !requiredConsentsChecked()) {
       syncSignupConsentState();
       showToast('필수 동의 항목을 모두 체크해 주세요.');
       return;
     }
 
     setLoginBusy(true);
-    if (authTab === 'signup' && typeof window.handleEmailSignUp === 'function') {
-      Promise.resolve(window.handleEmailSignUp(cleanedEmail, cleanedPass)).catch(function (err) {
-        showToast((err && err.message) || t('login.authError'));
+    if (authAction === 'signup' && typeof window.handleEmailSignUp === 'function') {
+      Promise.resolve(window.handleEmailSignUp(cleanedEmail, cleanedPass)).then(function (result) {
+        if (result && result.needsEmail) showSignupConfirmation();
+      }).catch(function (err) {
+        showToast(authToastMessage(err));
       }).finally(function () {
         setLoginBusy(false);
       });
       return;
     }
-    if (typeof window.handleEmailSignIn === 'function') {
-      Promise.resolve(window.handleEmailSignIn(cleanedEmail, cleanedPass)).catch(function (err) {
-        showToast((err && err.message) || t('login.authError'));
+    if (authAction !== 'signup' && typeof window.handleEmailSignIn === 'function') {
+      Promise.resolve(window.handleEmailSignIn(cleanedEmail, cleanedPass)).then(function (result) {
+        if (result && result.needsConfirmation) showToast(t('login.emailNotConfirmed'));
+      }).catch(function (err) {
+        showToast(authToastMessage(err));
       }).finally(function () {
         setLoginBusy(false);
       });
       return;
     }
-    if (typeof window.handleAuthLogin === 'function') {
+    if (authAction !== 'signup' && typeof window.handleAuthLogin === 'function') {
       Promise.resolve(window.handleAuthLogin(cleanedEmail, cleanedPass)).catch(function (err) {
         setLoginBusy(false);
-        showToast((err && err.message) || t('login.authError'));
+        showToast(authToastMessage(err));
       });
       return;
     }
 
     waitForStore().then(function (store) {
-      if (!store || typeof store.signInWithEmail !== 'function') {
+      var method = authAction === 'signup' ? 'signUpWithEmail' : 'signInWithEmail';
+      if (!store || typeof store[method] !== 'function') {
         throw new Error('unavailable');
       }
-      return store.signInWithEmail(cleanedEmail, cleanedPass);
+      return store[method](cleanedEmail, cleanedPass);
     }).then(function (result) {
       setLoginBusy(false);
       if (!result) {
@@ -832,8 +858,7 @@
         return;
       }
       if (result.needsEmail) {
-        closeLogin();
-        showToast(t('login.confirmEmail'), 4200);
+        showSignupConfirmation();
         return;
       }
       try {
@@ -868,8 +893,10 @@
   function syncLoginI18n() {
     if (!overlay) return;
     var signup = authTab === 'signup';
+    var confirmationPending = overlay.classList.contains('is-confirmation-pending');
     var title = overlay.querySelector('#msLoginTitle');
     var desc = overlay.querySelector('.ms-sub');
+    var confirmationHelp = overlay.querySelector('.ms-signup-confirmation');
     var email = overlay.querySelector('#msEmail');
     var pass = overlay.querySelector('#msPassword');
     var submit = overlay.querySelector('#msAuthSubmit') || overlay.querySelector('.ms-login');
@@ -879,8 +906,9 @@
     var dismiss = overlay.querySelector('[data-ms-close]');
     var tabLogin = overlay.querySelector('[data-ms-tab="login"]');
     var tabSignup = overlay.querySelector('[data-ms-tab="signup"]');
-    if (title) title.textContent = signup ? t('login.signupTitle') : t('login.title');
-    if (desc) desc.textContent = signup ? t('login.signupDesc') : t('login.desc');
+    if (title) title.textContent = confirmationPending ? t('login.confirmPendingTitle') : (signup ? t('login.signupTitle') : t('login.title'));
+    if (desc) desc.textContent = confirmationPending ? t('login.confirmPendingDesc') : (signup ? t('login.signupDesc') : t('login.desc'));
+    if (confirmationHelp) confirmationHelp.textContent = t('login.confirmPendingHelp');
     if (email) email.placeholder = t('login.emailPlaceholder');
     if (pass) pass.placeholder = signup ? t('login.passwordPlaceholderSignup') : t('login.passwordPlaceholder');
     if (submit) submit.textContent = signup ? t('login.signupBtn') : t('login.startBtn');
@@ -905,8 +933,9 @@
       '    <button type="button" class="ms-tab" role="tab" id="msTabSignup" data-ms-tab="signup" aria-selected="false">', t('login.tabSignup'), '</button>',
       '  </div>',
       '  <div class="ms-key" aria-hidden="true"><img src="/images/logo.png" alt=""></div>',
-      '  <h2 id="msLoginTitle">', t('login.title'), '</h2>',
+      '  <h2 id="msLoginTitle" tabindex="-1">', t('login.title'), '</h2>',
       '  <p class="ms-sub">', t('login.desc'), '</p>',
+      '  <p class="ms-signup-confirmation" role="status" aria-live="polite"></p>',
       '  <form class="ms-form" id="msLoginForm">',
       '    <input class="ms-input" type="email" id="msEmail" name="email" autocomplete="email" required',
       '      placeholder="', t('login.emailPlaceholder'), '">',
