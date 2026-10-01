@@ -1,4 +1,4 @@
-/* DayO 티켓 지갑 — DB 확정 전 깜빡임 방지 + 신규 가입 재시도 */
+/* DayO 티켓 지갑 — 서버 확정 잔액을 화면에 동기화 */
 (function () {
   'use strict';
 
@@ -46,12 +46,6 @@
 
   function isHydrated() {
     return hydrated;
-  }
-
-  function persistTickets(n) {
-    if (window.DayOProfileStore && typeof window.DayOProfileStore.updateProfile === 'function') {
-      window.DayOProfileStore.updateProfile({ ticket_count: n }, { skipEvents: true });
-    }
   }
 
   function syncPendingUI() {
@@ -102,7 +96,6 @@
     document.dispatchEvent(new CustomEvent('dayo:ticketchange', {
       detail: { ticketCount: next, added: 0 }
     }));
-    persistTickets(next);
     return next;
   }
 
@@ -115,7 +108,6 @@
     document.dispatchEvent(new CustomEvent('dayo:ticketchange', {
       detail: { ticketCount: next, added: add }
     }));
-    persistTickets(next);
     return { ticketCount: next, added: add };
   }
 
@@ -132,8 +124,7 @@
     return null;
   }
 
-  async function loadUserTicketBalance(userId, retryCount) {
-    retryCount = retryCount || 0;
+  async function loadUserTicketBalance(userId) {
     var mySeq = ++loadSeq;
     var client = window.supabaseClient;
     if (!client || !userId) {
@@ -165,30 +156,11 @@
     var balance = resolveTicketBalance(profile);
     if (balance == null) balance = 0;
 
-    var isNewUser = false;
-    try {
-      if (profile && profile.created_at) {
-        isNewUser = (Date.now() - new Date(profile.created_at).getTime()) < 60000;
-      } else if (window._dayoAuthUser && window._dayoAuthUser.created_at) {
-        isNewUser = (Date.now() - new Date(window._dayoAuthUser.created_at).getTime()) < 60000;
-      }
-    } catch (e2) { isNewUser = false; }
-
-    /* 신규 가입 직후 웰컴 티켓 트리거 지연 — 0으로 확정하지 말고 재시도 */
-    if (balance === 0 && isNewUser && retryCount < 2) {
-      if (!hydrated) syncPendingUI();
-      setTimeout(function () {
-        loadUserTicketBalance(userId, retryCount + 1);
-      }, 500);
-      return null;
-    }
-
     setCount(balance);
     return balance;
   }
 
   function ensureInitialized() {
-    /* Do NOT write default 0 into localStorage — that causes 1→0 flicker for new signups */
     if (!hydrated) syncPendingUI();
   }
 
@@ -225,19 +197,12 @@
       var profile = e.detail && e.detail.profile;
       var user = e.detail && e.detail.user;
       var balance = resolveTicketBalance(profile);
-      var isNew = false;
-      try {
-        if (user && user.created_at) {
-          isNew = (Date.now() - new Date(user.created_at).getTime()) < 60000;
-        }
-      } catch (err) { isNew = false; }
-
-      if (balance != null && !(balance === 0 && isNew)) {
+      if (balance != null) {
         setCount(balance);
         return;
       }
       if (user && user.id) {
-        loadUserTicketBalance(user.id, 0);
+        loadUserTicketBalance(user.id);
       } else if (!hydrated) {
         syncPendingUI();
       }
