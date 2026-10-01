@@ -83,7 +83,7 @@
     'landing.hero.rotate.2': { KO: '자신 있게', EN: 'with confidence' },
     'landing.hero.rotate.3': { KO: '자연스럽게', EN: 'naturally' },
     'landing.hero.description': { KO: '막히면 한국어로 말해도 괜찮은, 외국인 파트너와의 1:1 화상 대화', EN: 'A one-on-one video conversation where it’s okay to use Korean when you get stuck.' },
-    'landing.hero.imageAlt': { KO: '노트북을 보며 웃고 손을 흔드는 사람', EN: 'A person smiling and waving while looking at a laptop' },
+    'landing.hero.imageAlt': { KO: '노트북으로 외국인과 화상 대화를 하며 웃는 여성', EN: 'A woman smiling during a video conversation with an international partner' },
     'landing.hero.testCta': { KO: '무료로 스피킹 감각 확인하기', EN: 'Take the free speaking check' },
     'landing.hero.testLanguages': { KO: '5개 언어 스피킹 테스트 제공', EN: 'Speaking checks available in 5 languages' },
     'landing.hero.sessionLink': { KO: 'DayO 대화 세션 알아보기', EN: 'See how DayO conversations work' },

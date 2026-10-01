@@ -2678,6 +2678,275 @@
       overflow: hidden !important;
       box-sizing: border-box !important;
     }
+
+    /* Café landing palette: keep modal and other-page controls outside this scope. */
+    .dayo-cafe-landing {
+      --cafe-beige: #F8F0E3;
+      --cafe-cream: #FFF2C9;
+      --cafe-ivory: #FFFBF4;
+      --cafe-ink: #40362F;
+      --cafe-sage: #5F7D63;
+      --cafe-sage-hover: #506B55;
+      --cafe-sage-soft: #DDE8D9;
+      --cafe-orange: #D9854F;
+      background: var(--cafe-beige);
+      color: var(--cafe-ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", "Malgun Gothic", sans-serif;
+      font-weight: 400;
+    }
+    body.theme-learner:has(.dayo-cafe-landing) { background: #F8F0E3; }
+    body.theme-learner:has(.dayo-cafe-landing) > .mesh-bg,
+    body.theme-learner:has(.dayo-cafe-landing) > .cursor-glow { display: none; }
+    body.theme-learner:has(.dayo-cafe-landing) > header {
+      background: rgba(255, 251, 244, 0.95);
+      border-bottom-color: rgba(64, 54, 47, 0.12);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", "Malgun Gothic", sans-serif;
+    }
+    body.theme-learner:has(.dayo-cafe-landing) .nav-drawer { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", "Malgun Gothic", sans-serif; }
+    body.theme-learner:has(.dayo-cafe-landing) .nav-desktop a,
+    body.theme-learner:has(.dayo-cafe-landing) .nav-mobile-quick a { color: #40362F; font-weight: 600; }
+    body.theme-learner:has(.dayo-cafe-landing) .nav-desktop a:hover {
+      color: #506B55;
+      background: #DDE8D9;
+    }
+    body.theme-learner:has(.dayo-cafe-landing) .landing-header-cta,
+    body.theme-learner:has(.dayo-cafe-landing) .nav-drawer__cta {
+      background: #5F7D63;
+      color: #fff;
+      min-height: 44px;
+      padding: 0 1rem;
+      border-radius: 15px;
+      font-family: inherit;
+      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(64, 54, 47, 0.09);
+    }
+    body.theme-learner:has(.dayo-cafe-landing) .landing-header-cta:hover,
+    body.theme-learner:has(.dayo-cafe-landing) .nav-drawer__cta:hover { background: #506B55; }
+    body.theme-learner:has(.dayo-cafe-landing) > header .header-mode .ms-login-trigger,
+    body.theme-learner:has(.dayo-cafe-landing) > header .header-mode .header-mypage-cta {
+      border-color: #DDE8D9;
+      color: #5F7D63;
+    }
+    body.theme-learner:has(.dayo-cafe-landing) > header .header-mode .ms-login-trigger:hover,
+    body.theme-learner:has(.dayo-cafe-landing) > header .header-mode .header-mypage-cta:hover {
+      background: #DDE8D9;
+      color: #506B55;
+    }
+    body.theme-learner:has(.dayo-cafe-landing) > header .menu-toggle {
+      border-color: #DDE8D9;
+      color: #5F7D63;
+    }
+    body.theme-learner:has(.dayo-cafe-landing) > header .menu-toggle:hover,
+    body.theme-learner:has(.dayo-cafe-landing) > header .menu-toggle[aria-expanded="true"] {
+      background: #DDE8D9;
+      color: #506B55;
+    }
+    body.theme-learner:has(.dayo-cafe-landing) .landing-language-control .i18n-btn {
+      border-color: #DDE8D9;
+      color: #5F7D63;
+    }
+    body.theme-learner:has(.dayo-cafe-landing) .landing-language-control .i18n-btn:hover,
+    body.theme-learner:has(.dayo-cafe-landing) .landing-language-control .i18n-wrap.is-open .i18n-btn {
+      border-color: #5F7D63;
+      background: #DDE8D9;
+    }
+    body.theme-learner:has(.dayo-cafe-landing) .landing-language-control .i18n-menu { border-color: #DDE8D9; }
+    body.theme-learner:has(.dayo-cafe-landing) .landing-language-control .i18n-opt:hover,
+    body.theme-learner:has(.dayo-cafe-landing) .landing-language-control .i18n-opt.is-active {
+      background: #DDE8D9;
+      color: #506B55;
+    }
+    body.theme-learner:has(.dayo-cafe-landing) .nav-drawer a:hover,
+    body.theme-learner:has(.dayo-cafe-landing) .nav-drawer .btn-logout:hover {
+      background: #DDE8D9;
+      color: #506B55;
+    }
+    .dayo-cafe-landing .landing-preopen-banner {
+      background: #FFF2C9;
+      border-bottom-color: rgba(64, 54, 47, 0.12);
+      color: #40362F;
+      padding: 0.45rem 0.8rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+    .dayo-cafe-landing .hero {
+      padding: 0;
+      background: #F8F0E3;
+    }
+    .dayo-cafe-landing .home-stage-inner { max-width: 1180px; }
+    .dayo-cafe-landing .hero-grid {
+      position: relative;
+      justify-content: flex-start;
+      min-height: 500px;
+      isolation: isolate;
+    }
+    .dayo-cafe-landing .hero-media {
+      position: absolute;
+      inset: 0 auto 0 50%;
+      z-index: -1;
+      display: block;
+      width: 100vw;
+      overflow: hidden;
+      transform: translateX(-50%);
+    }
+    .dayo-cafe-landing .hero-media img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+    }
+    .dayo-cafe-landing .hero-media::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(248, 240, 227, 0.35), rgba(248, 240, 227, 0) 42%);
+      pointer-events: none;
+    }
+    .dayo-cafe-landing .hero-copy {
+      position: relative;
+      z-index: 1;
+      flex: 0 1 49%;
+      padding: 2.6rem 0;
+      text-align: left;
+    }
+    .dayo-cafe-landing .hero-title,
+    .dayo-cafe-landing .section-title,
+    .dayo-cafe-landing .journey-title,
+    .dayo-cafe-landing .landing-subsection h3 {
+      color: #40362F;
+      font-family: inherit;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+    .dayo-cafe-landing .hero-title {
+      max-width: 31rem;
+      font-size: clamp(1.85rem, 3.1vw, 2.3rem);
+      line-height: 1.32;
+    }
+    html[lang="ko"] .dayo-cafe-landing .hero-title-visible > [data-i18n="landing.hero.titleSuffix"] {
+      display: block;
+      white-space: nowrap;
+    }
+    .dayo-cafe-landing .hero-title-rotator { color: #5F7D63; }
+    .dayo-cafe-landing .hero-subtitle {
+      margin-left: 0;
+      color: #40362F;
+      max-width: 29rem;
+    }
+    .dayo-cafe-landing .cta-wrap { align-items: flex-start; }
+    .dayo-cafe-landing .home-cta-btn {
+      width: fit-content;
+      max-width: 100%;
+      min-height: 52px;
+      padding: 0.75rem 1.45rem;
+      border-radius: 15px;
+      background: #5F7D63;
+      color: #fff;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      box-shadow: 0 2px 7px rgba(64, 54, 47, 0.11);
+    }
+    .dayo-cafe-landing .home-cta-btn:hover { background: #506B55; box-shadow: 0 3px 8px rgba(64, 54, 47, 0.13); }
+    .dayo-cafe-landing .home-cta-btn:active { box-shadow: 0 1px 4px rgba(64, 54, 47, 0.1); }
+    .dayo-cafe-landing .home-quiz-link,
+    .dayo-cafe-landing .cta-btn,
+    .dayo-cafe-landing .faq-list a { color: #5F7D63; }
+    .dayo-cafe-landing .home-quiz-link { font-weight: 600; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+    .dayo-cafe-landing .home-quiz-link:hover,
+    .dayo-cafe-landing .cta-btn:hover,
+    .dayo-cafe-landing .faq-list a:hover { color: #506B55; }
+    .dayo-cafe-landing .conversation-overview { background: #FFFBF4; }
+    .dayo-cafe-landing #partners { background: #F8F0E3; }
+    .dayo-cafe-landing #pricing { background: #FFF2C9; }
+    .dayo-cafe-landing #faq { background: #FFFBF4; }
+    .dayo-cafe-landing .section-label,
+    .dayo-cafe-landing .journey-step {
+      color: #D9854F;
+      font-family: inherit;
+      font-weight: 600;
+    }
+    .dayo-cafe-landing .journey-card,
+    .dayo-cafe-landing .ticket-price-card,
+    .dayo-cafe-landing .faq-list details {
+      background: #FFFBF4;
+      border: 1px solid rgba(64, 54, 47, 0.14);
+      border-radius: 17px;
+      box-shadow: 0 2px 10px rgba(64, 54, 47, 0.045);
+    }
+    .dayo-cafe-landing .journey-card:hover { box-shadow: 0 4px 14px rgba(64, 54, 47, 0.07); }
+    .dayo-cafe-landing .journey-card__head,
+    .dayo-cafe-landing .partner-card__head { align-items: baseline; }
+    .dayo-cafe-landing .journey-card__head .journey-icon,
+    .dayo-cafe-landing .partner-card__head .journey-icon { font-size: 1.2rem; line-height: 1; }
+    .dayo-cafe-landing .journey-card__head .journey-title,
+    .dayo-cafe-landing .partner-card__head .journey-title { line-height: 1.35; }
+    .dayo-cafe-landing .ticket-price-card--trial {
+      background: #FFFBF4;
+      border-color: #DDE8D9;
+      box-shadow: 0 2px 10px rgba(64, 54, 47, 0.05);
+    }
+    .dayo-cafe-landing #pricing .header-cta {
+      min-height: 52px;
+      padding: 0.8rem 1.3rem;
+      border-radius: 15px;
+      background: #5F7D63;
+      color: #fff;
+      font-family: inherit;
+      font-weight: 600;
+      box-shadow: 0 2px 7px rgba(64, 54, 47, 0.09);
+    }
+    .dayo-cafe-landing #pricing .header-cta:hover { background: #506B55; }
+    .dayo-cafe-landing .dayo-video-wrapper__badge {
+      background: #FFF2C9;
+      color: #40362F;
+    }
+    .dayo-cafe-landing .how-note,
+    .dayo-cafe-landing .session-ribbon { background: #FFF2C9; color: #40362F; }
+    .dayo-cafe-landing .topic-chip,
+    .dayo-cafe-landing .partner-tags .tag { background: #FFF2C9; border-color: rgba(64, 54, 47, 0.1); color: #40362F; }
+    .dayo-cafe-landing .faq-all-link { background: #FFFBF4; border-color: #DDE8D9; color: #5F7D63; font-weight: 600; }
+    body.theme-learner:has(.dayo-cafe-landing) .chat-fab {
+      background: #5F7D63;
+      box-shadow: 0 3px 12px rgba(64, 54, 47, 0.12);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", "Malgun Gothic", sans-serif;
+    }
+    @media (max-width: 767px) {
+      .dayo-cafe-landing .hero { padding: 0; }
+      .dayo-cafe-landing .hero-grid { min-height: 0; flex-direction: column; gap: 0; }
+      .dayo-cafe-landing .hero-copy {
+        order: 0;
+        flex: none;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 1.8rem 0 1.25rem;
+        text-align: left;
+      }
+      .dayo-cafe-landing .hero-subtitle { margin-left: 0; margin-right: 0; }
+      .dayo-cafe-landing .cta-wrap { align-items: flex-start; }
+      .dayo-cafe-landing .hero-media {
+        order: 1;
+        position: relative;
+        inset: auto;
+        z-index: 0;
+        transform: none;
+        width: calc(100% + 2rem);
+        height: auto;
+        aspect-ratio: 16 / 9;
+        margin: 0 -1rem;
+      }
+      .dayo-cafe-landing .hero-media::after { display: none; }
+      .dayo-cafe-landing .hero-media img { object-position: center; }
+    }
+    @media (max-width: 600px) {
+      .dayo-cafe-landing .hero-copy { padding-top: 1.4rem; }
+      .dayo-cafe-landing .hero-title { font-size: clamp(1.58rem, 7vw, 1.85rem); }
+      html[lang="en"] .dayo-cafe-landing .hero-title { max-width: 22rem; font-size: clamp(1.55rem, 6.6vw, 1.8rem); }
+      .dayo-cafe-landing .home-cta-btn { width: 100%; min-height: 54px; }
+      .dayo-cafe-landing .hero-media { width: calc(100% + 2rem); }
+    }
   </style>
 </head>
 <body class="theme-learner" data-dayo-role="learner" data-landing-auto-popup="off">
@@ -2767,13 +3036,17 @@
     <button type="button" onclick="handleLogout(event)" class="btn-logout" style="cursor: pointer;" data-i18n="landing.nav.logout">로그아웃</button>
   </nav>
 
-  <div class="page">
+  <div class="page dayo-cafe-landing">
     <div class="landing-preopen-banner" role="status" data-i18n="landing.banner">10월 정식 오픈 준비 중 · DayO 대화 세션을 준비하고 있어요</div>
 
     <!-- ===== Landing hero (always visible) ===== -->
     <section class="hero home-stage" id="about" data-landing-hero-static>
       <div class="section-inner home-stage-inner">
         <div class="hero-grid">
+          <picture class="hero-media">
+            <source media="(max-width: 767px)" srcset="/images/dayo-cafe-hero-mobile.webp">
+            <img src="/images/dayo-cafe-hero-desktop.webp" alt="노트북으로 외국인과 화상 대화를 하며 웃는 여성" data-i18n="landing.hero.imageAlt" data-i18n-attr="alt" width="1536" height="864" fetchpriority="high">
+          </picture>
           <div class="hero-copy">
             <h1 class="hero-title">
               <span class="hero-sr-only" data-i18n="landing.hero.title">외국인과 눈을 맞추며 대화가 돼요.</span>
