@@ -186,8 +186,8 @@
       ES: 'Regístrate para recibir noticias sobre el lanzamiento de DayO.'
     },
     'login.signupBtn': {
-      KO: '가입하고 시작하기',
-      EN: 'Sign up and start',
+      KO: '이메일로 가입',
+      EN: 'Sign up with email',
       ZH: '注册并开始',
       JA: '登録して始める',
       FR: 'S’inscrire et commencer',
@@ -219,24 +219,24 @@
       KO: '닉네임 또는 이메일을 입력해 주세요', EN: 'Enter nickname or email', ZH: '请输入昵称或邮箱', JA: 'ニックネームまたはメールを入力', FR: 'Pseudo ou e-mail', ES: 'Apodo o correo'
     },
     'login.startBtn': {
-      KO: '이메일로 시작하기', EN: 'Continue with Email', FR: "Continuer avec l'e-mail", ES: 'Continuar con el correo'
+      KO: '이메일로 로그인', EN: 'Log in with email', FR: "Continuer avec l'e-mail", ES: 'Continuar con el correo'
     },
     'login.socialDivider': {
-      KO: '간편 로그인',
-      EN: 'Social Login',
+      KO: '또는',
+      EN: 'or',
       FR: 'Connexion rapide',
       ES: 'Acceso rápido'
     },
     'login.social.kakao': {
-      KO: '카카오로 1초 만에 시작하기',
-      EN: 'Start in 1 second with Kakao',
+      KO: '카카오로 계속하기',
+      EN: 'Continue with Kakao',
       ZH: '用 Kakao 1秒开始',
       JA: 'Kakaoで1秒ではじめる',
       FR: 'Commencer en 1 seconde avec Kakao',
       ES: 'Empezar en 1 segundo con Kakao'
     },
     'login.social.google': {
-      KO: 'Google 계정으로 계속하기',
+      KO: 'Google로 계속하기',
       EN: 'Continue with Google',
       ZH: '使用 Google 账号继续',
       JA: 'Googleアカウントで続ける',
