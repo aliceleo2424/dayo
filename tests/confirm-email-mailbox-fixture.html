@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Confirm Email mailbox layout fixture</title>
+</head>
+<body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#fff8f3;font-family:Arial,sans-serif">
+  <button type="button" data-ms-open-login>가입 확인 모달 열기</button>
+  <script>
+    window.handleEmailSignUp = async function () { return { needsEmail: true }; };
+  </script>
+  <script src="/public/mode-switch.js"></script>
+</body>
+</html>

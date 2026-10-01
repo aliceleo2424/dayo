@@ -7,13 +7,16 @@
 
   var MIN_PASSWORD_LENGTH = 6;
   var RESET_PATH = '/reset-password.html';
-  var GENERIC_RESET_NOTICE = '가입된 계정이면 비밀번호 재설정 메일을 보내드렸습니다.';
+  var GENERIC_RESET_NOTICE = '입력한 이메일이 가입 정보와 일치하는 경우 메일이 발송됩니다.';
 
   var TEXT = {
     ko: {
       forgot: '비밀번호를 잊으셨나요?', forgotTitle: '비밀번호 재설정',
       forgotDesc: '가입할 때 사용한 이메일을 입력해 주세요.', email: '이메일 주소',
       send: '재설정 메일 보내기', close: '닫기', genericNotice: GENERIC_RESET_NOTICE,
+      sentTitle: '비밀번호 재설정 메일을 보냈어요.',
+      sentBody: '받은편지함에서\n“[DayO 돼요] 비밀번호 재설정 안내”\n제목의 메일을 확인해 주세요.\n\n메일이 보이지 않으면 스팸함도 확인해 주세요.',
+      sentHelper: GENERIC_RESET_NOTICE,
       serviceError: '지금은 요청을 처리하지 못했어요. 잠시 후 다시 시도해 주세요.',
       accountTitle: '계정 설정', accountDesc: '로그인과 비밀번호를 안전하게 관리하세요.',
       change: '비밀번호 변경', socialOnly: '소셜 로그인으로 연결된 계정입니다.',
@@ -30,7 +33,10 @@
     en: {
       forgot: 'Forgot your password?', forgotTitle: 'Reset your password',
       forgotDesc: 'Enter the email address you used to sign up.', email: 'Email address',
-      send: 'Send reset email', close: 'Close', genericNotice: 'If an account exists for this email, we sent a password reset link.',
+      send: 'Send reset email', close: 'Close', genericNotice: 'If the email matches a registered account, a reset email will be sent.',
+      sentTitle: 'Password reset email sent.',
+      sentBody: 'Check your inbox for an email titled “[DayO 돼요] 비밀번호 재설정 안내”.\n\nIf you do not see it, check your spam folder.',
+      sentHelper: 'The email is sent when the address matches a registered account.',
       serviceError: 'We could not process your request right now. Please try again shortly.',
       accountTitle: 'Account settings', accountDesc: 'Keep your login and password secure.',
       change: 'Change password', socialOnly: 'This account uses social login.',
@@ -156,13 +162,15 @@
       '#login-modal[data-auth-tab="signup"] .dayo-forgot-link{display:none}',
       '.dayo-password-overlay{position:fixed;inset:0;z-index:2147483646;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(62,50,45,.48)}',
       '.dayo-password-overlay.is-open{display:flex}.dayo-password-card{width:min(100%,390px);max-height:calc(100dvh - 32px);overflow:auto;box-sizing:border-box;padding:24px;border:1px solid #ffe0d7;border-radius:22px;background:#fff;box-shadow:0 22px 60px rgba(62,50,45,.2)}',
-      '.dayo-password-card h2,.dayo-account-settings h3{margin:0 0 7px;color:#2f2926}.dayo-password-card>p,.dayo-account-settings p{margin:0 0 16px;color:#746b66;font-size:13px;line-height:1.55}',
+      '.dayo-password-card h2{margin:0 0 7px;color:#2f2926}.dayo-account-settings h3{margin:0;color:#2f2926;font-size:14px;line-height:1.35}.dayo-password-card>p{margin:0 0 16px;color:#746b66;font-size:13px;line-height:1.55}',
+      '#dayoForgotDescription{white-space:pre-line}',
       '.dayo-password-form{display:grid;gap:10px}.dayo-password-form label{font-size:12px;font-weight:800;color:#4b4541}.dayo-password-input{width:100%;box-sizing:border-box;border:1px solid #ddd4cf;border-radius:12px;padding:12px 13px;font:inherit;color:#2f2926}',
       '.dayo-password-hint,.dayo-password-status{min-height:19px;margin:0!important;font-size:12px!important}.dayo-password-status.is-error{color:#c74432}.dayo-password-status.is-success{color:#247552}',
+      '.dayo-password-status.is-reset-helper{margin-top:3px!important;line-height:1.55;color:#746b66}',
       '.dayo-password-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}.dayo-password-actions button,.dayo-account-password-btn{border:0;border-radius:12px;padding:11px 15px;font:inherit;font-size:13px;font-weight:800;cursor:pointer}',
-      '.dayo-password-primary,.dayo-account-password-btn{background:#ff6b57;color:#fff}.dayo-password-secondary{background:#f4f1ed;color:#5c4a42}.dayo-password-actions button:disabled{opacity:.6;cursor:wait}',
-      '.dayo-account-settings{background:#fff;border:1px solid #f1e8e3;border-radius:20px;padding:20px}.dayo-account-settings[hidden]{display:none}.dayo-account-provider{margin:0!important;color:#746b66!important}',
-      '@media(max-width:600px){.dayo-password-card{padding:20px;border-radius:18px}.dayo-password-actions{flex-direction:column-reverse}.dayo-password-actions button{width:100%}}'
+      '.dayo-password-primary{background:#ff6b57;color:#fff}.dayo-password-secondary{background:#f4f1ed;color:#5c4a42}.dayo-password-actions button:disabled{opacity:.6;cursor:wait}',
+      '.dayo-account-settings{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:0;background:#fffdfb;border:1px solid #f1e8e3;border-radius:14px;padding:12px 14px;box-shadow:none}.dayo-account-settings[hidden]{display:none}.dayo-account-provider{margin:0!important;color:#746b66!important;font-size:12px;line-height:1.4}.dayo-account-password-btn{flex:0 0 auto;padding:8px 11px;border:1px solid #e5d9d2;background:#fff;color:#5c4a42;font-size:12px}',
+      '@media(max-width:600px){.dayo-password-card{padding:20px;border-radius:18px}.dayo-password-actions{flex-direction:column-reverse}.dayo-password-actions button{width:100%}.dayo-account-settings{padding:10px 12px;flex-wrap:wrap}}'
     ].join('');
     document.head.appendChild(style);
   }
@@ -193,6 +201,14 @@
     element.textContent = message || '';
     element.classList.toggle('is-error', kind === 'error');
     element.classList.toggle('is-success', kind === 'success');
+  }
+
+  function setForgotCopy(sent) {
+    var title = document.getElementById('dayoForgotTitle');
+    var description = document.getElementById('dayoForgotDescription');
+    if (title) title.setAttribute('data-dp-text', sent ? 'sentTitle' : 'forgotTitle');
+    if (description) description.setAttribute('data-dp-text', sent ? 'sentBody' : 'forgotDesc');
+    applyLanguage();
   }
 
   function passwordFormMarkup(prefix, titleKey, descriptionKey) {
@@ -270,7 +286,7 @@
     overlay.innerHTML = [
       '<div class="dayo-password-card" role="dialog" aria-modal="true" aria-labelledby="dayoForgotTitle">',
       '  <h2 id="dayoForgotTitle" data-dp-text="forgotTitle"></h2>',
-      '  <p data-dp-text="forgotDesc"></p>',
+      '  <p id="dayoForgotDescription" data-dp-text="forgotDesc"></p>',
       '  <form class="dayo-password-form" id="dayoForgotForm">',
       '    <label for="dayoForgotEmail" data-dp-text="email"></label>',
       '    <input class="dayo-password-input" id="dayoForgotEmail" type="email" autocomplete="email" required data-dp-placeholder="email">',
@@ -288,7 +304,10 @@
       var source = document.getElementById('msEmail');
       var email = document.getElementById('dayoForgotEmail');
       if (email && source) email.value = source.value;
-      status(document.getElementById('dayoForgotStatus'), '', '');
+      var forgotStatus = document.getElementById('dayoForgotStatus');
+      setForgotCopy(false);
+      if (forgotStatus) forgotStatus.classList.remove('is-reset-helper');
+      status(forgotStatus, '', '');
       show(overlay);
       if (email) setTimeout(function () { email.focus(); }, 20);
     });
@@ -301,7 +320,14 @@
       var submit = event.currentTarget.querySelector('button[type="submit"]');
       submit.disabled = true;
       var result = await requestPasswordReset(getClient(), email && email.value, window.location);
-      status(document.getElementById('dayoForgotStatus'), text(result.unavailable ? 'serviceError' : 'genericNotice'), result.unavailable ? 'error' : 'success');
+      var forgotStatus = document.getElementById('dayoForgotStatus');
+      if (result.unavailable) {
+        status(forgotStatus, text('serviceError'), 'error');
+      } else {
+        setForgotCopy(true);
+        if (forgotStatus) forgotStatus.classList.add('is-reset-helper');
+        status(forgotStatus, text('sentHelper'), 'success');
+      }
       submit.disabled = false;
     });
     applyLanguage();
@@ -340,7 +366,6 @@
     section.hidden = true;
     section.innerHTML = [
       '<h3 data-dp-text="accountTitle"></h3>',
-      '<p data-dp-text="accountDesc"></p>',
       '<p class="dayo-account-provider" id="dayoAccountProvider"></p>',
       '<button type="button" class="dayo-account-password-btn" id="dayoPasswordChangeButton" data-dp-text="change" hidden></button>'
     ].join('');

@@ -244,12 +244,12 @@
       ES: 'Continuar con Google'
     },
     'login.passwordMismatch': {
-      KO: '비밀번호가 올바르지 않습니다.',
-      EN: 'The password is incorrect.',
-      ZH: '密码不正确。',
-      JA: 'パスワードが正しくありません。',
-      FR: 'Le mot de passe est incorrect.',
-      ES: 'La contraseña no es correcta.'
+      KO: '이메일 또는 비밀번호를 확인해 주세요.',
+      EN: 'Please check your email and password.',
+      ZH: '请检查您的电子邮箱和密码。',
+      JA: 'メールアドレスまたはパスワードをご確認ください。',
+      FR: 'Vérifiez votre adresse e-mail et votre mot de passe.',
+      ES: 'Comprueba tu correo electrónico y contraseña.'
     },
     'login.passwordTooShort': {
       KO: '비밀번호는 최소 6자리 이상이어야 합니다.',
@@ -274,6 +274,14 @@
       JA: '確認メールを送りました。受信箱を確認してください ✉️',
       FR: 'Un e-mail de confirmation a été envoyé ✉️',
       ES: 'Te enviamos un correo de confirmación ✉️'
+    },
+    'login.signupNotice': {
+      KO: '가입 요청을 확인했어요. 가입 가능한 이메일이면 확인 메일을 보내드렸습니다.',
+      EN: 'We received your sign-up request. If the email can be registered, a confirmation email has been sent.',
+      ZH: '我们已收到您的注册请求。如果该邮箱可以注册，确认邮件已发送。',
+      JA: '登録リクエストを受け付けました。登録可能なメールアドレスには確認メールを送信しました。',
+      FR: 'Nous avons reçu votre demande d’inscription. Si cette adresse peut être enregistrée, un e-mail de confirmation a été envoyé.',
+      ES: 'Hemos recibido tu solicitud de registro. Si el correo puede registrarse, se ha enviado un mensaje de confirmación.'
     },
     'login.authError': {
       KO: '로그인에 실패했어요. 잠시 후 다시 시도해 주세요',

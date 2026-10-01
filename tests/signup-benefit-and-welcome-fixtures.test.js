@@ -96,10 +96,61 @@ async function verifyTicketWallet() {
   assert.equal(paid.window.DayOTicketWallet.getCount(), 2);
 }
 
+function verifyCompactAccountSettings() {
+  const account = read('public/password-account.js');
+  assert.equal(account, read('password-account.js'), 'account settings root/public mirrors match');
+  assert.match(account, /\.dayo-account-settings\{display:flex;align-items:center;justify-content:space-between/);
+  assert.match(account, /\.dayo-account-password-btn\{flex:0 0 auto;[^']*background:#fff/);
+  assert.match(account, /@media\(max-width:600px\)[^']*\.dayo-account-settings\{padding:10px 12px;flex-wrap:wrap\}/);
+  const markup = account.match(/section\.innerHTML = \[([\s\S]*?)\]\.join\(''\);/);
+  assert.ok(markup, 'account settings markup exists');
+  assert.doesNotMatch(markup[1], /accountDesc/, 'the oversized explanation is not rendered');
+  assert.match(markup[1], /dayoPasswordChangeButton/, 'password-change control remains');
+}
+
+async function verifyWelcomeCopy() {
+  const sent = [];
+  const sandbox = {
+    module: { exports: {} },
+    process: { env: { RESEND_API_KEY: 'fixture-only-key' } },
+    fetch: async (_url, options) => {
+      sent.push(JSON.parse(options.body));
+      return { ok: true, json: async () => ({ id: 'fixture-email' }) };
+    },
+  };
+  vm.runInNewContext(read('api/send-welcome.js'), sandbox, { filename: 'send-welcome.js' });
+  const response = {
+    statusCode: 0,
+    setHeader() {},
+    end(body) { this.body = JSON.parse(body); },
+  };
+  await sandbox.module.exports({
+    method: 'POST',
+    body: { email: 'new@example.com', nickname: 'A&B' },
+  }, response);
+  assert.equal(response.statusCode, 200);
+  assert.equal(sent.length, 1);
+  const payload = sent[0];
+  assert.match(payload.subject, /외국인 파트너와 첫 대화를 준비/);
+  for (const body of [payload.html, payload.text]) {
+    assert.match(body, /1:1 화상 대화/);
+    assert.match(body, /한국어 가능한 파트너/);
+    assert.match(body, /AI 단어 도움/);
+    assert.match(body, /첫 이용 9,900원 할인 혜택/);
+    assert.match(body, /결제 후 지급/);
+    assert.doesNotMatch(body, /가입만으로 무료 티켓이 지급되지 않습니다|가입만으로 무료 티켓이 지급되지는 않아요/);
+    assert.match(body, /https:\/\/www\.dayotalk\.com\/#how/);
+    assert.doesNotMatch(body, /첫 세션 파트너 예약하기|3회 패키지|글로벌 캐주얼 라운지/);
+  }
+  assert.match(payload.html, /A&amp;B/, 'the HTML nickname remains escaped');
+}
+
 async function main() {
   verifySignupCorrection();
   await verifyTicketWallet();
-  console.log('Signup ticket correction and wallet fixtures passed.');
+  verifyCompactAccountSettings();
+  await verifyWelcomeCopy();
+  console.log('Signup contract, ticket wallet, compact account settings, and welcome copy fixtures passed.');
 }
 
 main().catch((error) => {

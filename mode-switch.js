@@ -85,6 +85,19 @@
     '.ms-overlay.is-confirmation-pending .ms-divider,.ms-overlay.is-confirmation-pending .ms-social{display:none;}',
     '.ms-signup-confirmation{display:none;margin-top:1rem;color:var(--muted,#9A8580);font-size:.84rem;line-height:1.65;}',
     '.ms-overlay.is-confirmation-pending .ms-signup-confirmation{display:block;}',
+    '.ms-mailbox-options{display:none;margin-top:1.15rem;text-align:left;}',
+    '.ms-overlay.is-confirmation-pending .ms-mailbox-options{display:block;}',
+    '.ms-mailbox-title{margin:0 0 .6rem;font-size:.8rem;font-weight:800;color:var(--text,#5C4A42);}',
+    '.ms-mailbox-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;}',
+    '.ms-mailbox-link{display:flex;align-items:center;gap:.5rem;min-width:0;padding:.65rem .7rem;',
+    'border:1px solid #EDE4D5;border-radius:12px;background:#fff;color:var(--text,#5C4A42);',
+    'font-size:.78rem;font-weight:750;text-decoration:none;line-height:1.25;}',
+    '.ms-mailbox-link:hover,.ms-mailbox-link:focus-visible{border-color:var(--coral,#FF6B57);}',
+    '.ms-mailbox-link::after{content:"↗";margin-left:auto;opacity:.55;font-size:.72rem;}',
+    '.ms-mailbox-link.is-featured{border-color:var(--coral,#FF6B57);background:#FFF1ED;}',
+    '.ms-mailbox-icon{display:grid;place-items:center;flex:0 0 1.4rem;width:1.4rem;height:1.4rem;',
+    'border-radius:6px;background:#F5F0EA;font-size:.77rem;font-weight:900;}',
+    '.ms-overlay.is-confirmation-pending .ms-dismiss{margin-top:1.1rem;padding:.25rem .5rem;text-decoration:underline;text-underline-offset:3px;}',
     '.ms-consent label{display:flex;align-items:flex-start;gap:.45rem;margin:0;color:#5C4A42;',
     'font-size:.74rem;font-weight:650;line-height:1.45;cursor:pointer;}',
     '.ms-consent input{margin-top:.15rem;flex:0 0 auto;accent-color:#FF6B57;}',
@@ -168,6 +181,9 @@
       confirmPendingTitle: '가입 확인 메일을 보냈어요.',
       confirmPendingDesc: '이메일에서 확인을 완료하면 DayO를 시작할 수 있어요.',
       confirmPendingHelp: '메일이 보이지 않으면 스팸함도 확인해 주세요.',
+      mailboxTitle: '메일함 바로가기',
+      mailbox: { gmail: 'Gmail', naver: '네이버 메일', daum: '다음/한메일', outlook: 'Outlook' },
+      later: '나중에 확인할게요',
       emailNotConfirmed: '이메일 확인이 아직 완료되지 않았어요. 가입할 때 받은 메일을 확인해 주세요.',
       loungeBtn: '대화 라운지 로그인',
       emailPlaceholder: '이메일 주소 입력',
@@ -189,6 +205,9 @@
       confirmPendingTitle: 'Check your email to finish signing up.',
       confirmPendingDesc: 'Confirm your email address to start using DayO.',
       confirmPendingHelp: 'If you do not see the email, check your spam folder.',
+      mailboxTitle: 'Open your inbox',
+      mailbox: { gmail: 'Gmail', naver: 'Naver Mail', daum: 'Daum Mail', outlook: 'Outlook' },
+      later: 'I’ll check later',
       emailNotConfirmed: 'Please confirm your email address using the message we sent when you signed up.',
       loungeBtn: 'Lounge login',
       emailPlaceholder: 'Enter your email',
@@ -755,12 +774,38 @@
     closeAuthModal();
   }
 
-  function showSignupConfirmation() {
+  function mailboxProviderForEmail(email) {
+    var domain = String(email || '').trim().toLowerCase().split('@').pop();
+    if (domain === 'gmail.com') return 'gmail';
+    if (domain === 'naver.com') return 'naver';
+    if (domain === 'daum.net' || domain === 'hanmail.net') return 'daum';
+    if (domain === 'outlook.com' || domain === 'hotmail.com' || domain === 'live.com') return 'outlook';
+    return '';
+  }
+
+  function prioritizeMailbox(email) {
+    var grid = overlay && overlay.querySelector('.ms-mailbox-grid');
+    if (!grid) return;
+    var provider = mailboxProviderForEmail(email);
+    ['gmail', 'naver', 'daum', 'outlook'].forEach(function (key) {
+      var link = grid.querySelector('[data-ms-mailbox="' + key + '"]');
+      if (!link) return;
+      link.classList.toggle('is-featured', key === provider);
+      grid.appendChild(link);
+    });
+    if (provider) {
+      var featured = grid.querySelector('[data-ms-mailbox="' + provider + '"]');
+      if (featured !== grid.firstChild) grid.insertBefore(featured, grid.firstChild);
+    }
+  }
+
+  function showSignupConfirmation(email) {
     if (!overlay) return;
     pendingHref = null;
     var password = overlay.querySelector('#msPassword');
     if (password) password.value = '';
     overlay.classList.add('is-confirmation-pending');
+    prioritizeMailbox(email);
     syncLoginI18n();
     var title = overlay.querySelector('#msLoginTitle');
     if (title) title.focus();
@@ -819,7 +864,7 @@
     setLoginBusy(true);
     if (authAction === 'signup' && typeof window.handleEmailSignUp === 'function') {
       Promise.resolve(window.handleEmailSignUp(cleanedEmail, cleanedPass)).then(function (result) {
-        if (result && result.needsEmail) showSignupConfirmation();
+        if (result && result.needsEmail) showSignupConfirmation(cleanedEmail);
       }).catch(function (err) {
         showToast(authToastMessage(err));
       }).finally(function () {
@@ -858,7 +903,7 @@
         return;
       }
       if (result.needsEmail) {
-        showSignupConfirmation();
+        showSignupConfirmation(cleanedEmail);
         return;
       }
       try {
@@ -897,6 +942,7 @@
     var title = overlay.querySelector('#msLoginTitle');
     var desc = overlay.querySelector('.ms-sub');
     var confirmationHelp = overlay.querySelector('.ms-signup-confirmation');
+    var mailboxTitle = overlay.querySelector('.ms-mailbox-title');
     var email = overlay.querySelector('#msEmail');
     var pass = overlay.querySelector('#msPassword');
     var submit = overlay.querySelector('#msAuthSubmit') || overlay.querySelector('.ms-login');
@@ -909,13 +955,17 @@
     if (title) title.textContent = confirmationPending ? t('login.confirmPendingTitle') : (signup ? t('login.signupTitle') : t('login.title'));
     if (desc) desc.textContent = confirmationPending ? t('login.confirmPendingDesc') : (signup ? t('login.signupDesc') : t('login.desc'));
     if (confirmationHelp) confirmationHelp.textContent = t('login.confirmPendingHelp');
+    if (mailboxTitle) mailboxTitle.textContent = t('login.mailboxTitle');
+    Array.prototype.forEach.call(overlay.querySelectorAll('[data-ms-mailbox-label]'), function (label) {
+      label.textContent = t('login.mailbox.' + label.getAttribute('data-ms-mailbox-label'));
+    });
     if (email) email.placeholder = t('login.emailPlaceholder');
     if (pass) pass.placeholder = signup ? t('login.passwordPlaceholderSignup') : t('login.passwordPlaceholder');
     if (submit) submit.textContent = signup ? t('login.signupBtn') : t('login.startBtn');
     if (divider) divider.textContent = t('login.socialDivider');
     if (kakao) kakao.textContent = t('login.social.kakao');
     if (google) google.textContent = t('login.social.google');
-    if (dismiss) dismiss.textContent = t('login.dismiss');
+    if (dismiss) dismiss.textContent = t(confirmationPending ? 'login.later' : 'login.dismiss');
     if (tabLogin) tabLogin.textContent = t('login.tabLogin');
     if (tabSignup) tabSignup.textContent = t('login.tabSignup');
     applyI18n();
@@ -936,6 +986,15 @@
       '  <h2 id="msLoginTitle" tabindex="-1">', t('login.title'), '</h2>',
       '  <p class="ms-sub">', t('login.desc'), '</p>',
       '  <p class="ms-signup-confirmation" role="status" aria-live="polite"></p>',
+      '  <div class="ms-mailbox-options">',
+      '    <p class="ms-mailbox-title">', t('login.mailboxTitle'), '</p>',
+      '    <div class="ms-mailbox-grid">',
+      '      <a class="ms-mailbox-link" data-ms-mailbox="gmail" href="https://mail.google.com/" target="_blank" rel="noopener noreferrer"><span class="ms-mailbox-icon" aria-hidden="true">G</span><span data-ms-mailbox-label="gmail">', t('login.mailbox.gmail'), '</span></a>',
+      '      <a class="ms-mailbox-link" data-ms-mailbox="naver" href="https://mail.naver.com/" target="_blank" rel="noopener noreferrer"><span class="ms-mailbox-icon" aria-hidden="true">N</span><span data-ms-mailbox-label="naver">', t('login.mailbox.naver'), '</span></a>',
+      '      <a class="ms-mailbox-link" data-ms-mailbox="daum" href="https://mail.daum.net/" target="_blank" rel="noopener noreferrer"><span class="ms-mailbox-icon" aria-hidden="true">D</span><span data-ms-mailbox-label="daum">', t('login.mailbox.daum'), '</span></a>',
+      '      <a class="ms-mailbox-link" data-ms-mailbox="outlook" href="https://outlook.live.com/mail/" target="_blank" rel="noopener noreferrer"><span class="ms-mailbox-icon" aria-hidden="true">O</span><span data-ms-mailbox-label="outlook">', t('login.mailbox.outlook'), '</span></a>',
+      '    </div>',
+      '  </div>',
       '  <form class="ms-form" id="msLoginForm">',
       '    <input class="ms-input" type="email" id="msEmail" name="email" autocomplete="email" required',
       '      placeholder="', t('login.emailPlaceholder'), '">',

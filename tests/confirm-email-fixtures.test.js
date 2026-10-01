@@ -164,7 +164,7 @@ async function verifyConfirmationPage() {
 }
 
 function verifySourceContracts() {
-  assert.match(mode, /showSignupConfirmation\(\)/);
+  assert.match(mode, /showSignupConfirmation\(cleanedEmail\)/);
   assert.match(mode, /\.ms-overlay\.is-confirmation-pending \.ms-form/);
   assert.match(mode, /emailNotConfirmed:/);
   assert.match(mode, /result && result\.needsConfirmation/);
