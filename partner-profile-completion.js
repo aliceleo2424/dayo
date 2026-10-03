@@ -123,7 +123,12 @@
   }
   function start() {
     document.addEventListener('dayo:partner-authorized',refresh);
-    if (window.supabaseClient && window.supabaseClient.auth.onAuthStateChange) window.supabaseClient.auth.onAuthStateChange(function () { ++generation; clear(); setTimeout(refresh,0); });
+    if (window.supabaseClient && window.supabaseClient.auth.onAuthStateChange) window.supabaseClient.auth.onAuthStateChange(function (event, session) {
+      // Supabase can repeat SIGNED_IN on tab focus; keep the current partner's draft/success screen.
+      if (currentUser && session && session.user && session.user.id === currentUser.id &&
+        (event === 'TOKEN_REFRESHED' || (event === 'SIGNED_IN' && dialog && dialog.open))) return;
+      ++generation; clear(); setTimeout(refresh,0);
+    });
     refresh();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',start,{once:true}); else start();
