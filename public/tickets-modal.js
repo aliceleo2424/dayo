@@ -268,9 +268,8 @@
   }
 
   function paymentPayload(plan) {
-    var applyCoupon = plan.id === 'single' && isCouponApplied();
-    var amount = applyCoupon ? welcomeDue().due : Number(plan.priceValue);
-    var orderName = applyCoupon ? '첫 세션 체험 할인권' : (plan.orderName || plan.title);
+    var amount = Number(plan.priceValue);
+    var orderName = plan.orderName || plan.title;
     return {
       planId: plan.id,
       amount: amount,

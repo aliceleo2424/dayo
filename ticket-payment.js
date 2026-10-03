@@ -66,24 +66,12 @@
     var key = ALIAS[planId] || planId;
     var base = PRODUCTS[key];
     if (!base) return null;
-    var product = {
+    return {
       id: key,
       name: base.name,
       price: base.price,
       tickets: base.tickets
     };
-    var plan = findPlan(planId);
-    if (plan && window.DayOTickets && typeof window.DayOTickets.paymentPayload === 'function') {
-      var payload = window.DayOTickets.paymentPayload(plan);
-      product.name = payload.orderName || product.name;
-      product.price = Number(payload.amount) || product.price;
-      product.tickets = Number(payload.ticketCount) || product.tickets;
-      if (product.price === PRODUCTS.trial.price && product.tickets === PRODUCTS.trial.tickets &&
-          /체험|trial/i.test(product.name)) {
-        product.id = 'trial';
-      }
-    }
-    return product;
   }
 
   function notify(message) {
