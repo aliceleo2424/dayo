@@ -2107,6 +2107,18 @@
 
     #wordSheet { max-height: min(68dvh, 540px); }
     .word-help-form { display: grid; gap: 0.65rem; }
+    #wordHelpAiSection[hidden] { display: none; }
+    .word-section-title { margin: 0; font-size: 0.9rem; }
+    #wordVocabularyResults { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.4rem; margin-top: 0.5rem; }
+    #wordVocabularyResults .word-card { min-width: 0; padding: 0.45rem 0.6rem; }
+    #wordVocabularyResults .word-card-text { font-size: 0.82rem; overflow-wrap: anywhere; }
+    #wordVocabularyResults .word-card-meaning { font-size: 0.7rem; }
+    #wordVocabularyResults .word-card-num, #wordVocabularyResults .word-card-hint { display: none; }
+    .word-vocabulary-next, .word-ai-toggle { border: 1px solid var(--border); background: #fff; border-radius: 10px; padding: 0.5rem 0.65rem; font: inherit; font-size: 0.78rem; cursor: pointer; }
+    .word-vocabulary-next { margin-top: 0.5rem; }
+    .word-ai-toggle { margin: 0.7rem 0; width: 100%; }
+    #wordHelpBtn.has-word-help-update::after { content: ''; position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%; background: var(--coral); }
+    #wordHelpBtn { position: relative; }
     .word-help-status { margin: 0.7rem 0 0; color: var(--text-muted); font-size: 0.82rem; line-height: 1.5; white-space: pre-line; }
     .word-help-status.is-error { color: #A13D2D; }
     .partner-question-actions { display: flex; justify-content: flex-end; margin-top: 10px; }
@@ -3181,7 +3193,7 @@
       #wordSheet .sheet-body {
         display: flex;
         flex-direction: column;
-        overflow: hidden;
+        overflow-y: auto;
         padding-bottom: max(0.7rem, env(safe-area-inset-bottom, 0px));
       }
       #wordSheet .sheet-desc { margin-bottom: 0.45rem; line-height: 1.35; }
@@ -3212,7 +3224,7 @@
       body.dayo-keyboard-open #wordSheet {
         max-height: min(calc(var(--dayo-visual-height) * 0.38), 210px);
       }
-      body.dayo-keyboard-open #wordHelpResults { max-height: 54px; }
+      body.dayo-keyboard-open #wordHelpResults { max-height: 130px; }
     }
 
     @media (max-width: 767px) and (max-height: 700px) {
@@ -3889,6 +3901,14 @@
         <button class="sheet-close" data-close-sheet="word" data-i18n="room.wordSheetCloseAria" data-i18n-attr="aria-label" aria-label="닫기">✕</button>
       </div>
       <div class="sheet-body">
+        <section class="word-vocabulary-section" aria-labelledby="wordVocabularyTitle">
+          <h3 id="wordVocabularyTitle" class="word-section-title">지금 대화에 쓸 단어</h3>
+          <p id="wordVocabularyStatus" class="word-help-status" role="status" aria-live="polite"></p>
+          <div class="word-cards" id="wordVocabularyResults"></div>
+          <button type="button" class="word-vocabulary-next" id="wordVocabularyNext" hidden>다른 단어 보기</button>
+        </section>
+        <button type="button" class="word-ai-toggle" id="wordHelpAiToggle" aria-expanded="false" aria-controls="wordHelpAiSection">찾는 표현이 없나요? AI 도움</button>
+        <section id="wordHelpAiSection" hidden>
         <p class="sheet-desc">무슨 말을 하고 싶나요?<br>한국어로 입력해도 괜찮아요.</p>
         <form class="word-help-form" id="wordHelpForm">
           <textarea class="sheet-input" id="wordHelpInput" maxlength="300" rows="2" placeholder="예: 경치가 아름다웠지만 사람이 많았어요."></textarea>
@@ -3896,6 +3916,7 @@
         </form>
         <p class="word-help-status" id="wordHelpStatus" role="status" aria-live="polite"></p>
         <div class="word-cards" id="wordHelpResults"></div>
+        </section>
       </div>
     </div>
   </div>
@@ -3979,6 +4000,7 @@
   <script type="module" src="profile-store.js?v=20260928-transcript-rpc"></script>
   <script src="chat-prefs.js"></script>
   <script src="talk-cards-data.js"></script>
+  <script src="word-help-vocabulary.js?v=20261003-word-help"></script>
   <script>window.__dayoUsePeerJS = true;</script>
   <script src="turn-ice.js?v=20260930-cloudflare-turn"></script>
   <script src="room-live.js?v=20260928-transcript-rpc"></script>
@@ -5595,11 +5617,13 @@
       var card = list[talkCardState.index];
       window.DayOCurrentTalkCard = {
         id: String(card.id || ''),
+        category: String(card.category || ''),
         question_en: String(card.questionEn || ''),
         question_ko: String(card.questionKo || ''),
         followups_en: Array.isArray(card.followupsEn) ? card.followupsEn.slice(0, 4).map(String) : [],
         followups_ko: Array.isArray(card.followupsKo) ? card.followupsKo.slice(0, 4).map(String) : []
       };
+      if (typeof window.syncWordHelpCard === 'function') window.syncWordHelpCard();
       if (question) {
         question.textContent = card.questionKo;
         question.setAttribute('data-card-id', card.id);
@@ -5724,6 +5748,47 @@
     });
 
     /* Word Help — explicit learner intent, fail-closed */
+    var wordHelpContextKey = null;
+    var wordHelpSessionKey = null;
+    var vocabularyIndex = 0;
+    function wordHelpLanguage() { return String((window.DayORoomAccess || {}).language || 'en'); }
+    function wordHelpVisible() { return document.getElementById('wordSheetOverlay').classList.contains('active'); }
+    function aiHelpVisible() { return wordHelpVisible() && !document.getElementById('wordHelpAiSection').hidden; }
+    function recordWordHelp(event, details) {
+      var row = Object.assign({ event: event, timestamp: Date.now() }, details || {});
+      window.__dayoWordHelpTelemetry = (window.__dayoWordHelpTelemetry || []).concat([row]).slice(-80);
+    }
+    function vocabularySets() {
+      return window.DayOWordVocabulary ? window.DayOWordVocabulary.sets(window.DayOCurrentTalkCard, wordHelpLanguage()) : [];
+    }
+    function renderVocabulary() {
+      var sets = vocabularySets(), rows = sets.length ? sets[vocabularyIndex % sets.length] : [];
+      document.getElementById('wordVocabularyResults').innerHTML = rows.map(function (item, index) {
+        return wordHelpCard(item, index, false, 'card-vocabulary');
+      }).join('');
+      var next = document.getElementById('wordVocabularyNext');
+      next.hidden = sets.length < 2;
+      var card = window.DayOCurrentTalkCard;
+      document.getElementById('wordVocabularyStatus').textContent = !card ? '파트너의 대화카드를 기다리고 있어요.' :
+        !sets.length ? '이 대화 언어의 기본 단어는 준비 중이에요. 아래 AI 도움을 이용해 주세요.' : '현재 대화카드에 어울리는 표현이에요.';
+      if (rows.length && wordHelpVisible()) recordWordHelp('word_help_shown', { source: 'card-vocabulary', card_id: card.id, language: wordHelpLanguage(), item_count: rows.length });
+    }
+    window.syncWordHelpCard = function () {
+      var access = window.DayORoomAccess || {}, card = window.DayOCurrentTalkCard || {};
+      var sessionKey = String(access.bookingId || access.roomId || '') + ':' + String(access.userId || '');
+      var key = sessionKey + ':' + String(card.id || '') + ':' + wordHelpLanguage();
+      if (key === wordHelpContextKey) return;
+      if (sessionKey !== wordHelpSessionKey) { window.__dayoWordHelpTelemetry = []; wordHelpSessionKey = sessionKey; }
+      wordHelpContextKey = key; vocabularyIndex = 0;
+      ++wordHelpRequestSequence;
+      if (wordHelpAbortController) wordHelpAbortController.abort();
+      wordHelpAbortController = null; wordHelpRequestInFlight = false;
+      document.getElementById('wordHelpResults').replaceChildren();
+      document.getElementById('wordHelpInput').value = '';
+      setWordHelpStatus('', false); setWordHelpBusy(false);
+      document.getElementById('wordHelpBtn').classList.remove('has-word-help-update');
+      renderVocabulary();
+    };
     var wordHelpRequestInFlight = false;
     var wordHelpRequestSequence = 0;
     var wordHelpAbortController = null;
@@ -5742,21 +5807,23 @@
       var text = String(node.getAttribute('data-text') || '').trim();
       var meaning = String(node.getAttribute('data-help-meaning') || '').trim();
       var source = String(node.getAttribute('data-help-source') || 'ai').trim();
-      if (text && typeof window.logSessionEvent === 'function') {
+      if (text && (source === 'ai' || source === 'fallback') && typeof window.logSessionEvent === 'function') {
         var eventId = typeof window.createSessionEventId === 'function' ? window.createSessionEventId() : null;
         window.logSessionEvent('word_help_clicked', {
           source: source,
           items: [{ text: text, ko: meaning }]
         }, eventId);
       }
+      recordWordHelp('word_help_clicked', { source: source });
       if (typeof window.copyHelpText === 'function') window.copyHelpText(text);
     };
 
-    function wordHelpCard(item, index, sentence) {
+    function wordHelpCard(item, index, sentence, source) {
+      source = source || 'ai';
       var text = String(item && item.text || '').trim();
       var meaning = String(item && item.ko || '').trim();
       return '<button type="button" class="word-card help-copy-chip" data-text="' + escapeHelpHtml(text) +
-        '" data-help-meaning="' + escapeHelpHtml(meaning) + '" data-help-source="ai" onclick="useHelpHint(this)">' +
+        '" data-help-meaning="' + escapeHelpHtml(meaning) + '" data-help-source="' + escapeHelpHtml(source) + '" onclick="useHelpHint(this)">' +
         '<div class="word-card-num">' + (sentence ? '바로 말하기' : '표현 ' + (index + 1)) + '</div>' +
         '<div class="word-card-text' + (sentence ? ' word-card-text--sentence' : '') + '">' + escapeHelpHtml(text) + '</div>' +
         '<div class="word-card-meaning">' + escapeHelpHtml(meaning) + '</div>' +
@@ -5790,6 +5857,7 @@
     }
 
     function submitWordHelp() {
+      window.syncWordHelpCard();
       var inputNode = document.getElementById('wordHelpInput');
       var input = String(inputNode && inputNode.value || '').replace(/\s+/g, ' ').trim().slice(0, 300);
       if (!input) {
@@ -5801,15 +5869,16 @@
       if (wordHelpAbortController) wordHelpAbortController.abort();
       wordHelpRequestInFlight = input;
       var requestId = ++wordHelpRequestSequence;
+      var requestedAt = Date.now();
+      recordWordHelp('word_help_requested', { request_id: requestId, source: 'ai', language: wordHelpLanguage() });
       wordHelpAbortController = new AbortController();
       var controller = wordHelpAbortController;
       var timeout = setTimeout(function () { controller.abort(); }, 5000);
       setWordHelpBusy(true);
       setWordHelpStatus('입 밖으로 바로 꺼낼 표현을 찾고 있어요.', false);
       var results = document.getElementById('wordHelpResults');
-      if (results) results.replaceChildren();
       var access = window.DayORoomAccess || {};
-      var language = ['en', 'es', 'fr', 'ko'].indexOf(access.language) !== -1 ? access.language : 'en';
+      var language = wordHelpLanguage();
       var card = window.DayOCurrentTalkCard || null;
       fetch('/api/word-help', {
         method: 'POST',
@@ -5830,10 +5899,13 @@
         if (!words.length && !phrases.length) throw new Error('empty-word-help');
         renderWordHelpResults(words, phrases);
         setWordHelpStatus('필요한 표현을 탭하면 복사돼요.', false);
+        recordWordHelp('word_help_generated', { request_id: requestId, source: 'ai', latency_ms: Date.now() - requestedAt, fallback_used: false });
+        if (aiHelpVisible()) recordWordHelp('word_help_shown', { request_id: requestId, source: 'ai' });
+        else document.getElementById('wordHelpBtn').classList.add('has-word-help-update');
         if (isMobileRoomLayout() && inputNode) inputNode.blur();
       }).catch(function () {
         if (requestId !== wordHelpRequestSequence) return;
-        if (results) results.replaceChildren();
+        recordWordHelp('word_help_failed', { request_id: requestId, source: 'ai', latency_ms: Date.now() - requestedAt, fallback_used: false });
         setWordHelpStatus('지금은 단어 도움을 불러오지 못했어요.\n조금 뒤 다시 시도해 주세요.', true);
       }).finally(function () {
         clearTimeout(timeout);
@@ -5845,13 +5917,30 @@
     }
 
     window.openWordHelp = function () {
+      window.syncWordHelpCard();
       openSheet('word');
-      setWordHelpStatus('', false);
-      var results = document.getElementById('wordHelpResults');
-      if (results) results.replaceChildren();
-      var input = document.getElementById('wordHelpInput');
-      if (input) setTimeout(function () { input.focus(); }, 120);
+      if (document.getElementById('wordHelpBtn').classList.contains('has-word-help-update')) {
+        document.getElementById('wordHelpAiSection').hidden = false;
+        document.getElementById('wordHelpAiToggle').setAttribute('aria-expanded', 'true');
+      }
+      document.getElementById('wordHelpBtn').classList.remove('has-word-help-update');
+      renderVocabulary();
+      if (aiHelpVisible() && document.getElementById('wordHelpResults').innerHTML) recordWordHelp('word_help_shown', { source: 'ai' });
     };
+    document.getElementById('wordVocabularyNext').addEventListener('click', function () {
+      window.syncWordHelpCard(); vocabularyIndex += 1; renderVocabulary();
+    });
+    document.getElementById('wordHelpAiToggle').addEventListener('click', function () {
+      var section = document.getElementById('wordHelpAiSection');
+      section.hidden = !section.hidden;
+      this.setAttribute('aria-expanded', section.hidden ? 'false' : 'true');
+      if (!section.hidden) {
+        document.getElementById('wordHelpInput').focus();
+        document.getElementById('wordHelpBtn').classList.remove('has-word-help-update');
+        if (document.getElementById('wordHelpResults').innerHTML) recordWordHelp('word_help_shown', { source: 'ai' });
+      }
+      else document.getElementById('wordHelpInput').blur();
+    });
 
     var wordHelpBtn = document.getElementById('wordHelpBtn');
     if (wordHelpBtn) wordHelpBtn.onclick = window.openWordHelp;

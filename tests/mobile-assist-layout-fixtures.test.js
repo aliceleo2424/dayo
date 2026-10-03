@@ -16,7 +16,7 @@ assert.match(room, /#partner-topic-card[\s\S]*0\.35[\s\S]*#partner-topic-content
 assert.match(room, /\.chat-input-row[\s\S]*position: sticky[\s\S]*bottom: 0/);
 assert.match(room, /#wordHelpResults[\s\S]*overflow-y: auto/);
 assert.match(room, /visualViewport\.addEventListener\('resize', syncMobileVisualViewport/);
-assert.match(room, /dayo-keyboard-open[\s\S]*#wordHelpResults \{ max-height: 54px; \}/);
+assert.match(room, /dayo-keyboard-open[\s\S]*#wordHelpResults \{ max-height: 130px; \}/);
 assert.match(room, /function closeMobileAssistPanels\(except\)/);
 assert.match(room, /chatPanel\.contains\(document\.activeElement\)[\s\S]*document\.activeElement\.blur\(\)/);
 assert.match(room, /sheet\.contains\(document\.activeElement\)[\s\S]*document\.activeElement\.blur\(\)/);
