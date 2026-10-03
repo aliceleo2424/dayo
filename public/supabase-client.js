@@ -595,6 +595,30 @@
     } catch (e) { /* ignore */ }
   }
 
+  // Called only after a booking/cancellation RPC commits successfully.
+  // The durable queue and server worker handle delivery retries.
+  window.DayONotifyCommittedBooking = async function (bookingId, eventType) {
+    try {
+      var supabase = getRpcClient();
+      if (!supabase || !bookingId) return;
+      var sessionResult = await supabase.auth.getSession();
+      var session = sessionResult && sessionResult.data && sessionResult.data.session;
+      if (!session || !session.access_token) return;
+      fetch('/api/booking-notifications', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + session.access_token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId: bookingId, event: eventType }),
+        keepalive: true
+      }).then(function (response) {
+        if (!response.ok) console.warn('[DayO] booking notification remains queued');
+      }).catch(function () {
+        console.warn('[DayO] booking notification remains queued');
+      });
+    } catch (error) {
+      console.warn('[DayO] booking notification remains queued');
+    }
+  };
+
   window.handleConfirmBooking = async function (learnerId, bookingId, extras) {
     var supabase = getRpcClient();
     if (!supabase || typeof supabase.rpc !== 'function') {
@@ -624,6 +648,7 @@
       }
 
       syncRemainingTickets(payload.remaining_tickets);
+      window.DayONotifyCommittedBooking(bookingId, 'booking_confirmed');
       console.log('✅ 잔여 티켓:', payload.remaining_tickets);
       return true;
     } catch (err) {
