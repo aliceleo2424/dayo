@@ -14,6 +14,8 @@ export type Application = {
   final_status: 'pending' | 'approved' | 'rejected' | 'hold';
   review_note: string;
   submitted_at: string;
+  first_viewed_at?: string | null;
+  shortlisted?: boolean;
   current_country?: string | null;
   native_languages?: string[] | null;
   other_language_proficiencies?: Record<string, string>;
@@ -25,12 +27,47 @@ export type Application = {
 export type ReviewAction = 'invite' | 'hold' | 'approve' | 'reject';
 
 const proficiencyLabels: Record<string, string> = { basic: 'Basic', conversational: 'Conversational', fluent: 'Fluent', native: 'Native / near-native' };
-const sourceLabels: Record<string, string> = {
+export const sourceLabels: Record<string, string> = {
   friend_referral: 'Friend / referral', instagram: 'Instagram', facebook_group: 'Facebook group', university_community: 'University community',
   international_student_community: 'International student community', job_board: 'Job board', reddit_discord: 'Reddit / Discord',
   google_search: 'Google search', flyer_qr: 'Flyer / QR poster', other: 'Other',
 };
-const periodLabels: Record<string, string> = { early_morning: 'Early morning · 6:00 AM–9:00 AM', morning: 'Morning · 9:00 AM–12:00 PM', afternoon: 'Afternoon · 12:00 PM–5:00 PM', evening: 'Evening · 5:00 PM–10:00 PM', late_night: 'Late night · 10:00 PM–1:00 AM (following day)' };
+export const periodLabels: Record<string, string> = { early_morning: 'Early morning · 6:00 AM–9:00 AM', morning: 'Morning · 9:00 AM–12:00 PM', afternoon: 'Afternoon · 12:00 PM–5:00 PM', evening: 'Evening · 5:00 PM–10:00 PM', late_night: 'Late night · 10:00 PM–1:00 AM (following day)' };
+
+export type ApplicationFilters = {
+  viewed: string; review: string; final: string; session: string; native: string;
+  residence: string; visa: string; capacity: string; availability: string; source: string; shortlist: string;
+};
+export const emptyFilters: ApplicationFilters = { viewed: '', review: '', final: '', session: '', native: '', residence: '', visa: '', capacity: '', availability: '', source: '', shortlist: '' };
+export type ApplicationSort = 'newest' | 'oldest' | 'score' | 'capacity' | 'name';
+export function applicationResidence(app: Application) {
+  if (app.current_country?.trim()) return ['korea','south korea','republic of korea','한국','대한민국'].includes(app.current_country.trim().toLowerCase()) ? 'korea' : 'overseas';
+  return app.visa_type === 'outside_korea' ? 'overseas' : 'unknown';
+}
+export function selectApplications(rows: Application[], filters: ApplicationFilters, search: string, sort: ApplicationSort) {
+  const query = search.trim().toLocaleLowerCase();
+  const matches = rows.filter(app => {
+    if (filters.viewed && (filters.viewed === 'new' ? !!app.first_viewed_at : !app.first_viewed_at)) return false;
+    if (filters.review && app.review_status !== filters.review || filters.final && app.final_status !== filters.final) return false;
+    if (filters.session && !app.partner_languages.includes(filters.session) || filters.native && !app.native_languages?.includes(filters.native)) return false;
+    if (filters.residence && applicationResidence(app) !== filters.residence || filters.visa && app.visa_type !== filters.visa) return false;
+    if (filters.capacity && app.weekly_session_capacity !== filters.capacity || filters.availability && !(app.availability_periods as string[] | undefined)?.includes(filters.availability)) return false;
+    if (filters.source && app.acquisition_source !== filters.source || filters.shortlist && !app.shortlisted) return false;
+    return !query || [app.full_name, app.email, app.university, app.nationality, app.strongest_language, app.other_languages,
+      ...(app.native_languages || []), ...app.partner_languages, ...Object.keys(app.other_language_proficiencies || {})]
+      .filter(Boolean).join(' ').toLocaleLowerCase().includes(query);
+  });
+  const capacities: Record<string, number> = { '1-2': 1, '3-5': 2, '6-10': 3, '10+': 4 };
+  return matches.sort((a, b) => {
+    let difference = 0;
+    if (sort === 'name') difference = a.full_name.localeCompare(b.full_name, 'en', { sensitivity: 'base' });
+    if (sort === 'score') difference = b.review_score - a.review_score;
+    if (sort === 'capacity') difference = (capacities[b.weekly_session_capacity] || 0) - (capacities[a.weekly_session_capacity] || 0);
+    if (difference) return difference;
+    const date = new Date(b.submitted_at).getTime() - new Date(a.submitted_at).getTime();
+    return (sort === 'oldest' ? -date : date) || a.id.localeCompare(b.id);
+  });
+}
 export function profileSummary(app: Application) {
   const structured = Array.isArray(app.native_languages);
   const other = Object.entries(app.other_language_proficiencies || {}).map(([language, level]) => `${language}: ${proficiencyLabels[level] || level}`).join('\n');
@@ -53,7 +90,7 @@ export function profileSummary(app: Application) {
   ].map(([label, value]) => ({ label: String(label), value: String(value || '—') }));
 }
 
-export async function applicationMedia(app: Application) {
+export async function applicationMedia(app: Pick<Application, 'intro_video_path'>) {
   async function sign(bucket: string, path: string | null | undefined) {
     if (!path) return null;
     const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, 120);
@@ -65,9 +102,27 @@ export async function applicationMedia(app: Application) {
 }
 
 export async function listApplications() {
-  const { data, error } = await supabase.from('partner_applications').select('*').order('submitted_at', { ascending: false });
+  // Explicit batches avoid Supabase's default 1,000-row response limit.
+  const rows: Application[] = [];
+  for (let offset = 0; ; offset += 500) {
+    const { data, error } = await supabase.from('partner_applications').select('*')
+      .order('submitted_at', { ascending: false }).order('id').range(offset, offset + 499);
+    if (error) throw error;
+    rows.push(...(data || []) as Application[]);
+    if (!data || data.length < 500) break;
+  }
+  return [...new Map(rows.map(row => [row.id, row])).values()];
+}
+
+export async function markApplicationViewed(id: string) {
+  const { data, error } = await supabase.rpc('mark_partner_application_viewed', { p_id: id }).single();
   if (error) throw error;
-  return (data || []) as Application[];
+  return data as Application;
+}
+export async function shortlistApplication(id: string, shortlisted: boolean) {
+  const { data, error } = await supabase.from('partner_applications').update({ shortlisted }).eq('id', id).select('*').single();
+  if (error) throw error;
+  return data as Application;
 }
 
 export async function updateApplication(id: string, changes: Partial<Pick<Application, 'review_status' | 'test_status' | 'final_status' | 'review_note'>>) {

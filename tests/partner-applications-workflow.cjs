@@ -188,6 +188,9 @@ async function adminBrowser() {
       }
       else if (url.includes('/auth/v1/')) body = user;
       else if (url.includes('/rest/v1/profiles')) body = { id: user.id, role: 'admin', nickname: 'Admin', email: user.email };
+      else if (url.includes('/rpc/mark_partner_application_viewed')) {
+        row = { ...row, first_viewed_at: row.first_viewed_at || new Date().toISOString() }; body = row;
+      }
       else if (url.includes('/rest/v1/partner_applications')) {
         if (route.request().method() === 'PATCH') {
           if (failSave) { await route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ message: 'Test failure' }) }); return; }
