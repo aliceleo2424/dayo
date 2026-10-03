@@ -1,0 +1,95 @@
+"use client";
+import { useCallback, useEffect, useState } from 'react';
+import { AdminHeader } from '@/components/admin/header';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { actionChanges, applicationMessage, listApplications, updateApplication, type Application, type ReviewAction } from '@/lib/partner-applications';
+
+const inputClass = 'w-full rounded border p-2 text-sm bg-background';
+const actionLabels: Record<ReviewAction, string> = { invite: 'Invite to Test', hold: 'Hold', reject: 'Reject', approve: 'Approve' };
+function validLink(value: string) {
+  try { return ['https:', 'http:'].includes(new URL(value).protocol); } catch { return false; }
+}
+export default function PartnerApplicationsPage() {
+  const [rows, setRows] = useState<Application[]>([]);
+  const [selected, setSelected] = useState<Application | null>(null);
+  const [filter, setFilter] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState('');
+  const [note, setNote] = useState('');
+  const [testStatus, setTestStatus] = useState<Application['test_status']>('not_invited');
+  const [testLink, setTestLink] = useState('');
+  const [onboardingLink, setOnboardingLink] = useState('');
+  const [message, setMessage] = useState('');
+  const [detailStatus, setDetailStatus] = useState('');
+  const load = useCallback(async () => {
+    setLoading(true); setStatus('');
+    try { setRows(await listApplications()); }
+    catch { setStatus('지원서 조회에 실패했습니다. 관리자 권한과 migration 적용 여부를 확인하세요.'); }
+    finally { setLoading(false); }
+  }, []);
+  useEffect(() => { void load(); }, [load]);
+  function open(row: Application) {
+    setSelected(row); setNote(row.review_note); setTestStatus(row.test_status); setMessage(''); setDetailStatus('');
+  }
+  async function save(action?: ReviewAction) {
+    if (!selected || busy) return;
+    const link = action === 'invite' ? testLink.trim() : onboardingLink.trim();
+    if ((action === 'invite' || action === 'approve') && !validLink(link)) {
+      setDetailStatus('메시지에 넣을 올바른 링크를 먼저 입력하세요.'); return;
+    }
+    setBusy(true); setDetailStatus(''); setMessage('');
+    try {
+      const updated = await updateApplication(selected.id, {
+        test_status: testStatus, review_note: note, ...(action ? actionChanges(action) : {}),
+      });
+      setRows(previous => previous.map(row => row.id === updated.id ? updated : row));
+      setSelected(updated); setTestStatus(updated.test_status);
+      if (action) setMessage(applicationMessage(action, updated, link));
+      setDetailStatus('저장했습니다.');
+    } catch { setDetailStatus('저장하지 못했습니다. 다시 시도하세요.'); }
+    finally { setBusy(false); }
+  }
+  async function copy() {
+    try { await navigator.clipboard.writeText(message); setDetailStatus('메시지를 복사했습니다.'); }
+    catch { setDetailStatus('자동 복사가 제한되었습니다. 아래 메시지를 선택해 직접 복사하세요.'); }
+  }
+  return <>
+    <AdminHeader title="Partner Applications" />
+    <main className="space-y-5 p-4 md:p-6">
+      <div className="flex flex-wrap gap-2">
+        {['all', 'ready', 'review', 'hold'].map(value => <Button key={value} variant={filter === value ? 'default' : 'outline'} onClick={() => setFilter(value)}>
+          {value === 'all' ? 'All' : value[0].toUpperCase() + value.slice(1)} [{rows.filter(row => value === 'all' || row.review_status === value).length}]
+        </Button>)}
+        <Button variant="outline" onClick={() => void load()} disabled={loading}>Refresh</Button>
+      </div>
+      <p role="status">{loading ? 'Loading…' : status}</p>
+      {!loading && !status && !rows.length && <p>아직 지원서가 없습니다.</p>}
+      <div className="overflow-x-auto rounded border">
+        <table className="w-full text-left text-sm"><thead><tr>{['Name','Nationality','Partner language','Visa','Weekly capacity','Review','Test / Final','Submitted'].map(label => <th key={label} className="whitespace-nowrap p-3">{label}</th>)}</tr></thead>
+          <tbody>{rows.filter(row => filter === 'all' || row.review_status === filter).map(row => <tr key={row.id} className="border-t">
+            <td className="p-3"><button className="text-left underline" onClick={() => open(row)}>{row.full_name}</button></td>
+            <td className="p-3">{row.nationality}</td><td className="p-3">{row.partner_languages.join(', ')}</td><td className="p-3">{row.visa_type}</td><td className="p-3">{row.weekly_session_capacity}</td>
+            <td className="p-3">{row.review_status} ({row.review_score}/7)</td><td className="p-3">{row.test_status} / {row.final_status}</td><td className="whitespace-nowrap p-3">{new Date(row.submitted_at).toLocaleDateString('en-GB', { timeZone: 'Asia/Seoul' })}</td>
+          </tr>)}</tbody></table>
+      </div>
+      <Dialog open={!!selected} onOpenChange={value => { if (!value && !busy) setSelected(null); }}>
+        <DialogContent aria-describedby="application-review-description" className="max-h-[90vh] max-w-3xl overflow-y-auto">
+          <DialogHeader><DialogTitle>{selected?.full_name}</DialogTitle><p id="application-review-description" className="text-sm text-muted-foreground">전체 답변 검토 및 상태 관리. 메시지는 직접 복사해 전달하세요.</p></DialogHeader>
+          {selected && <>
+            <dl className="space-y-3">{Object.entries(selected).map(([key, value]) => <div key={key} className="grid gap-1 border-b pb-2 sm:grid-cols-[180px_1fr]"><dt className="font-medium">{key.replaceAll('_', ' ')}</dt><dd className="whitespace-pre-wrap break-words">{Array.isArray(value) ? value.join(', ') : typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value ?? '—')}</dd></div>)}</dl>
+            <label className="text-sm">Review note<textarea className={inputClass} value={note} maxLength={5000} onChange={event => setNote(event.target.value)} disabled={busy} /></label>
+            <label className="text-sm">Test status<select className={inputClass} value={testStatus} onChange={event => setTestStatus(event.target.value as Application['test_status'])} disabled={busy}>{['not_invited','invited','scheduled','completed'].map(value => <option key={value}>{value}</option>)}</select></label>
+            <Button variant="outline" disabled={busy} onClick={() => void save()}>Save note & test status</Button>
+            <label className="text-sm">Test booking link<input type="url" className={inputClass} value={testLink} onChange={event => setTestLink(event.target.value)} placeholder="https://…" disabled={busy} /></label>
+            <label className="text-sm">Onboarding link<input type="url" className={inputClass} value={onboardingLink} onChange={event => setOnboardingLink(event.target.value)} placeholder="https://…" disabled={busy} /></label>
+            <div className="flex flex-wrap gap-2">{(Object.keys(actionLabels) as ReviewAction[]).map(action => <Button key={action} variant="outline" disabled={busy} onClick={() => void save(action)}>{actionLabels[action]}</Button>)}</div>
+            <p role="status" aria-live="polite">{detailStatus}</p>
+            {message && <><label>Message<textarea className={inputClass} rows={12} value={message} readOnly /></label><Button onClick={() => void copy()}>Copy</Button></>}
+          </>}
+        </DialogContent>
+      </Dialog>
+    </main>
+  </>;
+}
