@@ -214,10 +214,17 @@
       window.DayOPreopenBooking.isInternalTest());
   }
 
+  function canBypassBookingLeadTime() {
+    if (window.DayOPreopenBooking && typeof window.DayOPreopenBooking.canBypassLeadTime === 'function') {
+      return !!window.DayOPreopenBooking.canBypassLeadTime();
+    }
+    return isInternalBookingTest();
+  }
+
   function isBookableStart(startMs) {
     var nowMs = Date.now();
     return isFinite(startMs) && startMs > nowMs &&
-      (isInternalBookingTest() || startMs - nowMs >= BOOKING_MIN_LEAD_MS);
+      (canBypassBookingLeadTime() || startMs - nowMs >= BOOKING_MIN_LEAD_MS);
   }
 
   function requiresNoRefundWarning(startMs) {

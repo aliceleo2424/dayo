@@ -556,8 +556,20 @@
     return !!currentUserId && requestedUserId === currentUserId && PREOPEN_BOOKING_TEST_USERS.indexOf(currentUserId) !== -1;
   }
 
+  var BOOKING_LEAD_TIME_TEST_USERS = [
+    '85d0f35c-2af3-4170-8cbe-5d40a7706d25'
+  ];
+
+  function canBypassBookingLeadTime(userId) {
+    if (isInternalBookingTest(userId)) return true;
+    var currentUserId = String((window._dayoAuthUser && window._dayoAuthUser.id) || '');
+    var requestedUserId = String(userId || currentUserId);
+    return !!currentUserId && requestedUserId === currentUserId && BOOKING_LEAD_TIME_TEST_USERS.indexOf(currentUserId) !== -1;
+  }
+
   window.DayOPreopenBooking = {
-    isInternalTest: isInternalBookingTest
+    isInternalTest: isInternalBookingTest,
+    canBypassLeadTime: canBypassBookingLeadTime
   };
 
   function normalizeRpcPayload(data) {
