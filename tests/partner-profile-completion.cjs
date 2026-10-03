@@ -78,4 +78,19 @@ function files() {
   assert.doesNotMatch(sql,/(?:insert into|update|alter table) public\.(profiles|availability_slots|partner_capabilities|partner_applications)\b/i);
   console.log('PASS: root/public mirrors; no application row or protected table writes.');
 }
-(async()=>{ files(); await database(); await adminSummary(); })().catch(e=>{ console.error(e); process.exitCode=1; });
+function sessionEvents() {
+  const vm=require('node:vm'); let start,listener,clears=0,timers=0;
+  const document={readyState:'loading',addEventListener:(event,fn)=>{if(event==='DOMContentLoaded')start=fn;},getElementById:()=>null};
+  const window={supabaseClient:{auth:{onAuthStateChange:fn=>{listener=fn;}}}};
+  const source=fs.readFileSync(path.join(root,'public/partner-profile-completion.js'),'utf8').replace('function start() {','window.seedCompletionSession = function(user, open) { currentUser=user; dialog={open:open,close:function(){},remove:function(){clears++;}}; }; function start() {');
+  const sandbox={window,document,console,setTimeout:()=>{timers++;},get clears(){return clears;},set clears(n){clears=n;}};
+  vm.runInNewContext(source,sandbox);start();
+  const user={id:ids[1]};window.seedCompletionSession(user,true);
+  listener('SIGNED_IN',{user});listener('TOKEN_REFRESHED',{user});
+  assert.equal(clears,0,'Same-partner focus/refresh preserves draft and success screen');assert.equal(timers,0);
+  listener('SIGNED_IN',{user:{id:ids[3]}});assert.equal(clears,1,'Different identity immediately removes previous modal');assert.equal(timers,1);
+  window.seedCompletionSession(user,true);listener('SIGNED_OUT',null);assert.equal(clears,2,'Sign out clears partner UI');
+  window.seedCompletionSession(user,false);listener('SIGNED_IN',{user});assert.equal(clears,3,'Closed setup permits fresh profile check');
+  console.log('PASS: repeated same-partner sign-in/token refresh retains draft/success; different identity/sign-out clears UI.');
+}
+(async()=>{ files(); sessionEvents(); await database(); await adminSummary(); })().catch(e=>{ console.error(e); process.exitCode=1; });
