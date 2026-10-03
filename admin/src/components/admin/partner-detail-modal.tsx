@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PartnerProfileCompletionSummary } from "@/components/admin/partner-profile-completion-summary";
 import { SessionTranscriptModal } from "@/components/admin/SessionTranscriptModal";
 
 export type PartnerProfile = {
@@ -366,6 +367,7 @@ export function PartnerDetailModal({
           </DialogHeader>
           {partner && (
             <div className="space-y-5">
+              {partner.role === "partner" && <PartnerProfileCompletionSummary key={partner.id} partnerId={partner.id} />}
               <section className="grid gap-4 rounded-xl border bg-[#FAFAF9] p-4 sm:grid-cols-[1fr_auto]">
                 <div className="grid gap-2 text-sm sm:grid-cols-2">
                   <p><span className="text-muted-foreground">이메일</span><br />{dash(partner.email)}</p>
