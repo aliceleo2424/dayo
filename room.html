@@ -3980,6 +3980,7 @@
   <script src="chat-prefs.js"></script>
   <script src="talk-cards-data.js"></script>
   <script>window.__dayoUsePeerJS = true;</script>
+  <script src="turn-ice.js?v=20260930-cloudflare-turn"></script>
   <script src="room-live.js?v=20260928-transcript-rpc"></script>
   <script src="learner-expressions.js?v=20260928-learner-only-quiz"></script>
   <script>
@@ -4066,6 +4067,38 @@
       let remoteUnlockBound = false;
       let currentRemoteStream = null;
       const boundRemoteTracks = typeof WeakSet === 'function' ? new WeakSet() : null;
+      let activeIceServers = window.DayOTurnIce
+        ? window.DayOTurnIce.FALLBACK_ICE_SERVERS.slice()
+        : [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' }
+          ];
+      const turnIceManager = window.DayOTurnIce ? window.DayOTurnIce.createManager({
+        fetch: window.fetch.bind(window),
+        getAccessToken: async function () {
+          if (!window.supabaseClient || !window.supabaseClient.auth) return '';
+          var result = await window.supabaseClient.auth.getSession();
+          return result && result.data && result.data.session && result.data.session.access_token || '';
+        },
+        logEvent: function (eventType, payload) {
+          var telemetry = window.__dayoTurnTelemetry || { events: [], relayObserved: false, relaySelected: false };
+          telemetry.events.push({ type: eventType, payload: payload || {}, at: new Date().toISOString() });
+          telemetry.events = telemetry.events.slice(-20);
+          if (eventType === 'ice_candidate_type' && payload && payload.relay_observed) telemetry.relayObserved = true;
+          if (eventType === 'ice_selected_pair' && payload && payload.relay_selected) telemetry.relaySelected = true;
+          window.__dayoTurnTelemetry = telemetry;
+          console.info('[DayO TURN]', eventType, payload || {});
+        },
+        warn: function (message) { console.warn(message); }
+      }) : null;
+
+      function peerOptions() {
+        return { debug: 1, config: { iceServers: activeIceServers } };
+      }
+
+      function bindCallIceTelemetry(call) {
+        if (turnIceManager) turnIceManager.bindCall(call);
+      }
 
       function isObserverPeerId(peerId) {
         return /_observer/i.test(String(peerId || ''));
@@ -4217,6 +4250,7 @@
 
       function bindParticipantCallHealth(call, stream) {
         if (!call || !stream) return;
+        bindCallIceTelemetry(call);
         Array.prototype.forEach.call(stream.getTracks(), function (track) {
           if (boundRemoteTracks && boundRemoteTracks.has(track)) return;
           if (boundRemoteTracks) boundRemoteTracks.add(track);
@@ -4382,6 +4416,7 @@
           return;
         }
         activeCall = call;
+        bindCallIceTelemetry(call);
         var receivedStream = false;
         call.on('stream', function (incomingStream) {
           if (activeCall !== call) return;
@@ -4579,15 +4614,7 @@
           if (stage) stage.hidden = true;
 
           var myPeerId = currentRoomId + '_observer_' + Math.floor(Math.random() * 10000);
-          peer = new Peer(myPeerId, {
-            debug: 1,
-            config: {
-              iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
-              ]
-            }
-          });
+          peer = new Peer(myPeerId, peerOptions());
 
           peer.on('open', function (id) {
             console.log('[DayO Observer] peer open ID', id);
@@ -4661,15 +4688,7 @@
 
       function createParticipantPeer() {
         if (destroyed || isObserver || peer || !participantPeerId) return;
-        var instance = new Peer(participantPeerId, {
-          debug: 1,
-          config: {
-            iceServers: [
-              { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:stun1.l.google.com:19302' }
-            ]
-          }
-        });
+        var instance = new Peer(participantPeerId, peerOptions());
         peer = instance;
         bindSessionPeerHelpers();
 
@@ -4698,6 +4717,7 @@
           if (currentRole === 'partner') {
             window.__dayoGuestPeerId = call.peer;
           }
+          bindCallIceTelemetry(call);
           var previousCall = activeCall;
           activeCall = call;
           if (previousCall && previousCall !== call) {
@@ -4744,6 +4764,7 @@
         currentRole = isObserver ? 'observer' : (access.adminTest ? access.previewRole : access.role);
         currentRoomId = access.roomId;
         HOST_ID = currentRoomId + '_host';
+        if (turnIceManager) activeIceServers = await turnIceManager.getIceServers(access);
         if (isObserver) {
           return initObserverWebRTC();
         }
