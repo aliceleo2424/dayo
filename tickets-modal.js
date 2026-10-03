@@ -216,7 +216,28 @@
     '.tk-body{padding:1rem .95rem 1.2rem;}',
     '.tk-single__row{flex-direction:column;align-items:stretch;}',
     '.tk-buy--slim{width:100%;}',
-    '}'
+    '}',
+    '.tk-modal{border-radius:20px;border-color:#E7DDD0;background:#FFFBF4;box-shadow:0 18px 48px rgba(64,54,47,.16);color:#40362F;}',
+    '.tk-close{width:44px;height:44px;background:#FFFBF4;color:#506B55;border:1px solid #DDE8D9;}',
+    '.tk-close:hover,.tk-close:focus-visible{background:#DDE8D9;color:#40362F;}',
+    '.tk-head{background:linear-gradient(135deg,#FFF2C9,#F8F0E3);}',
+    '.tk-title,.tk-card__title{font-family:inherit;color:#40362F;}',
+    '.tk-eyebrow,.tk-card__benefit{color:#B85D37;}',
+    '.tk-sub,.tk-card__meta,.tk-single__ask{color:#6B625B;}',
+    '.tk-banner{border:1px solid #DDE8D9;border-radius:18px;background:#F1F5EE;box-shadow:0 2px 10px rgba(64,54,47,.05);}',
+    '.tk-card,.tk-card--starter,.tk-card--deal{border:1px solid #E7DDD0;border-radius:18px;background:#FFFBF4;box-shadow:0 2px 10px rgba(64,54,47,.05);}',
+    '.tk-card--best{border:1px solid #5F7D63;border-radius:18px;background:#F1F5EE;box-shadow:0 2px 10px rgba(64,54,47,.07);}',
+    '.tk-card__price{color:#40362F;}',
+    '.tk-card--best .tk-badge,.tk-banner .tk-badge{background:#FFF2C9;color:#40362F;border:1px solid #E7DDD0;}',
+    '.tk-buy,.tk-card--best .tk-buy,.tk-buy--slim{min-height:44px;border-radius:15px;background:#5F7D63;color:#fff;box-shadow:0 2px 8px rgba(64,54,47,.1);}',
+    '.tk-buy:hover,.tk-buy:focus-visible,.tk-card--best .tk-buy:hover{background:#506B55;transform:none;box-shadow:0 3px 10px rgba(64,54,47,.12);}',
+    '.tk-buy:active{background:#506B55;transform:none;box-shadow:0 1px 5px rgba(64,54,47,.1);}',
+    '.tk-buy:disabled,.tk-buy.is-disabled{background:#CBD5E1;color:#64748B;box-shadow:none;transform:none;}',
+    '.tk-single,.tk-policy,.tk-consent,.tk-notice__card{border:1px solid #E7DDD0;border-radius:16px;background:#FFFBF4;box-shadow:none;}',
+    '.tk-policy__list strong,.tk-consent a,.tk-consent [data-terms-mini],.tk-consent [data-refund-mini]{color:#506B55;}',
+    '.tk-consent input{accent-color:#5F7D63;}',
+    '.tk-notice__kicker{color:#506B55;}',
+    '@media (max-width:860px){.tk-banner__copy{flex:0 1 auto;}}'
   ].join('');
 
   var el = {};
@@ -262,6 +283,11 @@
     var payload = paymentPayload(plan);
     var disabled = !!(opts && opts.disabled);
     var label = (opts && opts.cta) || plan.cta || '구매하기';
+    if (!(opts && opts.cta) && window.DayOI18n && window.DayOI18n.getLang() === 'EN' && plan.id !== 'admin_test_1000') {
+      label = plan.id === 'trial'
+        ? t('tickets.modal.trialCta', { price: '₩' + Number(plan.priceValue).toLocaleString('ko-KR') })
+        : t('tickets.modal.buyCta');
+    }
     return '' +
       '<button type="button" class="tk-buy' + (plan.tier === 'single' ? ' tk-buy--slim' : '') + (disabled ? ' is-disabled' : '') + '"' +
         (disabled ? ' disabled aria-disabled="true"' : '') +
@@ -530,10 +556,10 @@
     return null;
   }
 
-  async function loadCoupons() {
+  async function loadCoupons(couponRows) {
     var store = window.DayOProfileStore;
-    var rows = [];
-    if (store && typeof store.fetchCoupons === 'function') {
+    var rows = Array.isArray(couponRows) ? couponRows : [];
+    if (!Array.isArray(couponRows) && store && typeof store.fetchCoupons === 'function') {
       try {
         rows = await store.fetchCoupons();
       } catch (e) {
@@ -720,8 +746,12 @@
       if (el.overlay.classList.contains('is-open')) close();
     });
 
-    document.addEventListener('dayo:couponchange', function () {
-      if (el.overlay && el.overlay.classList.contains('is-open')) loadCoupons();
+    document.addEventListener('dayo:couponchange', function (event) {
+      var rows = event.detail && event.detail.coupons;
+      if (el.overlay && el.overlay.classList.contains('is-open') && Array.isArray(rows)) loadCoupons(rows);
+    });
+    document.addEventListener('dayo:langchange', function () {
+      if (el.overlay && el.overlay.classList.contains('is-open')) renderPlans();
     });
   }
 

@@ -162,14 +162,18 @@
       '#login-modal[data-auth-tab="signup"] .dayo-forgot-link{display:none}',
       '.dayo-password-overlay{position:fixed;inset:0;z-index:2147483646;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(62,50,45,.48)}',
       '.dayo-password-overlay.is-open{display:flex}.dayo-password-card{width:min(100%,390px);max-height:calc(100dvh - 32px);overflow:auto;box-sizing:border-box;padding:24px;border:1px solid #ffe0d7;border-radius:22px;background:#fff;box-shadow:0 22px 60px rgba(62,50,45,.2)}',
-      '.dayo-password-card h2{margin:0 0 7px;color:#2f2926}.dayo-account-settings h3{margin:0;color:#2f2926;font-size:14px;line-height:1.35}.dayo-password-card>p{margin:0 0 16px;color:#746b66;font-size:13px;line-height:1.55}',
+      '.dayo-password-card h2{margin:0 0 7px;color:#40362f}.dayo-account-settings h3{margin:0;color:#40362f;font-size:14px;line-height:1.35}.dayo-password-card>p{margin:0 0 16px;color:#6f6259;font-size:13px;line-height:1.55}',
       '#dayoForgotDescription{white-space:pre-line}',
       '.dayo-password-form{display:grid;gap:10px}.dayo-password-form label{font-size:12px;font-weight:800;color:#4b4541}.dayo-password-input{width:100%;box-sizing:border-box;border:1px solid #ddd4cf;border-radius:12px;padding:12px 13px;font:inherit;color:#2f2926}',
       '.dayo-password-hint,.dayo-password-status{min-height:19px;margin:0!important;font-size:12px!important}.dayo-password-status.is-error{color:#c74432}.dayo-password-status.is-success{color:#247552}',
       '.dayo-password-status.is-reset-helper{margin-top:3px!important;line-height:1.55;color:#746b66}',
       '.dayo-password-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}.dayo-password-actions button,.dayo-account-password-btn{border:0;border-radius:12px;padding:11px 15px;font:inherit;font-size:13px;font-weight:800;cursor:pointer}',
-      '.dayo-password-primary{background:#ff6b57;color:#fff}.dayo-password-secondary{background:#f4f1ed;color:#5c4a42}.dayo-password-actions button:disabled{opacity:.6;cursor:wait}',
+      '.dayo-password-primary{background:#5f7d63;color:#fff;min-height:44px}.dayo-password-primary:hover{background:#506b55}.dayo-password-secondary{background:#fffbf4;color:#40362f;border:1px solid #ded5c9!important;min-height:44px}.dayo-password-actions button:disabled{opacity:.6;cursor:wait}',
       '.dayo-account-settings{display:flex;flex:0 0 auto;align-items:center;justify-content:space-between;gap:12px;height:auto;min-height:0;background:#fffdfb;border:1px solid #f1e8e3;border-radius:14px;padding:12px 14px;box-shadow:none}.dayo-account-settings[hidden]{display:none}.dayo-account-copy{min-width:0}.dayo-account-desc,.dayo-account-provider{margin:3px 0 0!important;color:#746b66!important;font-size:12px;line-height:1.4}.dayo-account-password-btn{flex:0 0 auto;padding:8px 11px;border:1px solid #e5d9d2;background:#fff;color:#5c4a42;font-size:12px;box-shadow:none}',
+      '.dayo-password-overlay,.dayo-password-card{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR","Malgun Gothic",sans-serif}',
+      '.dayo-password-card{background:#fffbf4;border-color:#e7ddd0;border-radius:18px;box-shadow:0 16px 42px rgba(64,54,47,.14)}',
+      '.dayo-password-input:focus{outline:2px solid #5f7d63;outline-offset:1px;border-color:#5f7d63}',
+      '.dayo-account-settings{background:#fffbf4;border-color:#e7ddd0}.dayo-account-password-btn{border-color:#dde8d9;color:#506b55}',
       '@media(max-width:600px){.dayo-password-card{padding:20px;border-radius:18px}.dayo-password-actions{flex-direction:column-reverse}.dayo-password-actions button{width:100%}.dayo-account-settings{padding:10px 12px;flex-wrap:wrap}}'
     ].join('');
     document.head.appendChild(style);

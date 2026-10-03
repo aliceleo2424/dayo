@@ -1524,6 +1524,101 @@
       border-radius: 14px;
       color: var(--partner-mint-deep) !important;
     }
+
+    /* Match the customer dashboard to the café landing without changing card behavior. */
+    body[data-dayo-role="member"] {
+      color: #40362F;
+      background: #F8F0E3;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", "Malgun Gothic", sans-serif;
+    }
+    body[data-dayo-role="member"] .topbar {
+      background: rgba(255, 251, 244, .95);
+      border-bottom-color: #E7DDD0;
+    }
+    body[data-dayo-role="member"] .card,
+    body[data-dayo-role="member"] .mypage-welcome-row,
+    body[data-dayo-role="member"] .mypage-lounge,
+    body[data-dayo-role="member"] .speaking-progress-card,
+    body[data-dayo-role="member"] .session-ticket-card,
+    body[data-dayo-role="member"] .wallet-fold,
+    body[data-dayo-role="member"] .coupon-item,
+    body[data-dayo-role="member"] .history-item,
+    body[data-dayo-role="member"] .dayo-account-settings {
+      background: #FFFBF4;
+      border: 1px solid #E7DDD0;
+      border-radius: 18px;
+      box-shadow: 0 2px 10px rgba(64, 54, 47, .05);
+    }
+    body[data-dayo-role="member"] .speaking-card,
+    body[data-dayo-role="member"] .status-item { background: #FFF2C9; }
+    body[data-dayo-role="member"] .status-item:nth-child(3),
+    body[data-dayo-role="member"] .speaking-progress-metric { background: #F1F5EE; border-color: #DDE8D9; }
+    body[data-dayo-role="member"] .coupon-item { background: #FFFBF4; }
+    body[data-dayo-role="member"] .mypage-welcome-row { background: #FFFBF4 !important; border-color: #E7DDD0 !important; }
+    body[data-dayo-role="member"] #urgent-session-banner { background: #FFF2C9 !important; border-color: #E7DDD0 !important; }
+    body[data-dayo-role="member"] #urgent-session-badge { background: #5F7D63 !important; }
+    body[data-dayo-role="member"] .primary-btn,
+    body[data-dayo-role="member"] .mypage-welcome-cta--room,
+    body[data-dayo-role="member"] #urgent-session-banner button[onclick="enterStudio()"],
+    body[data-dayo-role="member"] .live-partner-book,
+    body[data-dayo-role="member"] .edit-profile-save {
+      background: #5F7D63 !important;
+      color: #fff !important;
+      border-radius: 15px;
+      box-shadow: 0 2px 7px rgba(64, 54, 47, .1) !important;
+    }
+    body[data-dayo-role="member"] .primary-btn:hover,
+    body[data-dayo-role="member"] .mypage-welcome-cta--room:hover { background: #506B55 !important; }
+    body[data-dayo-role="member"] .primary-btn:active { transform: none; box-shadow: 0 2px 7px rgba(64, 54, 47, .1); }
+    body[data-dayo-role="member"] .ghost-btn,
+    body[data-dayo-role="member"] .speaking-retest-btn,
+    body[data-dayo-role="member"] .mypage-welcome-cta--speak,
+    body[data-dayo-role="member"] .mypage-welcome-cta--book,
+    body[data-dayo-role="member"] .edit-nickname-btn,
+    body[data-dayo-role="member"] .dayo-account-password-btn {
+      background: #FFFBF4;
+      color: #506B55;
+      border: 1px solid #DDE8D9;
+      box-shadow: none;
+    }
+    body[data-dayo-role="member"] .mypage-welcome-benefit .primary-btn { background: #FFFBF4 !important; color: #506B55 !important; border: 1px solid #DDE8D9; box-shadow: none !important; }
+    body[data-dayo-role="member"] .coupon-item__price strong,
+    body[data-dayo-role="member"] .coupon-item__eyebrow,
+    body[data-dayo-role="member"] .speaking-eyebrow,
+    body[data-dayo-role="member"] #user-ticket-count,
+    body[data-dayo-role="member"] #mypage-ticket-unit { color: #506B55; }
+    body[data-dayo-role="member"] .dayo-account-settings { height: auto; min-height: 0; box-shadow: none; }
+    body[data-dayo-role="member"] .menu-toggle { border-color: #DDE8D9; color: #5F7D63; background: #FFFBF4; }
+    body[data-dayo-role="member"] .menu-toggle:hover,
+    body[data-dayo-role="member"] .menu-toggle[aria-expanded="true"] { background: #DDE8D9; }
+    body[data-dayo-role="member"] .nav-drawer { background: #FFFBF4; border-left-color: #E7DDD0; }
+    body[data-dayo-role="member"] .nav-drawer > .btn-logout { display: flex; }
+    body[data-dayo-role="member"] .nav-drawer a:hover,
+    body[data-dayo-role="member"] .nav-drawer .nav-drawer__link:hover,
+    body[data-dayo-role="member"] .nav-drawer .btn-logout:hover { background: #DDE8D9; color: #506B55; }
+    body[data-dayo-role="member"] .topbar .ms-btn { border-color: #DDE8D9; color: #506B55; background: #FFFBF4; }
+    body[data-dayo-role="member"] .topbar .ms-btn:hover,
+    body[data-dayo-role="member"] .topbar .ms-btn:focus-visible { border-color: #5F7D63; background: #F1F5EE; color: #506B55; }
+    body[data-dayo-role="member"] .topbar .ms-avatar { background: #DDE8D9; }
+    body[data-dayo-role="member"] .ms-menu { border-color: #E7DDD0; background: #FFFBF4; box-shadow: 0 8px 20px rgba(64,54,47,.1); }
+    body[data-dayo-role="member"] .ms-menu a:hover,
+    body[data-dayo-role="member"] .ms-menu button:hover { background: #DDE8D9; color: #506B55; }
+    body[data-dayo-role="member"] .mypage-welcome-benefit .primary-btn { background: #5F7D63 !important; border-color: #5F7D63; color: #fff !important; }
+    body[data-dayo-role="member"] .mypage-welcome-benefit .primary-btn:hover { background: #506B55 !important; }
+    body[data-dayo-role="member"] .dayo-monthly-story,
+    body[data-dayo-role="member"] .dayo-conversation-story { background: #FFFBF4; border: 1px solid #E7DDD0; border-radius: 18px; box-shadow: 0 2px 10px rgba(64,54,47,.05); }
+    body[data-dayo-role="member"] .dayo-monthly-story__eyebrow,
+    body[data-dayo-role="member"] .dayo-conversation-story__eyebrow { color: #506B55; }
+    body[data-dayo-role="member"] .dayo-monthly-story h2 strong,
+    body[data-dayo-role="member"] .dayo-conversation-story h3 strong { color: #506B55; }
+    body[data-dayo-role="member"] .dayo-monthly-story__cta { min-height: 44px; background: #5F7D63; border-radius: 15px; box-shadow: 0 2px 7px rgba(64,54,47,.1); }
+    body[data-dayo-role="member"] .dayo-monthly-story__cta:hover,
+    body[data-dayo-role="member"] .dayo-monthly-story__cta:focus-visible { background: #506B55; }
+    body[data-dayo-role="member"] .dayo-tea-table,
+    body[data-dayo-role="member"] .lounge-card { background: #FFFBF4; border-color: #E7DDD0; box-shadow: 0 2px 10px rgba(64,54,47,.05); }
+    body[data-dayo-role="member"] .talk-album-empty__cta { min-height: 44px; background: #5F7D63; border-radius: 15px; box-shadow: 0 2px 7px rgba(64,54,47,.1); }
+    body[data-dayo-role="member"] .talk-album-empty__cta:hover,
+    body[data-dayo-role="member"] .talk-album-empty__cta:focus-visible { background: #506B55; filter: none; }
   </style>
 </head>
 <body data-dayo-role="member">

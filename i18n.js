@@ -861,7 +861,7 @@
       FR: '🎉 Coupon d’essai 9 900 KRW (19 900 ➔ 9 900)',
       ES: '🎉 Cupón de prueba 9.900 KRW (19.900 ➔ 9.900)'
     },
-    'mypage.welcomeBenefit.title': { KO: '🎉 첫 세션 9,900원 체험 할인권 (19,900원 ➔ 9,900원)', EN: '🎉 First-session trial offer: ₩9,900' },
+    'mypage.welcomeBenefit.title': { KO: '첫 세션 체험 혜택', EN: 'First-session trial offer' },
     'mypage.welcomeBenefit.cta': { KO: '9,900원으로 첫 대화 시작하기', EN: 'Start your first conversation for ₩9,900' },
     'mypage.monthly.loading': { KO: '이번 달의 대화를 불러오고 있어요…', EN: 'Loading this month’s conversations…' },
     'mypage.monthly.eyebrow': { KO: '이번 달의 대화', EN: 'This month’s conversations' },
@@ -1428,6 +1428,8 @@
       ES: 'Solo cuando no salen las palabras, el asistente en pantalla continúa. No es un profesor que evalúa: es ayuda para que no se corte.'
     },
     'tickets.eyebrow': { KO: 'Session Ticket', EN: 'Session Ticket', ZH: '会话券', JA: 'セッションチケット', FR: 'Ticket de session', ES: 'Ticket de sesión' },
+    'tickets.modal.trialCta': { KO: '{price}에 시작하기', EN: 'Start for {price}' },
+    'tickets.modal.buyCta': { KO: '구매하기', EN: 'Buy now' },
     'tickets.title': {
       KO: '가볍게 이어가는 세션 이용권',
       EN: 'Session passes, as light as you need',

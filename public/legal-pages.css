@@ -1,4 +1,14 @@
 /* DayO standalone legal pages */
+::selection {
+  background: #CFE8D4;
+  color: #243229;
+}
+
+::-moz-selection {
+  background: #CFE8D4;
+  color: #243229;
+}
+
 .legal-page {
   margin: 0;
   min-height: 100vh;

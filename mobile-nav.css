@@ -2,6 +2,16 @@
  * Breakpoint: below 768px (md)
  */
 
+::selection {
+  background: #CFE8D4;
+  color: #243229;
+}
+
+::-moz-selection {
+  background: #CFE8D4;
+  color: #243229;
+}
+
 html {
   max-width: 100%;
   overflow-x: hidden;
