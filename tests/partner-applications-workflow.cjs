@@ -116,14 +116,22 @@ async function browser() {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     let payload, requests = 0, error = null;
     await page.route('**/cdn.jsdelivr.net/**', route => route.fulfill({ contentType: 'text/javascript', body: 'window.supabase={createClient:()=>({})};' }));
-    await page.route('**/supabase-client.js', route => route.fulfill({ contentType: 'text/javascript', body: 'window.supabaseClient={from:()=>({insert:async p=>window.submitMock(p)})};' }));
+    await page.route('**/supabase-client.js', route => route.fulfill({ contentType: 'text/javascript', body: 'window.supabaseClient={from:()=>({insert:async p=>window.submitMock(p)}),storage:{from:()=>({uploadToSignedUrl:async()=>({error:null})})}};' }));
+    await page.route('**/api/partner-application-upload', route => route.fulfill({ contentType: 'application/json', body: JSON.stringify({ id: '44444444-4444-4444-8444-444444444444', video: { bucket: 'partner-application-videos', path: 'applications/fixture/intro.webm', token: 'fixture-only' } }) }));
     await page.exposeFunction('submitMock', async data => { payload = data; requests++; return { error }; });
     const url = `http://127.0.0.1:${server.address().port}/partner-apply.html`;
     await page.goto(url);
     assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-    for (const name of ['full_name','contact_method','nationality','current_city','strongest_language','scenario_answer','motivation']) await page.locator(`[name=${name}]`).fill('Test answer');
+    for (const name of ['full_name','contact_method','nationality','current_country','current_city','scenario_answer']) await page.locator(`[name=${name}]`).fill('Test answer');
     await page.locator('[name=email]').fill('Test@example.com');
-    await page.locator('[name=partner_languages]').fill('English, Japanese, English');
+    await page.locator('[name=native_language_choice][value=English]').check();
+    await page.locator('[name=other_language_choice][value=Japanese]').check();
+    await page.getByLabel('Japanese proficiency', { exact: true }).selectOption('fluent');
+    await page.locator('[name=partner_languages][value=English]').check();
+    await page.locator('[name=partner_languages][value=Japanese]').check();
+    const {video}=await require('./partner-application-video-fixture.cjs').createVideo(browser);
+    await page.locator('[name=intro_video]').setInputFiles({name:'intro.webm',mimeType:'video/webm',buffer:video});
+    await page.locator('[name=intro_video_language]').selectOption('English');
     for (const [name, value] of Object.entries({visa_type:'D-2',korean_level:'basic',stranger_conversation_comfort:'comfortable',weekly_session_capacity:'3-5',device:'laptop_pc',video_environment:'yes'})) await page.locator(`[name=${name}]`).selectOption(value);
     await page.locator('[name=privacy_consent]').check();
     await page.locator('#submit-button').click();
@@ -140,6 +148,9 @@ async function browser() {
     await page.locator('#submit-button').click();
     await page.locator('#success').waitFor({ state: 'visible' });
     assert.deepEqual(payload.partner_languages, ['English', 'Japanese']);
+    assert.deepEqual(payload.native_languages, ['English']);
+    assert.deepEqual(payload.other_language_proficiencies, { Japanese: 'fluent' });
+    assert.equal(payload.intro_video_path, 'applications/fixture/intro.webm');assert(!('motivation' in payload));
     assert.equal(payload.email, 'test@example.com'); assert.equal(payload.privacy_consent, true);
     assert(!('review_score' in payload)); assert(!('submitted_at' in payload));
     await page.goto(url);
@@ -154,6 +165,7 @@ async function adminBrowser() {
   if (!process.env.PARTNER_ADMIN_QA_URL) return;
   const browser = await chromium.launch({ executablePath: 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe', headless: true });
   try {
+    const {video}=await require('./partner-application-video-fixture.cjs').createVideo(browser);
     const context = await browser.newContext({ permissions: ['clipboard-read', 'clipboard-write'] });
     const page = await context.newPage();
     const user = { id: '11111111-1111-4111-8111-111111111111', email: 'admin@example.com', role: 'authenticated', aud: 'authenticated', app_metadata: {}, user_metadata: {} };
@@ -161,12 +173,20 @@ async function adminBrowser() {
     await page.addInitScript(session => {
       localStorage.setItem('sb-mmh apsimcngmtefqfrcg-auth-token'.replace(' ', ''), JSON.stringify(session));
     }, { access_token: token, refresh_token: 'fake-test-token', token_type: 'bearer', expires_at: Math.floor(Date.now()/1000) + 3600, expires_in: 3600, user });
-    let row = { id: '22222222-2222-4222-8222-222222222222', full_name: 'Jane Applicant', email: 'jane@example.com', nationality: 'Canada', partner_languages: ['English'], visa_type: 'D-2', weekly_session_capacity: '3-5', review_score: 7, review_status: 'ready', test_status: 'not_invited', final_status: 'pending', review_note: '', submitted_at: new Date().toISOString() };
+    let row = { id: '22222222-2222-4222-8222-222222222222', full_name: 'Jane Applicant', email: 'jane@example.com', nationality: 'Canada', current_country: 'Canada', current_city: 'Toronto', native_languages: ['English'], other_language_proficiencies: { Japanese: 'fluent' }, partner_languages: ['English','Japanese'], korean_level: 'native', visa_type: 'outside_korea', availability_periods: ['weekend_late_night'], acquisition_source: 'other', acquisition_source_other: 'Local newsletter', intro_video_language: 'English', intro_video_path: 'applications/fixture/intro.webm', weekly_session_capacity: '3-5', review_score: 7, review_status: 'ready', test_status: 'not_invited', final_status: 'pending', review_note: '', submitted_at: new Date().toISOString() };
     let failSave = false;
     await page.route('**/*.supabase.co/**', async route => {
       const url = route.request().url();
       let body;
-      if (url.includes('/auth/v1/')) body = user;
+      if (url.includes('/storage/v1/object/sign/')) {
+        if (route.request().method() === 'POST') {
+          assert.equal(route.request().postDataJSON().expiresIn, 120);
+          body = { signedURL: new URL(url).pathname.replace('/storage/v1', '') + '?token=fixture-only-read-token' };
+        } else {
+          await route.fulfill({ contentType: 'video/webm', body: video }); return;
+        }
+      }
+      else if (url.includes('/auth/v1/')) body = user;
       else if (url.includes('/rest/v1/profiles')) body = { id: user.id, role: 'admin', nickname: 'Admin', email: user.email };
       else if (url.includes('/rest/v1/partner_applications')) {
         if (route.request().method() === 'PATCH') {
@@ -179,6 +199,25 @@ async function adminBrowser() {
     await page.routeWebSocket('**/*.supabase.co/**', socket => socket.close());
     await page.goto(process.env.PARTNER_ADMIN_QA_URL);
     await page.getByRole('button', { name: 'Jane Applicant', exact: true }).click({ timeout: 60000 });
+    await page.locator('video[src]').waitFor();
+    assert((await page.getByRole('dialog').innerText()).includes('Toronto, Canada'));
+    assert((await page.getByRole('dialog').innerText()).includes('Japanese: Fluent'));
+    assert((await page.getByRole('dialog').innerText()).includes('Late night · 10:00 PM–1:00 AM'));
+    assert((await page.getByRole('dialog').innerText()).includes('Local newsletter'));
+    assert.equal(await page.locator('video').count(), 1);
+    await page.waitForFunction(()=>document.querySelector('video')?.readyState>=1);
+    assert.equal(await page.locator('video').evaluate(e=>e.duration),35);
+    await page.locator('video').evaluate(e=>e.play());
+    assert.equal(await page.locator('video').evaluate(e=>e.paused),false);
+    assert.equal(await page.getByAltText('Applicant profile photo').count(),0);
+    await page.getByRole('button', { name: 'Refresh private links' }).click();
+    await page.locator('video[src]').waitFor();
+    await page.getByRole('dialog').evaluate(element => { element.scrollTop = 0; });
+    await page.screenshot({ path: path.join(root, '.partner-qa/admin-profile-desktop.png') });
+    await page.setViewportSize({ width: 390, height: 844 });
+    assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+    await page.screenshot({ path: path.join(root, '.partner-qa/admin-profile-mobile.png') });
+    await page.setViewportSize({ width: 1280, height: 900 });
     await page.getByRole('button', { name: 'Invite to Test', exact: true }).click();
     assert((await page.getByRole('dialog').innerText()).includes('올바른 링크'));
     await page.getByLabel('Test booking link').fill('https://example.com/test');
@@ -206,7 +245,7 @@ async function adminBrowser() {
     await page.reload();
     await page.getByRole('button', { name: 'Jane Applicant', exact: true }).waitFor();
     assert((await page.locator('tbody').innerText()).includes('approved'));
-    console.log('PASS: admin board/detail, link validation, four state changes, notes/test status, refresh persistence, failed-save feedback and real clipboard copy (mock backend)');
+    console.log('PASS: admin structured profile/private media, mobile/desktop, expiring read links, link validation, four state changes, notes/test status, refresh persistence, failed-save feedback and real clipboard copy (mock backend)');
   } finally { await browser.close(); }
 }
 (async () => { await database(); messages(); await browser(); await adminBrowser(); })().catch(error => { console.error(error); process.exitCode = 1; });

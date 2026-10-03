@@ -2,36 +2,65 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Join DayO as a Conversation Partner</title><meta name="description" content="Get paid for short, structured 1:1 video conversations on DayO."><link rel="canonical" href="https://www.dayotalk.com/partner-apply"><meta property="og:url" content="https://www.dayotalk.com/partner-apply"><link rel="stylesheet" href="partner-apply.css"></head>
 <body><main><a class="brand" href="/">DayO</a><header><h1>Join DayO as a Conversation Partner</h1><p>Get paid for short, structured 1:1 video conversations.</p><p class="rate">₩7,500 / completed 30-min session</p><p>Remote · Flexible schedule · No teaching required</p><p class="eyebrow">All conversations take place on the DayO platform.</p><a class="apply-cta" href="#application-form">Apply now</a></header><nav class="entry-links" aria-label="DayO partner links"><a href="/">Explore DayO</a><span>Already a DayO partner? <a href="/partner">Go to Partner Lounge</a></span></nav>
 <form id="application-form">
-<fieldset><legend>About you</legend><div class="grid">
+<fieldset><legend>1. Basic profile</legend><div class="grid">
 <label>Full name<input name="full_name" autocomplete="name" maxlength="120" required></label>
 <label>Email<input name="email" type="email" autocomplete="email" maxlength="254" required></label>
-<label>Preferred contact method and contact details<input name="contact_method" placeholder="Email, or Kakao ID / phone number" maxlength="300" required></label>
+<label>Preferred contact method and contact details<input name="contact_method" placeholder="Email, Kakao ID or phone number" maxlength="300" required></label>
 <label>Nationality<input name="nationality" maxlength="100" required></label>
-<label>Current city<input name="current_city" autocomplete="address-level2" maxlength="100" required></label>
 <label>University (optional)<input name="university" maxlength="200"></label>
-<label>Visa type<select name="visa_type" required><option value="">Select</option><option>D-2</option><option>D-4</option><option>F-series</option><option>Other</option></select></label>
 </div></fieldset>
-<fieldset><legend>Languages & conversation</legend><div class="grid">
-<label>Strongest language<input name="strongest_language" maxlength="100" required></label>
-<label>Other languages (optional)<input name="other_languages" maxlength="300"></label>
-<label>Languages you can use as a partner<input name="partner_languages" placeholder="English, Japanese… (separate with commas)" maxlength="300" required></label>
-<label>Korean level<select name="korean_level" required><option value="">Select</option><option value="none">None</option><option value="basic">Basic</option><option value="conversational">Conversational</option><option value="advanced">Advanced</option></select></label>
-<label>How comfortable are you talking with a stranger?<select name="stranger_conversation_comfort" required><option value="">Select</option><option value="very_comfortable">Very comfortable</option><option value="comfortable">Comfortable</option><option value="slightly_nervous">Slightly nervous</option><option value="uncomfortable">Uncomfortable</option></select></label>
+<fieldset><legend>2. Location & visa</legend><div class="grid">
+<label>Current country<input name="current_country" autocomplete="country-name" maxlength="100" required></label>
+<label>Current city<input name="current_city" autocomplete="address-level2" maxlength="100" required></label>
+<label>Visa type<select name="visa_type" required><option value="">Select</option><option>D-2</option><option>D-4</option><option>F-series</option><option value="Other">Other visa</option><option value="outside_korea">Not applicable — currently living outside Korea</option></select></label>
 </div></fieldset>
-<fieldset><legend>Availability & setup</legend><p>Choose the periods that usually work for you (Korea time).</p><div class="checks">
-<label><input type="checkbox" name="availability_periods" value="weekday_morning">Weekday morning</label><label><input type="checkbox" name="availability_periods" value="weekday_afternoon">Weekday afternoon</label><label><input type="checkbox" name="availability_periods" value="weekday_evening">Weekday evening</label><label><input type="checkbox" name="availability_periods" value="weekend_morning">Weekend morning</label><label><input type="checkbox" name="availability_periods" value="weekend_afternoon">Weekend afternoon</label><label><input type="checkbox" name="availability_periods" value="weekend_evening">Weekend evening</label>
-</div><div class="grid">
+<fieldset><legend>3. Languages</legend>
+<p id="native-label" class="question">Native language(s)</p><div class="checks language-checks" id="native-languages" role="group" aria-labelledby="native-label"></div>
+<label id="native-other-field" hidden>Other native language<input name="native_language_other" maxlength="100" disabled></label>
+<p id="other-label" class="question">Other languages you can speak (optional)</p><div class="checks language-checks" id="other-languages" role="group" aria-labelledby="other-label"></div>
+<label id="other-language-field" hidden>Other language name<input name="other_language_name" maxlength="100" disabled></label>
+<div id="language-proficiencies" class="grid"></div>
+<p id="session-label" class="question">Which language(s) could you host DayO sessions in?</p>
+<p class="hint">Choose from your native languages and other languages rated Fluent or Native / near-native.</p>
+<div id="session-languages" class="checks" role="group" aria-labelledby="session-label"></div><p id="session-language-hint" class="hint">Select your languages above first.</p>
+<label>Korean level<select name="korean_level" required><option value="">Select</option>
+<option value="none">None — Almost no Korean / TOPIK 0</option>
+<option value="basic">Basic — Simple greetings and basic expressions / roughly TOPIK 1–2</option>
+<option value="conversational">Conversational — Comfortable with everyday conversation / roughly TOPIK 3–4</option>
+<option value="advanced">Advanced — Comfortable discussing complex topics / roughly TOPIK 5–6</option>
+<option value="native">Native / near-native</option></select></label>
+<p class="hint">TOPIK levels are a reference only. No TOPIK certificate is required.</p>
+</fieldset>
+<fieldset><legend>4. Availability</legend><p>All times are Korea Standard Time (KST, UTC+9).</p>
+<p class="question">Weekdays</p><div class="checks"><label><input type="checkbox" name="availability_periods" value="weekday_early_morning">Early morning — 6:00 AM–9:00 AM</label><label><input type="checkbox" name="availability_periods" value="weekday_morning">Morning — 9:00 AM–12:00 PM</label><label><input type="checkbox" name="availability_periods" value="weekday_afternoon">Afternoon — 12:00 PM–5:00 PM</label><label><input type="checkbox" name="availability_periods" value="weekday_evening">Evening — 5:00 PM–10:00 PM</label><label><input type="checkbox" name="availability_periods" value="weekday_late_night">Late night — 10:00 PM–1:00 AM</label></div>
+<p class="question">Weekends</p><div class="checks"><label><input type="checkbox" name="availability_periods" value="weekend_early_morning">Early morning — 6:00 AM–9:00 AM</label><label><input type="checkbox" name="availability_periods" value="weekend_morning">Morning — 9:00 AM–12:00 PM</label><label><input type="checkbox" name="availability_periods" value="weekend_afternoon">Afternoon — 12:00 PM–5:00 PM</label><label><input type="checkbox" name="availability_periods" value="weekend_evening">Evening — 5:00 PM–10:00 PM</label><label><input type="checkbox" name="availability_periods" value="weekend_late_night">Late night — 10:00 PM–1:00 AM</label></div>
+<p class="hint">Late night continues into the following day.</p>
 <label>Weekly session capacity<select name="weekly_session_capacity" required><option value="">Select</option><option>1-2</option><option>3-5</option><option>6-10</option><option>10+</option></select></label>
+</fieldset>
+<fieldset><legend>5. Conversation fit</legend><div class="grid">
+<label>How comfortable are you talking with a stranger?<select name="stranger_conversation_comfort" required><option value="">Select</option><option value="very_comfortable">Very comfortable</option><option value="comfortable">Comfortable</option><option value="slightly_nervous">Slightly nervous</option><option value="uncomfortable">Uncomfortable</option></select></label>
 <label>Device<select name="device" required><option value="">Select</option><option value="laptop_pc">Laptop / PC</option><option value="tablet">Tablet</option><option value="smartphone">Smartphone</option></select></label>
 <label>Do you have a quiet space and stable video connection?<select name="video_environment" required><option value="">Select</option><option value="yes">Yes</option><option value="mostly">Mostly</option><option value="no">No</option></select></label>
-</div></fieldset>
-<fieldset><legend>Your approach</legend>
-<label>A user is nervous and keeps answering with only one or two words. What would you do?<textarea name="scenario_answer" rows="4" maxlength="3000" required></textarea></label>
-<label>Why would you like to become a DayO Language Partner?<textarea name="motivation" rows="4" maxlength="3000" required></textarea></label>
-<div class="grid"><label>How did you hear about DayO? (optional)<input name="acquisition_source" maxlength="200"></label><label>Referral code (optional)<input name="referral_code" maxlength="100"></label></div>
+</div><label>A user is nervous and keeps answering with only one or two words. What would you do?<textarea name="scenario_answer" rows="3" maxlength="3000" required></textarea></label></fieldset>
+<fieldset><legend>6. Short Introduction Video (30–60 sec)</legend>
+<p>Please record a short video in one of the languages you would like to host on DayO.</p>
+<p>Choose ONE:</p>
+<p>A. Tell us about something funny or interesting that happened to you recently.</p>
+<p>B. Introduce one interesting thing about your culture, hometown, food, tradition, or everyday life.</p>
+<p>Just speak naturally — no script or professional filming needed.</p>
+<p>At the end, look at the camera and say:</p>
+<p>“See you on DayO!” 👋</p>
+<label>Video language<select name="intro_video_language" required><option value="">Select a DayO session language above</option></select></label>
+<label>Short introduction video (required)<input name="intro_video" type="file" accept="video/mp4,video/webm,video/quicktime" required></label>
+<p class="hint">MP4, WebM or MOV · up to 50 MB. Your video is private and visible only to DayO administrators.</p>
 </fieldset>
-<p>Your answers and contact details will be used to review your application and contact you about becoming a partner. Read our <a href="privacy.html" target="_blank" rel="noopener">privacy policy</a>.</p>
-<label class="consent"><input name="privacy_consent" type="checkbox" required>I consent to DayO collecting and using these details for partner recruitment.</label>
+<fieldset><legend>7. Referral</legend>
+<div class="grid"><label>How did you hear about DayO? (optional)<select name="acquisition_source"><option value="">Select (optional)</option>
+<option value="friend_referral">Friend / referral</option><option value="instagram">Instagram</option><option value="facebook_group">Facebook group</option><option value="university_community">University community</option><option value="international_student_community">International student community</option><option value="job_board">Job board</option><option value="reddit_discord">Reddit / Discord</option><option value="google_search">Google search</option><option value="flyer_qr">Flyer / QR poster</option><option value="other">Other</option>
+</select></label><label id="source-other-field" hidden>Other source<input name="acquisition_source_other" maxlength="200" disabled></label><label>Referral code (optional)<input name="referral_code" maxlength="100"></label></div>
+</fieldset>
+<p>Your answers, contact details, introduction video will be used to review your application and contact you about becoming a partner. Read our <a href="privacy.html" target="_blank" rel="noopener">privacy policy</a>.</p>
+<label class="consent"><input name="privacy_consent" type="checkbox" required>I consent to DayO collecting and using these details and files for partner recruitment.</label>
 <p id="form-status" role="status" aria-live="polite"></p><button id="submit-button" type="submit">Submit application</button>
 </form><section id="success" hidden tabindex="-1"><h2>Thank you for applying!</h2><p>Your application has been received. The DayO team will review it and contact you about the next step.</p><a href="/">Back to DayO</a></section><noscript>Please enable JavaScript to submit your application.</noscript></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script><script src="supabase-client.js"></script><script src="partner-apply.js"></script></body></html>

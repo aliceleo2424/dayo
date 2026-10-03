@@ -3,12 +3,37 @@ import { useCallback, useEffect, useState } from 'react';
 import { AdminHeader } from '@/components/admin/header';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { actionChanges, applicationMessage, listApplications, updateApplication, type Application, type ReviewAction } from '@/lib/partner-applications';
+import { actionChanges, applicationMedia, applicationMessage, listApplications, profileSummary, updateApplication, type Application, type ReviewAction } from '@/lib/partner-applications';
 
 const inputClass = 'w-full rounded border p-2 text-sm bg-background';
 const actionLabels: Record<ReviewAction, string> = { invite: 'Invite to Test', hold: 'Hold', reject: 'Reject', approve: 'Approve' };
 function validLink(value: string) {
   try { return ['https:', 'http:'].includes(new URL(value).protocol); } catch { return false; }
+}
+function ApplicantMedia({ applicant }: { applicant: Application }) {
+  const [media, setMedia] = useState<{ video: string | null }>({ video: null });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [refresh, setRefresh] = useState(0);
+  useEffect(() => {
+    let active = true;
+    setLoading(true); setError(''); setMedia({ video: null });
+    applicationMedia(applicant).then(result => { if (active) setMedia(result); })
+      .catch(() => { if (active) setError('비공개 파일을 불러오지 못했습니다. 관리자 권한과 Storage 정책을 확인하세요.'); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [applicant, refresh]);
+  return <section className="space-y-3 rounded border p-3" aria-label="Applicant introduction video">
+    <h3 className="font-semibold">Short introduction video</h3>
+    <p className="text-xs text-muted-foreground">관리자 전용 · 조회 링크는 2분 후 만료됩니다.</p>
+    {loading && <p role="status">Loading private files…</p>}
+    {error && <p role="status">{error}</p>}
+    <div className="space-y-3">
+      <div><p className="text-sm font-medium">Intro video</p>{media.video ? <><video src={media.video} controls preload="metadata" className="mt-2 w-full rounded" /><a href={media.video} target="_blank" rel="noopener noreferrer" className="text-sm underline">Open video</a></> : !loading && <p className="text-sm">{applicant.intro_video_path ? 'Unavailable' : 'Not submitted'}</p>}</div>
+    </div>
+    <p className="text-xs text-muted-foreground">사람이 검토할 항목: natural communication · camera comfort · clarity · friendliness · storytelling ability · suitability for conversational sessions</p>
+    {applicant.intro_video_path && <Button variant="outline" disabled={loading} onClick={() => setRefresh(value => value + 1)}>Refresh private links</Button>}
+  </section>;
 }
 export default function PartnerApplicationsPage() {
   const [rows, setRows] = useState<Application[]>([]);
@@ -78,7 +103,9 @@ export default function PartnerApplicationsPage() {
         <DialogContent aria-describedby="application-review-description" className="max-h-[90vh] max-w-3xl overflow-y-auto">
           <DialogHeader><DialogTitle>{selected?.full_name}</DialogTitle><p id="application-review-description" className="text-sm text-muted-foreground">전체 답변 검토 및 상태 관리. 메시지는 직접 복사해 전달하세요.</p></DialogHeader>
           {selected && <>
-            <dl className="space-y-3">{Object.entries(selected).map(([key, value]) => <div key={key} className="grid gap-1 border-b pb-2 sm:grid-cols-[180px_1fr]"><dt className="font-medium">{key.replaceAll('_', ' ')}</dt><dd className="whitespace-pre-wrap break-words">{Array.isArray(value) ? value.join(', ') : typeof value === 'boolean' ? (value ? 'Yes' : 'No') : String(value ?? '—')}</dd></div>)}</dl>
+            <ApplicantMedia key={selected.id} applicant={selected} />
+            <dl className="grid gap-3 sm:grid-cols-2">{profileSummary(selected).map(({ label, value }) => <div key={label} className="rounded border p-3"><dt className="text-sm font-semibold">{label}</dt><dd className="whitespace-pre-wrap break-words text-sm">{value}</dd></div>)}</dl>
+            <details><summary className="cursor-pointer font-medium">All answers & review history</summary><dl className="mt-3 space-y-3">{Object.entries(selected).filter(([key, value]) => !['intro_video_path','media_upload_id'].includes(key) && (key !== 'motivation' || !!value)).map(([key, value]) => <div key={key} className="grid gap-1 border-b pb-2 sm:grid-cols-[180px_1fr]"><dt className="font-medium">{key.replaceAll('_', ' ')}</dt><dd className="whitespace-pre-wrap break-words">{Array.isArray(value) ? value.join(', ') : typeof value === 'boolean' ? (value ? 'Yes' : 'No') : typeof value === 'object' && value ? JSON.stringify(value, null, 2) : String(value ?? '—')}</dd></div>)}</dl></details>
             <label className="text-sm">Review note<textarea className={inputClass} value={note} maxLength={5000} onChange={event => setNote(event.target.value)} disabled={busy} /></label>
             <label className="text-sm">Test status<select className={inputClass} value={testStatus} onChange={event => setTestStatus(event.target.value as Application['test_status'])} disabled={busy}>{['not_invited','invited','scheduled','completed'].map(value => <option key={value}>{value}</option>)}</select></label>
             <Button variant="outline" disabled={busy} onClick={() => void save()}>Save note & test status</Button>
