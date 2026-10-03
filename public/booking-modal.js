@@ -208,12 +208,6 @@
   var ZERO_TICKET_MSG = '보유 이용권이 없습니다. 이용권을 충전해 주세요.';
   var BOOKING_TRIGGER = '[data-booking-open], a[href="#booking"], a[href*="#booking"], a[href*="booking=open"]';
 
-  function canCreateBookingDuringPreopen(userId) {
-    return !!(window.DayOPreopenBooking &&
-      typeof window.DayOPreopenBooking.canCreate === 'function' &&
-      window.DayOPreopenBooking.canCreate(userId));
-  }
-
   function isInternalBookingTest() {
     return !!(window.DayOPreopenBooking &&
       typeof window.DayOPreopenBooking.isInternalTest === 'function' &&
@@ -229,14 +223,6 @@
   function requiresNoRefundWarning(startMs) {
     var remaining = startMs - Date.now();
     return !isInternalBookingTest() && isFinite(startMs) && remaining > 0 && remaining <= REFUND_CUTOFF_MS;
-  }
-
-  function showPreopenBookingNotice() {
-    if (window.DayOPreopenBooking && typeof window.DayOPreopenBooking.showNotice === 'function') {
-      window.DayOPreopenBooking.showNotice();
-      return;
-    }
-    alert('10월 정식 오픈 준비 중이에요\n\n현재 화상 연결과 세션 흐름을 최종 점검하고 있어요.\n정식 오픈 후 1:1 대화를 예약할 수 있습니다.');
   }
 
   function startOfToday() {
@@ -1108,13 +1094,6 @@
         learnerId = authRes && authRes.data && authRes.data.user && authRes.data.user.id || '';
       } catch (e) { learnerId = ''; }
     }
-    if (!canCreateBookingDuringPreopen(learnerId)) {
-      if (el.nextBtn) el.nextBtn.disabled = !isStepReady(state.step);
-      close();
-      showPreopenBookingNotice();
-      return;
-    }
-
     var partnerId = state.partner;
     var partner = getPartner(partnerId) || {};
     var selectedSlot = state.selectedSlot && {
@@ -1450,10 +1429,6 @@
 
   function open(opts) {
     opts = opts || {};
-    if (!canCreateBookingDuringPreopen()) {
-      showPreopenBookingNotice();
-      return;
-    }
     lastFocused = document.activeElement;
     reset();
     var draft = loadDraft();
@@ -1470,10 +1445,6 @@
   function requestOpen() {
     if (!checkUserLoggedIn()) {
       openLoginForBooking();
-      return;
-    }
-    if (!canCreateBookingDuringPreopen()) {
-      showPreopenBookingNotice();
       return;
     }
     if (getTicketCount() < 1) {

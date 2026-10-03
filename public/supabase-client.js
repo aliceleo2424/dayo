@@ -556,29 +556,8 @@
     return !!currentUserId && requestedUserId === currentUserId && PREOPEN_BOOKING_TEST_USERS.indexOf(currentUserId) !== -1;
   }
 
-  function canCreatePreopenBooking(userId) {
-    return isInternalBookingTest(userId);
-  }
-
-  function showPreopenBookingNotice() {
-    var modal = document.getElementById('demo-notice-modal');
-    if (modal) {
-      var title = modal.querySelector('.modal-title');
-      var summary = modal.querySelector('.summary-text');
-      var detail = modal.querySelector('.detail-text');
-      if (title) title.textContent = '10월 정식 오픈 준비 중이에요';
-      if (summary) summary.textContent = '현재 화상 연결과 세션 흐름을 최종 점검하고 있어요.';
-      if (detail) detail.textContent = '정식 오픈 후 1:1 대화를 예약할 수 있습니다.';
-      modal.style.display = 'flex';
-      return;
-    }
-    alert('10월 정식 오픈 준비 중이에요\n\n현재 화상 연결과 세션 흐름을 최종 점검하고 있어요.\n정식 오픈 후 1:1 대화를 예약할 수 있습니다.');
-  }
-
   window.DayOPreopenBooking = {
-    canCreate: canCreatePreopenBooking,
-    isInternalTest: isInternalBookingTest,
-    showNotice: showPreopenBookingNotice
+    isInternalTest: isInternalBookingTest
   };
 
   function normalizeRpcPayload(data) {
@@ -605,10 +584,6 @@
   }
 
   window.handleConfirmBooking = async function (learnerId, bookingId, extras) {
-    if (!canCreatePreopenBooking(learnerId)) {
-      showPreopenBookingNotice();
-      return false;
-    }
     var supabase = getRpcClient();
     if (!supabase || typeof supabase.rpc !== 'function') {
       alert('예약 처리 중 통신 오류가 발생했습니다.');
@@ -677,10 +652,6 @@
   window.createPendingBooking = async function (fields) {
     var supabase = getRpcClient();
     var row = fields || {};
-    if (!canCreatePreopenBooking(row.learner_id)) {
-      showPreopenBookingNotice();
-      return null;
-    }
     if (!supabase) return null;
     var insertRes = await supabase.from('bookings').insert([{
       learner_id: row.learner_id,

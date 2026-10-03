@@ -4056,6 +4056,11 @@
             const topics = quizTopicCardsForLang(quizLang);
             const idx = Number(btn.getAttribute('data-quiz-topic'));
             try { window.localStorage.setItem('dayo_quiz_topic', topics[idx] || ''); } catch (e) { /* ignore */ }
+            closeQuizModal();
+            if (window.DayOBooking && typeof window.DayOBooking.requestOpen === 'function') {
+              window.DayOBooking.requestOpen();
+            }
+            return;
           }
           if (typeof window.openQuizPreopenNotice === 'function') window.openQuizPreopenNotice();
         });

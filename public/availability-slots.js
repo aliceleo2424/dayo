@@ -938,14 +938,6 @@
     if (legacyBookingSubmitting) return;
     legacyBookingSubmitting = true;
     try {
-    if (!window.DayOPreopenBooking ||
-        typeof window.DayOPreopenBooking.canCreate !== 'function' ||
-        !window.DayOPreopenBooking.canCreate()) {
-      if (window.DayOPreopenBooking && typeof window.DayOPreopenBooking.showNotice === 'function') {
-        window.DayOPreopenBooking.showNotice();
-      }
-      return;
-    }
     var supabase = client();
     if (!supabase) {
       alert('예약 처리 중 통신 오류가 발생했습니다.');
@@ -957,11 +949,6 @@
       alert('로그인 후 예약이 가능합니다.');
       return;
     }
-    if (!window.DayOPreopenBooking.canCreate(user.id)) {
-      window.DayOPreopenBooking.showNotice();
-      return;
-    }
-
     var slotResult = await supabase.from('availability_slots')
       .select('id, partner_id, slot_time, status').eq('id', slotId).single();
     var selectedSlot = slotResult.data;
