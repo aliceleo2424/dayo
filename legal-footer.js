@@ -41,14 +41,14 @@
       return {
         nav: 'Terms and policies', terms: 'Terms of Service', privacy: 'Privacy Policy', refund: 'Cancellation and Refund Policy',
         service: 'Service', business: 'Business name', representative: 'Representative', registration: 'Business Registration No.',
-        address: 'Address', mailOrder: 'Mail-order business registration', pending: 'Registration pending',
+        address: 'Address', mailOrder: 'Mail-order business registration No.', mailOrderNumber: '제2026-서울강동-1580호',
         email: 'Customer support email', phone: 'Customer support phone', live: 'Live support', liveChannel: 'KakaoTalk Channel', hosting: 'Hosting service provider'
       };
     }
     return {
       nav: '약관 및 정책', terms: '이용약관', privacy: '개인정보처리방침', refund: '취소 및 환불규정',
       service: '서비스명', business: '상호', representative: '대표자', registration: '사업자등록번호',
-      address: '사업장 소재지', mailOrder: '통신판매업신고번호', pending: '신고 준비 중',
+      address: '사업장 소재지', mailOrder: '통신판매업 신고번호', mailOrderNumber: '제2026-서울강동-1580호',
       email: '고객센터 이메일', phone: '고객센터 전화', live: '실시간 상담', liveChannel: '카카오톡 채널', hosting: '호스팅 서비스 제공자'
     };
   }
@@ -68,7 +68,7 @@
       '    <p>' + copy.service + ': DayO(돼요) | ' + copy.business + ': 88드래곤즈 | ' + copy.representative + ': 여승현</p>',
       '    <p>' + copy.registration + ': 687-79-00609</p>',
       '    <p>' + copy.address + ': 서울특별시 강동구 고덕로 262, 720호<br>(명일동, 고덕역효성해링턴타워 더퍼스트)</p>',
-      '    <p>' + copy.mailOrder + ': ' + copy.pending + '</p>',
+      '    <p>' + copy.mailOrder + ': ' + copy.mailOrderNumber + '</p>',
       '    <p>' + copy.email + ': <a href="mailto:dayo.speak@gmail.com">dayo.speak@gmail.com</a></p>',
       '    <p>' + copy.phone + ': <a href="tel:07080951988">070-8095-1988</a></p>',
       '    <p>' + copy.live + ': ' + copy.liveChannel + ' ‘DayO 돼요’</p>',
