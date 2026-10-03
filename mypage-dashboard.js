@@ -188,6 +188,9 @@
       if (result.error || !result.data || result.data.success !== true) {
         throw result.error || new Error((result.data && result.data.message) || '예약 취소에 실패했습니다.');
       }
+      if (typeof window.DayONotifyCommittedBooking === 'function') {
+        window.DayONotifyCommittedBooking(bookingId, 'booking_cancelled');
+      }
       try {
         if (window.localStorage.getItem('dayo_active_booking_id') === bookingId) {
           window.localStorage.removeItem('dayo_active_booking_id');
