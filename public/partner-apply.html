@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Become a DayO Language Partner</title><link rel="stylesheet" href="partner-apply.css"></head>
+<body><main><a class="brand" href="/">DayO</a><header><p class="eyebrow">Share your interests. Connect with people.</p><h1>Become a DayO Language Partner</h1><p class="rate">₩7,500 per completed 30-min session</p><p>Work remotely · Choose your availability ·<br>No teaching experience required</p><p>Application takes about 3 minutes.</p></header>
+<form id="application-form">
+<fieldset><legend>About you</legend><div class="grid">
+<label>Full name<input name="full_name" autocomplete="name" maxlength="120" required></label>
+<label>Email<input name="email" type="email" autocomplete="email" maxlength="254" required></label>
+<label>Preferred contact method and contact details<input name="contact_method" placeholder="Email, or Kakao ID / phone number" maxlength="300" required></label>
+<label>Nationality<input name="nationality" maxlength="100" required></label>
+<label>Current city<input name="current_city" autocomplete="address-level2" maxlength="100" required></label>
+<label>University (optional)<input name="university" maxlength="200"></label>
+<label>Visa type<select name="visa_type" required><option value="">Select</option><option>D-2</option><option>D-4</option><option>F-series</option><option>Other</option></select></label>
+</div></fieldset>
+<fieldset><legend>Languages & conversation</legend><div class="grid">
+<label>Strongest language<input name="strongest_language" maxlength="100" required></label>
+<label>Other languages (optional)<input name="other_languages" maxlength="300"></label>
+<label>Languages you can use as a partner<input name="partner_languages" placeholder="English, Japanese… (separate with commas)" maxlength="300" required></label>
+<label>Korean level<select name="korean_level" required><option value="">Select</option><option value="none">None</option><option value="basic">Basic</option><option value="conversational">Conversational</option><option value="advanced">Advanced</option></select></label>
+<label>How comfortable are you talking with a stranger?<select name="stranger_conversation_comfort" required><option value="">Select</option><option value="very_comfortable">Very comfortable</option><option value="comfortable">Comfortable</option><option value="slightly_nervous">Slightly nervous</option><option value="uncomfortable">Uncomfortable</option></select></label>
+</div></fieldset>
+<fieldset><legend>Availability & setup</legend><p>Choose the periods that usually work for you (Korea time).</p><div class="checks">
+<label><input type="checkbox" name="availability_periods" value="weekday_morning">Weekday morning</label><label><input type="checkbox" name="availability_periods" value="weekday_afternoon">Weekday afternoon</label><label><input type="checkbox" name="availability_periods" value="weekday_evening">Weekday evening</label><label><input type="checkbox" name="availability_periods" value="weekend_morning">Weekend morning</label><label><input type="checkbox" name="availability_periods" value="weekend_afternoon">Weekend afternoon</label><label><input type="checkbox" name="availability_periods" value="weekend_evening">Weekend evening</label>
+</div><div class="grid">
+<label>Weekly session capacity<select name="weekly_session_capacity" required><option value="">Select</option><option>1-2</option><option>3-5</option><option>6-10</option><option>10+</option></select></label>
+<label>Device<select name="device" required><option value="">Select</option><option value="laptop_pc">Laptop / PC</option><option value="tablet">Tablet</option><option value="smartphone">Smartphone</option></select></label>
+<label>Do you have a quiet space and stable video connection?<select name="video_environment" required><option value="">Select</option><option value="yes">Yes</option><option value="mostly">Mostly</option><option value="no">No</option></select></label>
+</div></fieldset>
+<fieldset><legend>Your approach</legend>
+<label>A user is nervous and keeps answering with only one or two words. What would you do?<textarea name="scenario_answer" rows="4" maxlength="3000" required></textarea></label>
+<label>Why would you like to become a DayO Language Partner?<textarea name="motivation" rows="4" maxlength="3000" required></textarea></label>
+<div class="grid"><label>How did you hear about DayO? (optional)<input name="acquisition_source" maxlength="200"></label><label>Referral code (optional)<input name="referral_code" maxlength="100"></label></div>
+</fieldset>
+<p>Your answers and contact details will be used to review your application and contact you about becoming a partner. Read our <a href="privacy.html" target="_blank" rel="noopener">privacy policy</a>.</p>
+<label class="consent"><input name="privacy_consent" type="checkbox" required>I consent to DayO collecting and using these details for partner recruitment.</label>
+<p id="form-status" role="status" aria-live="polite"></p><button id="submit-button" type="submit">Submit application</button>
+</form><section id="success" hidden tabindex="-1"><h2>Thank you for applying!</h2><p>Your application has been received. The DayO team will review it and contact you about the next step.</p><a href="/">Back to DayO</a></section><noscript>Please enable JavaScript to submit your application.</noscript></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script><script src="supabase-client.js"></script><script src="partner-apply.js"></script></body></html>
