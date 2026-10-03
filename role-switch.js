@@ -43,6 +43,58 @@
     else setUserModeUi();
   }
 
+
+  function bindPartnerToggleVisibility() {
+    var control = document.querySelector('.role-segmented-control[data-partner-access]');
+    if (!control || isPartnerPage()) return;
+    var accessRunId = 0;
+
+    function setPartnerAccess(allowed) {
+      control.setAttribute('data-partner-access', allowed ? 'approved' : 'unapproved');
+      var entries = document.querySelectorAll('[data-partner-mode-entry]');
+      Array.prototype.forEach.call(entries, function (entry) {
+        entry.hidden = !allowed;
+      });
+      if (!allowed) setUserModeUi();
+    }
+
+    async function refreshPartnerAccess() {
+      var myRun = ++accessRunId;
+      setPartnerAccess(false);
+      try {
+        var client = window.supabaseClient;
+        var current = await client.auth.getUser();
+        if (myRun !== accessRunId) return;
+        var user = current && current.data && current.data.user;
+        if (!user || current.error) return;
+        // Match the existing partner.html gate: profiles.id and normalized role.
+        var result = await client.from('profiles').select('role, nickname').eq('id', user.id).maybeSingle();
+        if (myRun !== accessRunId) return;
+        var profile = result.error ? null : result.data;
+        var role = String(profile && profile.role || '').trim().toLowerCase().replace(/[\s-]+/g, '_');
+        setPartnerAccess(role === 'partner');
+      } catch (err) {
+        if (myRun === accessRunId) setPartnerAccess(false);
+      }
+    }
+
+    setPartnerAccess(false);
+    var tries = 60;
+    (function waitForClient() {
+      var client = window.supabaseClient;
+      if (!client || !client.auth) {
+        if (tries-- > 0) setTimeout(waitForClient, 25);
+        return;
+      }
+      client.auth.onAuthStateChange(function () {
+        accessRunId += 1;
+        setPartnerAccess(false);
+        setTimeout(refreshPartnerAccess, 0);
+      });
+      refreshPartnerAccess();
+    })();
+  }
+
   function openLoginModal() {
     if (window.DayOMode && typeof window.DayOMode.openLogin === 'function') {
       window.DayOMode.openLogin();
@@ -116,6 +168,7 @@
 
   function init() {
     initRoleSwitchState();
+    bindPartnerToggleVisibility();
     bindPartnerApplyModal();
     bindPartnerLinks();
   }

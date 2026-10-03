@@ -714,13 +714,13 @@
       KO: '파트너 신청이 검수 중이거나 승인이 필요합니다 ☕', EN: 'Partner application is under review or needs approval ☕', ZH: '伙伴申请正在审核或需要批准 ☕', JA: 'パートナー申請の審査中、または承認が必要です ☕', FR: 'Candidature partenaire en revue ou en attente d’approbation ☕', ES: 'La solicitud de partner está en revisión o necesita aprobación ☕'
     },
     'mypage.apply.p1': {
-      KO: '구글폼으로 지원하시면 운영팀 검수 후 파트너 라운지를 이용할 수 있어요.', EN: 'Apply via Google Form — after review you can use the Partner Lounge.', ZH: '通过谷歌表单申请，运营审核通过后即可使用伙伴休息室。', JA: 'Googleフォームで応募すると、運営審査後にパートナーラウンジを利用できます。', FR: 'Candidatez via Google Form — après validation, le lounge partenaire s’ouvre.', ES: 'Postúlate con Google Form: tras la revisión podrás usar el lounge de partners.'
+      KO: "지원서를 제출하시면 운영팀 검토와 승인 후 파트너 라운지를 이용할 수 있어요.", EN: "Submit your application to use the Partner Lounge after review and approval.", ZH: "提交申请后，经运营团队审核批准即可使用伙伴休息室。", JA: "応募書類を提出し、運営チームの審査・承認後にパートナーラウンジを利用できます。", FR: "Soumettez votre candidature pour accéder au lounge partenaire après validation.", ES: "Envía tu solicitud para acceder al lounge de partners tras la revisión y aprobación."
     },
     'mypage.apply.p2': {
       KO: '승인 완료 전에는 이 화면에서 지원 안내만 확인하실 수 있습니다.', EN: 'Until approval, you can only view partner application guidance here.', ZH: '批准前只能在此查看申请指引。', JA: '承認前はこの画面で応募案内のみ確認できます。', FR: 'Avant validation, seule la candidature est accessible ici.', ES: 'Hasta la aprobación, solo verás la guía de solicitud aquí.'
     },
     'mypage.apply.submit': {
-      KO: '구글폼으로 지원하기', EN: 'Apply via Google Form', ZH: '用谷歌表单申请', JA: 'Googleフォームで応募する', FR: 'Postuler via Google Form', ES: 'Postularse con Google Form'
+      KO: "파트너 지원하기", EN: "Apply as a conversation partner", ZH: "申请成为对话伙伴", JA: "会話パートナーに応募する", FR: "Postuler comme partenaire de conversation", ES: "Postularse como partner de conversación"
     },
     'mypage.nick.modalTitle': {
       KO: '닉네임 변경', EN: 'Change nickname', ZH: '修改昵称', JA: 'ニックネーム変更', FR: 'Modifier le pseudo', ES: 'Cambiar apodo'
@@ -947,6 +947,10 @@
     'partner.brandSub': {
       KO: '파트너 라운지', EN: 'PARTNER LOUNGE', ZH: 'PARTNER LOUNGE', JA: 'PARTNER LOUNGE', FR: 'PARTNER LOUNGE', ES: 'PARTNER LOUNGE'
     },
+    'partner.auth.title': { KO: '파트너 전용 페이지입니다.', EN: 'This page is for approved partners' },
+    'partner.auth.desc': { KO: '승인된 DayO 파트너만 이용할 수 있습니다.', EN: 'Only approved DayO partners can use this page.' },
+    'partner.auth.home': { KO: 'DayO 둘러보기', EN: 'Explore DayO' },
+    'partner.auth.apply': { KO: '파트너 지원하기', EN: 'Apply as a partner' },
     'partner.welcome': {
       KO: '{name} 님, 반갑습니다! ☕', EN: 'Welcome, {name}! ☕', ZH: '欢迎，{name}！☕', JA: '{name}さん、こんにちは！☕', FR: 'Bonjour {name} ! ☕', ES: '¡Hola {name}! ☕'
     },
@@ -992,10 +996,7 @@
       ES: '🕒 Abre horarios solo cuando te venga bien'
     },
     'partner.recruit.cta': {
-      KO: '글로벌 파트너 지원서 작성하기 (1분 소요) 📝',
-      EN: 'Fill out the global partner form (1 min) 📝',
-      FR: 'Remplir la candidature partenaire (1 min) 📝',
-      ES: 'Completar la solicitud de partner (1 min) 📝'
+      KO: "파트너 지원하기", EN: "Apply as a conversation partner", FR: "Postuler comme partenaire de conversation", ES: "Postularse como partner de conversación"
     },
     'partner.recruit.status': {
       KO: '이미 지원서를 제출하셨나요? 운영팀 검수 후 승인이 완료되면 본 페이지에서 즉시 활동하실 수 있습니다.',

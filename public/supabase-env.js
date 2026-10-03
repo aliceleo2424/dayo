@@ -8,6 +8,6 @@
     NEXT_PUBLIC_DAILY_DOMAIN: 'dayo-live.daily.co',
     NEXT_PUBLIC_GEMINI_API_KEY: '',
     PORTONE_IMP_CODE: 'imp03104402',
-    PARTNER_APPLY_FORM_URL: 'https://docs.google.com/forms/d/e/1FAIpQLScBTytUfVL4uyxv3R95dFfcs5rV-UBMnvujJ5GsK4ZNzh_1ZQ/viewform',
+    PARTNER_APPLY_FORM_URL: '/partner-apply',
   };
 })();
