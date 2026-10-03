@@ -65,7 +65,8 @@ async function run() {
   process.env.GEMINI_API_KEY = 'fixture-key';
   try {
     const wordUpstream = {
-      ok: true,
+      ok: true, status: 200, headers: { get: () => 'application/json' },
+      text: async () => JSON.stringify(await wordUpstream.json()),
       json: async () => geminiPayload({
         words: [
           { text: 'beautiful scenery', ko: '아름다운 경치' },

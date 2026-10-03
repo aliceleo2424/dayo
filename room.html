@@ -5741,7 +5741,7 @@
       if (!node) return;
       var text = String(node.getAttribute('data-text') || '').trim();
       var meaning = String(node.getAttribute('data-help-meaning') || '').trim();
-      var source = String(node.getAttribute('data-help-source') || 'ai-intent').trim();
+      var source = String(node.getAttribute('data-help-source') || 'ai').trim();
       if (text && typeof window.logSessionEvent === 'function') {
         var eventId = typeof window.createSessionEventId === 'function' ? window.createSessionEventId() : null;
         window.logSessionEvent('word_help_clicked', {
@@ -5756,7 +5756,7 @@
       var text = String(item && item.text || '').trim();
       var meaning = String(item && item.ko || '').trim();
       return '<button type="button" class="word-card help-copy-chip" data-text="' + escapeHelpHtml(text) +
-        '" data-help-meaning="' + escapeHelpHtml(meaning) + '" data-help-source="ai-intent" onclick="useHelpHint(this)">' +
+        '" data-help-meaning="' + escapeHelpHtml(meaning) + '" data-help-source="ai" onclick="useHelpHint(this)">' +
         '<div class="word-card-num">' + (sentence ? '바로 말하기' : '표현 ' + (index + 1)) + '</div>' +
         '<div class="word-card-text' + (sentence ? ' word-card-text--sentence' : '') + '">' + escapeHelpHtml(text) + '</div>' +
         '<div class="word-card-meaning">' + escapeHelpHtml(meaning) + '</div>' +
@@ -5827,7 +5827,7 @@
         var phrases = Array.isArray(result && result.phrases) ? result.phrases.filter(function (item) {
           return item && String(item.text || '').trim() && String(item.ko || '').trim();
         }).slice(0, 1) : [];
-        if (words.length < 2 || !phrases.length) throw new Error('empty-word-help');
+        if (!words.length && !phrases.length) throw new Error('empty-word-help');
         renderWordHelpResults(words, phrases);
         setWordHelpStatus('필요한 표현을 탭하면 복사돼요.', false);
         if (isMobileRoomLayout() && inputNode) inputNode.blur();
