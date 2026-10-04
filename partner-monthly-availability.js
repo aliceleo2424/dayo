@@ -68,7 +68,13 @@
     wrapper.querySelector('.ma-apply').onclick=function(){save('apply_partner_weekly_template');};
     document.addEventListener('dayo:availabilitychanged',function(){if(!busy)load();});
     function clearOwner(){++seq;owner=null;data=null;selected=null;busy=false;calendar();editor();}
-    document.addEventListener('dayo:authchange',clearOwner);
+    document.addEventListener('dayo:authchange',function(event){
+      var detail=event.detail||{};
+      // Repeated sign-in/profile refresh for this partner must not cancel a
+      // pending schedule response or discard the already loaded calendar.
+      if(detail.loggedIn&&detail.userId===owner)return;
+      clearOwner();
+    });
     document.addEventListener('dayo:authprofile',function(event){var detail=event.detail||{},profile=detail.profile,user=detail.user;
       if(!profile||profile.role!=='partner'||!user){clearOwner();return;}
       if(owner!==user.id||!data){owner=user.id;load();}

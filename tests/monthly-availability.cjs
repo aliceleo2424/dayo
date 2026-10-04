@@ -12,6 +12,19 @@ assert.equal(rules.slotMs('2026-10-09T10:00:00'),Date.parse('2026-10-09T01:00:00
 const setupWindow={DayOAvailabilityCalendar:rules};vm.runInNewContext(fs.readFileSync(path.join(root,'public/partner-dashboard.js'),'utf8'),{window:setupWindow,document:{readyState:'loading',addEventListener(){}},Date});
 assert(!setupWindow.DayOPartnerSetup.hasFutureSlot([{status:'available',slot_time:'2026-11-03T10:00:00+09:00'}],Date.parse('2026-10-04T01:00Z')),'outside-window slots do not suppress the Sessions alert');
 const booking=fs.readFileSync(path.join(root,'public/booking-modal.js'),'utf8'),slots=fs.readFileSync(path.join(root,'public/availability-slots.js'),'utf8');
+// Reproduce authprofile -> repeated authchange while the RPC is pending or
+// loaded. The old unconditional reset discarded valid responses for this owner.
+const monthlyUI=fs.readFileSync(path.join(root,'public/partner-monthly-availability.js'),'utf8');
+const authStart=monthlyUI.indexOf("document.addEventListener('dayo:authchange'");
+const authEnd=monthlyUI.indexOf("document.addEventListener('dayo:authprofile'",authStart);
+let onAuthChange;
+const authState={owner:'partner-a',clears:0,document:{addEventListener(name,handler){onAuthChange=handler;}}};
+authState.clearOwner=()=>{authState.clears++;authState.owner=null;};
+vm.runInNewContext(monthlyUI.slice(authStart,authEnd),authState);
+for(const event of ['INITIAL_SESSION','SIGNED_IN','TOKEN_REFRESHED'])onAuthChange({detail:{loggedIn:true,userId:'partner-a',event}});
+assert.equal(authState.clears,0,'same partner keeps pending/loaded schedule on repeated auth events');
+onAuthChange({detail:{loggedIn:true,userId:'partner-b'}});assert.equal(authState.clears,1,'different account invalidates previous schedule');
+authState.owner='partner-b';onAuthChange({detail:{loggedIn:false,userId:'partner-b'}});assert.equal(authState.clears,2,'sign-out invalidates schedule');
 // Fixed integration base keeps core preservation checks meaningful after commit.
 const integrationBase='a58b7a0e7df5c028814b1783884c6746fa421cce';
 const baseline=cp.execFileSync('git',['show',integrationBase+':public/booking-modal.js'],{cwd:root,encoding:'utf8'}).replace(/\r\n/g,'\n');
