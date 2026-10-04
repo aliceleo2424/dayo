@@ -6,12 +6,13 @@ const root = path.join(__dirname, '..');
 const room = fs.readFileSync(path.join(root, 'public/room.html'), 'utf8');
 const helper = room.slice(room.indexOf('/* Bottom sheets */'), room.indexOf('/* Feedback / rating'));
 const timer = room.slice(room.indexOf('/* Session timer'), room.indexOf('(function initVideoSwap()')).replace(/Date.now\(\)/g, 'fixtureNow()').replace('setInterval(tick, 1000)', '(window.fixtureTick = tick, 0)');
+const captionRender = room.match(/render: function \(state\) \{([\s\S]*?)\n          }}\);/)[1];
 const html = room.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '').replace('</body>', `
 <div style="position:fixed;top:3px;right:6px;z-index:9999;background:white;font-size:12px;padding:3px">
   Fixture <select id="fixtureLanguage"><option>en</option><option>ko</option><option>es</option><option>fr</option></select>
-  <button id="fixtureCard">카드 변경</button><select id="fixtureCategory"><option>food</option><option>daily</option><option>taste</option><option>korea-life</option><option>korea-trip</option><option>world-trip</option><option>culture</option></select><button id="fixtureError">AI 실패 전환</button><select id="fixtureRole"><option>user</option><option>partner</option></select><button id="fixtureThree">3분 알림</button><button id="fixtureOne">1분 알림</button><button onclick="this.parentElement.hidden=true">Fixture 숨기기</button>
+  <button id="fixtureCard">카드 변경</button><select id="fixtureCategory"><option>food</option><option>daily</option><option>taste</option><option>korea-life</option><option>korea-trip</option><option>world-trip</option><option>culture</option></select><button id="fixtureError">AI 실패 전환</button><select id="fixtureRole"><option>user</option><option>partner</option></select><button id="fixtureThree">3분 알림</button><button id="fixtureOne">1분 알림</button><button id="fixtureCaptionPartner">Partner final</button><button id="fixtureCaptionUser">User final</button><button id="fixtureCaptionDrop">Caption reconnect</button><button onclick="this.parentElement.hidden=true">Fixture 숨기기</button>
 </div>
-<script src="/talk-cards-data.js"></script><script src="/word-help-vocabulary.js"></script>
+<script src="/partner-captions.js"></script><script src="/talk-cards-data.js"></script><script src="/word-help-vocabulary.js"></script>
 <script>
 document.body.classList.add('room-access-granted');
 window.DayORoomAccess = {allowed:true,role:'user',bookingId:'fixture-booking',userId:'fixture-user',language:'en',wordHelpTargetLanguage:'en'};
@@ -33,6 +34,29 @@ window.DayORoomAccess.internalTest = true;
 window.DayORoomAccessReady = Promise.resolve(window.DayORoomAccess);
 ${timer}
 ${helper}
+// Two paired mock data connections; production caption controller and renderer are unchanged.
+function CaptionPeer(id) {this.id=id;this.open=true;this.handlers={};}
+CaptionPeer.prototype.on=function(n,f){(this.handlers[n]||(this.handlers[n]=[])).push(f);};
+CaptionPeer.prototype.emit=function(n,x){(this.handlers[n]||[]).forEach(function(f){f(x);});};
+function CaptionConnection(id,label){this.peer=id;this.label=label;this.open=true;this.handlers={};}
+CaptionConnection.prototype.on=CaptionPeer.prototype.on;
+CaptionConnection.prototype.emit=CaptionPeer.prototype.emit;
+CaptionConnection.prototype.send=function(p){this.other.emit('data',p);};
+CaptionConnection.prototype.close=function(){if(!this.open)return;this.open=false;this.emit('close');if(this.other.open){this.other.open=false;this.other.emit('close');}};
+var fixtureCaptionPartner=new CaptionPeer('caption_host'),fixtureCaptionUser=new CaptionPeer('caption_user'),fixtureCaptionLatest;
+fixtureCaptionUser.connect=function(id,opts){var a=new CaptionConnection(id,opts.label),b=new CaptionConnection(this.id,opts.label);a.other=b;b.other=a;fixtureCaptionLatest=a;fixtureCaptionPartner.emit('connection',b);return a;};
+var fixtureCaptionAccess={allowed:true,role:'user',bookingId:'11111111-1111-4111-8111-111111111111',userId:'fixture-user',learnerId:'fixture-user',partnerId:'fixture-partner',language:'en'};
+var fixtureCaptionDoc=new EventTarget();
+var fixtureCaptionReceiver=window.DayOPartnerCaptions.create({access:fixtureCaptionAccess,render:function(state){${captionRender}}});
+var fixtureCaptionSender=window.DayOPartnerCaptions.create({access:Object.assign({},fixtureCaptionAccess,{role:'partner',userId:'fixture-partner'}),document:fixtureCaptionDoc});
+fixtureCaptionSender.bindPeer(fixtureCaptionPartner);fixtureCaptionReceiver.bindPeer(fixtureCaptionUser);
+fixtureCaptionSender.setRemotePeer('caption_user');fixtureCaptionReceiver.setRemotePeer('caption_host');
+var fixtureCaptionSeq=0;
+function fixtureSendCaption(speaker){fixtureCaptionDoc.dispatchEvent(new CustomEvent('dayo:transcript',{detail:{id:'fixture-caption-'+(++fixtureCaptionSeq),speaker:speaker,text:'I like discovering new cafés and trying local food.',timestamp:new Date()}}));}
+document.getElementById('fixtureCaptionPartner').onclick=function(){fixtureSendCaption('partner');};
+document.getElementById('fixtureCaptionUser').onclick=function(){fixtureSendCaption('learner');};
+document.getElementById('fixtureCaptionDrop').onclick=function(){fixtureCaptionLatest.close();};
+document.getElementById('partnerCaptionToggle').onclick=function(e){e.stopPropagation();fixtureCaptionReceiver.toggle();};
 document.getElementById('fixtureRole').onchange = function(){window.DayORoomAccess.role=this.value;document.body.classList.toggle('theme-partner',this.value==='partner');document.body.classList.toggle('theme-learner',this.value==='user');};
 document.getElementById('fixtureThree').onclick = function(){fixtureClock += 22*60*1000;window.fixtureTick();};
 document.getElementById('fixtureOne').onclick = function(){fixtureClock += 2*60*1000;window.fixtureTick();};
@@ -41,7 +65,7 @@ document.getElementById('fixtureCard').onclick = function() {window.DayOCurrentT
 document.getElementById('fixtureCategory').onchange = function() {window.DayOCurrentTalkCard=window.DayOTalkCards.find(card=>card.category===this.value);window.syncWordHelpCard();};
 document.getElementById('fixtureError').onclick = function() {fixtureFail=!fixtureFail;this.textContent=fixtureFail?'AI 실패 모드':'AI 정상 모드';};
 </script></body>`);
-const assets = new Set(['conversation-insights.css','word-help-vocabulary.js','talk-cards-data.js']);
+const assets = new Set(['conversation-insights.css','word-help-vocabulary.js','talk-cards-data.js','partner-captions.js']);
 http.createServer((req,res) => {
   const name = new URL(req.url, 'http://localhost').pathname.slice(1);
   if (!name) {res.setHeader('Content-Type','text/html; charset=utf-8');res.end(html);return;}
