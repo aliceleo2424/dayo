@@ -456,6 +456,7 @@
       person.className = 'partner-upcoming-person';
       var name = document.createElement('span');
       name.className = 'partner-upcoming-name';
+      main.setAttribute('aria-label', 'View conversation brief');
       name.textContent = t('partner.upcoming.nameFormat', { name: t('partner.upcoming.userFallback') });
       var language = document.createElement('span');
       language.className = 'partner-upcoming-meta';
@@ -776,6 +777,15 @@
         };
       });
 
+      // 084 provides atomic weekly saves that retain date overrides and booked rows.
+      var monthly = await supabase.rpc('save_partner_weekly_template', { p_slots: openSlots });
+      if (!monthly.error) {
+        alert(window.DayOI18n.t('partner.schedule.saved'));
+        document.dispatchEvent(new CustomEvent('dayo:availabilitychanged'));
+        return;
+      }
+      if (!window.DayOAvailabilityCalendar || !window.DayOAvailabilityCalendar.missingRPC(monthly.error)) throw monthly.error;
+      // Older DB during staged rollout: preserve the original weekly save path.
       var slotsToInsert = buildRows(user.id, openSlots);
       var weeklyRows = slotsToInsert.filter(function (row) {
         return String(row.slot_time || '').indexOf('weekly:') === 0;
@@ -917,6 +927,7 @@
       var raw = String(s.slot_time || '');
       if (raw.indexOf('weekly:') === 0) return false;
       if (dateFilter && raw.indexOf(dateFilter) !== 0) return false;
+      if(window.DayOAvailabilityCalendar&&!window.DayOAvailabilityCalendar.inWindow(window.DayOAvailabilityCalendar.dateAt(bookingSlotStartMs(raw))))return false;
       return isFutureBookableDatedSlot(raw, Date.now());
     });
 

@@ -1,0 +1,30 @@
+.monthly-availability{min-width:0;padding:20px!important;background:#FFFBF4!important;color:#5C4A42}
+.monthly-availability *{box-sizing:border-box}
+.monthly-availability h2{margin:0 0 14px;font-size:20px}.monthly-availability h3{margin:0;font-size:15px}
+.ma-tabs{display:flex;gap:8px;margin-bottom:12px}.ma-tabs button{flex:1;min-width:0;padding:10px 6px;min-height:42px;border:1px solid #C9D7E3;border-radius:12px;background:transparent;color:#5C4A42;font:inherit;font-size:13px}
+.ma-tabs [aria-selected=true]{background:#EAF0F5;color:#466A8A;font-weight:700}
+.ma-tabs+section[hidden],#ma-week[hidden]{display:none!important}.ma-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+.ma-range,.ma-hint,.ma-date-note,.ma-message{font-size:12px;line-height:1.5;margin:8px 0}.ma-hint{color:#827568}.ma-apply{margin:4px 0;max-width:100%;white-space:normal}
+.ma-month-head{display:flex;align-items:center;justify-content:space-between;margin:12px 0;gap:8px}.ma-month-head button{width:34px;height:34px;border:1px solid #C9D7E3;border-radius:10px;background:#FFFBF4;color:#466A8A}
+.ma-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.ma-dow{text-align:center;font-size:11px;padding:4px 0}
+.ma-day{position:relative;min-width:0;min-height:70px;padding:5px 2px;display:flex;flex-direction:column;align-items:center;gap:3px;border:1px solid #E7DDD0;border-radius:9px;background:#F8F0E3;color:#5C4A42;cursor:pointer}
+.ma-day strong{font-size:13px}.ma-day small{font-size:9px;line-height:1.2;overflow-wrap:anywhere}.ma-day.is-selected{border-color:#5F7F9E;background:#EAF0F5}.ma-day:disabled{opacity:.4;cursor:default}.ma-holiday{position:absolute;top:1px;right:4px;color:#995747}
+.ma-editor{min-width:0;padding-top:12px}.ma-modes{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.ma-modes button{flex:1 1 90px;min-height:38px;padding:8px 6px;font:inherit;font-size:11px;white-space:normal;border:1px solid #C9D7E3;border-radius:10px;background:#F8F0E3;color:#466A8A}
+.ma-modes [aria-pressed=true],.ma-slots [aria-pressed=true]{background:#EAF0F5;border-color:#5F7F9E;font-weight:700}.ma-slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:12px}
+.ma-slots button{min-width:0;min-height:34px;padding:6px 2px;border:1px solid #C9D7E3;border-radius:8px;background:#FFFBF4;color:#466A8A;font:inherit;font-size:11px;overflow-wrap:anywhere}.ma-save{width:100%;white-space:normal}
+.monthly-availability button:disabled{opacity:.45;cursor:default}.monthly-availability button:focus-visible{outline:2px solid #466A8A;outline-offset:2px}
+#ma-week .schedule-card{padding:8px 0!important;border:0;box-shadow:none;margin:0!important;background:transparent}
+.partner-upcoming-name{cursor:pointer;text-decoration:underline;text-decoration-color:#C9D7E3;text-underline-offset:3px}.partner-upcoming-main:hover .partner-upcoming-name{text-decoration-color:#466A8A}
+#bookingPrepModal .partner-upcoming-hero-detail{display:block!important;padding:8px 0}#bookingPrepModal .partner-upcoming-hero-detail[hidden]{display:none!important}
+#bookingPrepModal dt{font-size:11px;line-height:1.4;margin-bottom:3px;white-space:normal}#bookingPrepModal dd{margin:0;font-size:13px;line-height:1.5}
+#bookingPrepModal .prep-countdown{padding:8px 10px;font-size:12px;background:#F8F0E3;color:#827568}
+#booking-prep-enter:disabled{background:#F8F0E3!important;color:#827568!important;box-shadow:none;border:1px solid #E7DDD0;font-size:12px;min-height:36px}
+.bk-day.has-open::after{content:'•';display:block;font-size:12px;line-height:8px;color:#5F7D63}.bk-day .bk-holiday{position:absolute;top:3px;right:4px;font-size:9px;line-height:1;color:#995747}
+.bk-modal .bk-cal-grid{grid-template-columns:repeat(7,minmax(0,1fr))}.bk-modal .bk-day{position:relative;min-width:0;min-height:48px;aspect-ratio:auto;border-radius:10px;padding:5px 2px;flex-direction:column}.bk-cal-dow{min-width:0}
+.bk-day.is-on{background:#DDE8D9!important;color:#506B55!important}.bk-calendar-status{font-size:12px;color:#827568;line-height:1.5;margin-top:8px}
+.bk-day.is-on{border:2px solid #5F7D63!important;font-weight:700}.bk-selected-date{margin:6px 0 0;font-size:12px;line-height:1.5;color:#5C4A42;overflow-wrap:anywhere}.bk-selected-date[hidden]{display:none}
+@media(max-width:1000px){.ma-layout{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:480px){.monthly-availability{padding:14px!important}.ma-day{min-height:63px}.ma-slots{grid-template-columns:repeat(5,minmax(0,1fr))}.ma-layout{gap:10px}}
+
+#bookingPrepModal .modal-head{align-items:flex-start;gap:12px}#bookingPrepModal .booking-prep-name{margin:0!important;font-size:20px!important;line-height:1.3;min-width:0;overflow-wrap:anywhere}
+#bookingPrepModal .booking-prep-time{margin:6px 0 12px!important;font-size:13px;color:#827568}#bookingPrepModal .booking-prep-info{padding:8px 10px;border:1px solid #E7DDD0;border-radius:10px;background:#F8F0E3;color:#827568;font-size:12px;line-height:1.4;margin:12px 0 8px}

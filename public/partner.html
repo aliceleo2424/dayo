@@ -2056,7 +2056,22 @@
       line-height: 1.65;
       color: #7A8A82;
     }
+    .dayo-avatar-picker { margin:16px 0; }
+    .dayo-avatar-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    .dayo-avatar-option { border:1px solid #ddd; border-radius:12px; padding:8px; background:#fff; cursor:pointer; }
+    .dayo-avatar-option:focus, .dayo-avatar-option[aria-pressed="true"] { outline:2px solid #555; }
+    .dayo-avatar-option img { width:100%; aspect-ratio:1; object-fit:cover; border-radius:50%; }
+    #photoModal .modal { max-height:90dvh; overflow-y:auto; }
+    #profileAvatar span, #photoPreview span { font-weight:600; font-size:32px; }
+    @media(max-width:480px) { .dayo-avatar-grid {grid-template-columns:repeat(2,minmax(0,1fr));} }
   </style>
+  <link rel="stylesheet" href="partner-profile-completion.css">
+  <script src="partner-profile-fields.js"></script>
+  <script src="partner-avatar-options.js"></script>
+  <link rel="stylesheet" href="partner-dashboard.css">
+  <script src="dashboard-tabs.js" defer></script>
+  <script src="partner-dashboard.js" defer></script>
+  <link rel="stylesheet" href="availability-calendar.css">
 </head>
 <body class="theme-partner partner-page-body" data-dayo-role="partner" data-mode="partner">
   <script>
@@ -2201,7 +2216,7 @@
     <section class="card profile-card" aria-labelledby="profileTitle">
       <div class="avatar-panel">
         <div class="avatar" id="profileAvatar" role="img" data-i18n="partner.profile.avatarAria" data-i18n-attr="aria-label" aria-label="파트너 프로필 사진">
-          <span class="profile-photo-placeholder" aria-hidden="true">📷</span>
+          <span class="profile-photo-placeholder" aria-hidden="true">D</span>
         </div>
         <div class="avatar-meta">
           <p class="avatar-name" id="miniName">DayO 파트너</p>
@@ -2246,7 +2261,7 @@
           </div>
         </div>
 
-        <button class="gcal-card" type="button" id="gcalSync">
+        <button class="gcal-card" type="button" id="gcalSync" hidden>
           <span class="gcal-badge" aria-hidden="true">G</span>
           <span class="gcal-copy">
             <span class="gcal-title" data-i18n="partner.gcal.title">📅 Google Calendar 연동하기</span>
@@ -2342,13 +2357,12 @@
   </main>
 
   <div class="modal-overlay" id="bookingPrepModal">
-    <div class="modal booking-prep-modal" role="dialog" aria-modal="true" aria-labelledby="bookingPrepTitle">
+    <div class="modal booking-prep-modal" role="dialog" aria-modal="true" aria-labelledby="booking-prep-name">
       <div class="modal-head">
-        <h2 class="card-title" id="bookingPrepTitle" data-i18n="partner.upcoming.prepTitle">대화 준비</h2>
+        <h2 class="card-title booking-prep-name" id="booking-prep-name"></h2>
         <button class="modal-close" type="button" data-close-modal aria-label="닫기" data-i18n="partner.photoModal.closeAria" data-i18n-attr="aria-label">✕</button>
       </div>
       <p class="booking-prep-time" id="booking-prep-time"></p>
-      <p class="booking-prep-name" id="booking-prep-name"></p>
       <div class="partner-upcoming-hero-brief" id="booking-prep-brief" hidden>
         <dl class="partner-upcoming-hero-details">
           <div class="partner-upcoming-hero-detail" data-brief-field="purposes" hidden><dt data-i18n="partner.upcoming.purposes">대화 목적</dt><dd></dd></div>
@@ -2358,6 +2372,7 @@
           <div class="partner-upcoming-hero-detail" data-brief-field="partner_preference" hidden><dt data-i18n="partner.upcoming.partnerPreference">파트너 조건</dt><dd></dd></div>
         </dl>
       </div>
+      <p class="booking-prep-info" data-i18n="partner.upcoming.enterEarly">Entry opens 5 minutes before start</p>
       <button class="partner-upcoming-hero-action booking-prep-action" id="booking-prep-enter" type="button" disabled>5분 전부터 입장 가능</button>
     </div>
   </div>
@@ -2376,27 +2391,29 @@
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="photoModalTitle">
       <div class="modal-head">
         <div>
-          <h2 class="card-title" id="photoModalTitle" data-i18n="partner.photoModal.title">📷 프로필 사진 변경</h2>
-          <p class="card-subtitle" data-i18n="partner.photoModal.desc">파트너 프로필에 사용할 본인 얼굴 사진을 업로드해 주세요.</p>
+          <h2 class="card-title" id="photoModalTitle">Change Photo</h2>
+          <p class="card-subtitle">Choose a DayO avatar or upload your photo.</p>
         </div>
         <button class="modal-close" type="button" data-close-modal data-i18n="partner.photoModal.closeAria" data-i18n-attr="aria-label" aria-label="닫기">✕</button>
       </div>
 
+      <section class="dayo-avatar-picker" aria-label="Choose a DayO avatar"><h3>Choose a DayO avatar</h3><div id="dayo-avatar-grid" class="dayo-avatar-grid"></div><p id="dayo-avatar-empty">DayO avatars will be available soon.</p></section>
       <div>
         <div class="upload-drop" id="uploadDrop">
           <div class="upload-preview" id="photoPreview" role="img" data-i18n="partner.photoModal.previewAria" data-i18n-attr="aria-label" aria-label="업로드한 프로필 사진 미리보기">
-            <span class="upload-preview-empty" aria-hidden="true">📷</span>
+            <span class="upload-preview-empty" aria-hidden="true">D</span>
           </div>
-          <p class="upload-title" data-i18n="partner.photoModal.uploadTitle">내 얼굴 사진을 올려보세요</p>
-          <p class="upload-hint" data-i18n="partner.photoModal.uploadHint">JPG 또는 PNG 파일을 선택하면 바로 미리보기로 확인할 수 있어요.</p>
+          <p class="upload-title">Upload your photo</p>
+          <p class="upload-hint">JPG, PNG or WebP · up to 2 MB. Preview your photo before saving.</p>
           <div class="upload-actions">
-            <button class="photo-upload-btn" type="button" id="uploadBtn" data-i18n="partner.photoModal.uploadBtn">📷 사진 업로드</button>
+            <button class="photo-upload-btn" type="button" id="uploadBtn" >Upload your photo</button>
           </div>
-          <input type="file" id="photoInput" accept="image/*" hidden>
+          <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp" hidden>
         </div>
       </div>
 
-      <button type="button" class="photo-save-btn" id="photo-save-btn" data-i18n="partner.photoModal.save">✔ 이 사진으로 저장하기</button>
+      <p id="partner-photo-status" role="status" aria-live="polite"></p>
+      <button type="button" class="photo-save-btn" id="photo-save-btn" disabled>Save profile image</button>
     </div>
   </div>
 
@@ -2725,19 +2742,31 @@
 
     document.getElementById('uploadBtn').addEventListener('click', () => photoInput.click());
 
+    const avatarOptions = window.DayOPartnerAvatars;
+    const photoStatus = document.getElementById('partner-photo-status');
+    let photoReadGeneration = 0, photoHasNewSelection = false, photoReading = false, photoSaving = false;
+    function updatePhotoSaveState() { document.getElementById('photo-save-btn').disabled = photoSaving || photoReading || !photoHasNewSelection; }
+    function previewAvatar(url, newlySelected) { pendingAvatarUrl = url; if (newlySelected) photoHasNewSelection = !!avatarOptions.imageUrl(url) && url !== avatarOptions.imageUrl(window.__dayoPartnerProfile && window.__dayoPartnerProfile.avatar_url); updatePhotoSaveState(); avatarOptions.paint(photoPreview,url,savedNickname); document.querySelectorAll('.dayo-avatar-option').forEach(button => button.setAttribute('aria-pressed',String(button.dataset.avatarPath === url))); }
+    const avatarGrid = document.getElementById('dayo-avatar-grid');
+    avatarOptions.options.forEach(item => {
+      const button = document.createElement('button'), image = document.createElement('img');
+      button.type = 'button'; button.className = 'dayo-avatar-option'; button.dataset.avatarPath = item.path; button.setAttribute('aria-label',item.label); button.setAttribute('aria-pressed','false');
+      image.src = item.path; image.alt = item.label; button.append(image);
+      button.addEventListener('click', () => { ++photoReadGeneration; photoReading = false; previewAvatar(item.path,true); photoStatus.textContent = item.label+' selected. Save to use this avatar.'; }); avatarGrid.append(button);
+    });
+    document.getElementById('dayo-avatar-empty').hidden = avatarOptions.options.length > 0;
     photoInput.addEventListener('change', () => {
-      const file = photoInput.files && photoInput.files[0];
-      if (!file) return;
-      const reader = new FileReader();
+      const file = photoInput.files && photoInput.files[0], run = ++photoReadGeneration;
+      photoInput.value = ''; photoReading = false; updatePhotoSaveState(); if (!file) return;
+      if (!avatarOptions.validUpload(file)) { photoStatus.textContent = 'Choose a JPG, PNG or WebP image up to 2 MB.'; return; }
+      photoReading = true; updatePhotoSaveState(); photoStatus.textContent = 'Reading photo…';
+      const reader = new FileReader(); reader.onerror = () => { if(run===photoReadGeneration){photoReading=false;updatePhotoSaveState();photoStatus.textContent='Could not read this image.';} };
       reader.onload = () => {
-        pendingAvatarUrl = String(reader.result || '');
-        profileAvatar.classList.add('has-photo');
-        profileAvatar.style.backgroundImage = `url(${reader.result})`;
-        photoPreview.classList.add('has-photo');
-        photoPreview.style.backgroundImage = `url(${reader.result})`;
-      };
-      reader.readAsDataURL(file);
-      photoInput.value = '';
+        const image = new Image();
+        image.onerror = () => { if(run===photoReadGeneration){photoReading=false;updatePhotoSaveState();photoStatus.textContent='Could not read this image.';} };
+        image.onload = () => { if(run!==photoReadGeneration)return; photoReading=false;updatePhotoSaveState(); if (!image.naturalWidth || !image.naturalHeight || image.naturalWidth * image.naturalHeight > 40000000) { photoStatus.textContent='Choose an image with at most 40 megapixels.'; return; } previewAvatar(String(reader.result),true); photoStatus.textContent='Photo ready. Save to use this photo.'; };
+        image.src = String(reader.result);
+      }; reader.readAsDataURL(file);
     });
 
     async function savePartnerAvatar() {
@@ -2747,19 +2776,17 @@
       var user = userRes && userRes.data && userRes.data.user;
       if (userRes && userRes.error) throw userRes.error;
       if (!user) throw new Error('no session');
-      if (!pendingAvatarUrl) throw new Error('no avatar');
-      var payload = { avatar_url: pendingAvatarUrl };
+      const avatarToSave = avatarOptions.imageUrl(pendingAvatarUrl);
+      if (!photoHasNewSelection || photoReading || !avatarToSave) throw new Error('Choose an avatar or upload your photo first.');
+      var payload = { avatar_url: avatarToSave };
       var res = await client.from('profiles').update(payload).eq('id', user.id).select('id').maybeSingle();
       if (res.error) {
         console.error('[DayO] avatar update failed', res.error);
         throw res.error;
       }
       if (!res.data) throw new Error('현재 로그인한 파트너 프로필을 찾을 수 없습니다.');
-      if (window.__dayoPartnerProfile) window.__dayoPartnerProfile.avatar_url = pendingAvatarUrl;
-      if (pendingAvatarUrl.indexOf('data:') === 0 || pendingAvatarUrl.indexOf('http') === 0) {
-        profileAvatar.classList.add('has-photo');
-        profileAvatar.style.backgroundImage = 'url(' + pendingAvatarUrl + ')';
-      }
+      if (window.__dayoPartnerProfile) window.__dayoPartnerProfile.avatar_url = avatarToSave;
+      avatarOptions.paint(profileAvatar,avatarToSave,savedNickname); photoHasNewSelection=false;
       showToast(t('partner.toast.photoSaved'));
       return true;
     }
@@ -2767,15 +2794,18 @@
     var photoSaveBtn = document.getElementById('photo-save-btn');
     if (photoSaveBtn) {
       photoSaveBtn.addEventListener('click', async function () {
-        photoSaveBtn.disabled = true;
+        if (photoSaving || photoReading || !photoHasNewSelection) return;
+        photoSaving = true; updatePhotoSaveState(); ++photoReadGeneration;
+        const photoControls = [document.getElementById('uploadBtn'),...avatarGrid.querySelectorAll('button')]; photoControls.forEach(button => button.disabled = true);
         try {
           await savePartnerAvatar();
           closeModal(document.getElementById('photoModal'));
         } catch (err) {
           console.warn('[DayO] avatar save failed', err);
+          photoStatus.textContent = avatarOptions.imageUrl(pendingAvatarUrl) ? 'Could not save your photo. Please try again.' : 'Choose an avatar or upload your photo first.';
           showToast(t('partner.toast.photoSaveFailed'));
         } finally {
-          photoSaveBtn.disabled = false;
+          photoSaving = false; updatePhotoSaveState(); photoControls.forEach(button => button.disabled = false);
         }
       });
     }
@@ -2801,7 +2831,7 @@
       else document.body.style.overflow = '';
     }
 
-    document.getElementById('photoBtn').addEventListener('click', () => openModal(photoModal));
+    document.getElementById('photoBtn').addEventListener('click', () => { ++photoReadGeneration; photoReading=false; photoHasNewSelection=false; previewAvatar(window.__dayoPartnerProfile && window.__dayoPartnerProfile.avatar_url || ''); photoStatus.textContent=''; openModal(photoModal); });
     document.getElementById('historyBtn').addEventListener('click', () => {
       renderHistory();
       openModal(historyModal);
@@ -2894,19 +2924,9 @@
         introInput.value = bio;
         syncIntro();
       }
-      if (profile && profile.avatar_url) {
-        pendingAvatarUrl = String(profile.avatar_url);
-        profileAvatar.classList.add('has-photo');
-        profileAvatar.style.backgroundImage = 'url(' + pendingAvatarUrl + ')';
-        photoPreview.classList.add('has-photo');
-        photoPreview.style.backgroundImage = 'url(' + pendingAvatarUrl + ')';
-      } else {
-        pendingAvatarUrl = '';
-        profileAvatar.classList.remove('has-photo');
-        profileAvatar.style.backgroundImage = '';
-        photoPreview.classList.remove('has-photo');
-        photoPreview.style.backgroundImage = '';
-      }
+      pendingAvatarUrl = avatarOptions.imageUrl(profile && profile.avatar_url);
+      avatarOptions.paint(profileAvatar,pendingAvatarUrl,nickname);
+      avatarOptions.paint(photoPreview,pendingAvatarUrl,nickname);
       if (profile && (profile.is_available === false || profile.partner_status === 'resting')) {
         partnerActive = false;
       } else if (profile && (profile.is_available === true || profile.partner_status === 'active')) {
@@ -3091,7 +3111,9 @@
   </script>
   <script src="materials.js"></script>
   <script src="supabase-env.js"></script>
+  <script src="availability-calendar.js"></script>
   <script src="availability-slots.js"></script>
+  <script src="partner-monthly-availability.js" defer></script>
   <script type="module" src="profile-store.js?v=20260916-auth-strict"></script>
   <script>
     (function waitForPartnerStore() {
@@ -3108,6 +3130,7 @@
   <script src="mode-switch.js?v=20260916-gnb-minimal"></script>
   <script src="role-switch.js"></script>
   <script src="legal-footer.js"></script>
+  <script src="partner-profile-completion.js" defer></script>
   <script>
     (function bindPartnerAuthLogin() {
       var btn = document.getElementById('partner-auth-login-btn');

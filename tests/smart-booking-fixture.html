@@ -74,6 +74,10 @@
 
     window.supabaseClient = {
       rpc: function (name) {
+        if(name==='get_booking_calendar_slots'){
+          var base=new Date(Date.now()+2*86400000).toISOString().slice(0,10);
+          return Promise.resolve({data:fixturePartners.filter(function(p){return p.conversation_languages;}).map(function(p){return{id:p.id+'-1800',partner_id:p.id,slot_time:base+'T18:00:00+09:00',status:'available'};}),error:null});
+        }
         return Promise.resolve(name === 'list_public_partner_profiles'
           ? { data: fixturePartners, error: null }
           : { data: null, error: null });
@@ -103,6 +107,7 @@
   </script>
   <script src="../public/i18n.js"></script>
   <script src="../public/chat-prefs.js"></script>
+  <script src="../public/availability-calendar.js"></script>
   <script src="../public/booking-modal.js"></script>
 </body>
 </html>

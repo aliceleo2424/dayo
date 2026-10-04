@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AdminHeader } from '@/components/admin/header';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { actionChanges, applicationMedia, applicationMessage, applicationResidence, emptyFilters, listApplications, markApplicationViewed, periodLabels, profileSummary, selectApplications, shortlistApplication, sourceLabels, updateApplication, type Application, type ApplicationFilters, type ApplicationSort, type ReviewAction } from '@/lib/partner-applications';
+import { actionChanges, applicationMedia, applicationMessage, applicationResidence, emptyFilters, listApplications, markApplicationViewed, profileSummary, selectApplications, shortlistApplication, sourceLabels, updateApplication, type Application, type ApplicationFilters, type ApplicationSort, type ReviewAction } from '@/lib/partner-applications';
 
 const inputClass = 'w-full rounded border p-2 text-sm bg-background';
 const actionLabels: Record<ReviewAction, string> = { invite: 'Invite to Test', hold: 'Hold', reject: 'Reject', approve: 'Approve' };
@@ -129,7 +129,7 @@ export default function PartnerApplicationsPage() {
   function indicators(row: Application) {
     return <>{!row.first_viewed_at && <span className="rounded bg-blue-100 px-1.5 py-0.5 text-xs text-blue-800">New</span>}{row.review_note.trim() && <span title="Review note saved" aria-label="Review note saved" className="text-xs text-muted-foreground">Note</span>}</>;
   }
-  const visaLabel = (row: Application) => row.visa_type === 'outside_korea' ? 'Overseas' : row.visa_type === 'Other' ? 'Other visa' : row.visa_type;
+  const visaLabel = (row: Application) => ['outside_korea','not_applicable_overseas'].includes(row.visa_type) ? 'Overseas' : row.visa_type === 'Other' ? 'Other visa' : row.visa_type;
   const submitted = (row: Application) => new Date(row.submitted_at).toLocaleDateString('en-GB', { timeZone: 'Asia/Seoul' });
   return <div className="partner-applications-page">
     <AdminHeader title="Partner Applications" />
@@ -144,7 +144,7 @@ export default function PartnerApplicationsPage() {
       <section aria-label="Application search and filters" className="space-y-3 rounded border p-3">
         <div className="grid gap-3 sm:grid-cols-[1fr_230px]">
           <label className="text-xs font-medium">Search applications<input aria-label="Search applications" type="search" className={inputClass} value={search} onChange={event => setSearch(event.target.value)} placeholder="Name, email, university, nationality, languages" /></label>
-          <label className="text-xs font-medium">Sort<select aria-label="Sort" className={inputClass} value={sort} onChange={event => setSort(event.target.value as ApplicationSort)}>{[['newest','Newest'],['oldest','Oldest'],['score','Review score: High → Low'],['capacity','Weekly capacity: High → Low'],['name','Name A–Z']].map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+          <label className="text-xs font-medium">Sort<select aria-label="Sort" className={inputClass} value={sort} onChange={event => setSort(event.target.value as ApplicationSort)}>{[['newest','Newest'],['oldest','Oldest'],['score','Review score: High → Low'],['capacity','Weekly capacity (estimate): High → Low'],['name','Name A–Z']].map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
         </div>
         <details><summary className="cursor-pointer text-sm font-medium">Filters {Object.values(filters).filter(Boolean).length > 0 && `(${Object.values(filters).filter(Boolean).length})`}</summary>
           <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -154,9 +154,10 @@ export default function PartnerApplicationsPage() {
             {filterSelect('session','Session language',languageOptions('partner_languages').map(value => [value,value]))}
             {filterSelect('native','Native language',languageOptions('native_languages').map(value => [value,value]))}
             {filterSelect('residence','Current residence',[['korea','Korea resident'],['overseas','Overseas'],['unknown','Not collected (legacy)']])}
-            {filterSelect('visa','Visa type',[['D-2','D-2'],['D-4','D-4'],['F-series','F-series'],['Other','Other visa'],['outside_korea','Not applicable — overseas']])}
-            {filterSelect('capacity','Weekly capacity',['1-2','3-5','6-10','10+'].map(value => [value,value]))}
-            {filterSelect('availability','Availability · KST', ['weekday','weekend'].flatMap(day => Object.entries(periodLabels).map(([period,label]): [string,string] => [`${day}_${period}`,`${day === 'weekday' ? 'Weekdays' : 'Weekends'} · ${label}`])))}
+            {filterSelect('country','Country',[...new Set(rows.map(row => row.current_country || '').filter(Boolean))].sort().map(value => [value,value]))}
+            {filterSelect('city','City',[...new Set(rows.map(row => row.current_city || '').filter(Boolean))].sort().map(value => [value,value]))}
+            {filterSelect('visa','Visa type',[['D-2','D-2'],['D-4','D-4'],['F-series','F-series'],['Other visa','Other visa'],['not_applicable_overseas','Not applicable — overseas']])}
+            {filterSelect('capacity','Weekly capacity · estimate',['1-2','3-5','6-10','10+'].map(value => [value,value]))}
             {filterSelect('source','Acquisition source',[...new Set([...Object.keys(sourceLabels),...rows.map(row => String(row.acquisition_source || '')).filter(Boolean)])].map(value => [value,sourceLabels[value] || value]))}
             {filterSelect('shortlist','Shortlist',[['only','Shortlisted only']])}
           </div>
@@ -167,7 +168,7 @@ export default function PartnerApplicationsPage() {
       {!loading && !status && !rows.length && <p>아직 지원서가 없습니다.</p>}
       {!loading && !!rows.length && !visible.length && <p>조건에 맞는 지원서가 없습니다.</p>}
       <div className="hidden overflow-x-auto rounded border md:block">
-        <table className="w-full text-left text-sm"><thead><tr>{['Shortlist','Name','Nationality','Session languages','Visa / residence','Weekly capacity','Score / Review','Test / Final','Submitted'].map(label => <th key={label} className="whitespace-nowrap p-3">{label}</th>)}</tr></thead>
+        <table className="w-full text-left text-sm"><thead><tr>{['Shortlist','Name','Nationality','Session languages','Visa / residence','Weekly capacity · estimate','Score / Review','Test / Final','Submitted'].map(label => <th key={label} className="whitespace-nowrap p-3">{label}</th>)}</tr></thead>
           <tbody>{visible.map(row => <tr key={row.id} className="border-t">
             <td className="p-2">{star(row)}</td>
             <td className="p-3"><button className="break-words text-left underline" onClick={() => void open(row)}>{row.full_name}</button><div className="mt-1 flex gap-2">{indicators(row)}</div></td>

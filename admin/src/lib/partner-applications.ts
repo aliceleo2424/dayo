@@ -17,6 +17,9 @@ export type Application = {
   first_viewed_at?: string | null;
   shortlisted?: boolean;
   current_country?: string | null;
+  current_city?: string | null;
+  location_status?: string | null;
+  korea_city_other?: string | null;
   native_languages?: string[] | null;
   other_language_proficiencies?: Record<string, string>;
   acquisition_source_other?: string;
@@ -32,17 +35,17 @@ export const sourceLabels: Record<string, string> = {
   international_student_community: 'International student community', job_board: 'Job board', reddit_discord: 'Reddit / Discord',
   google_search: 'Google search', flyer_qr: 'Flyer / QR poster', other: 'Other',
 };
-export const periodLabels: Record<string, string> = { early_morning: 'Early morning · 6:00 AM–9:00 AM', morning: 'Morning · 9:00 AM–12:00 PM', afternoon: 'Afternoon · 12:00 PM–5:00 PM', evening: 'Evening · 5:00 PM–10:00 PM', late_night: 'Late night · 10:00 PM–1:00 AM (following day)' };
 
 export type ApplicationFilters = {
   viewed: string; review: string; final: string; session: string; native: string;
-  residence: string; visa: string; capacity: string; availability: string; source: string; shortlist: string;
+  country: string; city: string; residence: string; visa: string; capacity: string; source: string; shortlist: string;
 };
-export const emptyFilters: ApplicationFilters = { viewed: '', review: '', final: '', session: '', native: '', residence: '', visa: '', capacity: '', availability: '', source: '', shortlist: '' };
+export const emptyFilters: ApplicationFilters = { viewed: '', review: '', final: '', session: '', native: '', country: '', city: '', residence: '', visa: '', capacity: '', source: '', shortlist: '' };
 export type ApplicationSort = 'newest' | 'oldest' | 'score' | 'capacity' | 'name';
 export function applicationResidence(app: Application) {
+  if (app.location_status === 'korea' || app.location_status === 'overseas') return app.location_status;
   if (app.current_country?.trim()) return ['korea','south korea','republic of korea','한국','대한민국'].includes(app.current_country.trim().toLowerCase()) ? 'korea' : 'overseas';
-  return app.visa_type === 'outside_korea' ? 'overseas' : 'unknown';
+  return ['outside_korea','not_applicable_overseas'].includes(app.visa_type) ? 'overseas' : 'unknown';
 }
 export function selectApplications(rows: Application[], filters: ApplicationFilters, search: string, sort: ApplicationSort) {
   const query = search.trim().toLocaleLowerCase();
@@ -50,10 +53,11 @@ export function selectApplications(rows: Application[], filters: ApplicationFilt
     if (filters.viewed && (filters.viewed === 'new' ? !!app.first_viewed_at : !app.first_viewed_at)) return false;
     if (filters.review && app.review_status !== filters.review || filters.final && app.final_status !== filters.final) return false;
     if (filters.session && !app.partner_languages.includes(filters.session) || filters.native && !app.native_languages?.includes(filters.native)) return false;
-    if (filters.residence && applicationResidence(app) !== filters.residence || filters.visa && app.visa_type !== filters.visa) return false;
-    if (filters.capacity && app.weekly_session_capacity !== filters.capacity || filters.availability && !(app.availability_periods as string[] | undefined)?.includes(filters.availability)) return false;
+    if (filters.country && app.current_country !== filters.country || filters.city && app.current_city !== filters.city) return false;
+    if (filters.residence && applicationResidence(app) !== filters.residence || filters.visa && (['outside_korea','not_applicable_overseas'].includes(app.visa_type) ? 'not_applicable_overseas' : app.visa_type === 'Other' ? 'Other visa' : app.visa_type) !== (filters.visa === 'outside_korea' ? 'not_applicable_overseas' : filters.visa === 'Other' ? 'Other visa' : filters.visa)) return false;
+    if (filters.capacity && app.weekly_session_capacity !== filters.capacity) return false;
     if (filters.source && app.acquisition_source !== filters.source || filters.shortlist && !app.shortlisted) return false;
-    return !query || [app.full_name, app.email, app.university, app.nationality, app.strongest_language, app.other_languages,
+    return !query || [app.full_name, app.email, app.university, app.nationality, app.current_country, app.current_city, app.strongest_language, app.other_languages,
       ...(app.native_languages || []), ...app.partner_languages, ...Object.keys(app.other_language_proficiencies || {})]
       .filter(Boolean).join(' ').toLocaleLowerCase().includes(query);
   });
@@ -70,22 +74,19 @@ export function selectApplications(rows: Application[], filters: ApplicationFilt
 }
 export function profileSummary(app: Application) {
   const structured = Array.isArray(app.native_languages);
-  const other = Object.entries(app.other_language_proficiencies || {}).map(([language, level]) => `${language}: ${proficiencyLabels[level] || level}`).join('\n');
-  const periods = Array.isArray(app.availability_periods) ? app.availability_periods.map(period => {
-    const [day, ...time] = period.split('_');
-    const slot = time.join('_');
-    return `${day === 'weekday' ? 'Weekdays' : 'Weekends'} · ${structured ? periodLabels[slot] || slot : slot + ' (legacy time band)'}`;
-  }).join('\n') : '—';
+  const other = Object.entries(app.other_language_proficiencies || {}).map(([language, level]) => `${language} — ${proficiencyLabels[level] || level}`).join('\n');
   return [
     ['Current location', [app.current_city, app.current_country].filter(Boolean).join(', ')],
+    ['Country', app.current_country],
+    ['City', app.current_city],
+    ['Location', applicationResidence(app) === 'korea' ? 'Korea resident' : applicationResidence(app) === 'overseas' ? 'Overseas' : 'Not collected (legacy application)'],
     ['Visa / overseas', app.visa_type === 'outside_korea' ? 'Not applicable — currently living outside Korea' : app.visa_type === 'Other' ? 'Other visa' : app.visa_type],
     ['Native languages', structured ? app.native_languages?.join(', ') : 'Not collected (legacy application)'],
     ['Other languages + proficiency', other || app.other_languages || '—'],
     ['DayO session languages', app.partner_languages.join(', ')],
     ['Introduction video language', app.intro_video_language || 'Not collected (legacy application)'],
     ['Korean level', app.korean_level === 'none' ? 'None' : app.korean_level === 'advanced' ? 'Advanced' : proficiencyLabels[String(app.korean_level)] || app.korean_level],
-    ['Weekly capacity', app.weekly_session_capacity + ' sessions'],
-    ['Availability · KST (UTC+9)', periods],
+    ['Weekly capacity (rough estimate)', app.weekly_session_capacity + ' sessions'],
     ['Acquisition source', [sourceLabels[String(app.acquisition_source)] || app.acquisition_source, app.acquisition_source === 'other' ? app.acquisition_source_other : null].filter(Boolean).join(' · ') || '—'],
   ].map(([label, value]) => ({ label: String(label), value: String(value || '—') }));
 }

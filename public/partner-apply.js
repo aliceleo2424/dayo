@@ -2,8 +2,11 @@
   'use strict';
   var form = document.getElementById('application-form'), button = document.getElementById('submit-button'), status = document.getElementById('form-status');
   var busy = false, uploaded = null;
-  var languages = ['English','Korean','French','Spanish','Chinese (Mandarin)','Japanese','German','Portuguese','Arabic','Russian','Vietnamese','Thai','Indonesian','Other'];
-  var levels = [['basic','Basic — greetings / simple phrases'],['conversational','Conversational — can hold everyday conversations'],['fluent','Fluent — comfortable with complex topics'],['native','Native / near-native']];
+  var catalog = window.DayOPartnerFields, languages = catalog.languages;
+  var locationContainer = document.getElementById('partner-location-fields');
+  locationContainer.innerHTML = catalog.locationMarkup();
+  var locationFields = catalog.mountLocation(locationContainer);
+  var levels = catalog.levels;
   function check(container, name, value, checked) {
     var label = document.createElement('label'), input = document.createElement('input');
     input.type = 'checkbox'; input.name = name; input.value = value; input.checked = !!checked;
@@ -33,7 +36,7 @@
   document.getElementById('session-languages').addEventListener('change', refreshVideoLanguages);
   function renderHostLanguages() {
     var container = document.getElementById('session-languages'), chosen = Array.from(container.querySelectorAll('input:checked')).map(function (input) { return input.value; });
-    var mapping = proficiencyMapping(), eligible = Array.from(new Set(selectedLanguages('native').concat(Object.keys(mapping).filter(function (name) { return ['fluent','native'].includes(mapping[name]); }))));
+    var mapping = proficiencyMapping(), eligible = Array.from(new Set(selectedLanguages('native').concat(Object.keys(mapping).filter(function (name) { return catalog.canHost(mapping[name]); }))));
     container.replaceChildren(); eligible.forEach(function (name) { check(container, 'partner_languages', name, chosen.includes(name)); });
     document.getElementById('session-language-hint').hidden = eligible.length > 0; refreshVideoLanguages();
   }
@@ -83,13 +86,13 @@
     event.preventDefault(); if (busy || !form.reportValidity()) return; status.textContent = '';
     var fields = new FormData(form), payload = {};
     ['full_name','email','contact_method','nationality','current_country','current_city','university','visa_type','korean_level','stranger_conversation_comfort','weekly_session_capacity','device','video_environment','scenario_answer','intro_video_language','acquisition_source','acquisition_source_other','referral_code'].forEach(function (key) { payload[key] = String(fields.get(key) || '').trim(); });
+    var location = locationFields.read(); payload.location_status = location.location_status; payload.current_country = location.country; payload.current_city = location.city; payload.korea_city_other = location.korea_city_other; payload.visa_type = location.visa_type;
     payload.email = payload.email.toLowerCase(); payload.native_languages = selectedLanguages('native'); payload.other_language_proficiencies = proficiencyMapping();
     payload.partner_languages = fields.getAll('partner_languages'); payload.strongest_language = payload.native_languages[0];
-    payload.other_languages = Object.keys(payload.other_language_proficiencies).join(', ').slice(0,300); payload.availability_periods = fields.getAll('availability_periods'); payload.privacy_consent = fields.has('privacy_consent');
+    payload.other_languages = Object.keys(payload.other_language_proficiencies).join(', ').slice(0,300); payload.privacy_consent = fields.has('privacy_consent');
     var lower = payload.native_languages.map(function (name) { return name.toLowerCase(); });
     if (!lower.length || new Set(lower).size !== lower.length || Object.keys(payload.other_language_proficiencies).some(function (name) { return lower.includes(name.toLowerCase()); })) { status.textContent = 'Choose your native languages and avoid selecting the same language twice.'; return; }
     if (!payload.partner_languages.length) { status.textContent = 'Please choose at least one DayO session language.'; return; }
-    if (!payload.availability_periods.length) { status.textContent = 'Please choose at least one availability period.'; return; }
     if (['full_name','email','contact_method','nationality','current_country','current_city','scenario_answer','intro_video_language'].some(function (key) { return !payload[key]; })) { status.textContent = 'Please complete all required fields.'; return; }
     if (!window.supabaseClient) { status.textContent = 'The application service is unavailable. Please try again later.'; return; }
     var video = form.elements.intro_video.files[0];

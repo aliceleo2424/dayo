@@ -43,7 +43,13 @@ const baseline=execFileSync('git',['show','HEAD:public/booking-modal.js'],{cwd:r
 for(const name of ['fetchDateAvailability','loadDateAvailability','loadAvailablePartners','derivePartnersForSelectedTime','partnerMatchesCriteria','isInternalBookingTest','canBypassBookingLeadTime','isBookableStart','requiresNoRefundWarning','bookingSlotStartMs','isFutureThirtyMinuteConcreteSlot','getTicketCount','needsTicketTopup','ensureLoggedInForBooking','requestOpen','routeToTicketTopup','persistLearningLanguage']) {
   const rx=new RegExp('(?:async )?function '+name+'\\([^)]*\\) \\{[\\s\\S]*?\\n  \\}');
   assert.ok(source.match(rx),name);
-  assert.equal(source.match(rx)[0].replace(/\r\n/g,'\n'),baseline.match(rx)[0],name+' unchanged');
+  const actualFunction=source.match(rx)[0].replace(/\r\n/g,'\n'),oldFunction=baseline.match(rx)[0];
+  if(name==='fetchDateAvailability'){
+    // 084 intentionally adds a monthly RPC adapter before the intact legacy query.
+    assert(actualFunction.includes('loadCalendarSlots(eligiblePartnerIds)'));
+    const queryStart='    var supabase = dbClient();';
+    assert.equal(actualFunction.slice(actualFunction.indexOf(queryStart)),oldFunction.slice(oldFunction.indexOf(queryStart)),'legacy query and failure behavior unchanged');
+  }else assert.equal(actualFunction,oldFunction,name+' unchanged');
 }
 assert.doesNotMatch(source,/id="bkComfort"|id="bkChatStyles"|id="bkChatRequests"|id="bkFirstTip"/,'no comfort option UI');
 assert.match(source,/code: id\.toUpperCase\(\)/,'canonical language codes');

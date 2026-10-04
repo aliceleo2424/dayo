@@ -142,7 +142,7 @@ async function helpers() {
   const ids=(filters={},query='',sort='newest')=>Array.from(selectApplications(rows,{...emptyFilters,...filters},query,sort),x=>x.id);
   assert.deepEqual(ids(),['b','c','a']); assert.deepEqual(ids({},'','oldest'),['a','c','b']);assert.deepEqual(ids({},'','name'),['b','c','a']);
   assert.deepEqual(ids({},'','score'),['a','b','c']);assert.deepEqual(ids({},'','capacity'),['b','a','c']);
-  assert.deepEqual(ids({viewed:'new',review:'ready',shortlist:'only',residence:'overseas',native:'English',availability:'weekday_evening'},'JAPAN'),['a']);
+  assert.deepEqual(ids({viewed:'new',review:'ready',shortlist:'only',residence:'overseas',native:'English',capacity:'3-5'},'JAPAN'),['a']);assert(!('availability' in emptyFilters));
   assert.deepEqual(ids({viewed:'viewed',visa:'F-series',capacity:'10+',source:'instagram',final:'approved',session:'Korean'}),['b']);
   assert.deepEqual(ids({native:'English',residence:'korea'}),[]);
   for(const query of ['fixture@','toronto university','canad']) assert.equal(ids({},query).length,3);

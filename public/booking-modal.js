@@ -70,6 +70,7 @@
   var partnersLoaded = false;
   var partnersLoading = false;
   var availabilityLoadSeq = 0;
+  var calendarSeq = 0, calendarKey = '', calendarRows = null, calendarLoading = false, calendarError = false;
   function weekdays() {
     return window.DayOI18n ? window.DayOI18n.weekdayNames() : ['일', '월', '화', '수', '목', '금', '토'];
   }
@@ -735,6 +736,7 @@
 
   function resetAfterCriteriaChange(clearDate) {
     availabilityLoadSeq += 1;
+    calendarSeq += 1; calendarKey = ''; calendarRows = null;
     state.time = null;
     state.timeKey = null;
     state.partner = null;
@@ -776,8 +778,49 @@
     renderCalendar();
   }
 
+  async function loadCalendarSlots(ids) {
+    var rules = window.DayOAvailabilityCalendar, db = dbClient(), w = rules.windowDates();
+    if (!ids.length) return [];
+    var result = await db.rpc('get_booking_calendar_slots', { p_partner_ids: ids });
+    if (!result.error) {
+      if (!Array.isArray(result.data)) throw new Error('Invalid calendar response');
+      return result.data;
+    }
+    if (!rules.missingRPC(result.error)) throw result.error;
+    // During rollout use real existing slots, never synthetic weekly occurrences.
+    var rows = [];
+    for (var offset = 0; ; offset += 500) {
+      var page = await db.from('availability_slots').select('id,partner_id,slot_time,status')
+        .eq('status','available').in('partner_id',ids).gte('slot_time',w.start).lt('slot_time',rules.addDays(w.end,1))
+        .order('id',{ascending:true}).range(offset,offset+499);
+      if (page.error) throw page.error;
+      rows.push.apply(rows,page.data||[]);
+      if ((page.data||[]).length<500) return rows;
+    }
+  }
+
+  async function refreshBookingCalendar() {
+    var rules=window.DayOAvailabilityCalendar;
+    if (!rules || !state.language || state.step!==1) return;
+    var key=state.language+'|'+state.koreanHelp+'|'+rules.windowDates().start;
+    if (calendarKey===key) return;
+    calendarKey=key;calendarRows=null;calendarLoading=true;calendarError=false;
+    var seq=++calendarSeq,language=state.language,help=state.koreanHelp;
+    try {
+      if (!partnersLoaded) await loadAvailablePartners();
+      var ids=allPartners.filter(function(p){return partnerMatchesCriteria(p,language,help);}).map(function(p){return String(p.id);});
+      var rows=await loadCalendarSlots(ids);
+      if(seq!==calendarSeq||key!==calendarKey)return;
+      calendarRows=rows.filter(function(s){var ms=rules.slotMs(s.slot_time);return s.status==='available'&&isFinite(ms)&&rules.inWindow(rules.dateAt(ms))&&isFutureThirtyMinuteConcreteSlot(s);});
+    } catch(error) {if(seq===calendarSeq){calendarError=true;calendarRows=[];}}
+    finally {if(seq===calendarSeq){calendarLoading=false;renderCalendar();}}
+  }
+
   function renderCalendar() {
-    var today = startOfToday();
+    var rules = window.DayOAvailabilityCalendar;
+    var windowRange = rules && rules.windowDates();
+    var today = windowRange ? new Date(windowRange.start+'T00:00:00') : startOfToday();
+    if (state.step===1 && rules) refreshBookingCalendar();
     var first = new Date(state.viewYear, state.viewMonth, 1);
     var daysInMonth = new Date(state.viewYear, state.viewMonth + 1, 0).getDate();
     var dow = weekdays();
@@ -785,6 +828,7 @@
     el.calTitle.textContent = window.DayOI18n ? window.DayOI18n.monthTitle(state.viewYear, state.viewMonth) : (state.viewYear + '년 ' + (state.viewMonth + 1) + '월');
     el.prevMonth.disabled = state.viewYear === today.getFullYear() && state.viewMonth === today.getMonth();
 
+    if (windowRange) el.nextMonth.disabled = state.viewYear+'-'+String(state.viewMonth+1).padStart(2,'0') >= windowRange.end.slice(0,7);
     var cells = dow.map(function (d) {
       return '<span class="bk-cal-dow">' + d + '</span>';
     });
@@ -796,15 +840,23 @@
     for (var day = 1; day <= daysInMonth; day++) {
       var date = new Date(state.viewYear, state.viewMonth, day);
       var iso = toISO(date);
-      var selectable = date >= today;
+      var hasSlots = !rules || (calendarRows || []).some(function(s){return rules.dateAt(rules.slotMs(s.slot_time))===iso;});
+      var selectable = date >= today && (!windowRange || iso<=windowRange.end) && hasSlots && !calendarLoading;
+      var holiday = rules ? rules.holiday(iso, !window.DayOI18n || window.DayOI18n.getLang()==='KO') : '';
       cells.push(
-        '<button type="button" class="bk-day' + (state.date === iso ? ' is-on' : '') + '"' +
+        '<button type="button" class="bk-day' + (hasSlots ? ' has-open' : '') + (state.date === iso ? ' is-on' : '') + '"' +
         ' data-date="' + iso + '"' + (selectable ? '' : ' disabled') +
-        ' aria-label="' + formatDate(iso) + '">' + day + '</button>'
+        ' aria-label="' + formatDate(iso) + (holiday ? ' · '+holiday : '') + '">' + day + (holiday ? '<span class="bk-holiday" aria-hidden="true">✦</span>' : '') + '</button>'
       );
     }
 
     el.calGrid.innerHTML = cells.join('');
+    var calendarNote=el.calGrid.parentElement.querySelector('.bk-calendar-status');if(!calendarNote){calendarNote=document.createElement('p');calendarNote.className='bk-calendar-status';calendarNote.setAttribute('role','status');el.calGrid.after(calendarNote);}
+    calendarNote.textContent=calendarLoading?ux('예약 가능 날짜 확인 중…','Checking available dates…'):calendarError?ux('날짜를 불러오지 못했어요. 다시 열어 주세요.','Could not load dates. Please reopen.'):calendarRows&&calendarRows.length===0?ux('선택한 조건에 맞는 예약 가능 시간이 없어요.','No available dates for these settings.'):ux('KST · 오늘 포함 30일','KST · 30 calendar days, including today');
+    var dateDetail=el.calGrid.parentElement.querySelector('.bk-selected-date');if(!dateDetail){dateDetail=document.createElement('p');dateDetail.className='bk-selected-date';calendarNote.after(dateDetail);}
+    var selectedHoliday=state.date&&rules?rules.holiday(state.date,!window.DayOI18n||window.DayOI18n.getLang()==='KO'):'';
+    dateDetail.hidden=!state.date;
+    dateDetail.textContent=state.date?formatDate(state.date)+(selectedHoliday?' · '+selectedHoliday+' · '+ux('공휴일','Public holiday'):'')+' · KST':'';
   }
 
   function toISO(date) {
@@ -996,6 +1048,11 @@
   }
 
   async function fetchDateAvailability(isoDate, eligiblePartnerIds) {
+    if (window.DayOAvailabilityCalendar) {
+      if (!window.DayOAvailabilityCalendar.inWindow(isoDate)) return [];
+      var resolved=await loadCalendarSlots(eligiblePartnerIds);
+      return resolved.filter(function(slot){var ms=window.DayOAvailabilityCalendar.slotMs(slot.slot_time);return slot.status==='available'&&isFinite(ms)&&window.DayOAvailabilityCalendar.dateAt(ms)===isoDate&&isFutureThirtyMinuteConcreteSlot(slot);});
+    }
     var supabase = dbClient();
     if (!supabase || !isoDate || !eligiblePartnerIds.length) return [];
 
@@ -1209,7 +1266,7 @@
     Array.prototype.forEach.call(el.steps, function (section, i) {
       section.classList.toggle('is-active', i === step);
     });
-    if (step === 1 && state.date) loadDateAvailability();
+    if (step === 1) { renderCalendar(); if (state.date) loadDateAvailability(); }
     if (step === 2) renderAvailablePartners();
     if (step === 4) renderSummary();
 
@@ -1586,8 +1643,9 @@
     liveSlots = [];
     liveTimes = [];
     livePartners = [];
-    state.viewYear = today.getFullYear();
-    state.viewMonth = today.getMonth();
+    var kstToday=window.DayOAvailabilityCalendar&&window.DayOAvailabilityCalendar.windowDates().start;
+    state.viewYear = kstToday?Number(kstToday.slice(0,4)):today.getFullYear();
+    state.viewMonth = kstToday?Number(kstToday.slice(5,7))-1:today.getMonth();
     loadComfortIntoState();
 
     ['language', 'koreanHelp', 'purpose', 'interest', 'style', 'time', 'chatStyle', 'chatRequest'].forEach(syncChips);
@@ -1604,6 +1662,8 @@
     opts = opts || {};
     lastFocused = document.activeElement;
     ++recentSeq;
+    ++calendarSeq;calendarKey='';calendarRows=null;calendarLoading=false;calendarError=false;
+    if(window.DayOAvailabilityCalendar){var initial=window.DayOAvailabilityCalendar.windowDates().start.split('-');state.viewYear=Number(initial[0]);state.viewMonth=Number(initial[1])-1;}
     bookingOwner = currentUserId();
     reset();
     var draft = loadDraft();
@@ -1633,6 +1693,7 @@
   function close() {
     if (!el.overlay.classList.contains('is-open')) return;
     ++recentSeq;
+    ++calendarSeq;calendarKey='';
     recentLoading = false;
     el.overlay.classList.remove('is-open');
     if (window.DayOScrollLock) window.DayOScrollLock.unlock();
@@ -1671,6 +1732,15 @@
       requestOpen();
     });
     document.addEventListener('dayo:langchange', refreshOnLangChange);
+    // Re-read concrete availability when returning from another tab/window.
+    // The existing date loader clears any selected slot that is no longer open.
+    function refreshVisibleCalendar() {
+      if(document.visibilityState==='hidden'||!el.overlay.classList.contains('is-open')||state.step!==1)return;
+      calendarKey=null;renderCalendar();if(state.date)loadDateAvailability();
+    }
+    document.addEventListener('dayo:availabilitychanged',refreshVisibleCalendar);
+    document.addEventListener('visibilitychange',refreshVisibleCalendar);
+    window.addEventListener('focus',refreshVisibleCalendar);
     document.addEventListener('dayo:authchange', function (e) {
       if (el.overlay.classList.contains('is-open') && (!e.detail || !e.detail.loggedIn || bookingOwner !== currentUserId())) close();
       if (!e.detail || !e.detail.loggedIn) return;
@@ -1710,6 +1780,8 @@
       canonicalStyle: canonicalStyle,
       preferenceSnapshot: preferenceSnapshot,
       readRecentBooking: readRecentBooking,
+      loadCalendarSlots: loadCalendarSlots,
+      fetchDateAvailability: fetchDateAvailability,
       stepOrder: STEP_ORDER.slice(),
       state: state,
       isStepReady: isStepReady

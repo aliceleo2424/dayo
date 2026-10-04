@@ -9,19 +9,15 @@
 <label>Nationality<input name="nationality" maxlength="100" required></label>
 <label>University (optional)<input name="university" maxlength="200"></label>
 </div></fieldset>
-<fieldset><legend>2. Location & visa</legend><div class="grid">
-<label>Current country<input name="current_country" autocomplete="country-name" maxlength="100" required></label>
-<label>Current city<input name="current_city" autocomplete="address-level2" maxlength="100" required></label>
-<label>Visa type<select name="visa_type" required><option value="">Select</option><option>D-2</option><option>D-4</option><option>F-series</option><option value="Other">Other visa</option><option value="outside_korea">Not applicable — currently living outside Korea</option></select></label>
-</div></fieldset>
+<fieldset><legend>2. Location & visa</legend><div class="grid" id="partner-location-fields"></div></fieldset>
 <fieldset><legend>3. Languages</legend>
 <p id="native-label" class="question">Native language(s)</p><div class="checks language-checks" id="native-languages" role="group" aria-labelledby="native-label"></div>
-<label id="native-other-field" hidden>Other native language<input name="native_language_other" maxlength="100" disabled></label>
+<label id="native-other-field" hidden>What language?<input name="native_language_other" maxlength="100" disabled></label>
 <p id="other-label" class="question">Other languages you can speak (optional)</p><div class="checks language-checks" id="other-languages" role="group" aria-labelledby="other-label"></div>
-<label id="other-language-field" hidden>Other language name<input name="other_language_name" maxlength="100" disabled></label>
+<label id="other-language-field" hidden>What language?<input name="other_language_name" maxlength="100" disabled></label>
 <div id="language-proficiencies" class="grid"></div>
 <p id="session-label" class="question">Which language(s) could you host DayO sessions in?</p>
-<p class="hint">Choose from your native languages and other languages rated Fluent or Native / near-native.</p>
+<p class="hint">Choose from your native languages and other languages rated Conversational or higher.</p>
 <div id="session-languages" class="checks" role="group" aria-labelledby="session-label"></div><p id="session-language-hint" class="hint">Select your languages above first.</p>
 <label>Korean level<select name="korean_level" required><option value="">Select</option>
 <option value="none">None — Almost no Korean / TOPIK 0</option>
@@ -31,11 +27,9 @@
 <option value="native">Native / near-native</option></select></label>
 <p class="hint">TOPIK levels are a reference only. No TOPIK certificate is required.</p>
 </fieldset>
-<fieldset><legend>4. Availability</legend><p>All times are Korea Standard Time (KST, UTC+9).</p>
-<p class="question">Weekdays</p><div class="checks"><label><input type="checkbox" name="availability_periods" value="weekday_early_morning">Early morning — 6:00 AM–9:00 AM</label><label><input type="checkbox" name="availability_periods" value="weekday_morning">Morning — 9:00 AM–12:00 PM</label><label><input type="checkbox" name="availability_periods" value="weekday_afternoon">Afternoon — 12:00 PM–5:00 PM</label><label><input type="checkbox" name="availability_periods" value="weekday_evening">Evening — 5:00 PM–10:00 PM</label><label><input type="checkbox" name="availability_periods" value="weekday_late_night">Late night — 10:00 PM–1:00 AM</label></div>
-<p class="question">Weekends</p><div class="checks"><label><input type="checkbox" name="availability_periods" value="weekend_early_morning">Early morning — 6:00 AM–9:00 AM</label><label><input type="checkbox" name="availability_periods" value="weekend_morning">Morning — 9:00 AM–12:00 PM</label><label><input type="checkbox" name="availability_periods" value="weekend_afternoon">Afternoon — 12:00 PM–5:00 PM</label><label><input type="checkbox" name="availability_periods" value="weekend_evening">Evening — 5:00 PM–10:00 PM</label><label><input type="checkbox" name="availability_periods" value="weekend_late_night">Late night — 10:00 PM–1:00 AM</label></div>
-<p class="hint">Late night continues into the following day.</p>
-<label>Weekly session capacity<select name="weekly_session_capacity" required><option value="">Select</option><option>1-2</option><option>3-5</option><option>6-10</option><option>10+</option></select></label>
+<fieldset><legend>4. Weekly capacity</legend>
+<label>About how many DayO sessions would you usually like to host per week?<select name="weekly_session_capacity" aria-describedby="capacity-hint" required><option value="">Select</option><option value="1-2">1–2</option><option value="3-5">3–5</option><option value="6-10">6–10</option><option value="10+">10+</option></select></label>
+<p class="hint" id="capacity-hint">This is just a rough estimate — you can change your actual availability anytime.</p>
 </fieldset>
 <fieldset><legend>5. Conversation fit</legend><div class="grid">
 <label>How comfortable are you talking with a stranger?<select name="stranger_conversation_comfort" required><option value="">Select</option><option value="very_comfortable">Very comfortable</option><option value="comfortable">Comfortable</option><option value="slightly_nervous">Slightly nervous</option><option value="uncomfortable">Uncomfortable</option></select></label>
@@ -63,4 +57,4 @@
 <label class="consent"><input name="privacy_consent" type="checkbox" required>I consent to DayO collecting and using these details and files for partner recruitment.</label>
 <p id="form-status" role="status" aria-live="polite"></p><button id="submit-button" type="submit">Submit application</button>
 </form><section id="success" hidden tabindex="-1"><h2>Thank you for applying!</h2><p>Your application has been received. The DayO team will review it and contact you about the next step.</p><a href="/">Back to DayO</a></section><noscript>Please enable JavaScript to submit your application.</noscript></main>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script><script src="supabase-client.js"></script><script src="partner-apply.js"></script></body></html>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script><script src="supabase-client.js"></script><script src="partner-profile-fields.js"></script><script src="partner-apply.js"></script></body></html>

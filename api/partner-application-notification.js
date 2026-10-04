@@ -43,8 +43,8 @@ module.exports = async function handler(req, res) {
     const languages = (app.partner_languages || []).map(line).join(', ');
     const country = line(app.current_country);
     const korea = ['korea','south korea','republic of korea','한국','대한민국'].includes(country.toLowerCase());
-    const location = korea ? 'Korea resident' : app.current_country ? 'Overseas — ' + country : app.visa_type === 'outside_korea' ? 'Overseas' : 'Not collected';
-    const visa = app.visa_type === 'outside_korea' ? 'Not applicable — living outside Korea' : app.visa_type === 'Other' ? 'Other visa' : line(app.visa_type);
+    const location = korea ? 'Korea resident' : app.current_country ? 'Overseas — ' + country : ['outside_korea','not_applicable_overseas'].includes(app.visa_type) ? 'Overseas' : 'Not collected';
+    const visa = ['outside_korea','not_applicable_overseas'].includes(app.visa_type) ? 'Not applicable — living outside Korea' : app.visa_type === 'Other' ? 'Other visa' : line(app.visa_type);
     const text = [
       'New DayO Partner Application', '', 'Name: ' + line(app.full_name), 'Nationality: ' + line(app.nationality),
       'Native languages: ' + ((app.native_languages || []).map(line).join(', ') || 'Not collected'),
