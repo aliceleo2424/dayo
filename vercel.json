@@ -23,6 +23,9 @@
     },
     "api/send-welcome.js": {
       "maxDuration": 15
+    },
+    "api/booking-notifications-retry.js": {
+      "maxDuration": 60
     }
   }
 }

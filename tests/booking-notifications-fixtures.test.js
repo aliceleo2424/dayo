@@ -6,6 +6,7 @@ const path = require('node:path');
 const vm = require('node:vm');
 const { PGlite } = require('@electric-sql/pglite');
 const { createHandler } = require('../api/booking-notifications');
+const { createRetryHandler } = require('../api/booking-notifications-retry');
 const { dispatch, sendResend, kstTime, displayName } = require('../api/_lib/booking-notifications');
 // Read the parallel Work's audited contract; never rewrite its fixture or RPCs.
 const contract = require('./fixtures/internal-test-learner-production-contract.json');
@@ -356,6 +357,28 @@ async function main() {
     await db.query('select confirm_booking_with_cutoff_cleanup($1,$2)', [rolledBack.user, rolledBack.id]);
     await db.exec('rollback;');
     check((await logs(rolledBack.id)).length === 0 && (await state(rolledBack.id)).status === 'pending', 'Rolled-back booking leaves no notification to dispatch');
+
+    // The production scheduler endpoint reuses the real SQL outbox contract.
+    const scheduled = await booking(); await confirm(scheduled);
+    providerMode = 'reject'; await deliver(scheduled);
+    await owner(); await db.query('update booking_notification_log set next_attempt_at=now() where booking_id=$1',[scheduled.id]);
+    await db.exec('set role service_role;'); providerMode='success';
+    const retryHandler=createRetryHandler({config:{...config,retrySecret:'fixture-retry-secret-with-at-least-32-characters'},service,
+      dispatch:(svc,cfg,scope)=>dispatch(svc,cfg,scope,{fetch:fetchProvider})});
+    async function runScheduled(){await owner(); await db.exec('set role service_role;'); const res={setHeader(){},end(raw){this.body=JSON.parse(raw);}};await retryHandler({method:'POST',headers:{authorization:'Bearer fixture-retry-secret-with-at-least-32-characters'},body:{bookingId:scheduled.id,event:'booking_confirmed'}},res);return res;}
+    const scheduledState=JSON.stringify(await state(scheduled.id));
+    check((await runScheduled()).body.sent===2,'Authenticated scheduler transitions retryable failed rows to sent');
+    const deliveredCount=requests.length;
+    check((await runScheduled()).body.sent===0 && requests.length===deliveredCount,'Scheduler repetition skips already sent rows without provider requests');
+    check((await logs(scheduled.id)).every(row=>row.status==='sent' && row.attempts===2),'Initial failure plus one successful retry recorded exactly');
+    check(JSON.stringify(await state(scheduled.id))===scheduledState,'Scheduled delivery never changes booking/ticket/refund/reward state');
+
+    // SQL total-attempt cap must hold even if the next retry is already due.
+    const exhausted = await booking(); await confirm(exhausted); await owner();
+    await db.query("update booking_notification_log set status='failed',attempts=10,next_attempt_at=now(),first_attempt_at=now() where booking_id=$1",[exhausted.id]);
+    const beforeExhausted=requests.length; await deliver(exhausted);
+    check((await logs(exhausted.id)).every(row=>row.status==='needs_review' && row.attempts===10),'Ten total attempts enter review without an eleventh attempt');
+    check(requests.length===beforeExhausted,'Attempt cap prevents any provider call');
 
     // Server-only worker route can drain due jobs without an end-user session.
     await owner();

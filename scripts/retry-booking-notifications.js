@@ -1,16 +1,16 @@
 'use strict';
 
-// Run from a trusted server/scheduler with the EXISTING service role environment.
+// Run from a trusted server/scheduler with the dedicated booking notification retry secret.
 // Never put this credential in frontend code. Do not run as an external mail test.
 async function retry() {
-  const key = String(process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
-  if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY is required in the trusted runner');
+  const key = String(process.env.BOOKING_NOTIFICATION_RETRY_SECRET || '').trim();
+  if (!key) throw new Error('BOOKING_NOTIFICATION_RETRY_SECRET is required in the trusted runner');
   const totals = { sent: 0, failed: 0, review: 0 };
   for (let batch = 0; batch < 10; batch += 1) {
-    const response = await fetch('https://www.dayotalk.com/api/booking-notifications', {
+    const response = await fetch('https://www.dayotalk.com/api/booking-notifications-retry', {
       method: 'POST', redirect: 'error',
       headers: { Authorization: 'Bearer ' + key, 'Content-Type': 'application/json' },
-      body: '{}', signal: AbortSignal.timeout(15000)
+      body: '{}', signal: AbortSignal.timeout(65000)
     });
     if (!response.ok) throw new Error('Notification worker request failed: HTTP ' + response.status);
     const counts = await response.json();
@@ -23,7 +23,7 @@ async function retry() {
 if (require.main === module) retry().catch(error => {
   // Fixed error messages only; credentials and provider responses are never printed.
   console.error('Booking notification retry failed:', error && error.name === 'TimeoutError' ? 'request timed out' :
-    /^Notification worker request failed: HTTP \d+$|^SUPABASE_SERVICE_ROLE_KEY is required/.test(String(error.message)) ? error.message : 'request unavailable');
+    /^Notification worker request failed: HTTP \d+$|^BOOKING_NOTIFICATION_RETRY_SECRET is required/.test(String(error.message)) ? error.message : 'request unavailable');
   process.exitCode = 1;
 });
 
