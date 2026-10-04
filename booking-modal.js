@@ -11,7 +11,13 @@
   var ACTIVE_LANG_IDS = ['en', 'es', 'fr', 'ko'];
   var PURPOSE_IDS = ['travel', 'opic', 'abroad', 'casual'];
   var INTEREST_IDS = ['drama', 'movies', 'youtube', 'music', 'travel', 'food_cafe', 'exercise', 'games', 'fashion_beauty', 'pets', 'books_webtoon', 'work_school'];
-  var STYLE_IDS = ['slow', 'fast', 'correct', 'korean'];
+  var STYLE_IDS = ['slow', 'fast', 'correct', 'encourage'];
+  // Keep semantic section IDs: timing/slot code continues to use its original IDs.
+  var STEP_ORDER = [0, 3, 1, 2, 4];
+
+  function ux(ko, en) {
+    return !window.DayOI18n || window.DayOI18n.getLang() === 'KO' ? ko : en;
+  }
 
   function isActiveBookingLang(id) {
     return ACTIVE_LANG_IDS.indexOf(String(id || '').toLowerCase()) !== -1;
@@ -22,22 +28,26 @@
       return {
         id: id,
         label: t('book.lang.' + id),
-        flag: window.DayOI18n ? window.DayOI18n.langFlag(id) : '',
+        code: id.toUpperCase(),
         disabled: !isActiveBookingLang(id)
       };
     });
   }
 
   function PURPOSES() {
-    return PURPOSE_IDS.map(function (id) { return { id: id, label: t('book.purpose.' + id) }; });
+    var labels = [ux('여행 · 일상', 'Travel & everyday life'), ux('요즘 나의 일상', 'My everyday life'), ux('워홀 · 유학 준비', 'Working holiday & study abroad'), ux('자유 수다', 'Casual conversation')];
+    return PURPOSE_IDS.map(function (id, i) { return { id: id, label: labels[i] }; });
   }
 
   function INTERESTS() {
-    return INTEREST_IDS.map(function (id) { return { id: id, label: t('book.interest.' + id) }; });
+    var labels = [ux('드라마','TV series'),ux('영화','Movies'),ux('유튜브 · 쇼츠','YouTube / shorts'),ux('음악','Music'),ux('여행','Travel'),ux('맛집 · 카페','Food / cafés'),ux('운동','Exercise'),ux('게임','Games'),ux('패션 · 뷰티','Fashion / beauty'),ux('반려동물','Pets'),ux('책 · 웹툰','Books / webtoons'),ux('일 · 학교','Work / school')];
+    return INTEREST_IDS.map(function (id, i) { return { id: id, label: labels[i] }; });
   }
 
   function STYLES() {
-    return STYLE_IDS.map(function (id) { return { id: id, label: t('book.style.' + id) }; });
+    return STYLE_IDS.map(function (id) {
+      return { id: id, label: id === 'encourage' ? ux('칭찬 · 응원', 'Praise & encouragement') : t('book.style.' + id) };
+    });
   }
 
   var TEST_PARTNER_ID = '00000000-0000-0000-0000-000000000001';
@@ -64,30 +74,33 @@
     return window.DayOI18n ? window.DayOI18n.weekdayNames() : ['일', '월', '화', '수', '목', '금', '토'];
   }
   function stepLabel(step) {
-    return t('book.step' + step);
+    return step === 3 ? ux('대화 설정', 'Conversation settings') : t('book.step' + step);
   }
 
   var CSS = [
+    '.bk-overlay{--bk-surface:var(--cafe-ivory,#FFFBF4);--bk-secondary:var(--cafe-beige,#F8F0E3);',
+    '--bk-primary:var(--cafe-sage,#5F7D63);--bk-primary-hover:var(--cafe-sage-hover,#506B55);',
+    '--bk-selected:var(--cafe-sage-soft,#DDE8D9);--bk-border:#E7DDD0;}',
     '.bk-overlay{position:fixed;inset:0;z-index:900;display:flex;align-items:center;justify-content:center;',
     'padding:1.25rem;background:rgba(92,74,66,.28);backdrop-filter:blur(10px);',
     'width:100%;max-width:100%;overflow-x:hidden;box-sizing:border-box;',
     'opacity:0;visibility:hidden;pointer-events:none;transition:opacity .3s ease,visibility .3s ease;}',
     '.bk-overlay.is-open{opacity:1;visibility:visible;pointer-events:auto;}',
     '.bk-modal{position:relative;display:flex;flex-direction:column;width:100%;max-width:520px;',
-    'max-height:min(88vh,88dvh);background:var(--bg-card,#FFFCFA);border:1px solid var(--coral-pale,#FFE8E3);',
-    'border-radius:var(--radius-lg,24px);box-shadow:0 24px 64px rgba(255,107,87,.18);overflow:hidden;',
+    'max-height:min(88vh,88dvh);background:var(--bk-surface);border:1px solid var(--bk-border);',
+    'border-radius:var(--radius-lg,24px);box-shadow:0 24px 64px rgba(64,54,47,.16);overflow:hidden;',
     'transform:translateY(18px) scale(.96);transition:transform .38s cubic-bezier(.34,1.4,.64,1);',
     'font-family:inherit;color:var(--text,#5C4A42);text-align:left;}',
     '.bk-overlay.is-open .bk-modal{transform:translateY(0) scale(1);}',
-    '.bk-head{padding:1.35rem 1.5rem 1rem;background:linear-gradient(135deg,var(--pink,#FFD1DC),var(--peach,#FFE5B4));}',
-    '.bk-eyebrow{font-size:.74rem;font-weight:700;letter-spacing:.04em;color:var(--coral,#FF6B57);}',
+    '.bk-head{padding:1.35rem 1.5rem 1rem;background:var(--bk-secondary);}',
+    '.bk-eyebrow{font-size:.74rem;font-weight:700;letter-spacing:.04em;color:var(--bk-primary);}',
     '.bk-title{margin-top:.3rem;font-family:Quicksand,sans-serif;font-size:1.18rem;font-weight:700;line-height:1.45;}',
-    '.bk-progress{margin-top:.9rem;height:7px;border-radius:999px;background:rgba(255,255,255,.65);overflow:hidden;}',
-    '.bk-progress-bar{height:100%;width:20%;border-radius:999px;background:var(--coral,#FF6B57);transition:width .4s ease;}',
+    '.bk-progress{margin-top:.9rem;height:7px;border-radius:999px;background:var(--bk-border);overflow:hidden;}',
+    '.bk-progress-bar{height:100%;width:20%;border-radius:999px;background:var(--bk-primary);transition:width .4s ease;}',
     '.bk-progress-label{margin-top:.35rem;font-size:.72rem;font-weight:700;color:var(--text-muted,#9A8580);text-align:right;}',
     '.bk-close{position:absolute;top:.9rem;right:.9rem;width:34px;height:34px;border:none;border-radius:50%;',
-    'background:rgba(255,255,255,.75);color:var(--coral,#FF6B57);font-size:.95rem;cursor:pointer;line-height:1;}',
-    '.bk-close:hover{background:var(--coral,#FF6B57);color:#fff;}',
+    'background:var(--bk-surface);color:var(--bk-primary);font-size:.95rem;cursor:pointer;line-height:1;}',
+    '.bk-close:hover{background:var(--bk-primary);color:#fff;}',
     '.bk-body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1.25rem 1.5rem;}',
     '.bk-step{display:none;}',
     '.bk-step.is-active{display:block;animation:bkFade .32s ease;}',
@@ -99,11 +112,11 @@
     '.bk-group:last-child{margin-bottom:0;}',
     '.bk-chips{display:flex;flex-wrap:wrap;gap:.5rem;}',
     '.bk-chips--stack{flex-direction:column;flex-wrap:nowrap;}',
-    '.bk-chip{padding:.6rem .95rem;border:1px solid var(--coral-pale,#FFE8E3);border-radius:999px;',
-    'background:var(--cream,#FFF8F5);font-family:inherit;font-size:.85rem;color:inherit;cursor:pointer;',
+    '.bk-chip{padding:.6rem .95rem;border:1px solid var(--bk-border);border-radius:999px;',
+    'background:var(--bk-secondary);font-family:inherit;font-size:.85rem;color:inherit;cursor:pointer;',
     'text-align:left;transition:background .2s,border-color .2s,transform .2s;}',
-    '.bk-chip:hover{border-color:var(--coral,#FF6B57);transform:translateY(-1px);}',
-    '.bk-chip.is-on{background:var(--coral,#FF6B57);border-color:var(--coral,#FF6B57);color:#fff;font-weight:700;}',
+    '.bk-chip:hover{border-color:var(--bk-primary);transform:translateY(-1px);}',
+    '.bk-chip.is-on{background:var(--bk-selected);border-color:var(--bk-primary);color:var(--bk-primary-hover);font-weight:700;}',
     '.bk-chip.is-disabled,.bk-chip:disabled{background:#F5F5F4 !important;color:#A8A29E !important;',
     'border:1px solid #E7E5E4 !important;opacity:0.55;cursor:not-allowed !important;pointer-events:none;',
     'transform:none !important;box-shadow:none !important;}',
@@ -111,60 +124,63 @@
     '.bk-chip__soon{display:inline-block;margin-left:.35rem;padding:.08rem .35rem;border-radius:999px;',
     'background:#E7E5E4;color:#78716C;font-size:.62rem;font-weight:800;letter-spacing:-.01em;vertical-align:middle;}',
     '.bk-chips--stack .bk-chip{border-radius:var(--radius,18px);line-height:1.5;}',
-    '.bk-first-tip{margin:0 0 1rem;padding:.75rem .9rem;border-radius:16px;border:1px solid rgba(255,209,220,.75);',
-    'background:linear-gradient(135deg,rgba(255,246,242,.95),rgba(255,241,216,.9));font-size:.8rem;font-weight:700;line-height:1.55;color:var(--text,#5C4A42);}',
+    '.bk-first-tip{margin:0 0 1rem;padding:.75rem .9rem;border-radius:16px;border:1px solid var(--bk-border);',
+    'background:var(--bk-secondary);font-size:.8rem;font-weight:700;line-height:1.55;color:var(--text,#5C4A42);}',
     '.bk-first-tip[hidden]{display:none;}',
-    '.bk-comfort{margin-bottom:1.35rem;padding:1rem;border-radius:18px;border:1px dashed rgba(255,209,220,.85);background:rgba(255,252,250,.8);}',
+    '.bk-comfort{margin-bottom:1.35rem;padding:1rem;border-radius:18px;border:1px dashed var(--bk-border);background:var(--bk-surface);}',
     '.bk-comfort .bk-group{margin-bottom:1rem;}',
     '.bk-comfort .bk-group:last-child{margin-bottom:0;}',
     '.bk-cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;}',
     '.bk-cal-title{font-family:Quicksand,sans-serif;font-size:.95rem;font-weight:700;}',
-    '.bk-cal-nav{width:32px;height:32px;border:1px solid var(--coral-pale,#FFE8E3);border-radius:50%;',
-    'background:var(--cream,#FFF8F5);color:var(--coral,#FF6B57);cursor:pointer;font-size:.85rem;line-height:1;}',
+    '.bk-cal-nav{width:32px;height:32px;border:1px solid var(--bk-border);border-radius:50%;',
+    'background:var(--bk-secondary);color:var(--bk-primary);cursor:pointer;font-size:.85rem;line-height:1;}',
     '.bk-cal-nav:disabled{opacity:.35;cursor:not-allowed;}',
     '.bk-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem;}',
     '.bk-cal-dow{padding:.3rem 0;font-size:.7rem;font-weight:700;color:var(--text-muted,#9A8580);text-align:center;}',
     '.bk-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border:1px solid transparent;',
-    'border-radius:50%;background:var(--cream,#FFF8F5);font-family:inherit;font-size:.82rem;color:inherit;cursor:pointer;}',
-    '.bk-day:hover:not(:disabled){border-color:var(--coral,#FF6B57);}',
+    'border-radius:50%;background:var(--bk-secondary);font-family:inherit;font-size:.82rem;color:inherit;cursor:pointer;}',
+    '.bk-day:hover:not(:disabled){border-color:var(--bk-primary);}',
     '.bk-day:disabled{background:transparent;color:#D9CFC9;cursor:not-allowed;}',
     '.bk-day.is-empty{background:transparent;cursor:default;pointer-events:none;}',
-    '.bk-day.is-on{background:var(--coral,#FF6B57);border-color:var(--coral,#FF6B57);color:#fff;font-weight:700;}',
+    '.bk-day.is-on{background:var(--bk-primary);border-color:var(--bk-primary);color:#fff;font-weight:700;}',
     '.bk-slots{margin-top:1.2rem;}',
     '.bk-slots[hidden]{display:none;}',
     '.bk-live-slots{display:flex;flex-wrap:wrap;gap:4px;margin-top:.45rem;min-height:2rem;}',
     '.bk-partners{display:flex;flex-direction:column;gap:.65rem;}',
-    '.bk-partner{width:100%;display:flex;align-items:center;gap:.85rem;padding:.8rem;border:1px solid var(--coral-pale,#FFE8E3);',
-    'border-radius:var(--radius,18px);background:var(--cream,#FFF8F5);font-family:inherit;color:inherit;text-align:left;cursor:pointer;',
+    '.bk-partner{width:100%;display:flex;align-items:center;gap:.85rem;padding:.8rem;border:1px solid var(--bk-border);',
+    'border-radius:var(--radius,18px);background:var(--bk-secondary);font-family:inherit;color:inherit;text-align:left;cursor:pointer;',
     'transition:transform .2s,border-color .2s,background .2s;}',
-    '.bk-partner:hover{transform:translateY(-1px);border-color:var(--coral,#FF6B57);}',
-    '.bk-partner.is-on{border-color:var(--coral,#FF6B57);background:var(--coral-pale,#FFE8E3);box-shadow:0 0 0 2px rgba(255,107,87,.1);}',
+    '.bk-partner:hover{transform:translateY(-1px);border-color:var(--bk-primary);}',
+    '.bk-partner.is-on{border-color:var(--bk-primary);background:var(--bk-selected);box-shadow:0 0 0 2px rgba(95,125,99,.12);}',
     '.bk-partner-avatar{flex:0 0 46px;height:46px;display:flex;align-items:center;justify-content:center;border-radius:50%;',
-    'background:linear-gradient(135deg,var(--pink,#FFD1DC),var(--peach,#FFE5B4));border:2px solid #fff;',
-    'font-family:Quicksand,sans-serif;font-size:1rem;font-weight:700;color:var(--coral,#FF6B57);box-shadow:0 4px 10px rgba(92,74,66,.08);}',
+    'background:var(--bk-selected);border:2px solid var(--bk-surface);',
+    'font-family:Quicksand,sans-serif;font-size:1rem;font-weight:700;color:var(--bk-primary);box-shadow:0 4px 10px rgba(92,74,66,.08);}',
     '.bk-partner-copy{min-width:0;flex:1;}.bk-partner-name{display:block;font-size:.88rem;font-weight:700;}',
     '.bk-partner-avatar img{width:100%;height:100%;object-fit:cover;border-radius:50%;}',
     '.bk-test-badge{display:inline-block;margin-left:.4rem;padding:.12rem .45rem;border-radius:999px;',
     'background:#EEF2FF;color:#4338CA;font-size:.64rem;font-weight:800;vertical-align:middle;letter-spacing:-.02em;}',
     '.bk-partner-meta{display:block;margin-top:.2rem;font-size:.72rem;color:var(--text-muted,#9A8580);line-height:1.45;}',
-    '.bk-partner-check{font-size:1rem;color:var(--coral,#FF6B57);opacity:0;}.bk-partner.is-on .bk-partner-check{opacity:1;}',
+    '.bk-partner-check{font-size:1rem;color:var(--bk-primary);opacity:0;}.bk-partner.is-on .bk-partner-check{opacity:1;}',
     '.bk-slot-empty{font-size:.78rem;color:var(--text-muted,#9A8580);padding:.35rem 0;}',
-    '.bk-inline-action{display:block;margin-top:.65rem;padding:.55rem .75rem;border:1px solid var(--coral-pale,#FFE8E3);',
-    'border-radius:999px;background:#fff;color:var(--coral,#FF6B57);font:inherit;font-weight:700;cursor:pointer;}',
+    '.bk-inline-action{display:block;margin-top:.65rem;padding:.55rem .75rem;border:1px solid var(--bk-border);',
+    'border-radius:999px;background:var(--bk-surface);color:var(--bk-primary);font:inherit;font-weight:700;cursor:pointer;}',
     '.bk-summary{padding:1.1rem 1.25rem;border-radius:var(--radius,18px);',
-    'background:linear-gradient(135deg,var(--pink,#FFD1DC),var(--peach,#FFE5B4));}',
+    'background:var(--bk-secondary);border:1px solid var(--bk-border);}',
     '.bk-row{display:flex;gap:.75rem;padding:.5rem 0;font-size:.86rem;line-height:1.5;}',
-    '.bk-row+.bk-row{border-top:1px dashed rgba(255,255,255,.7);}',
-    '.bk-row dt{flex:0 0 4.6rem;font-weight:700;color:var(--coral,#FF6B57);}',
+    '.bk-row+.bk-row{border-top:1px dashed var(--bk-border);}',
+    '.bk-row dt{flex:0 0 4.6rem;font-weight:700;color:var(--bk-primary);}',
     '.bk-row dd{flex:1;margin:0;}',
-    '.bk-foot{display:flex;gap:.6rem;padding:1rem 1.5rem 1.25rem;border-top:1px solid var(--coral-pale,#FFE8E3);',
-    'background:var(--bg-card,#FFFCFA);}',
+    '.bk-foot{display:flex;flex-shrink:0;gap:.6rem;padding:1rem 1.5rem 1.25rem;border-top:1px solid var(--bk-border);',
+    'background:var(--bk-surface);}',
     '.bk-btn{flex:1;padding:.9rem 1rem;border:none;border-radius:var(--radius,18px);font-family:inherit;',
     'font-size:.9rem;font-weight:700;cursor:pointer;transition:transform .15s,opacity .2s;}',
     '.bk-btn:active{transform:translateY(1px);}',
-    '.bk-btn--ghost{flex:0 0 auto;padding:.9rem 1.15rem;background:var(--cream,#FFF8F5);',
-    'border:1px solid var(--coral-pale,#FFE8E3);color:var(--text-muted,#9A8580);}',
-    '.bk-btn--primary{background:var(--coral,#FF6B57);color:#fff;box-shadow:0 4px 0 var(--coral-dark,#E55A45);}',
+    '.bk-btn--ghost{flex:0 0 auto;padding:.9rem 1.15rem;background:var(--bk-secondary);',
+    'border:1px solid var(--bk-border);color:var(--text,#5C4A42);}',
+    '.bk-btn--primary{background:var(--bk-primary);color:#fff;box-shadow:0 4px 0 var(--bk-primary-hover);}',
+    '.bk-btn--primary:hover:not(:disabled){background:var(--bk-primary-hover);}',
+    '.bk-btn--ghost:hover:not(:disabled){border-color:var(--bk-primary);color:var(--bk-primary-hover);}',
+    '.bk-modal button:focus-visible,.bk-modal summary:focus-visible{outline:2px solid var(--bk-primary);outline-offset:3px;}',
     '.bk-btn--primary:disabled{opacity:.45;cursor:not-allowed;box-shadow:none;}',
     '.bk-toast{position:fixed;left:50%;bottom:2rem;z-index:960;max-width:min(420px,calc(100% - 2rem));',
     'padding:.95rem 1.4rem;border:1px solid var(--coral-pale,#FFE8E3);border-radius:var(--radius,18px);',
@@ -177,7 +193,11 @@
     '.bk-modal{max-width:none;max-height:min(92vh,92dvh);border-radius:var(--radius-lg,24px) var(--radius-lg,24px) 0 0;}',
     '.bk-head{padding:1.15rem 1.15rem .9rem;}.bk-body{padding:1.1rem 1.15rem;}',
     '.bk-foot{padding:.85rem 1.15rem calc(.85rem + env(safe-area-inset-bottom));}',
-    '.bk-chip{font-size:.82rem;}}'
+    '.bk-chip{font-size:.82rem;}}',
+    '.bk-recent[hidden],.bk-group[hidden],.bk-step[hidden]{display:none!important;}',
+    '.bk-recent p{margin:0 0 .65rem;line-height:1.5;}.bk-recent .bk-summary{margin:0;}',
+    '.bk-optional{margin-bottom:1rem;}.bk-optional>summary{cursor:pointer;font-size:.8rem;font-weight:700;padding:.6rem 0;}',
+    '.bk-optional .bk-comfort{margin-bottom:0;}.bk-row dd{min-width:0;overflow-wrap:anywhere;}'
   ].join('');
 
   var state = {
@@ -203,10 +223,142 @@
   var lastFocused = null;
   var toastTimer = null;
   var DRAFT_KEY = 'dayo.bookingDraft';
+  var RECENT_KEY = 'dayo.confirmedPreferences.v1:';
+  var recentSummary = false;
+  var recentLoading = false;
+  var recentSeq = 0;
+  var bookingOwner = null;
   var PENDING_OPEN_KEY = 'dayo.pendingBookingOpen';
   var RESUME_KEY = 'dayo.bookingResumeAfterTopup';
   var ZERO_TICKET_MSG = '보유 이용권이 없습니다. 이용권을 충전해 주세요.';
   var BOOKING_TRIGGER = '[data-booking-open], a[href="#booking"], a[href*="#booking"], a[href*="booking=open"]';
+
+  function uniqueKeys(value, allowed, max) {
+    return Array.isArray(value) ? value.filter(function (id, i, all) {
+      return allowed.indexOf(id) >= 0 && all.indexOf(id) === i;
+    }).slice(0, max) : [];
+  }
+
+  function canonicalStyle(brief) {
+    if (brief.schema_version === 1 && STYLE_IDS.indexOf(brief.conversation_style) >= 0) return brief.conversation_style;
+    if (['slow', 'fast', 'correct'].indexOf(brief.partner_preference) >= 0) return brief.partner_preference;
+    // Legacy 'korean' denotes capability, not a conversation style. Never alias it.
+    if (!brief.partner_preference && brief.chat_request === 'praise') return 'encourage';
+    return null;
+  }
+
+  function preferencesFromBooking(booking, supplement) {
+    var brief = booking.conversation_brief || {};
+    var help = brief.schema_version === 1 ? brief.korean_support_preference : null;
+    // A session-only supplement is valid solely for this exact confirmed booking.
+    if (!help && supplement && supplement.bookingId === booking.id) help = supplement.koreanSupport;
+    return {
+      language: isActiveBookingLang(booking.language) ? booking.language : null,
+      koreanHelp: booking.language === 'ko' ? null : help === 'required' ? 'needed' : help === 'any' ? 'any' : null,
+      purposes: uniqueKeys(brief.purposes, PURPOSE_IDS, 4),
+      interests: uniqueKeys(brief.interests, INTEREST_IDS, 4),
+      style: canonicalStyle(brief),
+      chatStyle: ['casual', 'correct', 'interview'].indexOf(brief.chat_style) >= 0 ? brief.chat_style : null,
+      chatRequest: ['praise', 'gentle', 'encourage'].indexOf(brief.chat_request) >= 0 ? brief.chat_request : null
+    };
+  }
+
+  function currentUserId() {
+    return window._dayoAuthUser && window._dayoAuthUser.id || null;
+  }
+
+  async function readRecentBooking(client, userId) {
+    // completed is a successfully confirmed booking; pending/cancelled never supply defaults.
+    var result = await client.from('bookings').select('id,language,conversation_brief,created_at')
+      .eq('learner_id', userId).in('status', ['confirmed', 'completed'])
+      .order('created_at', { ascending: false }).order('id', { ascending: false }).limit(1);
+    if (result.error) throw result.error;
+    return result.data && result.data[0] || null;
+  }
+
+  function koreanHelpLabel() {
+    return state.koreanHelp === 'needed' ? t('book.koreanHelpNeeded') : state.koreanHelp === 'any'
+      ? t('book.koreanHelpAny') : ux('미확인 — 선택해 주세요', 'Unknown — please choose');
+  }
+
+  function updateKoreanVisibility() {
+    var question = el.overlay && el.overlay.querySelector('#bkKoreanQuestion');
+    if (question) question.parentElement.hidden = state.language === 'ko';
+  }
+
+  function renderProgress() {
+    var position = STEP_ORDER.indexOf(state.step) + 1;
+    el.progressBar.style.width = (position / STEP_ORDER.length * 100) + '%';
+    el.progressLabel.textContent = recentSummary ? ux('지난 설정', 'Last settings')
+      : position + '/' + STEP_ORDER.length + ' · ' + stepLabel(state.step);
+  }
+
+  function renderRecentSummary() {
+    el.recent.hidden = !recentSummary;
+    Array.prototype.forEach.call(el.steps, function (section) { section.hidden = recentSummary; });
+    if (!recentSummary) return;
+    if (recentLoading) { el.recent.textContent = ux('지난 예약 설정을 확인하고 있어요…', 'Loading your last booking settings…'); return; }
+    var interestLabels = state.interests.slice(0, 3).map(function (id) { return labelOf(INTERESTS, id); });
+    var overflow = state.interests.length > 3 ? ' +' + (state.interests.length - 3) : '';
+    var languageText = state.language ? state.language.toUpperCase() + ' ' + t('book.lang.' + state.language) : ux('미확인', 'Unknown');
+    var rows = row(t('book.summaryLanguage'), languageText) +
+      (state.language === 'ko' ? '' : row(t('book.summaryKoreanHelp'), koreanHelpLabel())) +
+      row(t('book.summaryPurpose'), state.purposes.map(function (id) { return labelOf(PURPOSES, id); }).join(' · ') || ux('미선택', 'Not selected')) +
+      row(ux('관심사', 'Interests'), interestLabels.join(' · ') + overflow || ux('미선택', 'Not selected')) +
+      row(t('book.summaryStyle'), labelOf(STYLES, state.style) || ux('미확인', 'Unknown'));
+    el.recent.innerHTML = '<p class="bk-label">' + ux('지난 설정', 'Last settings') + '</p><dl class="bk-summary">' + rows + '</dl>' +
+      '<p class="bk-hint">' + ux('목적은 이번 대화에 맞게 수정할 수 있어요.', 'You can change the purpose for this conversation.') + '</p>' +
+      (!isStepReady(0) || !isStepReady(3) ? '<p class="bk-hint">' + ux('미확인 항목은 수정하기에서 선택해 주세요.', 'Choose missing settings in Edit before continuing.') + '</p>' : '');
+  }
+
+  async function loadRecentPreferences() {
+    var seq = ++recentSeq;
+    recentSummary = true;
+    recentLoading = true;
+    renderRecentSummary(); renderProgress(); updateFooter();
+    try {
+      var client = window.supabaseClient;
+      if (!client || !client.auth || !client.auth.getSession) return;
+      var auth = await client.auth.getSession();
+      var user = auth.data && auth.data.session && auth.data.session.user;
+      if (!user || auth.error || (currentUserId() && currentUserId() !== user.id)) return;
+      bookingOwner = user.id;
+      var booking = await readRecentBooking(client, user.id);
+      if (seq !== recentSeq || currentUserId() && currentUserId() !== user.id || !booking) return;
+      var supplement;
+      try { supplement = JSON.parse(storageGet(RECENT_KEY + user.id) || 'null'); } catch (e) { /* no supplement */ }
+      var prefs = preferencesFromBooking(booking, supplement);
+      Object.keys(prefs).forEach(function (key) { state[key] = prefs[key]; });
+      recentSummary = true;
+      ['language', 'koreanHelp', 'purpose', 'interest', 'style', 'chatStyle', 'chatRequest'].forEach(syncChips);
+      updateKoreanVisibility();
+      return;
+    } catch (e) {
+      // RLS/network failures must leave the ordinary booking flow available.
+    } finally {
+      if (seq === recentSeq) {
+        recentLoading = false;
+        // Only an actual recent language/preferences record produces the shortcut screen.
+        recentSummary = !!state.language;
+        renderRecentSummary(); renderProgress(); updateFooter();
+      }
+    }
+  }
+
+  function preferenceSnapshot() {
+    return {
+      language: state.language,
+      koreanSupport: state.language === 'ko' ? null : state.koreanHelp === 'needed' ? 'required' : state.koreanHelp === 'any' ? 'any' : null,
+      conversationStyle: state.style,
+      brief: {
+        purposes: state.purposes.slice(), interests: state.interests.slice(),
+        chat_style: state.chatStyle,
+        chat_request: state.style === 'encourage' ? 'praise' : state.chatRequest,
+        // 062 still rejects canonical v1 keys/encourage here. Keep its accepted legacy contract.
+        partner_preference: state.style === 'encourage' ? null : state.style
+      }
+    };
+  }
 
   function isInternalBookingTest() {
     return !!(window.DayOPreopenBooking &&
@@ -240,7 +392,7 @@
 
   function chipsMarkup(items, group) {
     return items.map(function (item) {
-      var label = item.flag ? item.flag + ' ' + item.label : item.label;
+      var label = item.code ? item.code + ' ' + item.label : item.label;
       var disabled = group === 'language' && (item.disabled || !isActiveBookingLang(item.id));
       if (disabled) {
         return '<button type="button" class="bk-chip is-disabled" data-group="' + group + '" data-id="' + item.id +
@@ -263,13 +415,14 @@
           '<p class="bk-progress-label" id="bkProgressLabel"></p>' +
         '</div>' +
         '<div class="bk-body">' +
+          '<section class="bk-recent" id="bkRecent" hidden aria-live="polite"></section>' +
           '<section class="bk-step" data-step="0">' +
             '<div class="bk-group">' +
               '<p class="bk-label">' + t('book.languageQuestion') + '</p>' +
               '<div class="bk-chips" id="bkLanguages">' + chipsMarkup(LANGUAGES(), 'language') + '</div>' +
             '</div>' +
             '<div class="bk-group">' +
-              '<p class="bk-label">' + t('book.koreanHelpQuestion') + '</p>' +
+              '<p class="bk-label" id="bkKoreanQuestion">' + t('book.koreanHelpQuestion') + '</p>' +
               '<div class="bk-chips bk-chips--stack" id="bkKoreanHelp">' +
                 '<button type="button" class="bk-chip" data-group="koreanHelp" data-id="needed" aria-pressed="false">' + t('book.koreanHelpNeeded') + '</button>' +
                 '<button type="button" class="bk-chip" data-group="koreanHelp" data-id="any" aria-pressed="true">' + t('book.koreanHelpAny') + '</button>' +
@@ -300,31 +453,19 @@
             '</div>' +
           '</section>' +
           '<section class="bk-step" data-step="3">' +
-            '<div class="bk-first-tip" id="bkFirstTip" hidden></div>' +
             '<div class="bk-group">' +
               '<p class="bk-label">' + t('book.purposeQuestion') + '</p>' +
               '<p class="bk-hint">' + t('book.purposeHint') + '</p>' +
               '<div class="bk-chips" id="bkPurposes">' + chipsMarkup(PURPOSES(), 'purpose') + '</div>' +
             '</div>' +
-            '<div class="bk-comfort" id="bkComfort">' +
-              '<p class="bk-label">' + t('book.comfortTitle') + '</p>' +
-              '<div class="bk-group">' +
-                '<p class="bk-hint">' + t('chatPrefs.styleLabel') + '</p>' +
-                '<div class="bk-chips" id="bkChatStyles"></div>' +
-              '</div>' +
-              '<div class="bk-group">' +
-                '<p class="bk-hint">' + t('chatPrefs.requestLabel') + '</p>' +
-                '<div class="bk-chips bk-chips--stack" id="bkChatRequests"></div>' +
-              '</div>' +
-            '</div>' +
             '<div class="bk-group">' +
-              '<p class="bk-label">' + t('book.interestsQuestion') + '</p>' +
+              '<p class="bk-label">' + ux('관심사', 'Interests') + '</p>' +
               '<p class="bk-hint">' + t('book.interestsHint') + '</p>' +
               '<div class="bk-chips" id="bkInterests">' + chipsMarkup(INTERESTS(), 'interest') + '</div>' +
             '</div>' +
             '<div class="bk-group">' +
               '<p class="bk-label">' + t('book.styleQuestion') + '</p>' +
-              '<p class="bk-hint">' + t('book.styleHint') + '</p>' +
+              '<p class="bk-hint">' + ux('원하는 대화 분위기를 골라주세요.', 'Choose the conversation style you prefer.') + '</p>' +
               '<div class="bk-chips bk-chips--stack" id="bkStyles">' + chipsMarkup(STYLES(), 'style') + '</div>' +
             '</div>' +
           '</section>' +
@@ -387,6 +528,8 @@
     el.firstTip = el.overlay.querySelector('#bkFirstTip');
     el.chatStyles = el.overlay.querySelector('#bkChatStyles');
     el.chatRequests = el.overlay.querySelector('#bkChatRequests');
+    el.recent = el.overlay.querySelector('#bkRecent');
+    updateKoreanVisibility();
 
     renderComfortChips();
     bindDynamicEvents();
@@ -496,8 +639,19 @@
       loadDateAvailability();
     });
 
-    el.prevBtn.addEventListener('click', function () { goTo(state.step - 1); });
+    el.prevBtn.addEventListener('click', function () {
+      if (recentSummary) { recentSummary = false; goTo(0); return; }
+      goTo(STEP_ORDER[STEP_ORDER.indexOf(state.step) - 1]);
+    });
     el.nextBtn.addEventListener('click', function () {
+      if (recentSummary) {
+        if (!isStepReady(0) || !isStepReady(3)) return;
+        persistLearningLanguage(state.language);
+        recentSummary = false;
+        state.step = 3;
+        goTo(1);
+        return;
+      }
       if (state.step === 4) { confirmBooking(); return; }
       if (state.step === 0 && isStepReady(0)) {
         persistLearningLanguage(state.language);
@@ -506,7 +660,7 @@
           return;
         }
       }
-      goTo(state.step + 1);
+      goTo(STEP_ORDER[STEP_ORDER.indexOf(state.step) + 1]);
     });
   }
 
@@ -522,8 +676,8 @@
     if (state.step === 1 && state.date) loadDateAvailability();
     if (state.step === 2) renderAvailablePartners();
     if (state.step === 4) renderSummary();
-    el.progressBar.style.width = ((state.step + 1) / 5 * 100) + '%';
-    el.progressLabel.textContent = t('book.progressFormat', { step: state.step + 1, label: stepLabel(state.step) });
+    renderRecentSummary();
+    renderProgress();
     updateFooter();
     if (wasOpen) el.overlay.classList.add('is-open');
   }
@@ -547,12 +701,14 @@
       if (!isActiveBookingLang(id)) return;
       if (state.language !== id) resetAfterCriteriaChange(false);
       state.language = id;
+      if (id === 'ko') { state.koreanHelp = null; syncChips('koreanHelp'); }
     } else if (group === 'koreanHelp') {
       if (id !== 'needed' && id !== 'any') return;
       if (state.koreanHelp !== id) resetAfterCriteriaChange(false);
       state.koreanHelp = id;
     } else if (group === 'style') {
       state.style = id;
+      if (id === 'encourage') { state.chatRequest = 'praise'; syncChips('chatRequest'); }
     } else if (group === 'time') {
       if (!ensureLoggedInForBooking()) return;
       var selectedTime = liveTimes.find(function (time) { return time.key === id; });
@@ -565,12 +721,14 @@
       derivePartnersForSelectedTime();
     } else if (group === 'chatStyle' || group === 'chatRequest') {
       state[group] = id;
+      if (group === 'chatRequest' && id !== 'praise' && state.style === 'encourage') { state.style = null; syncChips('style'); }
       persistComfortPrefs(true);
     } else {
       return;
     }
 
     syncChips(group);
+    updateKoreanVisibility();
     if (group === 'time') renderTimeChips();
     updateFooter();
   }
@@ -668,7 +826,7 @@
   function labelOf(getList, id) {
     var list = getList();
     for (var i = 0; i < list.length; i++) {
-      if (list[i].id === id) return list[i].flag ? list[i].flag + ' ' + list[i].label : list[i].label;
+      if (list[i].id === id) return list[i].code ? list[i].code + ' ' + list[i].label : list[i].label;
     }
     return '';
   }
@@ -1004,7 +1162,7 @@
   }
 
   function isStepReady(step) {
-    if (step === 0) return isActiveBookingLang(state.language) && (state.koreanHelp === 'any' || state.koreanHelp === 'needed');
+    if (step === 0) return isActiveBookingLang(state.language) && (state.language === 'ko' || state.koreanHelp === 'any' || state.koreanHelp === 'needed');
     if (step === 1) return !!(!partnersLoading && state.date && state.timeKey && liveTimes.some(function (time) { return time.key === state.timeKey; }));
     if (step === 2) return !!(
       !partnersLoading &&
@@ -1016,7 +1174,7 @@
       state.selectedSlot.date === state.date &&
       isBookableStart(bookingSlotStartMs(state.selectedSlot.slot_time))
     );
-    if (step === 3) return state.purposes.length > 0 && !!state.style;
+    if (step === 3) return state.purposes.length > 0 && STYLE_IDS.indexOf(state.style) >= 0;
     return true;
   }
 
@@ -1031,11 +1189,9 @@
 
     el.summary.innerHTML = '' +
       row(t('book.summaryLanguage'), labelOf(LANGUAGES, state.language)) +
-      row(t('book.summaryKoreanHelp'), state.koreanHelp === 'needed' ? t('book.koreanHelpNeeded') : t('book.koreanHelpAny')) +
+      (state.language === 'ko' ? '' : row(t('book.summaryKoreanHelp'), koreanHelpLabel())) +
       row(t('book.summaryPurpose'), purposeText) +
-      (interestText ? row(t('book.interestsQuestion'), interestText) : '') +
-      row(t('chatPrefs.styleLabel'), api ? api.styleLabel(state.chatStyle) : state.chatStyle) +
-      row(t('chatPrefs.requestLabel'), api ? api.requestLabel(state.chatRequest) : state.chatRequest) +
+      (interestText ? row(ux('관심사', 'Interests'), interestText) : '') +
       row(t('book.summaryStyle'), labelOf(STYLES, state.style)) +
       row(t('book.summaryDatetime'), formatDate(state.date) + ' · ' + (state.time || '')) +
       row(t('book.summaryPartner'), (getPartner(state.partner) || {}).name || '');
@@ -1046,8 +1202,8 @@
   }
 
   function goTo(step) {
-    if (step < 0 || step > 4) return;
-    if (step > state.step && !isStepReady(state.step)) return;
+    if (STEP_ORDER.indexOf(step) < 0) return;
+    if (STEP_ORDER.indexOf(step) > STEP_ORDER.indexOf(state.step) && !isStepReady(state.step)) return;
 
     state.step = step;
     Array.prototype.forEach.call(el.steps, function (section, i) {
@@ -1057,16 +1213,18 @@
     if (step === 2) renderAvailablePartners();
     if (step === 4) renderSummary();
 
-    el.progressBar.style.width = ((step + 1) / 5 * 100) + '%';
-    el.progressLabel.textContent = t('book.progressFormat', { step: step + 1, label: stepLabel(step) });
+    renderRecentSummary();
+    renderProgress();
     el.overlay.querySelector('.bk-body').scrollTop = 0;
     updateFooter();
   }
 
   function updateFooter() {
-    el.prevBtn.style.display = state.step === 0 ? 'none' : '';
-    el.nextBtn.textContent = state.step === 4 ? t('book.confirm') : t('book.next');
-    el.nextBtn.disabled = !isStepReady(state.step);
+    el.prevBtn.style.display = recentSummary || state.step !== 0 ? '' : 'none';
+    el.prevBtn.textContent = recentSummary ? ux('수정하기', 'Edit') : t('book.prev');
+    el.nextBtn.textContent = recentSummary ? ux('그대로 예약', 'Use these settings') : state.step === 4 ? t('book.confirm') : t('book.next');
+    el.nextBtn.disabled = recentLoading || bookingSubmitting || (recentSummary ? !isStepReady(0) || !isStepReady(3) : !isStepReady(state.step));
+    el.prevBtn.disabled = recentLoading || bookingSubmitting;
   }
 
   function showToast(message) {
@@ -1088,12 +1246,14 @@
     persistComfortPrefs(true);
     settleConfirmedBooking().finally(function () {
       bookingSubmitting = false;
-      if (el.nextBtn) el.nextBtn.disabled = !isStepReady(state.step);
+      updateFooter();
     });
   }
 
   async function settleConfirmedBooking() {
     if (el.nextBtn) el.nextBtn.disabled = true;
+    // Copy preferences before any async confirmation work; previous booking snapshots stay immutable.
+    var chosenPreferences = preferenceSnapshot();
     var learnerId = (window._dayoAuthUser && window._dayoAuthUser.id) || '';
     if (!learnerId && window.supabaseClient) {
       try {
@@ -1140,14 +1300,8 @@
         partner_id: partnerId,
         partner_user_id: partnerId,
         partner_name: partner.name || '',
-        language: state.language || '',
-        conversation_brief: {
-          purposes: state.purposes.slice(),
-          interests: state.interests.slice(),
-          chat_style: state.chatStyle,
-          chat_request: state.chatRequest,
-          partner_preference: state.style
-        },
+        language: chosenPreferences.language || '',
+        conversation_brief: chosenPreferences.brief,
         scheduled_at: scheduledAt,
         slot_id: selectedSlot.id
       });
@@ -1165,6 +1319,12 @@
 
     if (el.nextBtn) el.nextBtn.disabled = !isStepReady(state.step);
     if (!deducted) return;
+
+    // No profile preference writes. This supplement expires with the browser session
+    // and is reused only after the server confirms the same booking is still the latest.
+    if (learnerId && bookingId) storageSet(RECENT_KEY + learnerId, JSON.stringify({
+      bookingId: bookingId, koreanSupport: chosenPreferences.koreanSupport
+    }));
 
     try {
       if (bookingId) localStorage.setItem('dayo_active_booking_id', bookingId);
@@ -1209,6 +1369,7 @@
 
   function saveDraft() {
     storageSet(DRAFT_KEY, JSON.stringify({
+      ownerId: currentUserId(),
       language: state.language,
       koreanHelp: state.koreanHelp,
       purposes: state.purposes.slice(),
@@ -1229,7 +1390,8 @@
   function loadDraft() {
     try {
       var raw = storageGet(DRAFT_KEY);
-      return raw ? JSON.parse(raw) : null;
+      var draft = raw ? JSON.parse(raw) : null;
+      return draft && draft.ownerId && draft.ownerId === currentUserId() ? draft : null;
     } catch (e) {
       return null;
     }
@@ -1242,7 +1404,7 @@
   function applyDraft(draft) {
     if (!draft) return;
     state.language = isActiveBookingLang(draft.language) ? draft.language : null;
-    state.koreanHelp = draft.koreanHelp === 'needed' ? 'needed' : 'any';
+    state.koreanHelp = state.language === 'ko' ? null : draft.koreanHelp === 'needed' ? 'needed' : draft.koreanHelp === 'any' ? 'any' : null;
     state.purposes = Array.isArray(draft.purposes) ? draft.purposes.slice() : [];
     state.interests = Array.isArray(draft.interests) ? draft.interests.filter(function (id, index, all) {
       return INTEREST_IDS.indexOf(id) > -1 && all.indexOf(id) === index;
@@ -1278,6 +1440,7 @@
     updateFirstTip();
     el.slots.hidden = !state.date;
     renderCalendar();
+    updateKoreanVisibility();
     goTo(typeof draft.step === 'number' ? draft.step : 0);
   }
 
@@ -1431,22 +1594,28 @@
     updateFirstTip();
     el.slots.hidden = true;
     renderCalendar();
+    updateKoreanVisibility();
+    recentSummary = false;
+    recentLoading = false;
     goTo(0);
   }
 
   function open(opts) {
     opts = opts || {};
     lastFocused = document.activeElement;
+    ++recentSeq;
+    bookingOwner = currentUserId();
     reset();
     var draft = loadDraft();
     if (draft) applyDraft(draft);
     if (opts.resume && getTicketCount() > 0 && state.step === 0 && isStepReady(0)) {
-      goTo(1);
+      goTo(3);
     }
     el.overlay.classList.add('is-open');
     if (window.DayOScrollLock) window.DayOScrollLock.lock();
     else document.body.style.overflow = 'hidden';
     el.modal.querySelector('.bk-close').focus();
+    if (!draft) loadRecentPreferences();
   }
 
   function requestOpen() {
@@ -1463,6 +1632,8 @@
 
   function close() {
     if (!el.overlay.classList.contains('is-open')) return;
+    ++recentSeq;
+    recentLoading = false;
     el.overlay.classList.remove('is-open');
     if (window.DayOScrollLock) window.DayOScrollLock.unlock();
     else {
@@ -1501,6 +1672,7 @@
     });
     document.addEventListener('dayo:langchange', refreshOnLangChange);
     document.addEventListener('dayo:authchange', function (e) {
+      if (el.overlay.classList.contains('is-open') && (!e.detail || !e.detail.loggedIn || bookingOwner !== currentUserId())) close();
       if (!e.detail || !e.detail.loggedIn) return;
       setTimeout(tryOpenPendingBooking, 350);
     });
@@ -1533,7 +1705,14 @@
       isFutureThirtyMinuteConcreteSlot: isFutureThirtyMinuteConcreteSlot,
       isBookableStart: isBookableStart,
       requiresNoRefundWarning: requiresNoRefundWarning,
-      slotStartKey: slotStartKey
+      slotStartKey: slotStartKey,
+      preferencesFromBooking: preferencesFromBooking,
+      canonicalStyle: canonicalStyle,
+      preferenceSnapshot: preferenceSnapshot,
+      readRecentBooking: readRecentBooking,
+      stepOrder: STEP_ORDER.slice(),
+      state: state,
+      isStepReady: isStepReady
     };
   }
 

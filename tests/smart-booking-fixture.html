@@ -11,6 +11,11 @@
 </head>
 <body>
   <button type="button" data-booking-open>Smart Booking 열기</button>
+  <nav aria-label="Fixture scenarios">
+    <a href="?scenario=recent">Recent v1</a> · <a href="?scenario=legacy">Legacy / missing help</a> ·
+    <a href="?scenario=none">No recent</a> · <a href="?scenario=ko">KO</a> · <a href="?scenario=error">Read error</a>
+  </nav>
+  <pre id="fixtureResult" style="white-space:pre-wrap;overflow-wrap:anywhere" aria-label="Saved booking payload"></pre>
   <script>
     window._dayoAuthUser = { id: 'fixture-learner' };
     window.DayOPreopenBooking = {
@@ -18,6 +23,30 @@
       isInternalTest: function () { return false; }
     };
     localStorage.setItem('dayo_ticket_count', '1');
+    var scenario = new URLSearchParams(location.search).get('scenario') || 'recent';
+    var previousBooking = {
+      id: 'previous-' + scenario, learner_id: 'fixture-learner', status: 'confirmed',
+      language: scenario === 'ko' ? 'ko' : 'en', created_at: '2026-10-01T00:00:00Z',
+      conversation_brief: { purposes: ['travel'], interests: ['food_cafe', 'travel', 'music', 'movies'],
+        chat_style: 'casual', chat_request: 'praise', partner_preference: null }
+    };
+    if (scenario === 'recent') Object.assign(previousBooking.conversation_brief, {
+      schema_version: 1, korean_support_preference: 'any', conversation_style: 'encourage'
+    });
+    var fixtureBookings = scenario === 'none' ? [] : [previousBooking];
+    var originalPrevious = JSON.stringify(previousBooking);
+    function recentQuery() {
+      var filters = {}, statuses = [];
+      var query = {
+        select: function () { return this; }, eq: function (k, v) { filters[k] = v; return this; },
+        in: function (_, v) { statuses = v; return this; }, order: function () { return this; },
+        limit: function () { return Promise.resolve({
+          data: fixtureBookings.filter(function (b) { return b.learner_id === filters.learner_id && statuses.indexOf(b.status) >= 0; })
+            .sort(function (a,b) { return b.created_at.localeCompare(a.created_at); }).slice(0,1),
+          error: scenario === 'error' ? {message:'Fixture read failure'} : null
+        }); }
+      }; return query;
+    }
 
     var fixturePartners = [
       { id: 'jen', nickname: 'Jen', avatar_url: '', bio: 'Fluent Korean help', conversation_languages: ['en', 'es', 'fr', 'ko'], korean_support_level: 'fluent' },
@@ -50,6 +79,7 @@
           : { data: null, error: null });
       },
       from: function (table) {
+        if (table === 'bookings') return recentQuery();
         if (table === 'availability_slots') return availabilityQuery();
         return { update: function () { return { eq: function () { return { select: function () { return Promise.resolve({ data: [], error: null }); } }; } }; } };
       },
@@ -64,10 +94,15 @@
     };
     window.handleConfirmBooking = function (learnerId, bookingId, options) {
       window.__fixtureConfirmedBooking = { learnerId: learnerId, bookingId: bookingId, options: options };
+      fixtureBookings.push(Object.assign({}, window.__fixturePendingBooking, {id:bookingId, status:'confirmed',created_at:new Date().toISOString()}));
+      document.getElementById('fixtureResult').textContent = JSON.stringify({
+        saved: window.__fixturePendingBooking, previousUnchanged: JSON.stringify(previousBooking) === originalPrevious
+      }, null, 2);
       return Promise.resolve(true);
     };
   </script>
   <script src="../public/i18n.js"></script>
+  <script src="../public/chat-prefs.js"></script>
   <script src="../public/booking-modal.js"></script>
 </body>
 </html>
