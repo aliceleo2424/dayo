@@ -2173,7 +2173,7 @@
     },
 
     /* ===== Booking modal (booking-modal.js) ===== */
-    'book.title': { KO: '☕ 오늘의 대화, 예약해요', EN: "☕ Let's book today's chat", ZH: '☕ 预约今天的对话', JA: '☕ 今日の会話を予約しましょう', FR: "☕ Réservons votre conversation", ES: '☕ Reservemos tu charla' },
+    'book.title': { KO: '☕ 오늘의 대화, 예약해요', EN: "☕ Let's book your next chat", ZH: '☕ 预约今天的对话', JA: '☕ 今日の会話を予約しましょう', FR: "☕ Réservons votre conversation", ES: '☕ Reservemos tu charla' },
     'book.closeAria': { KO: '예약 닫기', EN: 'Close booking', ZH: '关闭预约', JA: '予約を閉じる', FR: 'Fermer la réservation', ES: 'Cerrar reserva' },
     'book.step0': { KO: '언어', EN: 'Language', ZH: '语言', JA: '言語', FR: 'Langue', ES: 'Idioma' },
     'book.step1': { KO: '시간', EN: 'Time', ZH: '时间', JA: '時間', FR: 'Horaire', ES: 'Horario' },
