@@ -296,17 +296,24 @@
     }
   }
 
+  var checkoutLoading = null;
+  function loadCheckout() {
+    if (window.DayOCheckout) return Promise.resolve(window.DayOCheckout);
+    if (!checkoutLoading) checkoutLoading = new Promise(function (resolve, reject) {
+      var script = document.createElement('script');
+      script.src = '/checkout-preparation.js?v=alpha-contact-1';
+      script.onload = function () {
+        if (window.DayOCheckout) resolve(window.DayOCheckout);
+        else { checkoutLoading = null; reject(new Error('checkout-unavailable')); }
+      };
+      script.onerror = function () { checkoutLoading = null; script.remove(); reject(new Error('checkout-unavailable')); };
+      document.head.appendChild(script);
+    });
+    return checkoutLoading;
+  }
+
   async function requestPay(planId) {
     if (paying) return;
-    if (window.DayOTickets && typeof window.DayOTickets.ensureRefundConsent === 'function') {
-      if (!window.DayOTickets.ensureRefundConsent()) return;
-    } else {
-      var agree = document.getElementById('tkRefundAgree');
-      if (agree && !agree.checked) {
-        alert('취소 및 환불 규정에 동의해 주세요.');
-        return;
-      }
-    }
     paying = true;
     try {
       var selectedProduct = resolveProduct(planId);
@@ -339,6 +346,16 @@
         }
       }
 
+      // Checkout persists private contact BEFORE order preparation or the PG dialog.
+      var contact = null;
+      if (selectedProduct.id !== 'admin_test_1000') {
+        var checkout = await loadCheckout();
+        contact = await checkout.open(session, selectedProduct);
+        if (!contact) { paying = false; return; }
+      } else if (window.DayOTickets && !window.DayOTickets.ensureRefundConsent()) {
+        paying = false; return;
+      }
+
       var IMP = ensureImp();
       if (!IMP) {
         paying = false;
@@ -361,7 +378,8 @@
         merchant_uid: prepared.merchant_uid,
         name: prepared.product.name,
         amount: prepared.product.amount,
-        buyer_email: session.user.email,
+        buyer_email: contact ? contact.contact_email : session.user.email,
+        buyer_tel: contact ? contact.mobile_phone : undefined,
         buyer_name: (session.user.user_metadata && (session.user.user_metadata.name || session.user.user_metadata.full_name)) || 'DayO 유저'
       }, async function (rsp) {
         try {

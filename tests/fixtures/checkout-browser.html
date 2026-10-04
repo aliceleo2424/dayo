@@ -1,0 +1,24 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DayO checkout · synthetic fixture</title><style>body{font-family:Arial,sans-serif;background:#FFFBF4;color:#40362F;margin:16px}*{box-sizing:border-box}button,input{font-family:inherit}#fixture-result{white-space:pre-wrap;overflow-wrap:anywhere}#fixture-status{color:#506B55}</style></head><body>
+<h1>Checkout 검증용</h1><p>로컬 synthetic 데이터 · 실제 PG/DB 요청 없음</p><button data-tickets-open>이용권 선택</button><p id="fixture-status" role="status"></p><pre id="fixture-result"></pre>
+<script>
+(() => {
+  const mode=new URLSearchParams(location.search).get('mode');
+  const user={id:'00000000-0000-4000-8000-000000000001',email:'auth@example.invalid',user_metadata:{name:'Fixture'}};
+  const session={user,access_token:'synthetic-local-only'};
+  const writes=[],steps=[];let contact=null,pref=null;
+  function result(){document.getElementById('fixture-result').textContent=JSON.stringify({steps,contact,pref},null,2);}
+  window._dayoAuthUser=user;window._dayoAuthProfile={id:user.id,user_id:user.id,has_used_welcome_ticket:false};
+  window.__DAYO_ENV__={PORTONE_IMP_CODE:'synthetic-local-merchant'};
+  const coupon={code:'WELCOME9900',is_used:false};
+  window.DayOProfileStore={getUserId:()=>user.id,getCachedProfile:()=>window._dayoAuthProfile,getUnusedWelcomeCoupon:()=>coupon,fetchCoupons:async()=>[coupon]};
+  window.supabaseClient={auth:{getSession:async()=>({data:{session}}),getUser:async()=>({data:{user}})},from(table){let payload=null;const q={
+    select(){return q},eq(){return q},in(){return q},order(){return q},limit(){return Promise.resolve({data:[]})},then(a,b){return Promise.resolve({data:[]}).then(a,b)},
+    upsert(p){payload=p;return q},
+    maybeSingle:async()=>({data:table==='profiles'?{has_used_welcome_ticket:false}:table==='user_contact_info'?contact:pref,error:mode==='read-fail'&&table==='user_contact_info'?{code:'synthetic-read-failure'}:null}),
+    single:async()=>{const failed=(mode==='contact-fail'&&table==='user_contact_info')||(mode==='pref-fail'&&table==='user_conversation_preferences');if(!failed){writes.push(table);steps.push(table==='user_contact_info'?'contact_saved':'preferences_saved');if(table==='user_contact_info')contact=payload;else {payload.schema_version=1;pref=payload;}result();}return {data:failed?null:payload,error:failed?{code:'synthetic-save-failure'}:null};}
+  };return q;}};
+  window.fetch=async(url,options)=>{if(url!=='/api/ticket-payment')throw Error('unexpected-network');const body=JSON.parse(options.body);if(body.action!=='prepare')throw Error('fixture-does-not-finalize-payment');if(!contact)throw Error('contact-not-saved');steps.push('order_prepare');result();const products={trial:[9900,1],single:[19900,1],starter3:[54900,3],light11:[179000,11],full33:[499000,33]};const p=products[body.product_id];return {ok:true,json:async()=>({ok:true,merchant_uid:'fixture-only',product:{id:body.product_id,name:'Synthetic selected product',amount:p[0],tickets:p[1]}})};};
+  window.alert=message=>{document.getElementById('fixture-status').textContent=message;};
+  window.IMP={init(){},request_pay(args,callback){steps.push('mock_pg_opened');document.getElementById('fixture-result').textContent=JSON.stringify({steps,product:args.name,amount:args.amount,contact_email:args.buyer_email,mobile_phone:args.buyer_tel,interests:pref&&pref.interests,other_interest:pref&&pref.other_interest,required_consent_completed:true,real_payment:false},null,2);callback({success:false,error_code:'fixture-cancel',error_msg:'로컬 mock PG · 실제 결제 없음'});}};
+})();
+</script><script src="/tickets-modal.js"></script><script src="/ticket-payment.js"></script><script src="/terms-mini-modal.js"></script></body></html>

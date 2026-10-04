@@ -573,6 +573,18 @@ async function prepare(service, user, body) {
     }
   }
 
+  // Contact is server-resolved by authenticated identity, never accepted from payment payload.
+  if (productKey !== 'admin_test_1000') {
+    var contactResult = await service.from('user_contact_info').select('contact_email,mobile_phone')
+      .eq('user_id', user.id).maybeSingle();
+    if (contactResult.error) return { status: 503, body: { ok: false, error: 'contact-check-unavailable' } };
+    var contact = contactResult.data;
+    if (!contact || !/^010[0-9]{8}$/.test(String(contact.mobile_phone || '')) ||
+        String(contact.contact_email || '').length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(contact.contact_email || ''))) {
+      return { status: 400, body: { ok: false, error: 'contact-required' } };
+    }
+  }
+
   var result = await service.rpc('prepare_verified_ticket_purchase', {
     p_user_id: user.id,
     p_product_key: productKey,

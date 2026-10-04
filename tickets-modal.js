@@ -361,6 +361,9 @@
   }
 
   function renderPlans() {
+    // Normal purchases collect all required consent in checkout; keep the admin-test DOM contract.
+    var legacyConsent = el.overlay && el.overlay.querySelector('.tk-consent');
+    if (legacyConsent) legacyConsent.style.display = adminPaymentTestVisible ? '' : 'none';
     var used = !!couponState.trialUsed;
     if (el.banner) {
       el.banner.hidden = used;
@@ -608,6 +611,7 @@
   }
 
   function close() {
+    if (window.DayOCheckout) window.DayOCheckout.cancel();
     if (!el.overlay.classList.contains('is-open')) return;
     el.overlay.classList.remove('is-open');
     if (window.DayOScrollLock) window.DayOScrollLock.unlock();
@@ -660,11 +664,12 @@
   async function completePurchase(plan) {
     if (buying || !plan) return;
     if (plan.id === 'trial' && couponState.trialUsed) return;
-    if (!ensureRefundConsent()) return;
     var payId = plan.payId || plan.id;
     if (typeof window.requestPay === 'function') {
       return window.requestPay(payId);
     }
+    showToast('결제 기능을 불러오지 못했어요. 새로고침 후 다시 시도해 주세요.');
+    return;
     buying = true;
     var payload = paymentPayload(plan);
     window.DayOTickets = window.DayOTickets || {};
