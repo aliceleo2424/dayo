@@ -201,9 +201,7 @@
   function markWelcomeEmailSent(client, user) {
     if (!user || !user.id) return;
     try { window.localStorage.setItem(welcomeEmailSentKey(user.id), '1'); } catch (e) { /* ignore */ }
-    if (client) {
-      client.from('profiles').update({ welcome_email_sent: true }).eq('id', user.id).then(function () {}, function () {});
-    }
+    // Provider delivery state is server-owned. Keep the existing local dedup key.
   }
 
   function isRecentSignup(user) {
@@ -239,11 +237,14 @@
 
     return (async function () {
       var sent = false;
+      var sessionResult = await window.supabaseClient.auth.getSession();
+      var session = sessionResult && sessionResult.data && sessionResult.data.session;
+      if (!session || !session.user || session.user.id !== user.id || !session.access_token) return;
       for (var i = 0; i < urls.length; i += 1) {
         try {
           var res = await fetch(urls[i], {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
             body: payload
           });
           if (res && res.ok) {
@@ -342,28 +343,7 @@
     rememberLocalProfile(profile, user.email);
     window._dayoAuthProfile = profile;
     window.updateProfileUI(profile.nickname);
-    try {
-      var hist = JSON.parse(localStorage.getItem('dayo_speaking_test_history') || '[]');
-      var latest = Array.isArray(hist) ? hist[0] : null;
-      if (latest && latest.last_test_date) {
-        var remoteDate = profile.last_test_date ? new Date(profile.last_test_date).getTime() : 0;
-        var localDate = new Date(latest.last_test_date).getTime();
-        if (!remoteDate || localDate > remoteDate) {
-          var speakingUpdate = {
-            speaking_level: latest.speaking_level,
-            last_test_score: latest.last_test_score,
-            last_test_date: latest.last_test_date
-          };
-          var synced = await client.from('profiles').update(speakingUpdate).eq('user_id', user.id);
-          if (synced && !synced.error) {
-            profile.speaking_level = latest.speaking_level;
-            profile.last_test_score = latest.last_test_score;
-            profile.last_test_date = latest.last_test_date;
-            window._dayoAuthProfile = profile;
-          }
-        }
-      }
-    } catch (e) { /* ignore pending speaking sync */ }
+    // Quiz history remains local; legacy score columns are absent from live profiles.
     window.DayOSendWelcomeEmail(user, profile);
     document.dispatchEvent(new CustomEvent('dayo:authprofile', { detail: { user: user, profile: profile } }));
     document.documentElement.classList.remove('dayo-auth-pending');

@@ -1,6 +1,7 @@
 /* Vercel serverless: POST /api/send-welcome
  * Env: RESEND_API_KEY (required)
  */
+var { prepareWelcome, markWelcomeSent } = require('./_lib/welcome-profile-state');
 function json(res, status, body) {
   res.statusCode = status;
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -10,7 +11,7 @@ function json(res, status, body) {
 function cors(res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
 }
 
 function readBody(req) {
@@ -98,8 +99,10 @@ module.exports = async function handler(req, res) {
 
   try {
     var body = await readBody(req);
-    var email = String(body.email || '').trim().toLowerCase();
-    var nickname = String(body.nickname || '회원').trim() || '회원';
+    var welcome = await prepareWelcome(req, body);
+    if (welcome.skip) { json(res, 200, { ok: true, skipped: true }); return; }
+    var email = welcome.email;
+    var nickname = welcome.nickname;
     if (!isValidEmail(email)) {
       json(res, 400, { ok: false, error: 'valid email is required' });
       return;
@@ -118,7 +121,8 @@ module.exports = async function handler(req, res) {
       method: 'POST',
       headers: {
         Authorization: 'Bearer ' + apiKey,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Idempotency-Key': 'welcome:' + welcome.userId
       },
       body: JSON.stringify(payload)
     });
@@ -127,8 +131,9 @@ module.exports = async function handler(req, res) {
       json(res, 502, { ok: false, error: (data && (data.message || data.error)) || 'resend failed' });
       return;
     }
+    await markWelcomeSent(welcome);
     json(res, 200, { ok: true, id: data && data.id ? data.id : null });
   } catch (err) {
-    json(res, 500, { ok: false, error: (err && err.message) || 'welcome email failed' });
+    json(res, err && err.status || 500, { ok: false, error: (err && err.message) || 'welcome email failed' });
   }
 };

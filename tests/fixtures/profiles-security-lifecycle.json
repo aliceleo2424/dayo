@@ -1,0 +1,194 @@
+{
+  "snapshot": {
+    "triggers": [
+      {
+        "name": "on_auth_user_created",
+        "table": "users",
+        "schema": "auth",
+        "enabled": "O",
+        "definition": "CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION handle_new_user()",
+        "function_hash": "9e60737c03d5c2c63d4b754ba6f15e35",
+        "function_name": "handle_new_user",
+        "function_schema": "public",
+        "function_owner": "postgres",
+        "function_acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "function_config": null,
+        "function_definer": true
+      },
+      {
+        "name": "on_social_user_created",
+        "table": "users",
+        "schema": "auth",
+        "enabled": "O",
+        "definition": "CREATE TRIGGER on_social_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION handle_social_user_signup()",
+        "function_hash": "e2b6bcb0281bd357afbc952e77aed90b",
+        "function_name": "handle_social_user_signup",
+        "function_schema": "public",
+        "function_owner": "postgres",
+        "function_acl": "{=X/postgres,postgres=X/postgres,anon=X/postgres,authenticated=X/postgres,service_role=X/postgres}",
+        "function_config": null,
+        "function_definer": true
+      },
+      {
+        "name": "profiles_role_write_guard",
+        "table": "profiles",
+        "schema": "public",
+        "enabled": "O",
+        "definition": "CREATE TRIGGER profiles_role_write_guard BEFORE INSERT OR UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION guard_profiles_role_write()",
+        "function_hash": "527d0be1fd58ec136fb0b11c3b2c0ced",
+        "function_name": "guard_profiles_role_write",
+        "function_schema": "public",
+        "function_owner": "postgres",
+        "function_acl": "{postgres=X/postgres,service_role=X/postgres}",
+        "function_config": [
+          "search_path=\"\""
+        ],
+        "function_definer": false
+      }
+    ],
+    "profile_constraints": [
+      {
+        "name": "profiles_email_key",
+        "type": "u",
+        "definition": "UNIQUE (email)"
+      },
+      {
+        "name": "profiles_pkey",
+        "type": "p",
+        "definition": "PRIMARY KEY (id)"
+      },
+      {
+        "name": "profiles_user_id_key",
+        "type": "u",
+        "definition": "UNIQUE (user_id)"
+      }
+    ],
+    "partner_table": {
+      "acl": "{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres,authenticated=r/postgres}",
+      "rls": true,
+      "name": "partner_profile_details"
+    },
+    "partner_columns": [
+      {
+        "name": "availability_periods",
+        "type": "ARRAY",
+        "table": "partner_profile_details"
+      },
+      {
+        "name": "completed_at",
+        "type": "timestamp with time zone",
+        "table": "partner_profile_details"
+      },
+      {
+        "name": "created_at",
+        "type": "timestamp with time zone",
+        "table": "partner_profile_details"
+      },
+      {
+        "name": "id",
+        "type": "uuid",
+        "table": "partner_profile_details"
+      },
+      {
+        "name": "korean_level",
+        "type": "text",
+        "table": "partner_profile_details"
+      },
+      {
+        "name": "location_status",
+        "type": "text",
+        "table": "partner_profile_details"
+      },
+      {
+        "name": "native_languages",
+        "type": "ARRAY",
+        "table": "partner_profile_details"
+      },
+      {
+        "name": "other_languages",
+        "type": "jsonb",
+        "table": "partner_profile_details"
+      },
+      {
+        "name": "partner_guide_acknowledged_at",
+        "type": "timestamp with time zone",
+        "table": "partner_profile_details"
+      },
+      {
+        "name": "partner_id",
+        "type": "uuid",
+        "table": "partner_profile_details"
+      },
+      {
+        "name": "session_languages",
+        "type": "ARRAY",
+        "table": "partner_profile_details"
+      },
+      {
+        "name": "updated_at",
+        "type": "timestamp with time zone",
+        "table": "partner_profile_details"
+      },
+      {
+        "name": "visa_type",
+        "type": "text",
+        "table": "partner_profile_details"
+      },
+      {
+        "name": "weekly_session_capacity",
+        "type": "text",
+        "table": "partner_profile_details"
+      }
+    ],
+    "partner_policies": [
+      {
+        "cmd": "SELECT",
+        "mode": "PERMISSIVE",
+        "name": "partner_profile_details_read",
+        "check": null,
+        "roles": [
+          "authenticated"
+        ],
+        "table": "partner_profile_details",
+        "using": "(dayo_is_admin() OR ((partner_id = auth.uid()) AND (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.id = auth.uid()) AND ((p.role)::text = 'partner'::text))))))"
+      }
+    ],
+    "function": {
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "args": "p_details jsonb",
+      "hash": "ee9f46842440fffc9f1afb9a41c12315",
+      "name": "save_partner_profile_completion",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "return": "jsonb",
+      "definer": true
+    }
+  },
+  "collect": "select jsonb_build_object('triggers',(select jsonb_agg(jsonb_build_object('schema',n.nspname,'table',c.relname,'name',t.tgname,'enabled',t.tgenabled,'definition',pg_get_triggerdef(t.oid),'function_schema',pn.nspname,'function_name',p.proname,'function_hash',md5(pg_get_functiondef(p.oid)),'function_owner',pg_get_userbyid(p.proowner),'function_acl',p.proacl::text,'function_config',p.proconfig,'function_definer',p.prosecdef) order by n.nspname,c.relname,t.tgname) from pg_trigger t join pg_class c on c.oid=t.tgrelid join pg_namespace n on n.oid=c.relnamespace join pg_proc p on p.oid=t.tgfoid join pg_namespace pn on pn.oid=p.pronamespace where not t.tgisinternal and (t.tgrelid='public.profiles'::regclass or t.tgrelid='auth.users'::regclass)),'profile_constraints',(select jsonb_agg(jsonb_build_object('name',conname,'type',contype,'definition',pg_get_constraintdef(oid)) order by conname) from pg_constraint where conrelid='public.profiles'::regclass),'partner_table',(select jsonb_build_object('name',c.relname,'rls',c.relrowsecurity,'acl',c.relacl::text) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='public' and c.relname='partner_profile_details'),'partner_columns',(select jsonb_agg(jsonb_build_object('table',table_name,'name',column_name,'type',data_type) order by table_name,column_name) from information_schema.columns where table_schema='public' and table_name='partner_profile_details'),'partner_policies',(select jsonb_agg(jsonb_build_object('table',tablename,'name',policyname,'roles',roles,'cmd',cmd,'using',qual,'check',with_check,'mode',permissive) order by tablename,policyname) from pg_policies where schemaname='public' and tablename='partner_profile_details'),'function',(select jsonb_build_object('name',p.proname,'args',pg_get_function_identity_arguments(p.oid),'return',pg_get_function_result(p.oid),'hash',md5(pg_get_functiondef(p.oid)),'owner',pg_get_userbyid(p.proowner),'definer',p.prosecdef,'config',p.proconfig,'acl',p.proacl::text) from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.proname='save_partner_profile_completion' and pg_get_function_identity_arguments(p.oid)='p_details jsonb'))",
+  "auth_definitions": [
+    {
+      "name": "handle_new_user",
+      "definition": "CREATE OR REPLACE FUNCTION public.handle_new_user()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n  detected_provider text;\r\nBEGIN\r\n  detected_provider := COALESCE(\r\n    NEW.raw_app_meta_data->>'provider',\r\n    CASE \r\n      WHEN NEW.raw_user_meta_data->>'iss' LIKE '%kakao%' THEN 'kakao'\r\n      WHEN NEW.raw_user_meta_data->>'iss' LIKE '%google%' THEN 'google'\r\n      WHEN NEW.email IS NOT NULL THEN 'email'\r\n      ELSE '미확인'\r\n    END\r\n  );\r\n\r\n  INSERT INTO public.profiles (\r\n    id,\r\n    full_name,\r\n    nickname,\r\n    role,\r\n    ticket_count,\r\n    provider,\r\n    admin_memo,\r\n    avatar_url,\r\n    created_at\r\n  )\r\n  VALUES (\r\n    NEW.id,\r\n    COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1)),\r\n    COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email, '@', 1)),\r\n    'user',\r\n    0,\r\n    detected_provider,\r\n    NULL,\r\n    COALESCE(NEW.raw_user_meta_data->>'avatar_url', 'https://api.dicebear.com/7.x/bottts/svg?seed=' || NEW.id),\r\n    timezone('utc', now())\r\n  )\r\n  ON CONFLICT (id) DO UPDATE SET\r\n    provider = EXCLUDED.provider;\r\n\r\n  RETURN NEW;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "name": "handle_social_user_signup",
+      "definition": "CREATE OR REPLACE FUNCTION public.handle_social_user_signup()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n  raw_meta jsonb;\r\n  user_provider text;\r\n  kakao_uid text;\r\n  user_nick text;\r\n  user_mail text;\r\n  user_avatar text;\r\nBEGIN\r\n  raw_meta := new.raw_user_meta_data;\r\n  user_provider := COALESCE(new.raw_app_meta_data->>'provider', 'email');\r\n  \r\n  -- 카카오 고유 ID 추출 (sub 또는 provider_id)\r\n  kakao_uid := COALESCE(raw_meta->>'provider_id', raw_meta->>'sub', new.id::text);\r\n  \r\n  -- 닉네임 추출 (name, nickname, full_name 순서로 확인)\r\n  user_nick := COALESCE(\r\n    raw_meta->>'name',\r\n    raw_meta->>'nickname',\r\n    raw_meta->>'full_name',\r\n    CASE WHEN user_provider = 'kakao' THEN '카카오 회원 (' || SUBSTRING(new.id::text, 1, 5) || ')' ELSE '새싹 회원' END\r\n  );\r\n  \r\n  -- 이메일 추출\r\n  user_mail := COALESCE(new.email, raw_meta->>'email', '');\r\n  user_avatar := COALESCE(raw_meta->>'avatar_url', raw_meta->>'picture', '');\r\n\r\n  -- profiles 테이블 생성/업데이트\r\n  INSERT INTO public.profiles (\r\n    id,\r\n    user_id,\r\n    email,\r\n    nickname,\r\n    user_name,\r\n    avatar_url,\r\n    provider,\r\n    kakao_id,\r\n    role,\r\n    ticket_count,\r\n    tickets\r\n  )\r\n  VALUES (\r\n    new.id,\r\n    new.id,\r\n    user_mail,\r\n    user_nick,\r\n    user_nick,\r\n    user_avatar,\r\n    user_provider,\r\n    CASE WHEN user_provider = 'kakao' THEN kakao_uid ELSE NULL END,\r\n    'user',\r\n    0,\r\n    0\r\n  )\r\n  ON CONFLICT (id) DO UPDATE SET\r\n    email = EXCLUDED.email,\r\n    nickname = CASE WHEN profiles.nickname IS NULL OR profiles.nickname = '' OR profiles.nickname = '미등록' THEN EXCLUDED.nickname ELSE profiles.nickname END,\r\n    provider = EXCLUDED.provider,\r\n    kakao_id = COALESCE(profiles.kakao_id, EXCLUDED.kakao_id);\r\n\r\n  RETURN new;\r\nEND;\r\n$function$\n"
+    }
+  ],
+  "guard_definition": "CREATE OR REPLACE FUNCTION public.guard_profiles_role_write()\n RETURNS trigger\n LANGUAGE plpgsql\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_rpc_owner name;\r\nbegin\r\n  if tg_op = 'INSERT' then\r\n    -- Defaults and the Auth signup trigger insert 'user'. A browser must\r\n    -- not create a privileged profile via the existing broad INSERT policy.\r\n    if new.role is distinct from 'user' then\r\n      raise exception 'Profile role must start as user.' using errcode = '42501';\r\n    end if;\r\n    return new;\r\n  end if;\r\n\r\n  -- Without this narrow guard, broad UPDATE policies could let a client\r\n  -- rebind an existing admin row to its own auth.uid() without editing role.\r\n  if old.role = 'admin' and (\r\n    new.id is distinct from old.id or\r\n    new.user_id is distinct from old.user_id or\r\n    new.client_key is distinct from old.client_key\r\n  ) then\r\n    raise exception 'Admin profile identity cannot be changed here.'\r\n      using errcode = '42501';\r\n  end if;\r\n\r\n  if new.role is distinct from old.role then\r\n    select pg_catalog.pg_get_userbyid(proowner) into v_rpc_owner\r\n    from pg_catalog.pg_proc\r\n    where oid = 'public.admin_set_user_role(uuid,text)'::pg_catalog.regprocedure;\r\n\r\n    if v_rpc_owner is null\r\n       or current_user <> v_rpc_owner\r\n       or pg_catalog.current_setting('dayo.admin_role_rpc', true) is distinct from 'on' then\r\n      raise exception 'Profile role can only be changed by the admin RPC.'\r\n        using errcode = '42501';\r\n    end if;\r\n  end if;\r\n\r\n  return new;\r\nend;\r\n$function$\n",
+  "partner_definition": "CREATE OR REPLACE FUNCTION public.save_partner_profile_completion(p_details jsonb)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_uid uuid := auth.uid();\r\n  v_location text; v_visa text; v_korean text; v_capacity text;\r\n  v_native text[]; v_session text[]; v_availability text[];\r\n  v_other jsonb; v_entry jsonb; v_language text; v_level text;\r\n  v_seen text[] := '{}'::text[];\r\n  v_result public.partner_profile_details;\r\nbegin\r\n  if v_uid is null then raise exception 'Partner access required.' using errcode = '42501'; end if;\r\n  perform 1 from public.profiles where id = v_uid and role = 'partner' for share;\r\n  if not found then raise exception 'Partner access required.' using errcode = '42501'; end if;\r\n  if p_details is null or jsonb_typeof(p_details) is distinct from 'object'\r\n    or p_details -> 'guide_acknowledged' is distinct from 'true'::jsonb then\r\n    raise exception 'Read and acknowledge the DayO Partner Guide.' using errcode = '22023';\r\n  end if;\r\n  v_location := p_details ->> 'location_status'; v_visa := p_details ->> 'visa_type';\r\n  v_korean := p_details ->> 'korean_level'; v_capacity := p_details ->> 'weekly_session_capacity';\r\n  if v_location is null or v_location not in ('korea','overseas')\r\n    or v_visa is null or (v_location = 'korea' and v_visa not in ('D-2','D-4','F-series','Other visa'))\r\n    or (v_location = 'overseas' and v_visa <> 'not_applicable_overseas')\r\n    or v_korean is null or v_korean not in ('none','basic','conversational','advanced','native')\r\n    or v_capacity is null or v_capacity not in ('1-2','3-5','6-10','10+') then\r\n    raise exception 'Complete location, visa, Korean level and weekly capacity.' using errcode = '22023';\r\n  end if;\r\n  if jsonb_typeof(p_details -> 'native_languages') is distinct from 'array'\r\n    or jsonb_typeof(p_details -> 'session_languages') is distinct from 'array'\r\n    or jsonb_typeof(p_details -> 'availability_periods') is distinct from 'array'\r\n    or jsonb_typeof(p_details -> 'other_languages') is distinct from 'array' then\r\n    raise exception 'Invalid language or availability selections.' using errcode = '22023';\r\n  end if;\r\n  if exists (select 1 from jsonb_array_elements(p_details -> 'native_languages') x where jsonb_typeof(x) <> 'string')\r\n    or exists (select 1 from jsonb_array_elements(p_details -> 'session_languages') x where jsonb_typeof(x) <> 'string')\r\n    or exists (select 1 from jsonb_array_elements(p_details -> 'availability_periods') x where jsonb_typeof(x) <> 'string') then\r\n    raise exception 'Selections must be text.' using errcode = '22023';\r\n  end if;\r\n  select array_agg(btrim(value)) into v_native from jsonb_array_elements_text(p_details -> 'native_languages');\r\n  select array_agg(btrim(value)) into v_session from jsonb_array_elements_text(p_details -> 'session_languages');\r\n  select array_agg(value) into v_availability from jsonb_array_elements_text(p_details -> 'availability_periods');\r\n  if coalesce(cardinality(v_native),0) not between 1 and 14\r\n    or coalesce(cardinality(v_session),0) not between 1 and 28\r\n    or coalesce(cardinality(v_availability),0) not between 1 and 10\r\n    or exists (select 1 from unnest(v_native || v_session) l where l is null or length(l) not between 1 and 100)\r\n    or cardinality(v_native) <> (select count(distinct lower(l)) from unnest(v_native) l)\r\n    or cardinality(v_session) <> (select count(distinct lower(l)) from unnest(v_session) l)\r\n    or cardinality(v_availability) <> (select count(distinct l) from unnest(v_availability) l)\r\n    or not (v_availability <@ array['weekday_early_morning','weekday_morning','weekday_afternoon','weekday_evening','weekday_late_night',\r\n      'weekend_early_morning','weekend_morning','weekend_afternoon','weekend_evening','weekend_late_night']::text[]) then\r\n    raise exception 'Choose valid, distinct languages and KST availability.' using errcode = '22023';\r\n  end if;\r\n  v_other := p_details -> 'other_languages';\r\n  if jsonb_array_length(v_other) > 14 then raise exception 'Too many other languages.' using errcode = '22023'; end if;\r\n  for v_entry in select value from jsonb_array_elements(v_other) loop\r\n    v_language := btrim(v_entry ->> 'language'); v_level := v_entry ->> 'level';\r\n    if jsonb_typeof(v_entry) <> 'object' or jsonb_typeof(v_entry -> 'language') is distinct from 'string'\r\n      or v_language is null or length(v_language) not between 1 and 100\r\n      or v_level is null or v_level not in ('basic','conversational','fluent','native')\r\n      or lower(v_language) = any(v_seen)\r\n      or exists (select 1 from unnest(v_native) l where lower(l) = lower(v_language)) then\r\n      raise exception 'Invalid other language proficiency.' using errcode = '22023';\r\n    end if;\r\n    v_seen := array_append(v_seen,lower(v_language));\r\n  end loop;\r\n  if exists (select 1 from unnest(v_session) l where not (l = any(v_native)) and not exists (\r\n    select 1 from jsonb_array_elements(v_other) o where btrim(o ->> 'language') = l and o ->> 'level' in ('fluent','native'))) then\r\n    raise exception 'Session languages must be native or fluent.' using errcode = '22023';\r\n  end if;\r\n  select coalesce(jsonb_agg(jsonb_build_object('language',btrim(o ->> 'language'),'level',o ->> 'level')),'[]'::jsonb)\r\n    into v_other from jsonb_array_elements(v_other) o;\r\n  insert into public.partner_profile_details(partner_id,location_status,visa_type,native_languages,other_languages,\r\n    session_languages,korean_level,availability_periods,weekly_session_capacity,partner_guide_acknowledged_at,completed_at)\r\n  values(v_uid,v_location,v_visa,v_native,v_other,v_session,v_korean,v_availability,v_capacity,now(),now())\r\n  on conflict (partner_id) do update set location_status = excluded.location_status, visa_type = excluded.visa_type,\r\n    native_languages = excluded.native_languages, other_languages = excluded.other_languages,\r\n    session_languages = excluded.session_languages, korean_level = excluded.korean_level,\r\n    availability_periods = excluded.availability_periods, weekly_session_capacity = excluded.weekly_session_capacity,\r\n    partner_guide_acknowledged_at = coalesce(partner_profile_details.partner_guide_acknowledged_at,excluded.partner_guide_acknowledged_at),\r\n    completed_at = coalesce(partner_profile_details.completed_at,excluded.completed_at), updated_at = now()\r\n  returning * into v_result;\r\n  return to_jsonb(v_result);\r\nend;\r\n$function$\n",
+  "partner_081_sql": "-- Self-declared operational details; never change approved roles or verified capabilities.\r\nbegin;\r\ncreate table public.partner_profile_details (\r\n  id uuid primary key default gen_random_uuid(),\r\n  partner_id uuid unique not null references public.profiles(id) on delete restrict,\r\n  location_status text check (location_status in ('korea','overseas')),\r\n  visa_type text check (visa_type in ('D-2','D-4','F-series','Other visa','not_applicable_overseas')),\r\n  native_languages text[],\r\n  other_languages jsonb not null default '[]'::jsonb check (jsonb_typeof(other_languages) = 'array'),\r\n  session_languages text[],\r\n  korean_level text check (korean_level in ('none','basic','conversational','advanced','native')),\r\n  availability_periods text[],\r\n  weekly_session_capacity text check (weekly_session_capacity in ('1-2','3-5','6-10','10+')),\r\n  partner_guide_acknowledged_at timestamptz,\r\n  completed_at timestamptz,\r\n  created_at timestamptz not null default now(),\r\n  updated_at timestamptz not null default now(),\r\n  constraint partner_profile_completion_required check (completed_at is null or (\r\n    location_status is not null and visa_type is not null and korean_level is not null\r\n    and weekly_session_capacity is not null and partner_guide_acknowledged_at is not null\r\n    and coalesce(cardinality(native_languages),0) > 0\r\n    and coalesce(cardinality(session_languages),0) > 0\r\n    and coalesce(cardinality(availability_periods),0) > 0))\r\n);\r\ncomment on table public.partner_profile_details is 'Partner self-declared details, separate from profiles and admin-verified partner_capabilities.';\r\nalter table public.partner_profile_details enable row level security;\r\nrevoke all on public.partner_profile_details from public, anon, authenticated;\r\ngrant select on public.partner_profile_details to authenticated;\r\ncreate policy partner_profile_details_read on public.partner_profile_details for select to authenticated\r\n  using (public.dayo_is_admin() or (partner_id = auth.uid() and exists (\r\n    select 1 from public.profiles p where p.id = auth.uid() and p.role = 'partner')));\r\n\r\n-- Only this RPC writes. The caller cannot provide an identity, completion date or approval role.\r\ncreate function public.save_partner_profile_completion(p_details jsonb)\r\nreturns jsonb\r\nlanguage plpgsql security definer set search_path = '' as $$\r\ndeclare\r\n  v_uid uuid := auth.uid();\r\n  v_location text; v_visa text; v_korean text; v_capacity text;\r\n  v_native text[]; v_session text[]; v_availability text[];\r\n  v_other jsonb; v_entry jsonb; v_language text; v_level text;\r\n  v_seen text[] := '{}'::text[];\r\n  v_result public.partner_profile_details;\r\nbegin\r\n  if v_uid is null then raise exception 'Partner access required.' using errcode = '42501'; end if;\r\n  perform 1 from public.profiles where id = v_uid and role = 'partner' for share;\r\n  if not found then raise exception 'Partner access required.' using errcode = '42501'; end if;\r\n  if p_details is null or jsonb_typeof(p_details) is distinct from 'object'\r\n    or p_details -> 'guide_acknowledged' is distinct from 'true'::jsonb then\r\n    raise exception 'Read and acknowledge the DayO Partner Guide.' using errcode = '22023';\r\n  end if;\r\n  v_location := p_details ->> 'location_status'; v_visa := p_details ->> 'visa_type';\r\n  v_korean := p_details ->> 'korean_level'; v_capacity := p_details ->> 'weekly_session_capacity';\r\n  if v_location is null or v_location not in ('korea','overseas')\r\n    or v_visa is null or (v_location = 'korea' and v_visa not in ('D-2','D-4','F-series','Other visa'))\r\n    or (v_location = 'overseas' and v_visa <> 'not_applicable_overseas')\r\n    or v_korean is null or v_korean not in ('none','basic','conversational','advanced','native')\r\n    or v_capacity is null or v_capacity not in ('1-2','3-5','6-10','10+') then\r\n    raise exception 'Complete location, visa, Korean level and weekly capacity.' using errcode = '22023';\r\n  end if;\r\n  if jsonb_typeof(p_details -> 'native_languages') is distinct from 'array'\r\n    or jsonb_typeof(p_details -> 'session_languages') is distinct from 'array'\r\n    or jsonb_typeof(p_details -> 'availability_periods') is distinct from 'array'\r\n    or jsonb_typeof(p_details -> 'other_languages') is distinct from 'array' then\r\n    raise exception 'Invalid language or availability selections.' using errcode = '22023';\r\n  end if;\r\n  if exists (select 1 from jsonb_array_elements(p_details -> 'native_languages') x where jsonb_typeof(x) <> 'string')\r\n    or exists (select 1 from jsonb_array_elements(p_details -> 'session_languages') x where jsonb_typeof(x) <> 'string')\r\n    or exists (select 1 from jsonb_array_elements(p_details -> 'availability_periods') x where jsonb_typeof(x) <> 'string') then\r\n    raise exception 'Selections must be text.' using errcode = '22023';\r\n  end if;\r\n  select array_agg(btrim(value)) into v_native from jsonb_array_elements_text(p_details -> 'native_languages');\r\n  select array_agg(btrim(value)) into v_session from jsonb_array_elements_text(p_details -> 'session_languages');\r\n  select array_agg(value) into v_availability from jsonb_array_elements_text(p_details -> 'availability_periods');\r\n  if coalesce(cardinality(v_native),0) not between 1 and 14\r\n    or coalesce(cardinality(v_session),0) not between 1 and 28\r\n    or coalesce(cardinality(v_availability),0) not between 1 and 10\r\n    or exists (select 1 from unnest(v_native || v_session) l where l is null or length(l) not between 1 and 100)\r\n    or cardinality(v_native) <> (select count(distinct lower(l)) from unnest(v_native) l)\r\n    or cardinality(v_session) <> (select count(distinct lower(l)) from unnest(v_session) l)\r\n    or cardinality(v_availability) <> (select count(distinct l) from unnest(v_availability) l)\r\n    or not (v_availability <@ array['weekday_early_morning','weekday_morning','weekday_afternoon','weekday_evening','weekday_late_night',\r\n      'weekend_early_morning','weekend_morning','weekend_afternoon','weekend_evening','weekend_late_night']::text[]) then\r\n    raise exception 'Choose valid, distinct languages and KST availability.' using errcode = '22023';\r\n  end if;\r\n  v_other := p_details -> 'other_languages';\r\n  if jsonb_array_length(v_other) > 14 then raise exception 'Too many other languages.' using errcode = '22023'; end if;\r\n  for v_entry in select value from jsonb_array_elements(v_other) loop\r\n    v_language := btrim(v_entry ->> 'language'); v_level := v_entry ->> 'level';\r\n    if jsonb_typeof(v_entry) <> 'object' or jsonb_typeof(v_entry -> 'language') is distinct from 'string'\r\n      or v_language is null or length(v_language) not between 1 and 100\r\n      or v_level is null or v_level not in ('basic','conversational','fluent','native')\r\n      or lower(v_language) = any(v_seen)\r\n      or exists (select 1 from unnest(v_native) l where lower(l) = lower(v_language)) then\r\n      raise exception 'Invalid other language proficiency.' using errcode = '22023';\r\n    end if;\r\n    v_seen := array_append(v_seen,lower(v_language));\r\n  end loop;\r\n  if exists (select 1 from unnest(v_session) l where not (l = any(v_native)) and not exists (\r\n    select 1 from jsonb_array_elements(v_other) o where btrim(o ->> 'language') = l and o ->> 'level' in ('fluent','native'))) then\r\n    raise exception 'Session languages must be native or fluent.' using errcode = '22023';\r\n  end if;\r\n  select coalesce(jsonb_agg(jsonb_build_object('language',btrim(o ->> 'language'),'level',o ->> 'level')),'[]'::jsonb)\r\n    into v_other from jsonb_array_elements(v_other) o;\r\n  insert into public.partner_profile_details(partner_id,location_status,visa_type,native_languages,other_languages,\r\n    session_languages,korean_level,availability_periods,weekly_session_capacity,partner_guide_acknowledged_at,completed_at)\r\n  values(v_uid,v_location,v_visa,v_native,v_other,v_session,v_korean,v_availability,v_capacity,now(),now())\r\n  on conflict (partner_id) do update set location_status = excluded.location_status, visa_type = excluded.visa_type,\r\n    native_languages = excluded.native_languages, other_languages = excluded.other_languages,\r\n    session_languages = excluded.session_languages, korean_level = excluded.korean_level,\r\n    availability_periods = excluded.availability_periods, weekly_session_capacity = excluded.weekly_session_capacity,\r\n    partner_guide_acknowledged_at = coalesce(partner_profile_details.partner_guide_acknowledged_at,excluded.partner_guide_acknowledged_at),\r\n    completed_at = coalesce(partner_profile_details.completed_at,excluded.completed_at), updated_at = now()\r\n  returning * into v_result;\r\n  return to_jsonb(v_result);\r\nend;\r\n$$;\r\nrevoke all on function public.save_partner_profile_completion(jsonb) from public, anon, authenticated;\r\ngrant execute on function public.save_partner_profile_completion(jsonb) to authenticated;\r\nnotify pgrst, 'reload schema';\r\ncommit;\r\n",
+  "partner_082_completion_function": "create or replace function public.save_partner_profile_completion(p_details jsonb)\nreturns jsonb\nlanguage plpgsql security definer set search_path = '' as $$\ndeclare\n  v_uid uuid := auth.uid();\n  v_location text; v_visa text; v_korean text; v_capacity text;\n  v_country text; v_city text; v_city_other text; v_has_location boolean;\n  v_native text[]; v_session text[];\n  v_other jsonb; v_entry jsonb; v_language text; v_level text;\n  v_seen text[] := '{}'::text[];\n  v_result public.partner_profile_details;\nbegin\n  if v_uid is null then raise exception 'Partner access required.' using errcode = '42501'; end if;\n  perform 1 from public.profiles where id = v_uid and role = 'partner' for share;\n  if not found then raise exception 'Partner access required.' using errcode = '42501'; end if;\n  if p_details is null or jsonb_typeof(p_details) is distinct from 'object'\n    or p_details -> 'guide_acknowledged' is distinct from 'true'::jsonb then\n    raise exception 'Read and acknowledge the DayO Partner Guide.' using errcode = '22023';\n  end if;\n  v_location := p_details ->> 'location_status'; v_visa := p_details ->> 'visa_type';\n  v_korean := p_details ->> 'korean_level'; v_capacity := p_details ->> 'weekly_session_capacity';\n  if v_location is null or v_location not in ('korea','overseas')\n    or v_visa is null or (v_location = 'korea' and v_visa not in ('D-2','D-4','F-series','Other visa'))\n    or (v_location = 'overseas' and v_visa <> 'not_applicable_overseas')\n    or v_korean is null or v_korean not in ('none','basic','conversational','advanced','native')\n    or v_capacity is null or v_capacity not in ('1-2','3-5','6-10','10+') then\n    raise exception 'Complete location, visa, Korean level and weekly capacity.' using errcode = '22023';\n  end if;\n  -- Do not rewrite completed legacy rows or require them to complete again.\n  -- New clients send country/city. Old 081 clients omit both during rollout.\n  v_has_location := p_details ? 'country' or p_details ? 'city';\n  if v_has_location then\n    v_country := btrim(p_details ->> 'country'); v_city := btrim(p_details ->> 'city');\n    v_city_other := nullif(btrim(p_details ->> 'korea_city_other'),'');\n    if v_country is null or length(v_country) not between 1 and 100\n      or v_city is null or length(v_city) not between 1 and 100\n      or (v_location = 'korea' and v_country <> 'South Korea')\n      or (v_location = 'overseas' and lower(v_country) in ('korea','south korea','republic of korea','한국','대한민국'))\n      or (v_city_other is not null and (v_location <> 'korea' or v_city_other <> v_city)) then\n      raise exception 'Complete a valid country and city for your location.' using errcode = '22023';\n    end if;\n  end if;\n  if jsonb_typeof(p_details -> 'native_languages') is distinct from 'array'\n    or jsonb_typeof(p_details -> 'session_languages') is distinct from 'array'\n    or jsonb_typeof(p_details -> 'other_languages') is distinct from 'array' then\n    raise exception 'Invalid language selections.' using errcode = '22023';\n  end if;\n  if exists (select 1 from jsonb_array_elements(p_details -> 'native_languages') x where jsonb_typeof(x) <> 'string')\n    or exists (select 1 from jsonb_array_elements(p_details -> 'session_languages') x where jsonb_typeof(x) <> 'string') then\n    raise exception 'Selections must be text.' using errcode = '22023';\n  end if;\n  select array_agg(btrim(value)) into v_native from jsonb_array_elements_text(p_details -> 'native_languages');\n  select array_agg(btrim(value)) into v_session from jsonb_array_elements_text(p_details -> 'session_languages');\n  if coalesce(cardinality(v_native),0) not between 1 and 14\n    or coalesce(cardinality(v_session),0) not between 1 and 28\n    or exists (select 1 from unnest(v_native || v_session) l where l is null or length(l) not between 1 and 100)\n    or cardinality(v_native) <> (select count(distinct lower(l)) from unnest(v_native) l)\n    or cardinality(v_session) <> (select count(distinct lower(l)) from unnest(v_session) l) then\n    raise exception 'Choose valid, distinct languages.' using errcode = '22023';\n  end if;\n  v_other := p_details -> 'other_languages';\n  if jsonb_array_length(v_other) > 14 then raise exception 'Too many other languages.' using errcode = '22023'; end if;\n  for v_entry in select value from jsonb_array_elements(v_other) loop\n    v_language := btrim(v_entry ->> 'language'); v_level := v_entry ->> 'level';\n    if jsonb_typeof(v_entry) <> 'object' or jsonb_typeof(v_entry -> 'language') is distinct from 'string'\n      or v_language is null or length(v_language) not between 1 and 100\n      or v_level is null or v_level not in ('basic','conversational','fluent','native')\n      or lower(v_language) = any(v_seen)\n      or exists (select 1 from unnest(v_native) l where lower(l) = lower(v_language)) then\n      raise exception 'Invalid other language proficiency.' using errcode = '22023';\n    end if;\n    v_seen := array_append(v_seen,lower(v_language));\n  end loop;\n  if exists (select 1 from unnest(v_session) l where not (l = any(v_native)) and not exists (\n    select 1 from jsonb_array_elements(v_other) o where btrim(o ->> 'language') = l and o ->> 'level' in ('conversational','fluent','native'))) then\n    raise exception 'Session languages must be native or Conversational or higher.' using errcode = '22023';\n  end if;\n  select coalesce(jsonb_agg(jsonb_build_object('language',btrim(o ->> 'language'),'level',o ->> 'level')),'[]'::jsonb)\n    into v_other from jsonb_array_elements(v_other) o;\n  insert into public.partner_profile_details(partner_id,location_status,visa_type,country,city,korea_city_other,native_languages,other_languages,\n    session_languages,korean_level,weekly_session_capacity,partner_guide_acknowledged_at,completed_at)\n  values(v_uid,v_location,v_visa,v_country,v_city,v_city_other,v_native,v_other,v_session,v_korean,v_capacity,now(),now())\n  on conflict (partner_id) do update set location_status = excluded.location_status, visa_type = excluded.visa_type,\n    country = case when v_has_location then excluded.country else case when excluded.location_status = partner_profile_details.location_status then partner_profile_details.country else null end end,\n    city = case when v_has_location then excluded.city else case when excluded.location_status = partner_profile_details.location_status then partner_profile_details.city else null end end,\n    korea_city_other = case when v_has_location then excluded.korea_city_other else case when excluded.location_status = partner_profile_details.location_status then partner_profile_details.korea_city_other else null end end,\n    native_languages = excluded.native_languages, other_languages = excluded.other_languages,\n    session_languages = excluded.session_languages, korean_level = excluded.korean_level,\n    weekly_session_capacity = excluded.weekly_session_capacity,\n    partner_guide_acknowledged_at = coalesce(partner_profile_details.partner_guide_acknowledged_at,excluded.partner_guide_acknowledged_at),\n    completed_at = coalesce(partner_profile_details.completed_at,excluded.completed_at), updated_at = now()\n  returning * into v_result;\n  return to_jsonb(v_result);\nend;\n$$;",
+  "provenance": {
+    "read_only": true,
+    "user_rows_read": false,
+    "origin_main": "d59cda26418e9b09f1910389c48b0f8b48ea1458",
+    "partner_work_head": "10b2f35",
+    "partner_082_pending": false,
+    "verified_on": "2026-10-05",
+    "partner_extension_pending": "083_partner_language_location_profile.sql"
+  },
+  "partner_082_details_sql": "alter table public.partner_profile_details\n  add column country text check (length(btrim(country)) between 1 and 100),\n  add column city text check (length(btrim(city)) between 1 and 100),\n  add column korea_city_other text check (length(btrim(korea_city_other)) between 1 and 100);\n-- 081 already created availability_periods: preserve the column and all historical values.\nalter table public.partner_profile_details drop constraint partner_profile_completion_required;\nalter table public.partner_profile_details add constraint partner_profile_completion_required check (completed_at is null or (\n  location_status is not null and visa_type is not null and korean_level is not null\n  and weekly_session_capacity is not null and partner_guide_acknowledged_at is not null\n  and coalesce(cardinality(native_languages),0) > 0 and coalesce(cardinality(session_languages),0) > 0));\ncomment on column public.partner_profile_details.availability_periods is 'Deprecated self-declared time bands, retained for history only. RPC no longer writes this field.';\ncomment on column public.partner_profile_details.weekly_session_capacity is 'Rough supply-planning estimate only; booking availability comes from availability_slots.';\n"
+}

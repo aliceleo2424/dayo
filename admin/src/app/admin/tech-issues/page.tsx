@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { AdminHeader } from "@/components/admin/header";
 import { supabase } from "@/lib/supabase";
+import { adminProfiles } from "@/lib/admin-data";
 import { formatDateTime } from "@/lib/utils";
 
 type Evidence = {
@@ -96,7 +97,7 @@ export default function TechIssuesPage() {
     const userIds = Array.from(new Set(bookingRows.flatMap((row) =>
       [row.learner_id, row.partner_user_id].filter((id): id is string => !!id))));
     const profileResult = userIds.length
-      ? await supabase.from("profiles").select("id,nickname,user_name,email").in("id", userIds)
+      ? await adminProfiles().select("id,nickname,user_name,email").in("id", userIds)
       : null;
     if (profileResult?.error) {
       setError(`참가자 정보를 불러오지 못했습니다: ${profileResult.error.message}`);

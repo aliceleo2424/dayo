@@ -2,13 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { bookingStatusLabel, formatSessionDateTime, type SessionTranscriptContext } from "@/lib/admin-data";
+import { adminProfiles, bookingStatusLabel, formatSessionDateTime, type SessionTranscriptContext } from "@/lib/admin-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PartnerProfileCompletionSummary } from "@/components/admin/partner-profile-completion-summary";
 import { SessionTranscriptModal } from "@/components/admin/SessionTranscriptModal";
 
 export type PartnerProfile = {
@@ -158,7 +159,7 @@ export function PartnerDetailModal({
       const learnerIds = Array.from(new Set(bookingRows.map((row) => String(row.learner_id || "")).filter(Boolean)));
       const learnerMap = new Map<string, { name: string; email: string }>();
       if (learnerIds.length) {
-        const learners = await supabase.from("profiles").select("user_id, nickname, user_name, email").in("user_id", learnerIds);
+        const learners = await adminProfiles().select("user_id, nickname, user_name, email").in("user_id", learnerIds);
         for (const row of (learners.data || []) as Record<string, unknown>[]) {
           const id = String(row.user_id || "");
           learnerMap.set(id, {
@@ -289,7 +290,7 @@ export function PartnerDetailModal({
   }, [sessions]);
 
   async function updateStatus(nextStatus: string) {
-    if (!partner || nextStatus === String(partner.partner_status || "active")) return;
+    if (!partner || typeof partner.partner_status !== "string" || nextStatus === partner.partner_status) return;
     const labels: Record<string, string> = { active: "활동중", vacation: "휴가중", suspended: "활동정지", withdrawn: "탈퇴(기록보존)" };
     if (!window.confirm(`${partnerName(partner)} 파트너 상태를 '${labels[nextStatus]}'(으)로 변경할까요?`)) return;
     setBusy(true);
@@ -366,6 +367,7 @@ export function PartnerDetailModal({
           </DialogHeader>
           {partner && (
             <div className="space-y-5">
+              {partner.role === "partner" && <PartnerProfileCompletionSummary key={partner.id} partnerId={partner.id} />}
               <section className="grid gap-4 rounded-xl border bg-[#FAFAF9] p-4 sm:grid-cols-[1fr_auto]">
                 <div className="grid gap-2 text-sm sm:grid-cols-2">
                   <p><span className="text-muted-foreground">이메일</span><br />{dash(partner.email)}</p>
@@ -377,10 +379,11 @@ export function PartnerDetailModal({
                   상태 변경
                   <select
                     className="mt-1 block rounded-md border bg-white px-3 py-2 text-sm text-foreground"
-                    value={String(partner.partner_status || "active")}
-                    disabled={busy}
+                    value={String(partner.partner_status || "")}
+                    disabled={busy || typeof partner.partner_status !== "string"}
                     onChange={(event) => void updateStatus(event.target.value)}
                   >
+                    {typeof partner.partner_status !== "string" && <option value="">승인 역할 기준 · 별도 활동 상태 없음</option>}
                     <option value="active">🟢 활동중 (Active)</option>
                     <option value="vacation">☕ 휴가중 (Vacation)</option>
                     <option value="suspended">🚫 활동정지 (Suspended)</option>

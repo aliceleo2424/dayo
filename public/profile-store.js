@@ -28,6 +28,8 @@ var REQUEST_KEY = 'dayo.chat.request';
 
 var supabase = null;
 var profileCache = null;
+// Production column contract: private admin/identity metadata is never selected.
+var OWN_PROFILE_COLUMNS = 'id,user_id,nickname,user_name,bio,avatar_url,country_code,learning_languages,role,email,provider,ticket_count,tickets,point_balance,has_welcome_coupon,welcome_email_sent,streak_count,last_login_date,speech_speed,preferred_style,created_at,updated_at';
 var readyPromise = null;
 var authUser = null;
 var authBound = false;
@@ -270,56 +272,9 @@ function applyProfileToLocal(profile) {
 }
 
 async function fetchOrCreateProfile() {
-  var client = getClient();
-  var local = defaultsFromLocal();
-  if (!client) {
-    profileCache = Object.assign({ id: null, _offline: true }, local);
-    return profileCache;
-  }
-
-  try {
-    var select = await client
-      .from('profiles')
-      .select('*')
-      .eq('client_key', local.client_key)
-      .maybeSingle();
-
-    if (select.error) throw select.error;
-
-    if (select.data) {
-      profileCache = select.data;
-      applyProfileToLocal(profileCache);
-      return profileCache;
-    }
-
-    var insertPayload = {
-      client_key: local.client_key,
-      user_id: getAuthUserId() || null,
-      user_name: local.user_name || '',
-      email: local.email || '',
-      ticket_count: Number.isFinite(Number(local.ticket_count)) ? Number(local.ticket_count) : 0,
-      has_welcome_coupon: !!local.has_welcome_coupon,
-      streak_count: local.streak_count,
-      last_login_date: local.last_login_date || '',
-      speech_speed: local.speech_speed,
-      preferred_style: local.preferred_style,
-      preferred_request: local.preferred_request,
-      updated_at: new Date().toISOString()
-    };
-    var inserted = await client
-      .from('profiles')
-      .upsert(insertPayload, { onConflict: 'client_key' })
-      .select('*')
-      .single();
-    if (inserted.error) throw inserted.error;
-    profileCache = inserted.data;
-    applyProfileToLocal(profileCache);
-    return profileCache;
-  } catch (err) {
-    console.warn('[DayO] profiles sync failed — using localStorage fallback', err);
-    profileCache = Object.assign({ id: null, _offline: true }, local);
-    return profileCache;
-  }
+  // Anonymous preferences stay local; Auth triggers own profile creation.
+  profileCache = Object.assign({ id: null, _offline: true }, defaultsFromLocal());
+  return profileCache;
 }
 
 function mirrorLocalFields(profile) {
@@ -336,60 +291,57 @@ function mirrorLocalFields(profile) {
   if (profile.preferred_request) lsSet(REQUEST_KEY, profile.preferred_request);
 }
 
+function profileWritePatch(partial) {
+  partial = partial || {};
+  var patch = {};
+  var textLimits = { nickname: 50, user_name: 100, bio: 1000, learning_languages: 200 };
+  Object.keys(textLimits).forEach(function (key) {
+    if (!Object.prototype.hasOwnProperty.call(partial, key)) return;
+    if (typeof partial[key] !== 'string' || Array.from(partial[key]).length > textLimits[key]) throw new Error('invalid_profile_' + key);
+    patch[key] = partial[key].trim();
+  });
+  if (Object.prototype.hasOwnProperty.call(partial, 'avatar_url')) {
+    var avatar = partial.avatar_url;
+    if (typeof avatar !== 'string' || avatar.length > 3 * 1024 * 1024 ||
+        (avatar && !/^https:\/\/[^\s]+$|^\/(?!\/)[^\s]*$|^data:image\/(?:png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/.test(avatar))) throw new Error('invalid_profile_avatar_url');
+    patch.avatar_url = avatar;
+  }
+  if (Object.prototype.hasOwnProperty.call(partial, 'country_code')) {
+    var country = partial.country_code;
+    if (typeof country !== 'string' || (country && !/^[A-Za-z]{2}$/.test(country))) throw new Error('invalid_profile_country_code');
+    patch.country_code = country.toUpperCase();
+  }
+  [['speech_speed', ['slow', 'native']], ['preferred_style', ['casual', 'correct', 'interview']],
+   ['preferred_request', ['praise', 'gentle', 'encourage']]].forEach(function (item) {
+    if (!Object.prototype.hasOwnProperty.call(partial, item[0])) return;
+    if (item[1].indexOf(partial[item[0]]) < 0) throw new Error('invalid_profile_' + item[0]);
+    patch[item[0]] = partial[item[0]];
+  });
+  return patch;
+}
+
 async function updateProfile(partial, options) {
   var opts = options || {};
-  var base = profileCache || defaultsFromLocal();
-  var next = Object.assign({}, base, partial || {}, {
-    client_key: (partial && partial.client_key) || base.client_key || getClientKey(),
-    updated_at: new Date().toISOString()
-  });
-
-  // Always mirror to localStorage first (offline-safe)
+  // Reject privileged fields before both remote writes and local balance/UI mirrors.
+  var safe = profileWritePatch(partial);
+  var next = Object.assign({}, profileCache || defaultsFromLocal(), safe);
   mirrorLocalFields(next);
   profileCache = next;
   if (!opts.skipEvents) applyProfileToLocal(next);
-
-  var client = getClient();
-  if (!client || !next.client_key) return next;
-
+  var client = getClient(), userId = authUser && authUser.id;
+  if (!client || !userId) return next;
+  var payload = Object.assign({}, safe);
+  // This preference has no column in the audited production schema.
+  delete payload.preferred_request;
+  if (!Object.keys(payload).length) return next;
+  payload.updated_at = new Date().toISOString();
   try {
-    var payload = {
-      client_key: next.client_key,
-      user_id: next.user_id || getAuthUserId() || null,
-      nickname: next.nickname || cachedNickname() || next.user_name || '',
-      user_name: next.nickname || next.user_name || '',
-      email: next.email || '',
-      ticket_count: Number(next.ticket_count) || 0,
-      has_welcome_coupon: !!next.has_welcome_coupon,
-      streak_count: Number(next.streak_count) || 1,
-      last_login_date: next.last_login_date || '',
-      speech_speed: next.speech_speed || 'slow',
-      preferred_style: next.preferred_style || 'casual',
-      preferred_request: next.preferred_request || 'praise',
-      updated_at: next.updated_at
-    };
-
-    var result = await client
-      .from('profiles')
-      .upsert(payload, { onConflict: 'client_key' })
-      .select('*')
-      .single();
-
-    if (result.error) {
-      var noUserCol = Object.assign({}, payload);
-      delete noUserCol.user_id;
-      result = await client
-        .from('profiles')
-        .upsert(noUserCol, { onConflict: 'client_key' })
-        .select('*')
-        .single();
-    }
-
+    var result = await client.from('profiles').update(payload).eq('id', userId).select(OWN_PROFILE_COLUMNS).single();
     if (result.error) throw result.error;
-    profileCache = Object.assign({}, result.data);
+    profileCache = Object.assign({}, next, result.data);
     return profileCache;
   } catch (err) {
-    console.warn('[DayO] profiles update failed — localStorage kept', err);
+    console.warn('[DayO] profiles update failed — local preferences kept', err);
     return next;
   }
 }
@@ -589,12 +541,7 @@ async function grantWelcomeCoupon(userId, clientKey) {
   dispatchCouponChange();
   var client = getClient();
   if (!client || !userId) return;
-  try {
-    await client.from('profiles').update({
-      has_welcome_coupon: true,
-      updated_at: new Date().toISOString()
-    }).eq('user_id', userId);
-  } catch (e) { /* column may not exist yet */ }
+  // Entitlement fields remain server-owned; no profiles write here.
   try {
     await client.from('coupons').insert({
       user_id: userId,
@@ -631,9 +578,9 @@ async function waitForTriggerProfile(client, userId) {
   var lastError = null;
   for (var i = 0; i < 5; i++) {
     try {
-      var byId = await client.from('profiles').select('*').eq('id', userId).maybeSingle();
+      var byId = await client.from('profiles').select(OWN_PROFILE_COLUMNS).eq('id', userId).maybeSingle();
       if (!byId.error && !byId.data) {
-        byId = await client.from('profiles').select('*').eq('user_id', userId).maybeSingle();
+        byId = await client.from('profiles').select(OWN_PROFILE_COLUMNS).eq('user_id', userId).maybeSingle();
       }
       if (byId.error) lastError = byId.error;
       else if (byId.data) return byId.data;
@@ -655,24 +602,20 @@ async function syncSocialProfileFields(client, existing, user, name) {
   if (!String(existing.nickname || '').trim() && nextName) patch.nickname = nextName;
   if (!String(existing.user_name || '').trim() && nextName) patch.user_name = nextName;
   if (!String(existing.avatar_url || '').trim() && social.avatar) patch.avatar_url = social.avatar;
-  if (social.provider && String(existing.provider || '').toLowerCase() !== social.provider) {
-    patch.provider = social.provider;
-  }
 
   var keys = Object.keys(patch);
   if (!keys.length) return existing;
 
   patch.updated_at = new Date().toISOString();
   try {
-    var updated = await client.from('profiles').update(patch).eq('id', existing.id).select('*').single();
+    var updated = await client.from('profiles').update(patch).eq('id', existing.id).select(OWN_PROFILE_COLUMNS).single();
     if (updated && updated.data) return updated.data;
-    if (updated && updated.error && (patch.provider || patch.avatar_url || patch.nickname)) {
+    if (updated && updated.error && (patch.avatar_url || patch.nickname)) {
       var slim = Object.assign({}, patch);
-      delete slim.provider;
       delete slim.avatar_url;
       delete slim.nickname;
       if (Object.keys(slim).length <= 1) return Object.assign({}, existing, patch);
-      var retry = await client.from('profiles').update(slim).eq('id', existing.id).select('*').single();
+      var retry = await client.from('profiles').update(slim).eq('id', existing.id).select(OWN_PROFILE_COLUMNS).single();
       if (retry && retry.data) return retry.data;
     }
   } catch (e) {
@@ -731,7 +674,6 @@ async function ensureProfileForUser(user) {
         if (!existing.user_name || !existing.last_login_date) {
           await client.from('profiles').update({
             user_name: nextLogin.user_name,
-            email: nextLogin.email,
             last_login_date: today,
             updated_at: new Date().toISOString()
           }).eq('id', existing.id);
@@ -1328,6 +1270,7 @@ window.DayOProfileStore = {
   ready: ready,
   getProfile: getProfile,
   updateProfile: updateProfile,
+  profileWritePatch: profileWritePatch,
   fetchOrCreateProfile: fetchOrCreateProfile,
   ensureProfileForUser: ensureProfileForUser,
   rebindIdentity: rebindIdentity,

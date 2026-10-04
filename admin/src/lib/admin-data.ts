@@ -1,5 +1,9 @@
 import { supabase } from "@/lib/supabase";
 
+export function adminProfiles(options?: { count?: "exact"; head?: boolean }) {
+  return supabase.rpc("admin_list_profiles", {}, options);
+}
+
 export type AuthProvider = "kakao" | "google" | "email" | "unknown";
 
 export type CrmMember = {
@@ -147,7 +151,7 @@ export async function fetchCrmMembers(): Promise<{ rows: CrmMember[]; error: str
     let data: ProfileRecord[] | null = null;
     let lastError = "";
     for (const columns of selects) {
-      const result = await supabase.from("profiles").select(columns).order("created_at", { ascending: false });
+      const result = await adminProfiles().select(columns).order("created_at", { ascending: false });
       if (!result.error) {
         data = (result.data || []) as unknown as ProfileRecord[];
         lastError = "";
@@ -180,7 +184,7 @@ export async function fetchCrmMember(id: string): Promise<{ row: CrmMember | nul
   let record: ProfileRecord | null = null;
   let lastError = "";
   for (const columns of selects) {
-    const byPk = await supabase.from("profiles").select(columns).eq("id", id).maybeSingle();
+    const byPk = await adminProfiles().select(columns).eq("id", id).maybeSingle();
     if (!byPk.error) {
       record = (byPk.data || null) as unknown as ProfileRecord | null;
       lastError = "";
@@ -191,7 +195,7 @@ export async function fetchCrmMember(id: string): Promise<{ row: CrmMember | nul
 
   if (!record) {
     for (const columns of selects) {
-      const byAuth = await supabase.from("profiles").select(columns).eq("user_id", id).maybeSingle();
+      const byAuth = await adminProfiles().select(columns).eq("user_id", id).maybeSingle();
       if (!byAuth.error) {
         record = (byAuth.data || null) as unknown as ProfileRecord | null;
         lastError = "";
@@ -236,8 +240,8 @@ function roomUrl(bookingId: string) {
 
 export async function fetchDashboardKpis(): Promise<DashboardKpis> {
   const [members, partners, sessions, orders] = await Promise.all([
-    supabase.from("profiles").select("id", { count: "exact", head: true }),
-    supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "partner"),
+    adminProfiles({ count: "exact", head: true }).select("id"),
+    adminProfiles({ count: "exact", head: true }).select("id").eq("role", "partner"),
     supabase.from("bookings").select("id", { count: "exact", head: true }).eq("status", "completed"),
     supabase.from("orders").select("amount").eq("status", "paid"),
   ]);
@@ -262,15 +266,13 @@ export async function fetchPartnerProfiles() {
     "id, user_id, nickname, user_name, email, role, point_balance, created_at",
   ];
 
-  let last = await supabase
-    .from("profiles")
+  let last = await adminProfiles()
     .select(selects[selects.length - 1])
     .in("role", ["partner", "admin"])
     .order("created_at", { ascending: false });
 
   for (const columns of selects) {
-    const result = await supabase
-      .from("profiles")
+    const result = await adminProfiles()
       .select(columns)
       .in("role", ["partner", "admin"])
       .order("created_at", { ascending: false });
@@ -328,11 +330,10 @@ export async function fetchBookings(): Promise<{ rows: BookingRow[]; error: stri
 
   const names = new Map<string, string>();
   if (ids.length) {
-    const profiles = await supabase
-      .from("profiles")
+    const profiles = await adminProfiles()
       .select("user_id, nickname, user_name, email")
       .in("user_id", ids);
-    for (const profile of profiles.data || []) {
+    for (const profile of (profiles.data || []) as unknown as ProfileRecord[]) {
       const uid = String((profile as { user_id?: string }).user_id || "");
       const label = String(
         (profile as { nickname?: string }).nickname
@@ -431,18 +432,18 @@ export async function fetchSessionDetailContext(bookingId: string): Promise<Sess
   const ids = Array.from(new Set([learnerId, partnerId].filter(Boolean)));
   const names = new Map<string, string>();
   if (ids.length) {
-    const byId = await supabase.from("profiles").select("id, user_id, nickname, user_name").in("id", ids);
+    const byId = await adminProfiles().select("id, user_id, nickname, user_name").in("id", ids);
     if (!byId.error) {
-      for (const profile of byId.data || []) {
+      for (const profile of (byId.data || []) as unknown as ProfileRecord[]) {
         const name = String(profile.nickname || profile.user_name || "").trim();
         if (name) names.set(String(profile.id), name);
       }
     }
     const missing = ids.filter((id) => !names.has(id));
     if (missing.length) {
-      const byUserId = await supabase.from("profiles").select("id, user_id, nickname, user_name").in("user_id", missing);
+      const byUserId = await adminProfiles().select("id, user_id, nickname, user_name").in("user_id", missing);
       if (!byUserId.error) {
-        for (const profile of byUserId.data || []) {
+        for (const profile of (byUserId.data || []) as unknown as ProfileRecord[]) {
           const name = String(profile.nickname || profile.user_name || "").trim();
           if (profile.user_id && name) names.set(String(profile.user_id), name);
         }
@@ -718,15 +719,13 @@ export async function saveAdminMemo(
   row: { id: string },
   memo: string
 ) {
-  const payload = { admin_memo: memo, updated_at: new Date().toISOString() };
-  const result = await supabase.from("profiles").update(payload).eq("id", row.id).select("admin_memo").single();
+  const result = await supabase.rpc("admin_update_profile_memo", { p_profile_id: row.id, p_memo: memo });
   if (result.error) throw new Error(result.error.message);
-  return String(result.data?.admin_memo || "");
+  return String((result.data as { admin_memo?: string } | null)?.admin_memo || "");
 }
 
 export async function fetchAdminMemo(profileId: string) {
-  const result = await supabase
-    .from("profiles")
+  const result = await adminProfiles()
     .select("admin_memo")
     .eq("id", profileId)
     .single();

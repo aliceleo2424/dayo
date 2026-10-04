@@ -9,7 +9,7 @@ import { RoleActions } from "@/components/admin/role-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { updateProfileRole, detectMemberProvider, profileDisplayName, type SessionTranscriptContext } from "@/lib/admin-data";
+import { adminProfiles, updateProfileRole, detectMemberProvider, profileDisplayName, type SessionTranscriptContext } from "@/lib/admin-data";
 import { ProviderBadge, KakaoPrivateEmailHint, LearningLanguageTag } from "@/components/admin/provider-badge";
 import { UserDetailDrawer } from "@/components/admin/UserDetailDrawer";
 import { SessionTranscriptModal } from "@/components/admin/SessionTranscriptModal";
@@ -77,12 +77,11 @@ export default function DashboardPage() {
     setNotice("");
     try {
       const [memberCount, partnerCount, sessionCount, paidRows, memberRows] = await Promise.all([
-        supabase.from("profiles").select("id", { count: "exact", head: true }),
-        supabase.from("profiles").select("id", { count: "exact", head: true }).eq("role", "partner"),
+        adminProfiles({ count: "exact", head: true }).select("id"),
+        adminProfiles({ count: "exact", head: true }).select("id").eq("role", "partner"),
         supabase.from("bookings").select("id", { count: "exact", head: true }),
         supabase.from("orders").select("amount").eq("status", "paid"),
-        supabase
-          .from("profiles")
+        adminProfiles()
           .select("id, user_id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url, client_key, learning_languages, created_at, admin_memo, kakao_id")
           .order("created_at", { ascending: false }),
       ]);
@@ -100,8 +99,7 @@ export default function DashboardPage() {
           "id, nickname, user_name, email, role, point_balance",
         ];
         for (const columns of fallbackSelects) {
-          const fallback = await supabase
-            .from("profiles")
+          const fallback = await adminProfiles()
             .select(columns)
             .order("created_at", { ascending: false });
           if (!fallback.error && fallback.data) {
@@ -149,7 +147,7 @@ export default function DashboardPage() {
       ));
       const names = new Map<string, string>();
       if (ids.length) {
-        const named = await supabase.from("profiles").select("user_id, nickname, user_name, email").in("user_id", ids);
+        const named = await adminProfiles().select("user_id, nickname, user_name, email").in("user_id", ids);
         ((named.data || []) as unknown as { user_id?: string; nickname?: string; user_name?: string; email?: string }[]).forEach((row) => {
           const uid = String(row.user_id || "");
           const label = String(row.nickname || row.user_name || row.email || "").trim();
