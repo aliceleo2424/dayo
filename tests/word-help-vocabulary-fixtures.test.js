@@ -12,11 +12,17 @@ for (const card of cards) {
     const sets = vocabulary.sets(card, language);
     assert.ok(sets.length >= 2);
     for (const set of sets) {
-      assert.ok(set.length >= 4 && set.length <= 6);
-      assert.ok(set.every(item => item.text && item.ko));
+      assert.equal(set.length, 4);
+      assert.ok(set.every(item => item.text && item.meaning && item.pronunciation && item.example && item.language === language));
+      assert.equal(new Set(set.map(item => item.text)).size, 4);
+      if (language === 'en') assert.ok(set.every(item => /[가-힣]/.test(item.meaning) && /[가-힣]/.test(item.pronunciation) && /[a-z]/i.test(item.example)));
+      if (language === 'ko') assert.ok(set.every(item => /[a-z]/i.test(item.meaning) && /^[a-z -]+$/.test(item.pronunciation) && /[가-힣]/.test(item.example)));
       if (language === 'ko') assert.ok(set.every(item => /[가-힣]/.test(item.text) && !/[a-z]/i.test(item.text)));
     }
-    assert.equal(new Set(sets.flat().map(item => item.text.toLowerCase())).size, sets.flat().length);
+    for (let i = 0; i < sets.length; i++) {
+      const next = sets[(i+1) % sets.length];
+      assert.ok(sets[i].every(item => !next.some(other => other.text === item.text)), 'consecutive sets including wrap must not overlap');
+    }
   }
   for (const language of ['es', 'fr', 'unknown']) assert.deepEqual(vocabulary.sets(card, language), []);
 }
@@ -24,6 +30,10 @@ const room = fs.readFileSync('public/room.html', 'utf8');
 assert.match(room, /category: String\(card\.category/);
 assert.match(room, /DayOCurrentTalkCard = \{[\s\S]*window\.syncWordHelpCard\(\)/);
 assert.match(room, /body\.theme-partner #wordHelpBtn/);
+assert.doesNotMatch(room, /대화 구조대/);
+assert.match(room, /id="wordVocabularyTitle" class="word-section-title">이런 단어가 필요하신가요\?/);
+assert.match(room, /wordHelpTargetLanguage: String\(booking.language/);
+assert.match(room, /✨ AI 표현 도움/);
 const block = room.slice(room.indexOf('/* Word Help —'), room.indexOf('/* Feedback / rating'));
 const elements = {};
 function element(id) {
@@ -31,32 +41,57 @@ function element(id) {
   const classes = new Set();
   return elements[id] = { value: '', innerHTML: '', textContent: '', hidden: id === 'wordHelpAiSection', attributes: {},
     classList: { add: x => classes.add(x), remove: x => classes.delete(x), contains: x => classes.has(x), toggle(x, on) { if (on) classes.add(x); else classes.delete(x); } },
-    setAttribute(k, v) { this.attributes[k] = v; }, replaceChildren() { this.innerHTML = ''; },
+    getAttribute(k) { return this.attributes[k] || ''; }, setAttribute(k, v) { this.attributes[k] = v; }, replaceChildren() { this.innerHTML = ''; },
     focus() { this.focusCount = (this.focusCount || 0) + 1; }, blur() {}, addEventListener(type, fn) { this[type] = fn; } };
 }
-const requests = [], events = [];
+const requests = [], events = [], copies = [];
 let timer = 0;
 const context = { window: { DayOWordVocabulary: vocabulary,
-  DayORoomAccess: { bookingId: 'session-a', userId: 'user-a', language: 'en' }, DayOCurrentTalkCard: cards[0],
-  logSessionEvent: (...args) => events.push(args), copyHelpText() {} },
-  document: { getElementById: element }, AbortController, setTimeout: () => ++timer, clearTimeout() {},
+  DayORoomAccess: { role: 'user', bookingId: 'session-a', userId: 'user-a', language: 'en' }, DayOCurrentTalkCard: cards[0],
+  logSessionEvent: (...args) => events.push(args), copyHelpText(text) { copies.push(text); } },
+  document: { getElementById: element, querySelectorAll: () => [element('vocab-toggle-0'), element('vocab-toggle-1')] }, AbortController, setTimeout: () => ++timer, clearTimeout() {},
   isMobileRoomLayout: () => true, openSheet: () => element('wordSheetOverlay').classList.add('active'),
   fetch: (url, options) => new Promise(resolve => requests.push({ url, options, resolve })) };
 vm.createContext(context); vm.runInContext(block, context);
 const tick = () => new Promise(resolve => setImmediate(resolve));
 const submit = () => elements.wordHelpForm.submit({ preventDefault() {} });
 const oneWord = { words: [{ text: 'flavor', ko: '맛' }], phrases: [{ text: 'I like this flavor.', ko: '이 맛이 좋아요.' }] };
-const countWords = () => (element('wordVocabularyResults').innerHTML.match(/data-help-source=/g) || []).length;
+const countWords = () => (element('wordVocabularyResults').innerHTML.match(/class="word-card word-vocab-toggle"/g) || []).length;
 (async () => {
   context.window.openWordHelp();
-  assert.ok(countWords() >= 4 && countWords() <= 6);
+  assert.equal(countWords(), 4);
   assert.equal(requests.length, 0);
   assert.equal(element('wordHelpInput').focusCount || 0, 0, 'opening basic help must not open mobile keyboard');
   const first = element('wordVocabularyResults').innerHTML;
   element('wordVocabularyNext').click();
   assert.notEqual(element('wordVocabularyResults').innerHTML, first);
   element('wordVocabularyNext').click();
+  element('wordVocabularyNext').click();
   assert.equal(element('wordVocabularyResults').innerHTML, first);
+  const toggle0 = element('vocab-toggle-0'), toggle1 = element('vocab-toggle-1');
+  toggle0.setAttribute('aria-controls', 'wordVocabularyExample-0');
+  toggle1.setAttribute('aria-controls', 'wordVocabularyExample-1');
+  element('wordVocabularyExample-0').hidden = true;
+  context.window.toggleVocabularyExample(toggle0);
+  assert.equal(element('wordVocabularyExample-0').hidden, false);
+  context.window.toggleVocabularyExample(toggle1);
+  assert.equal(element('wordVocabularyExample-0').hidden, true, 'only one example expands at a time');
+  context.window.toggleVocabularyExample(toggle1);
+  assert.equal(element('wordVocabularyExample-1').hidden, true, 'second tap collapses');
+  context.window.copyVocabularyExample({ getAttribute: () => 'I like savory food.' });
+  assert.equal(copies[0], 'I like savory food.');
+  assert.equal(requests.length, 0, 'opening/copying an example must not call AI');
+  context.window.DayORoomAccess.wordHelpTargetLanguage = 'ko';
+  context.window.syncWordHelpCard();
+  assert.match(element('wordVocabularyResults').innerHTML, /word-vocab-pronunciation">go-so-ha-da<\/span>[\s\S]*word-card-meaning">nutty \/ savory/);
+  context.window.DayORoomAccess.wordHelpTargetLanguage = '';
+  context.window.syncWordHelpCard();
+  assert.equal(countWords(), 0, 'missing raw booking language must not use inherited English default');
+  element('wordHelpInput').value = 'test'; submit(); assert.equal(requests.length, 0);
+  delete context.window.DayORoomAccess.wordHelpTargetLanguage;
+  context.window.DayORoomAccess.role = 'partner'; context.window.syncWordHelpCard();
+  assert.equal(countWords(), 0, 'partner must not receive learner vocabulary');
+  context.window.DayORoomAccess.role = 'user'; context.window.syncWordHelpCard();
   context.window.DayOCurrentTalkCard = cards.find(c => c.category === 'culture'); context.window.syncWordHelpCard();
   assert.notEqual(element('wordVocabularyResults').innerHTML, first);
   context.window.DayORoomAccess.language = 'ko'; context.window.syncWordHelpCard();

@@ -10,13 +10,13 @@ const wordHandler = require('../api/word-help.js');
 const questionHandler = require('../api/partner-question.js');
 
 assert.equal(room, roomRoot, 'root/public room mirrors must match');
-assert.match(room, /한국어로 입력해도 괜찮아요[\s\S]*id="wordHelpInput"/);
-assert.match(room, /id="wordHelpSubmit"[^>]*>도움받기</);
+assert.match(room, /하고 싶은 말을 짧게 입력해 주세요[\s\S]*id="wordHelpInput"/);
+assert.match(room, /id="wordHelpSubmit"[^>]*>표현 찾기</);
 assert.doesNotMatch(room, /defaultWordHints|defaultSentenceHints|beautiful<\/|souvenir|dayo-help-hint-modal/);
 assert.doesNotMatch(room, /id="sentenceSheetOverlay"/);
 assert.match(room, /wordHelpRequestSequence[\s\S]*wordHelpAbortController\.abort\(\)/);
 assert.match(room, /if \(requestId !== wordHelpRequestSequence\) return/);
-assert.match(room, /지금은 단어 도움을 불러오지 못했어요\.\\n조금 뒤 다시 시도해 주세요/);
+assert.match(room, /지금은 AI 표현 도움을 불러오지 못했어요\.\\n조금 뒤 다시 시도해 주세요/);
 
 const renderHelp = room.slice(room.indexOf('function renderWordHelpResults'), room.indexOf('function setWordHelpStatus'));
 assert.doesNotMatch(renderHelp, /logSessionEvent|word_help_clicked/, 'rendering suggestions must not record usage');

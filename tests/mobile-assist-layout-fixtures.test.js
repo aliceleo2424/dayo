@@ -32,4 +32,12 @@ assert.match(fixture, /id="remoteVideo"/);
 assert.match(fixture, /overflow: hidden/);
 assert.doesNotMatch(fixture, /width:\s*[4-9]\d{2}px/, 'fixture must not require a desktop-width panel');
 
+assert.match(room, /word-vocab-example\[hidden\]/);
+assert.match(room, /id="wordHelpAiSection" hidden/);
+assert.match(room, /id="wordVocabularyNext" hidden>🔄 다른 단어 보기/);
+assert.match(room, /word-vocab-item \{[^}]*height: 56px/);
+assert.match(room, /word-vocab-example \{ position: absolute; inset: 0/);
+assert.match(room, /word-vocab-pronunciation \{[^}]*font-size: 0\.65rem/);
+assert.match(room, /--room-sage: #5F7D63/);
+assert.match(room, /--coral: #FF6B57/);
 console.log('Mobile assist layout fixtures passed: video priority, compact chat/Word Help/partner/talk panels, keyboard viewport handling, and mutual exclusivity.');

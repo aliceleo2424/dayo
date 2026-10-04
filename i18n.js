@@ -1244,7 +1244,7 @@
       KO: '원어민 대화 파트너와 대화 중', EN: 'Chatting with your partner', ZH: '正在与对话伙伴交流', JA: 'パートナーと会話中', FR: 'En conversation avec votre partenaire', ES: 'Charlando con tu compañero'
     },
     'room.wordHelp': {
-      KO: '💡 단어도움', EN: '💡 Word Help', ZH: '💡 单词帮助', JA: '💡 単語ヘルプ', FR: '💡 Mots', ES: '💡 Palabras'
+      KO: '💡 말하기 도움', EN: '💡 Speaking Help', ZH: '💡 口语帮助', JA: '💡 会話サポート', FR: '💡 Aide à l’expression', ES: '💡 Ayuda para expresarse'
     },
     'room.wordHelpLoading': {
       KO: 'AI가 추천 단어 찾는 중...', EN: 'AI is finding word tips...', ZH: 'AI正在寻找推荐单词…', JA: 'AIがおすすめ単語を探しています…', FR: 'L’IA cherche des mots…', ES: 'La IA busca palabras…'
