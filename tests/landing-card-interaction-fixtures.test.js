@@ -21,6 +21,7 @@ const partners = html.slice(html.indexOf('<!-- Partners -->'), html.indexOf('<!-
 assert.equal((partners.match(/<article class="journey-card/g) || []).length, 3);
 assert.ok(!/data-landing-ticket|data-booking-open|onclick|tabindex|role="button"/.test(partners));
 assert.ok(html.includes('(hover: hover) and (pointer: fine)'));
+assert.ok(html.includes('#partners .journey-card.reveal.visible { animation-fill-mode: backwards; }'));
 assert.ok(html.includes('.ticket-price-card:focus-visible'));
 assert.ok(html.includes('prefers-reduced-motion: reduce'));
 assert.ok(html.includes('data-booking-open data-i18n="landing.pricing.book"'));
