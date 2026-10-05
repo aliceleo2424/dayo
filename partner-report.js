@@ -15,15 +15,15 @@
   if(!url){failed();setImageStatus('Illustration unavailable for this topic. Your theme will still be saved.');return;}
   image.onerror=failed;timer=setTimeout(failed,12000);image.src=url;
  }
+ function noteTopic(){return String(context.topic||(context.talkCard&&context.talkCard.topic)||'').trim();}
  function syncTopicTemplate(){
-  var topic=selectedKeyword||context.topic||'',button=el('pr-note-templates').querySelector('[data-value="e"]');
-  if(button){button.disabled=!topic;button.title=topic?'':'Available when a conversation theme is known.';}
+  var topic=noteTopic(),button=el('pr-note-templates').querySelector('[data-value="e"]');
+  if(button){button.disabled=!topic;button.title=topic?'':'Available when a session or Talk Card topic is known.';}
   if(selectedTemplate==='e'&&!noteEdited)el('popup-partner-comment').value=contract.note('e',{topic:topic});
  }
  function chooseKeyword(value,source){
   var keyword=contract.safeKeyword(value);if(!keyword){setImageStatus('Choose a short topic, without contact details or links.');return;}
   selectedKeyword=keyword;
-  syncTopicTemplate();
   el('pr-keyword-value').textContent='Today’s theme: '+keyword;
   selectButtons(el('pr-keyword-options'),source==='suggested'?keyword:'custom');
   requestIllustration();
@@ -37,7 +37,7 @@
  }
  function selectTemplate(id){
   selectedTemplate=id;noteEdited=false;selectButtons(el('pr-note-templates'),id);el('pr-recommendation-field').hidden=id!=='f';
-  el('popup-partner-comment').value=contract.note(id,Object.assign({},context,{topic:selectedKeyword||context.topic}),el('pr-recommendation').value);
+  el('popup-partner-comment').value=contract.note(id,Object.assign({},context,{topic:noteTopic()}),el('pr-recommendation').value);
   if(id==='f')el('pr-recommendation').focus();else if(id==='g')el('popup-partner-comment').focus();
  }
  function mount(){

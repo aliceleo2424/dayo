@@ -6961,7 +6961,19 @@
     function setPartnerReportSubmitStatus(message, success) {
       var status = document.getElementById('partner-report-submit-status');
       if (!status) return;
-      status.textContent = message || '';
+      var text = String(message || '');
+      if (/^room\.partnerReport\./.test(text)) {
+        var translated = window.DayOI18n && typeof window.DayOI18n.t === 'function' ? window.DayOI18n.t(text) : '';
+        var fallback = {
+          'room.partnerReport.success': 'Report submitted successfully!',
+          'room.partnerReport.saving': 'Submitting your report…',
+          'room.partnerReport.preview': 'This is a preview. No report was submitted.',
+          'room.partnerReport.invalidBooking': 'This booking could not be verified. Please reopen the conversation.',
+          'room.partnerReport.rewardUnavailable': 'Reward processing could not be completed. Please try again.'
+        };
+        text = translated && !/^room\.partnerReport\./.test(translated) ? translated : (fallback[text] || 'Please try submitting your report again.');
+      }
+      status.textContent = text;
       status.hidden = !message;
       status.style.color = success ? '#166534' : '#BE123C';
     }
