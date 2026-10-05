@@ -1,0 +1,18 @@
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const c=require('../public/partner-report-contract.js');
+const values={a:'It was so nice talking with you in Spanish today.\nHave a great day!',b:'You did a great job keeping the conversation going in Spanish today!',c:'I really enjoyed hearing your stories today.\nHope we can talk again soon!',d:'You asked great questions today.\nKeep speaking with confidence!',e:'I loved talking about Seoul Forest cafés with you today!',f:'I recommend Seoul Forest cafés — I think you’d enjoy it!',g:''};
+for(const [id,text] of Object.entries(values))assert.equal(c.note(id,{language:'es',topic:'Seoul Forest cafés'},'Seoul Forest cafés'),text);
+for(const [key,label] of Object.entries({en:'English',es:'Spanish',fr:'French',ko:'Korean'}))assert.match(c.note('a',{language:key}),new RegExp('in '+label));
+assert.doesNotMatch(c.note('a',{}),/undefined|\{language\}|English/);
+assert.equal(c.note('e',{}),'');assert.equal(c.note('f',{},''),'');
+const room=fs.readFileSync('public/room.html','utf8');
+assert.match(room,/Choose a message, then make it your own/);
+assert.match(room,/hidden>Recommendation<input/);assert.match(room,/placeholder="Place, food or activity"/);
+assert.match(room,/Suggested conversation themes/);assert.doesNotMatch(room,/Suggested keywords/);
+const ui=fs.readFileSync('public/partner-report.js','utf8');
+assert.match(ui,/topic:selectedKeyword\|\|context.topic/);
+assert.match(ui,/selectedTemplate==='e'&&!noteEdited/);
+assert.match(ui,/selectedTemplate==='f'&&!noteEdited/);
+assert.match(ui,/button.disabled=!topic/);
+assert.match(ui,/custom.textContent='Write my own'/);
+console.log('PASS: exact A–G complete notes, EN/ES/FR/KO substitution, missing variables never guessed, recommendation input, theme-first topic, editable note guards, conversation-theme UI labels.');

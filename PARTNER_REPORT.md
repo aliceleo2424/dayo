@@ -6,7 +6,7 @@ Status: isolated `codex/partner-report-simplify`, based on persistence stabiliza
 
 `public/partner-report-contract.js` contains A–G note templates, actual language labels, six existing Treat codes/meanings, conservative keyword suggestions and the illustration prompt. It is available as `window.DayOPartnerReportContract` and as a Node module. A future User Report can import the same Treat mapping; the current User UI is unchanged.
 
-The popup offers editable note templates, six Treats plus No Treat, at most three keyword suggestions, custom keyword entry and an optional illustration. The transcript is a collapsed reference. No learner sentence selection, grammar correction or AI report approval is required. A–B use the known session language; missing language is omitted rather than guessed. E requires an explicit session topic or a selected keyword. F provides a short recommendation input; edits to the note are preserved when the recommendation subsequently changes.
+The popup offers editable note templates, six Treats plus No Treat, at most three keyword suggestions, custom keyword entry and an optional illustration. The transcript is a collapsed reference. No learner sentence selection, grammar correction or AI report approval is required. A–B use the known session language; missing language is omitted rather than guessed. E requires an explicit session topic or a selected conversation theme. A selected theme takes priority; changing the theme updates the E sentence only while the note has not been manually edited. Missing topic leaves E disabled. The UI says Choose a message and shows an editable complete sentence, not a saved chip label. F shows a Recommendation input with Place, food or activity placeholder; edits to the note are preserved when the recommendation subsequently changes.
 
 The intended completion time is about one minute; an average completion time has not been measured. Scoped CSS uses a scrollable modal, wrapping chips, 3-column desktop / 2-column mobile Treat cards and a sticky Submit report control.
 
@@ -69,6 +69,7 @@ Run:
 ```text
 node tests/partner-report-simplify-fixtures.test.js
 node tests/partner-report-themes-fixtures.test.js
+node tests/partner-report-notes-fixtures.test.js
 node tests/session-report-persistence-fixtures.test.js
 node tests/session-review-fixtures.test.js
 node tests/partner-reward-reliability-fixtures.test.js

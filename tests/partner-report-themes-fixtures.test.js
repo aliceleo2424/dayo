@@ -29,6 +29,6 @@ const room=fs.readFileSync('public/room.html','utf8').replace(/\r/g,'');
 const oldRoom=cp.execFileSync('git',['show','231efce:public/room.html'],{encoding:'utf8'}).replace(/\r/g,'');
 function section(s,a,b){return s.slice(s.indexOf(a),s.indexOf(b,s.indexOf(a)));}
 assert.equal(section(room,'window.executePartnerPayoutAndExit =','window.handleHeaderExitClick ='),section(oldRoom,'window.executePartnerPayoutAndExit =','window.handleHeaderExitClick ='),'submit/persistence unchanged');
-assert.equal(section(room,'<section class="pr-section"><h3>1.','<section class="pr-section"><h3>3.'),section(oldRoom,'<section class="pr-section"><h3>1.','<section class="pr-section"><h3>3.'),'Note/Treat UI unchanged');
+assert.equal(section(room,'<div id="pr-treats"','<section class="pr-section"><h3>3.'),section(oldRoom,'<div id="pr-treats"','<section class="pr-section"><h3>3.'),'Treat structure unchanged');
 assert.equal(fs.readFileSync('public/partner-report.css','utf8').replace(/\r/g,''),cp.execFileSync('git',['show','231efce:public/partner-report.css'],{encoding:'utf8'}).replace(/\r/g,''),'CSS unchanged');
-console.log('PASS: grouped nearby fragments, preserved named entities, 0–3 grounded phrases, shared context, generic/learner exclusions, private prompt boundary, Note/Treat/submission/CSS unchanged.');
+console.log('PASS: grouped nearby fragments, preserved named entities, 0–3 grounded phrases, shared context, generic/learner exclusions, private prompt boundary, Note contract/Treat structure/submission/CSS unchanged.');

@@ -15,10 +15,15 @@
   if(!url){failed();setImageStatus('Illustration unavailable for this topic. Your theme will still be saved.');return;}
   image.onerror=failed;timer=setTimeout(failed,12000);image.src=url;
  }
+ function syncTopicTemplate(){
+  var topic=selectedKeyword||context.topic||'',button=el('pr-note-templates').querySelector('[data-value="e"]');
+  if(button){button.disabled=!topic;button.title=topic?'':'Available when a conversation theme is known.';}
+  if(selectedTemplate==='e'&&!noteEdited)el('popup-partner-comment').value=contract.note('e',{topic:topic});
+ }
  function chooseKeyword(value,source){
   var keyword=contract.safeKeyword(value);if(!keyword){setImageStatus('Choose a short topic, without contact details or links.');return;}
   selectedKeyword=keyword;
-  var topicButton=el('pr-note-templates').querySelector('[data-value="e"]');if(topicButton)topicButton.disabled=false;
+  syncTopicTemplate();
   el('pr-keyword-value').textContent='Today’s theme: '+keyword;
   selectButtons(el('pr-keyword-options'),source==='suggested'?keyword:'custom');
   requestIllustration();
@@ -28,11 +33,11 @@
   var candidates=contract.suggestions(context);
   el('pr-keyword-hint').textContent=candidates.length?'Short topics supported by your conversation.':'No specific theme found. Write a short topic or phrase.';
   candidates.forEach(function(word){var button=document.createElement('button');button.type='button';button.textContent=word;button.dataset.value=word;button.setAttribute('aria-pressed',String(word===selectedKeyword));button.addEventListener('click',function(){el('pr-custom-keyword-field').hidden=true;chooseKeyword(word,'suggested');});list.append(button);});
-  var custom=document.createElement('button');custom.type='button';custom.textContent='Other / Write my own';custom.dataset.value='custom';custom.setAttribute('aria-pressed','false');custom.addEventListener('click',function(){el('pr-custom-keyword-field').hidden=false;el('pr-custom-keyword').focus();});list.append(custom);
+  var custom=document.createElement('button');custom.type='button';custom.textContent='Write my own';custom.dataset.value='custom';custom.setAttribute('aria-pressed','false');custom.addEventListener('click',function(){el('pr-custom-keyword-field').hidden=false;el('pr-custom-keyword').focus();});list.append(custom);
  }
  function selectTemplate(id){
   selectedTemplate=id;noteEdited=false;selectButtons(el('pr-note-templates'),id);el('pr-recommendation-field').hidden=id!=='f';
-  el('popup-partner-comment').value=contract.note(id,Object.assign({},context,{topic:context.topic||selectedKeyword}),el('pr-recommendation').value);
+  el('popup-partner-comment').value=contract.note(id,Object.assign({},context,{topic:selectedKeyword||context.topic}),el('pr-recommendation').value);
   if(id==='f')el('pr-recommendation').focus();else if(id==='g')el('popup-partner-comment').focus();
  }
  function mount(){
@@ -48,8 +53,8 @@
  }
  function open(data){
   mount();if(!initialized)return;context=data||{};
-  var topicButton=el('pr-note-templates').querySelector('[data-value="e"]');topicButton.disabled=!(context.topic||selectedKeyword);topicButton.title=context.topic?'':'Available when a specific session topic is known.';
+  syncTopicTemplate();
   paintSuggestions();if(!selectedTemplate&&!el('popup-partner-comment').value)selectTemplate('a');
  }
- window.DayOPartnerReport={open:open,refresh:function(data){context=data||context;if(initialized&&!selectedKeyword)paintSuggestions();},payload:function(){return {partnerComment:el('popup-partner-comment').value,stamp:(root.querySelector('input[name="popup_stamp"]:checked')||{}).value||null,keyword:selectedKeyword||null,illustUrl:imageUrl};}};
+ window.DayOPartnerReport={open:open,refresh:function(data){context=data||context;if(initialized){syncTopicTemplate();if(!selectedKeyword)paintSuggestions();}},payload:function(){return {partnerComment:el('popup-partner-comment').value,stamp:(root.querySelector('input[name="popup_stamp"]:checked')||{}).value||null,keyword:selectedKeyword||null,illustUrl:imageUrl};}};
 })();
