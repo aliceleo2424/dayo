@@ -15,30 +15,61 @@
   if(id==='f')return recommendation?'I recommend '+clean(recommendation,120)+' — I think you’d enjoy it!':'';
   return '';
  }
- // Conservative noun vocabulary: never pretend token frequency is a grammar/POS model.
- // Unknown topics remain manual input rather than inventing a topic or a learner sentence.
- var nouns=['café','coffee','pasta','pizza','food','restaurant','cooking','baking','bread','dessert','tea','cake','chocolate','music','concert','guitar','piano','movie','cinema','drama','book','webtoon','game','football','baseball','tennis','yoga','hiking','cycling','swimming','beach','mountain','park','museum','art','painting','photography','fashion','shopping','cat','dog','pet','garden','flower','travel','trip','festival','university','school','work','culture'];
- var phrases=['Seoul Forest','K-pop concert','K-pop','Busan trip','Jeju Island'];
+ // Supported topic rules preserve known entities and combine only nearby evidence.
+ // This is a conservative local heuristic, not a multilingual NLP/PII model.
+ function topicText(value){return clean(value,12000).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[/|]+/g,' ');}
+ var themeRules=[
+  {id:'seoul_cafes',label:'Seoul Forest cafés',groups:[/\bseoul\s+forest\b/,/\b(?:cafes?|coffee)\b/],concept:'a cozy café near Seoul Forest',suppresses:['seoul_forest']},
+  {id:'pasta_home',label:'making pasta at home',groups:[/\bpasta\b/,/\b(?:cook(?:ing|ed)?|mak(?:e|ing))\b/,/\bhome\b/],concept:'making pasta in a home kitchen',suppresses:['pasta_cooking']},
+  {id:'busan_trip',label:'Busan trip',groups:[/\bbusan\b/,/\b(?:travel(?:ing|ling)?|trip|beach)\b/],concept:'a trip to Busan'},
+  {id:'kpop_concerts',label:'K-pop concerts',groups:[/\bk[- ]?pop\b/,/\bconcerts?\b/],concept:'a K-pop concert venue with lights and a stage'},
+  {id:'seoul_rain',label:'rainy weather in Seoul',groups:[/\bseoul\b/,/\brain(?:y|ing)?\b/,/\bweather\b/],concept:'a rainy day in Seoul'},
+  {id:'cafe_study',label:'studying at a café',groups:[/\bstud(?:y|ying|ied)\b/,/\bcafes?\b/],concept:'books and a warm drink on a café study table'},
+  {id:'pasta_cooking',label:'making pasta',groups:[/\bpasta\b/,/\b(?:cook(?:ing|ed)?|mak(?:e|ing))\b/],concept:'preparing pasta in a kitchen'},
+  {id:'seoul_forest',label:'Seoul Forest',groups:[/\bseoul\s+forest\b/],concept:'a peaceful walk through Seoul Forest'},
+  {id:'jeju_island',label:'Jeju Island',groups:[/\bjeju\s+island\b/],concept:'the scenery of Jeju Island'},
+  {id:'korean_drama',label:'Korean dramas',groups:[/\bkorean\s+dramas?\b/],concept:'a cozy television and sofa for watching Korean dramas'},
+  {id:'live_music',label:'live music',groups:[/\blive\s+music\b/],concept:'a small live music stage with instruments'},
+  {id:'street_food',label:'street food',groups:[/\bstreet\s+food\b/],concept:'a colorful street food stall'},
+  {id:'homemade_pasta',label:'homemade pasta',groups:[/\bhomemade\s+pasta\b/],concept:'a plate of homemade pasta'},
+  {id:'reading_books',label:'reading books',groups:[/\bread(?:ing)?\b/,/\bbooks?\b/],concept:'books and a comfortable reading corner'},
+  {id:'hiking_mountains',label:'mountain hiking',groups:[/\bhik(?:e|ing)\b/,/\bmountains?\b/],concept:'a mountain hiking trail'}
+ ];
+ function supports(rule,text){return rule.groups.every(function(group){return group.test(text);});}
  function suggestions(context){
   context=context||{};
-  var transcript=(context.transcript||[]).filter(function(row){return row&&typeof row==='object'&&['partner','me','local'].includes(String(row.speaker||'').toLowerCase());}).map(function(row){return clean(row.text||row.message,1000);}).join(' ').slice(-12000);
-  var card=context.talkCard||{},fallback=clean(card.topic||card.question_en,500),sessionTopic=clean(context.topic,80),topicText=fallback+' '+sessionTopic;
+  var rows=(Array.isArray(context.transcript)?context.transcript:[]).filter(function(row){return row&&typeof row==='object'&&['partner','me','local'].includes(String(row.speaker||'').toLowerCase());}).slice(-40).map(function(row){return topicText(clean(row.text||row.message,600));});
+  var card=context.talkCard||{},topic=topicText(context.topic||''),cardText=topicText(card.topic||card.question_en||''),contextText=topic+' '+cardText;
   var ranked=[];
-  function extract(text,weight){
-   var lower=text.toLowerCase();
-   phrases.forEach(function(phrase){var count=lower.split(phrase.toLowerCase()).length-1;if(count)add(phrase,count*weight+2);});
-   nouns.forEach(function(noun){var term=noun==='café'?'caf[eé]s?':noun+'s?';var matches=lower.match(new RegExp('(?:^|[^a-zé])'+term+'(?=$|[^a-zé])','g'));if(matches)add(noun==='café'?'Café':noun.charAt(0).toUpperCase()+noun.slice(1),matches.length*weight);});
-  }
-  function add(label,score){var found=ranked.find(function(x){return x.label.toLowerCase()===label.toLowerCase();});if(found)found.score+=score;else ranked.push({label:label,score:score,order:ranked.length});}
-  extract(transcript,3);extract(topicText,1);
-  // A short explicit topic is valid context, unlike an entire question/speech turn.
-  if(!ranked.length&&safeKeyword(sessionTopic))add(sessionTopic,1);
-  return ranked.sort(function(a,b){return b.score-a.score||a.order-b.order;}).map(function(x){return x.label;}).filter(function(label,i,all){return !all.some(function(other,j){return j<i&&other.toLowerCase().includes(label.toLowerCase());});}).slice(0,3);
+  themeRules.forEach(function(rule,index){
+   var exact=rows.filter(function(row){return supports(rule,row);}).length;
+   var near=rows.some(function(_,i){return supports(rule,rows.slice(i,i+3).join(' ').slice(0,600));});
+   var shared=rule.groups.every(function(group){return group.test(rows.join(' '))||group.test(contextText);})&&rule.groups.some(function(group){return group.test(rows.join(' '));})&&rule.groups.some(function(group){return group.test(contextText);});
+   var contextual=supports(rule,contextText);
+   if(!exact&&!near&&!shared&&!contextual)return;
+   var score=exact>1?30+exact*3:exact?18:shared?14:near?10:3;
+   if(contextual&&(exact||near))score+=5;
+   score+=rule.groups.length;
+   ranked.push({rule:rule,score:score,index:index});
+  });
+  // Keep a complete entity/topic rather than its shorter overlapping version.
+  ranked=ranked.filter(function(candidate){return !ranked.some(function(other){return (other.rule.suppresses||[]).includes(candidate.rule.id);});});
+  return ranked.sort(function(a,b){return b.score-a.score||a.index-b.index;}).slice(0,3).map(function(item){return item.rule.label;});
  }
- function illustrationUrl(keyword,seed){var safe=safeKeyword(keyword);if(!safe)return null;
-  var prompt='A simple warm editorial illustration of '+safe+'. DayO cream, sage and soft coral palette. Cozy minimal composition. No text, no typography, no letters, no speech bubbles.';
+ function illustrationConcept(theme){
+  var safe=safeKeyword(theme);if(!safe)return '';
+  var normalized=topicText(safe),exact=themeRules.find(function(rule){return topicText(rule.label)===normalized;});
+  if(exact)return exact.concept;
+  var supported=themeRules.find(function(rule){return supports(rule,normalized);});if(supported)return supported.concept;
+  // Manual topics can use safe concrete subjects; unknown names/private places
+  // are never interpolated into the external provider prompt.
+  var subjects={pottery:'a pottery wheel and handmade ceramic bowls',coffee:'a cozy cup of coffee',pasta:'a plate of pasta',cafe:'a cozy café',cafes:'a cozy café',baking:'freshly baked bread',painting:'a painting workspace',gardening:'a peaceful garden'};
+  return subjects[normalized]||'';
+ }
+ function illustrationUrl(keyword,seed){var concept=illustrationConcept(keyword);if(!concept)return null;
+  var prompt='A simple warm editorial illustration inspired by '+concept+'. Warm cream, sage and soft coral mood. Cozy minimal composition. No text, no typography, no letters, no speech bubbles.';
   return 'https://image.pollinations.ai/prompt/'+encodeURIComponent(prompt)+'?width=400&height=400&nologo=true&seed='+encodeURIComponent(seed||1);
  }
- var api={treats:Object.freeze(treats),templates:templates,note:note,suggestions:suggestions,safeKeyword:safeKeyword,illustrationUrl:illustrationUrl};
+ var api={treats:Object.freeze(treats),templates:templates,note:note,suggestions:suggestions,safeKeyword:safeKeyword,illustrationConcept:illustrationConcept,illustrationUrl:illustrationUrl};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.DayOPartnerReportContract=api;
 })(typeof window!=='undefined'?window:this);

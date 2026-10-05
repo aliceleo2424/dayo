@@ -10,22 +10,23 @@
   var old=el('pr-illustration'),image=document.createElement('img');image.id='pr-illustration';image.alt='Conversation keepsake illustration';image.referrerPolicy='no-referrer';image.hidden=true;old.replaceWith(image);
   setImageStatus('Creating your illustration… You can submit now.');
   var pending=true,url=contract.illustrationUrl(keyword,Math.floor(Math.random()*1000000));
-  function failed(){if(run!==request||!pending)return;pending=false;clearTimeout(timer);imageUrl=null;image.hidden=true;setImageStatus('Illustration unavailable. Your keyword will still be saved.');}
+  function failed(){if(run!==request||!pending)return;pending=false;clearTimeout(timer);imageUrl=null;image.hidden=true;setImageStatus('Illustration unavailable. Your theme will still be saved.');}
   image.onload=function(){if(run!==request||!pending)return;if(!image.naturalWidth){failed();return;}pending=false;clearTimeout(timer);imageUrl=url;image.hidden=false;setImageStatus(keyword);};
+  if(!url){failed();setImageStatus('Illustration unavailable for this topic. Your theme will still be saved.');return;}
   image.onerror=failed;timer=setTimeout(failed,12000);image.src=url;
  }
  function chooseKeyword(value,source){
   var keyword=contract.safeKeyword(value);if(!keyword){setImageStatus('Choose a short topic, without contact details or links.');return;}
   selectedKeyword=keyword;
   var topicButton=el('pr-note-templates').querySelector('[data-value="e"]');if(topicButton)topicButton.disabled=false;
-  el('pr-keyword-value').textContent='Today’s keyword: '+keyword;
+  el('pr-keyword-value').textContent='Today’s theme: '+keyword;
   selectButtons(el('pr-keyword-options'),source==='suggested'?keyword:'custom');
   requestIllustration();
  }
  function paintSuggestions(){
   var list=el('pr-keyword-options');list.replaceChildren();
   var candidates=contract.suggestions(context);
-  el('pr-keyword-hint').textContent=candidates.length?'Suggestions from your conversation context.':'No specific topic found. Write your own keyword.';
+  el('pr-keyword-hint').textContent=candidates.length?'Short topics supported by your conversation.':'No specific theme found. Write a short topic or phrase.';
   candidates.forEach(function(word){var button=document.createElement('button');button.type='button';button.textContent=word;button.dataset.value=word;button.setAttribute('aria-pressed',String(word===selectedKeyword));button.addEventListener('click',function(){el('pr-custom-keyword-field').hidden=true;chooseKeyword(word,'suggested');});list.append(button);});
   var custom=document.createElement('button');custom.type='button';custom.textContent='Other / Write my own';custom.dataset.value='custom';custom.setAttribute('aria-pressed','false');custom.addEventListener('click',function(){el('pr-custom-keyword-field').hidden=false;el('pr-custom-keyword').focus();});list.append(custom);
  }

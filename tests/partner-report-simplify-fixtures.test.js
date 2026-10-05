@@ -4,10 +4,13 @@ for(const f of ['room.html','partner-report-contract.js','partner-report.js','pa
 assert.equal(contract.treats.length,6);assert.deepEqual(contract.treats.map(t=>t.code),['americano','green_tea','vanilla_latte','cookie','croissant','macaron']);assert.equal(contract.treats[3].meaning,'Curious questions');
 for(const id of ['a','b','c','d','e','f','g'])assert(!/[{}]/.test(contract.note(id,{language:'es',topic:'Pasta'},'Seoul Forest cafés')));
 assert.match(contract.note('a',{language:'es'}),/in Spanish/);assert.doesNotMatch(contract.note('a',{}),/English|undefined/);assert.equal(contract.note('e',{}),'');assert.equal(contract.note('g',{}),'');assert.match(contract.note('f',{},'Pasta café'),/Pasta café/);
-assert.deepEqual(contract.suggestions({}),[]);assert.deepEqual(contract.suggestions({transcript:[{speaker:'partner',text:'Coffee coffee coffee.'}]}),['Coffee']);assert.equal(contract.suggestions({transcript:[{speaker:'partner',text:'Coffee pasta Seoul Forest coffee pasta.'}]}).length,3);
-assert.deepEqual(contract.suggestions({transcript:[{speaker:'learner',text:'Coffee pasta'}]}),[]);assert.deepEqual(contract.suggestions({transcript:[{speaker:'partner',text:'thing time day people question conversation user partner language English'}]}),[]);
-assert.deepEqual(contract.suggestions({talkCard:{question_en:'What is your favorite coffee?'}}),['Coffee']);assert.deepEqual(contract.suggestions({topic:'Pottery'}),['Pottery']);
-assert.deepEqual(contract.suggestions({transcript:[{speaker:'partner',text:'Café, café.'}]}),['Café']);
+assert.deepEqual(contract.suggestions({}),[]);
+assert.deepEqual(contract.suggestions({transcript:[{speaker:'partner',text:'Coffee coffee coffee.'}]}),[]);
+assert.deepEqual(contract.suggestions({transcript:[{speaker:'partner',text:'Seoul Forest cafés. Making pasta at home. Busan beach trip.'}]}),['making pasta at home','Seoul Forest cafés','Busan trip']);
+assert.deepEqual(contract.suggestions({transcript:[{speaker:'learner',text:'Seoul Forest cafés'}]}),[]);
+assert.deepEqual(contract.suggestions({transcript:[{speaker:'partner',text:'thing time day people question conversation user partner language English'}]}),[]);
+assert.deepEqual(contract.suggestions({talkCard:{question_en:'What is your favorite coffee?'}}),[]);
+assert.deepEqual(contract.suggestions({topic:'Pottery'}),[]);
 assert.equal(contract.safeKeyword('mail@example.com'),'');assert.equal(contract.safeKeyword('https://private.invalid'),'');
 const url=decodeURIComponent(contract.illustrationUrl('Seoul Forest café',4));assert.match(url,/warm editorial illustration/);assert.match(url,/No text, no typography/);assert.doesNotMatch(url,/transcript|private learner/i);
 const room=read('public/room.html');for(const m of room.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)){if(m[1].trim())new vm.Script(m[1]);}new vm.Script(read('public/partner-report.js'));new vm.Script(read('public/partner-report-contract.js'));

@@ -12,19 +12,19 @@ The intended completion time is about one minute; an average completion time has
 
 ## Keyword sources and privacy boundaries
 
-The current room context is `DayORoomAccess`, `DayOLive.getTranscript()` / `sessionTranscript`, and `DayOCurrentTalkCard`. There is no new fallback to a prior session's localStorage transcript. Only explicitly partner/local/me transcript rows contribute to suggestions. Learner/user rows and unknown-role strings are excluded. A small concrete noun/phrase vocabulary ranks frequency and topic relevance. This is a local heuristic, not a multilingual POS model or an AI evaluator. Unknown topics may have no suggestions.
+The current room context is `DayORoomAccess`, `DayOLive.getTranscript()` / `sessionTranscript`, and `DayOCurrentTalkCard`. There is no new fallback to a prior session's localStorage transcript. Only explicitly partner/local/me transcript rows contribute to suggestions. Learner/user rows and unknown-role strings are excluded. Grounded theme rules preserve complete named entities and combine related evidence within up to three nearby Partner rows / 600 characters. Repeated supported topics rank first, shared transcript/topic evidence next, nearby grouping next, then recognized contextual fallback. Rules never emit bare Coffee, Pasta, Forest or other fragments. This is a conservative local heuristic with a limited topic vocabulary, not a multilingual NLP model or an AI evaluator. Unknown topics may have no suggestions.
 
-Fallback uses concrete nouns in the current Talk Card topic/question, then the current explicit session topic, then manual input. Suggestions are capped at three. Generic conversation/filler words are excluded. The keyword check rejects obvious contact/link patterns and angle/curly brackets; it is not a general PII classifier. Only the selected keyword and fixed artistic instructions go into the illustration URL, never the full transcript.
+Known phrase rules also consider the current Talk Card topic/question and explicit session topic. Suggestions are capped at three; zero, one or two is valid. Generic conversation/filler words are excluded. The UI asks for a short topic or phrase. The selected complete phrase is still stored in the existing keyword field. The keyword check rejects obvious contact/link patterns and angle/curly brackets; it is not a general PII classifier. External image prompts use only reviewed topic concepts derived from the selected phrase and fixed artistic instructions, never raw transcript, person names or private places. Unsupported custom topics remain saveable but do not generate an external image request.
 
 Future learner grammar corrections must use user-side recognized speech only. Partner transcript must not become the learner correction source.
 
 ## Illustration
 
-The pre-existing Pollinations URL provider is reused: `https://image.pollinations.ai/prompt/{encoded_prompt}`. The prompt asks for a warm editorial illustration, cream/sage/soft-coral mood, no text, typography, letters or speech bubbles. No new provider credential, environment setting, proxy or storage schema was added.
+The pre-existing Pollinations URL provider is reused: `https://image.pollinations.ai/prompt/{encoded_prompt}`. The phrase is mapped to a short safe visual concept (Seoul Forest cafés → a cozy café near Seoul Forest; Busan trip → a trip to Busan). The prompt asks for a warm editorial illustration, cream/sage/soft-coral mood, no text, typography, letters or speech bubbles. No new provider credential, environment setting, proxy or storage schema was added.
 
 A successful image load stores its URL in the pending report. Failure, timeout (12 seconds), or submission before the image finishes stores the keyword with `illust_url: null`. Submission never waits for illustration generation. Late callbacks from earlier keyword requests cannot replace the current selected keyword's image. Images completing after submission are not separately saved.
 
-The local harness substitutes a local image / 404 / delayed image only to verify success, failure and pending UI paths. Actual legacy-provider success and long-term URL persistence are unverified. Current official provider documentation at https://gen.pollinations.ai/docs describes an API-key requirement for the modern endpoint. Confirm the legacy endpoint before release; any authenticated server adapter and durable asset storage are separate scope/configuration decisions. An image failure must remain non-blocking.
+The local harness substitutes a local image / 404 / delayed image for deterministic fixtures; image=real keeps the actual provider URL. On 2026-10-05, the revised Seoul Forest cafés prompt with seed 533247 returned HTTP 200 image/jpeg (15,066 bytes); the browser displayed a real 400×400 image, and the report payload retained the phrase and provider URL. The same topic with seed 20261005 returned HTTP 402 Payment Required, application/json, with an x402 payment-required header. The unauthenticated legacy endpoint is therefore not consistently available for fresh requests. The browser subsequently loaded a 400×400 image for that same seed, so the CLI 402 could not be reproduced as a browser-image failure; the provider-side/client-dependent condition has not been established. Deterministic 404 failure is covered separately by the local fixture and submits the complete phrase with illust_url null. No payment, credential or provider settings were changed. The successful image contained provider watermark/text despite nologo=true / no typography instructions; these are prompt requests rather than a guaranteed output filter. Durable storage and an authenticated server adapter remain separate scope decisions. Image failure stays non-blocking; actual-provider success is not represented as production readiness.
 
 ## Save ownership and persistence
 
@@ -68,6 +68,7 @@ Run:
 
 ```text
 node tests/partner-report-simplify-fixtures.test.js
+node tests/partner-report-themes-fixtures.test.js
 node tests/session-report-persistence-fixtures.test.js
 node tests/session-review-fixtures.test.js
 node tests/partner-reward-reliability-fixtures.test.js
@@ -75,9 +76,9 @@ node tests/session-transcript-reliability-fixtures.test.js
 node tests/production-room-regressions.test.js
 ```
 
-`node tests/partner-report-preview.cjs` serves a local-only popup at `http://127.0.0.1:3051/preview`. It extracts the actual popup/submission code but replaces auth, storage, reward, redirects and image URLs with fixtures. It loads no production credentials, live media or quiz runtime. Query fixtures: `keywords=0|1|3`, `image=fail|pending`, `report=fail`, `reward=fail`, `transcript=fail`.
+`node tests/partner-report-preview.cjs` serves a local-only popup at `http://127.0.0.1:3051/preview`. It extracts the actual popup/submission code but replaces auth, storage, reward, redirects and image URLs with fixtures. It loads no production credentials, live media or quiz runtime. Query fixtures: `keywords=0|1|3`, `image=fail|pending|real (optional numeric seed for real provider)`, `report=fail`, `reward=fail`, `transcript=fail`.
 
-Verified locally: A–G / language substitution / editable recommendation, six Treats + No Treat, 0/1/3 candidates and manual keyword, image success/404/pending, submission, report/reward/transcript failure isolation and retry, idempotent fixture reward, transcript reference, 390px and 1280px no horizontal overflow / Submit inside modal. Duplicate and learner ownership contracts are covered by persistence regression fixtures. Production/RPC E2E and real provider generation are not claimed.
+Verified locally: A–G / language substitution / editable recommendation, six Treats + No Treat, 0/1/3 candidates and manual keyword, image success/404/pending, submission, report/reward/transcript failure isolation and retry, idempotent fixture reward, transcript reference, 390px and 1280px no horizontal overflow / Submit inside modal. Duplicate and learner ownership contracts are covered by persistence regression fixtures. Production/RPC E2E is not claimed. Actual provider generation was separately exercised as recorded above; production data was not created.
 
 The fixtures compare the learner quiz inline section and the persistence/retry section with f1006f5, and assert room-live/session-lifecycle/Supabase client/My Page files remain unchanged. No DB/backend files are edited.
 
