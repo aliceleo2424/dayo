@@ -54,7 +54,7 @@ The transcript flush is bounded to 1.8s; API work has a 7.5s deadline and browse
 
 Human Touch + Language Recap IA is unchanged. Correction count zero hides its block. Existing legacy corrections remain readable with their original quality/provenance rules. Source loading refreshes only the matching already-open detail and preserves scroll. English save label is `Save this report`; its existing export action is unchanged.
 
-## Verification and release boundary
+## Initial implementation verification
 
 - New fixtures: filters, 0/1/3, multilingual, exact original/ID, meaning guards, own-booking access rejection, cached zero/result retry, API/provider failure, actual browser enrichment and lifecycle merge integration, both participant SQL ownership contracts, mirrors and unchanged lifecycle remainder.
 - Existing 8 suites: User report UI, session review/Quiz, session persistence, transcript reliability, conversation insights, Partner notes/themes/finalize.
@@ -63,3 +63,23 @@ Human Touch + Language Recap IA is unchanged. Correction count zero hides its bl
 - Auth/RLS reads and writes are exercised with controlled HTTP/VM fixtures and unchanged SQL inspection, not a live Supabase session. No real session was created or modified; production E2E is still required.
 
 Before release: review integration with the primary checkout's pending room/Quiz/client work, ensure the existing server Gemini key/model and Supabase public config are available to the user-site API, deploy only after approval, then verify own-learner vs Partner/outsider access, actual transcript save -> generation -> merge -> refresh, provider failure and retries in staging. Consider latency and request-cost controls before broad rollout. No main merge, push, production migration or deploy in this task.
+
+
+## Actual DB release validation — 2026-10-05
+
+The user explicitly designated a disposable confirmed Learner/Jen booking. The QA recorder feeds synthetic final-recognition events through the existing room-live recognition callback, UUID/timestamp serialization, ProfileStore ES module and authenticated `upsert_session_transcript`. The test clock uses that booking's session timestamp; this does not test microphone recognition, room entry or booking completion. No ticket/reward/session-state calls are made.
+
+- Actual DayO Supabase accepted four canonical Learner rows. The real API read them with the Learner's JWT and called Gemini 3.6 Flash. Only `I am very agree.` produced a grammar correction (`I strongly agree.`); the natural café sentence had no correction and the fragment/`yes` were excluded.
+- Existing Learner RPC saved source log/utterance IDs, exact original text, suggestion, reason/type, model/version/digest in feedback. Fresh authenticated reads retained one report and one correction; identical API retry used the stored digest without another provider call.
+- Natural-only speech generated a valid zero result; the correction section disappeared. Partner RPC saved a test note/Treat/theme/image while retaining Learner feedback and the explicit QA Quiz sentinel (67, not a real Quiz attempt).
+- Genuine Partner login was denied Learner API (403), Learner report SELECT, direct UPDATE and Learner merge. Production read-only catalog inspection confirmed authenticated SELECT-only table grants, owner/admin RLS, and separate participant RPC ownership. No policy/grant changes.
+- A deliberately invalid key in the local handler copy caused a real Google 400. The existing Learner merge still saved the base report, preserving Partner fields and Quiz. No raw provider error reached the report UI. Restoring normal provider generation retained those fields.
+- The unchanged actual My Page loaded the persisted report on a new page request (no report fixture injection). Korean/English views showed Human Touch, source-bound correction, useful expressions and Quiz. Illustration loaded; 390px had no horizontal overflow and retained the Save CTA.
+- Existing lower speaking-pattern/word-count/rhythm insight remains. It is not the same correction data, but is better suited to the Progress/metrics view in a future UI task; no removal here.
+- Real E2E exposed the existing `/rest/v1/` Supabase URL format. The new API now normalizes that public URL like the existing client, while still rejecting non-Supabase hosts. No environment variable was edited.
+
+Local actual-DB tool (never part of the public site):
+`node tests/learner-language-recap-e2e-server.cjs <server-env-file> <explicit-test-config-json>`
+Config: bookingId, learnerId, partnerId, optional email. Keep real identifiers outside Git. Use only an explicitly authorized disposable booking. `--production-api` selects the fixed DayO production endpoint after release; failure simulation applies only to the local handler. Login is performed in the browser; no credentials are committed. After verification, delete only newly created QA log/report rows with explicit confirmation and keep the booking unchanged.
+
+Release gates: latest main integration, the 12 relevant regression suites, production Ready/source match, authenticated production endpoint and production My Page smoke, then exact QA-row cleanup. No migration is needed.

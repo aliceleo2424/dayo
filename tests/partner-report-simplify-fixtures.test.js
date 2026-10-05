@@ -20,5 +20,15 @@ const baseline=cp.execFileSync('git',['show','f1006f5:public/room.html'],{cwd:ro
 function section(s,start,end){return normalize(s.slice(s.indexOf(start),s.indexOf(end,s.indexOf(start))))}
 assert.equal(section(room,'window.openQuizModalImmediately','/* Partner copilot'),section(baseline,'window.openQuizModalImmediately','/* Partner copilot'),'Learner quiz inline code unchanged');
 assert.equal(section(room,'var rewardPromise =','window.submitPartnerReportAndLeave'),section(baseline,'var rewardPromise =','window.submitPartnerReportAndLeave'),'Reward/failure/retry behavior unchanged');
-for(const f of ['public/room-live.js','public/session-lifecycle.js','public/supabase-client.js','public/mypage.html','public/mypage-dashboard.js'])assert.equal(normalize(read(f)),normalize(cp.execFileSync('git',['show','f1006f5:'+f],{cwd:root,encoding:'utf8'})),f+' unchanged');
-console.log('PASS: A–G templates, actual language/optional topic, Treat codes, 0/1/3 keywords, partner-only sources, safe image prompt, syntax/mirrors, quiz/lifecycle/client/My Page unchanged, exact persistence/failure isolation preservation.');
+// Preserve the historical Partner/Quiz contract while allowing the independently tested Learner Recap hooks.
+const oldFile=f=>normalize(cp.execFileSync('git',['show','f1006f5:'+f],{cwd:root,encoding:'utf8'}));
+for(const f of ['public/room-live.js','public/mypage-dashboard.js'])assert.equal(normalize(read(f)),oldFile(f),f+' unchanged');
+const lifecycle=normalize(read('public/session-lifecycle.js'));
+const optionalStart=lifecycle.indexOf('    // Optional learner-only enrichment;'),optionalEnd=lifecycle.indexOf("    var result = await db.rpc('merge_learner_session_report'",optionalStart);
+assert(optionalStart>=0&&optionalEnd>optionalStart);
+assert.equal((lifecycle.slice(0,optionalStart)+lifecycle.slice(optionalEnd)).replace('p_report: reportPayload','p_report: payload'),oldFile('public/session-lifecycle.js'),'Existing lifecycle outside optional Learner enrichment unchanged');
+const client=normalize(read('public/supabase-client.js')),oldClient=oldFile('public/supabase-client.js');
+assert.equal(section(client,'(function','  function isPlaceholderReport'),section(oldClient,'(function','  function isPlaceholderReport'),'Auth and shared client behavior unchanged');
+const inline=s=>Array.from(s.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)).map(m=>normalize(m[1]).trim()).filter(Boolean);
+assert.deepEqual(inline(read('public/mypage.html')),inline(oldFile('public/mypage.html')),'My Page inline behavior unchanged');
+console.log('PASS: A–G templates, actual language/optional topic, Treat codes, 0/1/3 keywords, partner-only sources, safe image prompt, syntax/mirrors, protected Quiz/lifecycle/client/My Page behavior unchanged, exact persistence/failure isolation preservation.');

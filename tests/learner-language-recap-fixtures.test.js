@@ -23,7 +23,7 @@ async function api(options={}){
   if(options.providerFail)throw Error('network');
   return wire(options.raw||raw);
  };
- const handler=createHandler({env:{NEXT_PUBLIC_SUPABASE_URL:'https://test.supabase.co',NEXT_PUBLIC_SUPABASE_ANON_KEY:'test-anon',GEMINI_API_KEY:options.noKey?'':'synthetic-key'},fetchImpl});
+ const handler=createHandler({env:{NEXT_PUBLIC_SUPABASE_URL:options.supabaseUrl||'https://test.supabase.co',NEXT_PUBLIC_SUPABASE_ANON_KEY:'test-anon',GEMINI_API_KEY:options.noKey?'':'synthetic-key'},fetchImpl});
  const res={setHeader(){},end(body){this.body=JSON.parse(body);}};
  await handler({method:options.method||'POST',headers:{authorization:options.noAuth?'':'Bearer fixture.token'},body:{booking_id:ids.booking,...options.body}},res);
  return{status:res.statusCode,body:res.body,calls};
@@ -57,7 +57,7 @@ async function lifecycle(enricher){
  assert.equal(contract.candidates(log,'unknown').length,0);
  for(const edit of [{source_utterance_id:'invented'},{original_text:'I really agree.'},{meaning_preserved:false},{correction_needed:false},{confidence:0.9},{suggested_text:texts[0]},{suggested_text:'I completely agree with Alice.'},{suggested_text:'I completely agree 2026.'},{correction_type:'score'}])assert.equal(contract.validate([{...raw[0],...edit}],candidates,'en').length,0,JSON.stringify(edit));
  assert.equal(contract.validate([raw[0],raw[0]],candidates,'en').length,1);assert.deepEqual(contract.validate([],candidates,'en'),[]);
- const good=await api();assert.equal(good.status,200);assert.equal(good.body.corrections.length,3);
+ const restUrl=await api({supabaseUrl:'https://test.supabase.co/rest/v1/'});assert.equal(restUrl.status,200);assert.ok(restUrl.calls[0].url==='https://test.supabase.co/auth/v1/user');assert.equal((await api({supabaseUrl:'https://private.invalid/rest/v1/'})).status,503); const good=await api();assert.equal(good.status,200);assert.equal(good.body.corrections.length,3);
  const cached=await api({feedback:[...good.body.corrections,good.body.metadata]});assert.equal(cached.body.status,'cached');assert.equal(cached.calls.length,4);assert.ok(cached.body.corrections[0].source_digest);
  const zero=await api({raw:[]});assert.equal(zero.body.corrections.length,0);assert.equal((await api({feedback:[zero.body.metadata]})).body.status,'cached');
  assert.equal((await api({noAuth:true})).status,401);assert.equal((await api({authFail:true})).status,401);assert.equal((await api({method:'GET'})).status,405);assert.equal((await api({outsider:true})).status,403);

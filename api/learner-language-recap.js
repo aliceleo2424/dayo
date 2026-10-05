@@ -13,7 +13,7 @@ function createHandler({env=process.env,fetchImpl=fetch}={}){return async functi
   if(!input||typeof input!=='object'||Array.isArray(input)||!uuid(input.booking_id)){json(res,400,{error:'invalid_booking_id'});return;}
   // A caller may not supply transcript, language, identity or Partner fields.
   if(Object.keys(input).some(k=>!['booking_id','locale'].includes(k))){json(res,400,{error:'unexpected_fields'});return;}
-  const url=String(env.NEXT_PUBLIC_SUPABASE_URL||env.SUPABASE_URL||'').replace(/\/+$/,''),anon=String(env.NEXT_PUBLIC_SUPABASE_ANON_KEY||'').trim();
+  const url=String(env.NEXT_PUBLIC_SUPABASE_URL||env.SUPABASE_URL||'').trim().replace(/\/rest\/v1\/?$/i,'').replace(/\/+$/,''),anon=String(env.NEXT_PUBLIC_SUPABASE_ANON_KEY||'').trim();
   if(!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url)||!anon){json(res,503,{error:'recap_unavailable'});return;}
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),7500);
   const headers={apikey:anon,Authorization:'Bearer '+token[1]};
