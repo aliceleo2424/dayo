@@ -3018,6 +3018,7 @@
   <link rel="stylesheet" href="availability-calendar.css">
   <link rel="stylesheet" href="/english-typography.css?v=20261005-en">
   <link rel="stylesheet" href="/brand-surfaces.css?v=20261005-logo-palette">
+  <link rel="stylesheet" href="/speaking-guidebook.css?v=20261006-guidebook">
 </head>
 <body class="theme-learner" data-dayo-role="learner" data-landing-auto-popup="off">
   <script>
@@ -4039,14 +4040,11 @@
       const feedbackKey = thirdReady
         ? 'quiz.speaking.feedback.flow'
         : (completed >= 2 ? 'quiz.speaking.feedback.pause' : 'quiz.speaking.feedback.open');
-      const leadTitle = t('quiz.speaking.leadTitle');
+      const leadTitle = t('quiz.guidebook.title');
       const topicCards = quizTopicCardsForLang(quizLang).map((title, idx) => (
-        '<article class="quiz-topic-card">' +
-          '<p class="quiz-topic-card-title">' + escapeHtml(title) + '</p>' +
-          '<a class="quiz-topic-cta" href="#" data-quiz-preopen-cta data-quiz-topic="' + idx + '">' +
-            escapeHtml(t('quiz.resultTopicCta')) +
-          '</a>' +
-        '</article>'
+        '<button type="button" class="quiz-topic-card" data-quiz-topic-choice="' + idx + '" aria-pressed="' + (idx === 0 ? 'true' : 'false') + '">' +
+          '<span class="quiz-topic-card-title">' + escapeHtml(title) + '</span>' +
+        '</button>'
       )).join('');
       const slide = document.createElement('div');
       slide.className = 'quiz-slide active';
@@ -4065,14 +4063,15 @@
         <div class="quiz-result-block">
           <p class="quiz-result-label">${escapeHtml(t('quiz.resultTopicsTitle'))}</p>
           <p class="quiz-result-topics-sub">${escapeHtml(t('quiz.resultTopicsSub'))}</p>
-          <div class="quiz-topic-grid">${topicCards}</div>
+          <div class="quiz-topic-grid" role="group" aria-label="${escapeHtml(t('quiz.resultTopicsTitle'))}">${topicCards}</div>
+          <a class="quiz-topic-cta" href="#" data-quiz-preopen-cta data-quiz-topic="0">${escapeHtml(t('quiz.resultTopicCta'))}</a>
         </div>
         <div class="quiz-lead-card" id="quizLeadCard">
           <p class="quiz-lead-title">${escapeHtml(leadTitle)}</p>
-          <p class="quiz-lead-desc">${escapeHtml(t('quiz.emailDesc'))}</p>
+          <p class="quiz-lead-desc">${escapeHtml(t('quiz.guidebook.description'))}</p>
           <form class="email-form" id="quizLeadForm" novalidate>
             <div class="email-compose">
-              <input class="email-input" id="lead-email-id" type="text" autocomplete="username" inputmode="email" placeholder="${escapeHtml(t('quiz.emailLocalPlaceholder'))}" aria-label="${escapeHtml(t('quiz.emailLocalPlaceholder'))}">
+              <input class="email-input" id="lead-email-id" type="text" maxlength="254" autocomplete="username" inputmode="email" placeholder="${escapeHtml(t('quiz.emailLocalPlaceholder'))}" aria-label="${escapeHtml(t('quiz.emailLocalPlaceholder'))}">
               <span class="email-at" aria-hidden="true">@</span>
               <select class="email-domain-select" id="lead-email-domain" aria-label="${escapeHtml(t('quiz.emailDomainAria'))}">
                 <option value="naver.com">${escapeHtml(t('quiz.emailDomain.naver'))}</option>
@@ -4084,18 +4083,29 @@
                 <option value="hanmail.net">${escapeHtml(t('quiz.emailDomain.hanmail'))}</option>
                 <option value="custom">${escapeHtml(t('quiz.emailDomain.custom'))}</option>
               </select>
-              <input class="email-domain-custom" id="lead-email-domain-custom" type="text" hidden placeholder="${escapeHtml(t('quiz.emailDomainCustomPlaceholder'))}" aria-label="${escapeHtml(t('quiz.emailDomainCustomPlaceholder'))}">
+              <input class="email-domain-custom" id="lead-email-domain-custom" type="text" maxlength="253" hidden placeholder="${escapeHtml(t('quiz.emailDomainCustomPlaceholder'))}" aria-label="${escapeHtml(t('quiz.emailDomainCustomPlaceholder'))}">
             </div>
+            <label class="guidebook-consent"><input id="guidebook-consent" type="checkbox" required><span>${escapeHtml(t('quiz.guidebook.consent'))} <a href="/privacy" target="_blank" rel="noopener">${escapeHtml(t('quiz.guidebook.privacy'))}</a></span></label>
+            <p class="guidebook-privacy-note">${escapeHtml(t('quiz.guidebook.retention'))}</p>
+            <label class="guidebook-consent guidebook-marketing"><input id="guidebook-marketing" type="checkbox"><span>${escapeHtml(t('quiz.guidebook.marketing'))}</span></label>
+            <p class="guidebook-helper">${escapeHtml(t('quiz.guidebook.marketingDetails'))}</p>
             <p class="quiz-lead-error" id="quizLeadError" role="alert"></p>
-            <button class="email-submit" type="submit">${escapeHtml(t('quiz.emailSubmit'))}</button>
+            <button class="email-submit" type="submit">${escapeHtml(t('quiz.guidebook.submit'))}</button>
+            <p class="guidebook-helper">${escapeHtml(t('quiz.guidebook.helper'))}</p>
           </form>
           <div class="quiz-lead-done">
             <p class="quiz-lead-success" id="quizLeadSuccess"></p>
-            <a class="quiz-lead-cta" href="#" data-quiz-preopen-cta>${escapeHtml(t('quiz.lead.startCta'))}</a>
+            <a class="quiz-lead-cta" href="/guidebook/level-1" target="_blank" rel="noopener">${escapeHtml(t('quiz.guidebook.open'))}</a>
           </div>
         </div>
         <button class="quiz-result-retry" type="button">${escapeHtml(t('quiz.speaking.retryAll'))}</button>
       </div>`;
+      slide.querySelectorAll('[data-quiz-topic-choice]').forEach((choice) => {
+        choice.addEventListener('click', () => {
+          slide.querySelectorAll('[data-quiz-topic-choice]').forEach((item) => item.setAttribute('aria-pressed', String(item === choice)));
+          slide.querySelector('[data-quiz-preopen-cta]').setAttribute('data-quiz-topic', choice.getAttribute('data-quiz-topic-choice'));
+        });
+      });
       bindQuizLeadForm(slide);
       slide.querySelectorAll('[data-quiz-preopen-cta]').forEach((btn) => {
         btn.addEventListener('click', (event) => {
@@ -4127,12 +4137,12 @@
       const directDomainInput = String((customEl && customEl.value) || '').trim();
 
       if (idInput.includes('@')) {
-        return idInput.replace(/\s+/g, '').toLowerCase();
+        return idInput.toLowerCase();
       }
 
       let finalDomain = domainSelect === 'custom' ? directDomainInput : domainSelect;
       if (!idInput || !finalDomain) return '';
-      finalDomain = finalDomain.replace(/^@/, '').replace(/\s+/g, '');
+      finalDomain = finalDomain.replace(/^@/, '');
       return (idInput + '@' + finalDomain).toLowerCase();
     }
 
@@ -4141,7 +4151,7 @@
     }
 
     function isValidEmail(value) {
-      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || ''));
+      return value.length <= 254 && /^[^\s@,;<>]+@[^\s@,;<>]+\.[^\s@,;<>]+$/.test(String(value || ''));
     }
 
     function bindQuizLeadForm(slide) {
@@ -4167,55 +4177,44 @@
           if (errorEl) errorEl.textContent = t('quiz.lead.errorEmail');
           return;
         }
-        if (errorEl) errorEl.textContent = '';
+        const consent = slide.querySelector('#guidebook-consent');
+        if (!consent || !consent.checked) {
+          if (errorEl) errorEl.textContent = t('quiz.guidebook.consentRequired');
+          return;
+        }
         const submitBtn = form.querySelector('.email-submit');
+        if (submitBtn && submitBtn.disabled) return;
+        if (errorEl) errorEl.textContent = '';
         if (submitBtn) {
           submitBtn.disabled = true;
           submitBtn.classList.add('is-loading');
-          submitBtn.textContent = t('quiz.emailSending');
+          submitBtn.textContent = t('quiz.guidebook.sending');
         }
 
-        const store = window.DayOProfileStore;
         const successEl = slide.querySelector('#quizLeadSuccess');
         const finishSuccess = function () {
-          if (successEl) successEl.textContent = t('quiz.lead.success', { email: fullEmail });
+          if (successEl) successEl.textContent = t('quiz.guidebook.success', { email: fullEmail });
           card.classList.add('is-done');
-          showToast(t('quiz.lead.success', { email: fullEmail }));
+          showToast(t('quiz.guidebook.success', { email: fullEmail }));
         };
         const finishError = function (message) {
           if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.classList.remove('is-loading');
-            submitBtn.textContent = t('quiz.emailSubmit');
+            submitBtn.textContent = t('quiz.guidebook.submit');
           }
-          if (errorEl) errorEl.textContent = message || t('quiz.lead.errorSend');
+          if (errorEl) errorEl.textContent = message || t('quiz.guidebook.errorSend');
         };
 
-        const saveLead = function () {
-          if (!store || typeof store.saveQuizLead !== 'function') {
-            return Promise.resolve({ ok: true, local: true });
-          }
-          return store.saveQuizLead({
-            email: fullEmail,
-            language: quizLang || 'en',
-            level: 'speaking-sense',
-            score: speechAnswers.filter(Boolean).length
-          });
-        };
-
-        try { window.localStorage.setItem('lead_email', fullEmail); } catch (e) { /* ignore */ }
-        const pending = (store && typeof store.ready === 'function')
-          ? store.ready().then(saveLead).catch(saveLead)
-          : saveLead();
-        Promise.resolve(pending).then(function (result) {
-          if (result && result.ok === false) {
-            finishError(t('quiz.lead.errorSend'));
-            return;
-          }
+        fetch('/api/send-lead-email', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ kind: 'guidebook', email: fullEmail, consent: true, marketingConsent: !!slide.querySelector('#guidebook-marketing').checked }),
+          signal: AbortSignal.timeout(15000)
+        }).then(async (response) => {
+          const result = await response.json();
+          if (!response.ok || !result || !result.ok) { finishError(t('quiz.guidebook.errorSend')); return; }
           finishSuccess();
-        }, function () {
-          finishError();
-        });
+        }).catch(() => finishError(t('quiz.guidebook.errorSend')));
       });
     }
 

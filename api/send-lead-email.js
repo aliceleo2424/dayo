@@ -227,6 +227,8 @@ module.exports = async function handler(req, res) {
     });
   }
 
+  if (body.kind === 'guidebook') return require('./_lib/guidebook-delivery.js')(body, email, res, { json, getSupabase });
+
   var lang = sheets.normalizeLang(body.language || body.lang);
   var level = sheets.normalizeLevel(body.level);
   var info = sheets.meta(lang, level);
