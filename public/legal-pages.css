@@ -47,6 +47,7 @@
 }
 
 .legal-logo {
+  object-fit: contain;
   height: 42px;
   width: auto;
   display: block;

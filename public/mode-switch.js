@@ -995,7 +995,7 @@
       '    <button type="button" class="ms-tab is-active" role="tab" id="msTabLogin" data-ms-tab="login" aria-selected="true">', t('login.tabLogin'), '</button>',
       '    <button type="button" class="ms-tab" role="tab" id="msTabSignup" data-ms-tab="signup" aria-selected="false">', t('login.tabSignup'), '</button>',
       '  </div>',
-      '  <div class="ms-key" aria-hidden="true"><img src="/images/logo.png" alt=""></div>',
+      '  <div class="ms-key" aria-hidden="true"><img src="/images/logo_header.png" alt=""></div>',
       '  <h2 id="msLoginTitle" tabindex="-1">', t('login.title'), '</h2>',
       '  <p class="ms-sub">', t('login.desc'), '</p>',
       '  <p class="ms-signup-confirmation" role="status" aria-live="polite"></p>',
