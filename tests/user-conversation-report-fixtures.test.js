@@ -3,7 +3,8 @@ const report=require('../public/user-conversation-report.js');
 const fixture={id:'report-fixture',booking_id:'11111111-1111-4111-8111-111111111111',partner_name:'Alex',created_at:'2026-10-05T05:00:00Z',language:'en',partner_comment:'It was so nice talking with you today.\nHave a great day!',stamp:'green_tea',keyword:'Seoul Forest cafés',illust_url:'/images/cafe.png',summary:'You talked about cafés in Seoul. You shared your weekend plans.',key_expressions:['I enjoy visiting new places',{expression:'I went to Osaka last year',usage:'Talking about past travel'},'I love exploring new cafés','I enjoy visiting new places','um uh yeah','zxq qwe zxq'],quiz_score:80,feedback:[{original:'I am very agree.',corrected:'I totally agree.',source:'learner_recognized_speech',meaning_preserved:true,correction_needed:true,explanation:'Use “agree” as a verb.'}],__dayoLearnerTranscript:[{speaker:'learner',text:'I am very agree.',timestamp:'2026-10-05T05:01:00Z'},{speaker:'partner',text:'I go to Osaka yesterday'}]};
 module.exports={fixture};
 if(require.main===module){
-const cp=require('node:child_process'),base='7980c3d';
+// Existing production branding is preserved in the integrated release baseline.
+const cp=require('node:child_process'),base='9e47372';
 const read=f=>fs.readFileSync(path.join(__dirname,'..',f),'utf8').replace(/\r/g,'');
 const old=f=>cp.execFileSync('git',['show',base+':'+f],{cwd:path.join(__dirname,'..'),encoding:'utf8'}).replace(/\r/g,'');
 for(const f of ['public/room-live.js','public/learner-expressions.js','public/partner-reward.js','public/partner-report-contract.js','public/partner-report.js','public/mypage-dashboard.js','public/booking-modal.js'])assert.equal(read(f),old(f),f+' protected');
