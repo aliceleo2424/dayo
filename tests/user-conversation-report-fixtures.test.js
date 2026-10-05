@@ -6,7 +6,8 @@ if(require.main===module){
 const cp=require('node:child_process'),base='7980c3d';
 const read=f=>fs.readFileSync(path.join(__dirname,'..',f),'utf8').replace(/\r/g,'');
 const old=f=>cp.execFileSync('git',['show',base+':'+f],{cwd:path.join(__dirname,'..'),encoding:'utf8'}).replace(/\r/g,'');
-for(const f of ['public/room.html','public/room-live.js','public/session-lifecycle.js','public/learner-expressions.js','public/partner-reward.js','public/partner-report-contract.js','public/partner-report.js','public/mypage-dashboard.js','public/booking-modal.js'])assert.equal(read(f),old(f),f+' protected');
+for(const f of ['public/room-live.js','public/learner-expressions.js','public/partner-reward.js','public/partner-report-contract.js','public/partner-report.js','public/mypage-dashboard.js','public/booking-modal.js'])assert.equal(read(f),old(f),f+' protected');
+assert.equal(read('public/room.html').replace(/^.*<script src="learner-language-recap(?:-contract)?\.js[^\n]+\n/gm,'').replace(/(session-lifecycle|conversation-insights)\.js\?v=20261005-ai-recap/g,'$1.js?v=20260928-transcript-rpc'),old('public/room.html'),'room/Quiz unchanged except recap loaders');
 assert.equal(read('public/supabase-client.js').split('  function normalizeReportCard')[0],old('public/supabase-client.js').split('  function normalizeReportCard')[0],'auth/booking/report write path unchanged');
 assert.equal(read('public/supabase-client.js').split('  window.bindLearnerSessionId')[1],old('public/supabase-client.js').split('  window.bindLearnerSessionId')[1],'remaining shared client logic unchanged');
 const before=JSON.stringify(fixture),full=report.renderDetail(fixture,'en');

@@ -1,55 +1,65 @@
-# User Conversation Report — read-only presentation contract
+# Learner-side language recap — local implementation contract
 
-## Current sources
+## Sources and ownership
 
-`loadUserReports()` reads learner-owned `session_reports` and resolves partner nicknames using `list_public_partner_profiles`. It keeps existing legacy/fallback paths. My Page now opts into `user-conversation-report.js`; other pages keep their existing renderer.
+Final browser SpeechRecognition packets accumulate in `room-live.js` as rows with `id`, `speaker`, `text`, and timestamp. A packet may be a fragment; sentences are never reconstructed or combined for correction. `upsert_session_transcript` (existing 072) binds canonical `session_logs` to the authenticated booking participant and role.
 
-| UI | Existing persisted field/source | Owner |
-| --- | --- | --- |
-| Partner note | session_reports.partner_comment | Partner |
-| Treat | session_reports.stamp → DayOPartnerReportContract.treats | Partner |
-| Conversation Theme / illustration | session_reports.keyword / illust_url | Partner |
-| Recap | session_reports.summary | Learner |
-| Useful expressions | session_reports.key_expressions (max 3 displayed) | Learner |
-| Quiz | session_reports.quiz_score (percentage, including 0) | Learner |
-| Looked-up words | session_reports.word_help | Learner |
-| Corrections | Structured session_reports.feedback, corroborated against own canonical learner session_logs.transcript | Learner |
+`POST /api/learner-language-recap` validates the existing user JWT, reads only that user's confirmed/completed booking and canonical learner log with the same JWT/RLS, and derives language from the booking. It accepts only booking ID and UI locale. Client-provided transcripts, identities, languages, or Partner fields are rejected. No service-role key or new database permissions.
 
-The current recap producer is `DayOLearnerExpressions.buildReviewData`: it records learner-only extracted expressions and a deterministic summary about the recorded expressions. It does **not** generate an AI thematic summary or grammar corrections. Current feedback strings are user evaluation chips, not language corrections. No new AI producer, migration, RPC, write path or third-party transcript transmission is added by this UI change. No fabricated Quiz denominator or answer-review link.
+| Data | Stored source |
+| --- | --- |
+| Original learner speech | session_logs.transcript: row ID, learner speaker, text, timestamp; canonical participant_id / participant_role |
+| Partner note / Treat / theme / illustration | session_reports.partner_comment / stamp / keyword / illust_url; existing Partner merge |
+| Recap | Existing deterministic session_reports.summary from DayOLearnerExpressions.buildReviewData; no new thematic summary |
+| Useful expressions | Existing learner-only session_reports.key_expressions; max 3 displayed, corrections deduplicated; Quiz source unchanged |
+| Quiz | Existing session_reports.quiz_score percentage; original Quiz/Talk Record snapshot retained |
+| Corrections | Structured objects in existing session_reports.feedback JSONB array, beside preserved evaluation chips |
 
-## Correction admission (read adapter, not a new writer)
+## Generation and admission
 
-A future validated correction may use the existing feedback JSONB array; no schema expansion is required for this renderer. This is a presentation candidate, not an implemented/approved AI generation API:
+Reuses existing Gemini REST infrastructure: server-only GEMINI_API_KEY, existing GEMINI_MODEL override, default gemini-3.6-flash. Structured JSON schema; max 3 corrections. Only up to 8 bounded candidate packets leave the server, with ephemeral IDs (no account/booking/log IDs). No transcript or secret logging.
+
+Candidates require actual learner speaker, source row ID and timestamp, supported EN/ES/FR/KO, meaningful length, and basic quality checks. Short answers, unfinished connectors, damaged/repeated ASR, URLs/email, long number strings, and missing provenance are excluded. Supplied low ASR confidence is rejected; the current recorder does not provide a reliable confidence field, so no ASR certainty is invented. English reuses the existing sentence-quality helper; ES/FR use conservative verb checks; KO requires Korean text. These checks intentionally prefer omissions over guessed corrections.
+
+The prompt requires exact source text/ID, clear intent, a real correction need, minimum edits, unchanged meaning, and no new facts/context. Natural sentences and ambiguous ASR must yield zero. The server additionally checks exact original/source identity, type, explicit quality flags, model confidence >= .94, bounded explanation, lexical overlap, unchanged numbers, no added proper names, and script compatibility. These heuristics reduce invention; they cannot mathematically prove semantic equivalence or perfect ASR. Rendering also corroborates the saved log ID and utterance ID against the user's authenticated canonical log. Missing evidence hides corrections.
 
 ```json
 {
+  "schema_version": 1,
+  "generator": "dayo_learner_recap_v1",
   "source": "learner_recognized_speech",
-  "original": "I am very agree.",
-  "corrected": "I totally agree.",
+  "speaker": "learner",
+  "source_log_id": "canonical learner log UUID",
+  "source_utterance_id": "recognized packet ID",
+  "source_timestamp": "ISO timestamp",
+  "original_text": "I am very agree.",
+  "suggested_text": "I completely agree.",
+  "correction_type": "grammar",
+  "short_reason": "Use agree as a verb.",
   "meaning_preserved": true,
   "correction_needed": true,
-  "explanation": "Use agree as a verb."
+  "confidence": 0.98
 }
 ```
 
-Both quality flags must be explicit. The original must match a learner-labelled utterance in that booking's canonical log fetched by the existing authenticated participant query. Partner/unknown speakers, missing provenance, fragments, repeated/garbled English, low supplied ASR confidence, ambiguous items and identical corrections are omitted. At most 3 unique corrections appear. Missing evidence gives zero corrections. `spoken_sentence` is not used as correction evidence because legacy ownership was mixed. No grammatical correctness is inferred by this renderer.
+Stored results also carry source_digest, model, and generated_at. A separate feedback metadata object records generation version, digest, count and completion, including a valid zero-correction result. Identical sources/model/locale reuse a validated stored result on retry. Only this generator's previous entries are replaced; unrelated evaluation chips/legacy feedback remain.
 
-The current producer emits none of these correction objects; its existing evaluation chips remain stored unchanged. Before claiming AI-generated recap/corrections in production, define and validate a separate learner-only generation contract. Fixture correction objects are synthetic QA data, not real AI output.
+## Persistence / failure boundary
 
-## Rendering / compatibility
+The endpoint does not write to Supabase. The existing authenticated `merge_learner_session_report` RPC remains the sole write path. The optional browser enrichment precedes that merge; unavailable key/source, timeout, malformed output or provider failure falls back to the unchanged base report. Successful AI results are reused per booking within the page; failed attempts can retry. Existing report save success flag and booking identity remain unchanged.
 
-Human Touch and Language Recap are independent and omitted when empty. Successful illustrations use the saved URL; broken images are hidden and theme remains. Timed speaking metrics remain within Language Recap when learner evidence exists. Existing card export and My Page detail open/close entry points remain available. All text is escaped. Dates use KST; no guessed language/real-name fallback. Korean and English chrome are provided; saved multilingual text is preserved.
+The transcript flush is bounded to 1.8s; API work has a 7.5s deadline and browser fetch an 8.5s deadline. The UI may wait briefly for optional enrichment, but AI failure does not prevent saving the basic report. Changed script cache versions in room/My Page prevent stale readers from omitting new provenance. The original `__dayoLearnerReportPayload` remains intact for Quiz/Talk Record, so new structured feedback cannot render as evaluation-chip text there.
 
-Archive shows nickname/date/language/theme/Treat/Quiz only. It never expands note, expressions or correction text. Export captures Human Touch without duplicating the old decorative card in the detail.
+046 Partner conflict updates do not write summary/feedback/key_expressions/quiz_score; 047 learner conflict updates do not write partner_comment/stamp/keyword/illust_url. Both SQL contracts are unchanged. No migration, RLS, grants, role, reward, booking or Quiz change. Room adds only two script loaders and loader cache versions; lifecycle adds only the optional recap call and enriched merge argument.
 
-## Local verification / release boundary
+Human Touch + Language Recap IA is unchanged. Correction count zero hides its block. Existing legacy corrections remain readable with their original quality/provenance rules. Source loading refreshes only the matching already-open detail and preserves scroll. English save label is `Save this report`; its existing export action is unchanged.
 
-- `node tests/user-conversation-report-fixtures.test.js`
-- `node tests/session-review-fixtures.test.js`
-- `node tests/session-report-persistence-fixtures.test.js`
-- `node tests/conversation-insights-fixtures.test.js`
-- Existing Partner Report fixtures
-- `node tests/user-conversation-report-preview.cjs` → localhost:3052/preview (390px / 1280px, broken image / sparse / legacy / Korean controls)
+## Verification and release boundary
 
-No production writes or deploys. Based on clean origin/main 7980c3d. Primary working tree's uncommitted room/quiz/client changes are not copied or reverted. Before integration, review its supabase-client normalization hunk together with the separate pending work; keep both functionality. room, learner-expressions, session lifecycle and report persistence functions are unchanged.
-QA result: 8 relevant fixture suites passed; 390px/1280px UI checked, broken image hidden, theme retained, sparse recap omitted, long legacy note wraps, Korean chrome verified. The historical Partner Report Simplify suite fails its old full-file immutable client/My Page guard; that old test is unchanged. The new fixture independently compares room/Quiz/lifecycle/booking and shared-client write paths to latest-main baseline 7980c3d.
+- New fixtures: filters, 0/1/3, multilingual, exact original/ID, meaning guards, own-booking access rejection, cached zero/result retry, API/provider failure, actual browser enrichment and lifecycle merge integration, both participant SQL ownership contracts, mirrors and unchanged lifecycle remainder.
+- Existing 8 suites: User report UI, session review/Quiz, session persistence, transcript reliability, conversation insights, Partner notes/themes/finalize.
+- Actual Gemini calls use only synthetic speech and the user's locally configured server key. A: `I am very agree.` -> `I completely agree.`; B: `I really like this café.` -> omitted; C: `and I maybe the yesterday` and D: `yes` -> excluded before provider. Safe result fixture is tests/fixtures/learner-language-recap-live.json; contains no secret/account data.
+- Actual ES/FR/KO synthetic calls also produced source-bound corrections and Korean explanations. 390px/1280px local UI and Korean chrome checked; no horizontal overflow, existing Partner note and Quiz retained.
+- Auth/RLS reads and writes are exercised with controlled HTTP/VM fixtures and unchanged SQL inspection, not a live Supabase session. No real session was created or modified; production E2E is still required.
+
+Before release: review integration with the primary checkout's pending room/Quiz/client work, ensure the existing server Gemini key/model and Supabase public config are available to the user-site API, deploy only after approval, then verify own-learner vs Partner/outsider access, actual transcript save -> generation -> merge -> refresh, provider failure and retries in staging. Consider latency and request-cost controls before broad rollout. No main merge, push, production migration or deploy in this task.

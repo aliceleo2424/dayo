@@ -392,7 +392,23 @@
       report.__dayoConversationMetrics = metrics;
       // Already constrained by authenticated participant_id and learner role.
       report.__dayoLearnerTranscript = log.transcript.filter(isLearnerRow);
+      report.__dayoLearnerSourceLogId = log.id;
     });
+    // A detail opened before the authenticated log arrived must gain the same
+    // evidence as one opened later. Refresh only that booking, without reopening.
+    var openDetail = root.document.querySelector('.ucr-detail[data-booking-id]');
+    var detailBody = root.document.getElementById('report-detail-body');
+    if (openDetail && detailBody && typeof root.renderReportDetailHtml === 'function') {
+      var openReport = (reports || []).find(function (report) {
+        return report.booking_id === openDetail.getAttribute('data-booking-id');
+      });
+      if (openReport) {
+        var panel = detailBody.closest('.report-detail-panel');
+        var scrollTop = panel ? panel.scrollTop : 0;
+        detailBody.innerHTML = root.renderReportDetailHtml(openReport);
+        if (panel) panel.scrollTop = scrollTop;
+      }
+    }
     var sessions = monthBookings.map(function (booking) {
       var log = logs[String(booking.id)];
       if (!log || !Array.isArray(log.transcript)) return null;

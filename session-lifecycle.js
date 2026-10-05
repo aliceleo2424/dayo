@@ -277,9 +277,16 @@
     }
     var rating = document.querySelectorAll('.star-btn.active').length;
     if (rating > 0) payload.rating = rating;
+    // Optional learner-only enrichment; keep the original Quiz/Talk Record snapshot.
+    var reportPayload = payload;
+    if (window.DayOLearnerLanguageRecap) {
+      try { reportPayload = await window.DayOLearnerLanguageRecap.enrichReview({
+        db: db, bookingId: ctx.bookingId, payload: payload, ensureTranscript: persistTranscript
+      }); } catch (e) { reportPayload = payload; }
+    }
     var result = await db.rpc('merge_learner_session_report', {
       p_booking_id: ctx.bookingId,
-      p_report: payload
+      p_report: reportPayload
     });
     var resultData = result && result.data || {};
     if (result.error || !resultData.success) {
