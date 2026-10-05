@@ -218,6 +218,7 @@ module.exports = async function handler(req, res) {
   }
 
   var body = await readBody(req);
+  if (body.kind === 'guidebook-unsubscribe') return require('./_lib/guidebook-unsubscribe.js')({ method: req.method, body: body }, res);
   var email = String((body && body.email) || '').trim().toLowerCase();
   if (!isValidEmail(email)) {
     return json(res, 400, {
@@ -292,3 +293,4 @@ module.exports = async function handler(req, res) {
     });
   }
 };
+
