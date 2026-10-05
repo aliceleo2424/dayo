@@ -1,0 +1,21 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm'),cp=require('node:child_process');
+const root=path.resolve(__dirname,'..'),read=f=>fs.readFileSync(path.join(root,f),'utf8'),contract=require('../public/partner-report-contract.js');
+for(const f of ['room.html','partner-report-contract.js','partner-report.js','partner-report.css'])assert.equal(read('public/'+f),read(f));
+assert.equal(contract.treats.length,6);assert.deepEqual(contract.treats.map(t=>t.code),['americano','green_tea','vanilla_latte','cookie','croissant','macaron']);assert.equal(contract.treats[3].meaning,'Curious questions');
+for(const id of ['a','b','c','d','e','f','g'])assert(!/[{}]/.test(contract.note(id,{language:'es',topic:'Pasta'},'Seoul Forest cafés')));
+assert.match(contract.note('a',{language:'es'}),/in Spanish/);assert.doesNotMatch(contract.note('a',{}),/English|undefined/);assert.equal(contract.note('e',{}),'');assert.equal(contract.note('g',{}),'');assert.match(contract.note('f',{},'Pasta café'),/Pasta café/);
+assert.deepEqual(contract.suggestions({}),[]);assert.deepEqual(contract.suggestions({transcript:[{speaker:'partner',text:'Coffee coffee coffee.'}]}),['Coffee']);assert.equal(contract.suggestions({transcript:[{speaker:'partner',text:'Coffee pasta Seoul Forest coffee pasta.'}]}).length,3);
+assert.deepEqual(contract.suggestions({transcript:[{speaker:'learner',text:'Coffee pasta'}]}),[]);assert.deepEqual(contract.suggestions({transcript:[{speaker:'partner',text:'thing time day people question conversation user partner language English'}]}),[]);
+assert.deepEqual(contract.suggestions({talkCard:{question_en:'What is your favorite coffee?'}}),['Coffee']);assert.deepEqual(contract.suggestions({topic:'Pottery'}),['Pottery']);
+assert.deepEqual(contract.suggestions({transcript:[{speaker:'partner',text:'Café, café.'}]}),['Café']);
+assert.equal(contract.safeKeyword('mail@example.com'),'');assert.equal(contract.safeKeyword('https://private.invalid'),'');
+const url=decodeURIComponent(contract.illustrationUrl('Seoul Forest café',4));assert.match(url,/warm editorial illustration/);assert.match(url,/No text, no typography/);assert.doesNotMatch(url,/transcript|private learner/i);
+const room=read('public/room.html');for(const m of room.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)){if(m[1].trim())new vm.Script(m[1]);}new vm.Script(read('public/partner-report.js'));new vm.Script(read('public/partner-report-contract.js'));
+const popup=room.slice(room.indexOf('  <div id="partner-report-popup"'),room.indexOf('<div id="early-exit-modal"'));assert.doesNotMatch(popup,/notesReview|synonyms|nuance|card-sentence-options|spoken_sentence/);assert.match(popup,/pr-note-templates/);assert.match(popup,/View conversation transcript/);
+const open=room.slice(room.indexOf('window.openPartnerReportPopup = function'),room.indexOf('function setPartnerReportSubmitStatus'));assert.doesNotMatch(open,/startPartnerSentencePolling|initInstaCardSection/);assert.match(open,/DayOPartnerReport.open/);
+const baseline=cp.execFileSync('git',['show','f1006f5:public/room.html'],{cwd:root,encoding:'utf8'}),normalize=s=>s.replace(/\r/g,'');
+function section(s,start,end){return normalize(s.slice(s.indexOf(start),s.indexOf(end,s.indexOf(start))))}
+assert.equal(section(room,'window.openQuizModalImmediately','/* Partner copilot'),section(baseline,'window.openQuizModalImmediately','/* Partner copilot'),'Learner quiz inline code unchanged');
+assert.equal(section(room,'var rewardPromise =','window.submitPartnerReportAndLeave'),section(baseline,'var rewardPromise =','window.submitPartnerReportAndLeave'),'Reward/failure/retry behavior unchanged');
+for(const f of ['public/room-live.js','public/session-lifecycle.js','public/supabase-client.js','public/mypage.html','public/mypage-dashboard.js'])assert.equal(normalize(read(f)),normalize(cp.execFileSync('git',['show','f1006f5:'+f],{cwd:root,encoding:'utf8'})),f+' unchanged');
+console.log('PASS: A–G templates, actual language/optional topic, Treat codes, 0/1/3 keywords, partner-only sources, safe image prompt, syntax/mirrors, quiz/lifecycle/client/My Page unchanged, exact persistence/failure isolation preservation.');

@@ -3506,6 +3506,7 @@
       box-sizing: border-box !important;
     }
   </style>
+  <link rel="stylesheet" href="partner-report.css">
 </head>
 <body class="is-room theme-learner">
   <div id="room-access-screen" role="status" aria-live="polite">
@@ -6909,7 +6910,7 @@
       var viewer = document.getElementById('popup-transcript-list') ||
         document.getElementById('partner-transcript-viewer');
       if (!viewer) return;
-      var rows = collectSessionTranscriptRows();
+      var rows = partnerReportContext().transcript;
       viewer.innerHTML = '';
       if (!rows.length) {
         viewer.innerHTML = '<div style="font-size: 12px; color: #88928B; padding: 8px 4px; line-height: 1.5;">' + t('room.partnerReport.noTranscript') + '</div>';
@@ -6934,9 +6935,18 @@
       var popup = document.getElementById('partner-report-popup');
       if (popup && getComputedStyle(popup).display !== 'none') {
         if (typeof window.hydratePopupTranscriptList === 'function') window.hydratePopupTranscriptList();
-        if (typeof window.initInstaCardSection === 'function') window.initInstaCardSection();
+        if (window.DayOPartnerReport) window.DayOPartnerReport.refresh(partnerReportContext());
       }
     });
+
+    function partnerReportContext() {
+      var access = window.DayORoomAccess || {};
+      var rows = Array.isArray(window.sessionTranscript) ? window.sessionTranscript : [];
+      if (window.DayOLive && typeof window.DayOLive.getTranscript === 'function') {
+        try { rows = window.DayOLive.getTranscript() || rows; } catch (_) {}
+      }
+      return {language:access.language || '', transcript:rows,talkCard:window.DayOCurrentTalkCard || null,topic:typeof access.topic === 'string' ? access.topic : ''};
+    }
 
     window.openPartnerReportPopup = function () {
       var popup = document.getElementById('partner-report-popup');
@@ -6945,8 +6955,7 @@
         popup.style.setProperty('display', 'flex', 'important');
       }
       if (typeof window.hydratePopupTranscriptList === 'function') window.hydratePopupTranscriptList();
-      if (typeof window.initInstaCardSection === 'function') window.initInstaCardSection();
-      startPartnerSentencePolling();
+      if (window.DayOPartnerReport) window.DayOPartnerReport.open(partnerReportContext());
     };
 
     function setPartnerReportSubmitStatus(message, success) {
@@ -6983,7 +6992,7 @@
         setPartnerReportSubmitBusy(true);
         setPartnerReportSubmitStatus(t('room.partnerReport.saving'), true);
 
-        var cardData = window.currentSelectedCard || {
+        var cardData = window.DayOPartnerReport ? window.DayOPartnerReport.payload() : {
           sentence: null,
           keyword: null,
           illustUrl: null,
@@ -7349,115 +7358,14 @@
     테스트 종료 → 퀴즈/리포트
   </button>
 
-  <div id="partner-report-popup" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); z-index: 99999999; justify-content: center; align-items: center; padding: 20px;">
-    <div style="background: #FFFFFF; width: 100%; max-width: 940px; height: 86vh; border-radius: 20px; display: flex; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,0.35); border: 1.5px solid #EDE4D5;">
-
-      <div style="width: 35%; background: #F8FAF9; border-right: 1.5px solid #EDE4D5; padding: 20px; display: flex; flex-direction: column;">
-        <div style="font-weight: 800; font-size: 13.5px; color: #4F7460; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-          <span>💬</span> <span data-i18n="room.partnerReport.transcriptTitle">25분 대화 스크롤 로그</span>
-        </div>
-        <div id="popup-transcript-list" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 9px; font-size: 12px; padding-right: 6px;"></div>
-      </div>
-
-      <div style="width: 65%; padding: 24px 28px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: #FFFFFF;">
-        <div style="font-size: 17px; font-weight: 800; color: #3E4A42;" data-i18n="room.partnerReport.title">✨ 파트너 피드백 & 오늘의 대화 기록</div>
-
-        <div>
-          <label style="font-size: 12.5px; font-weight: 800; color: #3E4A42; display: block; margin-bottom: 6px;" data-i18n="room.partnerReport.commentLabel">1. 파트너 다정 코멘트 (직접 입력 또는 AI 추천 칩 탭)</label>
-          <textarea id="popup-partner-comment" rows="2" style="width: 100%; border: 1.5px solid #EDE4D5; border-radius: 10px; padding: 10px; font-size: 13px; resize: none; outline: none; box-sizing: border-box;" data-i18n="room.partnerReport.commentPlaceholder" data-i18n-attr="placeholder" placeholder="유저에게 따뜻한 응원의 한마디를 남겨주세요."></textarea>
-          <div style="display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap;">
-            <button type="button" onclick="document.getElementById('popup-partner-comment').value=this.innerText;" style="font-size: 11px; background: #FFF9ED; border: 1px solid #F6D365; border-radius: 12px; padding: 4px 10px; cursor: pointer; color: #3E4A42; font-weight: 600;" data-i18n="room.partnerReport.suggestion1">성수동 서울숲 근처 카페거리를 추천해요! ☕</button>
-            <button type="button" onclick="document.getElementById('popup-partner-comment').value=this.innerText;" style="font-size: 11px; background: #FFF9ED; border: 1px solid #F6D365; border-radius: 12px; padding: 4px 10px; cursor: pointer; color: #3E4A42; font-weight: 600;" data-i18n="room.partnerReport.suggestion2">새로운 표현에 적극적인 모습이 멋져요! 🌟</button>
-            <button type="button" onclick="document.getElementById('popup-partner-comment').value=this.innerText;" style="font-size: 11px; background: #FFF9ED; border: 1px solid #F6D365; border-radius: 12px; padding: 4px 10px; cursor: pointer; color: #3E4A42; font-weight: 600;" data-i18n="room.partnerReport.suggestion3">편안하게 대화 이끌어주셔서 감사합니다! ☕</button>
-          </div>
-        </div>
-
-        <div>
-          <label style="font-size: 12.5px; font-weight: 800; color: #3E4A42; display: block; margin-bottom: 3px;" data-i18n="room.partnerReport.stampLabel">2. 오늘의 Treat</label>
-          <p style="font-size: 11px; color: #7B807C; margin: 0 0 8px;" data-i18n="room.partnerReport.stampDescription">오늘 대화를 마무리하며 작은 Treat 하나를 골라주세요.</p>
-          <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px;">
-            <label class="dayo-treat-choice" style="display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; font-size: 10.5px; background: #FFFDF8; border: 1.5px solid #E8D7C2; padding: 7px 4px; border-radius: 11px; cursor: pointer; font-weight: 700; color: #5B4638; text-align: center;">
-              <input type="radio" name="popup_stamp" value="americano" style="accent-color:#A66A4A;">
-              <svg viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M15 20h32v25a8 8 0 0 1-8 8H23a8 8 0 0 1-8-8Z" fill="#F8E8D2" stroke="#8C6048" stroke-width="3"/><path d="M19 24h24v8H19z" fill="#6F4937"/><path d="M47 27h4a8 8 0 0 1 0 16h-4" fill="none" stroke="#8C6048" stroke-width="3"/></svg>
-              <span data-i18n="treat.americano">아메리카노</span>
-            </label>
-            <label class="dayo-treat-choice" style="display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; font-size: 10.5px; background: #FFFDF8; border: 1.5px solid #E8D7C2; padding: 7px 4px; border-radius: 11px; cursor: pointer; font-weight: 700; color: #5B4638; text-align: center;">
-              <input type="radio" name="popup_stamp" value="green_tea" style="accent-color:#71845A;">
-              <svg viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M14 23h34v21a9 9 0 0 1-9 9H23a9 9 0 0 1-9-9Z" fill="#EDF3D8" stroke="#71845A" stroke-width="3"/><path d="M19 27h24v8H19z" fill="#A8BE78"/><path d="M48 29h4a7 7 0 0 1 0 14h-4" fill="none" stroke="#71845A" stroke-width="3"/></svg>
-              <span data-i18n="treat.greenTea">그린티</span>
-            </label>
-            <label class="dayo-treat-choice" style="display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; font-size: 10.5px; background: #FFFDF8; border: 1.5px solid #E8D7C2; padding: 7px 4px; border-radius: 11px; cursor: pointer; font-weight: 700; color: #5B4638; text-align: center;">
-              <input type="radio" name="popup_stamp" value="vanilla_latte" style="accent-color:#B9855E;">
-              <svg viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M19 12h26l-3 42H22Z" fill="#FFF4D9" stroke="#A77452" stroke-width="3"/><path d="M21 29h22l-1 13H22z" fill="#C58A63"/><path d="M22 20h21l-1 9H22z" fill="#F6D9A7"/></svg>
-              <span data-i18n="treat.vanillaLatte">바닐라라떼</span>
-            </label>
-            <label class="dayo-treat-choice" style="display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; font-size: 10.5px; background: #FFFDF8; border: 1.5px solid #E8D7C2; padding: 7px 4px; border-radius: 11px; cursor: pointer; font-weight: 700; color: #5B4638; text-align: center;">
-              <input type="radio" name="popup_stamp" value="cookie" style="accent-color:#A66A4A;">
-              <svg viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><circle cx="32" cy="33" r="21" fill="#D9A66F" stroke="#8B6043" stroke-width="3"/><circle cx="24" cy="24" r="3" fill="#75503A"/><circle cx="40" cy="29" r="3" fill="#75503A"/><circle cx="29" cy="42" r="3" fill="#75503A"/><circle cx="43" cy="44" r="2.5" fill="#75503A"/></svg>
-              <span data-i18n="treat.cookie">쿠키</span>
-            </label>
-            <label class="dayo-treat-choice" style="display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; font-size: 10.5px; background: #FFFDF8; border: 1.5px solid #E8D7C2; padding: 7px 4px; border-radius: 11px; cursor: pointer; font-weight: 700; color: #5B4638; text-align: center;">
-              <input type="radio" name="popup_stamp" value="croissant" style="accent-color:#B9855E;">
-              <svg viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M11 39c6-18 14-25 21-25s15 7 21 25c-6 10-14 14-21 14S17 49 11 39Z" fill="#E7B96C" stroke="#9A683D" stroke-width="3"/><path d="M21 21c3 8 3 18 0 27M32 15c3 11 3 27 0 38M43 21c-3 8-3 18 0 27" fill="none" stroke="#C3894E" stroke-width="2.5"/></svg>
-              <span data-i18n="treat.croissant">크루아상</span>
-            </label>
-            <label class="dayo-treat-choice" style="display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; font-size: 10.5px; background: #FFFDF8; border: 1.5px solid #E8D7C2; padding: 7px 4px; border-radius: 11px; cursor: pointer; font-weight: 700; color: #5B4638; text-align: center;">
-              <input type="radio" name="popup_stamp" value="macaron" style="accent-color:#B7798E;">
-              <svg viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M15 29c1-11 8-17 17-17s16 6 17 17Z" fill="#E8AFC0" stroke="#936276" stroke-width="3"/><path d="M15 37c1 11 8 17 17 17s16-6 17-17Z" fill="#E8AFC0" stroke="#936276" stroke-width="3"/><rect x="14" y="28" width="36" height="10" rx="5" fill="#FFF2D9" stroke="#936276" stroke-width="3"/></svg>
-              <span data-i18n="treat.macaron">마카롱</span>
-            </label>
-          </div>
-          <label style="display: inline-flex; align-items: center; gap: 6px; margin-top: 7px; font-size: 10.5px; color: #7B807C; cursor: pointer;">
-            <input type="radio" name="popup_stamp" value="" checked style="accent-color:#A66A4A;">
-            <span data-i18n="room.partnerReport.stampNone">선택 안 함</span>
-          </label>
-        </div>
-
-        <div style="background: #FDFBF7; border: 1.5px solid #EDE4D5; border-radius: 12px; padding: 12px 14px;">
-          <div style="font-size: 12.5px; font-weight: 800; color: #4F7460; margin-bottom: 8px;" data-i18n="room.partnerReport.notesReview">3. 오늘의 대화 기록 검수 (필요 시 직접 수정)</div>
-          <div style="font-size: 12px; color: #3E4A42; display: flex; flex-direction: column; gap: 0;">
-            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; margin-bottom: 8px;">
-              <span style="font-size: 11.5px; font-weight: 700; color: #4F7460; white-space: nowrap; word-break: keep-all;" data-i18n="room.partnerReport.synonyms">• 빈출 유의어:</span>
-              <input type="text" value="like ➔ prefer, be fond of" style="width: 100%; box-sizing: border-box; border: 1.5px solid #EDE4D5; border-radius: 8px; padding: 7px 10px; font-size: 12px;">
-            </div>
-            <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; margin-bottom: 8px;">
-              <span style="font-size: 11.5px; font-weight: 700; color: #4F7460; white-space: nowrap; word-break: keep-all;" data-i18n="room.partnerReport.nuance">• 뉘앙스 교정:</span>
-              <input type="text" value="I am very agree ➔ I totally agree" style="width: 100%; box-sizing: border-box; border: 1.5px solid #EDE4D5; border-radius: 8px; padding: 7px 10px; font-size: 12px;">
-            </div>
-          </div>
-        </div>
-
-        <div style="background: #FAFBF9; border: 1.5px solid #EDE4D5; border-radius: 14px; padding: 14px 16px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-            <label style="font-size: 12.5px; font-weight: 800; color: #3E4A42;" data-i18n="room.partnerReport.cardSection">4. &lt;From DayO&gt; 인스타 카드 선택 & 문장 매칭</label>
-            <button type="button" onclick="regenerateInstaCard()" data-i18n="room.partnerReport.regenerateAria" data-i18n-attr="title" title="다른 카드 재생성" style="background: #FFFFFF; border: 1.5px solid #9AB89E; color: #4F7460; font-size: 15px; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.06);">
-              🔄
-            </button>
-          </div>
-
-          <div class="card-section-body" style="display: flex; flex-direction: column; width: 100%; gap: 12px;">
-            <div style="width: 100%; display: flex; flex-direction: column; gap: 8px;">
-              <div style="font-size: 11px; color: #55635A; font-weight: 600;" data-i18n="room.partnerReport.bestSentence">대화 속 베스트 문장 선택:</div>
-              <div id="card-sentence-options" style="display: flex; flex-direction: column; gap: 6px; width: 100%;"></div>
-            </div>
-
-            <div class="insta-card-export-wrap" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-              <div id="insta-card-capture" class="viral-card" style="width: 100%; max-width: 280px; aspect-ratio: 4 / 5; margin: 0 auto; border-radius: 16px; overflow: hidden; position: relative; box-shadow: 0 8px 18px rgba(0,0,0,0.12); display: flex; flex-direction: column; justify-content: space-between; padding: 14px; box-sizing: border-box; transition: background 0.3s ease, border-color 0.3s ease;"></div>
-              <div style="display: flex; gap: 8px; margin-top: 14px; width: 100%; max-width: 400px;">
-                <button id="btn-save-card" class="btn-save-card" type="button" onclick="saveInstaCard()" style="flex: 1; padding: 12px; background: #635BFF; color: #fff; font-weight: 700; border: none; border-radius: 12px; cursor: pointer; font-size: 13px;" data-i18n="room.partnerReport.saveCard">
-                  📸 카드 이미지 저장하기
-                </button>
-              </div>
-              <div style="font-size: 10px; color: #88928B; margin-top: 6px; text-align: center; width: 100%;" data-i18n="room.partnerReport.autoPublish">유저 마이페이지에 자동 발행</div>
-            </div>
-          </div>
-        </div>
-
-        <p id="partner-report-submit-status" role="status" aria-live="polite" hidden style="margin: 0; font-size: 12.5px; font-weight: 700; line-height: 1.5; text-align: center;"></p>
-        <button type="button" id="btn-final-partner-submit" onclick="executePartnerPayoutAndExit()" style="background: #4F7460; color: #FFF; border: none; border-radius: 12px; padding: 14px; font-size: 14px; font-weight: 800; cursor: pointer; margin-top: 4px; box-shadow: 0 4px 14px rgba(79, 116, 96, 0.28); transition: opacity 0.2s;" data-i18n="room.partnerReport.submit">
-          ✨ 검수 완료하고 6,000P 받기
-        </button>
-      </div>
+  <div id="partner-report-popup" style="display:none;position:fixed;inset:0;z-index:99999999;justify-content:center;align-items:center" role="dialog" aria-modal="true" aria-labelledby="pr-title">
+    <div class="pr-dialog">
+      <header><h2 id="pr-title">Feedback &amp; Conversation Keepsake</h2><p class="pr-intro">A small note and memory from today’s conversation.</p></header>
+      <section class="pr-section"><h3>1. Leave a note for the user</h3><div class="pr-chips" id="pr-note-templates" aria-label="Note templates"></div><label class="pr-field" id="pr-recommendation-field" hidden>What would you recommend?<input type="text" id="pr-recommendation" maxlength="120" placeholder="Seoul Forest cafés"></label><label class="pr-field">Your note<textarea id="popup-partner-comment" rows="3" maxlength="1000" placeholder="Leave a warm note. You can edit any template."></textarea></label></section>
+      <section class="pr-section"><h3>2. Choose a Treat for today</h3><p class="pr-hint">Choose one small Treat that matches today’s conversation.</p><div id="pr-treats" class="pr-treats"></div><label class="pr-choice pr-none"><input type="radio" name="popup_stamp" value="" checked><span>No Treat</span></label><div hidden id="pr-treat-icons"><svg data-pr-treat-icon viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M15 20h32v25a8 8 0 0 1-8 8H23a8 8 0 0 1-8-8Z" fill="#F8E8D2" stroke="#8C6048" stroke-width="3"/><path d="M19 24h24v8H19z" fill="#6F4937"/><path d="M47 27h4a8 8 0 0 1 0 16h-4" fill="none" stroke="#8C6048" stroke-width="3"/></svg><svg data-pr-treat-icon viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M14 23h34v21a9 9 0 0 1-9 9H23a9 9 0 0 1-9-9Z" fill="#EDF3D8" stroke="#71845A" stroke-width="3"/><path d="M19 27h24v8H19z" fill="#A8BE78"/><path d="M48 29h4a7 7 0 0 1 0 14h-4" fill="none" stroke="#71845A" stroke-width="3"/></svg><svg data-pr-treat-icon viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M19 12h26l-3 42H22Z" fill="#FFF4D9" stroke="#A77452" stroke-width="3"/><path d="M21 29h22l-1 13H22z" fill="#C58A63"/><path d="M22 20h21l-1 9H22z" fill="#F6D9A7"/></svg><svg data-pr-treat-icon viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><circle cx="32" cy="33" r="21" fill="#D9A66F" stroke="#8B6043" stroke-width="3"/><circle cx="24" cy="24" r="3" fill="#75503A"/><circle cx="40" cy="29" r="3" fill="#75503A"/><circle cx="29" cy="42" r="3" fill="#75503A"/><circle cx="43" cy="44" r="2.5" fill="#75503A"/></svg><svg data-pr-treat-icon viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M11 39c6-18 14-25 21-25s15 7 21 25c-6 10-14 14-21 14S17 49 11 39Z" fill="#E7B96C" stroke="#9A683D" stroke-width="3"/><path d="M21 21c3 8 3 18 0 27M32 15c3 11 3 27 0 38M43 21c-3 8-3 18 0 27" fill="none" stroke="#C3894E" stroke-width="2.5"/></svg><svg data-pr-treat-icon viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M15 29c1-11 8-17 17-17s16 6 17 17Z" fill="#E8AFC0" stroke="#936276" stroke-width="3"/><path d="M15 37c1 11 8 17 17 17s16-6 17-17Z" fill="#E8AFC0" stroke="#936276" stroke-width="3"/><rect x="14" y="28" width="36" height="10" rx="5" fill="#FFF2D9" stroke="#936276" stroke-width="3"/></svg></div></section>
+      <section class="pr-section"><h3>3. Choose today’s conversation keyword</h3><div class="pr-keyword-layout"><div><p id="pr-keyword-hint" class="pr-hint"></p><div id="pr-keyword-options" class="pr-chips" aria-label="Suggested keywords"></div><div id="pr-custom-keyword-field" hidden><label class="pr-field">Your keyword<input type="text" id="pr-custom-keyword" maxlength="60" placeholder="A topic, place or thing"></label><button type="button" id="pr-use-keyword">Use keyword</button></div><p id="pr-keyword-value" class="pr-hint" aria-live="polite"></p></div><figure class="pr-preview"><img id="pr-illustration" alt="Conversation keepsake illustration" hidden><figcaption id="pr-image-status" aria-live="polite">Choose a keyword for your illustration. Image generation is optional.</figcaption><button type="button" id="pr-image-retry">Try illustration again</button></figure></div></section>
+      <details class="pr-transcript"><summary>View conversation transcript — reference only</summary><div id="popup-transcript-list"></div></details>
+      <footer class="pr-actions"><p id="partner-report-submit-status" role="status" aria-live="polite" hidden></p><button type="button" id="btn-final-partner-submit" onclick="executePartnerPayoutAndExit()">Submit report</button></footer>
     </div>
   </div>
 
@@ -7531,5 +7439,7 @@
 </div>
 <script src="session-lifecycle.js?v=20260928-transcript-rpc"></script>
 <script src="conversation-insights.js?v=20260928-transcript-rpc"></script>
+  <script src="partner-report-contract.js"></script>
+  <script src="partner-report.js"></script>
 </body>
 </html>
