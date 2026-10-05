@@ -707,21 +707,25 @@
     if (client && user && bookingId && learnerId && partnerId && user.id === partnerId && access.role === 'partner') {
       var reportPayload = {
         partner_name: payload.partnerName || null,
-        spoken_sentence: payload.sentence || null,
+        // Learner-owned canonical sentence: partner cards must not overwrite it.
         keyword: payload.keyword || null,
         illust_url: payload.illustUrl || null,
         partner_comment: payload.partnerComment || null,
         stamp: payload.stamp || null
       };
-      var insertRes = await client.rpc('merge_partner_session_report', {
-        p_booking_id: bookingId,
-        p_report: reportPayload
-      });
-      var resultData = insertRes && insertRes.data || {};
-      if (insertRes.error || !resultData.success || resultData.learner_id !== learnerId) {
-        console.warn('[DayO] session_reports merge failed', insertRes.error || resultData.message || 'identity-mismatch');
-        try { localStorage.setItem('dayo_last_approved_card', JSON.stringify(payload)); } catch (e) { /* ignore */ }
-        return { ok: false, error: insertRes.error || new Error(resultData.message || 'identity-mismatch') };
+      try {
+        var insertRes = await client.rpc('merge_partner_session_report', {
+          p_booking_id: bookingId,
+          p_report: reportPayload
+        });
+        var resultData = normalizeRpcPayload(insertRes && insertRes.data);
+        if (!insertRes || (insertRes && insertRes.error) || !resultData.success || resultData.learner_id !== learnerId) {
+          console.warn('[DayO] session_reports merge failed', (insertRes && insertRes.error) || resultData.message || 'identity-mismatch');
+          try { localStorage.setItem('dayo_last_approved_card', JSON.stringify(payload)); } catch (e) { /* ignore */ }
+          return { ok: false, error: (insertRes && insertRes.error) || new Error(resultData.message || 'identity-mismatch') };
+        }
+      } catch (error) {
+        return { ok: false, error: error };
       }
       return { ok: true, learnerId: learnerId };
     }
@@ -745,8 +749,8 @@
       booking_id: r.booking_id || booking.id || '',
       partner_name: partnerName,
       spoken_sentence: r.spoken_sentence || r.sentence || '',
-      keyword: r.keyword || 'daily',
-      illust_url: r.illust_url || r.illustUrl || ('https://image.pollinations.ai/prompt/' + encodeURIComponent('cute coffee, cute 3d pastel clay illustration, warm cozy aesthetic') + '?width=400&height=400&nologo=true'),
+      keyword: r.keyword || '',
+      illust_url: r.illust_url || r.illustUrl || '',
       partner_comment: r.partner_comment || r.partnerComment || '',
       stamp: r.stamp || '',
       summary: r.summary || '',
@@ -783,9 +787,10 @@
     if (!r) return true;
     if (r.from_booking || r.from_transcript) return false;
     var sentence = String(r.spoken_sentence || '').trim();
+    var summary = String(r.summary || '').trim();
     var keyword = String(r.keyword || '').toLowerCase();
     var partner = String(r.partner_name || '').toLowerCase();
-    if (!sentence) return true;
+    if (!sentence && !summary && !r.partner_comment && !r.stamp && !r.keyword && !r.illust_url) return true;
     if (/small talk makes a big day/i.test(sentence)) return true;
     if (keyword === 'small' && partner.indexOf('camille') !== -1) return true;
     return false;
@@ -796,8 +801,8 @@
     return {
       partner_name: row.partner_name || row.partner_nickname || 'DayO 파트너',
       created_at: row.scheduled_at || row.completed_at || row.ended_at || row.created_at,
-      spoken_sentence: '세션 완료',
-      keyword: 'session',
+      spoken_sentence: '',
+      keyword: '',
       topic: row.language || row.topic || '대화',
       from_booking: true,
       booking_id: row.id
@@ -829,18 +834,14 @@
   function utteranceFromLog(row) {
     var transcript = row && row.transcript;
     if (!Array.isArray(transcript)) return '';
-    var line = null;
     for (var i = transcript.length - 1; i >= 0; i -= 1) {
       var item = transcript[i] || {};
       var role = String(item.role || item.speaker || '').toLowerCase();
       var text = String(item.text || item.content || item.message || '').trim();
-      if (text && (role === 'user' || role === 'learner' || role === 'me')) {
-        line = text;
-        break;
-      }
-      if (!line && text) line = text;
+      if (role && role !== 'user' && role !== 'learner' && role !== 'me') continue;
+      if (text && (role === 'user' || role === 'learner' || role === 'me')) return text;
     }
-    return line || '';
+    return '';
   }
 
   function reportFromSessionLog(row) {
@@ -848,32 +849,29 @@
     return normalizeReportCard({
       booking_id: row.room_id || '',
       partner_name: row.partner_name || 'DayO Partner',
-      spoken_sentence: utteranceFromLog(row) || '오늘도 따뜻한 대화 한 잔',
-      keyword: row.keyword || 'daily',
+      spoken_sentence: utteranceFromLog(row) || '',
+      keyword: row.keyword || '',
       partner_comment: row.partner_comment || '',
       created_at: row.created_at || ''
     });
   }
 
   function topicLabel(r) {
-    var k = String((r && r.keyword) || '').toLowerCase();
-    if (/korea|한국|korean/.test(k)) return '한국에서 발견한 것들';
-    if (/taste|취향|compare|집순/.test(k)) return '우리의 취향 비교';
-    if (/daily|일상|americano|smalltalk|cafe|pottery|취미/.test(k)) return '요즘 나의 일상';
     var raw = String((r && r.keyword) || '').replace(/^#/, '').trim();
-    return raw || '요즘 나의 일상';
+    if (!raw) return '대화 주제가 저장되지 않았어요';
+    return raw;
   }
 
   function topicEmoji(r) {
     var k = String((r && r.keyword) || '').toLowerCase();
     if (/korea|한국|korean/.test(k)) return '🇰🇷';
     if (/taste|취향|compare/.test(k)) return '⚖️';
-    return '🌸';
+    return '📝';
   }
 
   function memorablePhrase(r) {
     var phrase = String((r && r.spoken_sentence) || '').replace(/^\s+|\s+$/g, '');
-    return phrase || "I've been into pottery lately.";
+    return phrase || '기록된 문장이 없어요';
   }
 
   function reportTreat(r) {
@@ -936,7 +934,7 @@
   function renderTalkThumb(r, idx) {
     var name = talkQuoteLabel(r);
     var dateLabel = formatAlbumDate(r.created_at);
-    var keyword = String((r && r.keyword) || 'SmallTalk').replace(/^#/, '');
+    var keyword = topicLabel(r);
     var img = esc((r && r.illust_url) || '');
     return (
       '<button type="button" class="card-thumb-item" onclick="openCardDetailModal(' + idx + ')" style="background: #FFF9F5; border-radius: 16px; padding: 14px; border: 1px solid #FFEBE4; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-align: center; font-family: inherit; width: 100%;">' +
@@ -947,9 +945,9 @@
         '<div style="width: 100%; aspect-ratio: 1; border-radius: 12px; overflow: hidden; background: #fff; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; box-shadow: inset 0 0 4px rgba(0,0,0,0.04);">' +
           (img
             ? '<img src="' + img + '" alt="오늘의 픽" style="width: 100%; height: 100%; object-fit: cover;">'
-            : '<span style="font-size:40px" aria-hidden="true">☕</span>') +
+            : '<span style="font-size:40px" aria-hidden="true">📝</span>') +
         '</div>' +
-        '<div style="font-size: 12px; font-weight: 700; color: #333; margin-bottom: 2px;">#' + esc(keyword) + '</div>' +
+        '<div style="font-size: 12px; font-weight: 700; color: #333; margin-bottom: 2px;">' + esc(keyword) + '</div>' +
         '<div style="font-size: 11px; color: #FF5A36; font-weight: 600;">카드 열기 ➔</div>' +
       '</button>'
     );
@@ -994,11 +992,13 @@
           '<span style="font-size:11px; font-weight:800; color:#D97706;">✨ 오늘의 원픽</span>' +
         '</div>' +
         '<div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:8px 0; min-height:0;">' +
-          '<img src="' + esc(r.illust_url) + '" alt="" crossorigin="anonymous" referrerpolicy="no-referrer" onerror="this.onerror=null;this.removeAttribute(\'crossorigin\');this.style.display=\'none\';this.insertAdjacentHTML(\'afterend\',\'<span style=&quot;font-size:48px&quot;>✨</span>\')" style="width:56%; max-width:180px; aspect-ratio:1; object-fit:contain; border-radius:16px; filter:drop-shadow(0 4px 10px rgba(0,0,0,0.08));" />' +
-          '<div style="font-size:12px; color:#6E7A72; font-weight:700; margin-top:8px;">#' + esc(r.keyword) + '</div>' +
+          (r.illust_url
+            ? '<img src="' + esc(r.illust_url) + '" alt="" crossorigin="anonymous" referrerpolicy="no-referrer" onerror="this.onerror=null;this.removeAttribute(\'crossorigin\');this.style.display=\'none\';this.insertAdjacentHTML(\'afterend\',\'<span style=&quot;font-size:48px&quot;>📝</span>\')" style="width:56%; max-width:180px; aspect-ratio:1; object-fit:contain; border-radius:16px; filter:drop-shadow(0 4px 10px rgba(0,0,0,0.08));" />'
+            : '<span style="font-size:48px" aria-hidden="true">📝</span>') +
+          '<div style="font-size:12px; color:#6E7A72; font-weight:700; margin-top:8px;">' + esc(topicLabel(r)) + '</div>' +
         '</div>' +
         '<div style="background:#FFFFFF; border-radius:12px; padding:12px 14px; text-align:center; border:1px solid #EDE4D5;">' +
-          '<div style="font-size:14px; font-weight:800; color:#3E4A42; line-height:1.4; word-break:keep-all;">"' + esc(r.spoken_sentence) + '"</div>' +
+          '<div style="font-size:14px; font-weight:800; color:#3E4A42; line-height:1.4; word-break:keep-all;">"' + esc(memorablePhrase(r)) + '"</div>' +
         '</div>' +
       '</div>';
     if (opts.bare) return card;
@@ -1055,8 +1055,9 @@
         '<h3 style="margin: 0 0 4px; font-size: 17px; color: #222;">' + esc(name) + ' 파트너와의 대화</h3>' +
         '<p style="margin: 0 0 14px; font-size: 12px; color: #888;">' + esc(when || '날짜 미정') + '</p>' +
         '<div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">' +
-          '<div class="report-meta-row">💡 나눈 주제: ' + esc(topicLabel(r) === '요즘 나의 일상' ? '서울의 숨은 카페와 각자의 주말' : topicLabel(r)) + '</div>' +
-          '<div class="report-meta-row">☕ 파트너 추천: "' + esc(talkQuoteText(r)) + '"</div>' +
+          (r.summary ? '<div class="report-meta-row">📝 ' + esc(r.summary) + '</div>' : '') +
+          '<div class="report-meta-row">💡 나눈 주제: ' + esc(topicLabel(r)) + '</div>' +
+          '<div class="report-meta-row">☕ 파트너 추천: ' + (talkQuoteText(r) ? ('"' + esc(talkQuoteText(r)) + '"') : '기록된 코멘트가 없어요') + '</div>' +
           '<div class="report-meta-row">✨ 기억하고 싶은 표현: "' + esc(memorablePhrase(r)) + '"</div>' +
           (expressions ? '<div class="report-meta-row"><strong>핵심 표현</strong><div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px;">' + expressions + '</div></div>' : '') +
           (wordHelp ? '<div class="report-meta-row">💡 단어 도움: ' + esc(wordHelp) + '</div>' : '') +
@@ -1152,7 +1153,8 @@
               return {
                 partner_name: row.partner_name || row.partner_nickname || 'DayO 파트너',
                 created_at: row.ended_at || row.created_at || row.started_at,
-                spoken_sentence: row.summary || row.spoken_sentence || '세션 완료',
+                spoken_sentence: row.spoken_sentence || '',
+                summary: row.summary || '',
                 keyword: row.keyword || 'session',
                 topic: row.topic || row.language || '대화',
                 from_transcript: true

@@ -5,6 +5,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-env.js"></script>
   <script src="supabase-client.js?v=20260921-session-persistence"></script>
+  <script src="partner-reward.js?v=20260928-reward-reliability"></script>
   <link rel="stylesheet" href="conversation-insights.css?v=20260928-conversation-story">
   <style>
     body:not(.room-access-granted) .studio { visibility: hidden; }
@@ -6963,89 +6964,108 @@
       button.style.opacity = busy ? '0.65' : '1';
     }
 
+    var partnerReportSubmitPending = false;
+    var partnerReportSubmitComplete = false;
+
     window.executePartnerPayoutAndExit = async function () {
+      if (partnerReportSubmitPending || partnerReportSubmitComplete) return;
       if (window.isObserverRoomMode && window.isObserverRoomMode()) return;
-      stopPartnerSentencePolling();
-      if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
-        setPartnerReportSubmitBusy(true);
-        setPartnerReportSubmitStatus(t('room.partnerReport.preview'), true);
-        setTimeout(function () { window.location.href = 'index.html?mode=partner'; }, 1200);
-        return;
-      }
-      window.dayoSessionEnded = true;
-      setPartnerReportSubmitBusy(true);
-      setPartnerReportSubmitStatus(t('room.partnerReport.saving'), true);
-
-      var cardData = window.currentSelectedCard || {
-        sentence: null,
-        keyword: null,
-        illustUrl: null,
-        partnerComment: (document.getElementById('popup-partner-comment') || {}).value || '',
-        stamp: (document.querySelector('input[name="popup_stamp"]:checked') || {}).value || null
-      };
-      cardData.partnerComment = (document.getElementById('popup-partner-comment') || {}).value || cardData.partnerComment || '';
-      var selectedTreat = document.querySelector('input[name="popup_stamp"]:checked');
-      cardData.stamp = selectedTreat && selectedTreat.value ? selectedTreat.value : null;
-      cardData.approvedAt = new Date().toISOString();
-
-      var user = null;
-      if (window.supabaseClient) {
-        try {
-          var authRes = await window.supabaseClient.auth.getUser();
-          user = authRes && authRes.data && authRes.data.user;
-        } catch (e) { user = null; }
-      }
-
-      var bookingId = window.DayORoomAccess && window.DayORoomAccess.bookingId || '';
-      if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(bookingId)) {
-        setPartnerReportSubmitStatus(t('room.partnerReport.invalidBooking'), false);
-        setPartnerReportSubmitBusy(false);
-        return;
-      }
-
-      var rewarded = false;
+      partnerReportSubmitPending = true;
       try {
-        var transcriptSave = await persistTranscript();
-        if (!transcriptSave || !transcriptSave.ok) {
-          console.error('[DayO Partner] transcript was not saved', transcriptSave && transcriptSave.error);
-          setPartnerReportSubmitStatus(t('room.partnerReport.transcriptFailed'), false);
+        stopPartnerSentencePolling();
+        if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
+          setPartnerReportSubmitBusy(true);
+          setPartnerReportSubmitStatus(t('room.partnerReport.preview'), true);
+          setTimeout(function () { window.location.href = 'index.html?mode=partner'; }, 1200);
+          return;
+        }
+        window.dayoSessionEnded = true;
+        setPartnerReportSubmitBusy(true);
+        setPartnerReportSubmitStatus(t('room.partnerReport.saving'), true);
+
+        var cardData = window.currentSelectedCard || {
+          sentence: null,
+          keyword: null,
+          illustUrl: null,
+          partnerComment: (document.getElementById('popup-partner-comment') || {}).value || '',
+          stamp: (document.querySelector('input[name="popup_stamp"]:checked') || {}).value || null
+        };
+        cardData.partnerComment = (document.getElementById('popup-partner-comment') || {}).value || cardData.partnerComment || '';
+        var selectedTreat = document.querySelector('input[name="popup_stamp"]:checked');
+        cardData.stamp = selectedTreat && selectedTreat.value ? selectedTreat.value : null;
+        cardData.approvedAt = new Date().toISOString();
+
+        var user = null;
+        if (window.supabaseClient) {
+          try {
+            var authRes = await window.supabaseClient.auth.getUser();
+            user = authRes && authRes.data && authRes.data.user;
+          } catch (e) { user = null; }
+        }
+
+        var bookingId = window.DayORoomAccess && window.DayORoomAccess.bookingId || '';
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(bookingId)) {
+          setPartnerReportSubmitStatus(t('room.partnerReport.invalidBooking'), false);
           setPartnerReportSubmitBusy(false);
           return;
         }
-        if (user && typeof window.persistSessionReport === 'function') {
-          var reportSave = await window.persistSessionReport(cardData);
-          if (!reportSave || !reportSave.ok) {
-            console.error('[DayO Partner] report was not saved', reportSave && reportSave.error);
-            setPartnerReportSubmitStatus(t('room.partnerReport.notesFailed'), false);
-            setPartnerReportSubmitBusy(false);
-            return;
-          }
-        } else {
-          setPartnerReportSubmitStatus(t('room.partnerReport.authFailed'), false);
+
+        var rewardPromise = user && user.id && window.DayOPartnerReward
+          ? Promise.resolve().then(function () { return window.DayOPartnerReward.complete(bookingId, user.id); }).catch(function (error) {
+              return { success: false, code: 'rpc_error', error: error };
+            })
+          : Promise.resolve({ success: false, code: 'invalid_identity' });
+        var transcriptPromise = Promise.resolve().then(persistTranscript).catch(function (error) {
+          return { ok: false, error: error };
+        });
+        var reportPromise = user && typeof window.persistSessionReport === 'function'
+          ? Promise.resolve().then(function () { return window.persistSessionReport(cardData); }).catch(function (error) {
+              return { ok: false, error: error };
+            })
+          : Promise.resolve({ ok: false, skipped: true });
+        var outcomes = await Promise.all([rewardPromise, transcriptPromise, reportPromise]);
+        var rewardResult = outcomes[0] || {};
+        var transcriptSave = outcomes[1] || {};
+        var reportSave = outcomes[2] || {};
+
+        if (!transcriptSave.ok) {
+          console.error('[DayO Partner] transcript was not saved', transcriptSave.error);
+        }
+        if (!reportSave.ok) {
+          console.error('[DayO Partner] report was not saved', reportSave.error);
+        }
+
+        if (rewardResult.success !== true) {
+          var needsReview = rewardResult.needs_review === true || rewardResult.code === 'evidence_insufficient';
+          setPartnerReportSubmitStatus(
+            needsReview ? '세션 확인이 필요합니다.' : (rewardResult.message || t('room.partnerReport.rewardUnavailable')),
+            false
+          );
           setPartnerReportSubmitBusy(false);
           return;
         }
 
-        if (user && user.id && bookingId && typeof window.handleCompleteSession === 'function') {
-          rewarded = await window.handleCompleteSession(bookingId, user.id);
+        if (!reportSave.ok) {
+          setPartnerReportSubmitStatus('보상은 정상 처리되었습니다. 리포트 저장을 다시 시도해 주세요.', false);
+          setPartnerReportSubmitBusy(false);
+          return;
         }
-      } catch (err) {
-        console.warn('[DayO] partner report completion failed', err);
-        setPartnerReportSubmitStatus(t('room.partnerReport.completeFailed'), false);
-        setPartnerReportSubmitBusy(false);
-        return;
-      }
 
-      console.log('✨ 파트너 리포트 검수 완료 트리거');
-      if (!rewarded) {
-        setPartnerReportSubmitStatus(t('room.partnerReport.rewardUnavailable'), false);
-        setPartnerReportSubmitBusy(false);
-        return;
-      }
+        if (!transcriptSave.ok) {
+          setPartnerReportSubmitStatus('보상과 리포트는 정상 처리되었습니다. 대화 기록 저장을 다시 시도해 주세요.', false);
+          setPartnerReportSubmitBusy(false);
+          return;
+        }
 
-      setPartnerReportSubmitStatus(t('room.partnerReport.success'), true);
-      try { localStorage.setItem('dayo_current_mode', 'PARTNER'); } catch (e) {}
-      setTimeout(function () { window.location.href = 'partner.html'; }, 1200);
+        console.log('✨ 파트너 리포트와 보상 처리 완료');
+        partnerReportSubmitComplete = true;
+        setPartnerReportSubmitStatus(t('room.partnerReport.success'), true);
+        try { localStorage.setItem('dayo_current_mode', 'PARTNER'); } catch (e) {}
+        setTimeout(function () { window.location.href = 'partner.html'; }, 1200);
+      } finally {
+        partnerReportSubmitPending = false;
+        setPartnerReportSubmitBusy(partnerReportSubmitComplete);
+      }
     };
 
     window.submitPartnerReportAndLeave = window.executePartnerPayoutAndExit;
