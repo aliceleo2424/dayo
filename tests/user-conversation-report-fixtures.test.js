@@ -1,0 +1,37 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
+const report=require('../public/user-conversation-report.js');
+const fixture={id:'report-fixture',booking_id:'11111111-1111-4111-8111-111111111111',partner_name:'Alex',created_at:'2026-10-05T05:00:00Z',language:'en',partner_comment:'It was so nice talking with you today.\nHave a great day!',stamp:'green_tea',keyword:'Seoul Forest cafés',illust_url:'/images/logo.png',summary:'You talked about cafés in Seoul. You shared your weekend plans.',key_expressions:['I enjoy visiting new places',{expression:'I went to Osaka last year',usage:'Talking about past travel'},'I love exploring new cafés','I enjoy visiting new places','um uh yeah','zxq qwe zxq'],quiz_score:80,feedback:[{original:'I am very agree.',corrected:'I totally agree.',source:'learner_recognized_speech',meaning_preserved:true,correction_needed:true,explanation:'Use “agree” as a verb.'}],__dayoLearnerTranscript:[{speaker:'learner',text:'I am very agree.',timestamp:'2026-10-05T05:01:00Z'},{speaker:'partner',text:'I go to Osaka yesterday'}]};
+module.exports={fixture};
+if(require.main===module){
+const cp=require('node:child_process'),base='7980c3d';
+const read=f=>fs.readFileSync(path.join(__dirname,'..',f),'utf8').replace(/\r/g,'');
+const old=f=>cp.execFileSync('git',['show',base+':'+f],{cwd:path.join(__dirname,'..'),encoding:'utf8'}).replace(/\r/g,'');
+for(const f of ['public/room.html','public/room-live.js','public/session-lifecycle.js','public/learner-expressions.js','public/partner-reward.js','public/partner-report-contract.js','public/partner-report.js','public/mypage-dashboard.js','public/booking-modal.js'])assert.equal(read(f),old(f),f+' protected');
+assert.equal(read('public/supabase-client.js').split('  function normalizeReportCard')[0],old('public/supabase-client.js').split('  function normalizeReportCard')[0],'auth/booking/report write path unchanged');
+assert.equal(read('public/supabase-client.js').split('  window.bindLearnerSessionId')[1],old('public/supabase-client.js').split('  window.bindLearnerSessionId')[1],'remaining shared client logic unchanged');
+const before=JSON.stringify(fixture),full=report.renderDetail(fixture,'en');
+assert.match(full,/From Your Conversation Partner/);assert.match(full,/Your Language Recap/);assert.match(full,/Calm &amp; comfortable/);assert.match(full,/More natural/);assert.match(full,/80%/);assert.equal(JSON.stringify(fixture),before);
+assert.equal(report.expressions(fixture).length,3);assert.equal(report.corrections(fixture).length,1);
+for(const [field,title] of [['stamp','Today’s Treat'],['partner_comment','A little note'],['feedback','More natural'],['quiz_score','Quiz result']]){const copy={...fixture,[field]:field==='feedback'?[]:null};assert.ok(!report.renderDetail(copy,'en').includes(title),field);}
+const failed=report.renderDetail({...fixture,illust_url:'/missing.png'},'en');assert.match(failed,/onerror="DayOUserConversationReport.hideIllustration/);assert.match(failed,/Seoul Forest cafés/);assert.doesNotMatch(report.renderDetail({...fixture,illust_url:'javascript:alert(1)'},'en'),/<img/);
+assert.equal(report.corrections({...fixture,__dayoLearnerTranscript:[]}).length,0);
+assert.equal(report.corrections({...fixture,feedback:['Nice conversation',{original:'I am very agree.',corrected:'I totally agree.'}]}).length,0);
+for(const edit of [{speaker:'partner'},{meaning_preserved:false},{correction_needed:false},{ambiguous:true},{asr_confidence:0.4},{corrected:'I am very agree.'},{original:'um uh yeah'},{original:'zxq qwe zxq'}]){assert.equal(report.corrections({...fixture,feedback:[{...fixture.feedback[0],...edit}]}).length,0);}
+assert.equal(report.corrections({...fixture,__dayoLearnerTranscript:[{speaker:'partner',text:'I am very agree.'}]}).length,0);
+assert.equal(report.corrections({...fixture,feedback:Array(5).fill(fixture.feedback[0])}).length,1);
+assert.equal(report.summary({summary:'One. Two. Three. Four.'}),'One. Two. Three.');
+assert.doesNotMatch(report.renderDetail({__dayoConversationMetrics:{hasLearnerEvidence:false}},'en'),/ucr-recap/);assert.match(report.renderDetail({__dayoConversationMetrics:{hasLearnerEvidence:true}},'en'),/data-dayo-report-metrics/);assert.equal(report.quiz({quiz_score:0}),'0%');for(const value of [null,'',NaN,101])assert.equal(report.quiz({quiz_score:value}),'');
+assert.doesNotMatch(report.renderDetail({spoken_sentence:'Legacy partner sentence',feedback:['Slow down']},'en'),/More natural|ucr-section|Legacy partner sentence/);
+const minimal=report.renderDetail({partner_name:'private@example.com',partner_comment:'<script>alert(1)</script>'},'ko');assert.match(minimal,/DayO Partner/);assert.match(minimal,/&lt;script&gt;/);assert.doesNotMatch(minimal,/<script>/);
+for(const [lang,sentence] of [['es','Me gusta viajar con mis amigos'],['fr','J’aime visiter de nouveaux cafés'],['ko','친구들과 새로운 카페에 가는 것을 좋아해요']]){const out=report.renderDetail({...fixture,language:lang,key_expressions:[sentence],feedback:[]},'en');assert.ok(out.includes(sentence));}
+const archive=report.renderArchive(fixture,0,'en');assert.match(archive,/report-1/);assert.match(archive,/Green Tea/);assert.match(archive,/80%/);assert.doesNotMatch(archive,/I enjoy|Have a great|<img|More natural/);
+for(const name of ['user-conversation-report.js','user-conversation-report.css','supabase-client.js','mypage.html','conversation-insights.js'])assert.equal(fs.readFileSync(path.join(__dirname,'../public',name),'utf8'),fs.readFileSync(path.join(__dirname,'..',name),'utf8'));
+// Use the real client loader/normalizer, not a parallel renderer in the fixture.
+const list={innerHTML:''},calls=[];
+const saved=[{...fixture,bookings:{partner_name:'Alex',language:'en',scheduled_at:fixture.created_at}},{id:'quiz-only',booking_id:'22222222-2222-4222-8222-222222222222',quiz_score:0,bookings:{partner_name:'Alex',language:'en',scheduled_at:fixture.created_at}}];
+const client={auth:{getUser:async()=>({data:{user:{id:'learner-id'}}})},rpc:async name=>{calls.push(name);return{data:[{id:'partner-id',nickname:'Alex'}],error:null};},from(table){const q={};for(const key of ['select','eq','order','in','limit'])q[key]=(...args)=>{calls.push([table,key,...args]);return q;};q.then=(resolve,reject)=>Promise.resolve({data:table==='session_reports'?saved:[],error:null}).then(resolve,reject);return q;}};
+const doc={readyState:'loading',documentElement:{lang:'en'},addEventListener(){},dispatchEvent(){},getElementById(){return null;},querySelector(s){return s==='.mypage-report-list'?list:null;},querySelectorAll(){return[];}};
+const win={supabaseClient:client,DayOUserConversationReport:report};
+vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../public/supabase-client.js'),'utf8'),{window:win,document:doc,localStorage:{getItem(){return null;}},console:{log(){},warn(){},error(){}},setTimeout,CustomEvent:class{}});
+(async()=>{await win.loadUserReports();assert.match(list.innerHTML,/ucr-archive/);assert.match(list.innerHTML,/0%/);assert.equal(win.__dayoTalkAlbum.length,2);assert.match(win.renderReportDetailHtml(win.__dayoTalkAlbum[0]),/Your Language Recap/);assert.ok(calls.some(c=>Array.isArray(c)&&c[0]==='session_reports'&&c[1]==='eq'&&c[2]==='learner_id'));console.log('PASS: A–L report fixtures, strict learner correction evidence, existing Quiz percentage, partial fields, multilingual, archive, escaping, real client load and mirrors.');})().catch(e=>{console.error(e);process.exitCode=1;});
+}

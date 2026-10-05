@@ -790,7 +790,7 @@
     var summary = String(r.summary || '').trim();
     var keyword = String(r.keyword || '').toLowerCase();
     var partner = String(r.partner_name || '').toLowerCase();
-    if (!sentence && !summary && !r.partner_comment && !r.stamp && !r.keyword && !r.illust_url) return true;
+    if (!sentence && !summary && !r.partner_comment && !r.stamp && !r.keyword && !r.illust_url && !(r.key_expressions || []).length && r.quiz_score == null && !(r.feedback || []).length && !(r.word_help || []).length) return true;
     if (/small talk makes a big day/i.test(sentence)) return true;
     if (keyword === 'small' && partner.indexOf('camille') !== -1) return true;
     return false;
@@ -803,6 +803,7 @@
       created_at: row.scheduled_at || row.completed_at || row.ended_at || row.created_at,
       spoken_sentence: '',
       keyword: '',
+      language: row.language || '',
       topic: row.language || row.topic || '대화',
       from_booking: true,
       booking_id: row.id
@@ -954,6 +955,7 @@
   }
 
   function renderReportArchiveItem(r, idx) {
+    if (window.DayOUserConversationReport) return window.DayOUserConversationReport.renderArchive(r, idx, (window.DayOI18n && window.DayOI18n.getLang && window.DayOI18n.getLang() || document.documentElement.lang || 'KO').toLowerCase());
     var name = talkQuoteLabel(r);
     var dateLabel = formatAlbumDate(r.created_at) || '날짜 미정';
     var topic = topicLabel(r);
@@ -1028,6 +1030,7 @@
   };
 
   window.renderReportDetailHtml = function (r) {
+    if (window.DayOUserConversationReport) return window.DayOUserConversationReport.renderDetail(r, (window.DayOI18n && window.DayOI18n.getLang && window.DayOI18n.getLang() || document.documentElement.lang || 'KO').toLowerCase());
     var name = talkQuoteLabel(r);
     var dateLabel = formatAlbumDate(r.created_at);
     var timeLabel = '';
