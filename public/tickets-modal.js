@@ -819,9 +819,33 @@
     open();
   }
 
+  var landingSelectionPending = false;
+  async function selectLandingPlan(id) {
+    if (landingSelectionPending || ['trial', 'single', 'starter3', 'light11'].indexOf(id) === -1) return;
+    var plan = findPlan(id);
+    if (!plan) return;
+    landingSelectionPending = true;
+    try {
+      if (plan.id === 'trial') {
+        await loadCoupons();
+        if (couponState.trialUsed) {
+          open(); // Reuse the existing used-trial and regular-product guidance.
+          return;
+        }
+      }
+      await completePurchase(plan);
+    } finally { landingSelectionPending = false; }
+  }
+
   function init() {
     mount();
     document.addEventListener('click', function (e) {
+      var card = e.target.closest('#pricing [data-landing-ticket]');
+      if (card) {
+        e.preventDefault();
+        selectLandingPlan(card.getAttribute('data-landing-ticket'));
+        return;
+      }
       var trigger = e.target.closest('[data-tickets-open]');
       if (!trigger) return;
       e.preventDefault();

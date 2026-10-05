@@ -2904,6 +2904,34 @@
       border-color: #DDE8D9;
       box-shadow: 0 2px 10px rgba(64, 54, 47, 0.05);
     }
+    /* Informational partner cards and selectable ticket cards. */
+    .dayo-cafe-landing #partners .journey-card {
+      cursor: default;
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+    }
+    .dayo-cafe-landing #pricing button.ticket-price-card {
+      width: 100%; font: inherit; color: inherit; text-align: inherit;
+      cursor: pointer; appearance: none;
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+    }
+    .dayo-cafe-landing #pricing .ticket-price-card:focus-visible { outline: 3px solid #5F7D63; outline-offset: 4px; }
+    .dayo-cafe-landing #pricing .ticket-price-card:active { background: #F8F0E3; }
+    @media (hover: hover) and (pointer: fine) {
+      .dayo-cafe-landing #partners .journey-card:hover,
+      .dayo-cafe-landing #pricing .ticket-price-card:hover {
+        transform: translateY(-2px); border-color: #5F7D63;
+        background: #F8F0E3; box-shadow: 0 6px 16px rgba(95,125,99,.12);
+      }
+    }
+    @media (hover: none), (pointer: coarse) {
+      .dayo-cafe-landing #partners .journey-card:hover { transform: none; box-shadow: 0 2px 10px rgba(64,54,47,.045); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .dayo-cafe-landing #partners .journey-card,
+      .dayo-cafe-landing #pricing button.ticket-price-card { transition: none; }
+      .dayo-cafe-landing #partners .journey-card:hover,
+      .dayo-cafe-landing #pricing .ticket-price-card:hover { transform: none; }
+    }
     .dayo-cafe-landing #pricing .header-cta {
       min-height: 52px;
       padding: 0.8rem 1.3rem;
@@ -3218,26 +3246,26 @@
         <h2 class="section-title reveal" style="margin-bottom: 1.25rem;" data-i18n="landing.pricing.title">필요할 때 선택하는 티켓</h2>
         <p class="reveal" style="color: var(--text-muted); margin-bottom: 1.75rem; line-height: 1.7; max-width: 44rem; margin-left: auto; margin-right: auto;" data-i18n="landing.pricing.description">25분 1:1 영어 대화 + 5분 AI 대화 리캡, 정기결제 없이 필요할 때 한 번씩 이용할 수 있어요.</p>
         <div class="ticket-price-row reveal">
-          <div class="ticket-price-card ticket-price-card--trial">
+          <button type="button" class="ticket-price-card ticket-price-card--trial" data-landing-ticket="trial">
             <strong data-i18n="landing.pricing.trialName">첫 세션 체험 할인권</strong>
             <span data-i18n="landing.pricing.trialPrice">9,900원 · 1회</span>
             <small data-i18n="landing.pricing.trialBenefit">1회 한정 특별 혜택</small>
-          </div>
-          <div class="ticket-price-card">
+          </button>
+          <button type="button" class="ticket-price-card" data-landing-ticket="single">
             <strong data-i18n="landing.pricing.singleName">깔끔한 1회 티켓</strong>
             <span data-i18n="landing.pricing.singlePrice">19,900원 · 1회</span>
             <small data-i18n="landing.pricing.singleBenefit">약정 없이 필요할 때 딱 한 번</small>
-          </div>
-          <div class="ticket-price-card">
+          </button>
+          <button type="button" class="ticket-price-card" data-landing-ticket="starter3">
             <strong data-i18n="landing.pricing.threeName">산뜻한 3회 패키지</strong>
             <span data-i18n="landing.pricing.threePrice">54,900원 · 회당 약 18,300원</span>
             <small data-i18n="landing.pricing.threeBenefit">부담 없는 3주 루틴</small>
-          </div>
-          <div class="ticket-price-card">
+          </button>
+          <button type="button" class="ticket-price-card" data-landing-ticket="light11">
             <strong data-i18n="landing.pricing.elevenName">가벼운 11 패키지</strong>
             <span data-i18n="landing.pricing.elevenPrice">179,000원 · BEST 1회 보너스</span>
             <small data-i18n="landing.pricing.elevenBenefit">회당 약 16,270원 (10+1회)</small>
-          </div>
+          </button>
         </div>
         <div class="reveal" style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center;">
           <button type="button" class="header-cta" style="display: inline-flex; border: none; font-family: inherit; cursor: pointer;" data-booking-open data-i18n="landing.pricing.book">📅 대화 세션 예약하기</button>
