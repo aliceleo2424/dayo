@@ -55,6 +55,10 @@
   mount();if(!initialized)return;context=data||{};
   syncTopicTemplate();
   paintSuggestions();if(!selectedTemplate&&!el('popup-partner-comment').value)selectTemplate('a');
+  var ko=window.DayOI18n&&window.DayOI18n.getLang&&window.DayOI18n.getLang()==='ko';
+  el('pr-title').textContent=ko?'파트너 레터':'Partner Letter';
+  root.querySelector('.pr-intro').textContent=ko?'오늘의 대화를 떠올리며 짧은 메시지를 남겨 주세요.':'Leave a short, warm message about today’s conversation.';
+  el('btn-final-partner-submit').textContent=ko?'메시지 보내고 마치기':'Send letter and finish';
  }
  window.DayOPartnerReport={open:open,refresh:function(data){context=data||context;if(initialized){syncTopicTemplate();if(!selectedKeyword)paintSuggestions();}},payload:function(){return {partnerComment:el('popup-partner-comment').value,stamp:(root.querySelector('input[name="popup_stamp"]:checked')||{}).value||null,keyword:selectedKeyword||null,illustUrl:imageUrl};}};
 })();

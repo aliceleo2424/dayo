@@ -47,6 +47,11 @@
   var preflightMicDetected = false;
   var preflightFinalDetected = false;
   var transcriptSavePromise = null;
+  var transcriptRevision = 0;
+  var transcriptSavedRevision = -1;
+  var transcriptSaveResult = null;
+  var transcriptFlushPromise = null;
+  var transcriptFinalized = false;
 
   window.sessionTranscript = window.sessionTranscript || [];
   window.dayoSessionEnded = false;
@@ -549,6 +554,7 @@
   }
 
   function pushTranscript(text, speaker) {
+    if (transcriptFinalized) return null;
     var cleaned = String(text || '').trim();
     if (!cleaned) return null;
     var role = speaker || 'learner';
@@ -562,6 +568,7 @@
       timestamp: new Date()
     };
     sessionTranscript.push(entry);
+    transcriptRevision += 1;
     window.sessionTranscript = sessionTranscript.slice();
     console.log('🎤 [STT 인식 성공]:', cleaned);
     appendTranscriptRowToViewer(entry);
@@ -579,7 +586,15 @@
   }
 
   function saveTranscript() {
-    if (transcriptSavePromise) return transcriptSavePromise;
+    if ((hungUp || window.dayoSessionEnded) && !transcriptFinalized) {
+      return stopSpeech().then(saveTranscript);
+    }
+    if (transcriptSavePromise) {
+      return transcriptSavePromise.then(function (result) {
+        return result && result.ok && transcriptSavedRevision !== transcriptRevision ? saveTranscript() : result;
+      });
+    }
+    if (transcriptSaveResult && transcriptSavedRevision === transcriptRevision) return Promise.resolve(transcriptSaveResult);
     var serialized = backupTranscriptLocal();
     var access = window.DayORoomAccess;
     if (!access || !access.allowed || access.adminTest || access.observer) {
@@ -597,14 +612,21 @@
       document.dispatchEvent(new CustomEvent('dayo:transcriptsaved', { detail: payload }));
       return payload;
     };
+    var savingRevision = transcriptRevision;
     if (store && typeof store.saveSessionLog === 'function') {
       transcriptSavePromise = store.saveSessionLog(canonicalTranscript, extra).then(done).catch(function (err) {
         return done({ ok: false, local: true, transcript: serialized, error: err });
       }).then(function (result) {
-        if (!result || !result.ok) transcriptSavePromise = null;
+        transcriptSavePromise = null;
+        if (result && result.ok) {
+          transcriptSavedRevision = savingRevision;
+          transcriptSaveResult = result;
+        }
         return result;
       });
-      return transcriptSavePromise;
+      return transcriptSavePromise.then(function (result) {
+        return result && result.ok && transcriptSavedRevision !== transcriptRevision ? saveTranscript() : result;
+      });
     }
     return Promise.resolve(done({ ok: false, local: true, transcript: serialized }));
   }
@@ -1207,6 +1229,7 @@
       };
 
       recognition.onresult = function (event) {
+        if (transcriptFinalized) return;
         for (var i = event.resultIndex; i < event.results.length; i++) {
           if (!event.results[i].isFinal) continue;
           var chunk = event.results[i][0] && event.results[i][0].transcript;
@@ -1262,9 +1285,31 @@
     sttStarting = false;
     clearTimeout(sttRestartTimer);
     clearSttStartWatchdog();
-    if (!recognition) return;
-    recordSttState('stt_end', { reason: 'session-stop' });
-    try { recognition.onend = null; recognition.stop(); } catch (e) { /* ignore */ }
+    if (transcriptFlushPromise) return transcriptFlushPromise;
+    transcriptFlushPromise = new Promise(function (resolve) {
+      var timer;
+      var settled = false;
+      function finish(reason) {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        transcriptFinalized = true;
+        if (recognition) recognition.onend = null;
+        recordSttState('stt_end', { reason: reason });
+        resolve();
+      }
+      if (!recognition) { finish('session-stop'); return; }
+      var previousEnd = recognition.onend;
+      recognition.onend = function (event) {
+        if (typeof previousEnd === 'function') previousEnd.call(recognition, event);
+        finish('session-stop');
+      };
+      // Web Speech emits any final result before onend. Bound a stalled recognizer
+      // and close the source there so later callbacks cannot diverge from the DB.
+      timer = setTimeout(function () { finish('review-flush-timeout'); }, 2500);
+      try { recognition.stop(); } catch (e) { finish('session-stop'); }
+    });
+    return transcriptFlushPromise;
   }
 
   function pauseSpeech() {
@@ -1379,9 +1424,10 @@
 
   function start() {
     try {
-      window.dayoSessionEnded = false;
+      window.dayoSessionEnded = hungUp;
       restoreSessionTiming(window.DayORoomAccess);
       sessionTranscript = recoverTranscriptForQuiz();
+      transcriptRevision = sessionTranscript.length;
       window.sessionTranscript = sessionTranscript.slice();
       utteranceSeq = 0;
       backupTranscriptLocal();
@@ -1455,7 +1501,8 @@
     },
     suggestWords: suggestWords,
     suggestSentences: suggestSentences,
-    saveTranscript: saveTranscript
+    saveTranscript: saveTranscript,
+    finalizeTranscript: function () { return stopSpeech().then(saveTranscript); }
   };
 
   document.addEventListener('dayo:langchange', function () {

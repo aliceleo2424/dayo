@@ -164,15 +164,27 @@
     return size ? Math.round(Math.min(count, size) / size * 100) : null;
   }
 
-  function normalizeQuizState(saved, total) {
+  function contentFingerprint(bookingId, source, questions) {
+    var value = JSON.stringify([String(bookingId || ''), String(source || ''), questions || []]);
+    var first = 2166136261;
+    var second = 5381;
+    for (var i = 0; i < value.length; i += 1) {
+      first = Math.imul(first ^ value.charCodeAt(i), 16777619) >>> 0;
+      second = (Math.imul(second, 33) ^ value.charCodeAt(i)) >>> 0;
+    }
+    return 'review-v2:' + first.toString(16).padStart(8, '0') + second.toString(16).padStart(8, '0');
+  }
+
+  function normalizeQuizState(saved, total, fingerprint) {
     var size = Math.max(0, Number(total) || 0);
-    var source = saved && Number(saved.total) === size ? saved : {};
+    var source = saved && fingerprint && saved.fingerprint === fingerprint && Number(saved.total) === size ? saved : {};
     var startedAt = Number(source.startedAt);
     return {
       startedAt: Number.isFinite(startedAt) && startedAt > 0 ? startedAt : null,
       currentIndex: Math.min(Math.max(0, Number(source.currentIndex) || 0), size),
       completed: Math.min(Math.max(0, Number(source.completed) || 0), size),
       total: size,
+      fingerprint: fingerprint || null,
       ended: source.ended === true,
       endReason: source.endReason || null
     };
@@ -216,6 +228,7 @@
     representativeExpression: representativeExpression,
     quizScore: quizScore,
     normalizeQuizState: normalizeQuizState,
+    contentFingerprint: contentFingerprint,
     quizRemainingSeconds: quizRemainingSeconds,
     buildReviewData: buildReviewData
   };

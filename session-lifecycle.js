@@ -5,6 +5,10 @@
   var submittingSafety = false;
   var submittingTechIssue = false;
   var sessionEndedEventLogged = false;
+  var reviewSource = null;
+  var reviewSourcePromise = null;
+  var reviewSourceBookingId = '';
+  var reviewSavePromise = null;
   window.__dayoWordHelpHistory = [];
   window.__dayoWordHelpBookingId = '';
 
@@ -72,6 +76,86 @@
       try { rows = JSON.parse(stored('last_session_transcript') || '[]'); } catch (e) { rows = []; }
     }
     return Array.isArray(rows) ? rows : [];
+  }
+
+  function canonicalReviewSource() {
+    var ctx = context();
+    return reviewSource && reviewSource.bookingId === ctx.bookingId
+      ? reviewSource : { bookingId: ctx.bookingId, sourceId: '', version: '', rows: [], available: false };
+  }
+
+  function reviewDeadline(operation) {
+    var timer;
+    var deadline = new Promise(function (_, reject) {
+      timer = setTimeout(function () { reject(new Error('canonical-review-timeout')); }, 10000);
+    });
+    return Promise.race([operation, deadline]).then(function (result) {
+      clearTimeout(timer);
+      return result;
+    }, function (error) {
+      clearTimeout(timer);
+      throw error;
+    });
+  }
+
+  async function prepareReviewSource() {
+    var ctx = context();
+    if (!ctx.bookingId || !ctx.learnerId || !window.dayoSessionEnded || window.DayORoomAccess.role !== 'user') return canonicalReviewSource();
+    if (reviewSourceBookingId !== ctx.bookingId) {
+      reviewSourceBookingId = ctx.bookingId;
+      reviewSource = null;
+      reviewSourcePromise = null;
+      window.__dayoReviewReportSaved = false;
+      window.__dayoLearnerReportPayload = null;
+    }
+    if (reviewSource) return reviewSource;
+    if (reviewSourcePromise) return reviewSourcePromise;
+    var pending = (async function () {
+      try {
+        var live = window.DayOLive;
+        if (!live || typeof live.finalizeTranscript !== 'function') return canonicalReviewSource();
+        var saved = await reviewDeadline(live.finalizeTranscript());
+        if (!saved || !saved.ok) return canonicalReviewSource();
+        var user = await authUser();
+        var db = client();
+        if (!db || !user || user.id !== ctx.learnerId) return canonicalReviewSource();
+        var result = await reviewDeadline(db.from('session_logs')
+          .select('id, booking_id, participant_id, participant_role, transcript')
+          .eq('booking_id', ctx.bookingId).eq('participant_id', ctx.learnerId)
+          .eq('participant_role', 'learner').maybeSingle());
+        var row = result && result.data;
+        if (result.error || !row || !row.id || row.booking_id !== ctx.bookingId ||
+            row.participant_id !== ctx.learnerId || row.participant_role !== 'learner' ||
+            !Array.isArray(row.transcript) || context().bookingId !== ctx.bookingId) return canonicalReviewSource();
+        var recapApi = window.DayOConversationRecap;
+        var rows = recapApi.rows(row, ctx.bookingId, ctx.learnerId, 'learner').map(function (item) { return Object.freeze(item); });
+        var recap = recapApi.build({ bookingId: ctx.bookingId, learnerId: ctx.learnerId, partnerId: ctx.partnerId,
+          language: window.DayORoomAccess.language, learnerLog: row });
+        var version = recap.source.learner_version;
+        try {
+          var session = await db.auth.getSession();
+          var token = session && session.data && session.data.session && session.data.session.access_token;
+          if (token) {
+            var controller = new AbortController(), timeout = setTimeout(function () { controller.abort(); }, 7000);
+            try {
+              var response = await fetch('/api/conversation-recap', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+                body: JSON.stringify({ booking_id: ctx.bookingId, learner_version: version }), signal: controller.signal });
+              var data = response.ok ? await response.json() : null;
+              if (data && data.recap && data.recap.generator === recapApi.VERSION && data.recap.booking_id === ctx.bookingId && data.recap.source.learner_version === version) recap = data.recap;
+            } finally { clearTimeout(timeout); }
+          }
+        } catch (_) { /* Canonical learner recap remains available without server enrichment. */ }
+        if (context().bookingId !== ctx.bookingId) return canonicalReviewSource();
+        reviewSource = Object.freeze({ bookingId: ctx.bookingId, sourceId: row.id, version: version, rows: Object.freeze(rows), recap: recap, available: true });
+        return reviewSource;
+      } catch (error) {
+        console.warn('[DayO Review] canonical source unavailable');
+        return canonicalReviewSource();
+      }
+    })();
+    reviewSourcePromise = pending;
+    try { return await pending; }
+    finally { if (reviewSourcePromise === pending) reviewSourcePromise = null; }
   }
 
   async function persistTranscript() {
@@ -255,35 +339,51 @@
   function buildReviewSnapshot() {
     var api = window.DayOLearnerExpressions;
     if (!api) return null;
-    return api.buildReviewData(transcriptRows(), {
-      quizScore: window.__dayoQuizScore,
-      wordHelp: wordHelpHistory(),
-      feedback: selectedFeedback()
-    });
+    var source = canonicalReviewSource(), recap = source.recap;
+    if (!recap) return { summary: '', key_expressions: [], quiz_score: null, word_help: [], feedback: [], spoken_sentence: null };
+    recap = Object.assign({}, recap, { progress: Object.assign({}, window.__dayoQuizProgress || recap.progress) });
+    var existing = window.__dayoLearnerReportPayload;
+    return {
+      summary: window.DayOConversationRecap.labels('ko')[recap.comment] || '',
+      key_expressions: recap.expressions.map(function (item) { return item.text; }),
+      spoken_sentence: recap.expressions.length ? recap.expressions[0].text : null,
+      quiz_score: window.__dayoQuizScore == null ? null : Number(window.__dayoQuizScore),
+      word_help: wordHelpHistory(),
+      feedback: window.DayOConversationRecap.mergeFeedback(existing && existing.feedback || selectedFeedback(), recap)
+    };
   }
 
   async function persistReviewReport() {
+    if (reviewSavePromise) {
+      await reviewSavePromise;
+      return persistReviewReport();
+    }
+    var pending = saveReviewReport();
+    reviewSavePromise = pending;
+    try { return await pending; }
+    finally { if (reviewSavePromise === pending) reviewSavePromise = null; }
+  }
+
+  async function saveReviewReport() {
     if (isObserver()) return false;
-    if (window.__dayoReviewReportSaved) return true;
+
     var db = client();
     var user = await authUser();
     var ctx = context();
     if (!db || !user || !ctx.bookingId) return false;
+    var source = await prepareReviewSource();
+    if (!source.available) return false;
+    if (window.__dayoReviewReportSaved) return true;
     var payload = buildReviewSnapshot();
     if (!payload) return false;
+    var saveRevision = window.__dayoReviewRevision || 0;
     if (!ctx.learnerId || user.id !== ctx.learnerId) {
       console.error('[DayO Session] learner report identity mismatch');
       return false;
     }
     var rating = document.querySelectorAll('.star-btn.active').length;
     if (rating > 0) payload.rating = rating;
-    // Optional learner-only enrichment; keep the original Quiz/Talk Record snapshot.
     var reportPayload = payload;
-    if (window.DayOLearnerLanguageRecap) {
-      try { reportPayload = await window.DayOLearnerLanguageRecap.enrichReview({
-        db: db, bookingId: ctx.bookingId, payload: payload, ensureTranscript: persistTranscript
-      }); } catch (e) { reportPayload = payload; }
-    }
     var result = await db.rpc('merge_learner_session_report', {
       p_booking_id: ctx.bookingId,
       p_report: reportPayload
@@ -296,7 +396,7 @@
     if (rating > 0) {
       await db.from('bookings').update({ rating: rating }).eq('id', ctx.bookingId).eq('learner_id', ctx.learnerId);
     }
-    window.__dayoReviewReportSaved = true;
+    window.__dayoReviewReportSaved = saveRevision === (window.__dayoReviewRevision || 0);
     window.__dayoLearnerReportPayload = payload;
     return true;
   }
@@ -443,8 +543,11 @@
   window.closeSafetyReportModal = closeSafetyModal;
   window.submitSafetyReport = submitSafetyReport;
   window.persistSessionReviewReport = persistReviewReport;
+  window.prepareSessionReviewSource = prepareReviewSource;
+  window.getCanonicalReviewSource = canonicalReviewSource;
   window.getLearnerReviewSnapshot = function () {
-    return window.__dayoLearnerReportPayload || buildReviewSnapshot();
+    return canonicalReviewSource().available && window.__dayoReviewReportSaved && window.__dayoLearnerReportPayload
+      ? window.__dayoLearnerReportPayload : buildReviewSnapshot();
   };
   window.finalizeLearnerQuiz = async function () {
     if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
@@ -460,6 +563,14 @@
     if ((window.isPartnerRoomMode && window.isPartnerRoomMode()) ||
         (window.isObserverRoomMode && window.isObserverRoomMode())) return;
     var ctx = context();
+    // Persist independently of opening or dismissing the recap/rating UI.
+    var recapSave = persistReviewReport().then(function (saved) {
+      if (!saved) toast('리캡을 저장하지 못했어요. 리캡 화면에서 다시 저장해 주세요.');
+      return saved;
+    }).catch(function () {
+      toast('리캡을 저장하지 못했어요. 리캡 화면에서 다시 저장해 주세요.');
+      return false;
+    });
     if (ctx.bookingId && client()) {
       var result = await client().rpc('complete_learner_session', {
         p_booking_id: ctx.bookingId,
@@ -467,6 +578,7 @@
       });
       if (result.error) console.warn('[DayO] timed completion update failed', result.error);
     }
+    await recapSave;
   });
 
   window.handleUserQuizComplete = async function () {
