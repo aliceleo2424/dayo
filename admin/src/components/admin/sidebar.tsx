@@ -47,16 +47,16 @@ export function AdminSidebar() {
 
   return (
     <aside className={cn(
-      "fixed left-0 top-0 z-40 flex h-screen flex-col border-r bg-navy text-white transition-all duration-300",
+      "fixed left-0 top-0 z-40 flex h-screen flex-col border-r bg-[#5F7D63] text-white transition-all duration-300",
       sidebarCollapsed ? "w-[68px]" : "w-64"
     )}>
       <div className="flex h-16 items-center justify-between gap-2 border-b border-white/10 px-3">
         {!sidebarCollapsed && (
           <Link href="/admin/dashboard" className="flex min-w-0 flex-1 items-center bg-transparent">
-            <img src="/images/logo.png" alt="DayO Admin" className="h-8 w-auto max-w-[4.5rem] object-contain bg-transparent" />
+            <img src="/images/logo_header.png" alt="DayO Admin" className="h-8 w-auto max-w-[4.5rem] object-contain bg-transparent" />
             <span className="ml-1.5 inline-flex min-w-0 flex-col justify-center whitespace-nowrap border-l border-white/20 pl-1.5 text-left leading-[1.2]">
               <span className="text-[10px] font-semibold tracking-[-0.2px] text-white">1:1 Global Culture</span>
-              <span className="text-[10px] font-medium tracking-[-0.2px] text-slate-400">Conversation Lounge</span>
+              <span className="text-[10px] font-medium tracking-[-0.2px] text-white/80">Conversation Lounge</span>
             </span>
           </Link>
         )}
@@ -90,8 +90,8 @@ export function AdminSidebar() {
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                 sub && "ml-3 py-2",
                 active
-                  ? "bg-coral text-white"
-                  : "text-slate-300 hover:bg-white/10 hover:text-white"
+                  ? "bg-[#FFFBF4] text-[#5F7D63]"
+                  : "text-[#FFFBF4] hover:bg-white/10 hover:text-white"
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
@@ -101,7 +101,7 @@ export function AdminSidebar() {
         })}
       </nav>
       {!sidebarCollapsed && (
-        <div className="border-t border-white/10 p-4 text-xs text-slate-400">
+        <div className="border-t border-white/10 p-4 text-xs text-white/80">
           DayO 운영 어드민
         </div>
       )}

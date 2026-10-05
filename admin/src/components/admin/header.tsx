@@ -51,12 +51,12 @@ export function AdminHeader({ title }: { title: string }) {
 
   return (
     <header className={cn(
-      "sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60",
+      "sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-[#FFFBF4]/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-[#FFFBF4]/95",
       sidebarCollapsed ? "ml-[68px]" : "ml-64"
     )}>
       <div className="flex min-w-0 items-center gap-3">
         <Link href="/admin/dashboard" className="flex shrink-0 items-center">
-          <img src="/images/logo.png" alt="DayO" className="h-8 w-auto max-w-[8rem] object-contain bg-transparent" />
+          <img src="/images/logo_header.png" alt="DayO" className="h-8 w-auto max-w-[8rem] object-contain bg-transparent" />
           <span className="ml-2 inline-flex flex-col justify-center whitespace-nowrap border-l border-[#EDE4D5] pl-2 text-left leading-[1.2]">
             <span className="text-[10px] font-semibold tracking-[-0.2px] text-[#57534E]">1:1 Global Culture</span>
             <span className="text-[10px] font-medium tracking-[-0.2px] text-[#78716C]">Conversation Lounge</span>

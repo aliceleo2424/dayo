@@ -7,6 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "DayO Admin — 운영 대시보드",
   description: "DayO 실시간 운영 어드민",
+  icons: { icon: "/images/logo-square.png" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

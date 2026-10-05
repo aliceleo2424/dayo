@@ -1,0 +1,41 @@
+/* Shared brand surfaces only. Layout and semantic/status colors remain local. */
+body:not(.is-room),
+body.theme-learner:has(.dayo-cafe-landing),
+body.partner-page-body.theme-partner,
+body[data-dayo-role="member"] { background: #F8F0E3 !important; }
+body:not(.is-room) > .mesh-bg,
+body:not(.is-room) > .cursor-glow { background: none !important; }
+body:not(.is-room) > .mesh-bg .mesh-bg__layer { background: none !important; }
+body > header, .topbar, .legal-header,
+body.theme-learner:has(.dayo-cafe-landing) > header,
+body.partner-page-body.theme-partner header,
+body[data-dayo-role="member"] .topbar {
+  background: #FFFBF4 !important;
+  border-bottom-color: #E7DDD0 !important;
+}
+.nav-drawer, body.theme-learner .nav-drawer,
+body[data-dayo-role] .nav-drawer {
+  background: #FFFBF4 !important;
+  border-left-color: #E7DDD0 !important;
+}
+.nav-drawer__head { border-bottom-color: #E7DDD0 !important; }
+.menu-toggle,
+body.theme-learner:has(.dayo-cafe-landing) > header .menu-toggle,
+body[data-dayo-role] .menu-toggle {
+  background: #FFFBF4 !important; color: #5F7D63 !important; border-color: #E7DDD0 !important;
+}
+.menu-toggle:hover, .menu-toggle[aria-expanded="true"],
+.nav-drawer a:hover, .nav-drawer .nav-drawer__link:hover,
+.nav-drawer .btn-logout:hover {
+  background: #F8F0E3 !important; color: #5F7D63 !important;
+}
+.ms-overlay, .ms-welcome-overlay { background: rgba(64,54,47,.28) !important; }
+.ms-modal, .ms-welcome, .ms-menu, .ms-consent,
+.confirm-card, .reset-card, .legal-main--card, .legal-home-btn, .faq-item {
+  background: #FFFBF4 !important; border-color: #E7DDD0 !important;
+}
+.ms-overlay .ms-tabs { background: #F8F0E3 !important; }
+.ms-overlay .ms-tab.is-active { background: #FFFBF4 !important; color: #5F7D63 !important; }
+.ms-menu a:hover, .ms-menu button:hover, .legal-home-btn:hover {
+  background: #F8F0E3 !important; color: #5F7D63 !important;
+}
