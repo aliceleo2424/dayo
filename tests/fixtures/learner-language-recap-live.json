@@ -1,0 +1,25 @@
+{
+  "test": "Actual Gemini / synthetic learner speech",
+  "model": "gemini-3.6-flash",
+  "corrections": [
+    {
+      "schema_version": 1,
+      "generator": "dayo_learner_recap_v1",
+      "source": "learner_recognized_speech",
+      "speaker": "learner",
+      "source_log_id": "synthetic-log",
+      "source_utterance_id": "test-0",
+      "source_timestamp": "2026-10-05T05:01:00Z",
+      "original_text": "I am very agree.",
+      "suggested_text": "I completely agree.",
+      "correction_type": "grammar",
+      "short_reason": "In English, we say 'I agree' or 'I completely agree' instead of using 'am'.",
+      "meaning_preserved": true,
+      "correction_needed": true,
+      "confidence": 0.98
+    }
+  ],
+  "natural_sentence_skipped": true,
+  "broken_fragment_not_sent": true,
+  "short_answer_not_sent": true
+}
