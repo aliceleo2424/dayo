@@ -43,8 +43,8 @@ async function request(body={},email='qa@example.com'){let output;await guide({c
  assert.equal((await callEntry('GET',{})).status,405);assert.equal((await callEntry('OPTIONS',{})).status,204);assert.equal((await callEntry('POST',{kind:'guidebook-unsubscribe',token:crypto.randomUUID()})).status,200);
  assert.equal((await callEntry('POST',{kind:'guidebook',email:' ENTRY@EXAMPLE.COM ',consent:true})).status,200);
  assert.equal(rows.get(guide.leadId('entry@example.com')).email,'entry@example.com');
- const unsubSource=fs.readFileSync(path.join(root,'api/_lib/guidebook-unsubscribe.js'),'utf8');let rpcFailure=false,tokenCalls=[];const unsubSandbox={module:{exports:{}},process,AbortSignal,require:()=>({createClient:()=>({rpc:(name,args)=>{assert.equal(name,'unsubscribe_guidebook_marketing');tokenCalls.push(args.p_token);return{abortSignal:async()=>({error:rpcFailure?{}:null})};}})})};vm.runInNewContext(unsubSource,unsubSandbox);
- async function unsub(method,body){let output={};await unsubSandbox.module.exports({method,body},{setHeader(){},set statusCode(v){output.status=v;},end(v){output.body=JSON.parse(v);}});return output;}
+ const unsubSource=fs.readFileSync(path.join(root,'api/_lib/guidebook-unsubscribe.js'),'utf8');let rpcFailure=false,tokenCalls=[];const unsubSandbox={module:{exports:{}},process,AbortSignal,console:{warn(){}},require:()=>({createClient:()=>({rpc:(name,args)=>{assert.equal(name,'unsubscribe_guidebook_marketing');tokenCalls.push(args.p_token);return{abortSignal:async()=>({error:rpcFailure?{}:null})};}})})};vm.runInNewContext(unsubSource,unsubSandbox);
+ async function unsub(method,body){let output={};await unsubSandbox.module.exports({method,body},{setHeader(){},set statusCode(v){output.status=v;},end(v){output.body=JSON.parse(v);}},{getSupabase:()=>unsubSandbox.require().createClient()});return output;}
  assert.equal((await unsub('GET',{})).status,405);assert.equal((await unsub('POST',{token:'email@example.com'})).status,400);
  const token=rows.get(guide.leadId('qa@example.com')).marketing_unsubscribe_token;assert.equal((await unsub('POST',{token})).status,200);assert.equal((await unsub('POST',{token})).status,200);rpcFailure=true;assert.equal((await unsub('POST',{token})).status,503);
  const index=fs.readFileSync(path.join(root,'public/index.html'),'utf8');for(const m of index.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)){if(!/src=|application\//.test(m[1]))new vm.Script(m[2]);}
@@ -109,7 +109,3 @@ async function request(body={},email='qa@example.com'){let output;await guide({c
  fail=false;d.querySelector('#guidebook-marketing').checked=true;submit();await tick();assert.equal(payloads.at(-1).marketingConsent,true);assert.equal(d.querySelector('#quizLeadCard').classList.contains('is-done'),true);assert.match(d.querySelector('#quizLeadSuccess').textContent,/qa@example.com/);assert.doesNotMatch(d.querySelector('#quizLeadSuccess').textContent,/\{email\}/);dom.window.close();
  console.log('PASS: validation, required/optional consent, legacy-safe leads, parallel duplicates, retry/idempotency, send/storage failure isolation, consent timestamp/created_at preservation, inline JS syntax, root/public sync, PDF binary, additive migration, real PostgreSQL grants/RLS/legacy rows, actual UI renderer/validation/booking handoff/retry/translation.');
 })().finally(()=>{global.fetch=oldFetch;process.env=oldEnv;}).catch(e=>{console.error(e);process.exitCode=1;});
-
-
-
-
