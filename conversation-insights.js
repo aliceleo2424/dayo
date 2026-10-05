@@ -283,7 +283,7 @@
 
   function renderCurrentTalkRecord(root) {
     var box = root.document.getElementById('quiz-content-box');
-    if (!box || box.querySelector('.dayo-conversation-story')) return;
+    if (!box || box.querySelector('.dayo-recap') || box.querySelector('.dayo-conversation-story')) return;
     var access = root.DayORoomAccess || {};
     if (access.role && access.role !== 'user' && access.role !== 'admin') return;
     var metrics = analyzeSession(transcriptRows(root), access.scheduledAt || '');
@@ -425,6 +425,7 @@
     if (typeof original !== 'function' || original.__dayoInsightsWrapped) return;
     var wrapped = function (report) {
       var html = original(report);
+      if (html.indexOf('class="dayo-recap"') !== -1) return html;
       if (!report || !report.__dayoConversationMetrics) return html;
       if (html.indexOf('<div data-dayo-report-metrics></div>') !== -1) {
         return html.replace('<div data-dayo-report-metrics></div>', sessionCardHtml(report.__dayoConversationMetrics));

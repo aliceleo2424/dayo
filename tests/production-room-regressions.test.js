@@ -141,6 +141,7 @@ async function verifyInsufficientQuizHidesClock() {
     document: {
       getElementById(id) { return nodes[id] || null; },
       createElement() { return element(); },
+      addEventListener() {},
     },
     sessionStorage: { getItem() { return null; }, setItem() {}, removeItem() {} },
     localStorage: { getItem() { return null; } },
@@ -162,5 +163,5 @@ async function verifyInsufficientQuizHidesClock() {
 
 verifyBookingScopedWordHelp();
 verifyInsufficientQuizHidesClock().then(() => {
-  console.log('Production room regression fixtures passed: STT lifecycle/telemetry/preflight, connection retry/audio recovery, mobile Talk Card scroll, evidence-only Word Help, booking isolation, and zero-candidate quiz UX.');
+  console.log('Production room regression fixtures passed: STT lifecycle/telemetry/preflight, connection retry/audio recovery, mobile Talk Card scroll, evidence-only Word Help, booking isolation, and zero-candidate recap UX.');
 });

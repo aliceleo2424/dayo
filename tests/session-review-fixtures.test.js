@@ -42,12 +42,13 @@ assert.equal(expressions.quizScore(0, 0), null);
 
 const startedAt = Date.parse('2026-09-28T10:00:00Z');
 const recovered = expressions.normalizeQuizState({
+  fingerprint: 'fixture',
   startedAt,
   currentIndex: 2,
   completed: 2,
   total: 3,
   ended: false,
-}, 3);
+}, 3, 'fixture');
 assert.equal(recovered.currentIndex, 2);
 assert.equal(recovered.completed, 2);
 assert.equal(expressions.quizRemainingSeconds(startedAt, startedAt + 60_000, 300), 240);
@@ -66,71 +67,27 @@ assert.deepEqual(savedPayload.key_expressions, [
   'We watched a funny movie yesterday',
 ]);
 
-function element() {
-  return {
-    hidden: false,
-    innerHTML: '',
-    innerText: '',
-    textContent: '',
-    style: {},
-    children: [],
-    classList: { add() {}, remove() {} },
-    addEventListener(type, handler) { this.handlers = this.handlers || {}; this.handlers[type] = handler; },
-    appendChild(child) { this.children.push(child); this.lastChild = child; },
-  };
+// Replacement UX: exercise real DOM click delegation and the soft 30s clock.
+const {JSDOM}=require('jsdom');
+const recap=require('../public/conversation-recap.js');
+async function verifyRecapDOM(){
+ const dom=new JSDOM('<html lang="ko"><body><div id="quiz-modal"><div id="quiz-content-box"></div></div><div id="memory-game-modal" hidden><h3 id="memory-game-title"></h3><div id="game-round-badge"></div><div id="review-quiz-timer" hidden></div><p id="game-kr-meaning"></p><div id="word-pool-container"></div><button id="quiz-skip-btn"></button></div></body></html>',{runScripts:'outside-only',url:'https://fixture.invalid'});
+ const w=dom.window,B='11111111-1111-4111-8111-111111111111',L='learner';let clock=Date.now(),tick,opens=0;
+ w.Date=class extends Date{static now(){return clock;}};w.setInterval=fn=>{tick=fn;return 1;};w.clearInterval=()=>{};
+ w.DayORoomAccess={allowed:true,role:'user',bookingId:B};w.DayOLearnerExpressions=expressions;w.DayOConversationRecap=recap;
+ const data=recap.build({bookingId:B,learnerId:L,language:'en',learnerLog:{id:'source',booking_id:B,participant_id:L,participant_role:'learner',transcript:[{id:'u1',speaker:'learner',text:'The crowded café was busy.',timestamp:'2026-10-05T05:01:00Z'}]}});
+ w.prepareSessionReviewSource=async()=>({available:true,recap:data});w.getCanonicalReviewSource=()=>({available:true,recap:data});
+ w.getLearnerReviewSnapshot=()=>({booking_id:B,feedback:[{...data,progress:w.__dayoQuizProgress||data.progress}]});
+ w.finalizeLearnerQuiz=async()=>{w.__dayoReviewReportSaved=true;return true;};
+ w.openQuizModalImmediately=()=>{opens++;w.document.getElementById('quiz-content-box').innerHTML=recap.render(recap.saved(w.getLearnerReviewSnapshot()),'ko',{interactive:true});};
+ w.eval(fs.readFileSync(path.join(__dirname,'../public/memory-game.js'),'utf8'));
+ await w.openQuizModalImmediately();assert.equal(opens,1);assert.match(w.document.getElementById('quiz-content-box').textContent,/오늘의 대화 리캡/);
+ w.document.querySelector('[data-recap-start]').click();assert.equal(w.document.getElementById('memory-game-modal').hidden,false);assert.match(w.document.getElementById('memory-game-title').textContent,/30초 리캡/);
+ assert.equal(w.document.querySelectorAll('.recap-option').length,4);
+ w.document.querySelector('.recap-option').click();assert.equal(w.__dayoQuizProgress.completed,1);assert.match(w.document.querySelector('.recap-answer').textContent,/crowded · packed/);
+ Array.from(w.document.querySelectorAll('.recap-primary')).find(n=>n.textContent==='계속 보기').click();
+ clock+=31000;tick();await new Promise(setImmediate);
+ assert.equal(w.document.getElementById('memory-game-modal').hidden,true);assert.equal(w.__dayoQuizProgress.reason,'timeout');assert.equal(w.document.querySelector('[data-recap-start]'),null);
+ assert(!/점|100%|퀴즈/.test(w.document.getElementById('quiz-content-box').textContent));dom.window.close();
 }
-
-async function verifyImmediateSaveBeforeTalkRecord() {
-  const nodes = {};
-  ['memory-game-modal', 'memory-game-title', 'game-round-badge', 'review-quiz-timer', 'game-kr-meaning', 'answer-slot-container', 'word-pool-container']
-    .forEach((id) => { nodes[id] = element(); });
-  const storage = new Map();
-  let saveCalls = 0;
-  let talkRecordOpens = 0;
-  const windowStub = {
-    DayOLearnerExpressions: expressions,
-    DayORoomAccess: { bookingId: '11111111-1111-4111-8111-111111111111' },
-    isPartnerRoomMode() { return false; },
-    openQuizModalImmediately() { talkRecordOpens += 1; },
-    finalizeLearnerQuiz() { saveCalls += 1; return Promise.resolve(true); },
-  };
-  const context = {
-    window: windowStub,
-    document: {
-      getElementById(id) { return nodes[id] || null; },
-      createElement() { return element(); },
-    },
-    sessionStorage: {
-      getItem(key) { return storage.has(key) ? storage.get(key) : null; },
-      setItem(key, value) { storage.set(key, value); },
-      removeItem(key) { storage.delete(key); },
-    },
-    localStorage: { getItem() { return null; } },
-    console,
-    Date,
-    Math,
-    Promise,
-    setTimeout,
-    clearTimeout,
-    setInterval,
-    clearInterval,
-  };
-  const source = fs.readFileSync(path.join(__dirname, '..', 'public', 'memory-game.js'), 'utf8');
-  vm.runInNewContext(source, context, { filename: 'public/memory-game.js' });
-  windowStub.startMultiMemoryGame([]);
-  await new Promise((resolve) => setImmediate(resolve));
-  assert.equal(saveCalls, 1, 'candidate 0 must save the report immediately');
-  assert.equal(talkRecordOpens, 0, 'Talk Record must not open before save succeeds');
-  const recordButton = nodes['word-pool-container'].lastChild;
-  assert.equal(recordButton.textContent, '대화 기록 확인하기');
-  recordButton.handlers.click();
-  assert.equal(talkRecordOpens, 1);
-}
-
-verifyImmediateSaveBeforeTalkRecord().then(() => {
-  const lifecycleSource = fs.readFileSync(path.join(__dirname, '..', 'public', 'session-lifecycle.js'), 'utf8');
-  const roomSource = fs.readFileSync(path.join(__dirname, '..', 'public', 'room.html'), 'utf8');
-  assert.match(lifecycleSource, /window\.__dayoLearnerReportPayload = payload/);
-  assert.match(roomSource, /window\.getLearnerReviewSnapshot\(\)/);
-  console.log('Session review fixtures passed: learner-only extraction, quality filters, partial scores, refresh state, save-before-record, shared report source.');
-});
+verifyRecapDOM().then(()=>console.log('Session review fixtures passed: legacy JSON helpers, fingerprint compatibility, recap-first DOM, click delegation, answer completion and soft timeout.')).catch(e=>{console.error(e);process.exitCode=1;});

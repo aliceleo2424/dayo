@@ -97,8 +97,9 @@ function createSubmitContext(options = {}) {
       if (!settled.has('reward')) { settled.add('reward'); rewardRows++; }
       return Promise.resolve({ success: true, already_rewarded: rewardRows === 1 });
     } },
-    async persistSessionReport() {
+    async persistSessionReport(cardData) {
       calls.push('report');
+      if(options.messageOnly){assert.equal(cardData.partnerComment,'Great conversation');assert.equal(cardData.stamp,null);assert.equal(cardData.keyword,null);assert.equal(cardData.illustUrl,null);}
       if (failReport) { failReport = false; throw Error('report'); }
       if (!settled.has('report')) { settled.add('report'); reportRows++; }
       return { ok: true };
@@ -106,7 +107,7 @@ function createSubmitContext(options = {}) {
   };
   const context = {
     window, console: quiet, localStorage: storage,
-    document: { getElementById() { return { value: 'Great conversation' }; }, querySelector() { return { value: 'cookie' }; } },
+    document: { getElementById() { return { value: 'Great conversation' }; }, querySelector() { return options.messageOnly?null:{ value: 'cookie' }; } },
     stopPartnerSentencePolling() {},
     setPartnerReportSubmitBusy(value) { busy = value; },
     setPartnerReportSubmitStatus(value) { statuses.push(value); },
@@ -163,6 +164,10 @@ async function run() {
   assert.equal(submit.calls.length, 3, 'success is not submitted again before navigation');
   assert.equal(submit.busy(), true);
   assert.equal(submit.timers.length, 1);
+  const messageOnly=createSubmitContext({messageOnly:true});
+  await messageOnly.window.executePartnerPayoutAndExit();
+  assert.deepEqual(messageOnly.calls.slice().sort(),['report','reward','transcript'],'optional fields do not block completion/reward');
+  assert.deepEqual(messageOnly.counts(),{rewardRows:1,reportRows:1});assert.equal(messageOnly.timers.length,1);
 
   const loaded = createClientContext({ actor: learnerId });
   await loaded.window.loadUserReports();
