@@ -16,6 +16,28 @@
     return vars ? window.DayOI18n.tf(key, vars) : window.DayOI18n.t(key);
   }
 
+  // This confirmation dialog must remain readable if i18n is missing or stale.
+  var BOOKING_WINDOW_COPY = {
+    'book.nonRefundWarningTitle': { KO: '예약 취소 규정을 확인해 주세요', EN: 'Please check the cancellation policy' },
+    'book.nonRefundWarningBody': { KO: '이 예약은 시작 6시간 이내입니다.\n지금 예약하면 이후 취소 시 사용한 티켓은 반환되지 않습니다.\n계속 예약할까요?', EN: 'This session starts within 6 hours.\nIf you book now and cancel later, your ticket will not be returned.\nWould you like to continue?' },
+    'book.nonRefundWarningBack': { KO: '다시 확인하기', EN: 'Go back' },
+    'book.nonRefundWarningConfirm': { KO: '확인하고 예약하기', EN: 'Confirm booking' },
+    'book.nonRefundWarningClose': { KO: '닫기', EN: 'Close' },
+    'book.regularConfirmTitle': { KO: '이 시간으로 예약할까요?', EN: 'Book this time?' },
+    'book.regularConfirmBody': { KO: '티켓 1장을 사용해 이 시간으로 예약합니다.', EN: 'Use one ticket to book this time.' },
+    'book.regularConfirmConfirm': { KO: '예약하기', EN: 'Book now' },
+    'book.regularConfirmBack': { KO: '다른 시간 보기', EN: 'Choose another time' }
+  };
+
+  function bookingWindowText(key) {
+    var text;
+    try { text = t(key); } catch (e) { /* use the dialog's local copy */ }
+    if (typeof text === 'string' && text.trim() && text !== key) return text;
+    var lang = window.DayOI18n && typeof window.DayOI18n.getLang === 'function'
+      ? window.DayOI18n.getLang() : (/^en/i.test(document.documentElement.lang) ? 'EN' : 'KO');
+    return BOOKING_WINDOW_COPY[key][lang === 'KO' ? 'KO' : 'EN'];
+  }
+
   function isInternalBookingTest() {
     return !!(window.DayOPreopenBooking &&
       typeof window.DayOPreopenBooking.isInternalTest === 'function' &&
@@ -52,7 +74,7 @@
         style.textContent = '.dayo-booking-window-overlay{position:fixed;inset:0;z-index:980;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(70,52,48,.48);box-sizing:border-box}' +
           '.dayo-booking-window-dialog{position:relative;width:min(100%,440px);padding:28px;border:1px solid #ffe8e3;border-radius:22px;background:#fffcfa;box-shadow:0 24px 64px rgba(70,52,48,.2);color:#5c4a42;box-sizing:border-box}' +
           '.dayo-booking-window-dialog h2{margin:0 32px 12px 0;font-size:1.18rem;line-height:1.4}' +
-          '.dayo-booking-window-dialog p{margin:0 0 24px;font-size:.9rem;line-height:1.6}' +
+          '.dayo-booking-window-dialog p{margin:0 0 24px;font-size:.9rem;line-height:1.6;white-space:pre-line}' +
           '.dayo-booking-window-close{position:absolute;top:12px;right:14px;border:0;background:none;font-size:1.5rem;color:#9a8580;cursor:pointer}' +
           '.dayo-booking-window-actions{display:flex;gap:10px}.dayo-booking-window-actions button{flex:1;min-height:44px;padding:10px;border-radius:12px;font:inherit;font-weight:700;cursor:pointer}' +
           '.dayo-booking-window-back{border:1px solid #ffe8e3;background:#fff8f5;color:#5c4a42}' +
@@ -61,11 +83,11 @@
         document.head.appendChild(style);
       }
       function render() {
-        overlay.querySelector('#dayo-booking-window-title').textContent = t(regular ? 'book.regularConfirmTitle' : 'book.nonRefundWarningTitle');
-        overlay.querySelector('#dayo-booking-window-body').textContent = t(regular ? 'book.regularConfirmBody' : 'book.nonRefundWarningBody');
-        overlay.querySelector('.dayo-booking-window-confirm').textContent = t(regular ? 'book.regularConfirmConfirm' : 'book.nonRefundWarningConfirm');
-        overlay.querySelector('.dayo-booking-window-back').textContent = t(regular ? 'book.regularConfirmBack' : 'book.nonRefundWarningBack');
-        overlay.querySelector('.dayo-booking-window-close').setAttribute('aria-label', t('book.nonRefundWarningClose'));
+        overlay.querySelector('#dayo-booking-window-title').textContent = bookingWindowText(regular ? 'book.regularConfirmTitle' : 'book.nonRefundWarningTitle');
+        overlay.querySelector('#dayo-booking-window-body').textContent = bookingWindowText(regular ? 'book.regularConfirmBody' : 'book.nonRefundWarningBody');
+        overlay.querySelector('.dayo-booking-window-confirm').textContent = bookingWindowText(regular ? 'book.regularConfirmConfirm' : 'book.nonRefundWarningConfirm');
+        overlay.querySelector('.dayo-booking-window-back').textContent = bookingWindowText(regular ? 'book.regularConfirmBack' : 'book.nonRefundWarningBack');
+        overlay.querySelector('.dayo-booking-window-close').setAttribute('aria-label', bookingWindowText('book.nonRefundWarningClose'));
       }
       function finish(confirmed) {
         document.removeEventListener('keydown', onKey, true);

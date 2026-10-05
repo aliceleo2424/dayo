@@ -2261,6 +2261,8 @@
       ZH: '预约成功完成！与{partner}伙伴见面吧 💖',
       JA: '予約が完了しました！{partner}パートナーと会いましょう 💖',
       FR: 'Réservation confirmée ! À bientôt avec {partner} 💖',
+      ES: '¡Reserva confirmada! Nos vemos con {partner} 💖'
+    },
     'book.bookingWindowClosed': {
       KO: '이 시간은 예약 마감되었습니다. 다른 시간을 선택해 주세요.',
       EN: 'This time is no longer available for booking. Please choose another time.'
@@ -2270,22 +2272,20 @@
       EN: 'The booking window has passed. Please choose another time.'
     },
     'book.nonRefundWarningTitle': {
-      KO: '이 예약은 취소해도 티켓이 환불되지 않아요',
-      EN: 'This booking is non-refundable if cancelled'
+      KO: '예약 취소 규정을 확인해 주세요',
+      EN: 'Please check the cancellation policy'
     },
     'book.nonRefundWarningBody': {
-      KO: '세션 시작까지 6시간 이내이므로, 예약 후 취소하더라도 티켓은 환불되지 않습니다. 예약 시간을 다시 한 번 확인해 주세요.',
-      EN: 'Because the session starts within 6 hours, your ticket will not be refunded if you cancel after booking. Please check the time once more before confirming.'
+      KO: '이 예약은 시작 6시간 이내입니다.\n지금 예약하면 이후 취소 시 사용한 티켓은 반환되지 않습니다.\n계속 예약할까요?',
+      EN: 'This session starts within 6 hours.\nIf you book now and cancel later, your ticket will not be returned.\nWould you like to continue?'
     },
     'book.nonRefundWarningConfirm': { KO: '확인하고 예약하기', EN: 'Confirm booking' },
-    'book.nonRefundWarningBack': { KO: '다른 시간 보기', EN: 'Choose another time' },
+    'book.nonRefundWarningBack': { KO: '다시 확인하기', EN: 'Go back' },
     'book.nonRefundWarningClose': { KO: '닫기', EN: 'Close' },
     'book.regularConfirmTitle': { KO: '이 시간으로 예약할까요?', EN: 'Book this time?' },
     'book.regularConfirmBody': { KO: '티켓 1장을 사용해 이 시간으로 예약합니다.', EN: 'Use one ticket to book this time.' },
     'book.regularConfirmConfirm': { KO: '예약하기', EN: 'Book now' },
     'book.regularConfirmBack': { KO: '다른 시간 보기', EN: 'Choose another time' },
-      ES: '¡Reserva confirmada! Nos vemos con {partner} 💖'
-    },
     'book.needTicketsToast': {
       KO: '보유하신 세션 티켓이 없습니다. 첫 체험권(9,900원) 또는 세션 패스를 충전해 주세요.',
       EN: 'You have no session tickets. Please top up with the first trial (9,900 KRW) or a session pass.',
