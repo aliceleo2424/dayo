@@ -22,6 +22,7 @@ const navItems: {
   { href: "/admin/users", label: "회원 & CRM", icon: Users },
   { href: "/admin/users/automation", label: "CRM 자동화", icon: Zap, sub: true },
   { href: "/admin/promotions", label: "프로모션", icon: Ticket },
+  { href: "/admin/guidebook-leads", label: "가이드북 리드", icon: Users },
   { href: "/admin/webinars", label: "웨비나 사전 신청", icon: Radio },
   { href: "/admin/tech-issues", label: "기술문제 신고 검토", icon: ShieldAlert },
   { href: "/admin/cms", label: "프론트 CMS", icon: Palette },
