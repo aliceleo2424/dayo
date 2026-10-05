@@ -41,6 +41,7 @@ p + p { margin-top: 12px; }
 .hero-message strong { color: var(--sage-dark); }
 .mindset { padding-bottom: 48px; }
 .mindset > .eyebrow { text-align: center; margin-bottom: 20px; }
+.principle-rhythm { font-size: 15px; letter-spacing: 0; color: var(--sage-dark); text-align: center; margin-bottom: 20px; }
 .principles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .principles a { display: flex; flex-direction: column; gap: 14px; padding: 24px 20px; border-radius: 22px; border: 1px solid var(--line); background: var(--paper); text-decoration: none; color: var(--ink); }
 .principles a:nth-child(2) { background: var(--sage); }
@@ -59,7 +60,7 @@ p + p { margin-top: 12px; }
 .step { flex: 0 0 42px; display: grid; place-items: center; min-height: 42px; background: var(--coral-pale); border-radius: 14px; font-size: 14px; font-weight: 700; }
 .section-heading h2 { padding-top: 3px; }
 .example, .dialogue { padding: 21px 23px; background: var(--paper); border: 1px solid var(--line); border-radius: 16px; margin: 20px 0; }
-.example h3, .example h4, .dialogue h3 { margin-bottom: 10px; font-size: 12px; letter-spacing: .7px; text-transform: uppercase; }
+.example h3, .example h4, .dialogue h3, .dialogue h4 { margin-bottom: 10px; font-size: 12px; letter-spacing: .7px; text-transform: uppercase; }
 .example p, .dialogue p { line-height: 1.8; }
 .phrase-list { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
 .phrase-list li { padding: 5px 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 15px; background: var(--paper); }
