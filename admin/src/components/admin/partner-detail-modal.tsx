@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PartnerProfileCompletionSummary } from "@/components/admin/partner-profile-completion-summary";
 import { SessionTranscriptModal } from "@/components/admin/SessionTranscriptModal";
+import { PartnerAvailabilitySection } from "@/components/admin/partner-availability";
 
 export type PartnerProfile = {
   id: string;
@@ -366,7 +367,7 @@ export function PartnerDetailModal({
             <DialogTitle>{partner ? `${partnerName(partner)} 파트너 마스터 관제` : "파트너 상세 관제"}</DialogTitle>
           </DialogHeader>
           {partner && (
-            <div className="space-y-5">
+            <div className="min-w-0 space-y-5">
               {partner.role === "partner" && <PartnerProfileCompletionSummary key={partner.id} partnerId={partner.id} />}
               <section className="grid gap-4 rounded-xl border bg-[#FAFAF9] p-4 sm:grid-cols-[1fr_auto]">
                 <div className="grid gap-2 text-sm sm:grid-cols-2">
@@ -378,7 +379,7 @@ export function PartnerDetailModal({
                 <label className="text-xs font-semibold text-muted-foreground">
                   상태 변경
                   <select
-                    className="mt-1 block rounded-md border bg-white px-3 py-2 text-sm text-foreground"
+                    className="mt-1 block max-w-full rounded-md border bg-white px-3 py-2 text-sm text-foreground"
                     value={String(partner.partner_status || "")}
                     disabled={busy || typeof partner.partner_status !== "string"}
                     onChange={(event) => void updateStatus(event.target.value)}
@@ -432,6 +433,8 @@ export function PartnerDetailModal({
                 {capabilityError ? <p className="text-xs text-red-700" role="alert">{capabilityError}</p> : null}
                 {capabilityNotice ? <p className="text-xs text-emerald-700" role="status">{capabilityNotice}</p> : null}
               </section> : null}
+
+              {partner.role === "partner" && <PartnerAvailabilitySection key={`availability:${partner.id}`} partnerId={partner.id} name={partner.nickname || partner.user_name || "DayO Partner"} />}
 
               <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {[
