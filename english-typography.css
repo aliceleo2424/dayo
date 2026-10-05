@@ -1,0 +1,29 @@
+/* Reuse Partner Guide's existing Quicksand source and weights. */
+@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap");
+
+:root {
+  --font-dayo-ko-fallback: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic";
+  --font-dayo-en: "Quicksand", system-ui, -apple-system, sans-serif;
+}
+
+body {
+  --font-dayo-en: "Quicksand", var(--font-dayo-ko-fallback), system-ui, -apple-system, sans-serif;
+}
+
+/* Landing already uses Gowun Dodum for Korean glyphs. */
+body[data-landing-auto-popup] {
+  --font-dayo-ko-fallback: "Gowun Dodum", "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic";
+}
+
+/* i18n updates html.lang. Removing the English locale restores original styles.
+   Override only font-family: sizes, weights, spacing and semantic colors remain.
+   !important also covers existing inline/dynamically injected modal fonts. */
+html:is([lang="en"], [data-dayo-font-locale="en"]) body,
+html:is([lang="en"], [data-dayo-font-locale="en"]) body :where(
+  h1, h2, h3, h4, h5, h6, p, a, button, input, select, textarea,
+  label, legend, summary, blockquote, ul, ol, li, dl, dt, dd,
+  table, caption, th, td, div, span, small, strong, b, em, i,
+  section, article, header, footer, nav, aside, main, dialog, fieldset
+):not(.fa):not(.fas):not(.far):not(.fab):not([class*="fa-"]):not(.material-icons):not(.material-symbols-outlined):not(svg *):not(code *):not(pre *):not(kbd *):not(samp *):not([lang="ko"]):not([lang="ko"] *) {
+  font-family: var(--font-dayo-en) !important;
+}
