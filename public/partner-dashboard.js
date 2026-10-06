@@ -118,7 +118,7 @@
     syncCompleted();new MutationObserver(syncCompleted).observe(countSource,{childList:true,subtree:true,characterData:true});
     var earnings=card('Payouts & rewards','정산 · 리워드','View existing payout information.','기존 정산 정보를 확인하세요.');
     earnings.append(action('Payout information →','정산 정보 보기 →',function(){document.getElementById('stat-points-card').click();}));
-    var referralPromo=card('Invite a friend to DayO','DayO에 친구를 초대하세요','Know someone who’d make a great Conversation Partner? Refer them to DayO and earn a referral bonus when they qualify.','좋은 Conversation Partner가 될 친구가 있나요? DayO에 추천하고 친구가 조건을 충족하면 추천 보너스를 받으세요.');
+    var referralPromo=card('Invite a friend to DayO','DayO에 친구를 초대하세요','Invite a great Conversation Partner and earn a referral bonus.','좋은 Conversation Partner가 될 친구가 있나요? DayO에 추천하고 친구가 조건을 충족하면 추천 보너스를 받으세요.');
     referralPromo.classList.add('pd-referral-promo');
     // Replace the legacy fixed-amount referral promotion without changing reward logic.
     var legacyReferral=promos.querySelector('.promo-card');if(legacyReferral)legacyReferral.hidden=true;

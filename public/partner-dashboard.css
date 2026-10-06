@@ -294,13 +294,13 @@ body.theme-partner,body.partner-page-body,body.partner-page,body.is-partner-loun
 }
 
 /* Lightweight Earnings-only referral promotion. */
-#partner-dashboard-section .pd-referral-promo{margin-bottom:16px;padding:18px 20px;border-color:var(--partner-border);box-shadow:none}
-#partner-dashboard-section .pd-referral-promo h2{font-size:18px;margin:0 0 8px;color:var(--partner-dark)}
-#partner-dashboard-section .pd-referral-promo p{margin:0 0 10px;line-height:1.5}
-#partner-dashboard-section .pd-referral-promo .dashboard-action{margin:0;background:var(--partner-primary);color:#fff;max-width:100%;white-space:normal}
+#partner-dashboard-section .pd-referral-promo{margin-bottom:16px;padding:12px 20px;border-color:var(--partner-border);box-shadow:none}
+#partner-dashboard-section .pd-referral-promo h2{font-size:18px;margin:0 0 5px;color:var(--partner-dark)}
+#partner-dashboard-section .pd-referral-promo p{margin:0 0 6px;line-height:1.5}
+#partner-dashboard-section .pd-referral-promo .dashboard-action{min-height:44px;padding:8px 12px;margin:0;background:var(--partner-primary);color:#fff;max-width:100%;white-space:normal}
 #partner-dashboard-section .pd-referral-promo .dashboard-action:hover{background:var(--partner-dark)}
-#partner-dashboard-section .pd-referral-promo .pd-referral-helper{font-size:12px;color:var(--muted);margin:8px 0 0}
-@media(max-width:560px){#partner-dashboard-section .pd-referral-promo{padding:16px}}
+#partner-dashboard-section .pd-referral-promo .pd-referral-helper{font-size:12px;color:var(--muted);margin:5px 0 0}
+@media(max-width:560px){#partner-dashboard-section .pd-referral-promo{padding:12px 16px}}
 #partner-dashboard-section .lounge-promos .promo-card[hidden]{display:none!important}
-#partner-dashboard-section .pd-referral-url{display:block;width:fit-content;max-width:100%;margin:0 0 10px;padding:8px 10px;border:1px solid var(--partner-border);border-radius:8px;background:var(--partner-soft);color:var(--partner-dark);font-size:12px;line-height:1.5;overflow-wrap:anywhere}
-#partner-dashboard-section .pd-referral-actions{display:flex;flex-wrap:wrap;gap:8px}
+#partner-dashboard-section .pd-referral-url{display:block;width:fit-content;max-width:100%;margin:0 0 6px;padding:5px 10px;border:1px solid var(--partner-border);border-radius:8px;background:var(--partner-soft);color:var(--partner-dark);font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+#partner-dashboard-section .pd-referral-actions{display:flex;flex-wrap:wrap;gap:6px}
