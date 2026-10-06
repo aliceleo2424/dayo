@@ -1,0 +1,117 @@
+/* Scoped User My Page surfaces; business logic and global/Partner themes stay local. */
+.ud-dashboard {
+  --ud-primary: #5F7D63;
+  --ud-dark: #4F7C59;
+  --ud-soft: #EAF4E8;
+  --ud-butter: #F4D985;
+  --ud-butter-soft: #FFF6D3;
+  --ud-border: #E8DDBD;
+  --ud-surface: #FFFBF4;
+  --ud-text: #40362F;
+  color: var(--ud-text);
+  padding: 30px 24px 48px !important;
+}
+.ud-dashboard [hidden] { display: none !important; }
+.ud-dashboard .mypage-main-grid { display: block !important; margin: 0; }
+.ud-dashboard .ud-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 22px; }
+.ud-dashboard .ud-mode { background: var(--ud-butter); color: var(--ud-text); border-radius: 999px; padding: 7px 12px; font-size: 11px; font-weight: 800; letter-spacing: .06em; }
+.ud-dashboard .role-switch-wrapper { margin: 0 0 0 auto !important; order: 1; }
+.ud-dashboard .role-segmented-control { width: 320px !important; background: var(--ud-butter-soft) !important; }
+.ud-dashboard #segmented-glider { background: var(--ud-butter) !important; box-shadow: none !important; }
+.ud-dashboard #tab-user-mode { color: var(--ud-dark) !important; }
+.ud-dashboard .mypage-greeting-line { flex-basis: 100%; order: 2; }
+.ud-dashboard #mypage-greeting { font-size: clamp(23px, 3vw, 30px) !important; color: var(--ud-text) !important; line-height: 1.35; }
+.ud-dashboard #mypage-learning-lang { order: 3; margin: 0 !important; }
+.ud-dashboard .ud-card, .ud-dashboard #ud-archive > section, .ud-dashboard #recent-tech-issue-results { background: var(--ud-surface) !important; border: 1px solid var(--ud-border) !important; border-radius: 20px; box-shadow: 0 2px 8px rgba(64,54,47,.035) !important; padding: 24px; }
+.ud-dashboard .ud-card h2, .ud-dashboard .ud-section-head h2 { font-size: 19px; line-height: 1.35; margin: 0; color: var(--ud-text); }
+.ud-dashboard .ud-card p { margin-top: 6px; color: #7A7066; font-size: 13px; line-height: 1.6; }
+.ud-dashboard .ud-next { margin-bottom: 22px; }
+.ud-dashboard .ud-section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.ud-dashboard .ud-next .ud-section-head { margin-bottom: 14px; }
+.ud-dashboard .ud-language { background: var(--ud-soft); color: var(--ud-dark); padding: 5px 9px; border-radius: 8px; font-size: 12px; font-weight: 700; }
+body[data-dayo-role="member"] .ud-dashboard #urgent-session-banner { display: grid !important; grid-template-columns: minmax(0,1fr) auto; padding: 0 !important; margin: 0 !important; background: transparent !important; border: 0 !important; border-radius: 0; gap: 16px; }
+.ud-dashboard #urgent-session-banner > div { min-width: 0; }
+.ud-dashboard #urgent-session-banner > div:last-child { flex-wrap: wrap; justify-content: flex-end; }
+body[data-dayo-role="member"] .ud-dashboard #urgent-session-badge { background: var(--ud-soft) !important; color: var(--ud-dark) !important; }
+.ud-dashboard #urgent-session-title { font-size: 17px !important; line-height: 1.6; overflow-wrap: anywhere; }
+.ud-dashboard #urgent-session-meta { font-size: 12px !important; line-height: 1.6; }
+.ud-dashboard .ud-primary, body[data-dayo-role="member"] .ud-dashboard #urgent-session-banner button[onclick="enterStudio()"], body[data-dayo-role="member"] .ud-dashboard #main-action-btn, body[data-dayo-role="member"] .ud-dashboard .mypage-welcome-cta--speak, body[data-dayo-role="member"] .ud-dashboard .talk-album-empty__cta, body[data-dayo-role="member"] .ud-dashboard .dayo-monthly-story__cta, body[data-dayo-role="member"] .ud-dashboard .mypage-welcome-benefit .primary-btn { background: var(--ud-primary) !important; color: #fff !important; border: 1px solid var(--ud-primary) !important; border-radius: 12px; padding: 11px 16px; min-height: 44px; font-family: inherit; font-size: 13px; font-weight: 700; box-shadow: none !important; cursor: pointer; text-align: center; line-height: 1.4; text-decoration: none; }
+.ud-dashboard .ud-primary:hover, body[data-dayo-role="member"] .ud-dashboard #main-action-btn:hover, body[data-dayo-role="member"] .ud-dashboard .mypage-welcome-cta--speak:hover, body[data-dayo-role="member"] .ud-dashboard #urgent-session-banner button[onclick="enterStudio()"]:hover { background: var(--ud-dark) !important; }
+.ud-dashboard #ud-next-empty { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.ud-dashboard #ud-next-empty p { margin: 0; }
+.ud-dashboard :is(button, a, summary, [role="tabpanel"]):focus-visible { outline: 3px solid var(--ud-dark); outline-offset: 3px; }
+.ud-dashboard .ud-tabs { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 10px; margin-bottom: 20px; scrollbar-width: thin; }
+.ud-dashboard .ud-tabs button { flex: 0 0 auto; min-height: 44px; border: 1px solid transparent; border-radius: 12px; padding: 10px 22px; background: transparent; color: #7A7066; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.ud-dashboard .ud-tabs button:hover { background: #F8F0E3; }
+.ud-dashboard .ud-tabs button[aria-selected="true"] { background: var(--ud-butter-soft); color: var(--ud-dark); border-color: var(--ud-border); font-weight: 800; }
+.ud-dashboard .ud-panel { display: grid; gap: 20px; min-width: 0; }
+.ud-dashboard .ud-sessions-head { padding: 0 2px; }
+.ud-dashboard #main-action-btn { margin: 0; width: auto; max-width: 100%; }
+.ud-dashboard #upcoming-booking-list { margin: 0 !important; display: grid; gap: 10px; }
+.ud-dashboard #upcoming-booking-list > div { margin: 0 !important; padding: 16px !important; background: var(--ud-surface) !important; border-color: var(--ud-border) !important; }
+.ud-dashboard #upcoming-booking-list > div > div { min-width: 0; overflow-wrap: anywhere; }
+.ud-dashboard #upcoming-booking-list button, .ud-dashboard #urgent-session-cancel { min-height: 44px; background: var(--ud-surface) !important; border-color: var(--ud-border) !important; color: #6D6359 !important; border-radius: 12px !important; }
+.ud-dashboard #ud-archive > section { width: 100%; }
+.ud-dashboard .speaking-progress-card { padding: 24px; background: var(--ud-surface); border-color: var(--ud-border); margin: 0; }
+body[data-dayo-role="member"] .ud-dashboard .speaking-progress-metric { background: var(--ud-soft); border-color: var(--ud-border); }
+.ud-dashboard .ud-speaking-action, .ud-dashboard .ud-ticket-card, .ud-dashboard .ud-account-identity { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.ud-dashboard .ud-options { padding: 0 4px; font-size: 13px; color: var(--ud-dark); }
+.ud-dashboard .ud-options summary { cursor: pointer; }
+.ud-dashboard #ud-retest-action { padding-top: 12px; }
+.ud-dashboard .dayo-tea-table { padding: 24px; border-color: var(--ud-border) !important; box-shadow: none; background: var(--ud-surface); }
+.ud-dashboard #ud-ticket-summary { margin-top: 12px; font-size: 14px !important; line-height: 1.8; }
+.ud-dashboard #user-ticket-count { font-size: 32px; color: var(--ud-dark) !important; margin: 0 6px; }
+.ud-dashboard .mypage-welcome-benefit { margin: 0; }
+.ud-dashboard #right-column { display: grid; gap: 20px; }
+.ud-dashboard .ud-account-language { display: grid; gap: 12px; }
+.ud-dashboard .edit-nickname-btn { margin: 0; border-color: var(--ud-border) !important; color: var(--ud-dark) !important; }
+.ud-dashboard .ud-explore { border-top: 1px solid var(--ud-border); padding-top: 18px; }
+.ud-dashboard .ud-explore summary { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 15px; font-weight: 700; cursor: pointer; }
+.ud-dashboard .ud-explore summary::after { content: '+'; color: var(--ud-dark); }
+.ud-dashboard .ud-explore[open] summary::after { content: '−'; }
+.ud-dashboard .ud-explore-hint { color: #82776C; font-size: 12px; font-weight: 400; }
+.ud-dashboard #ud-explore-content { margin-top: 16px; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 20px; }
+.ud-dashboard #ud-explore-content > section { padding: 20px !important; min-width: 0; margin: 0; }
+.ud-dashboard #ud-explore-content .lounge-grid { display: flex; overflow-x: auto; gap: 12px; }
+.ud-dashboard #ud-explore-content .lounge-card { flex: 0 0 90%; min-width: 0; }
+.ud-dashboard [data-story-topic] { background: var(--ud-surface) !important; border-color: var(--ud-border) !important; }
+.ud-dashboard [data-story-topic][aria-pressed="true"] { background: var(--ud-butter-soft) !important; color: var(--ud-dark) !important; }
+@media (max-width: 600px) {
+  .ud-dashboard { padding: 22px 16px 36px !important; }
+  .ud-dashboard .ud-heading { gap: 10px; margin-bottom: 18px; }
+  .ud-dashboard .role-switch-wrapper { flex-basis: 100%; order: 3; justify-content: flex-start !important; }
+  .ud-dashboard .role-segmented-control { width: min(100%, 320px) !important; }
+  .ud-dashboard #mypage-greeting { font-size: 23px !important; }
+  .ud-dashboard .ud-card, .ud-dashboard #ud-archive > section { padding: 18px; border-radius: 18px; }
+  body[data-dayo-role="member"] .ud-dashboard #urgent-session-banner { grid-template-columns: minmax(0,1fr); gap: 14px; }
+  .ud-dashboard #urgent-session-banner > div:last-child { justify-content: flex-start; }
+  .ud-dashboard #urgent-session-banner button { flex: 1 1 auto; padding: 11px 12px !important; white-space: normal !important; }
+  .ud-dashboard .ud-tabs { gap: 4px; }
+  .ud-dashboard .ud-tabs button { flex: 1 0 auto; padding: 10px 10px; font-size: 13px; }
+  .ud-dashboard .ud-section-head h2 { font-size: 18px; }
+  .ud-dashboard .ud-speaking-action, .ud-dashboard .ud-ticket-card, .ud-dashboard .ud-account-identity { align-items: flex-start; }
+  .ud-dashboard #ud-next-empty { align-items: flex-start; }
+  .ud-dashboard #ud-empty-book { width: 100%; }
+  .ud-dashboard .speaking-progress-card, .ud-dashboard .dayo-tea-table { padding: 18px; }
+  .ud-dashboard #ud-explore-content { grid-template-columns: minmax(0,1fr); }
+  .ud-dashboard .ud-explore-hint { flex-basis: 100%; }
+  .ud-dashboard #upcoming-booking-list > div { flex-wrap: wrap; }
+  .ud-dashboard .speaking-progress-metrics { grid-template-columns: minmax(0,1fr); }
+}
+
+/* Hidden runtime states win over component display rules. */
+.ud-dashboard [hidden][hidden], body[data-dayo-role="member"] .ud-dashboard #urgent-session-banner[hidden] { display: none !important; }
+
+/* Keep empty runtime hosts from creating blank grid rows. */
+.ud-dashboard #ud-upcoming:has(> [hidden]), .ud-dashboard #ud-session-updates:has(> [hidden]), .ud-dashboard #ud-benefits:has(> [hidden]) { display: none; }
+.ud-dashboard #urgent-session-banner button { width: auto; max-width: 100%; min-width: 0; }
+
+/* A single User-mode segment duplicates the badge; approved partners keep both controls. */
+.ud-dashboard .role-switch-wrapper:has(.role-segmented-control:not([data-partner-access="approved"])) { display: none !important; }
+
+.ud-dashboard #ud-growth { display: grid; gap: 20px; }
+
+/* Keep validity copy together below the live balance, including narrow layouts. */
+.ud-dashboard #ud-ticket-summary > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px; }
+.ud-dashboard #ud-ticket-summary > div > span:not([data-i18n]) { display: none; }
+.ud-dashboard #ud-ticket-summary [data-i18n="mypage.ticket.validity"] { flex-basis: 100%; word-break: keep-all; }

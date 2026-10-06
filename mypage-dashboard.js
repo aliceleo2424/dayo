@@ -325,6 +325,7 @@
     syncRoomEntryLinks(confirmedBookingId);
     renderAdditionalBookingList(futureBookings, confirmedBookingId, userId);
     if (session && /[@+]/.test(String(session.partnerName || ''))) session.partnerName = 'DayO Partner';
+    document.dispatchEvent(new CustomEvent('dayo:mypage-next', { detail: { session: session, confirmedBookingId: confirmedBookingId } }));
 
     if (!session || !session.partnerName) {
       if (titleEl) titleEl.textContent = i18n('mypage.urgent.empty');
@@ -705,6 +706,7 @@
         ? i18n('mypage.progress.streakDays', { n: streak })
         : i18n('mypage.progress.streakNone');
     }
+    document.dispatchEvent(new CustomEvent('dayo:mypage-speaking', { detail: { diagnosed: !!(record && (record.speaking_level || record.last_test_score != null)) } }));
   }
 
   function nicknameModalEls() {
