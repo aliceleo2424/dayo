@@ -40,6 +40,31 @@
   if(!root||!root.document)return;
   root.DayOPartnerConversationProfile=contract;
 
+  // The host is a two-column profile grid; this independent section spans both columns.
+  if (!document.getElementById('dayo-conversation-profile-style')) {
+    var style=document.createElement('style');style.id='dayo-conversation-profile-style';
+    style.textContent=[
+      '.partner-conversation-profile{grid-column:1/-1;min-width:0;width:100%;box-sizing:border-box;text-align:left}',
+      '.partner-conversation-profile details{min-width:0}',
+      '.partner-conversation-profile summary{cursor:pointer;font-weight:700}',
+      '.partner-conversation-profile .pcv-hint,.partner-conversation-profile .pcv-status{font-size:.85rem;line-height:1.5;overflow-wrap:anywhere}',
+      '.partner-conversation-profile fieldset{min-width:0;margin:.9rem 0;padding:0;border:0}',
+      '.partner-conversation-profile legend{font-size:.85rem;font-weight:600;margin-bottom:.4rem}',
+      '.partner-conversation-profile .pcv-chips{display:flex;flex-wrap:wrap;gap:.4rem}',
+      '.partner-conversation-profile .pcv-chip{display:flex;align-items:center;gap:.4rem;width:auto;max-width:100%;padding:.5rem .65rem;border:1px solid #e3dfd5;border-radius:12px;box-sizing:border-box;cursor:pointer}',
+      '.partner-conversation-profile .pcv-chip input{flex:0 0 auto;width:auto;margin:0;accent-color:#5F7D63}',
+      '.partner-conversation-profile .pcv-chip span{min-width:0;overflow-wrap:anywhere}',
+      '.partner-conversation-profile .pcv-chip:has(input:checked){border-color:#5F7D63;background:#F8F0E3}',
+      '.partner-conversation-profile .pcv-chip:has(input:disabled){opacity:.55;cursor:default}',
+      '.partner-conversation-profile .pcv-styles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}',
+      '.partner-conversation-profile .pcv-actions{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem}',
+      '.partner-conversation-profile .pcv-save{max-width:100%;padding:.6rem .85rem;border:0;border-radius:12px;background:#5F7D63;color:white;font-weight:600;cursor:pointer}',
+      '.partner-conversation-profile .pcv-save:disabled{opacity:.5;cursor:default}',
+      '.partner-conversation-profile input:focus-visible,.partner-conversation-profile button:focus-visible,.partner-conversation-profile summary:focus-visible{outline:2px solid #5F7D63;outline-offset:3px}',
+      '@media(max-width:480px){.partner-conversation-profile .pcv-styles{grid-template-columns:1fr}}'
+    ].join('');document.head.append(style);
+  }
+
   var section,activeId=null,activeProfile=null,readDraft=null;
   function clear(){if(section)section.remove();section=null;activeId=activeProfile=null;readDraft=null;}
   async function mount(user,profile,draft,keepOpen){

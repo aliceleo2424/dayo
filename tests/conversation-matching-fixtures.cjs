@@ -233,6 +233,8 @@ async function partnerUI(){
  w.supabaseClient={auth:{getSession:async()=>({data:{session:{user:{id:partner}}}}),onAuthStateChange:fn=>{authListener=fn;}},from:name=>{assert.equal(name,'partner_profile_details');return {select(fields){assert.equal(fields,'conversation_preferences');return this},eq(k,id){assert.equal(k,'partner_id');assert.equal(id,partner);return this},maybeSingle:async()=>({data:{conversation_preferences:stored}})};},rpc:async(name,args)=>{assert.equal(name,'save_partner_conversation_preferences');stored=plain(args.p_preferences);writes++;return {data:stored};}};
  w.eval(read('public/partner-conversation-profile.js'));w.document.dispatchEvent(new w.Event('DOMContentLoaded'));await new Promise(r=>setTimeout(r,30));
  check(!!w.document.querySelector('.pcv-save'),'production UI mounted without localhost gate');
+ check(w.getComputedStyle(w.document.querySelector('.partner-conversation-profile')).gridColumn==='1/-1','new profile spans existing two-column host');
+ check(w.getComputedStyle(w.document.querySelector('.pcv-chips')).flexWrap==='wrap','preference chips wrap within profile width');
  check(w.document.querySelector('input[value="music"]').checked,'DB preferences restored');
  const chip=w.document.querySelector('input[value="movies"]');chip.checked=true;chip.dispatchEvent(new w.Event('change'));w.document.querySelector('.pcv-save').click();await new Promise(r=>setTimeout(r,20));check(writes===1&&stored.interests.includes('movies'),'save calls owner RPC');
  authListener('SIGNED_OUT',null);check(!w.document.querySelector('.partner-conversation-profile'),'logout clears Partner draft');
