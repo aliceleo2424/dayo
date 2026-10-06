@@ -27,6 +27,11 @@
   }
 
   function currentLang() {
+    // Explicit legal links take priority without changing the user's saved locale.
+    if (document.body && document.body.classList.contains('legal-page')) {
+      var requested = new URLSearchParams(window.location.search).get('lang');
+      if (requested && /^(en|ko)$/i.test(requested)) return requested.toLowerCase();
+    }
     var value = 'ko';
     try {
       value = window.DayOI18n && typeof window.DayOI18n.getLang === 'function'
@@ -55,14 +60,15 @@
 
   function footerHtml(lang) {
     var copy = copyFor(lang);
+    var legalQuery = lang === 'en' ? '?lang=en' : '';
     return [
       '<footer class="dayo-legal-footer" role="contentinfo">',
       '  <nav class="dayo-legal-footer__links" aria-label="' + copy.nav + '">',
-      '    <a href="/terms">' + copy.terms + '</a>',
+      '    <a href="/terms' + legalQuery + '">' + copy.terms + '</a>',
       '    <span class="dayo-legal-footer__sep" aria-hidden="true">|</span>',
-      '    <a href="/privacy">' + copy.privacy + '</a>',
+      '    <a href="/privacy' + legalQuery + '">' + copy.privacy + '</a>',
       '    <span class="dayo-legal-footer__sep" aria-hidden="true">|</span>',
-      '    <a href="/refund">' + copy.refund + '</a>',
+      '    <a href="/refund' + legalQuery + '">' + copy.refund + '</a>',
       '  </nav>',
       '  <div class="dayo-legal-footer__biz">',
       '    <p>' + copy.service + ': DayO(돼요) | ' + copy.business + ': 88드래곤즈 | ' + copy.representative + ': 여승현</p>',
@@ -87,6 +93,14 @@
     });
     if (!document.body || !document.body.classList.contains('legal-page')) return;
     document.documentElement.lang = lang;
+    // Keep related legal-document navigation in the explicitly selected language.
+    Array.prototype.forEach.call(document.querySelectorAll('a[href]'), function (node) {
+      var url = new URL(node.getAttribute('href'), window.location.href);
+      if (url.origin === window.location.origin && /^\/(privacy|terms|refund)(\.html)?\/?$/.test(url.pathname)) {
+        url.searchParams.set('lang', lang);
+        node.setAttribute('href', url.pathname + url.search + url.hash);
+      }
+    });
     var title = document.body.getAttribute(lang === 'en' ? 'data-legal-title-en' : 'data-legal-title-ko');
     var description = document.body.getAttribute(lang === 'en' ? 'data-legal-description-en' : 'data-legal-description-ko');
     if (title) document.title = title;
