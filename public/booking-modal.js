@@ -819,7 +819,7 @@
       var ids=allPartners.filter(function(p){return partnerMatchesCriteria(p,language,help);}).map(function(p){return String(p.id);});
       var rows=await loadCalendarSlots(ids);
       if(seq!==calendarSeq||key!==calendarKey)return;
-      calendarRows=rows.filter(function(s){var ms=rules.slotMs(s.slot_time);return s.status==='available'&&isFinite(ms)&&rules.inWindow(rules.dateAt(ms))&&isFutureThirtyMinuteConcreteSlot(s);});
+      calendarRows=rows.filter(function(s){var ms=rules.slotMs(s.slot_time);return s.status==='available'&&isFinite(ms)&&rules.inWindow(rules.dateAt(ms))&&isVisibleFutureThirtyMinuteConcreteSlot(s);});
     } catch(error) {if(seq===calendarSeq){calendarError=true;calendarRows=[];}}
     finally {if(seq===calendarSeq){calendarLoading=false;renderCalendar();}}
   }
@@ -1038,6 +1038,25 @@
     return isBookableStart(startMs);
   }
 
+  function isVisibleFutureThirtyMinuteConcreteSlot(slot) {
+    var raw = String(slot && slot.slot_time || '');
+    if (!slot || !slot.id || raw.indexOf('weekly:') === 0) return false;
+    var match = raw.match(/^\d{4}-\d{2}-\d{2}[T ]\d{2}:(\d{2})/);
+    var startMs = bookingSlotStartMs(raw);
+    return !!match && (match[1] === '00' || match[1] === '30') && isFinite(startMs) && startMs > Date.now();
+  }
+
+  async function fetchVisibleDateAvailability(isoDate, eligiblePartnerIds) {
+    var rules = window.DayOAvailabilityCalendar;
+    if (!rules) return fetchDateAvailability(isoDate, eligiblePartnerIds);
+    if (!rules.inWindow(isoDate)) return [];
+    var rows = await loadCalendarSlots(eligiblePartnerIds);
+    return rows.filter(function (slot) {
+      return slot.status === 'available' && eligiblePartnerIds.indexOf(String(slot.partner_id)) >= 0 &&
+        isVisibleFutureThirtyMinuteConcreteSlot(slot) && rules.dateAt(rules.slotMs(slot.slot_time)) === isoDate;
+    });
+  }
+
   function supportsKoreanHelp(partner) {
     return partner && (partner.korean_support_level === 'conversational' || partner.korean_support_level === 'fluent');
   }
@@ -1120,12 +1139,13 @@
       var eligiblePartnerIds = allPartners.filter(function (partner) {
         return partnerMatchesCriteria(partner, requestedLanguage, requestedKoreanHelp);
       }).map(function (partner) { return String(partner.id); });
-      var slots = await fetchDateAvailability(requestedDate, eligiblePartnerIds);
+      var visibleSlots = await fetchVisibleDateAvailability(requestedDate, eligiblePartnerIds);
+      var slots = visibleSlots.filter(isFutureThirtyMinuteConcreteSlot);
       if (requestSeq !== availabilityLoadSeq || requestedDate !== state.date ||
           requestedLanguage !== state.language || requestedKoreanHelp !== state.koreanHelp) return [];
       liveSlots = slots;
-      liveTimes = buildUniqueTimes(slots);
-      if (state.timeKey && !liveTimes.some(function (time) { return time.key === state.timeKey; })) {
+      liveTimes = buildUniqueTimes(visibleSlots);
+      if (state.timeKey && !slots.some(function (slot) { return slotStartKey(slot.slot_time) === state.timeKey; })) {
         state.time = null;
         state.timeKey = null;
         state.partner = null;
@@ -1200,12 +1220,23 @@
       updateFooter();
       return;
     }
+    var restrictedCount = 0;
     container.innerHTML = liveTimes.map(function (time) {
-      var on = state.timeKey === time.key;
-      return '<button type="button" class="bk-chip' + (on ? ' is-on' : '') +
+      var disabled = !isBookableStart(Number(time.key));
+      if (disabled) restrictedCount += 1;
+      var on = !disabled && state.timeKey === time.key;
+      return '<button type="button" class="bk-chip' + (on ? ' is-on' : '') + (disabled ? ' is-disabled' : '') +
         '" data-group="time" data-id="' + time.key +
-        '" aria-pressed="' + (on ? 'true' : 'false') + '">' + time.label + '</button>';
+        '" aria-pressed="' + (on ? 'true' : 'false') + '"' +
+        (disabled ? ' disabled aria-disabled="true" title="' + ux('4시간 전까지 예약할 수 있어요.', 'Book at least 4 hours before the session.') + '"' : '') + '>' + time.label + '</button>';
     }).join('');
+    if (restrictedCount) {
+      var note = document.createElement('p');
+      note.className = 'bk-slot-cutoff-note';
+      note.style.cssText = 'grid-column:1/-1;flex-basis:100%;margin:6px 0 0;font-size:13px;line-height:1.5;overflow-wrap:anywhere';
+      note.textContent = ux('4시간 전까지 예약할 수 있어요.', 'Book at least 4 hours before the session.');
+      container.appendChild(note);
+    }
     updateFooter();
   }
 
@@ -1820,6 +1851,8 @@
       readRecentBooking: readRecentBooking,
       loadCalendarSlots: loadCalendarSlots,
       fetchDateAvailability: fetchDateAvailability,
+      fetchVisibleDateAvailability: fetchVisibleDateAvailability,
+      isVisibleFutureThirtyMinuteConcreteSlot: isVisibleFutureThirtyMinuteConcreteSlot,
       stepOrder: STEP_ORDER.slice(),
       state: state,
       isStepReady: isStepReady

@@ -14,6 +14,7 @@ const root=path.resolve(__dirname,'..'),partner='22222222-2222-4222-8222-2222222
  insert into availability_slots(partner_id,slot_time) values('${partner}','weekly:mon|10:00'),('${partner}','weekly:fri|10:00');
  insert into availability_slots(partner_id,slot_time,status) values('${partner}',to_char((((clock_timestamp() at time zone 'Asia/Seoul')::date+2)+time '10:30'),'YYYY-MM-DD"T"HH24:MI:SS'),'booked');
  insert into bookings(partner_id,slot_id,status,scheduled_at) select partner_id,id,'confirmed',slot_time::timestamp at time zone 'Asia/Seoul' from availability_slots where status='booked';`);
+ await db.exec("insert into availability_slots(partner_id,slot_time) select '"+partner+"',to_char(s,'YYYY-MM-DD\"T\"HH24:MI:SS') from (select date_trunc('hour',clock_timestamp() at time zone 'Asia/Seoul')+interval '30 minutes'*(floor(extract(minute from clock_timestamp() at time zone 'Asia/Seoul')/30)+1) s) q where s::time between time '08:30' and time '23:00' on conflict(partner_id,slot_time) do nothing");
  await db.exec(fs.readFileSync(path.join(root,'supabase/migrations/084_partner_monthly_availability.sql'),'utf8'));
  let chain=Promise.resolve();
  const names={get_partner_monthly_schedule:['select get_partner_monthly_schedule() as data',()=>[]],save_partner_weekly_template:['select save_partner_weekly_template($1::jsonb) as data',a=>[JSON.stringify(a.p_slots)]],save_partner_availability_override:['select save_partner_availability_override($1::date,$2::text,$3::text[]) as data',a=>[a.p_date,a.p_mode,a.p_custom_slots]],apply_partner_weekly_template:['select apply_partner_weekly_template() as data',()=>[]],get_booking_calendar_slots:['select get_booking_calendar_slots($1::uuid[]) as data',a=>[a.p_partner_ids]]};
@@ -28,11 +29,14 @@ const root=path.resolve(__dirname,'..'),partner='22222222-2222-4222-8222-2222222
  source=source.replace("from:table=>{let changes,inserted;",`from:table=>{if(table==='availability_slots'){let filters={},offset=0,end=499;const q={select(){return this},eq(k,v){filters[k]=v;return this},order(){return this},range(a,b){offset=a;end=b;return this},then(resolve,reject){return apiFetch('/qa/slots',{method:'POST'}).then(r=>r.json()).then(r=>({data:r.data.filter(s=>Object.entries(filters).every(([k,v])=>s[k]===v)).slice(offset,end+1),error:r.error})).then(resolve,reject)}};return q;}let changes,inserted;`);
  source=source.replace("'availability-slots.js',", "'availability-slots.js','availability-calendar.js','partner-monthly-availability.js',");
  source=source.replace("http.createServer((req,res)=>{", "http.createServer((req,res)=>{if(req.url.startsWith('/qa/'))return qaHandle(req,res);if(req.url.startsWith('/booking-qa'))return qaBooking(req,res);");
+ source=source.replace("conversation_brief:{purposes:['casual'],interests:['food_cafe'],chat_style:'casual',chat_request:'gentle',partner_preference:'slow'}","conversation_brief:{schema_version:1,korean_support_preference:'required',purposes:['travel'],interests:['food_cafe'],conversation_style:'encourage'}");
  source=source.replaceAll("3048", "3049").replace("z-index:3000", "z-index:1");
  function qaBooking(req,res){
    let html=fs.readFileSync(path.join(__dirname,'smart-booking-fixture.html'),'utf8').replaceAll('../public/','/');
    html=html.replace("id: 'jen'","id: '"+partner+"'").replace("id: 'alex'","id: '44444444-4444-4444-8444-444444444444'").replace("id: 'unset'","id: '55555555-5555-4555-8555-555555555555'");
    html=html.replace('rpc: function (name) {',"rpc: function (name,args) {if(name==='get_booking_calendar_slots')return fetch('/qa/rpc',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,args,role:'user'})}).then(r=>r.json());");
+   html=html.replace("name === 'list_public_partner_profiles'", "(name === 'list_public_partner_profiles' || name === 'list_matching_partner_profiles')");
+   html=html.replace("window._dayoAuthUser =","localStorage.setItem('dayo_lang','"+(new URL(req.url,'http://127.0.0.1').searchParams.get('qa-lang')==='EN'?'EN':'KO')+"'); window._dayoAuthUser =");
    html=html.replace('</head>','<link rel="stylesheet" href="/availability-calendar.css"></head>');
    res.setHeader('Content-Type','text/html');res.end(html);
  }

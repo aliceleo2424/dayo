@@ -26,10 +26,20 @@ assert.equal(authState.clears,0,'same partner keeps pending/loaded schedule on r
 onAuthChange({detail:{loggedIn:true,userId:'partner-b'}});assert.equal(authState.clears,1,'different account invalidates previous schedule');
 authState.owner='partner-b';onAuthChange({detail:{loggedIn:false,userId:'partner-b'}});assert.equal(authState.clears,2,'sign-out invalidates schedule');
 // Fixed integration base keeps core preservation checks meaningful after commit.
-const integrationBase='a58b7a0e7df5c028814b1783884c6746fa421cce';
+const integrationBase='ae58787289c2b3274120f8df89ab233d26e8e47c';
 const baseline=cp.execFileSync('git',['show',integrationBase+':public/booking-modal.js'],{cwd:root,encoding:'utf8'}).replace(/\r\n/g,'\n');
+const auditedMonthly=cp.execFileSync('git',['show',integrationBase+':public/partner-monthly-availability.js'],{cwd:root,encoding:'utf8'}).replace(/\r\n/g,'\n');
+const displayOnlyMonthly=monthlyUI.replace("opens?'Open':'Closed'","opens?'Available':'Closed'")
+ .replace("var count=document.createElement('small');count.textContent=opens+' open';b.append(count);\n        if(booked){var reserved=document.createElement('small');reserved.textContent=booked+' booked';b.append(reserved);}\n        grid.append(b);","var count=document.createElement('small');count.textContent=booked?opens+' open · '+booked+' booked':opens+' open';b.append(count);grid.append(b);");
+assert.equal(displayOnlyMonthly,auditedMonthly,'Partner monthly calculation/save/auth/weekly handlers unchanged outside display labels');
 function fn(source,name){const start=source.search(new RegExp('(?:async )?function '+name+'\\('));assert(start>=0,name);return source.slice(start,source.indexOf('\n  }',start)+4).replace(/\r\n/g,'\n');}
-for(const name of ['loadDateAvailability','derivePartnersForSelectedTime','partnerMatchesCriteria','isBookableStart','canBypassBookingLeadTime','getTicketCount','needsTicketTopup','settleConfirmedBooking','readRecentBooking'])assert.equal(fn(booking,name),fn(baseline,name),name+' protected kernel');
+for(const name of ['derivePartnersForSelectedTime','partnerMatchesCriteria','isBookableStart','canBypassBookingLeadTime','getTicketCount','needsTicketTopup','settleConfirmedBooking','readRecentBooking'])assert.equal(fn(booking,name),fn(baseline,name),name+' protected kernel');
+// Only the visibility/eligibility split is allowed to differ from the audited main.
+const loadWithEligibilityOnly=fn(booking,'loadDateAvailability')
+ .replace('var visibleSlots = await fetchVisibleDateAvailability(requestedDate, eligiblePartnerIds);\n      var slots = visibleSlots.filter(isFutureThirtyMinuteConcreteSlot);','var slots = await fetchDateAvailability(requestedDate, eligiblePartnerIds);')
+ .replace('liveTimes = buildUniqueTimes(visibleSlots);','liveTimes = buildUniqueTimes(slots);')
+ .replace('!slots.some(function (slot) { return slotStartKey(slot.slot_time) === state.timeKey; })','!liveTimes.some(function (time) { return time.key === state.timeKey; })');
+assert.equal(loadWithEligibilityOnly,fn(baseline,'loadDateAvailability'),'all other loadDateAvailability guards preserved');
 assert(!booking.includes('<small class="bk-holiday">'));assert(booking.includes('bk-selected-date'));
 const oldSlots=cp.execFileSync('git',['show',integrationBase+':public/availability-slots.js'],{cwd:root,encoding:'utf8'});
 for(const name of ['openPartnerBookingPrep','getPartnerBookingBrief','closePartnerBookingPrep','isBookableStart','confirmBookingWindow'])assert.equal(fn(slots,name),fn(oldSlots,name),name+' timing/brief unchanged');

@@ -36,8 +36,10 @@
         b.setAttribute('aria-label',date+(holiday?' · '+holiday:'')+' · '+opens+' open · '+booked+' booked'+(o?' · '+o.mode:''));
         var number=document.createElement('strong');number.textContent=day;b.append(number);
         if(holiday){var h=document.createElement('span');h.className='ma-holiday';h.textContent='✦';h.title=holiday;h.setAttribute('aria-hidden','true');b.append(h);}
-        var state=document.createElement('small');state.textContent=o&&o.mode==='closed'?'Closed':o&&o.mode==='custom'?'Custom':opens?'Available':'Closed';b.append(state);
-        var count=document.createElement('small');count.textContent=booked?opens+' open · '+booked+' booked':opens+' open';b.append(count);grid.append(b);
+        var state=document.createElement('small');state.textContent=o&&o.mode==='closed'?'Closed':o&&o.mode==='custom'?'Custom':opens?'Open':'Closed';b.append(state);
+        var count=document.createElement('small');count.textContent=opens+' open';b.append(count);
+        if(booked){var reserved=document.createElement('small');reserved.textContent=booked+' booked';b.append(reserved);}
+        grid.append(b);
       }
     }
     function choose(date){selected=date;var o=override(date);mode=o&&o.mode||'default';custom=new Set(mode==='custom'?o.custom_slots:mode==='closed'?[]:openTimes(date));dirty=false;calendar();editor();}
