@@ -1633,6 +1633,7 @@
   <link rel="stylesheet" href="availability-calendar.css">
   <link rel="stylesheet" href="/english-typography.css?v=20261005-en">
   <link rel="stylesheet" href="/brand-surfaces.css?v=20261005-logo-palette">
+  <link rel="stylesheet" href="user-dashboard.css?v=20261007-ia">
 </head>
 <body data-dayo-role="member">
   <script>
@@ -1710,6 +1711,44 @@
 
   <main class="page mypage-container" style="max-width: 1140px; margin: 0 auto; padding: 32px 20px; box-sizing: border-box;">
 
+    <div id="user-dashboard-layout" hidden>
+      <div class="ud-heading"><span class="ud-mode" data-ud-copy="mode">USER MODE</span></div>
+      <section class="ud-next ud-card" aria-labelledby="ud-next-title">
+        <div class="ud-section-head"><h2 id="ud-next-title" data-ud-copy="next">Next Conversation</h2><span id="ud-next-language" class="ud-language" hidden></span></div>
+        <div id="ud-next-booking"></div>
+        <div id="ud-next-empty"><p id="ud-next-empty-copy" data-ud-copy="loading">Loading your next conversation…</p><button id="ud-empty-book" type="button" class="ud-primary" hidden data-ud-copy="book">Book a conversation</button></div>
+      </section>
+      <nav class="ud-tabs" role="tablist" aria-label="My Page" data-ud-aria="tabs">
+        <button id="ud-tab-sessions" type="button" role="tab" aria-selected="true" aria-controls="ud-sessions" data-ud-tab="sessions" data-ud-copy="sessions">Sessions</button>
+        <button id="ud-tab-progress" type="button" role="tab" aria-selected="false" aria-controls="ud-progress" data-ud-tab="progress" data-ud-copy="progress" tabindex="-1">Progress</button>
+        <button id="ud-tab-tickets" type="button" role="tab" aria-selected="false" aria-controls="ud-tickets" data-ud-tab="tickets" data-ud-copy="tickets" tabindex="-1">Tickets</button>
+        <button id="ud-tab-account" type="button" role="tab" aria-selected="false" aria-controls="ud-account" data-ud-tab="account" data-ud-copy="account" tabindex="-1">Account</button>
+      </nav>
+      <div id="ud-panels">
+        <section id="ud-sessions" class="ud-panel" role="tabpanel" aria-labelledby="ud-tab-sessions" tabindex="0">
+          <div class="ud-section-head ud-sessions-head"><h2 data-ud-copy="conversations">Your conversations</h2><div id="ud-booking-action"></div></div>
+          <div id="ud-upcoming"></div><div id="ud-session-updates"></div><div id="ud-archive"></div>
+          <div id="ud-legacy-room-link" hidden></div>
+        </section>
+        <section id="ud-progress" class="ud-panel" role="tabpanel" aria-labelledby="ud-tab-progress" tabindex="0" hidden>
+          <section id="ud-speaking-action" class="ud-card ud-speaking-action" hidden><div><h2 data-ud-copy="sense">Check your Speaking Sense</h2><p data-ud-copy="senseHint">Find your starting point for DayO conversations.</p></div><div id="ud-test-action"></div></section>
+          <div id="ud-growth"></div>
+          <details id="ud-retest" class="ud-options" hidden><summary data-ud-copy="senseOptions">Speaking Sense options</summary><div id="ud-retest-action"></div></details>
+          <div id="ud-treats"></div>
+          <details class="ud-explore"><summary><span data-ud-copy="explore">Explore DayO</span><span class="ud-explore-hint" data-ud-copy="exploreHint">Story cards & Lounge Magazine</span></summary><div id="ud-explore-content"></div></details>
+        </section>
+        <section id="ud-tickets" class="ud-panel" role="tabpanel" aria-labelledby="ud-tab-tickets" tabindex="0" hidden>
+          <section class="ud-card ud-ticket-card"><div><h2 data-ud-copy="yourTickets">Your tickets</h2><div id="ud-ticket-summary"></div></div><button type="button" class="ud-primary" data-tickets-open data-ud-copy="buyTickets">Buy / recharge tickets</button></section>
+          <div id="ud-benefits"></div>
+        </section>
+        <section id="ud-account" class="ud-panel" role="tabpanel" aria-labelledby="ud-tab-account" tabindex="0" hidden>
+          <section class="ud-card ud-account-identity"><div><h2 data-ud-copy="nickname">Nickname</h2><p data-ud-copy="nicknameHint">Manage how your name appears on DayO.</p></div><div id="ud-nickname-action"></div></section>
+          <section class="ud-card ud-account-language"><h2 data-ud-copy="language">Interface language</h2><div data-i18n-lang="block"></div></section>
+          <div id="ud-account-settings"></div>
+        </section>
+      </div>
+    </div>
+
     <div class="role-switch-wrapper" style="display: flex; justify-content: center; margin-bottom: 32px;">
       <div class="role-segmented-control" data-partner-access="pending" style="position: relative; display: flex; width: 300px; background: #F1F3F5; padding: 4px; border-radius: 999px; cursor: pointer;" role="group" data-i18n="role.switchAria" data-i18n-attr="aria-label" aria-label="역할 전환">
         <div id="segmented-glider" style="position: absolute; top: 4px; left: 4px; width: calc(50% - 4px); height: calc(100% - 8px); background: #fff; border-radius: 999px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); transition: transform 0.25s ease;"></div>
@@ -1726,7 +1765,7 @@
         </div>
         <div id="mypage-learning-lang" hidden style="margin: 6px 0 8px; font-size: 12.5px; color: #57534E;"></div>
         <div style="font-size: 13px; color: #666;">
-          <span data-i18n="mypage.ticket.held">보유 티켓</span> <strong style="color: #FF5A36;"><span id="user-ticket-count" class="ticket-count-display" data-ticket-count>-</span>장</strong> <span style="color: #ccc; margin: 0 8px;">|</span> <span data-i18n="mypage.ticket.validity">결제일로부터 90일 이내 이용 가능</span>
+          <span data-i18n="mypage.ticket.held">보유 티켓</span> <strong style="color: #FF5A36;"><span id="user-ticket-count" class="ticket-count-display" data-ticket-count>-</span><span id="mypage-ticket-unit">장</span></strong> <span style="color: #ccc; margin: 0 8px;">|</span> <span data-i18n="mypage.ticket.validity">결제일로부터 90일 이내 이용 가능</span>
         </div>
       </div>
       <div class="mypage-welcome-actions">
@@ -1890,6 +1929,7 @@
   <script src="lounge-carousel.js?v=20260916-articles"></script>
   <script src="legal-footer.js"></script>
   <script src="conversation-insights.js?v=20261005-recap-integration"></script>
+  <script src="user-dashboard.js?v=20261007-ia"></script>
   <script>
     if (typeof window.loadUserReports === 'function') window.loadUserReports();
   </script>

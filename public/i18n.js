@@ -531,6 +531,30 @@
       FR: 'Consultez vos conversations, sessions et souvenirs de discussion.',
       ES: 'Consulta tu estado, sesiones y registros de conversación.'
     },
+    /* My Page presentation labels use the shared locale contract. */
+    'mypage.dashboard.mode': { KO: "유저 모드", EN: "USER MODE" },
+    'mypage.dashboard.next': { KO: "다음 대화", EN: "Next Conversation" },
+    'mypage.dashboard.loading': { KO: "다음 대화를 불러오고 있어요…", EN: "Loading your next conversation…" },
+    'mypage.dashboard.empty': { KO: "예정된 대화가 없어요", EN: "No upcoming conversation" },
+    'mypage.dashboard.book': { KO: "대화 예약하기", EN: "Book a conversation" },
+    'mypage.dashboard.sessions': { KO: "세션", EN: "Sessions" },
+    'mypage.dashboard.progress': { KO: "성장", EN: "Progress" },
+    'mypage.dashboard.tickets': { KO: "티켓", EN: "Tickets" },
+    'mypage.dashboard.account': { KO: "계정", EN: "Account" },
+    'mypage.dashboard.tabs': { KO: "마이페이지 메뉴", EN: "My Page sections" },
+    'mypage.dashboard.conversations': { KO: "대화 일정", EN: "Your conversations" },
+    'mypage.dashboard.sense': { KO: "내 스피킹 감각 알아보기", EN: "Check your Speaking Sense" },
+    'mypage.dashboard.senseHint': { KO: "DayO 대화를 시작하는 나의 감각을 확인해요.", EN: "Find your starting point for DayO conversations." },
+    'mypage.dashboard.senseOptions': { KO: "스피킹 감각 설정", EN: "Speaking Sense options" },
+    'mypage.dashboard.explore': { KO: "DayO 둘러보기", EN: "Explore DayO" },
+    'mypage.dashboard.exploreHint': { KO: "이야기 카드 · 라운지 매거진", EN: "Story cards & Lounge Magazine" },
+    'mypage.dashboard.yourTickets': { KO: "내 티켓", EN: "Your tickets" },
+    'mypage.dashboard.buyTickets': { KO: "티켓 구매 / 충전", EN: "Buy / recharge tickets" },
+    'mypage.dashboard.nickname': { KO: "닉네임", EN: "Nickname" },
+    'mypage.dashboard.nicknameHint': { KO: "DayO에서 표시되는 이름을 관리해요.", EN: "Manage how your name appears on DayO." },
+    'mypage.dashboard.language': { KO: "화면 언어", EN: "Interface language" },
+    'mypage.booking.cancel': { KO: '예약 취소', EN: 'Cancel' },
+    'mypage.booking.additional': { KO: '예정된 대화 · {when}', EN: 'Upcoming chat · {when}' },
     'mypage.greet.morning': {
       KO: '👋 좋은 아침이에요, {name}님! ☕', EN: '👋 Good morning, {name}! ☕', ZH: '👋 早上好，{name}！☕', JA: '👋 おはよう、{name}さん！☕', FR: '👋 Bonjour, {name} ! ☕', ES: '👋 ¡Buenos días, {name}! ☕'
     },
@@ -573,13 +597,13 @@
       KO: '🎯 내 스피킹 감각 알아보기', EN: '🎯 Check my speaking sense', ZH: '🎯 了解我的口语感觉', JA: '🎯 スピーキング感覚を知る', FR: '🎯 Découvrir mon aisance orale', ES: '🎯 Descubrir mi sensación oral'
     },
     'mypage.cta.book': {
-      KO: '📅 대화 일정 예약하기', EN: '📅 Book a conversation', ZH: '📅 预约对话', JA: '📅 会話を予約する', FR: '📅 Réserver une conversation', ES: '📅 Reservar una conversación'
+      KO: '📅 대화 예약하기', EN: '📅 Book a conversation', ZH: '📅 预约对话', JA: '📅 会話を予約する', FR: '📅 Réserver une conversation', ES: '📅 Reservar una conversación'
     },
     'mypage.cta.charge': {
       KO: '🎟️ 세션 티켓 충전하기', EN: '🎟️ Buy session tickets', ZH: '🎟️ 充值会话券', JA: '🎟️ セッションチケットを買う', FR: '🎟️ Acheter des tickets', ES: '🎟️ Comprar tickets'
     },
     'mypage.urgent.badge': {
-      KO: '다가오는 대화', EN: 'Upcoming chat', ZH: '即将到来的对话', JA: 'まもなくの会話', FR: 'Conversation à venir', ES: 'Próxima conversación'
+      KO: '예정된 대화', EN: 'Upcoming chat', ZH: '即将到来的对话', JA: 'まもなくの会話', FR: 'Conversation à venir', ES: 'Próxima conversación'
     },
     'mypage.urgent.soon': {
       KO: '🚨 30분 후 시작', EN: '🚨 Starts in 30 min', ZH: '🚨 30分钟后开始', JA: '🚨 30分後に開始', FR: '🚨 Débute dans 30 min', ES: '🚨 Empieza en 30 min'
@@ -591,7 +615,7 @@
       KO: '대화 시작 5분 전부터 라운지 입장이 가능합니다.', EN: 'You can enter the lounge from 5 minutes before start.', ZH: '对话开始前5分钟即可进入休息室。', JA: '会話開始5分前からラウンジに入れます。', FR: 'Entrée possible 5 minutes avant le début.', ES: 'Puedes entrar al lounge 5 minutos antes.'
     },
     'mypage.urgent.enter': {
-      KO: '대화 스튜디오 입장', EN: 'Enter conversation studio', ZH: '进入对话工作室', JA: '会話スタジオに入る', FR: 'Entrer dans le studio', ES: 'Entrar al estudio'
+      KO: '대화방 입장', EN: 'Enter conversation studio', ZH: '进入对话工作室', JA: '会話スタジオに入る', FR: 'Entrer dans le studio', ES: 'Entrar al estudio'
     },
     'mypage.urgent.titleFormat': {
       KO: '{name} 파트너와의 대화 ({when})', EN: 'Chat with {name} ({when})', ZH: '与{name}伙伴的对话（{when}）', JA: '{name}パートナーとの会話（{when}）', FR: 'Conversation avec {name} ({when})', ES: 'Conversación con {name} ({when})'
@@ -652,7 +676,7 @@
       KO: '아직 시작 전', EN: 'Not started yet', ZH: '尚未开始', JA: 'まだこれから', FR: 'Pas encore commencé', ES: 'Aún no empieza'
     },
     'mypage.archive.title': {
-      KO: '📚 지난 대화 리포트 보관함', EN: '📚 Past conversation reports', ZH: '📚 过往对话报告存档', JA: '📚 過去の会話レポート', FR: '📚 Rapports de conversations passées', ES: '📚 Informes de conversaciones pasadas'
+      KO: '📚 지난 대화 리포트', EN: '📚 Past conversation reports', ZH: '📚 过往对话报告存档', JA: '📚 過去の会話レポート', FR: '📚 Rapports de conversations passées', ES: '📚 Informes de conversaciones pasadas'
     },
     'mypage.archive.count': {
       KO: '총 {n}개의 대화 기록', EN: '{n} conversation records', ZH: '共{n}条对话记录', JA: '会話記録 {n}件', FR: '{n} souvenirs de conversation', ES: '{n} registros de conversación'
@@ -676,7 +700,7 @@
       KO: '첫 세션을 예약하고 나만의 AI 대화 리포트를 받아보세요!', EN: 'Book your first session and get your own AI conversation report!', ZH: '预约第一场会话，领取专属 AI 对话报告！', JA: '最初のセッションを予約して、自分だけのAI会話レポートを受け取りましょう！', FR: 'Réservez votre première session et recevez votre rapport IA !', ES: '¡Reserva tu primera sesión y recibe tu informe de IA!'
     },
     'mypage.archive.emptyCta': {
-      KO: '📅 대화 일정 예약하기', EN: '📅 Book a conversation', ZH: '📅 预约对话', JA: '📅 会話スケジュールを予約', FR: '📅 Réserver une conversation', ES: '📅 Reservar una conversación'
+      KO: '📅 대화 예약하기', EN: '📅 Book a conversation', ZH: '📅 预约对话', JA: '📅 会話スケジュールを予約', FR: '📅 Réserver une conversation', ES: '📅 Reservar una conversación'
     },
     'mypage.fortune.title': {
       KO: '오늘의 대화 포춘쿠키', EN: 'Today’s conversation fortune cookie', ZH: '今日的对话幸运饼干', JA: '今日の会話フォーチュンクッキー', FR: 'Cookie fortune du jour', ES: 'Galleta de la fortuna de hoy'
