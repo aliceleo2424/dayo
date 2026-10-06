@@ -450,6 +450,25 @@
     });
   }
 
+  // Load the separate Partner cancellation UI only when requested.
+  var partnerCancellationLoader = null;
+  function openPartnerCancellation(booking, supabase) {
+    if (window.DayOPartnerCancellation) return window.DayOPartnerCancellation.open(booking, supabase);
+    if (!partnerCancellationLoader) {
+      partnerCancellationLoader = new Promise(function (resolve, reject) {
+        var script = document.createElement('script');
+        script.src = '/partner-booking-cancellation.js';
+        script.onload = function () { resolve(); };
+        script.onerror = function () { script.remove(); partnerCancellationLoader = null; reject(new Error('unavailable')); };
+        document.head.appendChild(script);
+      });
+    }
+    return partnerCancellationLoader.then(function () {
+      if (!window.DayOPartnerCancellation) throw new Error('unavailable');
+      return window.DayOPartnerCancellation.open(booking, supabase);
+    });
+  }
+
   function renderPartnerUpcomingList(rows, supabase, failed) {
     var list = document.getElementById('partner-upcoming-list');
     var allList = document.getElementById('partner-upcoming-all-list');
@@ -514,6 +533,28 @@
       prepare.className = 'partner-upcoming-prepare';
       prepare.textContent = t(index === 0 || fullList ? 'partner.upcoming.prepare' : 'partner.upcoming.prepareShort');
       side.appendChild(prepare);
+      if (booking.status === 'confirmed' && booking.partner_user_id === partnerBriefUserId && start.getTime() > Date.now()) {
+        var cancel = document.createElement('button');
+        cancel.type = 'button';
+        cancel.className = 'partner-upcoming-prepare partner-booking-cancel';
+        if (!document.getElementById('partner-cancellation-button-style')) {
+          var cancelStyle = document.createElement('style');
+          cancelStyle.id = 'partner-cancellation-button-style';
+          cancelStyle.textContent = '.partner-booking-cancel{display:block;margin-top:6px;background:#F8F0E3!important;color:#5F7D63!important;border:1px solid #c8d3c4!important}.partner-booking-cancel[hidden]{display:none!important}';
+          document.head.appendChild(cancelStyle);
+        }
+        cancel.textContent = !window.DayOI18n || window.DayOI18n.getLang() === 'KO' ? '예약 취소' : 'Cancel booking';
+        cancel.dataset.startsAt = String(start.getTime());
+        cancel.addEventListener('click', function () {
+          if (start.getTime() <= Date.now()) { cancel.hidden = true; return; }
+          if (fullList) closePartnerUpcomingAll();
+          cancel.disabled = true;
+          Promise.resolve(openPartnerCancellation(booking, supabase)).catch(function () {
+            window.alert(!window.DayOI18n || window.DayOI18n.getLang() === 'KO' ? '취소 화면을 불러오지 못했습니다. 다시 시도해 주세요.' : 'Could not load cancellation. Please retry.');
+          }).finally(function () { cancel.disabled = false; });
+        });
+        side.appendChild(cancel);
+      }
       row.append(kind, main, side);
       target.appendChild(row);
       function openPrep() {
@@ -575,6 +616,11 @@
 
     function updateEntries() {
       if (request !== partnerHeroRequest) return;
+      [list, allList].forEach(function (host) {
+        host.querySelectorAll('.partner-booking-cancel').forEach(function (button) {
+          button.hidden = Number(button.dataset.startsAt) <= Date.now();
+        });
+      });
       if (new Date(upcoming[0].scheduled_at).getTime() + 30 * 60000 <= Date.now()) {
         clearInterval(partnerHeroTimer);
         partnerHeroTimer = null;

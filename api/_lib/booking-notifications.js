@@ -40,12 +40,33 @@ function buildMessage(row, recipient, partnerName) {
   let intro;
   const lines = [`날짜·시작 시간: ${time}`, `대화 언어: ${language}`];
   if (cancelled) {
-    if (s.ticket_refunded !== (s.end_reason === 'user_cancelled_early') ||
-        s.partner_rewarded !== (s.end_reason === 'user_cancelled_late')) throw new Error('invalid_cancellation_state');
-    subject = '[DayO 돼요] 대화 예약이 취소됐어요';
-    intro = 'User가 아래 대화 예약을 취소했어요.';
-    lines.push(s.ticket_refunded ? 'User의 사용 티켓이 반환되었습니다.' : 'User의 사용 티켓은 반환되지 않았습니다.');
-    lines.push(s.partner_rewarded ? '취소 보상이 Partner에게 반영되었습니다.' : '이번 취소에는 Partner 보상이 적용되지 않았습니다.');
+    if (['partner_cancelled_early', 'partner_cancelled_late'].includes(s.end_reason)) {
+      if (s.cancelled_by !== 'partner' || s.ticket_refunded !== true || s.partner_rewarded !== false ||
+          s.late_cancel !== (s.end_reason === 'partner_cancelled_late') ||
+          !Number.isInteger(s.penalty_amount) || (s.late_cancel ? s.penalty_amount <= 0 : s.penalty_amount !== 0)) {
+        throw new Error('invalid_cancellation_state');
+      }
+      const reasons = { schedule_change: '갑작스러운 일정 변경', health: '건강 문제', school_exam: '학교/시험 일정',
+        technical: '인터넷·기기 문제', personal: '개인 사정', other: '기타' };
+      subject = partner ? '[DayO 돼요] 대화 예약 취소가 완료됐어요' : '[DayO 돼요] 예약된 대화가 취소됐어요';
+      intro = partner ? '아래 대화 예약의 취소가 완료됐어요.' :
+        s.public_reason === 'schedule_change' ? '파트너 일정 변경으로 예약이 취소되었습니다.' : '파트너 사정으로 예약이 취소되었습니다.';
+      if (partner) {
+        if (!Object.hasOwn(reasons, s.reason_code)) throw new Error('invalid_cancellation_state');
+        lines.push('취소 사유: ' + reasons[s.reason_code]);
+        lines.push(s.late_cancel ? `늦은 취소 패널티: ${s.penalty_amount.toLocaleString('ko-KR')}P` : '별도 패널티가 적용되지 않습니다.');
+        if (s.late_cancel) lines.push('기존 잔액은 차감하지 않고 향후 정상 대화 보상에서 상계됩니다.');
+      }
+      lines.push('사용한 원래 티켓 1장이 반환되었습니다. 기존 유효기간이 유지됩니다.');
+      if (!partner) lines.push('My Page에서 반환된 티켓을 확인하고 다른 대화를 예약해 주세요.');
+    } else {
+      if (s.ticket_refunded !== (s.end_reason === 'user_cancelled_early') ||
+          s.partner_rewarded !== (s.end_reason === 'user_cancelled_late')) throw new Error('invalid_cancellation_state');
+      subject = '[DayO 돼요] 대화 예약이 취소됐어요';
+      intro = 'User가 아래 대화 예약을 취소했어요.';
+      lines.push(s.ticket_refunded ? 'User의 사용 티켓이 반환되었습니다.' : 'User의 사용 티켓은 반환되지 않았습니다.');
+      lines.push(s.partner_rewarded ? '취소 보상이 Partner에게 반영되었습니다.' : '이번 취소에는 Partner 보상이 적용되지 않았습니다.');
+    }
   } else {
     subject = partner ? '[DayO 돼요] 새로운 대화가 예약됐어요' : '[DayO 돼요] 대화 예약이 완료됐어요';
     intro = partner ? 'DayO User와의 1:1 글로벌 대화가 예약됐어요.' : '1:1 글로벌 대화 예약이 완료됐어요.';

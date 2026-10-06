@@ -81,7 +81,7 @@ function createHandler(options = {}) {
         if (!booking || ![booking.learner_id, booking.partner_user_id].includes(user.id)) return json(res, 404, { ok: false, error: 'booking_not_available' });
         const valid = eventType === 'booking_confirmed'
           ? booking.status === 'confirmed' && booking.ticket_deducted === true
-          : booking.status === 'cancelled' && ['user_cancelled_early', 'user_cancelled_late'].includes(booking.end_reason);
+          : booking.status === 'cancelled' && ['user_cancelled_early', 'user_cancelled_late', 'partner_cancelled_early', 'partner_cancelled_late'].includes(booking.end_reason);
         if (!valid) return json(res, 409, { ok: false, error: 'event_not_committed' });
       }
       const counts = await (options.dispatch || dispatch)(service, config, { bookingId, eventType });

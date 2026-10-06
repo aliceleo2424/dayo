@@ -1,0 +1,361 @@
+{
+  "project": "mmhapsimcngmtefqfrcg",
+  "audited_at": "2026-10-06",
+  "migration": "091_partner_booking_cancellation.sql",
+  "migration_sha256": "f4787fe250dd7f56ddda6d371116756aa0c8c2b3f3d8815229620df1c8dea9d0",
+  "read_only": true,
+  "post_check": {
+    "rows": {
+      "history": 0,
+      "offsets": 0,
+      "penalties": 0,
+      "cancellations": 0
+    },
+    "policy": {
+      "enabled": true,
+      "settlement_mode": "future_reward_offset",
+      "late_penalty_amount": 6000
+    },
+    "new_tables": [
+      {
+        "rls": true,
+        "role": "anon",
+        "owner": "postgres",
+        "table": "booking_lifecycle_events",
+        "delete": false,
+        "insert": false,
+        "select": false,
+        "update": false,
+        "truncate": false
+      },
+      {
+        "rls": true,
+        "role": "authenticated",
+        "owner": "postgres",
+        "table": "booking_lifecycle_events",
+        "delete": false,
+        "insert": false,
+        "select": false,
+        "update": false,
+        "truncate": false
+      },
+      {
+        "rls": true,
+        "role": "service_role",
+        "owner": "postgres",
+        "table": "booking_lifecycle_events",
+        "delete": false,
+        "insert": false,
+        "select": false,
+        "update": false,
+        "truncate": false
+      },
+      {
+        "rls": true,
+        "role": "anon",
+        "owner": "postgres",
+        "table": "partner_booking_cancellations",
+        "delete": false,
+        "insert": false,
+        "select": false,
+        "update": false,
+        "truncate": false
+      },
+      {
+        "rls": true,
+        "role": "authenticated",
+        "owner": "postgres",
+        "table": "partner_booking_cancellations",
+        "delete": false,
+        "insert": false,
+        "select": false,
+        "update": false,
+        "truncate": false
+      },
+      {
+        "rls": true,
+        "role": "service_role",
+        "owner": "postgres",
+        "table": "partner_booking_cancellations",
+        "delete": false,
+        "insert": false,
+        "select": false,
+        "update": false,
+        "truncate": false
+      },
+      {
+        "rls": true,
+        "role": "anon",
+        "owner": "postgres",
+        "table": "partner_cancellation_penalties",
+        "delete": false,
+        "insert": false,
+        "select": false,
+        "update": false,
+        "truncate": false
+      },
+      {
+        "rls": true,
+        "role": "authenticated",
+        "owner": "postgres",
+        "table": "partner_cancellation_penalties",
+        "delete": false,
+        "insert": false,
+        "select": false,
+        "update": false,
+        "truncate": false
+      },
+      {
+        "rls": true,
+        "role": "service_role",
+        "owner": "postgres",
+        "table": "partner_cancellation_penalties",
+        "delete": false,
+        "insert": false,
+        "select": false,
+        "update": false,
+        "truncate": false
+      },
+      {
+        "rls": true,
+        "role": "anon",
+        "owner": "postgres",
+        "table": "partner_cancellation_penalty_offsets",
+        "delete": false,
+        "insert": false,
+        "select": false,
+        "update": false,
+        "truncate": false
+      },
+      {
+        "rls": true,
+        "role": "authenticated",
+        "owner": "postgres",
+        "table": "partner_cancellation_penalty_offsets",
+        "delete": false,
+        "insert": false,
+        "select": false,
+        "update": false,
+        "truncate": false
+      },
+      {
+        "rls": true,
+        "role": "service_role",
+        "owner": "postgres",
+        "table": "partner_cancellation_penalty_offsets",
+        "delete": false,
+        "insert": false,
+        "select": false,
+        "update": false,
+        "truncate": false
+      }
+    ],
+    "new_functions": [
+      {
+        "acl": "{postgres=X/postgres}",
+        "hash": "debe05b1e8a0031ab902daa3f379421e",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "definer": true,
+        "signature": "apply_partner_cancellation_reward_offsets(uuid,uuid,integer)"
+      },
+      {
+        "acl": "{postgres=X/postgres,authenticated=X/postgres}",
+        "hash": "55a91c222e96912e384c3f9a58f8ad33",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "definer": true,
+        "signature": "cancel_my_partner_booking(uuid,text,text,boolean)"
+      },
+      {
+        "acl": "{postgres=X/postgres}",
+        "hash": "d725d16cbe560ccc9502849a0bc9cdf6",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "definer": true,
+        "signature": "dayo_booking_lifecycle_history(uuid)"
+      },
+      {
+        "acl": "{postgres=X/postgres}",
+        "hash": "0fb9b99718ee4ea439e70a1535fa57a7",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "definer": false,
+        "signature": "dayo_immutable_partner_cancellation()"
+      },
+      {
+        "acl": "{postgres=X/postgres}",
+        "hash": "4047a4cecea8d1ece5e8c28fea5089cc",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "definer": false,
+        "signature": "dayo_partner_cancellation_is_late(timestamp with time zone,timestamp with time zone)"
+      },
+      {
+        "acl": "{postgres=X/postgres}",
+        "hash": "63e6fdac783a436731e956d8ce54f1ca",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "definer": false,
+        "signature": "dayo_partner_cancellation_policy()"
+      },
+      {
+        "acl": "{postgres=X/postgres,authenticated=X/postgres}",
+        "hash": "40d5669c46d8136a463a1fdddc3e8f5f",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "definer": true,
+        "signature": "get_admin_booking_lifecycle_history(uuid)"
+      },
+      {
+        "acl": "{postgres=X/postgres,authenticated=X/postgres}",
+        "hash": "1ecb336fc0ec3d850ba5e5b6bf93b516",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "definer": true,
+        "signature": "get_admin_partner_cancellation(uuid)"
+      },
+      {
+        "acl": "{postgres=X/postgres,authenticated=X/postgres}",
+        "hash": "a0c7fbfac32de2ab4e42e15764378eff",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "definer": true,
+        "signature": "get_my_partner_cancellation_history(uuid)"
+      },
+      {
+        "acl": "{postgres=X/postgres,authenticated=X/postgres}",
+        "hash": "bef92ddb454bd2bcd027f52b50d49f76",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "definer": true,
+        "signature": "get_my_partner_cancellation_preview(uuid)"
+      },
+      {
+        "acl": "{postgres=X/postgres}",
+        "hash": "5177eb89c16d397222a4435ba65d1034",
+        "owner": "postgres",
+        "config": [
+          "search_path=\"\""
+        ],
+        "definer": true,
+        "signature": "requeue_partner_cancellation_notifications(uuid)"
+      }
+    ],
+    "runtime_probe": "locked_partner_probe_not_executed_due_to_read_only_25006",
+    "immutable_triggers": [
+      "CREATE TRIGGER immutable_booking_lifecycle_event BEFORE DELETE OR UPDATE ON public.booking_lifecycle_events FOR EACH ROW EXECUTE FUNCTION dayo_immutable_partner_cancellation()",
+      "CREATE TRIGGER immutable_booking_lifecycle_truncate BEFORE TRUNCATE ON public.booking_lifecycle_events FOR EACH STATEMENT EXECUTE FUNCTION dayo_immutable_partner_cancellation()",
+      "CREATE TRIGGER immutable_partner_cancellation BEFORE DELETE OR UPDATE ON public.partner_booking_cancellations FOR EACH ROW EXECUTE FUNCTION dayo_immutable_partner_cancellation()",
+      "CREATE TRIGGER immutable_partner_penalty BEFORE DELETE OR UPDATE ON public.partner_cancellation_penalties FOR EACH ROW EXECUTE FUNCTION dayo_immutable_partner_cancellation()",
+      "CREATE TRIGGER immutable_partner_penalty_offset BEFORE DELETE OR UPDATE ON public.partner_cancellation_penalty_offsets FOR EACH ROW EXECUTE FUNCTION dayo_immutable_partner_cancellation()"
+    ],
+    "guard_and_original_snapshot": true,
+    "history_created_at_not_null": true,
+    "original_created_at_nullable": true
+  },
+  "existing_functions": [
+    {
+      "acl": "{postgres=X/postgres,authenticated=X/postgres}",
+      "hash": "e7a7c6e9e6b711a84409d7e912fa74e5",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "signature": "cancel_my_booking(uuid)",
+      "security_definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres,service_role=X/postgres}",
+      "hash": "83c5dbe9c0b847a164504c66f1b7c80b",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "signature": "claim_booking_notification(uuid,text)",
+      "security_definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "hash": "49cd57f4d92fa513bcaf354925e89542",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "signature": "complete_session_and_reward_partner(uuid,uuid,integer)",
+      "security_definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "hash": "b932d95fb53315d3521fc15648ea116b",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "signature": "dayo_is_admin()",
+      "security_definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres}",
+      "hash": "63059b8baa71be460bccff347e6df882",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "signature": "enqueue_booking_notification()",
+      "security_definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres,service_role=X/postgres,authenticated=X/postgres}",
+      "hash": "5d3c4f8f7688adf11312f0b9220e6650",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "signature": "get_booking_calendar_slots(uuid[])",
+      "security_definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres}",
+      "hash": "bf3824197897d2aadf7fd1ed0da520cd",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "signature": "refresh_ticket_balance_cache(uuid)",
+      "security_definer": true
+    },
+    {
+      "acl": "{postgres=X/postgres}",
+      "hash": "c920d130cde7434a9c0d7fddf72fcebe",
+      "owner": "postgres",
+      "config": [
+        "search_path=\"\""
+      ],
+      "signature": "refund_booking_ticket(uuid,text)",
+      "security_definer": true
+    }
+  ],
+  "existing_schema_and_rls_unchanged": true,
+  "verification_limit": "Partner cancellation locks require a write-capable transaction. The read-only runtime probe was aborted with SQLSTATE 25006 and rolled back; no real booking was cancelled. ACL/catalog verification and local real-SQL fixtures passed."
+}

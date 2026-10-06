@@ -193,7 +193,17 @@ function protectedKernels(){
  const fn=(s,n)=>s.match(new RegExp('(?:async )?function '+n+'\\([^)]*\\) \\{[\\s\\S]*?\\n  \\}'))[0];
  for(const n of ['loadCalendarSlots','fetchDateAvailability','partnerMatchesCriteria','isBookableStart','requiresNoRefundWarning','canBypassBookingLeadTime','getTicketCount','settleConfirmedBooking','readRecentBooking']){assert.equal(fn(current,n),fn(base,n),n+' current-main kernel preserved');checks++;}
  const old=cp.execFileSync('git',['show','HEAD:public/availability-slots.js'],{cwd:root,encoding:'utf8'}).replace(/\r\n/g,'\n'),actual=read('public/availability-slots.js');
- let restored=actual;for(const name of ['partnerBriefLabels','renderBriefRows'])restored=restored.replace(fn(actual,name),fn(old,name));assert.equal(restored,old,'availability file differs only in canonical brief display');checks++;
+ const withoutCancellationHooks=s=>{
+ let restored=s;
+ // Partner cancellation adds only lazy loading, an own/future button and expiry hiding.
+ // Its executable RPC/UI fixture covers these hooks; all other availability bytes stay guarded.
+ restored=restored.replace(/  \/\/ Load the separate Partner cancellation UI only when requested\.[\s\S]*?(?=  function renderPartnerUpcomingList)/,'');
+ restored=restored.replace(/      if \(booking\.status === 'confirmed' && booking\.partner_user_id === partnerBriefUserId && start\.getTime\(\) > Date\.now\(\)\) \{[\s\S]*?        side\.appendChild\(cancel\);\n      \}\n/,'');
+ restored=restored.replace(/      \[list, allList\]\.forEach\(function \(host\) \{\n        host\.querySelectorAll\('\.partner-booking-cancel'\)\.forEach\(function \(button\) \{\n          button\.hidden = Number\(button\.dataset\.startsAt\) <= Date\.now\(\);\n        \}\);\n      \}\);\n/,'');
+ return restored;
+ };
+ let restored=withoutCancellationHooks(actual);
+ for(const name of ['partnerBriefLabels','renderBriefRows'])restored=restored.replace(fn(actual,name),fn(old,name));assert.equal(restored,withoutCancellationHooks(old),'availability kernels preserved outside canonical brief/cancellation hooks');checks++;
 }
 function partnerBriefUI(){
  const source=read('public/availability-slots.js'),fn=name=>source.match(new RegExp('function '+name+'\\([^)]*\\) \\{[\\s\\S]*?\\n  \\}'))[0];
