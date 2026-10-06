@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { adminProfiles, bookingStatusLabel, formatSessionDateTime, type SessionTranscriptContext } from "@/lib/admin-data";
+import { adminProfiles, bookingStatusLabel, detectMemberProvider, formatSessionDateTime, type AuthProvider, type MemberIdentity, type SessionTranscriptContext } from "@/lib/admin-data";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PartnerProfileCompletionSummary } from "@/components/admin/partner-profile-completion-summary";
+import { ProviderBadge } from "@/components/admin/provider-badge";
 import { SessionTranscriptModal } from "@/components/admin/SessionTranscriptModal";
 import { PartnerAvailabilitySection } from "@/components/admin/partner-availability";
 
@@ -38,12 +39,53 @@ type PartnerSession = {
   id: string;
   learner_id: string | null;
   learner_name: string;
-  learner_email: string;
+  learner_email: string | null;
+  learner_provider: AuthProvider;
+  learner_profile_found: boolean;
   scheduled_at: string | null;
   status: string | null;
   rating: number | null;
   review: string | null;
 };
+
+type SessionLearner = { name: string; email: string | null; provider: AuthProvider };
+
+async function loadSessionLearners(learnerIds: string[]) {
+  const identities = new Map<string, SessionLearner>();
+  if (!learnerIds.length) return { identities, failed: false };
+  const result = await adminProfiles()
+    .select("id, user_id, nickname, user_name, email, provider")
+    .or(`id.in.(${learnerIds.join(",")}),user_id.in.(${learnerIds.join(",")})`);
+  if (result.error) return { identities, failed: true };
+  const rows = (result.data || []) as (MemberIdentity & { user_id?: string | null })[];
+  for (const learnerId of learnerIds) {
+    // The booking's exact profile id takes precedence over a legacy user_id alias.
+    const row = rows.find((item) => item.id === learnerId)
+      || rows.find((item) => item.user_id === learnerId);
+    if (!row) continue;
+    const email = row.email == null ? null : row.email.trim();
+    identities.set(learnerId, {
+      name: row.nickname?.trim() || row.user_name?.trim() || email || "이름 미등록",
+      email,
+      provider: detectMemberProvider(row),
+    });
+  }
+  return { identities, failed: false };
+}
+
+function SessionLearnerIdentity({ session }: { session: PartnerSession }) {
+  return (
+    <div className="mt-1 space-y-1 text-sm">
+      <p><span className="text-xs text-muted-foreground">상대 학습자 · </span>{session.learner_name}</p>
+      {session.learner_profile_found ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="break-all text-muted-foreground">{session.learner_email === null ? "이메일 미등록" : session.learner_email || "이메일 정보 없음"}</span>
+          {session.learner_provider !== "unknown" ? <ProviderBadge provider={session.learner_provider} /> : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 type LedgerEntry = {
   id: string;
@@ -158,17 +200,7 @@ export function PartnerDetailModal({
       }
 
       const learnerIds = Array.from(new Set(bookingRows.map((row) => String(row.learner_id || "")).filter(Boolean)));
-      const learnerMap = new Map<string, { name: string; email: string }>();
-      if (learnerIds.length) {
-        const learners = await adminProfiles().select("user_id, nickname, user_name, email").in("user_id", learnerIds);
-        for (const row of (learners.data || []) as Record<string, unknown>[]) {
-          const id = String(row.user_id || "");
-          learnerMap.set(id, {
-            name: String(row.nickname || row.user_name || row.email || "학습자"),
-            email: String(row.email || "이메일 미등록"),
-          });
-        }
-      }
+      const { identities: learnerMap, failed: learnerLookupFailed } = await loadSessionLearners(learnerIds);
 
       const reportsResult = await supabase
         .from("session_reports")
@@ -182,14 +214,14 @@ export function PartnerDetailModal({
         const learner = learnerMap.get(learnerId);
         const report = reportRows.find((item) =>
           String(item.booking_id || "") === String(row.id || "")
-        ) || reportRows.find((item) =>
-          learnerId && String(item.learner_id || "") === learnerId
         );
         return {
           id: String(row.id || ""),
           learner_id: learnerId || null,
-          learner_name: learner?.name || "학습자",
-          learner_email: learner?.email || "이메일 미등록",
+          learner_name: learner?.name || (learnerLookupFailed ? "학습자 정보를 불러오지 못했습니다." : "학습자 정보 없음"),
+          learner_email: learner?.email ?? null,
+          learner_provider: learner?.provider || "unknown",
+          learner_profile_found: Boolean(learner),
           scheduled_at: (row.scheduled_at as string | null) || null,
           status: (row.status as string | null) || null,
           rating: row.rating == null
@@ -470,7 +502,7 @@ export function PartnerDetailModal({
                         <div className="flex flex-wrap items-start justify-between gap-2">
                           <div>
                             <p className="font-semibold">{formatSessionDateTime(session.scheduled_at)} <span className="text-xs font-normal text-muted-foreground">(30분 세션)</span></p>
-                            <p className="mt-1 text-sm">{session.learner_name} <span className="text-muted-foreground">({session.learner_email})</span></p>
+                            <SessionLearnerIdentity session={session} />
                           </div>
                           <Badge variant={detail.variant}>{detail.label}</Badge>
                         </div>
