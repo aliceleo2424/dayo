@@ -13,7 +13,8 @@
   <button type="button" data-booking-open>Smart Booking 열기</button>
   <nav aria-label="Fixture scenarios">
     <a href="?scenario=recent">Recent v1</a> · <a href="?scenario=legacy">Legacy / missing help</a> ·
-    <a href="?scenario=none">No recent</a> · <a href="?scenario=ko">KO</a> · <a href="?scenario=error">Read error</a>
+    <a href="?scenario=none">No recent</a> · <a href="?scenario=ko">KO</a> · <a href="?scenario=error">Read error</a> ·
+    <a href="?scenario=no-interests">No optional interests</a> · <a href="?scenario=required-help">Saved required help</a> · <a href="?scenario=no-language">Missing language</a>
   </nav>
   <pre id="fixtureResult" style="white-space:pre-wrap;overflow-wrap:anywhere" aria-label="Saved booking payload"></pre>
   <script>
@@ -33,6 +34,11 @@
     if (scenario === 'recent') Object.assign(previousBooking.conversation_brief, {
       schema_version: 1, korean_support_preference: 'any', conversation_style: 'encourage'
     });
+    if (scenario === 'no-interests') previousBooking.conversation_brief.interests = [];
+    if (scenario === 'required-help') Object.assign(previousBooking.conversation_brief, {
+      schema_version: 1, korean_support_preference: 'required', conversation_style: 'slow'
+    });
+    if (scenario === 'no-language') previousBooking.language = null;
     var fixtureBookings = scenario === 'none' ? [] : [previousBooking];
     var originalPrevious = JSON.stringify(previousBooking);
     function recentQuery() {
@@ -73,7 +79,11 @@
     }
 
     window.supabaseClient = {
-      rpc: function (name) {
+      rpc: function (name, args) {
+        if(name==='list_matching_partner_profiles') return Promise.resolve({data:fixturePartners.filter(function(p){
+          return p.conversation_languages && p.conversation_languages.indexOf(args.p_language)>=0 &&
+            (args.p_korean_support_preference==='any' || ['conversational','fluent'].indexOf(p.korean_support_level)>=0);
+        }),error:null});
         if(name==='get_booking_calendar_slots'){
           var base=new Date(Date.now()+2*86400000).toISOString().slice(0,10);
           return Promise.resolve({data:fixturePartners.filter(function(p){return p.conversation_languages;}).map(function(p){return{id:p.id+'-1800',partner_id:p.id,slot_time:base+'T18:00:00+09:00',status:'available'};}),error:null});
@@ -83,6 +93,7 @@
           : { data: null, error: null });
       },
       from: function (table) {
+        if (table === 'user_conversation_preferences') return {select:function(){return this;},eq:function(){return this;},maybeSingle:function(){return Promise.resolve({data:null,error:null});}};
         if (table === 'bookings') return recentQuery();
         if (table === 'availability_slots') return availabilityQuery();
         return { update: function () { return { eq: function () { return { select: function () { return Promise.resolve({ data: [], error: null }); } }; } }; } };

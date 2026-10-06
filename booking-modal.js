@@ -270,6 +270,23 @@
     return window._dayoAuthUser && window._dayoAuthUser.id || null;
   }
 
+  function resolveRecentPreferences(prefs) {
+    var resolved = Object.assign({}, prefs);
+    // Resolve this new booking only; never rewrite an unknown historical snapshot.
+    if (resolved.language !== 'ko' && resolved.koreanHelp !== 'needed' && resolved.koreanHelp !== 'any') {
+      resolved.koreanHelp = 'any';
+    }
+    return resolved;
+  }
+
+  function recentRequiredFields() {
+    var missing = [];
+    if (!isActiveBookingLang(state.language)) missing.push(t('book.summaryLanguage'));
+    if (!state.purposes.length) missing.push(t('book.summaryPurpose'));
+    if (STYLE_IDS.indexOf(state.style) < 0) missing.push(t('book.summaryStyle'));
+    return missing;
+  }
+
   async function readRecentBooking(client, userId) {
     // completed is a successfully confirmed booking; pending/cancelled never supply defaults.
     var result = await client.from('bookings').select('id,language,conversation_brief,created_at')
@@ -311,7 +328,7 @@
       row(t('book.summaryStyle'), labelOf(STYLES, state.style) || ux('미확인', 'Unknown'));
     el.recent.innerHTML = '<p class="bk-label">' + ux('지난 설정', 'Last settings') + '</p><dl class="bk-summary">' + rows + '</dl>' +
       '<p class="bk-hint">' + ux('목적은 이번 대화에 맞게 수정할 수 있어요.', 'You can change the purpose for this conversation.') + '</p>' +
-      (!isStepReady(0) || !isStepReady(3) ? '<p class="bk-hint">' + ux('미확인 항목은 수정하기에서 선택해 주세요.', 'Choose missing settings in Edit before continuing.') + '</p>' : '');
+      (recentRequiredFields().length ? '<p class="bk-hint">' + ux('수정하기에서 필수 항목을 선택해 주세요: ', 'Choose required settings in Edit: ') + recentRequiredFields().join(' · ') + '</p>' : '');
   }
 
   async function loadRecentPreferences() {
@@ -339,7 +356,7 @@
       if (seq !== recentSeq || currentUserId() && currentUserId() !== user.id || !booking) return;
       var supplement;
       try { supplement = JSON.parse(storageGet(RECENT_KEY + user.id) || 'null'); } catch (e) { /* no supplement */ }
-      var prefs = preferencesFromBooking(booking, supplement);
+      var prefs = resolveRecentPreferences(preferencesFromBooking(booking, supplement));
       Object.keys(prefs).forEach(function (key) { state[key] = prefs[key]; });
       recentSummary = true;
       ['language', 'koreanHelp', 'purpose', 'interest', 'style', 'chatStyle', 'chatRequest'].forEach(syncChips);
@@ -656,7 +673,7 @@
     });
     el.nextBtn.addEventListener('click', function () {
       if (recentSummary) {
-        if (!isStepReady(0) || !isStepReady(3)) return;
+        if (recentRequiredFields().length) return;
         recentSummary = false;
         state.step = 3;
         goTo(1);
@@ -1345,7 +1362,7 @@
     el.prevBtn.style.display = recentSummary || state.step !== 0 ? '' : 'none';
     el.prevBtn.textContent = recentSummary ? ux('수정하기', 'Edit') : t('book.prev');
     el.nextBtn.textContent = recentSummary ? ux('그대로 예약', 'Use these settings') : state.step === 4 ? t('book.confirm') : t('book.next');
-    el.nextBtn.disabled = recentLoading || bookingSubmitting || (recentSummary ? !isStepReady(0) || !isStepReady(3) : !isStepReady(state.step));
+    el.nextBtn.disabled = recentLoading || bookingSubmitting || (recentSummary ? recentRequiredFields().length > 0 : !isStepReady(state.step));
     el.prevBtn.disabled = recentLoading || bookingSubmitting;
   }
 
@@ -1846,6 +1863,8 @@
       requiresNoRefundWarning: requiresNoRefundWarning,
       slotStartKey: slotStartKey,
       preferencesFromBooking: preferencesFromBooking,
+      resolveRecentPreferences: resolveRecentPreferences,
+      recentRequiredFields: recentRequiredFields,
       canonicalStyle: canonicalStyle,
       preferenceSnapshot: preferenceSnapshot,
       readRecentBooking: readRecentBooking,
