@@ -82,7 +82,7 @@ async function verifyRecapDOM(){
  w.openQuizModalImmediately=()=>{opens++;w.document.getElementById('quiz-content-box').innerHTML=recap.render(recap.saved(w.getLearnerReviewSnapshot()),'ko',{interactive:true});};
  w.eval(fs.readFileSync(path.join(__dirname,'../public/memory-game.js'),'utf8'));
  await w.openQuizModalImmediately();assert.equal(opens,1);assert.match(w.document.getElementById('quiz-content-box').textContent,/오늘의 대화 리캡/);
- w.document.querySelector('[data-recap-start]').click();assert.equal(w.document.getElementById('memory-game-modal').hidden,false);assert.match(w.document.getElementById('memory-game-title').textContent,/30초 리캡/);
+ w.document.querySelector('[data-recap-start]').click();assert.equal(w.document.getElementById('memory-game-modal').hidden,false);assert.match(w.document.getElementById('memory-game-title').textContent,/단어 리캡/);
  assert.equal(w.document.querySelectorAll('.recap-option').length,4);
  w.document.querySelector('.recap-option').click();assert.equal(w.__dayoQuizProgress.completed,1);assert.match(w.document.querySelector('.recap-answer').textContent,/crowded · packed/);
  Array.from(w.document.querySelectorAll('.recap-primary')).find(n=>n.textContent==='계속 보기').click();

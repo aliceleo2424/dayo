@@ -8,6 +8,7 @@ import { TestSessionModal } from "@/components/admin/test-session-modal";
 import { AdminHeader } from "@/components/admin/header";
 import { RoleActions } from "@/components/admin/role-actions";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { adminProfiles, updateProfileRole, detectMemberProvider, profileDisplayName, type SessionTranscriptContext } from "@/lib/admin-data";
@@ -66,6 +67,11 @@ function groupDashboardSessions(rows: SessionRow[], now: number) {
   return { upcoming, past };
 }
 
+function filterDashboardSessions(rows: SessionRow[], query: string) {
+  const search = query.trim().toLowerCase();
+  return search ? rows.filter(row => row.id.toLowerCase().includes(search)) : rows;
+}
+
 function dashboardSessionStatus(status: string | null) {
   const labels: Record<string, string> = {
     confirmed: "예약됨", completed: "완료", cancelled: "취소",
@@ -97,6 +103,7 @@ export default function DashboardPage() {
   const [drawerUser, setDrawerUser] = useState<MemberRow | null>(null);
   const [selectedSession, setSelectedSession] = useState<SessionTranscriptContext | null>(null);
   const [testModal, setTestModal] = useState(false);
+  const [sessionSearch, setSessionSearch] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -218,7 +225,8 @@ export default function DashboardPage() {
     return () => window.clearInterval(timer);
   }, []);
 
-  const sessionGroups = groupDashboardSessions(sessions, now);
+  const visibleSessions = filterDashboardSessions(sessions, sessionSearch);
+  const sessionGroups = groupDashboardSessions(visibleSessions, now);
 
   async function setRole(row: MemberRow, nextRole: "partner" | "user") {
     const label = String(row.nickname || row.email || "회원").trim() || "회원";
@@ -346,12 +354,13 @@ export default function DashboardPage() {
 
         <section>
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2"><h2 className="text-lg font-semibold">세션 예약 현황</h2><Button onClick={() => setTestModal(true)}>테스트 세션 생성</Button></div>
+          <Input aria-label="예약 ID 검색" placeholder="예약 ID 전체 또는 앞 8자리" value={sessionSearch} onChange={event => setSessionSearch(event.target.value)} className="mb-4 w-full sm:max-w-sm" />
           {loading ? (
             <div className="h-32 animate-pulse rounded-xl bg-muted" />
-          ) : !sessions.length ? (
+          ) : !visibleSessions.length ? (
             <Card>
               <CardContent className="py-16 text-center">
-                <p className="text-lg font-semibold">현재 예정된 세션 예약이 없습니다 ☕</p>
+                <p className="text-lg font-semibold">{sessionSearch.trim() ? "검색 결과가 없습니다." : "현재 예정된 세션 예약이 없습니다 ☕"}</p>
               </CardContent>
             </Card>
           ) : (
@@ -387,6 +396,7 @@ export default function DashboardPage() {
                           : "border-b bg-[#FFFCF7] text-[#57534E] last:border-0"}>
                           <td className={group.upcoming && index === 0 ? "px-3 py-3 shadow-[inset_4px_0_0_#5F7D63]" : "px-3 py-3"}>
                             {row.scheduled_at && Number.isFinite(Date.parse(row.scheduled_at)) ? formatDateTime(row.scheduled_at) : "미정"}
+                            {row.is_test_session ? <span className="mt-1 block font-mono text-xs text-[#466A49]">TEST · {row.id.slice(0, 8)}</span> : null}
                             {group.upcoming && index === 0 ? <span className="ml-2 inline-block text-xs font-semibold text-[#466A49]">다음 예약</span> : null}
                           </td>
                           <td className="px-3 py-3">{row.learner}</td>
@@ -399,6 +409,7 @@ export default function DashboardPage() {
                               onClick={() =>
                                 setSelectedSession({
                                   id: row.id,
+                                  is_test_session: row.is_test_session,
                                   scheduled_at: row.scheduled_at,
                                   status: row.status,
                                   learnerName: row.learner,

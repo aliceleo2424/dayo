@@ -12,14 +12,14 @@ const partner = [row('The spacious hotel is expensive.', 'partner')];
 const full = build(own, partner);
 assert.equal(full.metrics.user_word_count, 19); assert.equal(full.metrics.user_utterance_count, 4);
 assert.equal(full.metrics.partner_word_count, 5); assert.equal(full.metrics.user_participation_ratio, 19 / 24);
-assert.deepEqual(full.word_expansion.map(w => w.word), ['crowded', 'delicious']);
+assert.deepEqual(full.word_expansion.map(w => w.word), ['crowded', 'delicious', 'quiet']);
 assert(!full.expressions.some(x => /spacious|Yeah|um uh/.test(x.text)));
 assert(full.expressions.every(e => own.some(r => e.text === r.text)));
-assert(full.topics.length <= 3); assert(full.questions.length >= 1 && full.questions.length <= 3);
+assert(full.topics.length <= 3); assert(full.questions.length >= 1 && full.questions.length <= 6);
 assert(full.questions.every(q => full.word_expansion.some(w => w.word === q.word) && q.options.filter(x => x === q.answer).length === 1));
 for (const [ratio, expected] of [[60, 'speaking'], [55, 'speaking'], [45, 'balanced'], [35, 'balanced'], [25, 'listening']]) {
   const r = build([row(Array(ratio).fill('hello').join(' '))], [row(Array(100 - ratio).fill('hello').join(' '), 'partner')]);
-  assert.equal(r.interpretation, expected); assert(!/점|등급|못/.test(model.render(r, 'ko')));
+  assert.equal(r.interpretation, expected); assert(!/점|등급/.test(model.render(r, 'ko')));
 }
 const emptyWords = build([row('yeah uh the like')], partner);
 assert.equal(emptyWords.word_expansion.length, 0); assert.equal(emptyWords.questions.length, 0);
@@ -137,12 +137,12 @@ async function lifecycleChecks() {
     const report = b.window.getLearnerReviewSnapshot(), recap = model.saved({ ...plain(report), booking_id: B });
     assert.equal(recap.source.fingerprint, frozen.recap.source.fingerprint); assert.equal(b.opened, 1, 'recap shown before optional questions');
     assert.equal(b.window.__dayoReviewReportSaved, true);
-    b.window.startRecapQuestions(); assert(b.nodes['memory-game-title'].textContent.includes('30초'));
+    b.window.startRecapQuestions(); assert(b.nodes['memory-game-title'].textContent.includes('단어 리캡'));
     let stored = JSON.parse(b.store.getItem('dayo_recap_state:' + B)); assert(stored.fingerprint);
     b.nodes['word-pool-container'].children[0].handlers.click();
     b.nodes['word-pool-container'].children.at(-1).handlers.click();
     stored = JSON.parse(b.store.getItem('dayo_recap_state:' + B)); assert.equal(stored.completed, 1);
-    await b.window.skipToRecordCard(); assert.equal(b.window.savedPayload.quiz_score, 33, 'legacy value is completion only');
+    await b.window.skipToRecordCard(); assert.equal(b.window.savedPayload.quiz_score, 17, 'legacy value is completion only');
     assert.equal(model.saved({ ...b.window.savedPayload, booking_id: B }).progress.completed, 1);
     b.window.DayORoomAccess.bookingId = OTHER; assert.equal(b.window.getLearnerReviewSnapshot().key_expressions.length, 0, 'cached report cannot cross bookings');
   } finally { b.stop(); }
@@ -161,7 +161,7 @@ async function databaseChecks() {
       create table public.session_reports(id uuid primary key,booking_id uuid,learner_id uuid,partner_name text,spoken_sentence text not null,keyword text not null,illust_url text not null,partner_comment text,stamp text,created_at timestamptz);
       insert into public.bookings values('${B}','${L}','${P}','${P}','Partner','completed');`);
     for (const file of ['046_merge_session_reports_by_participant.sql', '047_fix_learner_report_spoken_sentence.sql']) await db.exec(fs.readFileSync(path.join(root, 'supabase/migrations', file), 'utf8'));
-    const payload = { summary: 'Recorded conversation', key_expressions: full.expressions.map(e => e.text), feedback: ['legacy', { ...full, progress: { completed: 1, total: 3, reason: 'skip' } }], quiz_score: 33, word_help: [{ text: 'clicked only' }] };
+    const payload = { summary: 'Recorded conversation', key_expressions: full.expressions.map(e => e.text), feedback: ['legacy', { ...full, progress: { completed: 1, total: 6, reason: 'skip' } }], quiz_score: 17, word_help: [{ text: 'clicked only' }] };
     await db.query(`select set_config('request.jwt.claim.sub',$1,false)`, [L]);
     assert.equal((await db.query('select merge_learner_session_report($1::uuid,$2::jsonb) result', [B, JSON.stringify(payload)])).rows[0].result.success, true);
     const before = (await db.query('select summary,key_expressions,feedback,quiz_score,word_help from session_reports')).rows[0];

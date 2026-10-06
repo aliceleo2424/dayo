@@ -372,6 +372,7 @@ export function SessionTranscriptModal({ open, session, onClose }: Props) {
   const [failedBookingId, setFailedBookingId] = useState<string | null>(null);
   const [detailState, setDetailState] = useState<{ bookingId: string; data: SessionTranscriptContext } | null>(null);
   const [bundleState, setBundleState] = useState<{ bookingId: string; data: SessionTranscriptBundle } | null>(null);
+  const [copyState, setCopyState] = useState<{ bookingId: string; success: boolean } | null>(null);
 
   useEffect(() => {
     if (!open || !session?.id) {
@@ -438,6 +439,7 @@ export function SessionTranscriptModal({ open, session, onClose }: Props) {
           <div className="min-w-0 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-lg font-semibold text-[#292524]">
+                {(detail?.is_test_session ?? session.is_test_session) ? <span className="mr-2">TEST · {session.id.slice(0, 8)}</span> : null}
                 {detail ? sessionRangeLabel(detail, bundle) : "예약 정보를 불러오는 중…"}
               </h2>
               <Badge variant={status.variant}>{status.label}</Badge>
@@ -445,6 +447,15 @@ export function SessionTranscriptModal({ open, session, onClose }: Props) {
             <p className="text-sm text-[#57534E]">
               {learnerName} <span className="text-[#A8A29E]">⟷</span> {partnerName}
             </p>
+            <Button type="button" variant="outline" size="sm" onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(session.id);
+                setCopyState({ bookingId: session.id, success: true });
+              } catch {
+                setCopyState({ bookingId: session.id, success: false });
+              }
+            }}>예약 ID 복사</Button>
+            <span role="status" className="ml-2 text-xs text-[#57534E]">{copyState?.bookingId === session.id ? copyState.success ? "복사됨" : "복사하지 못했습니다. 다시 시도해 주세요." : ""}</span>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} aria-label="닫기">
             <X className="h-4 w-4" />

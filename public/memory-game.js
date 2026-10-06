@@ -1,4 +1,4 @@
-/* 30-second vocabulary recap. Legacy entry names retained for room lifecycle. */
+/* Transcript-derived vocabulary recap. Legacy entry names retained for room lifecycle. */
 (function () {
   'use strict';
   var originalOpen = window.openQuizModalImmediately;
@@ -88,9 +88,9 @@
     modal(true); renderQuestion();
     var skip = document.getElementById('quiz-skip-btn'); if (skip) skip.hidden = false;
     function clock() {
-      var remaining = window.DayOLearnerExpressions.quizRemainingSeconds(state.startedAt, Date.now(), 30);
+      var remaining = window.DayOLearnerExpressions.quizRemainingSeconds(state.startedAt, Date.now(), window.DayOConversationRecap.quizDuration(questions.length));
       var node = document.getElementById('review-quiz-timer');
-      if (node) { node.hidden = false; node.style.display = 'inline-block'; node.textContent = '00:' + String(remaining).padStart(2, '0'); }
+      if (node) { node.hidden = false; node.style.display = 'inline-block'; node.textContent = String(Math.floor(remaining / 60)).padStart(2, '0') + ':' + String(remaining % 60).padStart(2, '0'); }
       if (!remaining) finish('timeout');
     }
     stopTimer(); clock(); if (!state.ended) timer = setInterval(clock, 1000);

@@ -1707,10 +1707,10 @@
       justify-content: center;
       gap: 0.5rem;
       flex: 0 0 auto;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       margin: 0 auto;
       width: 100%;
-      max-width: 480px;
+      max-width: none;
       min-height: var(--bottom-h);
       padding: 0.45rem 0.85rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
       background: var(--room-ivory);
@@ -1736,6 +1736,13 @@
       transition: transform 0.15s, background 0.2s, box-shadow 0.2s, opacity 0.2s;
       box-shadow: 0 3px 10px var(--room-shadow);
       min-width: 0;
+    }
+
+    #micBtn .ctrl-btn__text, #camBtn .ctrl-btn__text { display: none; }
+    #micBtn, #camBtn { flex: 0 0 auto; min-width: 44px; min-height: 44px; }
+    .bottom-bar .ctrl-btn { white-space: nowrap; min-height: 44px; }
+    @media (max-width: 767px) {
+      .bottom-bar .ctrl-btn:not(#micBtn):not(#camBtn) { flex: 1 1 0; min-width: 0; }
     }
 
     .ctrl-btn__icon {
@@ -3097,14 +3104,14 @@
         flex: 0 0 auto;
         margin: 0 auto;
         width: 100%;
-        max-width: 480px;
+        max-width: none;
         display: flex;
         flex-wrap: nowrap;
-        justify-content: space-between;
+        justify-content: center;
         align-items: center;
         gap: 6px;
         padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
-        overflow-x: auto;
+        overflow-x: visible;
         overscroll-behavior-x: contain;
         box-sizing: border-box;
       }
@@ -3763,19 +3770,19 @@
         <section class="copilot-bar" id="copilotBar" aria-live="polite">
           <div class="copilot-partner-only">
             <div id="partner-control-bar">
-              <button type="button" id="btn-partner-ask" onclick="generatePartnerQuestionSuggestions()" style="background: #B8E2C8; color: #247552; border: 1.5px solid #247552; font-weight: 800; padding: 10px 16px; border-radius: 12px; cursor: pointer;">
+              <button type="button" id="btn-partner-ask" data-i18n="room.nextQuestion" onclick="generatePartnerQuestionSuggestions()" style="background: #B8E2C8; color: #247552; border: 1.5px solid #247552; font-weight: 800; padding: 10px 16px; border-radius: 12px; cursor: pointer;">
                 💡 다음 질문 추천
               </button>
             </div>
-            <div id="partner-room-interests" hidden><strong>최근 관심사</strong><span id="partner-room-interests-list"></span></div>
+            <div id="partner-room-interests" hidden><strong data-i18n="room.recentInterests">최근 관심사</strong><span id="partner-room-interests-list"></span></div>
             <div id="partner-topic-card" style="display: none; background: #FFF9E8; border: 1.5px solid #FFEAA7; border-radius: 14px; padding: 14px; margin-top: 10px;">
               <div class="mobile-assist-handle" aria-hidden="true"></div>
               <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px;">
-                <div style="font-size: 11px; font-weight: 800; color: #966914;">✨ 다음 질문 추천</div>
-                <button type="button" onclick="closePartnerTopicHint()" aria-label="추천 패널 닫기" style="border: 0; background: transparent; color: #966914; font-size: 16px; line-height: 1; cursor: pointer; padding: 2px 4px;">✕</button>
+                <div data-i18n="room.nextQuestionTitle" style="font-size: 11px; font-weight: 800; color: #966914;">✨ 다음 질문 추천</div>
+                <button type="button" onclick="closePartnerTopicHint()" data-i18n="room.nextQuestionClose" data-i18n-attr="aria-label" aria-label="추천 패널 닫기" style="border: 0; background: transparent; color: #966914; font-size: 16px; line-height: 1; cursor: pointer; padding: 2px 4px;">✕</button>
               </div>
               <div id="partner-topic-content" style="font-size: 13px; color: #3E322D; font-weight: 700; line-height: 1.5;"></div>
-              <div class="partner-question-actions"><button type="button" id="partner-question-refresh">다시 추천</button></div>
+              <div class="partner-question-actions"><button type="button" id="partner-question-refresh" data-i18n="room.nextQuestionRefresh">다시 추천</button></div>
             </div>
           </div>
         </section>
@@ -3794,27 +3801,27 @@
         </form>
       </aside>
 
-      <aside class="chat-panel talk-card-panel" id="talk-card-panel" aria-label="DayO 대화카드">
+      <aside class="chat-panel talk-card-panel" id="talk-card-panel" data-i18n="room.talkCardsPanel" data-i18n-attr="aria-label" aria-label="DayO 대화카드">
         <div class="chat-header">
-          <span>🌐 DayO 대화카드</span>
-          <button class="chat-close" id="talkCardClose" type="button" aria-label="대화카드 닫기">✕</button>
+          <span data-i18n="room.talkCardsTitle">🌐 DayO 대화카드</span>
+          <button class="chat-close" id="talkCardClose" type="button" data-i18n="room.talkCardsClose" data-i18n-attr="aria-label" aria-label="대화카드 닫기">✕</button>
         </div>
-        <div class="talk-card-tabs" role="tablist" aria-label="대화카드 카테고리">
-          <button type="button" class="talk-card-tab is-active" data-talk-cat="daily" role="tab" aria-selected="true">☕ 일상·취향</button>
-          <button type="button" class="talk-card-tab" data-talk-cat="travel" role="tab" aria-selected="false">✈️ 여행·문화</button>
-          <button type="button" class="talk-card-tab" data-talk-cat="food" role="tab" aria-selected="false">🥐 디저트·음식</button>
+        <div class="talk-card-tabs" role="tablist" data-i18n="room.talkCardsCategories" data-i18n-attr="aria-label" aria-label="대화카드 카테고리">
+          <button type="button" class="talk-card-tab is-active" data-talk-cat="daily" data-i18n="room.talkCardsDaily" role="tab" aria-selected="true">☕ 일상·취향</button>
+          <button type="button" class="talk-card-tab" data-talk-cat="travel" data-i18n="room.talkCardsTravel" role="tab" aria-selected="false">✈️ 여행·문화</button>
+          <button type="button" class="talk-card-tab" data-talk-cat="food" data-i18n="room.talkCardsFood" role="tab" aria-selected="false">🥐 디저트·음식</button>
         </div>
-        <p class="talk-card-readonly-note" id="talkCardReadonlyNote" hidden>파트너가 다음 질문을 선택해요.</p>
+        <p class="talk-card-readonly-note" id="talkCardReadonlyNote" data-i18n="room.talkCardsReadonly" hidden>파트너가 다음 질문을 선택해요.</p>
         <div class="talk-card-body">
           <div class="talk-card-category" id="talkCardCategory"></div>
           <div class="talk-card-question" id="talkCardQuestion"></div>
           <p class="talk-card-english" id="talkCardQuestionEn" lang="en"></p>
           <div class="talk-card-followups">
-            <div class="talk-card-followups-title">조금 더 이야기해 볼까요?</div>
-            <div id="talkCardFollowups" aria-label="추가 질문"></div>
+            <div class="talk-card-followups-title" data-i18n="room.talkCardsFollowupsTitle">조금 더 이야기해 볼까요?</div>
+            <div id="talkCardFollowups" data-i18n="room.talkCardsFollowups" data-i18n-attr="aria-label" aria-label="추가 질문"></div>
           </div>
           <div class="talk-card-actions">
-            <button type="button" class="talk-card-btn talk-card-btn--next" id="talkCardNextBtn">다음 질문 보기</button>
+            <button type="button" class="talk-card-btn talk-card-btn--next" id="talkCardNextBtn" data-i18n="room.talkCardsNext">다음 질문 보기</button>
           </div>
         </div>
       </aside>
@@ -5106,7 +5113,7 @@
       if (talkBtn) {
         talkBtn.innerHTML =
           '<span class="ctrl-btn__icon" aria-hidden="true">🌐</span>' +
-          '<span class="ctrl-btn__text label">대화카드</span>';
+          '<span class="ctrl-btn__text label">' + t('room.talkCards') + '</span>';
       }
       var chatBtn = document.getElementById('chatToggle');
       if (chatBtn) {
@@ -5475,13 +5482,13 @@
       food: ['food']
     };
     var TALK_CARD_CATEGORY_LABELS = {
-      daily: '일상',
-      taste: '취향',
-      'korea-life': '한국 생활',
-      'korea-trip': '한국 여행',
-      'world-trip': '해외 여행',
-      culture: '문화',
-      food: '음식'
+      daily: 'room.talkCategory.daily',
+      taste: 'room.talkCategory.taste',
+      'korea-life': 'room.talkCategory.korea-life',
+      'korea-trip': 'room.talkCategory.korea-trip',
+      'world-trip': 'room.talkCategory.world-trip',
+      culture: 'room.talkCategory.culture',
+      food: 'room.talkCategory.food'
     };
     var talkCardState = { category: 'daily', index: 0, updatedAt: 0 };
 
@@ -5591,7 +5598,7 @@
       var followups = document.getElementById('talkCardFollowups');
       if (!list.length) {
         window.DayOCurrentTalkCard = null;
-        if (question) question.textContent = '대화카드를 불러오지 못했어요.';
+        if (question) question.textContent = t('room.talkCardsError');
         if (english) english.textContent = '';
         if (category) category.textContent = '';
         if (followups) followups.replaceChildren();
@@ -5609,23 +5616,26 @@
         followups_ko: Array.isArray(card.followupsKo) ? card.followupsKo.slice(0, 4).map(String) : []
       };
       if (typeof window.syncWordHelpCard === 'function') window.syncWordHelpCard();
+      var partnerEnglish = window.DayORoomAccess && window.DayORoomAccess.role === 'partner' && window.DayOI18n && String(window.DayOI18n.getLang()).toUpperCase() === 'EN';
       if (question) {
-        question.textContent = card.questionKo;
+        question.lang = partnerEnglish ? 'en' : 'ko';
+        question.textContent = partnerEnglish ? card.questionEn : card.questionKo;
         question.setAttribute('data-card-id', card.id);
       }
-      if (english) english.textContent = card.questionEn;
-      if (category) category.textContent = TALK_CARD_CATEGORY_LABELS[card.category] || card.category;
+      if (english) { english.lang = partnerEnglish ? 'ko' : 'en'; english.textContent = partnerEnglish ? card.questionKo : card.questionEn; }
+      if (category) category.textContent = TALK_CARD_CATEGORY_LABELS[card.category] ? t(TALK_CARD_CATEGORY_LABELS[card.category]) : card.category;
       if (followups) {
         followups.replaceChildren();
         card.followupsKo.slice(0, 2).forEach(function (text, index) {
           var item = document.createElement('div');
           item.className = 'talk-card-followup';
           var ko = document.createElement('span');
-          ko.textContent = (index + 1) + '. ' + text;
+          ko.lang = partnerEnglish ? 'en' : 'ko';
+          ko.textContent = (index + 1) + '. ' + (partnerEnglish ? card.followupsEn[index] || '' : text);
           var en = document.createElement('span');
           en.className = 'talk-card-followup-en';
-          en.lang = 'en';
-          en.textContent = card.followupsEn[index] || '';
+          en.lang = partnerEnglish ? 'ko' : 'en';
+          en.textContent = partnerEnglish ? text : card.followupsEn[index] || '';
           item.append(ko, en);
           followups.appendChild(item);
         });
@@ -5634,6 +5644,10 @@
       if (body) body.scrollTop = 0;
       return card;
     }
+
+    document.addEventListener('dayo:langchange', function () {
+      if (window.DayOCurrentTalkCard) renderTalkCardQuestion(false);
+    });
 
     function markLocalTalkCardChange() {
       if (!canControlTalkCards()) return;
@@ -5690,7 +5704,7 @@
         markLocalTalkCardChange();
       } else {
         var waitingQuestion = document.getElementById('talkCardQuestion');
-        if (waitingQuestion) waitingQuestion.textContent = '파트너의 대화카드를 기다리고 있어요.';
+        if (waitingQuestion) waitingQuestion.textContent = t('room.talkCardsWaiting');
         document.querySelectorAll('[data-talk-cat]').forEach(function (btn) {
           btn.classList.remove('is-active');
           btn.setAttribute('aria-selected', 'false');
@@ -6548,7 +6562,7 @@
             escapeHtml(item.en) + ko + '</div>';
         }).join('');
         var note = isFallback
-          ? '<div class="partner-topic-ko">현재 대화카드에 있는 이어지는 질문이에요.</div>'
+          ? '<div class="partner-topic-ko">' + escapeHtml(t('room.nextQuestionFallback')) + '</div>'
           : '';
         content.innerHTML = rows + note;
         card.style.display = 'block';
@@ -6557,7 +6571,7 @@
       function renderError() {
         var card = document.getElementById('partner-topic-card');
         var content = document.getElementById('partner-topic-content');
-        if (content) content.innerHTML = '<div class="partner-topic-item">질문을 불러오지 못했어요.</div><div class="partner-topic-ko">다시 시도해 주세요.</div>';
+        if (content) content.innerHTML = '<div class="partner-topic-item">' + escapeHtml(t('room.nextQuestionError')) + '</div><div class="partner-topic-ko">' + escapeHtml(t('room.nextQuestionRetry')) + '</div>';
         if (card) card.style.display = 'block';
       }
 
@@ -6586,7 +6600,7 @@
         var card = document.getElementById('partner-topic-card');
         var requestId = ++requestSequence;
         if (content && card) {
-          content.innerHTML = '<div class="partner-topic-item">AI가 추천 질문을 정리하는 중...</div>';
+          content.innerHTML = '<div class="partner-topic-item">' + escapeHtml(t('room.nextQuestionLoading')) + '</div>';
           card.style.display = 'block';
         }
         setBusy(true);

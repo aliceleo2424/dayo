@@ -34,7 +34,7 @@ assert.match(partnerBlock, /previous_questions: previousQuestions\.slice/);
 assert.doesNotMatch(partnerBlock, /sessionTranscript|readTranscript|NEXT_PUBLIC_GEMINI_API_KEY|generativelanguage\.googleapis\.com/);
 assert.match(partnerBlock, /fetch\('\/api\/partner-question'/);
 assert.match(partnerBlock, /followups_en[\s\S]*followups_ko[\s\S]*slice\(0, 3\)/);
-assert.match(partnerBlock, /질문을 불러오지 못했어요[\s\S]*다시 시도해 주세요/);
+assert.match(partnerBlock, /room\.nextQuestionError[\s\S]*room\.nextQuestionRetry/);
 assert.match(room, /#wordSheet \{ max-height: min\(68dvh, 540px\); \}/);
 assert.match(room, /\.sheet-body[\s\S]*overflow-y: auto/);
 

@@ -418,6 +418,7 @@ export type SessionCsReport = {
 
 export type SessionTranscriptContext = {
   id: string;
+  is_test_session?: boolean;
   scheduled_at?: string | null;
   status?: string | null;
   learnerName?: string;
@@ -458,6 +459,7 @@ export async function fetchSessionDetailContext(bookingId: string): Promise<Sess
   }
   return {
     id: bookingId,
+    is_test_session: booking.is_test_session === true,
     scheduled_at: typeof booking.scheduled_at === "string" ? booking.scheduled_at : null,
     status: typeof booking.status === "string" ? booking.status : null,
     learnerId: learnerId || null,

@@ -78,7 +78,7 @@
       if (!frequency[word]) order.push(word);
       frequency[word] = (frequency[word] || 0) + 1;
     }); });
-    return order.sort(function (a, b) { return frequency[b] - frequency[a]; }).slice(0, 2).map(function (word) {
+    return order.sort(function (a, b) { return frequency[b] - frequency[a]; }).filter(function (word) { return dictionary[word][1].length && dictionary[word][2].length; }).slice(0, 3).map(function (word) {
       var v = dictionary[word];
       return { word: word, meaning_ko: v[0], synonyms: v[1].slice(0, 2), antonyms: v[2].slice(0, 2), example: v[3], source: 'curated_dictionary' };
     });
@@ -86,12 +86,24 @@
   function questions(expansion) {
     // Fixed dictionary relations have unambiguous answers; no grammar judging.
     var out = [];
-    expansion.forEach(function (v) {
-      if (out.length < 3 && v.synonyms.length) out.push({ id: v.word + ':synonym', word: v.word, type: 'synonym', options: [v.synonyms[0], v.antonyms[0], 'slowly', 'yesterday'], answer: v.synonyms[0] });
-      if (out.length < 3 && v.antonyms.length) out.push({ id: v.word + ':antonym', word: v.word, type: 'antonym', options: [v.antonyms[0], v.synonyms[0], 'slowly', 'yesterday'], answer: v.antonyms[0] });
+    expansion.slice(0, 3).forEach(function (v) {
+      if (!v.synonyms.length || !v.antonyms.length) return;
+      if (out.length < 6) out.push({ id: v.word + ':synonym', word: v.word, type: 'synonym', options: [v.synonyms[0], v.antonyms[0], 'slowly', 'yesterday'], answer: v.synonyms[0] });
+      if (out.length < 6) out.push({ id: v.word + ':antonym', word: v.word, type: 'antonym', options: [v.antonyms[0], v.synonyms[0], 'slowly', 'yesterday'], answer: v.antonyms[0] });
     });
     return out;
   }
+  function volumeHistory(history, bookingId, count, scheduledAt) {
+    var seen = new Set();
+    var prior = (Array.isArray(history) ? history : []).filter(function (item) {
+      if (!item || item.booking_id === bookingId || seen.has(item.booking_id) || !item.booking_id || !Number.isFinite(Date.parse(item.scheduled_at)) || !Number.isInteger(item.word_count) || item.word_count < 0) return false;
+      seen.add(item.booking_id); return true;
+    }).sort(function (a, b) { return Date.parse(a.scheduled_at) - Date.parse(b.scheduled_at); }).slice(-4)
+      .map(function (item) { return { booking_id: String(item.booking_id), scheduled_at: item.scheduled_at, word_count: item.word_count }; });
+    if (Number.isInteger(count) && count >= 0) prior.push({ booking_id: bookingId, scheduled_at: Number.isFinite(Date.parse(scheduledAt)) ? scheduledAt : '', word_count: count });
+    return prior;
+  }
+  function quizDuration(total) { return Math.min(90, Math.max(30, Math.ceil(total) * 15)); }
   function build(options) {
     var o = options || {}, bookingId = String(o.bookingId || ''), lang = language(o.language);
     var userRows = rows(o.learnerLog, bookingId, o.learnerId, 'learner');
@@ -109,6 +121,7 @@
     return { kind: 'conversation_recap', schema_version: 1, generator: VERSION, booking_id: bookingId, language: lang, supported: supported,
       source: { learner_log_id: userRows ? o.learnerLog.id : '', learner_version: learnerVersion, fingerprint: fingerprint, learner_available: !!userRows, partner_available: !!partnerRows },
       metrics: { user_word_count: learnerWords, user_utterance_count: userRows ? u.length : null, partner_word_count: partnerWords, partner_utterance_count: partnerRows ? p.length : null, user_participation_ratio: ratio },
+      volume_history: o.isTestSession ? [] : volumeHistory(o.history, bookingId, learnerWords, o.scheduledAt), volume_history_status: o.isTestSession ? 'test_session' : o.historyStatus || (Array.isArray(o.history) ? 'available' : 'unavailable'), volume_previous: o.previousVolume || null,
       interpretation: ratio == null ? 'insufficient' : ratio >= 0.55 ? 'speaking' : ratio >= 0.35 ? 'balanced' : 'listening',
       comment: !supported ? 'unsupported' : !u.length || !learnerWords ? 'limited' : u.length >= 3 && learnerWords / u.length <= 4 ? 'short' : 'recorded',
       topics: supported ? topics(u.concat(p)) : [], expressions: ex, word_expansion: expansion,
@@ -125,29 +138,38 @@
   }
   function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
   var copy = {
-    ko: { title: '오늘의 대화 리캡', words: '내가 말한 양', utterances: '내가 말한 문장', participation: '대화 참여', missing: '기록 확인 중', ratioMissing: '두 사람의 기록이 필요해요', basis: '기록된 단어 기준 · 문장 수는 STT 발화 단위예요.', speaking: ['오늘은 많이 말했어요', '내 이야기를 길게 이어간 순간이 많았어요.'], balanced: ['균형 있게 대화했어요', '듣고 말하는 흐름이 자연스럽게 이어졌어요.'], listening: ['오늘은 많이 들었어요', '파트너 이야기를 충분히 듣고 반응하는 대화였어요.'], insufficient: ['기록된 발화를 돌아봐요', '참여 비율은 두 사람의 기록이 있을 때 표시돼요.'], limited: '기록된 발화가 많지 않아요.', short: '짧게 주고받는 대화가 많았어요.', recorded: '오늘 나눈 이야기를 기록했어요.', unsupported: '이 언어의 리캡은 아직 지원하지 않아요. 대화 기록은 그대로 보존돼요.', topics: '오늘 자주 나온 주제', expressions: '내가 실제로 쓴 표현', expansion: '단어 넓히기', synonyms: '비슷한 말', antonyms: '반대말', example: '예문', mini: '30초 리캡', help: 'AI 표현 도움에서 본 표현', helpNote: '클릭하거나 복사한 표현이에요. 실제로 말한 표현과는 구분해요.', completed: '완료', open: '30초 리캡 시작', me: '나', synonym: '와 가장 가까운 표현은?', antonym: '와 반대되는 표현은?', unavailable: '저장된 대화 기록을 확인할 수 없어요.' },
-    en: { title: 'Today’s conversation recap', words: 'Words I said', utterances: 'My utterances', participation: 'Participation', missing: 'Checking the record', ratioMissing: 'Both records are needed', basis: 'Based on recorded words · utterances follow STT segments.', speaking: ['You shared a lot today', 'There were many moments when you continued your story.'], balanced: ['A balanced conversation', 'Listening and speaking flowed naturally.'], listening: ['You listened a lot today', 'You took time to listen and respond to your partner.'], insufficient: ['Looking back at your conversation', 'Participation needs both participants’ records.'], limited: 'There are only a few recorded utterances.', short: 'There were many short exchanges.', recorded: 'Your conversation is recorded.', unsupported: 'Recaps for this language are not supported yet. Your record is preserved.', topics: 'Topics that came up', expressions: 'Expressions I actually used', expansion: 'Explore your words', synonyms: 'Similar words', antonyms: 'Opposite words', example: 'Example', mini: '30-second recap', help: 'Expressions viewed in AI Word Help', helpNote: 'Expressions you clicked or copied, separate from what you actually said.', completed: 'completed', open: 'Start 30-second recap', me: 'Me', synonym: ': which expression has a similar meaning?', antonym: ': which expression has the opposite meaning?', unavailable: 'The saved conversation record is unavailable.' }
+    ko: { title: '오늘의 대화 리캡', words: '내가 말한 양', utterances: '내가 말한 문장', participation: '대화 참여', missing: '기록 확인 중', ratioMissing: '두 사람의 기록이 필요해요', basis: '기록된 단어 기준 · 문장 수는 STT 발화 단위예요.', speaking: ['오늘은 많이 말했어요', '내 이야기를 길게 이어간 순간이 많았어요.'], balanced: ['균형 있게 대화했어요', '듣고 말하는 흐름이 자연스럽게 이어졌어요.'], listening: ['오늘은 많이 들었어요', '파트너 이야기를 충분히 듣고 반응하는 대화였어요.'], insufficient: ['기록된 발화를 돌아봐요', '참여 비율은 두 사람의 기록이 있을 때 표시돼요.'], limited: '기록된 발화가 많지 않아요.', short: '짧게 주고받는 대화가 많았어요.', recorded: '오늘 나눈 이야기를 기록했어요.', unsupported: '이 언어의 리캡은 아직 지원하지 않아요. 대화 기록은 그대로 보존돼요.', topics: '오늘 자주 나온 주제', expressions: '내가 실제로 쓴 표현', expansion: '단어 넓히기', synonyms: '비슷한 말', antonyms: '반대말', example: '예문', mini: '단어 리캡', help: 'AI 표현 도움에서 본 표현', helpNote: '클릭하거나 복사한 표현이에요. 실제로 말한 표현과는 구분해요.', completed: '완료', open: '단어 리캡 시작', me: '나', synonym: '와 가장 가까운 표현은?', antonym: '와 반대되는 표현은?', unavailable: '저장된 대화 기록을 확인할 수 없어요.' },
+    en: { title: 'Today’s conversation recap', words: 'Words I said', utterances: 'My utterances', participation: 'Participation', missing: 'Checking the record', ratioMissing: 'Both records are needed', basis: 'Based on recorded words · utterances follow STT segments.', speaking: ['You shared a lot today', 'There were many moments when you continued your story.'], balanced: ['A balanced conversation', 'Listening and speaking flowed naturally.'], listening: ['You listened a lot today', 'You took time to listen and respond to your partner.'], insufficient: ['Looking back at your conversation', 'Participation needs both participants’ records.'], limited: 'There are only a few recorded utterances.', short: 'There were many short exchanges.', recorded: 'Your conversation is recorded.', unsupported: 'Recaps for this language are not supported yet. Your record is preserved.', topics: 'Topics that came up', expressions: 'Expressions I actually used', expansion: 'Explore your words', synonyms: 'Similar words', antonyms: 'Opposite words', example: 'Example', mini: 'Word recap', help: 'Expressions viewed in AI Word Help', helpNote: 'Expressions you clicked or copied, separate from what you actually said.', completed: 'completed', open: 'Start word recap', me: 'Me', synonym: ': which expression has a similar meaning?', antonym: ': which expression has the opposite meaning?', unavailable: 'The saved conversation record is unavailable.' }
   };
   function labels(locale) { return copy[String(locale || '').toLowerCase() === 'ko' ? 'ko' : 'en']; }
+  function renderVolume(r, locale) {
+    var ko = String(locale).toLowerCase() === 'ko', count = r.metrics.user_word_count;
+    var history = r.volume_history_status === 'test_session' ? [] : volumeHistory(r.volume_history, r.booking_id, count, (r.volume_history || []).find(function (x) { return x.booking_id === r.booking_id; })?.scheduled_at);
+    var previous = r.volume_previous ? r.volume_previous.word_count : history.length > 1 ? history[history.length - 2].word_count : null;
+    var previousMissing = r.volume_previous && previous == null;
+    var delta = previous == null ? null : count - previous;
+    var html = '<section class="recap-volume recap-section"><h4>' + (ko ? '내 대화량' : 'My conversation volume') + '</h4><div class="recap-metrics">' +
+      '<div class="recap-spoken"><strong>' + esc(count == null ? '—' : count + (ko ? '단어' : ' words')) + '</strong><span>' + (ko ? '말했어요' : 'spoken') + '</span></div></div>';
+    html += '<p class="recap-volume-change">' + (delta == null ? (r.volume_history_status === 'test_session' ? (ko ? 'TEST 세션은 성장 추이에 포함하지 않아요.' : 'TEST sessions are not included in your progress trend.') : previousMissing ? (ko ? '직전 완료 세션의 발화 기록이 없어 비교할 수 없어요.' : 'Your previous completed session has no comparable speech record.') : r.volume_history_status !== 'available' ? (ko ? '이전 기록을 불러오지 못했어요.' : 'Previous records are unavailable.') : (ko ? '첫 기록이에요' : 'Your first record')) : (ko ? '직전 완료 세션 대비 ' : 'Since your previous completed session: ') + (delta > 0 ? '+' : '') + delta + (ko ? '단어' : ' words')) + '</p>';
+    if (history.length > 1) {
+      var max = Math.max(1, ...history.map(function (item) { return item.word_count; }));
+      var pts = history.map(function (item, i) { return { x: 12 + i * 256 / (history.length - 1), y: 68 - item.word_count / max * 56 }; });
+      var caption = (ko ? '최근 기록 · 최대 5개 세션' : 'Recent records · up to 5 sessions');
+      html += '<svg class="recap-volume-chart" viewBox="0 0 280 84" role="img" aria-label="' + esc(caption + ': ' + history.map(function (x) { return x.word_count; }).join(' → ')) + '"><path class="recap-volume-axis" d="M12 68H268"/><polyline points="' + pts.map(function (p) { return p.x + ',' + p.y; }).join(' ') + '"/>' + pts.map(function (p) { return '<circle cx="' + p.x + '" cy="' + p.y + '" r="3.5"/>'; }).join('') + '</svg><small>' + esc(caption) + '</small>';
+    }
+    return html + '<small class="recap-volume-basis">' + (ko ? '저장된 내 영어 발화의 단어 수 기준이에요. 녹음되지 않은 말은 포함하지 않아요.' : 'Counts words in your saved English transcript. Speech that was not captured is not counted.') + '</small></section>';
+  }
   function render(recap, locale, options) {
     var r = recap, l = labels(locale), o = options || {};
     if (!r) return '<section class="dayo-recap"><h3>' + esc(l.title) + '</h3><p>' + esc(l.unavailable) + '</p></section>';
-    var m = r.metrics, ratio = m.user_participation_ratio, percent = ratio == null ? null : Math.round(ratio * 100);
-    var interpretation = l[r.interpretation] || l.insufficient;
     function section(title, html) { return html ? '<section class="recap-section"><h4>' + esc(title) + '</h4>' + html + '</section>' : ''; }
-    function metric(title, value) { return '<div><span>' + esc(title) + '</span><strong>' + (Array.isArray(value) ? value.map(esc).join('<br>') : esc(value)) + '</strong></div>'; }
-    function spokenMetric(value, unit) {
-      var ko = String(locale).toLowerCase() === 'ko';
-      return '<div class="recap-spoken"><strong>' + esc(value == null ? '—' : value + (ko ? (unit === 'words' ? '단어' : '번') : ' ' + unit)) + '</strong><span>' + (ko ? '말했어요' : 'spoken') + '</span></div>';
-    }
     var html = '<section class="dayo-recap" data-recap-booking="' + esc(r.booking_id) + '">' + (o.hideTitle ? '' : '<h3>' + esc(l.title) + '</h3>');
     if (r.supported) {
       var ko = String(locale).toLowerCase() === 'ko';
-      html += '<div class="recap-metrics">' + spokenMetric(m.user_word_count, 'words') + spokenMetric(m.user_utterance_count, 'turns') + metric(l.participation, percent == null ? (ko ? '기록 준비 중' : 'Record pending') : [(ko ? '나' : 'You') + ' ' + percent + '%', (ko ? '파트너' : 'Partner') + ' ' + (100 - percent) + '%']) + '</div>';
-      html += '<div class="recap-interpretation"><h4>' + esc(interpretation[0]) + '</h4><p>' + esc(interpretation[1]) + '</p><small>' + esc(l[r.comment] || '') + '</small></div>';
+      html += '<div class="recap-interpretation"><p>' + esc(l[r.comment] || '') + '</p></div>';
       html += section(l.topics, (r.topics || []).slice(0, 3).map(function (t) { return '<span class="recap-chip">' + esc(String(locale).toLowerCase() === 'ko' ? t.ko : t.en) + '</span>'; }).join(''));
       html += section(l.expressions, (r.expressions || []).slice(0, 3).map(function (e) { return '<p class="recap-expression">“' + esc(e.text) + '”</p>'; }).join(''));
-      html += section(l.expansion, (r.word_expansion || []).slice(0, 2).map(function (w) { return '<details class="recap-word"><summary><strong>' + esc(w.word) + '</strong> · ' + esc(w.meaning_ko) + '</summary><small>' + esc(l.synonyms + ': ' + w.synonyms.join(' · ')) + '<br>' + esc(l.antonyms + ': ' + w.antonyms.join(' · ')) + '<br>' + esc(l.example + ': ' + w.example) + '</small></details>'; }).join(''));
+      html += renderVolume(r, locale);
       var progress = r.progress || { completed: 0, total: 0 };
       if (progress.total) html += section(l.mini, '<p>' + esc(progress.completed + '/' + progress.total + ' ' + l.completed) + '</p>' + (o.interactive && !progress.reason ? '<button class="recap-primary" type="button" data-recap-start>' + esc(l.open) + '</button>' : ''));
     } else html += '<p>' + esc(l.unsupported) + '</p>';
@@ -155,5 +177,5 @@
     if (help.length) html += '<details class="recap-help"><summary>' + esc(l.help) + '</summary><p>' + help.map(function (x) { return esc(x.text); }).join(' · ') + '</p><small>' + esc(l.helpNote) + '</small></details>';
     return html + '</section>';
   }
-  return { VERSION: VERSION, language: language, words: words, rows: rows, sourceVersion: sourceVersion, build: build, saved: saved, mergeFeedback: mergeFeedback, render: render, labels: labels, questions: questions };
+  return { VERSION: VERSION, language: language, words: words, rows: rows, sourceVersion: sourceVersion, build: build, saved: saved, mergeFeedback: mergeFeedback, render: render, labels: labels, questions: questions, quizDuration: quizDuration, volumeHistory: volumeHistory };
 });

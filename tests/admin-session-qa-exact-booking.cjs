@@ -2,9 +2,9 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const {createRequire}=require('node:module');
 const root=path.resolve(__dirname,'..'),adminRequire=createRequire(path.join(root,'admin/package.json')),ts=adminRequire('typescript');
-let tables={},calls=[],failing=new Set(),hookReact=null;
+let copiedId=null;let tables={},calls=[],failing=new Set(),hookReact=null;
 const supabase={from(table){const filters=[];let single=false;const q={select(){return q;},eq(key,value){filters.push([key,value]);return q;},maybeSingle(){single=true;return q;},then(resolve,reject){calls.push({table,filters});assert.deepEqual(filters,[['booking_id','target-booking']]);const rows=(tables[table]||[]).filter(row=>row.booking_id==='target-booking');return Promise.resolve({data:single?(rows[0]||null):rows,error:failing.has(table)?{message:'test unavailable'}:null}).then(resolve,reject);}};return q;}};
-function load(relative,extra=''){const source=fs.readFileSync(path.join(root,relative),'utf8')+extra;const compiled=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020,jsx:ts.JsxEmit.ReactJSX}}).outputText;const box={exports:{},require:name=>name==='react'&&hookReact?hookReact:name==='@/lib/supabase'?{supabase}:name==='@/lib/admin-data'?lib:name==='lucide-react'?{X:()=>null}:name==='@/lib/utils'?{cn:(...values)=>values.filter(Boolean).join(' ')}:name.startsWith('@/components/ui/')?new Proxy({},{get:(_,tag)=>props=>adminRequire('react').createElement(tag,props,props.children)}):adminRequire(name),console,setTimeout,window:{addEventListener(){},removeEventListener(){}}};vm.runInNewContext(compiled,box,{filename:relative});return box.exports;}
+function load(relative,extra=''){const source=fs.readFileSync(path.join(root,relative),'utf8')+extra;const compiled=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020,jsx:ts.JsxEmit.ReactJSX}}).outputText;const box={exports:{},require:name=>name==='react'&&hookReact?hookReact:name==='@/lib/supabase'?{supabase}:name==='@/lib/admin-data'?lib:name==='lucide-react'?{X:()=>null}:name==='@/lib/utils'?{cn:(...values)=>values.filter(Boolean).join(' ')}:name.startsWith('@/components/ui/')?new Proxy({},{get:(_,tag)=>props=>adminRequire('react').createElement(tag,props,props.children)}):adminRequire(name),console,setTimeout,navigator:{clipboard:{writeText:async id=>{copiedId=id;}}},window:{addEventListener(){},removeEventListener(){}}};vm.runInNewContext(compiled,box,{filename:relative});return box.exports;}
 const lib=load('admin/src/lib/admin-data.ts');
 const {ReportPanel,TranscriptBubble}=load('admin/src/components/admin/SessionTranscriptModal.tsx','\nexport { ReportPanel, TranscriptBubble };');
 const React=adminRequire('react'),render=adminRequire('react-dom/server').renderToStaticMarkup;
@@ -53,7 +53,12 @@ assert.ok(calls.every(c=>c.filters[0][1]==='target-booking'));
 // Successful empty state also offers a refresh for records saved later.
 props.session={...props.session};tables={};view();tree=await settle();assert.match(text(tree),/이 세션의 저장된 대화 기록이 없습니다/);
 button=nodes(tree).find(n=>n.props?.children==='다시 시도');tables.session_logs=[log('learner','late-log','Late saved exact transcript')];button.props.onClick();view();tree=await settle();assert.equal(nodes(tree).find(n=>n.props?.row && n.props?.learnerName).props.row.text,'Late saved exact transcript');
-console.log('Actual modal empty/error/retry/late-save transitions: passed');
+const testSession={id:'target-booking',is_test_session:true};
+ props.session=testSession;tree=view();
+ assert(render(tree).includes('TEST · target-b'));
+ const copyButton=nodes(tree).find(n=>n.props?.children==='예약 ID 복사');assert(copyButton);await copyButton.props.onClick();assert.equal(copiedId,'target-booking');
+ console.log('Actual modal TEST identity and full booking ID copy: passed');
+ console.log('Actual modal empty/error/retry/late-save transitions: passed');
 
 console.log('Session QA exact booking and failure/retry fixtures passed.');
 })().catch(e=>{console.error(e);process.exitCode=1;});

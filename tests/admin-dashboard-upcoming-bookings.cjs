@@ -7,7 +7,7 @@ const fixture=[
  {id:'past-old',scheduled_at:'2026-10-01T03:00:00Z',status:'completed'},
  {id:'future-later',scheduled_at:'2026-10-09T02:00:00Z',status:'confirmed'},
  {id:'future-cancelled',scheduled_at:'2026-10-08T03:00:00Z',status:'cancelled'},
- {id:'future-next',scheduled_at:'2026-10-07T00:00:00Z',status:'confirmed',created_at:'2026-10-06T02:59:59Z'},
+ {id:'future-next',scheduled_at:'2026-10-07T00:00:00Z',status:'confirmed',is_test_session:true,created_at:'2026-10-06T02:59:59Z'},
  {id:'past-recent',scheduled_at:'2026-10-05T03:00:00Z',status:'confirmed'},
  {id:'at-now',scheduled_at:'2026-10-06T03:00:00Z',status:'confirmed'},
  {id:'undated',scheduled_at:null,status:'pending'},
@@ -40,9 +40,14 @@ function loadModule(relative,extra='') {
  vm.runInNewContext(js,box,{filename:relative});moduleCache[relative]=box.exports;return box.exports;
 }
 const pagePath='admin/src/app/admin/dashboard/page.tsx';
-const page=loadModule(pagePath,'\nexport {groupDashboardSessions,dashboardSessionStatus};');
+const page=loadModule(pagePath,'\nexport {groupDashboardSessions,dashboardSessionStatus,filterDashboardSessions};');
 const ids=rows=>Array.from(rows,row=>row.id);
 (async()=>{
+ const bookingIds=[{id:'3d8a4fb1-1111-4111-8111-111111111111'},{id:'ab12cd34-2222-4222-8222-222222222222'}];
+ assert.deepEqual(ids(page.filterDashboardSessions(bookingIds,'3D8A4FB1')), [bookingIds[0].id]);
+ assert.deepEqual(ids(page.filterDashboardSessions(bookingIds,bookingIds[1].id)), [bookingIds[1].id]);
+ assert.equal(page.filterDashboardSessions(bookingIds,'wrong').length,0);
+ assert.equal(page.filterDashboardSessions(bookingIds,' ').length,2);
  const original=fixture.map(row=>({...row}));const groups=page.groupDashboardSessions(fixture,now);
  assert.deepEqual(ids(groups.upcoming),['future-next','future-later']);
  assert.deepEqual(ids(groups.past),['future-cancelled','at-now','past-recent','past-old','undated']);
@@ -65,8 +70,12 @@ const ids=rows=>Array.from(rows,row=>row.id);
  const clickHandlers=[];
  function walk(element){if(Array.isArray(element)){element.forEach(walk);return;}if(!element||typeof element!=='object')return;if(element.props?.onClick&&element.props.children?.[1]==='대화록 열람')clickHandlers.push(element.props.onClick);walk(element.props?.children);}
  walk(tree);assert.equal(clickHandlers.length,fixture.length);clickHandlers[0]();assert.equal(state[8].id,'future-next');
+ assert.equal(state[8].is_test_session,true);assert.match(html,/TEST · future-n/);assert.match(html,/예약 ID 전체 또는 앞 8자리/);
  assert.equal(state[8].status,'confirmed');assert.equal(state[8].learnerName,'학습자 이름');
  console.log('Rendered row groups, nearest accent, Korean labels, exact booking QA button context: passed');
+ state[10]='future-later';stateIndex=0;const searched=render(page.default());assert.equal((searched.match(/대화록 열람/g)||[]).length,1);assert(!searched.includes('TEST · future-n'));
+ state[10]='absent';stateIndex=0;assert(render(page.default()).includes('검색 결과가 없습니다.'));state[10]='';
+ console.log('TEST identity, exact full/prefix ID filtering and search empty state: passed');
  const previewIndex=process.argv.indexOf('--preview');if(previewIndex>=0){const dir=path.resolve(process.argv[previewIndex+1]);fs.mkdirSync(dir,{recursive:true});fs.writeFileSync(path.join(dir,'dashboard.html'),`<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dashboard booking fixture</title><link rel="stylesheet" href="dashboard.css"><body><div style="margin-left:252px">${html}</div></body></html>`);}
  console.log('Admin dashboard upcoming booking fixtures passed.');
 })().catch(error=>{console.error(error);process.exitCode=1;});
