@@ -56,7 +56,7 @@
 
   function STYLES() {
     return STYLE_IDS.map(function (id) {
-      return { id: id, label: id === 'encourage' ? ux('칭찬 · 응원', 'Praise & encouragement') : t('book.style.' + id) };
+      return { id: id, label: id === 'encourage' ? ux('💚 따뜻하게 칭찬하고 응원해주는 파트너', 'Praise & encouragement') : t('book.style.' + id) };
     });
   }
 
