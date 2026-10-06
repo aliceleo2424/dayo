@@ -397,6 +397,7 @@ export type SessionUtterance = {
 export type SessionCorrection = {
   original: string;
   corrected: string;
+  reason?: string;
 };
 
 export type SessionCsReport = {
@@ -408,6 +409,8 @@ export type SessionCsReport = {
   partnerStamp: string | null;
   partnerComment: string | null;
   hasReport: boolean;
+  summary?: string | null;
+  recap?: { userWordCount: number | null; userUtteranceCount: number | null; participationRatio: number | null; topics: string[]; expressions: string[] } | null;
 };
 
 export type SessionTranscriptContext = {
@@ -878,7 +881,7 @@ export async function fetchMemberBookings(learnerId: string): Promise<MemberBook
   return [];
 }
 
-function parseUtterances(raw: unknown): SessionUtterance[] {
+function parseUtterances(raw: unknown, participantRole: SessionUtterance["speaker"] = "unknown"): SessionUtterance[] {
   let rows: unknown[] = [];
   if (Array.isArray(raw)) rows = raw;
   else if (typeof raw === "string") {
@@ -895,7 +898,7 @@ function parseUtterances(raw: unknown): SessionUtterance[] {
   return rows
     .map((item, index) => {
       const row = (item || {}) as Record<string, unknown>;
-      const speakerRaw = String(row.speaker || row.role || row.from || "user").toLowerCase();
+      const speakerRaw = String(row.speaker || row.role || row.from || participantRole).toLowerCase();
       const isPartner = /partner|tutor|teacher|host|assistant/.test(speakerRaw);
       const isLearner = /user|learner|student|me|member/.test(speakerRaw) || speakerRaw === "user";
       const text = String(row.text || row.content || row.message || "").trim();
@@ -916,20 +919,17 @@ function parseUtterances(raw: unknown): SessionUtterance[] {
     });
 }
 
-function parseCorrections(raw: unknown, spokenSentence?: string | null): SessionCorrection[] {
-  const out: SessionCorrection[] = [];
-  if (Array.isArray(raw)) {
-    for (const item of raw) {
-      const row = (item || {}) as Record<string, unknown>;
-      const original = String(row.original || row.before || row.source || row.spoken || "").trim();
-      const corrected = String(row.corrected || row.after || row.target || row.suggestion || "").trim();
-      if (original || corrected) out.push({ original: original || "—", corrected: corrected || "—" });
-    }
-  }
-  if (!out.length && spokenSentence) {
-    out.push({ original: spokenSentence, corrected: spokenSentence });
-  }
-  return out;
+function parseCorrections(raw: unknown): SessionCorrection[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+    const row = item as Record<string, unknown>;
+    const original = String(row.original_text || row.original || row.before || row.source || row.spoken || "").trim();
+    const corrected = String(row.suggested_text || row.corrected || row.after || row.target || row.suggestion || "").trim();
+    // A spoken sentence or an unchanged pair is not a correction.
+    if (!original || !corrected || original === corrected) return [];
+    return [{ original, corrected, reason: String(row.short_reason || row.explanation || "").trim() || undefined }];
+  });
 }
 
 function parseVocab(raw: unknown): string[] {
@@ -969,121 +969,71 @@ export async function fetchSessionTranscriptBundle(
   let startedAt: string | null = session.scheduled_at || null;
   let endedAt: string | null = null;
 
-  const logSelects = ["*", "id, transcript, started_at, ended_at, user_id, room_name, booking_id"];
   const logCandidates: Record<string, unknown>[] = [];
+  // Every compatibility query keeps the full booking identity. Never use room
+  // fragments, participant history, or partner names to identify a session.
+  for (const table of ["session_logs", "session_transcripts"]) {
+    const result = await supabase.from(table).select("*").eq("booking_id", session.id);
+    if (!result.error) {
+      const rows = (result.data || []) as Record<string, unknown>[];
+      logCandidates.push(...rows.filter((row) => row.booking_id === session.id));
+    }
+    if (logCandidates.length) break;
+  }
 
-  for (const columns of logSelects) {
-    const byBooking = await supabase.from("session_logs").select(columns).eq("booking_id", session.id).limit(5);
-    if (!byBooking.error && byBooking.data?.length) {
-      logCandidates.push(...(byBooking.data as unknown as Record<string, unknown>[]));
-      break;
+  const seen = new Set<string>();
+  for (const log of logCandidates) {
+    const role = log.participant_role === "learner" || log.participant_role === "partner" ? log.participant_role : "unknown";
+    for (const row of parseUtterances(log.transcript || log.messages || log.utterances || log.logs, role)) {
+      if (role !== "unknown" && row.speaker !== role) continue;
+      const key = JSON.stringify([row.speaker, row.id, row.timestamp, row.text]);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      utterances.push({ ...row, id: String(log.id || "log") + ":" + row.id });
     }
   }
-
-  if (!logCandidates.length) {
-    for (const columns of logSelects) {
-      const byRoom = await supabase
-        .from("session_logs")
-        .select(columns)
-        .ilike("room_name", `%${String(session.id).replace(/-/g, "").slice(0, 12)}%`)
-        .limit(5);
-      if (!byRoom.error && byRoom.data?.length) {
-        logCandidates.push(...(byRoom.data as unknown as Record<string, unknown>[]));
-        break;
-      }
-    }
-  }
-
-  if (!logCandidates.length && session.learnerId) {
-    for (const columns of logSelects) {
-      let byUser = await supabase
-        .from("session_logs")
-        .select(columns)
-        .eq("user_id", session.learnerId)
-        .order("ended_at", { ascending: false })
-        .limit(8);
-      if (byUser.error) {
-        byUser = await supabase
-          .from("session_logs")
-          .select(columns)
-          .eq("learner_id", session.learnerId)
-          .order("ended_at", { ascending: false })
-          .limit(8);
-      }
-      if (!byUser.error && byUser.data?.length) {
-        logCandidates.push(...(byUser.data as unknown as Record<string, unknown>[]));
-        break;
-      }
-    }
-  }
-
-  if (!logCandidates.length) {
-    const txSelects = ["*", "id, transcript, messages, created_at, booking_id, user_id"];
-    for (const columns of txSelects) {
-      let tx = await supabase.from("session_transcripts").select(columns).eq("booking_id", session.id).limit(5);
-      if (tx.error && session.learnerId) {
-        tx = await supabase
-          .from("session_transcripts")
-          .select(columns)
-          .eq("user_id", session.learnerId)
-          .order("created_at", { ascending: false })
-          .limit(5);
-      }
-      if (!tx.error && tx.data?.length) {
-        logCandidates.push(...(tx.data as unknown as Record<string, unknown>[]));
-        break;
-      }
-    }
-  }
-
-  if (logCandidates.length) {
-    const best = logCandidates[0];
-    utterances = parseUtterances(best.transcript || best.messages || best.utterances || best.logs);
-    startedAt = (best.started_at as string | null) || startedAt;
-    endedAt = (best.ended_at as string | null) || (best.created_at as string | null) || null;
-  }
+  utterances.sort((a, b) => (Date.parse(a.timestamp || "") || 0) - (Date.parse(b.timestamp || "") || 0));
+  const starts = logCandidates.map((row) => row.started_at).filter((v): v is string => typeof v === "string" && Number.isFinite(Date.parse(v)));
+  const ends = logCandidates.map((row) => row.ended_at || row.created_at).filter((v): v is string => typeof v === "string" && Number.isFinite(Date.parse(v)));
+  if (starts.length) startedAt = starts.sort((a, b) => Date.parse(a) - Date.parse(b))[0];
+  if (ends.length) endedAt = ends.sort((a, b) => Date.parse(b) - Date.parse(a))[0];
 
   let report = { ...emptyReport };
-  const reportSelects = [
-    "id, learner_id, partner_name, spoken_sentence, keyword, partner_comment, stamp, rating, booking_id, word_help_count, word_help_vocab, corrections, review, created_at",
-    "id, learner_id, partner_name, spoken_sentence, keyword, partner_comment, stamp, rating, booking_id, created_at",
-    "id, learner_id, partner_name, spoken_sentence, keyword, partner_comment, stamp, rating, created_at",
-    "*",
-  ];
-
-  let reportRow: Record<string, unknown> | null = null;
-  for (const columns of reportSelects) {
-    let byBooking = await supabase.from("session_reports").select(columns).eq("booking_id", session.id).limit(1).maybeSingle();
-    if (!byBooking.error && byBooking.data) {
-      reportRow = byBooking.data as unknown as Record<string, unknown>;
-      break;
-    }
-    if (session.learnerId) {
-      const byLearner = await supabase
-        .from("session_reports")
-        .select(columns)
-        .eq("learner_id", session.learnerId)
-        .order("created_at", { ascending: false })
-        .limit(5);
-      if (!byLearner.error && byLearner.data?.length) {
-        const rows = byLearner.data as unknown as Record<string, unknown>[];
-        const partnerHint = String(session.partnerName || "").toLowerCase();
-        reportRow =
-          rows.find((row) => String(row.partner_name || "").toLowerCase().includes(partnerHint.split(/\s+/)[0] || "")) ||
-          rows[0];
-        break;
-      }
-    }
-  }
+  const byBooking = await supabase.from("session_reports").select("*").eq("booking_id", session.id).maybeSingle();
+  const reportRow = !byBooking.error && byBooking.data?.booking_id === session.id
+    ? byBooking.data as Record<string, unknown> : null;
 
   if (reportRow) {
+    const feedback = Array.isArray(reportRow.feedback) ? reportRow.feedback : [];
+    const corrections = feedback.filter((value) => {
+      if (!value || typeof value !== "object") return false;
+      const row = value as Record<string, unknown>;
+      if (row.source !== "learner_recognized_speech" || row.meaning_preserved !== true || row.correction_needed !== true || row.ambiguous === true) return false;
+      if (row.speaker && row.speaker !== "learner") return false;
+      if (typeof row.original_text !== "string" || !row.original_text.trim() || typeof row.suggested_text !== "string" || !row.suggested_text.trim()) return false;
+      if (row.booking_id && row.booking_id !== session.id) return false;
+      if (row.source_log_id && !logCandidates.some((log) => log.id === row.source_log_id && log.participant_role !== "partner")) return false;
+      return true;
+    });
+    const savedRecap = feedback.filter((value) => value && typeof value === "object" &&
+      value.kind === "conversation_recap" && value.generator === "dayo_conversation_recap_v1" &&
+      value.schema_version === 1 && value.booking_id === session.id && value.metrics && value.source).pop();
+    const metric = (value: unknown): number | null => typeof value === "number" && Number.isFinite(value) ? value : null;
     const vocab = parseVocab(reportRow.word_help_vocab || reportRow.vocab_chips || reportRow.keyword);
     report = {
       rating: reportRow.rating == null ? session.rating ?? null : Number(reportRow.rating),
       review: String(reportRow.review || reportRow.user_review || session.review || "").trim() || null,
       wordHelpCount: Number(reportRow.word_help_count || reportRow.help_count || vocab.length || 0),
       wordHelpVocab: vocab,
-      corrections: parseCorrections(reportRow.corrections || reportRow.ai_corrections, String(reportRow.spoken_sentence || "") || null),
+      corrections: parseCorrections(corrections.length ? corrections : reportRow.corrections || reportRow.ai_corrections),
+      summary: typeof reportRow.summary === "string" ? reportRow.summary.trim() || null : null,
+      recap: savedRecap ? {
+        userWordCount: metric(savedRecap.metrics.user_word_count),
+        userUtteranceCount: metric(savedRecap.metrics.user_utterance_count),
+        participationRatio: metric(savedRecap.metrics.user_participation_ratio),
+        topics: Array.isArray(savedRecap.topics) ? savedRecap.topics.flatMap((topic: Record<string, unknown>) => typeof topic?.ko === "string" ? [topic.ko] : typeof topic?.en === "string" ? [topic.en] : []) : [],
+        expressions: Array.isArray(savedRecap.expressions) ? savedRecap.expressions.flatMap((expression: Record<string, unknown>) => typeof expression?.text === "string" ? [expression.text] : []) : [],
+      } : null,
       partnerStamp: String(reportRow.stamp || "").trim() || null,
       partnerComment: String(reportRow.partner_comment || "").trim() || null,
       hasReport: true,

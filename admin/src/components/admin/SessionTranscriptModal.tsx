@@ -86,13 +86,28 @@ function ReportPanel({ report }: { report: SessionCsReport }) {
   if (!report.hasReport) {
     return (
       <div className="rounded-2xl border border-dashed bg-[#FAFAF9] px-4 py-10 text-center text-sm text-muted-foreground">
-        세션 완료 후 AI 리포트가 생성됩니다.
+        이 세션의 저장된 리포트가 없습니다.
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
+      {report.summary || report.recap ? (
+        <section className="rounded-2xl border bg-white p-4 shadow-sm">
+          <h4 className="mb-2 text-sm font-semibold text-[#44403C]">저장된 대화 리캡</h4>
+          {report.summary ? <p className="text-sm text-[#57534E]">{report.summary}</p> : null}
+          {report.recap ? (
+            <div className="mt-2 space-y-2 text-sm text-[#57534E]">
+              {report.recap.userWordCount != null ? <p>학습자 단어 수: {report.recap.userWordCount}</p> : null}
+              {report.recap.userUtteranceCount != null ? <p>학습자 발화 수: {report.recap.userUtteranceCount}</p> : null}
+              {report.recap.participationRatio != null ? <p>학습자 참여 비율: {Math.round(report.recap.participationRatio * 100)}%</p> : null}
+              {report.recap.topics.length ? <p>주제: {report.recap.topics.join(" · ")}</p> : null}
+              {report.recap.expressions.length ? <ul className="list-inside list-disc">{report.recap.expressions.map((text, index) => <li key={index}>{text}</li>)}</ul> : null}
+            </div>
+          ) : null}
+        </section>
+      ) : null}
       <section className="rounded-2xl border bg-white p-4 shadow-sm">
         <h4 className="mb-2 text-sm font-semibold text-[#44403C]">고객 만족도 및 후기</h4>
         {report.rating != null ? (
@@ -132,6 +147,7 @@ function ReportPanel({ report }: { report: SessionCsReport }) {
               <li key={`${item.original}-${index}`} className="rounded-xl bg-[#FAFAF9] p-3 text-sm">
                 <p className="text-[#A8A29E] line-through">{item.original}</p>
                 <p className="mt-1 font-medium text-[#292524]">→ {item.corrected}</p>
+                {item.reason ? <p className="mt-1 text-xs text-muted-foreground">{item.reason}</p> : null}
               </li>
             ))}
           </ul>
@@ -142,7 +158,7 @@ function ReportPanel({ report }: { report: SessionCsReport }) {
 
       <section className="rounded-2xl border bg-white p-4 shadow-sm">
         <h4 className="mb-2 text-sm font-semibold text-[#44403C]">파트너 최종 피드백</h4>
-        <p className="text-2xl">{report.partnerStamp || "☕"}</p>
+        {report.partnerStamp ? <p className="text-2xl">{report.partnerStamp}</p> : null}
         <p className="mt-2 text-sm leading-relaxed text-[#57534E]">
           {report.partnerComment || "파트너 총평이 아직 없습니다."}
         </p>
@@ -450,7 +466,7 @@ export function SessionTranscriptModal({ open, session, onClose }: Props) {
               <div className="h-40 animate-pulse rounded-xl bg-muted" />
             ) : !bundle?.utterances.length ? (
               <div className="rounded-2xl border border-dashed bg-white px-4 py-12 text-center text-sm text-muted-foreground">
-                수집된 발화 텍스트 데이터가 없습니다. (세션 진행 전이거나 미수집 세션) ☕
+                이 세션의 저장된 대화 기록이 없습니다.
               </div>
             ) : (
               <div className="space-y-3 pb-4">
