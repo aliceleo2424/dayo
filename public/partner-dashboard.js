@@ -118,6 +118,23 @@
     syncCompleted();new MutationObserver(syncCompleted).observe(countSource,{childList:true,subtree:true,characterData:true});
     var earnings=card('Payouts & rewards','정산 · 리워드','View existing payout information.','기존 정산 정보를 확인하세요.');
     earnings.append(action('Payout information →','정산 정보 보기 →',function(){document.getElementById('stat-points-card').click();}));
+    var referralPromo=card('Invite a friend to DayO','DayO에 친구를 초대하세요','Know someone who’d make a great Conversation Partner? Refer them to DayO and earn a referral bonus when they qualify.','좋은 Conversation Partner가 될 친구가 있나요? DayO에 추천하고 친구가 조건을 충족하면 추천 보너스를 받으세요.');
+    referralPromo.classList.add('pd-referral-promo');
+    // Replace the legacy fixed-amount referral promotion without changing reward logic.
+    var legacyReferral=promos.querySelector('.promo-card');if(legacyReferral)legacyReferral.hidden=true;
+    var referralShare=action('Share referral link','지원 링크 공유',async function(){
+      var url='https://www.dayotalk.com/partner-apply',ko=document.documentElement.lang==='ko';
+      if(typeof navigator.share==='function'&&window.matchMedia('(pointer: coarse)').matches){
+        try{await navigator.share({title:'Join DayO as a Conversation Partner',url:url});return;}
+        catch(error){if(error&&error.name==='AbortError')return;}
+      }
+      try{
+        await navigator.clipboard.writeText(url);
+        if(typeof window.showToast==='function')window.showToast(ko?'지원 링크를 복사했어요.':'Referral link copied.');
+      }catch(_){window.open(url,'_blank','noopener');}
+    });
+    var referralHelper=label('p','Ask your friend to enter your full name in the Referral field.','친구에게 Referral 항목에 추천인의 전체 이름을 입력해 달라고 안내해 주세요.');referralHelper.className='pd-referral-helper';
+    referralPromo.append(referralShare,referralHelper);
     var reliability=card('Partner benefits','파트너 혜택','Explore referral rewards and partner benefits.','추천 리워드와 파트너 혜택을 확인하세요.');
     // Retain the existing reward card and its copy, at lower priority.
     var legacyReward=promos.querySelectorAll('.promo-card')[1];if(legacyReward){var legacyDetails=document.createElement('details');legacyDetails.className='pd-legacy-reward';legacyDetails.append(label('summary','Other reward information','기타 리워드 안내'),legacyReward);promos.append(legacyDetails);}
@@ -136,7 +153,7 @@
     var bonusSummary=card('Bonuses','보너스','Referral rewards and partner benefits','추천 리워드와 파트너 혜택');
     var panels=[{panel:panel('pd-sessions',[availabilityAlert,schedule,calendarCard],[past,updates]),en:'Sessions',ko:'세션'},
       {panel:profilePanel,en:'Profile',ko:'프로필'},
-      {panel:panel('pd-earnings',[stats,earnings,bonusSummary],[completed,promos,reliability,convert]),en:'Earnings',ko:'수익'},
+      {panel:(function(){var n=panel('pd-earnings',[stats,earnings,bonusSummary],[completed,promos,reliability,convert]);n.prepend(referralPromo);return n;})(),en:'Earnings',ko:'수익'},
       {panel:panel('pd-resources',[resourceCards,rules],[resources]),en:'Resources',ko:'자료'}];
     var tabsHost=document.createElement('div');tabsHost.className='pd-tabs-host';upcoming.after(tabsHost);tabsHost.after(actionCenter);
     if(window.location.hash==='#pd-overview')window.history.replaceState(null,'',window.location.pathname+window.location.search+'#pd-sessions');
