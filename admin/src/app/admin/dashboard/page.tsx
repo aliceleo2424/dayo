@@ -189,7 +189,7 @@ export default function DashboardPage() {
           id: String(row.id || crypto.randomUUID()),
           scheduled_at: (row.scheduled_at as string | null) || null,
           status: (row.status as string | null) || null,
-          learner: names.get(learnerId) || "학습자",
+          learner: names.get(learnerId) || "유저",
           partner: names.get(partnerId) || String(row.partner_name || "파트너 미정"),
           learner_id: learnerId || null,
         };
@@ -358,7 +358,7 @@ export default function DashboardPage() {
                     <thead>
                       <tr className="border-b bg-muted/50 text-left text-muted-foreground">
                         <th className="px-3 py-3 font-medium">세션 일시</th>
-                        <th className="px-3 py-3 font-medium">학습자</th>
+                        <th className="px-3 py-3 font-medium">유저</th>
                         <th className="px-3 py-3 font-medium">파트너</th>
                         <th className="px-3 py-3 font-medium">상태</th>
                         <th className="px-3 py-3 font-medium">대화록</th>

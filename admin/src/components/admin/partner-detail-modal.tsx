@@ -76,7 +76,7 @@ async function loadSessionLearners(learnerIds: string[]) {
 function SessionLearnerIdentity({ session }: { session: PartnerSession }) {
   return (
     <div className="mt-1 space-y-1 text-sm">
-      <p><span className="text-xs text-muted-foreground">상대 학습자 · </span>{session.learner_name}</p>
+      <p><span className="text-xs text-muted-foreground">상대 유저 · </span>{session.learner_name}</p>
       {session.learner_profile_found ? (
         <div className="flex flex-wrap items-center gap-2">
           <span className="break-all text-muted-foreground">{session.learner_email === null ? "이메일 미등록" : session.learner_email || "이메일 정보 없음"}</span>
@@ -133,7 +133,7 @@ function maskAccount(value?: string | null) {
 
 function statusDetail(status?: string | null) {
   const raw = String(status || "").toLowerCase();
-  if (raw === "learner_noshow") return { label: "학습자 노쇼", variant: "warning" as const, detail: "+6,000P 파트너 활동비 100% 보전 지급", delta: 6000 };
+  if (raw === "learner_noshow") return { label: "유저 노쇼", variant: "warning" as const, detail: "+6,000P 파트너 활동비 100% 보전 지급", delta: 6000 };
   if (raw === "partner_noshow") return { label: "파트너 노쇼", variant: "warning" as const, detail: "패널티 -10,000P 차감 및 세션비 미지급", delta: -10000 };
   if (raw === "completed") return { label: "정상 완료", variant: "success" as const, detail: "25분 대화 완료 (+6,000P 적립)", delta: 6000 };
   if (raw === "cancelled" || raw === "canceled") return { label: "취소", variant: "default" as const, detail: "규정 내 취소", delta: 0 };
@@ -218,7 +218,7 @@ export function PartnerDetailModal({
         return {
           id: String(row.id || ""),
           learner_id: learnerId || null,
-          learner_name: learner?.name || (learnerLookupFailed ? "학습자 정보를 불러오지 못했습니다." : "학습자 정보 없음"),
+          learner_name: learner?.name || (learnerLookupFailed ? "유저 정보를 불러오지 못했습니다." : "유저 정보 없음"),
           learner_email: learner?.email ?? null,
           learner_provider: learner?.provider || "unknown",
           learner_profile_found: Boolean(learner),
@@ -488,7 +488,7 @@ export function PartnerDetailModal({
                 <TabsList className="grid h-auto w-full grid-cols-2 gap-1 lg:grid-cols-4">
                   <TabsTrigger value="sessions">☕ 세션 히스토리</TabsTrigger>
                   <TabsTrigger value="ledger">💰 정산·포인트</TabsTrigger>
-                  <TabsTrigger value="reviews">⭐ 학생 리뷰</TabsTrigger>
+                  <TabsTrigger value="reviews">⭐ 유저 리뷰</TabsTrigger>
                   <TabsTrigger value="tax">🏦 계좌·세무</TabsTrigger>
                 </TabsList>
 
@@ -561,7 +561,7 @@ export function PartnerDetailModal({
                       <p className="mt-2 text-sm text-muted-foreground">{session.review ? `“${session.review}”` : "후기 코멘트 없음"}</p>
                       <p className="mt-2 text-xs text-muted-foreground">{formatSessionDateTime(session.scheduled_at)}</p>
                     </article>
-                  )) : <p className="rounded-xl border border-dashed py-12 text-center text-sm text-muted-foreground">등록된 학생 리뷰가 없습니다.</p>}
+                  )) : <p className="rounded-xl border border-dashed py-12 text-center text-sm text-muted-foreground">등록된 유저 리뷰가 없습니다.</p>}
                 </TabsContent>
 
                 <TabsContent value="tax" className="mt-4">

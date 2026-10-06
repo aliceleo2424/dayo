@@ -39,14 +39,14 @@ function load(file, extra = '') {
   return mod.exports;
 }
 const component = load('admin/src/components/admin/partner-detail-modal.tsx', '\nexport { loadSessionLearners, SessionLearnerIdentity };');
-function identity(learner, fallback = '학습자 정보 없음') {
+function identity(learner, fallback = '유저 정보 없음') {
   return render(React.createElement(component.SessionLearnerIdentity, { session: { learner_name: learner?.name || fallback, learner_email: learner?.email ?? null, learner_provider: learner?.provider || 'unknown', learner_profile_found: Boolean(learner) } }));
 }
 (async () => {
   profiles = [
     { id: 'email-id', user_id: null, nickname: 'Email learner', email: 'email@example.test', provider: 'email' },
     { id: 'google-id', user_id: null, nickname: '젤리', email: 'google@example.test', provider: 'google' },
-    { id: 'kakao-id', user_id: null, nickname: '카카오 학습자', email: null, provider: 'kakao' },
+    { id: 'kakao-id', user_id: null, nickname: '카카오 유저', email: null, provider: 'kakao' },
     { id: 'nameless-id', user_id: null, nickname: '', user_name: '', email: 'nameless@example.test', provider: 'email' },
     { id: 'display-id', user_id: null, nickname: '', user_name: 'Display name', email: 'display@example.test', provider: 'google' },
     { id: 'legacy-profile', user_id: 'legacy-id', nickname: 'Legacy learner', email: 'legacy@example.test', provider: 'email' },
@@ -59,12 +59,12 @@ function identity(learner, fallback = '학습자 정보 없음') {
   assert.equal(result.identities.size, 6);
   assert.match(identity(result.identities.get('email-id')), /Email learner.*email@example.test.*이메일/s);
   assert.match(identity(result.identities.get('google-id')), /젤리.*google@example.test.*구글/s);
-  assert.match(identity(result.identities.get('kakao-id')), /카카오 학습자.*이메일 미등록.*카카오/s);
+  assert.match(identity(result.identities.get('kakao-id')), /카카오 유저.*이메일 미등록.*카카오/s);
   assert.equal(result.identities.get('nameless-id').name, 'nameless@example.test');
   assert.equal(result.identities.get('display-id').name, 'Display name');
   assert.equal(result.identities.get('legacy-id').name, 'Legacy learner');
   assert.equal(result.identities.get('google-id').name, '젤리', 'exact profile id wins over legacy alias');
-  assert.match(identity(result.identities.get('missing-id')), /학습자 정보 없음/);
+  assert.match(identity(result.identities.get('missing-id')), /유저 정보 없음/);
   assert.doesNotMatch(identity(result.identities.get('missing-id')), /이메일 미등록|Partner should never appear/);
   assert.ok(calls.some(c => c.table === 'profiles' && c.method === 'or' && c.args[0] === 'id.in.(' + ids.join(',') + '),user_id.in.(' + ids.join(',') + ')'));
   console.log('Email/Google/Kakao, nickname/display name/email priority, NULL email, missing profile, exact id and legacy id: passed');
@@ -72,7 +72,7 @@ function identity(learner, fallback = '학습자 정보 없음') {
   const failed = await component.loadSessionLearners(ids);
   assert.equal(failed.failed, true);
   assert.equal(failed.identities.size, 0);
-  assert.doesNotMatch(identity(null, '학습자 정보를 불러오지 못했습니다.'), /이메일 미등록|학습자 정보 없음/);
+  assert.doesNotMatch(identity(null, '유저 정보를 불러오지 못했습니다.'), /이메일 미등록|유저 정보 없음/);
   profileError = null;
   component.PartnerDetailModal({ partner: { id: 'partner-id', user_id: null, point_balance: 0 }, open: true, onOpenChange() {} });
   effects[0]();

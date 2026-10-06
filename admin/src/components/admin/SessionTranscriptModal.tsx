@@ -99,9 +99,9 @@ function ReportPanel({ report }: { report: SessionCsReport }) {
           {report.summary ? <p className="text-sm text-[#57534E]">{report.summary}</p> : null}
           {report.recap ? (
             <div className="mt-2 space-y-2 text-sm text-[#57534E]">
-              {report.recap.userWordCount != null ? <p>학습자 단어 수: {report.recap.userWordCount}</p> : null}
-              {report.recap.userUtteranceCount != null ? <p>학습자 발화 수: {report.recap.userUtteranceCount}</p> : null}
-              {report.recap.participationRatio != null ? <p>학습자 참여 비율: {Math.round(report.recap.participationRatio * 100)}%</p> : null}
+              {report.recap.userWordCount != null ? <p>유저 단어 수: {report.recap.userWordCount}</p> : null}
+              {report.recap.userUtteranceCount != null ? <p>유저 발화 수: {report.recap.userUtteranceCount}</p> : null}
+              {report.recap.participationRatio != null ? <p>유저 참여 비율: {Math.round(report.recap.participationRatio * 100)}%</p> : null}
               {report.recap.topics.length ? <p>주제: {report.recap.topics.join(" · ")}</p> : null}
               {report.recap.expressions.length ? <ul className="list-inside list-disc">{report.recap.expressions.map((text, index) => <li key={index}>{text}</li>)}</ul> : null}
             </div>
@@ -425,7 +425,7 @@ export function SessionTranscriptModal({ open, session, onClose }: Props) {
   const detail = detailState?.bookingId === session.id ? detailState.data : null;
   const bundle = bundleState?.bookingId === session.id ? bundleState.data : null;
   const sessionLoading = loading || !bundle;
-  const learnerName = detail?.learnerName || "학습자";
+  const learnerName = detail?.learnerName || "유저";
   const partnerName = detail?.partnerName || "파트너";
   const status = bookingStatusLabel(detail?.status);
 

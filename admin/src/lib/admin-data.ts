@@ -458,7 +458,7 @@ export async function fetchSessionDetailContext(bookingId: string): Promise<Sess
     scheduled_at: typeof booking.scheduled_at === "string" ? booking.scheduled_at : null,
     status: typeof booking.status === "string" ? booking.status : null,
     learnerId: learnerId || null,
-    learnerName: names.get(learnerId) || "학습자",
+    learnerName: names.get(learnerId) || "유저",
     partnerName: names.get(partnerId) || String(booking.partner_name || "파트너 미정"),
     rating: booking.rating == null ? null : Number(booking.rating),
     review: String(booking.review || booking.feedback || booking.comment || booking.review_text || "").trim() || null,

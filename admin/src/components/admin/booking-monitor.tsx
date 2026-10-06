@@ -44,7 +44,7 @@ export function BookingMonitor() {
       id: row.id,
       scheduled_at: row.scheduled_at,
       status: row.status,
-      learnerName: row.learner_nickname || "학습자",
+      learnerName: row.learner_nickname || "유저",
       partnerName: row.partner_nickname || row.partner_name || "파트너",
       learnerId: row.learner_id,
     });

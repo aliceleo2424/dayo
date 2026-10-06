@@ -9,7 +9,7 @@
       body: [
         '<p class="terms-mini-section">[서비스 목적]</p>',
         '<ul>',
-        '<li>DayO는 학습자와 글로벌 대화 파트너가 1:1 화상으로 일상 대화를 나누는 플랫폼입니다.</li>',
+        '<li>DayO는 이용자와 글로벌 대화 파트너가 1:1 화상으로 일상 대화를 나누는 플랫폼입니다.</li>',
         '</ul>',
         '<p class="terms-mini-section">[에스크로 결제]</p>',
         '<ul>',
@@ -69,7 +69,7 @@
         '<p class="terms-mini-translation-note">This English translation is provided for convenience. If there is any discrepancy, the Korean version will prevail.</p>',
         '<p class="terms-mini-section">[Purpose of the Service]</p>',
         '<ul>',
-        '<li>DayO is a platform where learners and global conversation partners have one-to-one everyday conversations by video.</li>',
+        '<li>DayO is a platform where users and global conversation partners have one-to-one everyday conversations by video.</li>',
         '</ul>',
         '<p class="terms-mini-section">[Escrow Payment]</p>',
         '<ul>',

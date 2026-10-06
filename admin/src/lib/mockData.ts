@@ -59,9 +59,9 @@ export const tutors: Tutor[] = [
 ];
 
 export const classReports: ClassReport[] = [
-  { id: "cr1", tutorId: "t1", tutorName: "Emma Wilson", userName: "학습자", rating: 5, noShow: false, date: "2026-07-28" },
-  { id: "cr2", tutorId: "t2", tutorName: "James Chen", userName: "학습자", rating: 4, noShow: false, date: "2026-07-28" },
-  { id: "cr3", tutorId: "t4", tutorName: "Carlos Rivera", userName: "학습자", rating: 0, noShow: true, issue: "학생 노쇼 — 연락 두절", date: "2026-07-27" },
-  { id: "cr4", tutorId: "t3", tutorName: "Sakura Tanaka", userName: "학습자", rating: 5, noShow: false, date: "2026-07-27" },
-  { id: "cr5", tutorId: "t1", tutorName: "Emma Wilson", userName: "학습자", rating: 5, noShow: false, date: "2026-07-26" },
+  { id: "cr1", tutorId: "t1", tutorName: "Emma Wilson", userName: "유저", rating: 5, noShow: false, date: "2026-07-28" },
+  { id: "cr2", tutorId: "t2", tutorName: "James Chen", userName: "유저", rating: 4, noShow: false, date: "2026-07-28" },
+  { id: "cr3", tutorId: "t4", tutorName: "Carlos Rivera", userName: "유저", rating: 0, noShow: true, issue: "유저 노쇼 — 연락 두절", date: "2026-07-27" },
+  { id: "cr4", tutorId: "t3", tutorName: "Sakura Tanaka", userName: "유저", rating: 5, noShow: false, date: "2026-07-27" },
+  { id: "cr5", tutorId: "t1", tutorName: "Emma Wilson", userName: "유저", rating: 5, noShow: false, date: "2026-07-26" },
 ];

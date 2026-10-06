@@ -146,7 +146,7 @@ export function applicationMessage(action: ReviewAction, applicant: Application,
   const name = applicant.full_name;
   const language = applicant.partner_languages.join(', ');
   switch (action) {
-    case 'invite': return `Hi ${name}!\nThank you for applying to become a DayO Language Partner 😊\n\nWe'd love to invite you to a short online partner test.\n\nThe test is very simple — you'll have a short video conversation\nsimilar to a real DayO session.\nNo lesson preparation is needed.\n\nPlease choose a time that works for you here:\n${link}\n\nSee you soon!\nDayO Team`;
+    case 'invite': return `Hi ${name}!\nThank you for applying to become a DayO Language Partner 😊\n\nWe'd love to invite you to a short online partner test.\n\nThe test is very simple — you'll have a short video conversation\nsimilar to a real DayO session.\nNo session preparation is needed.\n\nPlease choose a time that works for you here:\n${link}\n\nSee you soon!\nDayO Team`;
     case 'hold': return `Hi ${name},\nThank you for applying to DayO.\n\nWe've received your application and will keep it in our partner pool\nas we expand availability for ${language}.\n\nWe'll contact you when a suitable opening becomes available.\n\nThank you!\nDayO Team`;
     case 'approve': return `Hi ${name}! 🎉\n\nWe're happy to let you know that you've passed the DayO Partner Test.\n\nYour session rate is:\n₩7,500 per completed 30-minute session.\n\nThe next step is a short onboarding and account setup.\n\n${link}\n\nWelcome to DayO!`;
     case 'reject': return `Thank you for taking the time to apply and participate in the\nDayO Partner Test.\n\nWe won't be moving forward with your application at this time,\nbut we really appreciate your interest in DayO.`;

@@ -29,7 +29,7 @@
     '첫 대화를 기다리고 있어요.': 'emptyTitle',
     '첫 대화를 시작하면 나만의 대화 흐름이 여기에 쌓여요.': 'emptyDesc',
     '대화 경험이 차곡차곡 쌓이고 있어요.': 'unmeasuredTitle',
-    '저장된 대화는 있지만 learner 발화량을 계산할 수 있는 기록이 없어요.': 'unmeasuredDesc',
+    '저장된 대화는 있지만 유저 발화량을 계산할 수 있는 기록이 없어요.': 'unmeasuredDesc',
     '첫 대화 예약하기': 'book',
     '를 이야기했어요.': 'titleSuffix',
     '이번 달 최근 대화의 단어 흐름': 'chartAria',

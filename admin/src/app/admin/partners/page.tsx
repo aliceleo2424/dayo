@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export default function PartnersPage() {
   return (
     <>
-      <AdminHeader title="대화 파트너 & 클래스 관리" />
+      <AdminHeader title="대화 파트너 & 세션 관리" />
       <main className="p-6">
         <Tabs defaultValue="partners">
           <TabsList>

@@ -552,7 +552,7 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
                             id: session.id,
                             scheduled_at: session.scheduled_at,
                             status: session.status,
-                            learnerName: displayName || "학습자",
+                            learnerName: displayName || "유저",
                             partnerName: session.partner_name || "파트너",
                             learnerId: session.learner_id || user?.user_id || user?.id || null,
                             rating: session.rating,

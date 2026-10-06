@@ -27,7 +27,7 @@ const navItems: {
   { href: "/admin/tech-issues", label: "기술문제 신고 검토", icon: ShieldAlert },
   { href: "/admin/cms", label: "프론트 CMS", icon: Palette },
   { href: "/admin/articles", label: "라운지 매거진", icon: Newspaper, sub: true },
-  { href: PARTNERS_HREF, label: "대화 파트너 & 클래스", icon: GraduationCap },
+  { href: PARTNERS_HREF, label: "대화 파트너 & 세션", icon: GraduationCap },
   { href: "/admin/partner-applications", label: "Partner Applications", icon: Users },
 ];
 

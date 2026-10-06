@@ -210,7 +210,7 @@
       return '<section class="dayo-conversation-story dayo-conversation-story--empty" aria-label="오늘의 대화 패턴">' +
         '<p class="dayo-conversation-story__eyebrow">오늘의 대화 패턴</p>' +
         '<h3>대화 기록은 그대로 남아 있어요.</h3>' +
-        '<p>이번 대화에서는 집계할 수 있는 learner 발화가 충분하지 않았어요.</p></section>';
+        '<p>이번 대화에서는 집계할 수 있는 유저 발화가 충분하지 않았어요.</p></section>';
     }
     return '<section class="dayo-conversation-story" aria-label="오늘의 대화 패턴">' +
       '<p class="dayo-conversation-story__eyebrow">오늘의 대화 패턴</p>' +
@@ -227,7 +227,7 @@
       return '<section class="dayo-monthly-story dayo-monthly-story--empty" aria-labelledby="dayo-monthly-story-title">' +
         '<p class="dayo-monthly-story__eyebrow">이번 달의 대화</p>' +
         '<h2 id="dayo-monthly-story-title">' + (hasUnmeasured ? '대화 경험이 차곡차곡 쌓이고 있어요.' : '첫 대화를 기다리고 있어요.') + '</h2>' +
-        '<p>' + (hasUnmeasured ? '저장된 대화는 있지만 learner 발화량을 계산할 수 있는 기록이 없어요.' : '첫 대화를 시작하면 나만의 대화 흐름이 여기에 쌓여요.') + '</p>' +
+        '<p>' + (hasUnmeasured ? '저장된 대화는 있지만 유저 발화량을 계산할 수 있는 기록이 없어요.' : '첫 대화를 시작하면 나만의 대화 흐름이 여기에 쌓여요.') + '</p>' +
         (hasUnmeasured ? '' : '<button type="button" class="dayo-monthly-story__cta" data-dayo-booking-cta>첫 대화 예약하기</button>') +
         '</section>';
     }
