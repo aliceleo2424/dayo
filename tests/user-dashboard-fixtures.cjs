@@ -72,7 +72,9 @@ async function run(){
  const stripCopy=s=>s.replace("label.textContent = i18n('mypage.booking.additional', { when: formatSessionWhen(booking.scheduled_at) })", "label.textContent = '추가 예약 · ' + formatSessionWhen(booking.scheduled_at)").replace("button.textContent = i18n('mypage.booking.cancel');", "button.textContent = '예약 취소';").replace("      cancelButton.textContent = i18n('mypage.booking.cancel');\n", '');
  assert.equal(stripCopy(stripEvents(read('public/mypage-dashboard.js'))),old('public/mypage-dashboard.js'),'all existing My Page handlers/queries unchanged; only approved copy and view events differ');
  const protectedFiles=cp.execFileSync('git',['ls-tree','-r','--name-only',base],{cwd:root,encoding:'utf8'}).trim().split('\n').filter(f=>f.startsWith('api/')||f.startsWith('supabase/')||/^(?:public\/)?(?:room|quiz|memory-game|session-lifecycle|partner|learner|booking|availability|ticket|profile-store|supabase-client|auth|password-account|user-conversation-report|conversation-insights|tea-table|role-switch|mode-switch)/.test(f)&& !f.startsWith('tests/'));
- for(const f of protectedFiles)assert.equal(read(f),old(f),f+' preserved');
+ // The scoped room release intentionally changes only these protected-path files.
+ const scopedRoomFiles=new Set(['api/conversation-recap.js','public/room.html','room.html','public/memory-game.js','memory-game.js']);
+ for(const f of protectedFiles){const expected=scopedRoomFiles.has(f)?cp.execFileSync('git',['show','73c64d2cad8f8ec5c3d4625948a637dc18501372:'+f],{cwd:root,encoding:'utf8'}).replace(/\r/g,''):old(f);assert.equal(read(f),expected,f+' preserved against approved baseline');}
  for(const f of ['mypage.html','mypage-dashboard.js','user-dashboard.js','user-dashboard.css','i18n.js'])assert.equal(read('public/'+f),read(f),f+' mirror');
  const idsBefore=Array.from(new JSDOM(old('public/mypage.html')).window.document.querySelectorAll('[id]')).map(n=>n.id);
  const scriptsOf=h=>[...h.matchAll(/<script\b[^>]*src="([^"]+)"/g)].map(m=>m[1]).filter(s=>!s.startsWith('user-dashboard.js'));
