@@ -37,7 +37,7 @@
         var number=document.createElement('strong');number.textContent=day;b.append(number);
         if(holiday){var h=document.createElement('span');h.className='ma-holiday';h.textContent='✦';h.title=holiday;h.setAttribute('aria-hidden','true');b.append(h);}
         var state=document.createElement('small');state.textContent=o&&o.mode==='closed'?'Closed':o&&o.mode==='custom'?'Custom':opens?'Open':'Closed';b.append(state);
-        var count=document.createElement('small');count.textContent=opens+' open';b.append(count);
+        if(state.textContent!=='Closed'){var count=document.createElement('small');count.textContent=opens+' open';b.append(count);}
         if(booked){var reserved=document.createElement('small');reserved.textContent=booked+' booked';b.append(reserved);}
         grid.append(b);
       }

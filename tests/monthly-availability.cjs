@@ -29,9 +29,24 @@ authState.owner='partner-b';onAuthChange({detail:{loggedIn:false,userId:'partner
 const integrationBase='ae58787289c2b3274120f8df89ab233d26e8e47c';
 const baseline=cp.execFileSync('git',['show',integrationBase+':public/booking-modal.js'],{cwd:root,encoding:'utf8'}).replace(/\r\n/g,'\n');
 const auditedMonthly=cp.execFileSync('git',['show',integrationBase+':public/partner-monthly-availability.js'],{cwd:root,encoding:'utf8'}).replace(/\r\n/g,'\n');
-const displayOnlyMonthly=monthlyUI.replace("opens?'Open':'Closed'","opens?'Available':'Closed'")
+assert(monthlyUI.includes("if(state.textContent!=='Closed'){var count=document.createElement('small');count.textContent=opens+' open';b.append(count);}"),'Closed omits redundant count without changing Custom/Open/Booked rendering');
+const displayOnlyMonthly=monthlyUI.replace("if(state.textContent!=='Closed'){var count=document.createElement('small');count.textContent=opens+' open';b.append(count);}","var count=document.createElement('small');count.textContent=opens+' open';b.append(count);").replace("opens?'Open':'Closed'","opens?'Available':'Closed'")
  .replace("var count=document.createElement('small');count.textContent=opens+' open';b.append(count);\n        if(booked){var reserved=document.createElement('small');reserved.textContent=booked+' booked';b.append(reserved);}\n        grid.append(b);","var count=document.createElement('small');count.textContent=booked?opens+' open · '+booked+' booked':opens+' open';b.append(count);grid.append(b);");
 assert.equal(displayOnlyMonthly,auditedMonthly,'Partner monthly calculation/save/auth/weekly handlers unchanged outside display labels');
+const {JSDOM}=require('jsdom');
+const labelDom=new JSDOM('<section><p class="ma-range"></p><div class="ma-month-head"><h3></h3></div><button class="ma-prev"></button><button class="ma-next"></button><div class="ma-calendar"></div></section>');
+const labelDoc=labelDom.window.document;
+vm.runInNewContext('('+monthlyUI.slice(monthlyUI.indexOf('function calendar()'),monthlyUI.indexOf('function choose(date)')).trim()+')()',{
+ document:labelDoc,wrapper:labelDoc.querySelector('section'),rules,w:{start:'2026-10-06',end:'2026-11-04'},view:'2026-10',selected:null,data:{},busy:false,Date,Intl,
+ override:date=>date==='2026-10-07'?{mode:'custom'}:date==='2026-10-09'?{mode:'closed'}:null,
+ dayRows:date=>date==='2026-10-09'?[{status:'booked'}]:[],isReserved:s=>s.status==='booked',
+ openTimes:date=>date==='2026-10-08'?['10:00']:[]
+});
+const dayLabels=date=>[...labelDoc.querySelector('[data-date="'+date+'"]').querySelectorAll('small')].map(e=>e.textContent);
+assert.deepEqual(dayLabels('2026-10-06'),['Closed'],'Closed omits redundant 0 open');
+assert.deepEqual(dayLabels('2026-10-07'),['Custom','0 open'],'Custom count retained');
+assert.deepEqual(dayLabels('2026-10-08'),['Open','1 open'],'Open count retained');
+assert.deepEqual(dayLabels('2026-10-09'),['Closed','1 booked'],'Booked count retained on closed day');
 function fn(source,name){const start=source.search(new RegExp('(?:async )?function '+name+'\\('));assert(start>=0,name);return source.slice(start,source.indexOf('\n  }',start)+4).replace(/\r\n/g,'\n');}
 for(const name of ['derivePartnersForSelectedTime','partnerMatchesCriteria','isBookableStart','canBypassBookingLeadTime','getTicketCount','needsTicketTopup','settleConfirmedBooking','readRecentBooking'])assert.equal(fn(booking,name),fn(baseline,name),name+' protected kernel');
 // Only the visibility/eligibility split is allowed to differ from the audited main.
