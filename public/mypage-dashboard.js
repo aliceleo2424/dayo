@@ -231,12 +231,12 @@
       var row = document.createElement('div');
       row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px;margin-top:8px;border:1px solid #eee;border-radius:12px;background:#fff;';
       var label = document.createElement('span');
-      label.textContent = '추가 예약 · ' + formatSessionWhen(booking.scheduled_at)
+      label.textContent = i18n('mypage.booking.additional', { when: formatSessionWhen(booking.scheduled_at) })
         + (booking.language ? ' · ' + booking.language : '');
       row.appendChild(label);
       var button = document.createElement('button');
       button.type = 'button';
-      button.textContent = '예약 취소';
+      button.textContent = i18n('mypage.booking.cancel');
       button.style.cssText = 'padding:8px 14px;border:1px solid #ccc;border-radius:10px;background:#fff;cursor:pointer;font-family:inherit;';
       button.onclick = function () {
         cancelUpcomingBooking(booking.id, booking.scheduled_at, userId, button);
@@ -255,6 +255,7 @@
     var cancelButton = document.getElementById('urgent-session-cancel');
     if (cancelButton) {
       cancelButton.hidden = true;
+      cancelButton.textContent = i18n('mypage.booking.cancel');
       cancelButton.onclick = null;
     }
 

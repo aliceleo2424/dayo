@@ -69,16 +69,17 @@ async function run(){
  const plain=fs.readFileSync(path.join(pub,'mypage.html'),'utf8').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'');
  const base='32847a85a9f5c002454a64cf904f89f611c355fd';const read=f=>fs.readFileSync(path.join(root,f),'utf8').replace(/\r/g,'');const old=f=>cp.execFileSync('git',['show',base+':'+f],{cwd:root,encoding:'utf8'}).replace(/\r/g,'');
  const stripEvents=s=>s.replace(/^.*document\.dispatchEvent\(new CustomEvent\('dayo:mypage-(?:next|speaking)'[^\n]*\n/gm,'');
- assert.equal(stripEvents(read('public/mypage-dashboard.js')),old('public/mypage-dashboard.js'),'all existing My Page handlers/queries unchanged');
+ const stripCopy=s=>s.replace("label.textContent = i18n('mypage.booking.additional', { when: formatSessionWhen(booking.scheduled_at) })", "label.textContent = '추가 예약 · ' + formatSessionWhen(booking.scheduled_at)").replace("button.textContent = i18n('mypage.booking.cancel');", "button.textContent = '예약 취소';").replace("      cancelButton.textContent = i18n('mypage.booking.cancel');\n", '');
+ assert.equal(stripCopy(stripEvents(read('public/mypage-dashboard.js'))),old('public/mypage-dashboard.js'),'all existing My Page handlers/queries unchanged; only approved copy and view events differ');
  const protectedFiles=cp.execFileSync('git',['ls-tree','-r','--name-only',base],{cwd:root,encoding:'utf8'}).trim().split('\n').filter(f=>f.startsWith('api/')||f.startsWith('supabase/')||/^(?:public\/)?(?:room|quiz|memory-game|session-lifecycle|partner|learner|booking|availability|ticket|profile-store|supabase-client|auth|password-account|user-conversation-report|conversation-insights|tea-table|role-switch|mode-switch)/.test(f)&& !f.startsWith('tests/'));
  for(const f of protectedFiles)assert.equal(read(f),old(f),f+' preserved');
- for(const f of ['mypage.html','mypage-dashboard.js','user-dashboard.js','user-dashboard.css'])assert.equal(read('public/'+f),read(f),f+' mirror');
+ for(const f of ['mypage.html','mypage-dashboard.js','user-dashboard.js','user-dashboard.css','i18n.js'])assert.equal(read('public/'+f),read(f),f+' mirror');
  const idsBefore=Array.from(new JSDOM(old('public/mypage.html')).window.document.querySelectorAll('[id]')).map(n=>n.id);
  const scriptsOf=h=>[...h.matchAll(/<script\b[^>]*src="([^"]+)"/g)].map(m=>m[1]).filter(s=>!s.startsWith('user-dashboard.js'));
  assert.deepEqual(scriptsOf(read('public/mypage.html')),scriptsOf(old('public/mypage.html')),'all current script dependencies retained');
  const inlineOf=h=>[...h.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)].map(m=>m[1]).filter(s=>s.trim());
  assert.deepEqual(inlineOf(read('public/mypage.html')),inlineOf(old('public/mypage.html')),'all inline My Page logic unchanged');
- for(const opt of [{count:0,tickets:0,reports:false},{count:0,tickets:0,reports:false,eligible:true},{count:1},{count:4,diagnosed:true,role:'partner'},{count:2,lang:'ko'}]){
+ for(const opt of [{count:0,tickets:0,reports:false},{count:0,tickets:0,reports:false,eligible:true},{count:1},{count:4,diagnosed:true,role:'partner'},{count:2,lang:'ko'},{count:1,lang:'ko'},{count:4,lang:'ko'}]){
   const dom=new JSDOM(plain,{url:'http://127.0.0.1:3054/mypage',runScripts:'outside-only',pretendToBeVisual:true});const w=dom.window,d=w.document;
   w.eval(bootstrap(opt));for(const s of scripts)w.eval(read('public/'+s));await new Promise(r=>setTimeout(r,70));
   for(const id of idsBefore)assert.equal(d.querySelectorAll('[id="'+id+'"]').length,1,'existing ID retained: '+id);
@@ -90,6 +91,25 @@ async function run(){
   assert.equal(d.getElementById('tab-partner-mode').hidden,opt.role!=='partner');
   assert.equal(d.getElementById('ud-next-language').textContent,opt.count?'EN · English':'');
   assert.equal(d.querySelector('#ud-upcoming #upcoming-booking-list').children.length,Math.max(0,opt.count-1));
+  for(const lang of ['ko','en',opt.lang||'en']) {
+   w.DayOI18n.setLang(lang);await new Promise(r=>setTimeout(r,35));
+   assert.equal(d.getElementById('ud-next-title').textContent,lang==='ko'?'다음 대화':'Next Conversation');
+   assert.deepEqual(Array.from(d.querySelectorAll('[data-ud-tab]')).map(n=>n.textContent),lang==='ko'?['세션','성장','티켓','계정']:['Sessions','Progress','Tickets','Account']);
+   assert.equal(d.querySelector('[data-ud-copy="conversations"]').textContent,lang==='ko'?'대화 일정':'Your conversations');
+   assert.equal(d.getElementById('urgent-session-cancel').textContent,lang==='ko'?'예약 취소':'Cancel');
+   assert.equal(d.querySelector('[data-i18n="mypage.urgent.enter"]').textContent,lang==='ko'?'대화방 입장':'Enter conversation studio');
+   assert.equal(d.getElementById('talkArchiveTitle').textContent,lang==='ko'?'📚 지난 대화 리포트':'📚 Past conversation reports');
+   assert.match(d.getElementById('mypage-greeting').textContent,lang==='ko'?/[가-힣]/:/great|morning|afternoon|evening/);
+   const later=Array.from(d.querySelector('#ud-upcoming #upcoming-booking-list').children);
+   assert.equal(later.length,Math.max(0,opt.count-1));
+   for(const [i,row] of later.entries()) {
+    const at=new Date(w.__udFixture.bookings[i+1].scheduled_at);
+    assert.match(row.textContent,lang==='ko'?/예정된 대화/:/Upcoming chat/);
+    assert.ok(row.textContent.includes(lang==='ko'?(at.getMonth()+1)+'월 '+at.getDate()+'일':(at.getMonth()+1)+'/'+at.getDate()));
+    assert.equal(row.querySelector('button').textContent,lang==='ko'?'예약 취소':'Cancel');
+   }
+  }
+
   assert.ok(d.querySelector('#ud-archive #mypage-card-feed'));assert.ok(d.querySelector('#ud-growth #dayo-monthly-story-host'));assert.ok(d.querySelector('#ud-treats #dayo-tea-table-grid'));assert.ok(d.querySelector('#ud-ticket-summary #user-ticket-count'));assert.ok(d.querySelector('#ud-account-settings #dayoAccountSettings'));assert.ok(d.querySelector('#ud-explore-content #loungeCarousel'));assert.match(d.querySelector('#loungeTrack').textContent,/A warm conversation over coffee/);assert.ok(d.querySelector('#ud-explore-content [data-story-topic]'));assert.equal(d.querySelector('#ud-benefits [data-coupon-wallet]').hidden,!opt.eligible);assert.equal(d.getElementById('mypage-ticket-unit').textContent,opt.lang==='ko'?'장':'');
   // Original handlers remain bound after moving the same nodes.
   d.getElementById('ud-tab-account').click();d.getElementById('edit-nickname-btn').click();assert.equal(d.getElementById('edit-profile-modal').hidden,false);d.getElementById('edit-profile-cancel').click();
@@ -103,6 +123,6 @@ async function run(){
   if(opt.count){w.DayONotifyCommittedBooking=()=>{w.__udFixture.counters.notification++;}; d.getElementById('urgent-session-cancel').click();await new Promise(r=>setTimeout(r,30));assert.equal(w.__udFixture.counters.cancel,1);assert.equal(w.__udFixture.counters.notification,1);assert.equal(w.__udFixture.bookings[0].status,'cancelled');}
   dom.window.close();
  }
- console.log('PASS: User dashboard 0/1/4 bookings, EN/KO, diagnosis states, roles, original IDs/handlers, cancellation, tickets, account dialogs, reports, view events, tab/deep link, mirrors and protected logic.');
+ console.log('PASS: Locale switch EN/KO, nearest booking excluded from later list, later dates preserved, User dashboard 0/1/4 bookings, EN/KO, diagnosis states, roles, original IDs/handlers, cancellation, tickets, account dialogs, reports, view events, tab/deep link, mirrors and protected logic.');
 }
 if(require.main===module)run().then(()=>process.exit(0)).catch(e=>{console.error(e);process.exit(1);});
