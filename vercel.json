@@ -5,6 +5,10 @@
     {
       "source": "/magazine/:id",
       "destination": "https://dayo-sufk.vercel.app/magazine/:id"
+    },
+    {
+      "source": "/_next/static/:path*",
+      "destination": "https://dayo-sufk.vercel.app/_next/static/:path*"
     }
   ],
   "headers": [

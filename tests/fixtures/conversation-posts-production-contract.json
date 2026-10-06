@@ -1,0 +1,153 @@
+{
+  "project_ref": "mmhapsimcngmtefqfrcg",
+  "audited_at": "2026-10-06",
+  "tables": {
+    "articles": "articles",
+    "lounge_posts": "lounge_posts",
+    "site_settings": "site_settings"
+  },
+  "columns": [
+    {
+      "name": "id",
+      "type": "uuid",
+      "default": "gen_random_uuid()",
+      "nullable": "NO"
+    },
+    {
+      "name": "title",
+      "type": "text",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "category",
+      "type": "text",
+      "default": "'대화팁'::text",
+      "nullable": "YES"
+    },
+    {
+      "name": "summary",
+      "type": "text",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "content",
+      "type": "text",
+      "default": null,
+      "nullable": "NO"
+    },
+    {
+      "name": "thumbnail_url",
+      "type": "text",
+      "default": null,
+      "nullable": "YES"
+    },
+    {
+      "name": "is_published",
+      "type": "bool",
+      "default": "true",
+      "nullable": "YES"
+    },
+    {
+      "name": "created_at",
+      "type": "timestamptz",
+      "default": "now()",
+      "nullable": "YES"
+    },
+    {
+      "name": "published",
+      "type": "bool",
+      "default": "true",
+      "nullable": "YES"
+    }
+  ],
+  "policies": [
+    {
+      "cmd": "SELECT",
+      "name": "Anyone can read published articles",
+      "qual": "((is_published = true) OR (auth.role() = 'authenticated'::text))",
+      "check": null,
+      "roles": [
+        "public"
+      ]
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Authenticated users can insert articles",
+      "qual": null,
+      "check": "(auth.role() = 'authenticated'::text)",
+      "roles": [
+        "public"
+      ]
+    },
+    {
+      "cmd": "DELETE",
+      "name": "Authenticated users can delete articles",
+      "qual": "(auth.role() = 'authenticated'::text)",
+      "check": null,
+      "roles": [
+        "public"
+      ]
+    },
+    {
+      "cmd": "SELECT",
+      "name": "Allow public read articles",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "public"
+      ]
+    },
+    {
+      "cmd": "INSERT",
+      "name": "Allow authenticated insert articles",
+      "qual": null,
+      "check": "true",
+      "roles": [
+        "authenticated"
+      ]
+    },
+    {
+      "cmd": "UPDATE",
+      "name": "Allow authenticated update articles",
+      "qual": "true",
+      "check": "true",
+      "roles": [
+        "authenticated"
+      ]
+    },
+    {
+      "cmd": "DELETE",
+      "name": "Allow authenticated delete articles",
+      "qual": "true",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ]
+    }
+  ],
+  "security": {
+    "acl": "{postgres=arwdDxtm/postgres,anon=arwdDxtm/postgres,authenticated=arwdDxtm/postgres,service_role=arwdDxtm/postgres}",
+    "rls": true
+  },
+  "triggers": null,
+  "public_assets": {
+    "public": true,
+    "file_size_limit": null,
+    "allowed_mime_types": null
+  },
+  "admin_helper": {
+    "owner": "postgres",
+    "security_definer": true,
+    "search_path": "",
+    "anon_execute": false,
+    "authenticated_execute": true
+  },
+  "storage_cms_write_audit": {
+    "bucket": "public-assets",
+    "path_prefix": "magazine/",
+    "authenticated_insert_and_update": "bucket-wide before 094",
+    "public_read": true
+  }
+}

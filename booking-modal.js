@@ -1701,6 +1701,8 @@
     return !!(welcome);
   }
 
+  var pendingPostPrefill = null;
+
   function tryOpenPendingBooking() {
     if (!isLoggedIn() || !hasFlag(PENDING_OPEN_KEY)) return;
     if (welcomeOpen()) return;
@@ -1758,14 +1760,22 @@
     reset();
     var draft = loadDraft();
     if (draft) applyDraft(draft);
-    if (opts.resume && getTicketCount() > 0 && state.step === 0 && isStepReady(0)) {
+    var postPrefill = opts.conversationPost || pendingPostPrefill;
+    if (postPrefill) {
+      state.interests = uniqueKeys(postPrefill.interests, INTEREST_IDS, 4);
+      state.purposes = uniqueKeys(postPrefill.purposes, PURPOSE_IDS, 4);
+      state.date = state.time = state.timeKey = state.partner = state.slotId = state.selectedSlot = null;
+      syncChips('interest'); syncChips('purpose'); goTo(0);
+      pendingPostPrefill = null;
+    }
+    if (opts.resume && !postPrefill && getTicketCount() > 0 && state.step === 0 && isStepReady(0)) {
       goTo(3);
     }
     el.overlay.classList.add('is-open');
     if (window.DayOScrollLock) window.DayOScrollLock.lock();
     else document.body.style.overflow = 'hidden';
     el.modal.querySelector('.bk-close').focus();
-    if (!draft) loadRecentPreferences();
+    if (!draft && !postPrefill) loadRecentPreferences();
   }
 
   function requestOpen() {
@@ -1805,6 +1815,14 @@
     var fromQuery = /[?&]booking=open(&|$)/.test(window.location.search);
     var fromHash = window.location.hash === '#booking';
     if (!fromQuery && !fromHash) return;
+    var postKey = new URLSearchParams(window.location.search).get('post');
+    if (postKey && window.DayOConversationPosts) {
+      window.DayOConversationPosts.read(postKey).then(function(post) {
+        if (post) pendingPostPrefill = window.DayOConversationPosts.prefill(post);
+        requestOpen();
+      }).catch(function(){ requestOpen(); });
+      return;
+    }
     requestOpen();
     if (fromQuery && window.history && window.history.replaceState) {
       var clean = window.location.search.replace(/([?&])booking=open(&|$)/, '$1').replace(/[?&]$/, '');

@@ -301,13 +301,12 @@
         bindCopy(settings.hero_section);
         window.__dayoCmsHeroActive = bindRollingCards(settings.hero_section);
       }
-      if (settings.magazine_posts) bindMagazine(settings.magazine_posts);
       if (settings.real_reviews) bindReviews(settings.real_reviews);
-      var articles = await fetchPublishedArticles();
-      if (articles.length) bindMagazine(articles);
     } catch (error) {
       console.warn('[DayO CMS] static fallbacks retained', error);
     }
+    var magazine = document.getElementById('cmsMagazineGrid');
+    if (magazine && window.DayOConversationPosts) await window.DayOConversationPosts.mount(magazine);
   }
 
   function subscribeToHeroChanges() {

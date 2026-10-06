@@ -11,7 +11,7 @@ import { useAdminStore } from "@/store/admin-store";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 
-export function AdminHeader({ title }: { title: string }) {
+export function AdminHeader({ title, compactMobile = false }: { title: string; compactMobile?: boolean }) {
   const router = useRouter();
   const admin = useAdminAuth();
   const { darkMode, toggleDarkMode, sidebarCollapsed } = useAdminStore();
@@ -52,20 +52,23 @@ export function AdminHeader({ title }: { title: string }) {
   return (
     <header className={cn(
       "sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-[#FFFBF4]/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-[#FFFBF4]/95",
-      sidebarCollapsed ? "ml-[68px]" : "ml-64"
+      compactMobile
+        ? sidebarCollapsed ? "ml-0 md:ml-[68px]" : "ml-0 md:ml-64"
+        : sidebarCollapsed ? "ml-[68px]" : "ml-64",
+      compactMobile && "gap-2 px-4 md:px-6"
     )}>
       <div className="flex min-w-0 items-center gap-3">
         <Link href="/admin/dashboard" className="flex shrink-0 items-center">
           <img src="/images/logo_header.png" alt="DayO" className="h-8 w-auto max-w-[8rem] object-contain bg-transparent" />
-          <span className="ml-2 inline-flex flex-col justify-center whitespace-nowrap border-l border-[#EDE4D5] pl-2 text-left leading-[1.2]">
+          <span className={cn("ml-2 inline-flex flex-col justify-center whitespace-nowrap border-l border-[#EDE4D5] pl-2 text-left leading-[1.2]", compactMobile && "hidden md:inline-flex")}>
             <span className="text-[10px] font-semibold tracking-[-0.2px] text-[#57534E]">1:1 Global Culture</span>
             <span className="text-[10px] font-medium tracking-[-0.2px] text-[#78716C]">Conversation Lounge</span>
           </span>
         </Link>
-        <h1 className="truncate text-xl font-semibold text-navy">{title}</h1>
+        <h1 className={cn("truncate text-xl font-semibold text-navy", compactMobile && "text-base md:text-xl")}>{title}</h1>
       </div>
-      <div className="flex items-center gap-3">
-        <Badge variant="coral">Admin</Badge>
+      <div className={cn("flex items-center gap-3", compactMobile && "shrink-0 gap-1 md:gap-3")}>
+        <Badge variant="coral" className={cn(compactMobile && "hidden md:inline-flex")}>Admin</Badge>
         <Button variant="ghost" size="icon" className="relative" title={`긴급 안전 알림 ${urgentCount}건`}>
           <Bell className="h-4 w-4" />
           {urgentCount > 0 && (
@@ -77,15 +80,15 @@ export function AdminHeader({ title }: { title: string }) {
         <Button variant="ghost" size="icon" onClick={toggleDarkMode}>
           {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </Button>
-        <div className="flex items-center gap-2 rounded-full border px-3 py-1.5">
+        <div className={cn("flex items-center gap-2 rounded-full border px-3 py-1.5", compactMobile && "hidden md:flex")}>
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-navy text-xs text-white">
             <User className="h-3.5 w-3.5" />
           </div>
           <span className="max-w-36 truncate text-sm font-medium" title={admin.email}>{admin.displayName}</span>
         </div>
-        <Button variant="ghost" size="sm" onClick={() => void signOut()} disabled={signingOut}>
-          <LogOut className="mr-1.5 h-4 w-4" />
-          로그아웃
+        <Button variant="ghost" size="sm" aria-label="로그아웃" onClick={() => void signOut()} disabled={signingOut}>
+          <LogOut className={cn("mr-1.5 h-4 w-4", compactMobile && "mr-0 md:mr-1.5")} />
+          <span className={cn(compactMobile && "hidden md:inline")}>로그아웃</span>
         </Button>
       </div>
     </header>

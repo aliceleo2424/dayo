@@ -12,8 +12,10 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ImagePlus, Loader2 } from "lucide-react";
+import { ARTICLE_COLUMNS, EMPTY_METADATA, validatePostMetadata, safePostImage, type PostMetadata } from "@/lib/conversation-posts";
+import { PostMetadataFields } from "@/components/admin/post-metadata-fields";
 
-export type ArticleRow = {
+export type ArticleRow = PostMetadata & {
   id: string;
   title: string;
   category: string | null;
@@ -31,21 +33,23 @@ function articlesError(err: { message?: string; code?: string } | null, fallback
   const message = String(err?.message || "");
   const code = String(err?.code || "");
   if (code === "42P01" || /does not exist|relation .*articles/i.test(message)) {
-    return "articles 테이블이 없습니다. 마이그레이션 018과 030을 적용해 주세요.";
+    return "CMS 스키마를 확인해 주세요. 기존 마이그레이션을 재실행하지 마세요.";
   }
   if (code === "42501" || /row-level security|permission denied|RLS/i.test(message)) {
-    return "articles RLS가 쓰기를 막고 있습니다. 관리자 로그인 상태와 마이그레이션 030 적용 여부를 확인해 주세요.";
+    return "관리자 로그인 상태와 CMS 권한을 확인해 주세요.";
   }
+  if (code === "42703" || /column .*does not exist/i.test(message)) return "포스트 확장 스키마(094)가 아직 준비되지 않았습니다.";
   return message || fallback;
 }
 
 const emptyForm = {
+  ...EMPTY_METADATA,
   title: "",
   category: "대화팁",
   summary: "",
   content: "",
   thumbnail_url: "",
-  is_published: true,
+  is_published: false,
 };
 
 export function ArticlesCms() {
@@ -62,10 +66,10 @@ export function ArticlesCms() {
     if (!opts?.silent) setLoading(true);
     const { data, error: err } = await supabase
       .from("articles")
-      .select("id, title, category, summary, content, thumbnail_url, is_published, published, created_at")
+      .select(ARTICLE_COLUMNS)
       .order("created_at", { ascending: false });
     if (err) {
-      setError(articlesError(err, "articles 테이블을 읽을 수 없습니다. 마이그레이션 018·030을 적용해 주세요."));
+      setError(articlesError(err, "포스트를 불러오지 못했습니다."));
       setRows([]);
     } else {
       setError("");
@@ -98,18 +102,19 @@ export function ArticlesCms() {
   function startEdit(row: ArticleRow) {
     setEditingId(row.id);
     setForm({
+      ...EMPTY_METADATA, ...row,
       title: row.title || "",
       category: row.category || "꿀팁",
       summary: row.summary || "",
       content: row.content || "",
       thumbnail_url: row.thumbnail_url || "",
-      is_published: row.is_published !== false,
+      is_published: row.is_published === true,
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async function uploadThumbnail(file: File) {
-    if (!file.type.startsWith("image/")) {
+    if (!["image/jpeg","image/png","image/webp","image/avif"].includes(file.type)) {
       setError("이미지 파일만 업로드할 수 있습니다.");
       return;
     }
@@ -141,6 +146,9 @@ export function ArticlesCms() {
   }
 
   async function publish() {
+    const metadataError = validatePostMetadata(form);
+    if (metadataError) { setError(metadataError); return; }
+    if (form.thumbnail_url.trim() && !safePostImage(form.thumbnail_url)) { setError("이미지는 HTTPS URL을 사용해 주세요."); return; }
     if (!form.title.trim() || !form.content.trim()) {
       setError("제목과 본문은 필수입니다.");
       return;
@@ -149,6 +157,9 @@ export function ArticlesCms() {
     setError("");
     setNotice("");
     const payload = {
+      slug:form.slug,post_type:form.post_type,author_type:form.author_type,author_display_name:form.author_display_name.trim(),
+      partner_id:form.partner_id,country:form.country,language:form.language,interests:form.interests,purposes:form.purposes,
+      featured:form.featured,sort_order:form.sort_order,
       title: form.title.trim(),
       category: form.category || "대화팁",
       summary: form.summary.trim() || null,
@@ -157,13 +168,13 @@ export function ArticlesCms() {
       is_published: form.is_published,
       published: form.is_published,
     };
-    const ARTICLES_COLS = "id, title, category, summary, content, thumbnail_url, is_published, published, created_at";
+    const ARTICLES_COLS = ARTICLE_COLUMNS;
     const result = editingId
       ? await supabase.from("articles").update(payload).eq("id", editingId).select(ARTICLES_COLS)
       : await supabase.from("articles").insert({ ...payload, created_at: new Date().toISOString() }).select(ARTICLES_COLS);
     setSaving(false);
     if (result.error) {
-      const message = articlesError(result.error, "발행에 실패했습니다. 마이그레이션 030을 적용해 주세요.");
+      const message = articlesError(result.error, "포스트를 저장하지 못했습니다. CMS 상태를 확인해 주세요.");
       setError(message);
       window.alert(`아티클을 저장하지 못했습니다.\n${message}`);
       await load({ silent: true });
@@ -173,7 +184,7 @@ export function ArticlesCms() {
     if (saved) {
       setRows((prev) => [saved, ...prev.filter((row) => row.id !== saved.id)]);
     }
-    const success = editingId ? "🎉 아티클이 성공적으로 수정되었습니다!" : "🎉 아티클이 성공적으로 발행되었습니다!";
+    const success = form.is_published ? "포스트가 게시되었습니다." : "초안이 저장되었습니다.";
     setNotice(success);
     window.setTimeout(() => setNotice((current) => current === success ? "" : current), 4500);
     resetForm();
@@ -203,13 +214,13 @@ export function ArticlesCms() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6 break-keep">
       <Card>
-        <CardHeader>
+        <CardHeader className="p-4 sm:p-6">
           <CardTitle>{editingId ? "아티클 수정" : "새 아티클 작성"}</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
+        <CardContent className="space-y-4 p-4 pt-0 sm:p-6 sm:pt-0">
+          <div className="grid min-w-0 gap-4 sm:grid-cols-2 [&>div]:min-w-0">
             <div className="sm:col-span-2">
               <Label htmlFor="article-title">제목</Label>
               <Input
@@ -281,31 +292,32 @@ export function ArticlesCms() {
               />
             </div>
           </div>
+          <PostMetadataFields value={form} onChange={next=>setForm(current=>({...current,...next}))}/>
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
               <Switch checked={form.is_published} onCheckedChange={(v) => setForm((f) => ({ ...f, is_published: v }))} />
-              <span className="text-sm">바로 발행</span>
+              <span className="text-sm">게시 (해제하면 초안)</span>
             </div>
             <Button variant="coral" onClick={publish} disabled={saving || uploading}>
-              {saving ? "저장 중…" : "발행하기"}
+              {saving ? "저장 중…" : form.is_published ? "게시하기" : "초안 저장"}
             </Button>
             {editingId && (
               <Button variant="outline" onClick={resetForm}>새 글로 전환</Button>
             )}
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
-          {notice && <div className="fixed right-6 top-6 z-[100] rounded-xl bg-emerald-600 px-5 py-4 text-sm font-semibold text-white shadow-xl">{notice}</div>}
+          {notice && <div className="fixed left-4 right-4 top-6 z-[100] rounded-xl bg-emerald-600 px-5 py-4 text-sm font-semibold text-white shadow-xl sm:left-auto sm:right-6">{notice}</div>}
         </CardContent>
       </Card>
 
       <Card>
-        <CardHeader><CardTitle>작성된 아티클</CardTitle></CardHeader>
-        <CardContent>
+        <CardHeader className="p-4 sm:p-6"><CardTitle>작성된 아티클</CardTitle></CardHeader>
+        <CardContent className="min-w-0 p-4 pt-0 sm:p-6 sm:pt-0">
           {loading ? (
             <p className="text-sm text-muted-foreground">불러오는 중…</p>
           ) : (
             <div className="overflow-x-auto rounded-xl border">
-              <table className="w-full text-sm">
+              <table className="w-full min-w-[640px] text-sm">
                 <thead>
                   <tr className="border-b bg-muted/50">
                     <th className="px-4 py-3 text-left font-medium text-muted-foreground">제목</th>
@@ -322,7 +334,7 @@ export function ArticlesCms() {
                       <td className="px-4 py-3"><Badge variant="outline">{row.category || "꿀팁"}</Badge></td>
                       <td className="px-4 py-3 text-muted-foreground">{formatDate(row.created_at)}</td>
                       <td className="px-4 py-3">
-                        <Switch checked={row.is_published !== false} onCheckedChange={(v) => togglePublished(row, v)} />
+                        <Switch checked={row.is_published === true} onCheckedChange={(v) => togglePublished(row, v)} />
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex gap-2">

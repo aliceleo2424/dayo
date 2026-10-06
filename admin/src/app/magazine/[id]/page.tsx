@@ -2,45 +2,39 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
 import type { ReactNode } from "react";
+import { INTERESTS, INTEREST_LABELS, safePostImage } from "@/lib/conversation-posts";
+import { PostBookingCta } from "@/components/post-booking-cta";
 
 type Article = {
   id: string;
   title: string;
-  category: string | null;
+  post_type: string;
+  slug: string | null;
+  author_type: string;
+  author_display_name: string;
+  country: string | null;
+  language: string | null;
+  interests: string[];
+  published_at: string | null;
   summary: string | null;
   content: string;
   thumbnail_url: string | null;
   created_at: string;
 };
 
-const siteUrl = "https://dayotalk.com";
-const supabaseUrl = String(process.env.NEXT_PUBLIC_SUPABASE_URL || "https://mmhapsimcngmtefqfrcg.supabase.co")
-  .replace(/\/rest\/v1\/?$/i, "")
-  .replace(/\/+$/, "");
-const supabaseAnonKey = String(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "").trim();
+const siteUrl = "https://www.dayotalk.com";
+export const dynamic = "force-dynamic";
 
 async function fetchArticle(id: string): Promise<Article | null> {
-  if (!supabaseAnonKey) return null;
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    global: {
-      fetch: (input, init) => fetch(input, { ...init, cache: "no-store" }),
-    },
-  });
-  const { data, error } = await supabase
-    .from("articles")
-    .select("id, title, category, summary, content, thumbnail_url, created_at")
-    .eq("id", id)
-    .eq("is_published", true)
-    .single();
-
+  const { data, error } = await supabase.rpc("get_published_conversation_post", { p_key: id });
   if (error || !data) return null;
-  return data as Article;
+  return { ...data, summary: data.excerpt, content: data.body, thumbnail_url: safePostImage(data.cover_image), created_at: data.published_at } as Article;
 }
 
-function formatDate(value: string) {
+function formatDate(value: string | null) {
+  if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
   return new Intl.DateTimeFormat("ko-KR", {
@@ -50,11 +44,8 @@ function formatDate(value: string) {
   }).format(date).replace(/\s/g, "").replace(/\.$/, "");
 }
 
-function categoryLabel(category: string | null) {
-  const value = String(category || "대화팁");
-  if (/여행/.test(value)) return `✈️ ${value}`;
-  if (/문화/.test(value)) return `🌏 ${value}`;
-  return `☕ ${value}`;
+function categoryLabel(type: string) {
+  return ({ partner_story: "파트너 이야기", culture_note: "문화 이야기", conversation_starter: "대화의 시작" } as Record<string,string>)[type] || "대화 이야기";
 }
 
 function inlineMarkdown(value: string): ReactNode[] {
@@ -62,7 +53,7 @@ function inlineMarkdown(value: string): ReactNode[] {
     if (/^\*\*[^*]+\*\*$/.test(part)) return <strong key={index} className="font-bold text-[#292524]">{part.slice(2, -2)}</strong>;
     if (/^`[^`]+`$/.test(part)) return <code key={index} className="rounded bg-[#F3EEE8] px-1.5 py-0.5 text-[0.9em]">{part.slice(1, -1)}</code>;
     const link = part.match(/^\[([^\]]+)\]\(((?:https?:\/\/|\/)[^)]+)\)$/);
-    if (link) return <a key={index} href={link[2]} className="font-semibold text-[#D95F49] underline underline-offset-4">{link[1]}</a>;
+    if (link) return <a key={index} href={link[2]} className="font-semibold text-[#5F7D63] underline underline-offset-4">{link[1]}</a>;
     return part;
   });
 }
@@ -89,7 +80,7 @@ function renderMarkdown(markdown: string) {
     if (/^>\s?/.test(line)) {
       const quote: string[] = [];
       while (index < lines.length && /^>\s?/.test(lines[index])) quote.push(lines[index++].replace(/^>\s?/, ""));
-      blocks.push(<blockquote key={`quote-${index}`} className="my-8 border-l-4 border-[#FF8B73] bg-[#FFF7F2] px-5 py-4 text-[#57534E]">{inlineMarkdown(quote.join("\n"))}</blockquote>);
+      blocks.push(<blockquote key={`quote-${index}`} className="my-8 border-l-4 border-[#5F7D63] bg-[#FFFBF4] px-5 py-4 text-[#57534E]">{inlineMarkdown(quote.join("\n"))}</blockquote>);
       continue;
     }
     if (/^\s*[-*]\s+/.test(line)) {
@@ -121,7 +112,8 @@ export async function generateMetadata(
   if (!article) return { title: "아티클을 찾을 수 없습니다 | DayO 매거진" };
 
   const description = article.summary?.trim() || article.content.replace(/[#*_>`-]/g, "").trim().slice(0, 150);
-  const url = `${siteUrl}/magazine/${article.id}`;
+  const url = `${siteUrl}/magazine/${encodeURIComponent(article.slug || article.id)}`;
+  const image = article.thumbnail_url || `${siteUrl}/images/dayo-social-preview-20261005.png`;
   return {
     title: `${article.title} | DayO 라운지 매거진`,
     description,
@@ -133,14 +125,14 @@ export async function generateMetadata(
       title: article.title,
       description,
       url,
-      publishedTime: article.created_at,
-      images: article.thumbnail_url ? [{ url: article.thumbnail_url, alt: article.title }] : [],
+      publishedTime: article.published_at || undefined,
+      images: [{ url: image, alt: article.title }],
     },
     twitter: {
-      card: article.thumbnail_url ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title: article.title,
       description,
-      images: article.thumbnail_url ? [article.thumbnail_url] : [],
+      images: [image],
     },
   };
 }
@@ -157,7 +149,7 @@ export default async function MagazineArticlePage(
       <header className="border-b border-[#EDE4D5] bg-[#FFFBF4]">
         <div className="mx-auto flex h-16 max-w-6xl items-center px-4 sm:px-6">
           <Link href={siteUrl} className="flex items-center">
-            <Image src="/images/logo_header.png" alt="DayO" width={1072} height={599} className="h-8 w-auto object-contain" priority />
+            <Image src={`${siteUrl}/images/logo_header.png`} alt="DayO" width={1072} height={599} className="h-8 w-auto object-contain" priority unoptimized />
             <span className="ml-2 inline-flex flex-col justify-center whitespace-nowrap border-l border-[#EDE4D5] pl-2 text-left text-[10px] leading-[1.2]">
               <span className="font-semibold tracking-[-0.2px] text-[#57534E]">1:1 Global Culture</span>
               <span className="font-medium tracking-[-0.2px] text-[#78716C]">Conversation Lounge</span>
@@ -169,8 +161,8 @@ export default async function MagazineArticlePage(
       <main className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-16">
         <article>
           <header className="mx-auto max-w-3xl text-center">
-            <span className="inline-flex rounded-full bg-[#FFF0EB] px-3 py-1 text-sm font-bold text-[#D95F49]">
-              {categoryLabel(article.category)}
+            <span className="inline-flex rounded-full bg-[#FFFBF4] px-3 py-1 text-sm font-bold text-[#5F7D63]">
+              {categoryLabel(article.post_type)}
             </span>
             <h1 className="mt-5 break-keep text-3xl font-bold leading-tight tracking-[-0.03em] text-[#292524] sm:text-5xl">
               {article.title}
@@ -181,7 +173,8 @@ export default async function MagazineArticlePage(
               </p>
             ) : null}
             <p className="mt-5 text-sm text-[#A8A29E]">
-              {formatDate(article.created_at)} · DayO 매거진 에디터
+              {formatDate(article.published_at || article.created_at)} · {article.author_display_name || "DayO"}{article.author_type === "partner" ? " · 파트너" : ""}
+              {[article.country, article.language?.toUpperCase()].filter(Boolean).map(value => <span key={value}> · {value}</span>)}
             </p>
           </header>
 
@@ -196,7 +189,7 @@ export default async function MagazineArticlePage(
             </div>
           ) : null}
 
-          <div className="mx-auto mt-12 max-w-3xl text-[16px] leading-[1.9] text-[#44403C] sm:text-[18px]">
+          <div className="mx-auto mt-12 max-w-3xl break-words [overflow-wrap:anywhere] text-[16px] leading-[1.9] text-[#44403C] sm:text-[18px]">
             {renderMarkdown(article.content)}
           </div>
 
@@ -205,14 +198,10 @@ export default async function MagazineArticlePage(
           </aside>
         </article>
 
-        <section className="mx-auto mt-12 max-w-3xl rounded-3xl bg-gradient-to-br from-[#FFF0EB] to-[#FFF7DC] px-6 py-9 text-center sm:px-10">
-          <h2 className="break-keep text-xl font-bold text-[#292524] sm:text-2xl">
-            오늘 읽은 표현, 원어민 파트너와 직접 써보고 싶다면?
-          </h2>
-          <a href={`${siteUrl}/#partners`} className="mt-6 inline-flex rounded-full bg-[#FF755E] px-6 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#EB654F]">
-            🎟️ 첫 세션 9,900원으로 대화 시작하기
-          </a>
-        </section>
+        <div className="mx-auto mt-8 flex max-w-3xl flex-wrap gap-2">
+          {(article.interests || []).filter(key => INTERESTS.includes(key as typeof INTERESTS[number])).map(key => <span key={key} className="rounded-full bg-[#FFFBF4] px-3 py-1 text-sm text-[#5F7D63]">{INTEREST_LABELS[INTERESTS.indexOf(key as typeof INTERESTS[number])]}</span>)}
+        </div>
+        <PostBookingCta postKey={article.slug || article.id} postId={article.id} />
 
         <div className="mt-10 text-center">
           <Link href={siteUrl} className="text-sm font-semibold text-[#78716C] underline underline-offset-4 hover:text-[#44403C]">

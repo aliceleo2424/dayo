@@ -1,4 +1,4 @@
-/* DayO 라운지 — articles 발행글 그리드 (없으면 lounge_posts fallback)
+/* DayO 라운지 — published CMS RPC 그리드
  * 그리드 모드(#loungeDots 없음)에서는 슬라이드 초기화만 스킵합니다.
  */
 (function () {
@@ -67,7 +67,12 @@
   }
 
   function renderEmpty(track) {
-    renderPosts(track, fallbackTips());
+    var p = document.createElement('p');
+    p.className = 'post-empty';
+    p.textContent = window.DayOI18n && window.DayOI18n.getLang() === 'EN'
+      ? 'Stories could not be loaded. Please try again shortly.'
+      : '이야기를 불러오지 못했어요. 잠시 후 다시 확인해 주세요.';
+    track.replaceChildren(p);
   }
 
   function renderPosts(track, posts) {
@@ -105,32 +110,11 @@
   async function loadLoungePosts() {
     var track = document.getElementById('loungeTrack');
     if (!track) return;
-    var supabase = getLoungeClient();
-    if (!supabase) {
-      renderEmpty(track);
+    if (window.DayOConversationPosts) {
+      await window.DayOConversationPosts.mount(track);
       return;
     }
-
-    try {
-      var query = await supabase
-        .from('articles')
-        .select('*')
-        .eq('is_published', true)
-        .order('created_at', { ascending: false })
-        .limit(4);
-      if (query.error) {
-        query = await supabase
-          .from('lounge_posts')
-          .select('*')
-          .eq('is_published', true)
-          .order('created_at', { ascending: false });
-      }
-      if (query.error) throw query.error;
-      renderPosts(track, query.data);
-    } catch (err) {
-      console.warn('[DayO] lounge articles load failed', err);
-      renderEmpty(track);
-    }
+    renderEmpty(track);
   }
 
   function initLoungeCarousel() {

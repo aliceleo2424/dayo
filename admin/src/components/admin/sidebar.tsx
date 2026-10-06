@@ -49,7 +49,8 @@ export function AdminSidebar() {
   return (
     <aside className={cn(
       "fixed left-0 top-0 z-40 flex h-screen flex-col border-r bg-[#5F7D63] text-white transition-all duration-300",
-      sidebarCollapsed ? "w-[68px]" : "w-64"
+      sidebarCollapsed ? "w-[68px]" : "w-64",
+      pathname === "/admin/articles" && "hidden md:flex"
     )}>
       <div className="flex h-16 items-center justify-between gap-2 border-b border-white/10 px-3">
         {!sidebarCollapsed && (
