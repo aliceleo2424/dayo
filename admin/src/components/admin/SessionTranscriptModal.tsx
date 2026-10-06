@@ -368,6 +368,8 @@ function BookingCsNoteEditor({ session }: { session: SessionTranscriptContext })
 
 export function SessionTranscriptModal({ open, session, onClose }: Props) {
   const [loading, setLoading] = useState(false);
+  const [retryVersion, setRetryVersion] = useState(0);
+  const [failedBookingId, setFailedBookingId] = useState<string | null>(null);
   const [detailState, setDetailState] = useState<{ bookingId: string; data: SessionTranscriptContext } | null>(null);
   const [bundleState, setBundleState] = useState<{ bookingId: string; data: SessionTranscriptBundle } | null>(null);
 
@@ -375,10 +377,13 @@ export function SessionTranscriptModal({ open, session, onClose }: Props) {
     if (!open || !session?.id) {
       setDetailState(null);
       setBundleState(null);
+      setFailedBookingId(null);
       return;
     }
     let cancelled = false;
     setLoading(true);
+    setFailedBookingId(null);
+    setBundleState(null);
     void (async () => {
       const detail = await fetchSessionDetailContext(session.id).catch(() => session);
       if (cancelled) return;
@@ -387,21 +392,7 @@ export function SessionTranscriptModal({ open, session, onClose }: Props) {
         const data = await fetchSessionTranscriptBundle(detail);
         if (!cancelled) setBundleState({ bookingId: session.id, data });
       } catch {
-        if (!cancelled) setBundleState({ bookingId: session.id, data: {
-            utterances: [],
-            report: {
-              rating: detail.rating ?? null,
-              review: detail.review ?? null,
-              wordHelpCount: 0,
-              wordHelpVocab: [],
-              corrections: [],
-              partnerStamp: null,
-              partnerComment: null,
-              hasReport: !!(detail.rating != null || detail.review),
-            },
-            startedAt: detail.scheduled_at || null,
-            endedAt: null,
-          } });
+        if (!cancelled) setFailedBookingId(session.id);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -409,7 +400,7 @@ export function SessionTranscriptModal({ open, session, onClose }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [open, session]);
+  }, [open, session, retryVersion]);
 
   useEffect(() => {
     if (!open) return;
@@ -424,7 +415,8 @@ export function SessionTranscriptModal({ open, session, onClose }: Props) {
 
   const detail = detailState?.bookingId === session.id ? detailState.data : null;
   const bundle = bundleState?.bookingId === session.id ? bundleState.data : null;
-  const sessionLoading = loading || !bundle;
+  const loadFailed = failedBookingId === session.id;
+  const sessionLoading = loading || (!bundle && !loadFailed);
   const learnerName = detail?.learnerName || "유저";
   const partnerName = detail?.partnerName || "파트너";
   const status = bookingStatusLabel(detail?.status);
@@ -464,9 +456,15 @@ export function SessionTranscriptModal({ open, session, onClose }: Props) {
             <h3 className="mb-3 text-sm font-semibold text-[#44403C]">실시간 발화 타임라인</h3>
             {sessionLoading ? (
               <div className="h-40 animate-pulse rounded-xl bg-muted" />
+            ) : loadFailed ? (
+              <div role="alert" className="rounded-2xl border bg-white px-4 py-8 text-center text-sm">
+                <p>대화 기록을 불러오지 못했습니다.</p>
+                <Button type="button" variant="outline" className="mt-3" onClick={() => setRetryVersion(value => value + 1)}>다시 시도</Button>
+              </div>
             ) : !bundle?.utterances.length ? (
               <div className="rounded-2xl border border-dashed bg-white px-4 py-12 text-center text-sm text-muted-foreground">
-                이 세션의 저장된 대화 기록이 없습니다.
+                <p>이 세션의 저장된 대화 기록이 없습니다.</p>
+                <Button type="button" variant="outline" className="mt-3" onClick={() => setRetryVersion(value => value + 1)}>다시 시도</Button>
               </div>
             ) : (
               <div className="space-y-3 pb-4">
@@ -487,6 +485,8 @@ export function SessionTranscriptModal({ open, session, onClose }: Props) {
             <h3 className="mb-3 text-sm font-semibold text-[#44403C]">AI 분석 요약 & 세션 리포트</h3>
             {sessionLoading ? (
               <div className="h-40 animate-pulse rounded-xl bg-muted" />
+            ) : loadFailed ? (
+              <p className="text-sm text-muted-foreground">대화 기록과 리포트를 다시 불러와 주세요.</p>
             ) : (
               <ReportPanel
                 report={

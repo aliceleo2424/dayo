@@ -985,10 +985,14 @@ export async function fetchSessionTranscriptBundle(
   // fragments, participant history, or partner names to identify a session.
   for (const table of ["session_logs", "session_transcripts"]) {
     const result = await supabase.from(table).select("*").eq("booking_id", session.id);
-    if (!result.error) {
-      const rows = (result.data || []) as Record<string, unknown>[];
-      logCandidates.push(...rows.filter((row) => row.booking_id === session.id));
+    if (result.error) {
+      // Only a missing optional legacy table is compatible with no records.
+      // Network, permission and canonical-query failures must remain errors.
+      if (table === "session_transcripts" && ["42P01", "PGRST205"].includes(result.error.code)) continue;
+      throw new Error("대화 기록을 불러오지 못했습니다.");
     }
+    const rows = (result.data || []) as Record<string, unknown>[];
+    logCandidates.push(...rows.filter((row) => row.booking_id === session.id));
     if (logCandidates.length) break;
   }
 
@@ -1011,7 +1015,8 @@ export async function fetchSessionTranscriptBundle(
 
   let report = { ...emptyReport };
   const byBooking = await supabase.from("session_reports").select("*").eq("booking_id", session.id).maybeSingle();
-  const reportRow = !byBooking.error && byBooking.data?.booking_id === session.id
+  if (byBooking.error) throw new Error("대화 기록을 불러오지 못했습니다.");
+  const reportRow = byBooking.data?.booking_id === session.id
     ? byBooking.data as Record<string, unknown> : null;
 
   if (reportRow) {
