@@ -103,10 +103,8 @@
     var payLabel=label('p','Estimated activity pay','예상 활동 수익');payLabel.className='stat-label';
     var payValue=document.createElement('p');payValue.className='stat-value';payValue.textContent='…';payCard.append(payLabel,payValue);stats.append(payCard);
     var profilePanel=panel('pd-profile',[profile],[profileInfo]);
-    // Local contract preview only; production remains gated until Profiles Security work completes.
-    if(['localhost','127.0.0.1','[::1]'].includes(window.location.hostname)){
-      var conversationPreview=document.createElement('script');conversationPreview.src='partner-conversation-profile.js';document.head.append(conversationPreview);
-    }
+    // Owner-only persistent conversation preferences, loaded after the Lounge is mounted.
+    var conversationProfile=document.createElement('script');conversationProfile.src='partner-conversation-profile.js';document.head.append(conversationProfile);
     var past=card('Past Sessions','지난 대화','Loading recorded conversations…','대화 기록을 불러오는 중…');
     var pastList=document.createElement('ul');pastList.className='pd-past-list';past.append(pastList);
     var pastPartnerId=null,pastRun=0,pastRows=[];

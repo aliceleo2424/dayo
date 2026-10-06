@@ -30,17 +30,20 @@ Object.assign(api.state, plain(prefs), {koreanHelp:'needed',style:'encourage',pu
 const snapshot=api.preferenceSnapshot();
 assert.equal(snapshot.koreanSupport,'required');
 assert.equal(snapshot.conversationStyle,'encourage');
-assert.equal(snapshot.brief.chat_request,'praise');
-assert.equal(snapshot.brief.partner_preference,null,'no unsupported encourage enum in 062 payload');
+assert.equal(snapshot.brief.schema_version,1);
+assert.equal(snapshot.brief.conversation_style,'encourage');
+assert.equal(snapshot.brief.korean_support_preference,'required');
+assert.equal(snapshot.brief.chat_request,undefined);
+assert.equal(snapshot.brief.partner_preference,undefined);
 assert.deepEqual(plain(snapshot.brief.interests),['movies']);
 api.state.interests.push('music');
 assert.deepEqual(plain(snapshot.brief.interests),['movies'],'snapshot array does not follow later edits');
 assert.equal(JSON.stringify(previous),original,'previous server row is never mutated');
 Object.assign(api.state,{language:'ko',koreanHelp:null});
 assert.equal(api.isStepReady(0),true,'KO requires no Korean help choice');
-assert.equal(api.preferenceSnapshot().koreanSupport,null,'KO does not fabricate any');
+assert.equal(api.preferenceSnapshot().koreanSupport,'any','KO skips the help question and explicitly stores unrestricted support');
 const baseline=execFileSync('git',['show','HEAD:public/booking-modal.js'],{cwd:root,encoding:'utf8'});
-for(const name of ['fetchDateAvailability','loadDateAvailability','loadAvailablePartners','derivePartnersForSelectedTime','partnerMatchesCriteria','isInternalBookingTest','canBypassBookingLeadTime','isBookableStart','requiresNoRefundWarning','bookingSlotStartMs','isFutureThirtyMinuteConcreteSlot','getTicketCount','needsTicketTopup','ensureLoggedInForBooking','requestOpen','routeToTicketTopup','persistLearningLanguage']) {
+for(const name of ['fetchDateAvailability','partnerMatchesCriteria','isInternalBookingTest','canBypassBookingLeadTime','isBookableStart','requiresNoRefundWarning','bookingSlotStartMs','isFutureThirtyMinuteConcreteSlot','getTicketCount','needsTicketTopup','ensureLoggedInForBooking','requestOpen','routeToTicketTopup','persistLearningLanguage']) {
   const rx=new RegExp('(?:async )?function '+name+'\\([^)]*\\) \\{[\\s\\S]*?\\n  \\}');
   assert.ok(source.match(rx),name);
   const actualFunction=source.match(rx)[0].replace(/\r\n/g,'\n'),oldFunction=baseline.match(rx)[0];

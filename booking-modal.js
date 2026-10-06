@@ -9,7 +9,7 @@
 
   var LANG_IDS = ['en', 'es', 'fr', 'ja', 'zh', 'vi', 'de', 'it', 'ru', 'ko'];
   var ACTIVE_LANG_IDS = ['en', 'es', 'fr', 'ko'];
-  var PURPOSE_IDS = ['travel', 'opic', 'abroad', 'casual'];
+  var PURPOSE_IDS = ['travel', 'work_school', 'abroad', 'casual'];
   var INTEREST_IDS = ['drama', 'movies', 'youtube', 'music', 'travel', 'food_cafe', 'exercise', 'games', 'fashion_beauty', 'pets', 'books_webtoon', 'work_school'];
   var STYLE_IDS = ['slow', 'fast', 'correct', 'encourage'];
   // Keep semantic section IDs: timing/slot code continues to use its original IDs.
@@ -35,7 +35,7 @@
   }
 
   function PURPOSES() {
-    var labels = [ux('여행 · 일상', 'Travel & everyday life'), ux('요즘 나의 일상', 'My everyday life'), ux('워홀 · 유학 준비', 'Working holiday & study abroad'), ux('자유 수다', 'Casual conversation')];
+    var labels = [ux('여행 · 일상', 'Travel & everyday life'), ux('일 · 학교 생활', 'Work & school life'), ux('워홀 · 유학 준비', 'Working holiday & study abroad'), ux('자유 수다', 'Casual conversation')];
     return PURPOSE_IDS.map(function (id, i) { return { id: id, label: labels[i] }; });
   }
 
@@ -68,6 +68,8 @@
   var liveSlots = [];
   var liveTimes = [];
   var partnersLoaded = false;
+  var partnerCriteriaKey = null, partnerLoadSeq = 0;
+  var partnerRequest = null, partnerRequestKey = null;
   var partnersLoading = false;
   var availabilityLoadSeq = 0;
   var calendarSeq = 0, calendarKey = '', calendarRows = null, calendarLoading = false, calendarError = false;
@@ -325,6 +327,15 @@
       if (!user || auth.error || (currentUserId() && currentUserId() !== user.id)) return;
       bookingOwner = user.id;
       var booking = await readRecentBooking(client, user.id);
+      var defaults = await client.from('user_conversation_preferences')
+        .select('language,korean_support_preference,conversation_style,purposes,interests,source_booking_id').eq('user_id', user.id).maybeSingle();
+      // Only defaults linked to an actually confirmed booking can replace its choices.
+      var saved = !defaults.error && defaults.data;
+      if (saved && saved.source_booking_id && (!booking || saved.source_booking_id === booking.id)) {
+        booking = { id: saved.source_booking_id, language: saved.language, conversation_brief: {schema_version: 1,
+          korean_support_preference: saved.korean_support_preference, conversation_style: saved.conversation_style,
+          purposes: saved.purposes, interests: saved.interests} };
+      }
       if (seq !== recentSeq || currentUserId() && currentUserId() !== user.id || !booking) return;
       var supplement;
       try { supplement = JSON.parse(storageGet(RECENT_KEY + user.id) || 'null'); } catch (e) { /* no supplement */ }
@@ -349,14 +360,13 @@
   function preferenceSnapshot() {
     return {
       language: state.language,
-      koreanSupport: state.language === 'ko' ? null : state.koreanHelp === 'needed' ? 'required' : state.koreanHelp === 'any' ? 'any' : null,
+      koreanSupport: state.language === 'ko' ? 'any' : state.koreanHelp === 'needed' ? 'required' : state.koreanHelp === 'any' ? 'any' : null,
       conversationStyle: state.style,
       brief: {
+        schema_version: 1,
+        korean_support_preference: state.language === 'ko' ? 'any' : state.koreanHelp === 'needed' ? 'required' : state.koreanHelp === 'any' ? 'any' : null,
         purposes: state.purposes.slice(), interests: state.interests.slice(),
-        chat_style: state.chatStyle,
-        chat_request: state.style === 'encourage' ? 'praise' : state.chatRequest,
-        // 062 still rejects canonical v1 keys/encourage here. Keep its accepted legacy contract.
-        partner_preference: state.style === 'encourage' ? null : state.style
+        conversation_style: state.style
       }
     };
   }
@@ -647,7 +657,6 @@
     el.nextBtn.addEventListener('click', function () {
       if (recentSummary) {
         if (!isStepReady(0) || !isStepReady(3)) return;
-        persistLearningLanguage(state.language);
         recentSummary = false;
         state.step = 3;
         goTo(1);
@@ -655,7 +664,6 @@
       }
       if (state.step === 4) { confirmBooking(); return; }
       if (state.step === 0 && isStepReady(0)) {
-        persistLearningLanguage(state.language);
         if (needsTicketTopup()) {
           routeToTicketTopup();
           return;
@@ -807,7 +815,7 @@
     calendarKey=key;calendarRows=null;calendarLoading=true;calendarError=false;
     var seq=++calendarSeq,language=state.language,help=state.koreanHelp;
     try {
-      if (!partnersLoaded) await loadAvailablePartners();
+      await ensureMatchingPartners();
       var ids=allPartners.filter(function(p){return partnerMatchesCriteria(p,language,help);}).map(function(p){return String(p.id);});
       var rows=await loadCalendarSlots(ids);
       if(seq!==calendarSeq||key!==calendarKey)return;
@@ -950,6 +958,7 @@
         ? row.conversation_languages.filter(isActiveBookingLang)
         : [],
       korean_support_level: typeof row.korean_support_level === 'string' ? row.korean_support_level : null,
+      conversation_preferences: row.conversation_preferences || null,
       isTest: isTestPartnerId(id) || String(name).indexOf('DayO Test Partner') === 0,
       initial: initial
     };
@@ -966,24 +975,34 @@
     });
   }
 
+  async function ensureMatchingPartners() {
+    var key = currentUserId() + '|' + state.language + '|' + state.koreanHelp;
+    if (partnersLoaded && partnerCriteriaKey === key) return allPartners;
+    if (!partnerRequest || partnerRequestKey !== key) {
+      partnerRequestKey = key;
+      partnerRequest = loadAvailablePartners();
+    }
+    var pending = partnerRequest;
+    try { return await pending; }
+    finally { if (partnerRequest === pending) { partnerRequest = null; partnerRequestKey = null; } }
+  }
+
   async function loadAvailablePartners() {
     var supabase = dbClient();
-    var partners = [];
+    var partners = [], seq = ++partnerLoadSeq, language = state.language, help = state.koreanHelp, owner = currentUserId();
+    var support = language === 'ko' ? 'any' : help === 'needed' ? 'required' : help === 'any' ? 'any' : null;
+    if (!language || !support) return [];
     if (supabase) {
-      var res = await supabase.rpc('list_public_partner_profiles');
-      if (res.error && res.error.code === 'PGRST202') {
-        // Older production schemas may not expose the public partner-list RPC yet.
-        // Read only display fields through the existing profiles SELECT policy.
-        res = await supabase.from('profiles')
-          .select('id, user_id, nickname, avatar_url, bio, role')
-          .eq('role', 'partner');
-      }
+      var res = await supabase.rpc('list_matching_partner_profiles', {p_language: language, p_korean_support_preference: support});
       if (res.error) {
         console.error('파트너 로드 실패:', res.error);
+        throw res.error;
       } else {
         partners = (res.data || []).map(normalizePartner);
       }
     }
+    if (seq !== partnerLoadSeq || language !== state.language || help !== state.koreanHelp || owner !== currentUserId()) return [];
+    partnerCriteriaKey = owner + '|' + language + '|' + help;
     allPartners = partners.filter(Boolean);
     livePartners = allPartners.slice();
     partnersLoaded = true;
@@ -1097,7 +1116,7 @@
     el.slots.hidden = false;
     container.innerHTML = '<div class="bk-slot-empty">' + t('book.slotsLoading') + '</div>';
     try {
-      if (!partnersLoaded) await loadAvailablePartners();
+      await ensureMatchingPartners();
       var eligiblePartnerIds = allPartners.filter(function (partner) {
         return partnerMatchesCriteria(partner, requestedLanguage, requestedKoreanHelp);
       }).map(function (partner) { return String(partner.id); });
@@ -1137,7 +1156,7 @@
       livePartners = [];
       return livePartners;
     }
-    livePartners = partnersForTime(liveSlots, allPartners, state.timeKey);
+    livePartners = rankPartners(partnersForTime(liveSlots, allPartners, state.timeKey), preferenceSnapshot().brief);
     if (state.partner && !livePartners.some(function (partner) { return String(partner.id) === String(state.partner); })) {
       state.partner = null;
       state.slotId = null;
@@ -1152,6 +1171,21 @@
       if (slotStartKey(slot.slot_time) === timeKey) partnerIds[String(slot.partner_id)] = true;
     });
     return (partners || []).filter(function (partner) { return !!partnerIds[String(partner.id)]; });
+  }
+
+  function matchingScore(partner, brief) {
+    var value = partner && partner.conversation_preferences;
+    var pref = value && value.schema_version === 1 ? value : {};
+    function overlaps(values, available) { return (values || []).filter(function (id) { return Array.isArray(available) && available.indexOf(id) >= 0; }).length; }
+    return overlaps(brief.purposes, pref.comfortable_purposes) * 3 +
+      (Array.isArray(pref.conversation_styles) && pref.conversation_styles.indexOf(brief.conversation_style) >= 0 ? 2 : 0) +
+      overlaps(brief.interests, pref.interests);
+  }
+
+  function rankPartners(partners, brief) {
+    return partners.map(function (partner, index) { return {partner: partner, index: index, score: matchingScore(partner, brief)}; })
+      .sort(function (a, b) { return b.score - a.score || a.index - b.index; })
+      .map(function (item) { return item.partner; });
   }
 
   function renderTimeChips() {
@@ -1665,6 +1699,7 @@
     ++calendarSeq;calendarKey='';calendarRows=null;calendarLoading=false;calendarError=false;
     if(window.DayOAvailabilityCalendar){var initial=window.DayOAvailabilityCalendar.windowDates().start.split('-');state.viewYear=Number(initial[0]);state.viewMonth=Number(initial[1])-1;}
     bookingOwner = currentUserId();
+    ++partnerLoadSeq; partnersLoaded = false; partnerCriteriaKey = null; partnerRequest = null; partnerRequestKey = null;
     reset();
     var draft = loadDraft();
     if (draft) applyDraft(draft);
@@ -1769,6 +1804,9 @@
 
   if (window.__DAYO_SMART_BOOKING_TEST__) {
     window.__DAYO_SMART_BOOKING_TEST__.api = {
+      ensureMatchingPartners: ensureMatchingPartners,
+      matchingScore: matchingScore,
+      rankPartners: rankPartners,
       partnerMatchesCriteria: partnerMatchesCriteria,
       buildUniqueTimes: buildUniqueTimes,
       partnersForTime: partnersForTime,

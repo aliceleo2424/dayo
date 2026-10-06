@@ -302,6 +302,7 @@
     var brief = data && data.conversation_brief;
     if (!brief || typeof brief !== 'object' || Array.isArray(brief)) brief = {};
     var purposes = Array.isArray(brief.purposes) ? brief.purposes.map(function (id) {
+      if (id === 'work_school') return !window.DayOI18n || window.DayOI18n.getLang() === 'KO' ? '일 · 학교 생활' : 'Work & school life';
       return bookingOptionLabel('book.purpose.', id, ['travel', 'opic', 'abroad', 'casual']);
     }).filter(Boolean).join(' · ') : '';
     var interests = Array.isArray(brief.interests) ? brief.interests.map(function (id) {
@@ -313,9 +314,16 @@
     return { display: display, language: language, languageId: languageId, values: {
       purposes: purposes,
       interests: interests,
-      chat_style: bookingOptionLabel('chatPrefs.style.', brief.chat_style, ['casual', 'correct', 'interview']),
+      chat_style: brief.schema_version === 1
+        ? (brief.conversation_style === 'encourage' ? (!window.DayOI18n || window.DayOI18n.getLang() === 'KO' ? '칭찬 · 응원' : 'Praise & encouragement')
+          : bookingOptionLabel('book.style.', brief.conversation_style, ['slow', 'fast', 'correct']))
+        : bookingOptionLabel('chatPrefs.style.', brief.chat_style, ['casual', 'correct', 'interview']),
       chat_request: bookingOptionLabel('chatPrefs.request.', brief.chat_request, ['praise', 'gentle', 'encourage']),
-      partner_preference: bookingOptionLabel('book.style.', brief.partner_preference, ['slow', 'fast', 'correct', 'korean'])
+      partner_preference: brief.schema_version === 1 ? '' : bookingOptionLabel('book.style.', brief.partner_preference, ['slow', 'fast', 'correct', 'korean']),
+      korean_support_preference: brief.schema_version === 1
+        ? (brief.korean_support_preference === 'required' ? (!window.DayOI18n || window.DayOI18n.getLang() === 'KO' ? '한국어 도움이 필요해요' : 'Korean support preferred')
+          : brief.korean_support_preference === 'any' ? (!window.DayOI18n || window.DayOI18n.getLang() === 'KO' ? '상관없어요' : 'Either is fine') : '')
+        : ''
     } };
   }
 
@@ -324,6 +332,16 @@
     var visible = false;
     Object.keys(values).forEach(function (key) {
       var row = briefView.querySelector('[data-brief-field="' + key + '"]');
+      if (!row && key === 'korean_support_preference' && values[key]) {
+        var list = briefView.querySelector('dl');
+        if (list) {
+          row = document.createElement('div'); row.className = 'partner-upcoming-hero-detail';
+          row.setAttribute('data-brief-field', key);
+          var label = document.createElement('dt');
+          label.textContent = !window.DayOI18n || window.DayOI18n.getLang() === 'KO' ? '한국어 도움 선호' : 'Korean support preference';
+          row.append(label, document.createElement('dd')); list.append(row);
+        }
+      }
       if (!row) return;
       row.hidden = !values[key];
       if (values[key]) {

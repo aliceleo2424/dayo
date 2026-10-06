@@ -1,4 +1,4 @@
-/* Local UI preview and canonical contract only. No Supabase table/RPC writes. */
+/* Owner-only persistent conversation profile. Verified capability/completion stay separate. */
 (function (root) {
   'use strict';
   var catalog = {
@@ -39,26 +39,40 @@
   if(typeof module==='object'&&module.exports)module.exports=contract;
   if(!root||!root.document)return;
   root.DayOPartnerConversationProfile=contract;
-  // A deployment of this branch must not expose a fake server Save.
-  if(!['localhost','127.0.0.1','[::1]'].includes(root.location.hostname))return;
+
   var section,activeId=null,activeProfile=null,readDraft=null;
   function clear(){if(section)section.remove();section=null;activeId=activeProfile=null;readDraft=null;}
-  function mount(user,profile,draft,keepOpen){
+  async function mount(user,profile,draft,keepOpen){
     if(!user||!profile||profile.role!=='partner'){clear();return;}
     if(activeId===user.id&&section)return;
     clear();var host=document.querySelector('#partner-dashboard-section .profile-card');if(!host)return;
     activeId=user.id;activeProfile=profile;
-    var key='dayo:partner-conversation-draft:v1:'+user.id,saved=empty(),invalidDraft=false;
-    try{var raw=root.localStorage.getItem(key);if(raw)saved=validate(JSON.parse(raw));}catch(_){invalidDraft=true;}
+    var currentUser=user.id,loading=document.createElement('section');loading.className='partner-conversation-profile';
+    section=loading;host.append(loading);loading.textContent=document.documentElement.lang==='ko'?'대화 프로필을 불러오는 중…':'Loading conversation profile…';
+    var saved=empty();
+    try {
+      var client=root.supabaseClient;if(!client)throw new Error('Unavailable');
+      var auth=await client.auth.getSession(),owner=auth.data&&auth.data.session&&auth.data.session.user;
+      if(!owner||owner.id!==currentUser)throw new Error('Session changed');
+      var result=await client.from('partner_profile_details').select('conversation_preferences').eq('partner_id',currentUser).maybeSingle();
+      if(result.error||!result.data)throw new Error('Unavailable');
+      if(result.data.conversation_preferences)saved=validate(result.data.conversation_preferences);
+    } catch(_) {
+      if(activeId!==currentUser||section!==loading)return;
+      loading.textContent=document.documentElement.lang==='ko'?'대화 프로필을 확인하지 못했어요. 파트너 프로필 완성 여부를 확인한 뒤 다시 시도해 주세요.':'Could not load your conversation profile. Complete Partner Profile and retry.';
+      var retry=document.createElement('button');retry.type='button';retry.className='pcv-save';retry.textContent=document.documentElement.lang==='ko'?'다시 시도':'Retry';
+      retry.addEventListener('click',function(){clear();mount(user,profile,draft,keepOpen);});loading.append(retry);return;
+    }
+    if(activeId!==currentUser||section!==loading)return;
+    loading.remove();
     var original=JSON.stringify(saved),ko=document.documentElement.lang==='ko',inputs=[];
     if(draft)saved=validate(draft);
     function text(koText,enText){return ko?koText:enText;}
     function el(tag,copy,className){var n=document.createElement(tag);if(copy)n.textContent=copy;if(className)n.className=className;return n;}
     section=el('section',null,'partner-conversation-profile');section.id='partner-conversation-profile';
     var details=el('details'),summary=el('summary',text('대화 프로필','Conversation profile'));
-    details.open=keepOpen===undefined?(invalidDraft||Object.keys(catalog).every(function (group) {return !saved[group].length;})):keepOpen;
+    details.open=keepOpen===undefined?Object.keys(catalog).every(function (group) {return !saved[group].length;}):keepOpen;
     details.append(summary,el('p',text('잘 맞는 대화 목적·관심사·스타일을 골라 주세요. 복수 선택할 수 있어요.','Choose the conversations, interests and styles that suit you. Multiple selections are welcome.'),'pcv-hint'));
-    details.append(el('p',text('로컬 미리보기 · 이 브라우저에만 저장되며 실제 매칭에는 아직 사용되지 않습니다.','Local preview · Saved only in this browser; not yet used for live matching.'),'pcv-preview'));
     var groups={comfortable_purposes:text('잘 맞는 대화 목적','Conversation goals that suit you'),interests:text('관심사 · 최대 4개','Interests · up to 4'),conversation_styles:text('대화 스타일','Conversation styles')};
     Object.keys(catalog).forEach(function (group) {
       var fieldset=el('fieldset'),legend=el('legend',groups[group]),chips=el('div',null,'pcv-chips');
@@ -69,7 +83,7 @@
       });details.append(fieldset);
     });
     var status=el('p',null,'pcv-status');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
-    var count=el('span'),save=el('button',text('로컬 초안 저장','Save local draft'),'pcv-save');save.type='button';
+    var count=el('span'),save=el('button',text('대화 프로필 저장','Save conversation profile'),'pcv-save');save.type='button';
     var actions=el('div',null,'pcv-actions');actions.append(count,save);details.append(status,actions);section.append(details);host.append(section);
     function payload(){var value=empty();Object.keys(catalog).forEach(function (group) {value[group]=inputs.filter(function (input) {return input.name===group&&input.checked;}).map(function (input) {return input.value;});});return validate(value);}
     readDraft=payload;
@@ -84,12 +98,15 @@
         var client=root.supabaseClient;if(!client)throw new Error('Session unavailable.');
         var session=await client.auth.getSession(),current=session.data&&session.data.session&&session.data.session.user;
         if(!current||current.id!==expected||activeId!==expected||section!==currentSection||!activeProfile||activeProfile.role!=='partner')throw new Error(text('세션이 변경됐습니다. 다시 로그인해 주세요.','Session changed. Please sign in again.'));
-        var value=payload();root.localStorage.setItem(key,JSON.stringify(value));original=JSON.stringify(value);
-        status.textContent=text('이 브라우저에 초안을 저장했습니다. 운영 프로필에는 반영되지 않습니다.','Draft saved in this browser. Your live profile has not changed.');
+        var value=payload(),result=await client.rpc('save_partner_conversation_preferences',{p_preferences:value});
+        if(result.error)throw new Error(text('저장하지 못했어요. 다시 시도해 주세요.','Could not save. Please retry.'));
+        if(activeId!==expected||section!==currentSection)return;
+        original=JSON.stringify(validate(result.data));
+        status.textContent=text('대화 프로필을 저장했어요. 다음 로그인에서도 유지됩니다.','Conversation profile saved. It will be restored when you sign in again.');
       }catch(error){if(section===currentSection)status.textContent=error.message;}
       finally{if(section===currentSection)save.disabled=JSON.stringify(payload())===original;}
     });
-    update();if(invalidDraft)status.textContent=text('기존 초안을 읽을 수 없습니다. 다시 선택해서 저장해 주세요.','The existing draft could not be read. Select your preferences again to replace it.');
+    update();
   }
   function start(){
     document.addEventListener('dayo:partner-authorized',function(event){var d=event.detail||{};mount(d.user,d.profile);});
