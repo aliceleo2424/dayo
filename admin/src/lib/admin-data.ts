@@ -494,7 +494,22 @@ export type CreditLedgerRow = {
   reason: string | null;
   source: string | null;
   balance_after: number | null;
+  user_id?: string | null;
+  lot_id?: string | null;
+  transaction_id?: string | null;
+  source_id?: string | null;
+  booking_id?: string | null;
+  granted_by?: string | null;
+  admin_name?: string | null;
+  admin_email?: string | null;
 };
+
+export function ticketAuditTypeLabel(source: string | null) {
+  const labels: Record<string, string> = { admin_grant: '관리자 지급', purchase: '티켓 구매',
+    booking_use: '예약 사용', booking_refund: '취소·환불', promotion: '프로모션 지급',
+    service_recovery: '서비스 보상', legacy_balance: '이전 잔액' };
+  return labels[source || ''] || '티켓 변동';
+}
 
 export function bookingStatusLabel(status: string | null | undefined) {
   const raw = String(status || "").trim().toLowerCase();
@@ -697,28 +712,21 @@ export async function fetchMemberOrders(userId: string): Promise<MemberOrder[]> 
 }
 
 export async function fetchCreditLedgers(userId: string, profileId?: string | null): Promise<CreditLedgerRow[]> {
-  const ledgerUserId = userId || profileId;
+  const ledgerUserId = profileId || userId;
   if (!ledgerUserId) return [];
-  const result = await supabase
-    .from("credit_ledgers")
-    .select("id, user_id, change_amount, ledger_type, balance_after, created_at")
-    .eq("user_id", ledgerUserId)
-    .order("created_at", { ascending: false })
-    .limit(50);
-  if (result.error) return [];
-  const rows = (result.data || []) as unknown as Record<string, unknown>[];
-  return rows.map((row) => {
-    const ledgerType = String(row.ledger_type || "").trim();
-    return {
-      id: String(row.id || crypto.randomUUID()),
-      created_at: (row.created_at as string | null) || null,
-      delta: Number(row.change_amount || 0),
-      reason: ledgerType === "admin_grant" ? "관리자 티켓 지급 (사유 미저장)"
-        : ledgerType === "purchase" ? "티켓 구매" : null,
-      source: ledgerType || null,
-      balance_after: row.balance_after == null ? null : Number(row.balance_after),
-    };
-  });
+  const result = await supabase.rpc('admin_get_ticket_audit', { p_user_id: ledgerUserId, p_limit: 50, p_offset: 0 });
+  if (result.error) throw new Error('티켓 이력을 불러오지 못했습니다. 다시 열어 확인해 주세요.');
+  if (!Array.isArray(result.data)) throw new Error('티켓 이력 응답을 확인하지 못했습니다.');
+  return (result.data as Record<string, unknown>[]).map((row) => ({
+    id: String(row.id), created_at: (row.created_at as string | null) || null,
+    delta: Number(row.delta || 0), reason: (row.reason as string | null) || null,
+    source: (row.source as string | null) || null,
+    balance_after: row.balance_after == null ? null : Number(row.balance_after),
+    user_id: (row.user_id as string | null) || null, lot_id: (row.lot_id as string | null) || null,
+    transaction_id: (row.transaction_id as string | null) || null, source_id: (row.source_id as string | null) || null,
+    booking_id: (row.booking_id as string | null) || null, granted_by: (row.granted_by as string | null) || null,
+    admin_name: (row.admin_name as string | null) || null, admin_email: (row.admin_email as string | null) || null,
+  }));
 }
 
 export async function saveAdminMemo(

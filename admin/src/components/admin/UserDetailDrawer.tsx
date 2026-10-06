@@ -17,6 +17,7 @@ import {
   bookingStatusLabel,
   detectMemberProvider,
   fetchCreditLedgers,
+  ticketAuditTypeLabel,
   fetchMemberBookings,
   fetchMemberOrders,
   formatSessionDateTime,
@@ -49,6 +50,7 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
   const [ticketCount, setTicketCount] = useState(0);
   const [orders, setOrders] = useState<MemberOrder[]>([]);
   const [ledgers, setLedgers] = useState<CreditLedgerRow[]>([]);
+  const [ledgerError, setLedgerError] = useState("");
   const [sessions, setSessions] = useState<MemberBookingSession[]>([]);
   const [memoDraft, setMemoDraft] = useState("");
   const [memoEntries, setMemoEntries] = useState<AdminNoteEntry[]>([]);
@@ -83,6 +85,7 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
     setNotice("");
     setOrders([]);
     setLedgers([]);
+    setLedgerError("");
     setSessions([]);
     try {
       const stored = window.sessionStorage.getItem(`dayo_admin_grant_pending:${user.id}`);
@@ -102,7 +105,10 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
       try {
         const [orderRows, ledgerRows, bookingRows] = await Promise.all([
           fetchMemberOrders(authId).catch(() => [] as MemberOrder[]),
-          fetchCreditLedgers(authId, user.id).catch(() => [] as CreditLedgerRow[]),
+          fetchCreditLedgers(authId, user.id).catch((err: unknown) => {
+            if (!cancelled) setLedgerError(err instanceof Error ? err.message : '티켓 이력을 불러오지 못했습니다.');
+            return [] as CreditLedgerRow[];
+          }),
           fetchMemberBookings(authId).catch(() => [] as MemberBookingSession[]),
         ]);
         if (cancelled) return;
@@ -225,18 +231,11 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
       const result = await grantAdminTickets(user, 1, reason, attempt.sourceId);
       setTicketCount(result.ticketCount);
       onTicketChange?.(user.id, result.ticketCount);
-      if (!result.duplicate) {
-        setLedgers((cur) => [
-          {
-            id: attempt.sourceId,
-            created_at: new Date().toISOString(),
-            delta: 1,
-            reason: "관리자 티켓 지급 (사유 미저장)",
-            source: "admin_grant",
-            balance_after: result.ticketCount,
-          },
-          ...cur,
-        ]);
+      try {
+        setLedgers(await fetchCreditLedgers(user.id));
+        setLedgerError('');
+      } catch (err) {
+        setLedgerError(err instanceof Error ? err.message : '티켓 이력을 불러오지 못했습니다.');
       }
       try {
         window.sessionStorage.removeItem(`dayo_admin_grant_pending:${user.id}`);
@@ -485,24 +484,15 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
                 <h3 className="mb-3 text-sm font-semibold text-[#44403C]">티켓 변동 이력</h3>
                 {loading ? (
                   <div className="h-20 animate-pulse rounded-xl bg-muted" />
+                ) : ledgerError ? (
+                  <p role="alert" className="rounded-xl border px-4 py-3 text-sm text-red-700">{ledgerError}</p>
                 ) : !ledgers.length ? (
                   <div className="rounded-2xl border border-dashed px-4 py-8 text-center text-sm text-muted-foreground">
                     변동 이력이 아직 없습니다
                   </div>
                 ) : (
-                  <ul className="space-y-2 border-l-2 border-[#E7E5E4] pl-4">
-                    {ledgers.map((row) => (
-                      <li key={row.id} className="relative pb-3">
-                        <span className="absolute -left-[21px] top-1.5 h-2.5 w-2.5 rounded-full bg-coral" />
-                        <p className="text-xs text-[#78716C]">{formatSessionDateTime(row.created_at)}</p>
-                        <p className="text-sm font-medium text-[#292524]">
-                          <span className={row.delta >= 0 ? "text-emerald-700" : "text-red-600"}>
-                            {row.delta >= 0 ? `+${row.delta}` : row.delta}
-                          </span>
-                          <span className="ml-2 text-[#57534E]">{row.reason || "사유 미기록"}</span>
-                        </p>
-                      </li>
-                    ))}
+                  <ul className="space-y-3">
+                    {ledgers.map((row) => <TicketAuditEntry key={row.id} row={row} />)}
                   </ul>
                 )}
               </section>
@@ -649,7 +639,7 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
                 placeholder="예: 세션 장애 보상"
               />
               <p className="mt-1 text-xs text-muted-foreground">
-                현재 지급 사유는 티켓 이력에 저장되지 않습니다. 필요하면 CS 특이사항에 별도로 기록해 주세요.
+                지급 사유와 처리 관리자는 티켓 이력에 저장됩니다.
               </p>
             </div>
             <div className="mt-4 flex gap-2">
@@ -682,5 +672,27 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
         onClose={() => setSelectedSession(null)}
       />
     </>
+  );
+}
+
+export function TicketAuditEntry({ row }: { row: CreditLedgerRow }) {
+  const actor = [row.admin_name, row.admin_email].filter(Boolean).join(' · ') || row.granted_by || '미기록';
+  return (
+    <li className="min-w-0 rounded-xl border border-[#E7E5E4] p-3">
+      <p className="text-xs text-[#78716C]">{formatSessionDateTime(row.created_at)}</p>
+      <p className="mt-1 text-sm font-medium text-[#292524]">
+        <span className={row.delta >= 0 ? 'text-emerald-700' : 'text-red-600'}>{row.delta >= 0 ? '+' : ''}{row.delta}장</span>
+        <span className="ml-2">{ticketAuditTypeLabel(row.source)}</span>
+      </p>
+      <dl className="mt-2 space-y-1 break-words text-xs text-[#57534E]">
+        <div>사유: {row.reason || '미기록'}</div>
+        <div>처리 관리자: {actor}</div>
+        {row.balance_after != null && <div>처리 후 잔액: {row.balance_after}장</div>}
+        <div className="break-all">Lot ID: {row.lot_id || '미기록'}</div>
+        <div className="break-all">Transaction ID: {row.transaction_id || '미기록'}</div>
+        <div className="break-all">Source ID: {row.source_id || '미기록'}</div>
+        {row.booking_id && <div className="break-all">예약 ID: {row.booking_id}</div>}
+      </dl>
+    </li>
   );
 }
