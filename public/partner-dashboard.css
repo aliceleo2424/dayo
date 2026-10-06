@@ -302,3 +302,5 @@ body.theme-partner,body.partner-page-body,body.partner-page,body.is-partner-loun
 #partner-dashboard-section .pd-referral-promo .pd-referral-helper{font-size:12px;color:var(--muted);margin:8px 0 0}
 @media(max-width:560px){#partner-dashboard-section .pd-referral-promo{padding:16px}}
 #partner-dashboard-section .lounge-promos .promo-card[hidden]{display:none!important}
+#partner-dashboard-section .pd-referral-url{display:block;width:fit-content;max-width:100%;margin:0 0 10px;padding:8px 10px;border:1px solid var(--partner-border);border-radius:8px;background:var(--partner-soft);color:var(--partner-dark);font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+#partner-dashboard-section .pd-referral-actions{display:flex;flex-wrap:wrap;gap:8px}

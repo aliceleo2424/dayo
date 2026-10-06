@@ -122,19 +122,27 @@
     referralPromo.classList.add('pd-referral-promo');
     // Replace the legacy fixed-amount referral promotion without changing reward logic.
     var legacyReferral=promos.querySelector('.promo-card');if(legacyReferral)legacyReferral.hidden=true;
-    var referralShare=action('Share referral link','지원 링크 공유',async function(){
-      var url='https://www.dayotalk.com/partner-apply',ko=document.documentElement.lang==='ko';
+    var referralUrl='https://www.dayotalk.com/partner-apply';
+    var referralLink=document.createElement('a');referralLink.className='pd-referral-url';referralLink.href=referralUrl;referralLink.textContent=referralUrl;referralLink.target='_blank';referralLink.rel='noopener';
+    async function copyReferralLink(){
+      var copied=false,ko=document.documentElement.lang==='ko';
+      try{await navigator.clipboard.writeText(referralUrl);copied=true;}catch(_){
+        var temporary=document.createElement('textarea');temporary.value=referralUrl;temporary.readOnly=true;temporary.style.position='fixed';temporary.style.opacity='0';document.body.append(temporary);temporary.select();
+        try{copied=document.execCommand('copy');}catch(_){}finally{temporary.remove();}
+      }
+      if(typeof window.showToast==='function')window.showToast(copied?(ko?'지원 링크를 복사했어요!':'Referral link copied!'):(ko?'위의 지원 링크를 직접 복사해 주세요.':'Please copy the referral link above.'));
+    }
+    var referralCopy=action('Copy link','링크 복사',copyReferralLink);
+    var referralShare=action('Share','공유',async function(){
       if(typeof navigator.share==='function'&&window.matchMedia('(pointer: coarse)').matches){
-        try{await navigator.share({title:'Join DayO as a Conversation Partner',url:url});return;}
+        try{await navigator.share({title:'Join DayO as a Conversation Partner',url:referralUrl});return;}
         catch(error){if(error&&error.name==='AbortError')return;}
       }
-      try{
-        await navigator.clipboard.writeText(url);
-        if(typeof window.showToast==='function')window.showToast(ko?'지원 링크를 복사했어요.':'Referral link copied.');
-      }catch(_){window.open(url,'_blank','noopener');}
+      await copyReferralLink();
     });
+    var referralActions=document.createElement('div');referralActions.className='pd-referral-actions';referralActions.append(referralCopy,referralShare);
     var referralHelper=label('p','Ask your friend to enter your full name in the Referral field.','친구에게 Referral 항목에 추천인의 전체 이름을 입력해 달라고 안내해 주세요.');referralHelper.className='pd-referral-helper';
-    referralPromo.append(referralShare,referralHelper);
+    referralPromo.append(referralLink,referralActions,referralHelper);
     var reliability=card('Partner benefits','파트너 혜택','Explore referral rewards and partner benefits.','추천 리워드와 파트너 혜택을 확인하세요.');
     // Retain the existing reward card and its copy, at lower priority.
     var legacyReward=promos.querySelectorAll('.promo-card')[1];if(legacyReward){var legacyDetails=document.createElement('details');legacyDetails.className='pd-legacy-reward';legacyDetails.append(label('summary','Other reward information','기타 리워드 안내'),legacyReward);promos.append(legacyDetails);}
