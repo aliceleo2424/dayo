@@ -2,7 +2,7 @@
 
 /* ops-dashboard-v3 2026-09-14 — marketing dummy template removed */
 
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { CalendarCheck, FileText, GraduationCap, Users, Wallet } from "lucide-react";
 import { AdminHeader } from "@/components/admin/header";
 import { RoleActions } from "@/components/admin/role-actions";
@@ -50,6 +50,28 @@ type SessionRow = {
   learner_id: string | null;
 };
 
+function groupDashboardSessions(rows: SessionRow[], now: number) {
+  const time = (row: SessionRow) => row.scheduled_at ? Date.parse(row.scheduled_at) : NaN;
+  const upcoming = rows.filter(row => row.status !== "cancelled" && time(row) > now)
+    .sort((a, b) => time(a) - time(b));
+  const upcomingIds = new Set(upcoming.map(row => row.id));
+  const past = rows.filter(row => !upcomingIds.has(row.id)).sort((a, b) => {
+    const aTime = time(a), bTime = time(b);
+    if (!Number.isFinite(aTime)) return Number.isFinite(bTime) ? 1 : 0;
+    if (!Number.isFinite(bTime)) return -1;
+    return bTime - aTime;
+  });
+  return { upcoming, past };
+}
+
+function dashboardSessionStatus(status: string | null) {
+  const labels: Record<string, string> = {
+    confirmed: "예약됨", completed: "완료", cancelled: "취소",
+    pending: "대기 중", requested: "예약 요청",
+  };
+  return labels[status || "pending"] || status;
+}
+
 const ZERO_KPI: KpiState = { members: 0, partners: 0, sessions: 0, paid: 0 };
 
 function nameOf(row: MemberRow) {
@@ -66,6 +88,7 @@ export default function DashboardPage() {
   const [kpi, setKpi] = useState<KpiState>(ZERO_KPI);
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [sessions, setSessions] = useState<SessionRow[]>([]);
+  const [now, setNow] = useState(() => Date.now());
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState("");
   const [notice, setNotice] = useState("");
@@ -147,11 +170,15 @@ export default function DashboardPage() {
       ));
       const names = new Map<string, string>();
       if (ids.length) {
-        const named = await adminProfiles().select("user_id, nickname, user_name, email").in("user_id", ids);
-        ((named.data || []) as unknown as { user_id?: string; nickname?: string; user_name?: string; email?: string }[]).forEach((row) => {
+        const named = await adminProfiles().select("id, user_id, nickname, user_name, email")
+          .or(`id.in.(${ids.join(",")}),user_id.in.(${ids.join(",")})`);
+        ((named.data || []) as unknown as { id?: string; user_id?: string; nickname?: string; user_name?: string; email?: string }[]).forEach((row) => {
           const uid = String(row.user_id || "");
           const label = String(row.nickname || row.user_name || row.email || "").trim();
-          if (uid && label) names.set(uid, label);
+          if (label) {
+            if (uid) names.set(uid, label);
+            if (row.id) names.set(String(row.id), label);
+          }
         });
       }
 
@@ -181,6 +208,13 @@ export default function DashboardPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const sessionGroups = groupDashboardSessions(sessions, now);
 
   async function setRole(row: MemberRow, nextRole: "partner" | "user") {
     const label = String(row.nickname || row.email || "회원").trim() || "회원";
@@ -331,12 +365,29 @@ export default function DashboardPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {sessions.map((row) => (
-                        <tr key={row.id} className="border-b last:border-0">
-                          <td className="px-3 py-3">{row.scheduled_at ? formatDateTime(row.scheduled_at) : "미정"}</td>
+                      {[
+                        { label: "다가오는 예약", rows: sessionGroups.upcoming, upcoming: true },
+                        { label: "지난 세션 · 취소/미정 예약", rows: sessionGroups.past, upcoming: false },
+                      ].filter(group => group.rows.length).map(group => (
+                        <Fragment key={group.label}>
+                          <tr>
+                            <th colSpan={5} scope="rowgroup" className={group.upcoming
+                              ? "bg-[#EAF0E7] px-3 py-2 text-left font-semibold text-[#466A49]"
+                              : "bg-[#F8F5EF] px-3 py-2 text-left font-medium text-muted-foreground"}>
+                              {group.label} <span className="ml-1 text-xs">{group.rows.length}건</span>
+                            </th>
+                          </tr>
+                          {group.rows.map((row, index) => (
+                        <tr key={row.id} className={group.upcoming
+                          ? index === 0 ? "border-b bg-[#E8F0E3] text-[#292524]" : "border-b bg-[#F1F6EF] text-[#292524]"
+                          : "border-b bg-[#FFFCF7] text-[#57534E] last:border-0"}>
+                          <td className={group.upcoming && index === 0 ? "px-3 py-3 shadow-[inset_4px_0_0_#5F7D63]" : "px-3 py-3"}>
+                            {row.scheduled_at && Number.isFinite(Date.parse(row.scheduled_at)) ? formatDateTime(row.scheduled_at) : "미정"}
+                            {group.upcoming && index === 0 ? <span className="ml-2 inline-block text-xs font-semibold text-[#466A49]">다음 예약</span> : null}
+                          </td>
                           <td className="px-3 py-3">{row.learner}</td>
                           <td className="px-3 py-3">{row.partner}</td>
-                          <td className="px-3 py-3">{row.status || "pending"}</td>
+                          <td className="px-3 py-3">{dashboardSessionStatus(row.status)}</td>
                           <td className="px-3 py-3">
                             <Button
                               variant="outline"
@@ -357,6 +408,8 @@ export default function DashboardPage() {
                             </Button>
                           </td>
                         </tr>
+                          ))}
+                        </Fragment>
                       ))}
                     </tbody>
                   </table>
