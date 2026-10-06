@@ -1089,7 +1089,7 @@ async function fetchPartnerSessionLogs() {
     try {
       var result = await client
         .from('session_logs')
-        .select('id, user_id, room_id, created_at')
+        .select('id, user_id, room_id, created_at, bookings(is_test_session)')
         .eq('user_id', uid)
         .order('created_at', { ascending: false })
         .limit(500);
@@ -1120,6 +1120,7 @@ function summarizePartnerEarnings(rows, rate) {
   var monthCount = 0;
   var settledCount = 0;
   (rows || []).forEach(function (row) {
+    if (row && row.bookings && row.bookings.is_test_session === true) return;
     var ended = sessionEndedAt(row);
     if (!ended) return;
     if (isSameMonth(ended, now)) monthCount += 1;

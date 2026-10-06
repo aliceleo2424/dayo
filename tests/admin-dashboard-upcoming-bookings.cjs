@@ -56,7 +56,7 @@ const ids=rows=>Array.from(rows,row=>row.id);
  assert.equal(state[2].find(row=>row.id==='future-next').learner,'학습자 이름');
  assert.equal(state[2].find(row=>row.id==='future-next').partner,'파트너 이름');
  assert.ok(calls.some(call=>call.table==='profiles'&&call.method==='or'&&call.args[0].includes('id.in.')&&call.args[0].includes('user_id.in.')));
- assert.ok(!calls.some(call=>call.table==='bookings'&&['eq','in','or'].includes(call.method)),'no status/date query filters omit new bookings');
+ assert.ok(!calls.some(call=>call.table==='bookings'&&['eq','in','or'].includes(call.method)&&call.args[0]!=='is_test_session'),'no status/date query filters omit new bookings');
  console.log('Actual dashboard load path, new future booking inclusion, id/user_id name lookup: passed');
  stateIndex=0;const tree=page.default(); const html=render(tree);
  assert.ok(html.indexOf('다가오는 예약')<html.indexOf('지난 세션'));

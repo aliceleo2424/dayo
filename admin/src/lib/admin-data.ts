@@ -221,6 +221,7 @@ export type DashboardKpis = {
 };
 
 export type BookingRow = {
+  is_test_session: boolean;
   id: string;
   learner_id: string | null;
   partner_user_id: string | null;
@@ -242,7 +243,7 @@ export async function fetchDashboardKpis(): Promise<DashboardKpis> {
   const [members, partners, sessions, orders] = await Promise.all([
     adminProfiles({ count: "exact", head: true }).select("id"),
     adminProfiles({ count: "exact", head: true }).select("id").eq("role", "partner"),
-    supabase.from("bookings").select("id", { count: "exact", head: true }).eq("status", "completed"),
+    supabase.from("bookings").select("id", { count: "exact", head: true }).eq("status", "completed").eq("is_test_session", false),
     supabase.from("orders").select("amount").eq("status", "paid"),
   ]);
 
@@ -283,6 +284,7 @@ export async function fetchPartnerProfiles() {
 }
 
 type BookingRecord = {
+  is_test_session?: boolean;
   id?: string;
   learner_id?: string | null;
   partner_user_id?: string | null;
@@ -295,9 +297,9 @@ type BookingRecord = {
 
 export async function fetchBookings(): Promise<{ rows: BookingRow[]; error: string }> {
   const selects = [
-    "id, learner_id, partner_user_id, partner_name, language, scheduled_at, status",
-    "id, learner_id, partner_id, partner_name, language, scheduled_at, status",
-    "id, learner_id, partner_name, scheduled_at, status",
+    "id, learner_id, partner_user_id, partner_name, language, scheduled_at, status, is_test_session",
+    "id, learner_id, partner_id, partner_name, language, scheduled_at, status, is_test_session",
+    "id, learner_id, partner_name, scheduled_at, status, is_test_session",
     "*",
   ];
 
@@ -320,6 +322,7 @@ export async function fetchBookings(): Promise<{ rows: BookingRow[]; error: stri
     learner_id: row.learner_id || null,
     partner_user_id: row.partner_user_id || row.partner_id || null,
     partner_name: row.partner_name || null,
+    is_test_session: row.is_test_session === true,
     language: row.language || null,
     scheduled_at: row.scheduled_at || null,
     status: row.status || null,

@@ -133,6 +133,7 @@
         .select('id,scheduled_at,status,end_reason,ended_at,partner_rewarded')
         .eq('partner_user_id', user.id)
         .eq('partner_rewarded', false)
+        .eq('is_test_session', false)
         .in('status', ['confirmed', 'completed'])
         .gte('scheduled_at', since)
         .order('scheduled_at', { ascending: false })

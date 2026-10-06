@@ -2,7 +2,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const {PGlite}=require('@electric-sql/pglite');
 const {JSDOM}=require('jsdom');
-const root=path.resolve(__dirname,'..'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
+const root=path.resolve(__dirname,'..'),read=p=>fs.readFileSync(path.join(root,p),'utf8').replace(/\r\n/g,'\n');
 const baseline=require('./conversation-matching-production-contract.json');
 const cp=require('node:child_process');
 const previous=require('./fixtures/internal-test-learner-production-contract.json');
@@ -71,7 +71,9 @@ async function bootstrap(apply=true){
  for(const t of localTables){const expected=baseline.table_privileges.find(x=>x.relname===t.relname);assert.deepEqual(t.relacl.slice(1,-1).split(',').sort(),expected.relacl.slice(1,-1).split(',').sort());for(const k of ['relrowsecurity','authenticated_select','authenticated_insert','authenticated_update'])assert.equal(t[k],expected[k]);}
  local=local.replace(/\$tables\$[\s\S]*?\$tables\$/,'$tables$'+JSON.stringify(localTables)+'$tables$');
  const constraints=(await db.query("select jsonb_agg(jsonb_build_object('table',c.conrelid::regclass::text,'name',c.conname,'definition',pg_get_constraintdef(c.oid))) as value from pg_constraint c where c.conrelid in ('public.partner_profile_details'::regclass,'public.user_conversation_preferences'::regclass,'public.bookings'::regclass)")).rows[0].value;
- assert.equal(constraints.length,baseline.constraints.length);for(const c of constraints)assert(baseline.constraints.some(x=>x.name===c.name&&x.table===c.table));
+ // PostgreSQL 18/PGlite also catalogs column NOT NULL constraints.
+ const legacyConstraints=constraints.filter(c=>!c.definition.startsWith('NOT NULL'));
+ assert.equal(legacyConstraints.length,baseline.constraints.length);for(const c of legacyConstraints)assert(baseline.constraints.some(x=>x.name===c.name&&x.table===c.table));
  local=local.replace(/\$constraints\$[\s\S]*?\$constraints\$/,'$constraints$'+JSON.stringify(constraints)+'$constraints$');
  if(apply)await db.exec(local);
  return {db,local};
@@ -189,10 +191,10 @@ function ranking(){const hook={};vm.runInNewContext(read('public/booking-modal.j
  for(const f of ['partner-conversation-profile.js','partner-dashboard.js','booking-modal.js','availability-slots.js'])assert.equal(read('public/'+f),read(f));checks+=4;
 }
 function protectedKernels(){
- const base=cp.execFileSync('git',['show','HEAD:public/booking-modal.js'],{cwd:root,encoding:'utf8'}).replace(/\r\n/g,'\n'),current=read('public/booking-modal.js');
+ const base=cp.execFileSync('git',['show','a9888a33edccb4be50fe02f5faa8d5ebd3133687:public/booking-modal.js'],{cwd:root,encoding:'utf8'}).replace(/\r\n/g,'\n'),current=read('public/booking-modal.js').replace(/\r\n/g,'\n');
  const fn=(s,n)=>s.match(new RegExp('(?:async )?function '+n+'\\([^)]*\\) \\{[\\s\\S]*?\\n  \\}'))[0];
- for(const n of ['loadCalendarSlots','fetchDateAvailability','partnerMatchesCriteria','isBookableStart','requiresNoRefundWarning','canBypassBookingLeadTime','getTicketCount','settleConfirmedBooking','readRecentBooking']){assert.equal(fn(current,n),fn(base,n),n+' current-main kernel preserved');checks++;}
- const old=cp.execFileSync('git',['show','HEAD:public/availability-slots.js'],{cwd:root,encoding:'utf8'}).replace(/\r\n/g,'\n'),actual=read('public/availability-slots.js');
+ for(const n of ['loadCalendarSlots','fetchDateAvailability','isBookableStart','requiresNoRefundWarning','canBypassBookingLeadTime','getTicketCount','settleConfirmedBooking','readRecentBooking']){assert.equal(fn(current,n).replace(".eq('is_test_session', false)",''),fn(base,n),n+' current-main kernel preserved');checks++;}
+ const old=cp.execFileSync('git',['show','a9888a33edccb4be50fe02f5faa8d5ebd3133687:public/availability-slots.js'],{cwd:root,encoding:'utf8'}).replace(/\r\n/g,'\n'),actual=read('public/availability-slots.js');
  const withoutCancellationHooks=s=>{
  let restored=s;
  // Partner cancellation adds only lazy loading, an own/future button and expiry hiding.
@@ -252,4 +254,6 @@ async function partnerUI(){
  w.supabaseClient.rpc=async()=>({error:{message:'offline'}});const more=w.document.querySelector('input[value="games"]');more.checked=true;more.dispatchEvent(new w.Event('change'));w.document.querySelector('.pcv-save').click();await new Promise(r=>setTimeout(r,20));check(/다시 시도/.test(w.document.querySelector('.pcv-status').textContent),'save failure reports retry without fake success');
  check(w.localStorage.length===0,'localStorage is not production source of truth');dom.window.close();
 }
-(async()=>{ranking();protectedKernels();partnerBriefUI();await preflightDrift();await database();await candidateCaching();await partnerUI();console.log('PASS conversation matching fixtures:',checks,'checks total');})().catch(e=>{console.error(e);process.exitCode=1});
+// Reuse the audited production contract in alpha tests without executing old-policy cases.
+module.exports={bootstrap,actor,uid,other,baseline};
+if(require.main===module) (async()=>{ranking();protectedKernels();partnerBriefUI();await preflightDrift();await database();await candidateCaching();await partnerUI();console.log('PASS conversation matching fixtures:',checks,'checks total');})().catch(e=>{console.error(e);process.exitCode=1});

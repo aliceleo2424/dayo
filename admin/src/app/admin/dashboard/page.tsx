@@ -4,6 +4,7 @@
 
 import { Fragment, useCallback, useEffect, useState } from "react";
 import { CalendarCheck, FileText, GraduationCap, Users, Wallet } from "lucide-react";
+import { TestSessionModal } from "@/components/admin/test-session-modal";
 import { AdminHeader } from "@/components/admin/header";
 import { RoleActions } from "@/components/admin/role-actions";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,7 @@ type MemberRow = {
 };
 
 type SessionRow = {
+  is_test_session: boolean;
   id: string;
   scheduled_at: string | null;
   status: string | null;
@@ -94,6 +96,7 @@ export default function DashboardPage() {
   const [notice, setNotice] = useState("");
   const [drawerUser, setDrawerUser] = useState<MemberRow | null>(null);
   const [selectedSession, setSelectedSession] = useState<SessionTranscriptContext | null>(null);
+  const [testModal, setTestModal] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -102,7 +105,7 @@ export default function DashboardPage() {
       const [memberCount, partnerCount, sessionCount, paidRows, memberRows] = await Promise.all([
         adminProfiles({ count: "exact", head: true }).select("id"),
         adminProfiles({ count: "exact", head: true }).select("id").eq("role", "partner"),
-        supabase.from("bookings").select("id", { count: "exact", head: true }),
+        supabase.from("bookings").select("id", { count: "exact", head: true }).eq("is_test_session", false),
         supabase.from("orders").select("amount").eq("status", "paid"),
         adminProfiles()
           .select("id, user_id, nickname, user_name, email, role, ticket_count, point_balance, provider, avatar_url, client_key, learning_languages, created_at, admin_memo, kakao_id")
@@ -148,9 +151,9 @@ export default function DashboardPage() {
       setMembers(list);
 
       const bookingSelects = [
-        "id, learner_id, partner_user_id, partner_name, scheduled_at, status",
-        "id, learner_id, partner_id, partner_name, scheduled_at, status",
-        "id, learner_id, partner_name, scheduled_at, status",
+        "id, learner_id, partner_user_id, partner_name, scheduled_at, status, is_test_session",
+        "id, learner_id, partner_id, partner_name, scheduled_at, status, is_test_session",
+        "id, learner_id, partner_name, scheduled_at, status, is_test_session",
         "*",
       ];
       let bookingData: Record<string, unknown>[] = [];
@@ -192,6 +195,7 @@ export default function DashboardPage() {
           learner: names.get(learnerId) || "유저",
           partner: names.get(partnerId) || String(row.partner_name || "파트너 미정"),
           learner_id: learnerId || null,
+          is_test_session: row.is_test_session === true,
         };
       }));
     } catch (err) {
@@ -341,7 +345,7 @@ export default function DashboardPage() {
         </section>
 
         <section>
-          <h2 className="mb-4 text-lg font-semibold">세션 예약 현황</h2>
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2"><h2 className="text-lg font-semibold">세션 예약 현황</h2><Button onClick={() => setTestModal(true)}>테스트 세션 생성</Button></div>
           {loading ? (
             <div className="h-32 animate-pulse rounded-xl bg-muted" />
           ) : !sessions.length ? (
@@ -387,7 +391,7 @@ export default function DashboardPage() {
                           </td>
                           <td className="px-3 py-3">{row.learner}</td>
                           <td className="px-3 py-3">{row.partner}</td>
-                          <td className="px-3 py-3">{dashboardSessionStatus(row.status)}</td>
+                          <td className="px-3 py-3">{dashboardSessionStatus(row.status)} {row.is_test_session && <Badge>TEST</Badge>}</td>
                           <td className="px-3 py-3">
                             <Button
                               variant="outline"
@@ -420,6 +424,7 @@ export default function DashboardPage() {
         </section>
       </main>
 
+      <TestSessionModal open={testModal} onClose={() => setTestModal(false)} members={members} onCreated={() => void load()} />
       <UserDetailDrawer
         open={!!drawerUser}
         user={drawerUser}

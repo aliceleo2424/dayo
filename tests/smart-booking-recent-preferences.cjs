@@ -67,7 +67,8 @@ Object.assign(api.state,{language:'ko',koreanHelp:null});
 assert.equal(api.isStepReady(0),true,'KO requires no Korean help choice');
 assert.equal(api.preferenceSnapshot().koreanSupport,'any','KO skips the help question and explicitly stores unrestricted support');
 const baseline=execFileSync('git',['show','HEAD:public/booking-modal.js'],{cwd:root,encoding:'utf8'});
-for(const name of ['fetchDateAvailability','partnerMatchesCriteria','isInternalBookingTest','canBypassBookingLeadTime','isBookableStart','requiresNoRefundWarning','bookingSlotStartMs','isFutureThirtyMinuteConcreteSlot','getTicketCount','needsTicketTopup','ensureLoggedInForBooking','requestOpen','routeToTicketTopup','persistLearningLanguage']) {
+// Alpha eligibility is exercised in alpha-partner-eligibility.cjs. All other kernels stay protected.
+for(const name of ['fetchDateAvailability','isInternalBookingTest','canBypassBookingLeadTime','isBookableStart','requiresNoRefundWarning','bookingSlotStartMs','isFutureThirtyMinuteConcreteSlot','getTicketCount','needsTicketTopup','ensureLoggedInForBooking','requestOpen','routeToTicketTopup','persistLearningLanguage']) {
   const rx=new RegExp('(?:async )?function '+name+'\\([^)]*\\) \\{[\\s\\S]*?\\n  \\}');
   assert.ok(source.match(rx),name);
   const actualFunction=source.match(rx)[0].replace(/\r\n/g,'\n'),oldFunction=baseline.match(rx)[0];
@@ -95,21 +96,23 @@ for (const [start,end] of [['    var partnerId = state.partner;', '    var booki
 }
 (async()=>{
   const calls=[],rows=[
+    {id:'test',learner_id:'user-a',is_test_session:true,status:'confirmed',created_at:'2100'},
     {id:'pending',learner_id:'user-a',status:'pending',created_at:'2099'},
     {id:'other',learner_id:'user-b',status:'confirmed',created_at:'2098'},
     {id:'older',learner_id:'user-a',status:'confirmed',created_at:'2025'},
     {id:'newest',learner_id:'user-a',status:'completed',created_at:'2026'}
   ];
-  let uid,statuses;
+  let uid,statuses,testFlag;
   const query={
-    select(v){calls.push(['select',v]);return this},eq(k,v){calls.push(['eq',k,v]);uid=v;return this},
+    select(v){calls.push(['select',v]);return this},eq(k,v){calls.push(['eq',k,v]);if(k==='learner_id')uid=v;else if(k==='is_test_session')testFlag=v;return this},
     in(k,v){calls.push(['in',k,plain(v)]);statuses=v;return this},order(k,v){calls.push(['order',k,plain(v)]);return this},
-    limit(n){calls.push(['limit',n]);return Promise.resolve({data:rows.filter(r=>r.learner_id===uid&&statuses.includes(r.status)).sort((a,b)=>b.created_at.localeCompare(a.created_at)).slice(0,n),error:null})}
+    limit(n){calls.push(['limit',n]);return Promise.resolve({data:rows.filter(r=>r.learner_id===uid&&(r.is_test_session===true?true:false)===testFlag&&statuses.includes(r.status)).sort((a,b)=>b.created_at.localeCompare(a.created_at)).slice(0,n),error:null})}
   };
   const recent=await api.readRecentBooking({from(table){assert.equal(table,'bookings');return query}},'user-a');
   assert.equal(recent.id,'newest','only own successful bookings, newest submission first');
   assert.deepEqual(calls[1],['eq','learner_id','user-a']);
-  assert.deepEqual(calls[2],['in','status',['confirmed','completed']]);
+  assert.deepEqual(calls[2],['eq','is_test_session',false]);
+  assert.deepEqual(calls[3],['in','status',['confirmed','completed']]);
   await assert.rejects(api.readRecentBooking({from(){return {...query,limit(){return Promise.resolve({error:new Error('RLS fixture')})}}}},'user-a'),/RLS/);
   assert.equal(source,fs.readFileSync(path.join(root,'booking-modal.js'),'utf8'),'public/root synchronized');
   console.log('PASS: recent source isolation, unknown fields, canonical/legacy mapping, copied snapshots, KO, unchanged slot queries/timing, mirrors.');

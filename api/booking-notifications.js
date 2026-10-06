@@ -74,11 +74,12 @@ function createHandler(options = {}) {
         const verified = await auth.auth.getUser(token[1]);
         const user = verified.data && verified.data.user;
         if (verified.error || !user) return json(res, 401, { ok: false, error: 'authentication_required' });
-        const found = await service.from('bookings').select('id,learner_id,partner_user_id,status,ticket_deducted,end_reason').eq('id', bookingId).maybeSingle();
+        const found = await service.from('bookings').select('id,learner_id,partner_user_id,status,ticket_deducted,end_reason,is_test_session').eq('id', bookingId).maybeSingle();
         if (found.error) throw new Error('storage_unavailable');
         const booking = found.data;
         // Conceal whether an outsider's booking exists; never return participant data.
         if (!booking || ![booking.learner_id, booking.partner_user_id].includes(user.id)) return json(res, 404, { ok: false, error: 'booking_not_available' });
+        if (booking.is_test_session === true) return json(res, 200, { ok: true, skipped: 'test_session' });
         const valid = eventType === 'booking_confirmed'
           ? booking.status === 'confirmed' && booking.ticket_deducted === true
           : booking.status === 'cancelled' && ['user_cancelled_early', 'user_cancelled_late', 'partner_cancelled_early', 'partner_cancelled_late'].includes(booking.end_reason);

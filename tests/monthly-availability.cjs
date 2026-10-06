@@ -14,7 +14,7 @@ assert(!setupWindow.DayOPartnerSetup.hasFutureSlot([{status:'available',slot_tim
 const booking=fs.readFileSync(path.join(root,'public/booking-modal.js'),'utf8'),slots=fs.readFileSync(path.join(root,'public/availability-slots.js'),'utf8');
 // Reproduce authprofile -> repeated authchange while the RPC is pending or
 // loaded. The old unconditional reset discarded valid responses for this owner.
-const monthlyUI=fs.readFileSync(path.join(root,'public/partner-monthly-availability.js'),'utf8');
+const monthlyUI=fs.readFileSync(path.join(root,'public/partner-monthly-availability.js'),'utf8').replace(/\r\n/g,'\n');
 const authStart=monthlyUI.indexOf("document.addEventListener('dayo:authchange'");
 const authEnd=monthlyUI.indexOf("document.addEventListener('dayo:authprofile'",authStart);
 let onAuthChange;
@@ -48,7 +48,8 @@ assert.deepEqual(dayLabels('2026-10-07'),['Custom','0 open'],'Custom count retai
 assert.deepEqual(dayLabels('2026-10-08'),['Open','1 open'],'Open count retained');
 assert.deepEqual(dayLabels('2026-10-09'),['Closed','1 booked'],'Booked count retained on closed day');
 function fn(source,name){const start=source.search(new RegExp('(?:async )?function '+name+'\\('));assert(start>=0,name);return source.slice(start,source.indexOf('\n  }',start)+4).replace(/\r\n/g,'\n');}
-for(const name of ['derivePartnersForSelectedTime','partnerMatchesCriteria','isBookableStart','canBypassBookingLeadTime','getTicketCount','needsTicketTopup','settleConfirmedBooking','readRecentBooking'])assert.equal(fn(booking,name),fn(baseline,name),name+' protected kernel');
+// Alpha eligibility has its own SQL/browser regression; schedule kernels stay fixed.
+for(const name of ['derivePartnersForSelectedTime','isBookableStart','canBypassBookingLeadTime','getTicketCount','needsTicketTopup','settleConfirmedBooking','readRecentBooking'])assert.equal(fn(booking,name).replace(".eq('is_test_session', false)",''),fn(baseline,name),name+' protected kernel');
 // Only the visibility/eligibility split is allowed to differ from the audited main.
 const loadWithEligibilityOnly=fn(booking,'loadDateAvailability')
  .replace('var visibleSlots = await fetchVisibleDateAvailability(requestedDate, eligiblePartnerIds);\n      var slots = visibleSlots.filter(isFutureThirtyMinuteConcreteSlot);','var slots = await fetchDateAvailability(requestedDate, eligiblePartnerIds);')
@@ -59,10 +60,13 @@ assert(!booking.includes('<small class="bk-holiday">'));assert(booking.includes(
 const oldSlots=cp.execFileSync('git',['show',integrationBase+':public/availability-slots.js'],{cwd:root,encoding:'utf8'});
 for(const name of ['openPartnerBookingPrep','getPartnerBookingBrief','closePartnerBookingPrep','isBookableStart','confirmBookingWindow'])assert.equal(fn(slots,name),fn(oldSlots,name),name+' timing/brief unchanged');
 assert(slots.includes('main.addEventListener(\'click\', openPrep)'),'name row retains existing brief handler');
-for(const file of ['room.html','public/room.html','room-live.js','public/room-live.js','session-lifecycle.js','public/session-lifecycle.js','api/booking-notifications.js']){
+for(const file of ['room.html','public/room.html','room-live.js','public/room-live.js','session-lifecycle.js','public/session-lifecycle.js']){
  if(!fs.existsSync(path.join(root,file)))continue;
  assert.equal(fs.readFileSync(path.join(root,file),'utf8').replace(/\r\n/g,'\n'),cp.execFileSync('git',['show',integrationBase+':'+file],{cwd:root,encoding:'utf8'}).replace(/\r\n/g,'\n'),file+' unchanged');
 }
+const notificationBase=cp.execFileSync('git',['show',integrationBase+':api/booking-notifications.js'],{cwd:root,encoding:'utf8'}).replace(/\r\n/g,'\n');
+const expectedNotification=notificationBase.replace('ticket_deducted,end_reason','ticket_deducted,end_reason,is_test_session').replace("        const valid = eventType", "        if (booking.is_test_session === true) return json(res, 200, { ok: true, skipped: 'test_session' });\n        const valid = eventType");
+assert.equal(fs.readFileSync(path.join(root,'api/booking-notifications.js'),'utf8').replace(/\r\n/g,'\n'),expectedNotification,'notification API only adds TEST exclusion; 091 cancellation reasons retained');
 const clientSource=fs.readFileSync(path.join(root,'public/supabase-client.js'),'utf8').replace(/\r\n/g,'\n');
 const clientBase=cp.execFileSync('git',['show',integrationBase+':public/supabase-client.js'],{cwd:root,encoding:'utf8'}).replace(/\r\n/g,'\n');
 assert.equal(clientSource.slice(0,clientSource.indexOf('  function welcomeEmailSentKey')),clientBase.slice(0,clientBase.indexOf('  function welcomeEmailSentKey')),'SDK initialization/query builder unchanged; only audited Security helpers differ');

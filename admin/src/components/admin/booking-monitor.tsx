@@ -64,7 +64,7 @@ export function BookingMonitor() {
       header: "상태",
       render: (row) => {
         const status = String(row.status || "pending");
-        return <Badge variant={status === "completed" ? "success" : status === "cancelled" ? "warning" : "default"}>{statusLabel[status] || status}</Badge>;
+        return <>{row.is_test_session && <Badge>TEST</Badge>} <Badge variant={status === "completed" ? "success" : status === "cancelled" ? "warning" : "default"}>{statusLabel[status] || status}</Badge></>;
       },
     },
     {

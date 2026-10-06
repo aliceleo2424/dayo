@@ -89,6 +89,8 @@ async function main() {
       grant select on profiles,bookings to authenticated;
       grant insert on bookings to authenticated;
     `);
+    // 092 adds a non-test default; ordinary notification regression rows remain real bookings.
+    await db.exec('alter table bookings add column is_test_session boolean not null default false;');
     for (const f of [...contract.functions].sort((a, b) => Number(b.signature === 'dayo_is_admin()') - Number(a.signature === 'dayo_is_admin()'))) {
       await db.exec(f.definition);
       await db.exec(`revoke all on function public.${f.signature} from public, anon, authenticated, service_role;`);
@@ -228,6 +230,13 @@ async function main() {
     const aLogs = await logs(a.id);
     check(aLogs.length === 2 && aLogs.every(row => row.status === 'sent'), 'Both successes durably recorded');
     check(requests.filter(r => r.key.includes(a.id)).every(r => r.payload.to.length === 1), 'Separate envelopes for each participant');
+
+    // 092 TEST safety: an authorized participant gets a clean skip, never a provider call.
+    const qa = await booking();await owner();
+    await db.query('update bookings set is_test_session=true where id=$1',[qa.id]);
+    const beforeQA=requests.length,qaResult=await invoke(qa);
+    check(qaResult.statusCode===200 && qaResult.body.skipped==='test_session','TEST notification skipped');
+    check(requests.length===beforeQA,'TEST endpoint never contacts email provider');
 
     // B/C: insufficient tickets / invalid slot / idempotent confirmation.
     const b = await booking(8, 0, outsider);

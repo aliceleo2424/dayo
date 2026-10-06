@@ -23,6 +23,16 @@
     return ACTIVE_LANG_IDS.indexOf(String(id || '').toLowerCase()) !== -1;
   }
 
+  function canonicalBookingLanguages(values) {
+    var aliases = { en: 'en', english: 'en', es: 'es', spanish: 'es', fr: 'fr', french: 'fr', ko: 'ko', korean: 'ko' };
+    return (Array.isArray(values) ? values : []).reduce(function (languages, value) {
+      var key = String(value || '').trim().toLowerCase();
+      var language = Object.prototype.hasOwnProperty.call(aliases, key) ? aliases[key] : null;
+      if (language && isActiveBookingLang(language) && languages.indexOf(language) === -1) languages.push(language);
+      return languages;
+    }, []);
+  }
+
   function LANGUAGES() {
     return LANG_IDS.map(function (id) {
       return {
@@ -290,7 +300,7 @@
   async function readRecentBooking(client, userId) {
     // completed is a successfully confirmed booking; pending/cancelled never supply defaults.
     var result = await client.from('bookings').select('id,language,conversation_brief,created_at')
-      .eq('learner_id', userId).in('status', ['confirmed', 'completed'])
+      .eq('learner_id', userId).eq('is_test_session', false).in('status', ['confirmed', 'completed'])
       .order('created_at', { ascending: false }).order('id', { ascending: false }).limit(1);
     if (result.error) throw result.error;
     return result.data && result.data[0] || null;
@@ -971,9 +981,7 @@
       avatar_url: row.avatar_url || '',
       bio: row.bio || '',
       native_lang: row.native_lang || '',
-      conversation_languages: Array.isArray(row.conversation_languages)
-        ? row.conversation_languages.filter(isActiveBookingLang)
-        : [],
+      conversation_languages: canonicalBookingLanguages(row.conversation_languages),
       korean_support_level: typeof row.korean_support_level === 'string' ? row.korean_support_level : null,
       conversation_preferences: row.conversation_preferences || null,
       isTest: isTestPartnerId(id) || String(name).indexOf('DayO Test Partner') === 0,
@@ -1007,7 +1015,8 @@
   async function loadAvailablePartners() {
     var supabase = dbClient();
     var partners = [], seq = ++partnerLoadSeq, language = state.language, help = state.koreanHelp, owner = currentUserId();
-    var support = language === 'ko' ? 'any' : help === 'needed' ? 'required' : help === 'any' ? 'any' : null;
+    // Alpha keeps the chosen help value in the booking snapshot, not eligibility.
+    var support = help === 'needed' && language !== 'ko' ? 'required' : 'any';
     if (!language || !support) return [];
     if (supabase) {
       var res = await supabase.rpc('list_matching_partner_profiles', {p_language: language, p_korean_support_preference: support});
@@ -1079,9 +1088,9 @@
   }
 
   function partnerMatchesCriteria(partner, language, koreanHelp) {
-    if (!partner || partner.isTest || !Array.isArray(partner.conversation_languages)) return false;
-    if (partner.conversation_languages.indexOf(language) === -1) return false;
-    return koreanHelp !== 'needed' || supportsKoreanHelp(partner);
+    if (!partner || !Array.isArray(partner.conversation_languages)) return false;
+    // Public RPC supplies approved Partners with resolved canonical languages.
+    return canonicalBookingLanguages(partner.conversation_languages).indexOf(language) !== -1;
   }
 
   function slotStartKey(slotTime) {
@@ -1229,10 +1238,8 @@
     var container = el.slotBox || document.getElementById('partner-slots-container');
     if (!container) return;
     if (!liveTimes.length) {
-      var message = state.koreanHelp === 'needed' ? t('book.noKoreanHelpSlots') : t('book.noSlotsOnDate');
-      var action = state.koreanHelp === 'needed'
-        ? '<button type="button" class="bk-inline-action" data-relax-korean>' + t('book.relaxKoreanHelp') + '</button>'
-        : '';
+      var message = t('book.noSlotsOnDate');
+      var action = '';
       container.innerHTML = '<div class="bk-slot-empty">' + message + action + '</div>';
       updateFooter();
       return;
@@ -1852,6 +1859,8 @@
 
   if (window.__DAYO_SMART_BOOKING_TEST__) {
     window.__DAYO_SMART_BOOKING_TEST__.api = {
+      canonicalBookingLanguages: canonicalBookingLanguages,
+      normalizePartner: normalizePartner,
       ensureMatchingPartners: ensureMatchingPartners,
       matchingScore: matchingScore,
       rankPartners: rankPartners,

@@ -653,7 +653,7 @@
 
   function sessionCount() {
     var reports = window.__dayoTalkAlbum;
-    if (Array.isArray(reports)) return reports.length;
+    if (Array.isArray(reports)) return reports.filter(function (r) { return r.is_test_session !== true; }).length;
     if (window.__dayoCompletedSessionCount != null) {
       var n = Number(window.__dayoCompletedSessionCount);
       if (Number.isFinite(n) && n >= 0) return n;

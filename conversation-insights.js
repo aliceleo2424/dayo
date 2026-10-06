@@ -341,7 +341,7 @@
     }).filter(Boolean);
     var bounds = seoulMonthBounds(new Date());
     var monthBookingResult = bounds ? await client.from('bookings')
-      .select('id, scheduled_at, status')
+      .select('id, scheduled_at, status').eq('is_test_session', false)
       .eq('learner_id', user.id)
       .in('status', ['completed', 'done', 'finished'])
       .gte('scheduled_at', bounds.start)

@@ -747,6 +747,7 @@
     return {
       id: r.id || '',
       booking_id: r.booking_id || booking.id || '',
+      is_test_session: r.is_test_session === true || booking.is_test_session === true,
       partner_name: partnerName,
       spoken_sentence: r.spoken_sentence || r.sentence || '',
       keyword: r.keyword || '',
@@ -806,6 +807,7 @@
       language: row.language || '',
       topic: row.language || row.topic || '대화',
       from_booking: true,
+      is_test_session: row.is_test_session === true,
       booking_id: row.id
     };
   }
@@ -1101,7 +1103,7 @@
       try {
         var learnerBookingQ = await client
           .from('bookings')
-          .select('id, partner_user_id, partner_id')
+          .select('id, partner_user_id, partner_id, is_test_session')
           .eq('learner_id', user.id);
         if (!learnerBookingQ.error) {
           learnerBookings = learnerBookingQ.data || [];
@@ -1113,7 +1115,7 @@
 
       var query = await client
         .from('session_reports')
-        .select('*, bookings(id, scheduled_at, partner_name, language)')
+        .select('*, bookings(id, scheduled_at, partner_name, language, is_test_session)')
         .eq('learner_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -1171,7 +1173,7 @@
         try {
           var bookingQ = await client
             .from('bookings')
-            .select('id, partner_name, scheduled_at, status, created_at, completed_at, language')
+            .select('id, partner_name, scheduled_at, status, created_at, completed_at, language, is_test_session')
             .eq('learner_id', user.id)
             .in('status', ['completed', 'done', 'finished'])
             .order('scheduled_at', { ascending: false })
@@ -1202,7 +1204,9 @@
         });
       }
 
-      window.__dayoCompletedSessionCount = reports.length;
+      var testBookingIds = new Set(learnerBookings.filter(function (b) { return b.is_test_session === true; }).map(function (b) { return String(b.id); }));
+      reports.concat(treatReports).forEach(function (r) { r.is_test_session = r.is_test_session === true || testBookingIds.has(String(r.booking_id || '')); });
+      window.__dayoCompletedSessionCount = reports.filter(function (r) { return !r.is_test_session; }).length;
     } else {
       window.__dayoCompletedSessionCount = 0;
     }

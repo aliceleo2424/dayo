@@ -1,0 +1,1102 @@
+{
+  "columns": [
+    {
+      "data_type": "uuid",
+      "table_name": "bookings",
+      "column_name": "id",
+      "is_nullable": "NO",
+      "column_default": "gen_random_uuid()"
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "bookings",
+      "column_name": "learner_id",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "bookings",
+      "column_name": "partner_id",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "bookings",
+      "column_name": "slot_id",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "character varying",
+      "table_name": "bookings",
+      "column_name": "status",
+      "is_nullable": "YES",
+      "column_default": "'pending'::character varying"
+    },
+    {
+      "data_type": "boolean",
+      "table_name": "bookings",
+      "column_name": "ticket_deducted",
+      "is_nullable": "YES",
+      "column_default": "false"
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "bookings",
+      "column_name": "created_at",
+      "is_nullable": "YES",
+      "column_default": "timezone('utc'::text, now())"
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "bookings",
+      "column_name": "updated_at",
+      "is_nullable": "YES",
+      "column_default": "timezone('utc'::text, now())"
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "bookings",
+      "column_name": "ended_at",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "bookings",
+      "column_name": "partner_user_id",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "bookings",
+      "column_name": "scheduled_at",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "boolean",
+      "table_name": "bookings",
+      "column_name": "partner_rewarded",
+      "is_nullable": "NO",
+      "column_default": "false"
+    },
+    {
+      "data_type": "boolean",
+      "table_name": "bookings",
+      "column_name": "ticket_refunded",
+      "is_nullable": "NO",
+      "column_default": "false"
+    },
+    {
+      "data_type": "text",
+      "table_name": "bookings",
+      "column_name": "end_reason",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "bookings",
+      "column_name": "completed_at",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "bookings",
+      "column_name": "partner_name",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "bookings",
+      "column_name": "language",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "numeric",
+      "table_name": "bookings",
+      "column_name": "rating",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "jsonb",
+      "table_name": "bookings",
+      "column_name": "conversation_brief",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "jsonb",
+      "table_name": "bookings",
+      "column_name": "matching_snapshot",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "orders",
+      "column_name": "id",
+      "is_nullable": "NO",
+      "column_default": "gen_random_uuid()"
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "orders",
+      "column_name": "user_id",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "character varying",
+      "table_name": "orders",
+      "column_name": "merchant_uid",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "character varying",
+      "table_name": "orders",
+      "column_name": "product_name",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "integer",
+      "table_name": "orders",
+      "column_name": "amount",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "integer",
+      "table_name": "orders",
+      "column_name": "ticket_count",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "character varying",
+      "table_name": "orders",
+      "column_name": "status",
+      "is_nullable": "YES",
+      "column_default": "'paid'::character varying"
+    },
+    {
+      "data_type": "character varying",
+      "table_name": "orders",
+      "column_name": "imp_uid",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "orders",
+      "column_name": "created_at",
+      "is_nullable": "YES",
+      "column_default": "now()"
+    },
+    {
+      "data_type": "text",
+      "table_name": "orders",
+      "column_name": "product_key",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "partner_session_rewards",
+      "column_name": "booking_id",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "partner_session_rewards",
+      "column_name": "partner_id",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "integer",
+      "table_name": "partner_session_rewards",
+      "column_name": "reward_amount",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "partner_session_rewards",
+      "column_name": "created_at",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "profiles",
+      "column_name": "created_at",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "data_type": "text",
+      "table_name": "profiles",
+      "column_name": "user_name",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "bigint",
+      "table_name": "profiles",
+      "column_name": "ticket_count",
+      "is_nullable": "YES",
+      "column_default": "0"
+    },
+    {
+      "data_type": "bigint",
+      "table_name": "profiles",
+      "column_name": "streak_count",
+      "is_nullable": "YES",
+      "column_default": "'0'::bigint"
+    },
+    {
+      "data_type": "text",
+      "table_name": "profiles",
+      "column_name": "preferred_style",
+      "is_nullable": "YES",
+      "column_default": "'''casual'''::text"
+    },
+    {
+      "data_type": "text",
+      "table_name": "profiles",
+      "column_name": "speech_speed",
+      "is_nullable": "YES",
+      "column_default": "'''slow'''::text"
+    },
+    {
+      "data_type": "text",
+      "table_name": "profiles",
+      "column_name": "learning_languages",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "boolean",
+      "table_name": "profiles",
+      "column_name": "is_first_user",
+      "is_nullable": "YES",
+      "column_default": "true"
+    },
+    {
+      "data_type": "boolean",
+      "table_name": "profiles",
+      "column_name": "is_partner",
+      "is_nullable": "YES",
+      "column_default": "false"
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "profiles",
+      "column_name": "last_login_date",
+      "is_nullable": "YES",
+      "column_default": "now()"
+    },
+    {
+      "data_type": "text",
+      "table_name": "profiles",
+      "column_name": "avatar_url",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "profiles",
+      "column_name": "email",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "profiles",
+      "column_name": "country_code",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "profiles",
+      "column_name": "timezone",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "bigint",
+      "table_name": "profiles",
+      "column_name": "birth_year",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "profiles",
+      "column_name": "age_range",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "profiles",
+      "column_name": "id",
+      "is_nullable": "NO",
+      "column_default": "gen_random_uuid()"
+    },
+    {
+      "data_type": "text",
+      "table_name": "profiles",
+      "column_name": "client_key",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "profiles",
+      "column_name": "user_id",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "profiles",
+      "column_name": "full_name",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "integer",
+      "table_name": "profiles",
+      "column_name": "tickets",
+      "is_nullable": "YES",
+      "column_default": "0"
+    },
+    {
+      "data_type": "boolean",
+      "table_name": "profiles",
+      "column_name": "has_welcome_coupon",
+      "is_nullable": "YES",
+      "column_default": "true"
+    },
+    {
+      "data_type": "boolean",
+      "table_name": "profiles",
+      "column_name": "welcome_coupon_used",
+      "is_nullable": "YES",
+      "column_default": "false"
+    },
+    {
+      "data_type": "text",
+      "table_name": "profiles",
+      "column_name": "current_mode",
+      "is_nullable": "YES",
+      "column_default": "'LEARNER'::text"
+    },
+    {
+      "data_type": "integer",
+      "table_name": "profiles",
+      "column_name": "point_balance",
+      "is_nullable": "YES",
+      "column_default": "0"
+    },
+    {
+      "data_type": "text",
+      "table_name": "profiles",
+      "column_name": "nickname",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "character varying",
+      "table_name": "profiles",
+      "column_name": "role",
+      "is_nullable": "YES",
+      "column_default": "'user'::character varying"
+    },
+    {
+      "data_type": "boolean",
+      "table_name": "profiles",
+      "column_name": "welcome_email_sent",
+      "is_nullable": "NO",
+      "column_default": "false"
+    },
+    {
+      "data_type": "text",
+      "table_name": "profiles",
+      "column_name": "provider",
+      "is_nullable": "YES",
+      "column_default": "'email'::text"
+    },
+    {
+      "data_type": "text",
+      "table_name": "profiles",
+      "column_name": "kakao_id",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "profiles",
+      "column_name": "admin_memo",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "profiles",
+      "column_name": "updated_at",
+      "is_nullable": "YES",
+      "column_default": "now()"
+    },
+    {
+      "data_type": "text",
+      "table_name": "profiles",
+      "column_name": "bio",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "session_events",
+      "column_name": "id",
+      "is_nullable": "NO",
+      "column_default": "gen_random_uuid()"
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "session_events",
+      "column_name": "booking_id",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "session_events",
+      "column_name": "event_type",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "session_events",
+      "column_name": "actor_user_id",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "jsonb",
+      "table_name": "session_events",
+      "column_name": "payload",
+      "is_nullable": "NO",
+      "column_default": "'{}'::jsonb"
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "session_events",
+      "column_name": "created_at",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "session_logs",
+      "column_name": "id",
+      "is_nullable": "NO",
+      "column_default": "gen_random_uuid()"
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "session_logs",
+      "column_name": "user_id",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "session_logs",
+      "column_name": "room_id",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "jsonb",
+      "table_name": "session_logs",
+      "column_name": "transcript",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "jsonb",
+      "table_name": "session_logs",
+      "column_name": "feedback",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "session_logs",
+      "column_name": "created_at",
+      "is_nullable": "YES",
+      "column_default": "now()"
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "session_logs",
+      "column_name": "booking_id",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "session_logs",
+      "column_name": "participant_id",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "session_logs",
+      "column_name": "participant_role",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "session_logs",
+      "column_name": "learner_id",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "session_logs",
+      "column_name": "partner_id",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "session_logs",
+      "column_name": "started_at",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "session_logs",
+      "column_name": "ended_at",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "session_logs",
+      "column_name": "updated_at",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "session_reports",
+      "column_name": "id",
+      "is_nullable": "NO",
+      "column_default": "gen_random_uuid()"
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "session_reports",
+      "column_name": "booking_id",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "session_reports",
+      "column_name": "learner_id",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "session_reports",
+      "column_name": "partner_name",
+      "is_nullable": "YES",
+      "column_default": "'Partner'::text"
+    },
+    {
+      "data_type": "text",
+      "table_name": "session_reports",
+      "column_name": "spoken_sentence",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "session_reports",
+      "column_name": "keyword",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "session_reports",
+      "column_name": "illust_url",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "session_reports",
+      "column_name": "partner_comment",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "session_reports",
+      "column_name": "stamp",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "session_reports",
+      "column_name": "created_at",
+      "is_nullable": "YES",
+      "column_default": "now()"
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "session_reports",
+      "column_name": "partner_id",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "session_reports",
+      "column_name": "partner_user_id",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "session_reports",
+      "column_name": "summary",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "jsonb",
+      "table_name": "session_reports",
+      "column_name": "key_expressions",
+      "is_nullable": "NO",
+      "column_default": "'[]'::jsonb"
+    },
+    {
+      "data_type": "integer",
+      "table_name": "session_reports",
+      "column_name": "quiz_score",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "jsonb",
+      "table_name": "session_reports",
+      "column_name": "word_help",
+      "is_nullable": "NO",
+      "column_default": "'[]'::jsonb"
+    },
+    {
+      "data_type": "jsonb",
+      "table_name": "session_reports",
+      "column_name": "feedback",
+      "is_nullable": "NO",
+      "column_default": "'[]'::jsonb"
+    },
+    {
+      "data_type": "numeric",
+      "table_name": "session_reports",
+      "column_name": "rating",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "session_tech_issue_reports",
+      "column_name": "id",
+      "is_nullable": "NO",
+      "column_default": "gen_random_uuid()"
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "session_tech_issue_reports",
+      "column_name": "booking_id",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "session_tech_issue_reports",
+      "column_name": "reporter_user_id",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "session_tech_issue_reports",
+      "column_name": "reporter_role",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "session_tech_issue_reports",
+      "column_name": "issue_type",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "session_tech_issue_reports",
+      "column_name": "detail",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "session_tech_issue_reports",
+      "column_name": "reported_at",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "session_tech_issue_reports",
+      "column_name": "scheduled_at",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "session_tech_issue_reports",
+      "column_name": "decision",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "jsonb",
+      "table_name": "session_tech_issue_reports",
+      "column_name": "evidence",
+      "is_nullable": "NO",
+      "column_default": "'{}'::jsonb"
+    },
+    {
+      "data_type": "boolean",
+      "table_name": "session_tech_issue_reports",
+      "column_name": "user_refund_decision",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "boolean",
+      "table_name": "session_tech_issue_reports",
+      "column_name": "partner_reward_decision",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "session_tech_issue_reports",
+      "column_name": "resolution_reason",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "session_tech_issue_reports",
+      "column_name": "resolved_by",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "session_tech_issue_reports",
+      "column_name": "resolved_at",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "ticket_allocations",
+      "column_name": "id",
+      "is_nullable": "NO",
+      "column_default": "gen_random_uuid()"
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "ticket_allocations",
+      "column_name": "booking_id",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "ticket_allocations",
+      "column_name": "ticket_lot_id",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "integer",
+      "table_name": "ticket_allocations",
+      "column_name": "quantity",
+      "is_nullable": "NO",
+      "column_default": "1"
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "ticket_allocations",
+      "column_name": "consumed_at",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "ticket_allocations",
+      "column_name": "refunded_at",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "ticket_allocations",
+      "column_name": "refund_reason",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "ticket_allocations",
+      "column_name": "created_at",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "ticket_lots",
+      "column_name": "id",
+      "is_nullable": "NO",
+      "column_default": "gen_random_uuid()"
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "ticket_lots",
+      "column_name": "user_id",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "text",
+      "table_name": "ticket_lots",
+      "column_name": "source",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "uuid",
+      "table_name": "ticket_lots",
+      "column_name": "source_id",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "integer",
+      "table_name": "ticket_lots",
+      "column_name": "quantity_issued",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "integer",
+      "table_name": "ticket_lots",
+      "column_name": "quantity_remaining",
+      "is_nullable": "NO",
+      "column_default": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "ticket_lots",
+      "column_name": "issued_at",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "ticket_lots",
+      "column_name": "expires_at",
+      "is_nullable": "YES",
+      "column_default": null
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "ticket_lots",
+      "column_name": "created_at",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    },
+    {
+      "data_type": "timestamp with time zone",
+      "table_name": "ticket_lots",
+      "column_name": "updated_at",
+      "is_nullable": "NO",
+      "column_default": "now()"
+    }
+  ],
+  "functions": [
+    {
+      "args": "p_booking_id uuid",
+      "proname": "cancel_my_booking",
+      "definition": "CREATE OR REPLACE FUNCTION public.cancel_my_booking(p_booking_id uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_actor_id uuid := auth.uid();\r\n  v_now timestamptz := pg_catalog.now();\r\n  v_booking public.bookings%rowtype;\r\n  v_slot public.availability_slots%rowtype;\r\n  v_allocation public.ticket_allocations%rowtype;\r\n  v_lot public.ticket_lots%rowtype;\r\n  v_early boolean;\r\n  v_ticket_count integer;\r\n  v_partner_points integer;\r\nbegin\r\n  if v_actor_id is null or p_booking_id is null then\r\n    raise exception 'Login and booking ID are required.' using errcode = '42501';\r\n  end if;\r\n\r\n  select * into v_booking\r\n    from public.bookings\r\n   where id = p_booking_id\r\n   for update;\r\n  if not found or v_booking.learner_id is distinct from v_actor_id then\r\n    raise exception 'Learner booking access is required.' using errcode = '42501';\r\n  end if;\r\n\r\n  -- Every post-cutover confirmed booking must have precisely one allocation.\r\n  -- Do not invent a scalar or historical refund for missing allocations.\r\n  select * into v_allocation\r\n    from public.ticket_allocations\r\n   where booking_id = p_booking_id\r\n   for update;\r\n  if not found or v_allocation.quantity is distinct from 1\r\n     or v_booking.ticket_deducted is distinct from true then\r\n    raise exception 'Booking ticket allocation is inconsistent.' using errcode = '23514';\r\n  end if;\r\n\r\n  select * into v_lot\r\n    from public.ticket_lots\r\n   where id = v_allocation.ticket_lot_id;\r\n  if not found or v_lot.user_id is distinct from v_actor_id then\r\n    raise exception 'Booking allocation belongs to another ticket owner.' using errcode = '23514';\r\n  end if;\r\n\r\n  if v_booking.status = 'cancelled' then\r\n    if v_booking.end_reason = 'user_cancelled_early'\r\n       and v_booking.ticket_refunded is true\r\n       and v_allocation.refunded_at is not null\r\n       and v_allocation.refund_reason = 'user_cancelled_early'\r\n       and v_booking.partner_rewarded is false\r\n       and v_booking.ended_at is not null\r\n       and v_booking.completed_at is null then\r\n      return pg_catalog.jsonb_build_object(\r\n        'success', true, 'already_cancelled', true,\r\n        'cancellation_type', 'early', 'ticket_refunded', true,\r\n        'partner_rewarded', false\r\n      );\r\n    elsif v_booking.end_reason = 'user_cancelled_late'\r\n       and v_booking.ticket_refunded is false\r\n       and v_allocation.refunded_at is null\r\n       and v_allocation.refund_reason is null\r\n       and v_booking.partner_rewarded is true\r\n       and v_booking.ended_at is not null\r\n       and v_booking.completed_at is null then\r\n      -- Reward and booking flag were committed atomically by this RPC.\r\n      return pg_catalog.jsonb_build_object(\r\n        'success', true, 'already_cancelled', true,\r\n        'cancellation_type', 'late', 'ticket_refunded', false,\r\n        'partner_rewarded', true\r\n      );\r\n    end if;\r\n    raise exception 'Cancelled booking has inconsistent refund or reward state.'\r\n      using errcode = '23514';\r\n  end if;\r\n\r\n  if v_booking.status is distinct from 'confirmed'\r\n     or v_booking.scheduled_at is null\r\n     or v_booking.scheduled_at <= v_now then\r\n    raise exception 'Only future confirmed bookings can be cancelled.'\r\n      using errcode = '23514';\r\n  end if;\r\n  if v_booking.partner_user_id is null\r\n     or v_booking.partner_id is distinct from v_booking.partner_user_id\r\n     or v_booking.slot_id is null then\r\n    raise exception 'Booking partner or slot is incomplete.' using errcode = '23514';\r\n  end if;\r\n  if v_booking.ticket_refunded is distinct from false\r\n     or v_booking.partner_rewarded is distinct from false\r\n     or v_booking.ended_at is not null\r\n     or v_booking.completed_at is not null\r\n     or nullif(pg_catalog.btrim(v_booking.end_reason), '') is not null\r\n     or v_allocation.refunded_at is not null\r\n     or v_allocation.refund_reason is not null then\r\n    raise exception 'Booking has already entered a refund, reward or ending flow.'\r\n      using errcode = '23514';\r\n  end if;\r\n\r\n  select * into v_slot\r\n    from public.availability_slots\r\n   where id = v_booking.slot_id\r\n   for update;\r\n  if not found or v_slot.status is distinct from 'booked'\r\n     or v_slot.partner_id is distinct from v_booking.partner_user_id\r\n     or v_slot.slot_time is null or v_slot.slot_time like 'weekly:%' then\r\n    raise exception 'Booking availability slot is inconsistent.' using errcode = '23514';\r\n  end if;\r\n  if exists (\r\n    select 1 from public.bookings b\r\n     where b.slot_id = v_booking.slot_id\r\n       and b.id <> p_booking_id\r\n       and b.status = 'confirmed'\r\n  ) then\r\n    raise exception 'Another confirmed booking occupies this slot.' using errcode = '23514';\r\n  end if;\r\n\r\n  -- Recheck after the booking/slot locks: a wait can cross either boundary.\r\n  v_now := pg_catalog.clock_timestamp();\r\n  if v_booking.scheduled_at <= v_now then\r\n    raise exception 'Only future confirmed bookings can be cancelled.'\r\n      using errcode = '23514';\r\n  end if;\r\n  v_early := v_booking.scheduled_at > v_now + interval '6 hours';\r\n  if v_early then\r\n    -- Match lot-writer lock order: profile before lot. Original expiry stays.\r\n    perform 1 from public.profiles where id = v_actor_id for update;\r\n    if not found then\r\n      raise exception 'Learner profile not found.' using errcode = 'P0002';\r\n    end if;\r\n    select * into v_lot from public.ticket_lots\r\n     where id = v_allocation.ticket_lot_id for update;\r\n    if not found or v_lot.user_id is distinct from v_actor_id\r\n       or v_lot.quantity_remaining >= v_lot.quantity_issued then\r\n      raise exception 'Original ticket lot cannot be restored.' using errcode = '23514';\r\n    end if;\r\n    update public.ticket_lots\r\n       set quantity_remaining = quantity_remaining + 1,\r\n           updated_at = v_now\r\n     where id = v_lot.id and quantity_remaining < quantity_issued;\r\n    if not found then\r\n      raise exception 'Ticket lot changed during cancellation.' using errcode = '40001';\r\n    end if;\r\n    update public.ticket_allocations\r\n       set refunded_at = v_now, refund_reason = 'user_cancelled_early'\r\n     where id = v_allocation.id and refunded_at is null;\r\n    if not found then\r\n      raise exception 'Ticket allocation changed during cancellation.' using errcode = '40001';\r\n    end if;\r\n    v_ticket_count := public.refresh_ticket_balance_cache(v_actor_id);\r\n  else\r\n    -- A late cancellation is not session completion. Reuse only the existing\r\n    -- partner identity/role, 6,000P amount, profile lock and booking flag.\r\n    select point_balance into v_partner_points\r\n      from public.profiles\r\n     where id = v_booking.partner_user_id and role = 'partner'\r\n     for update;\r\n    if not found then\r\n      raise exception 'Partner profile is required for late cancellation compensation.'\r\n        using errcode = '23514';\r\n    end if;\r\n    update public.profiles\r\n       set point_balance = coalesce(point_balance, 0) + 6000,\r\n           updated_at = v_now\r\n     where id = v_booking.partner_user_id and role = 'partner';\r\n    if not found then\r\n      raise exception 'Partner compensation could not be applied.' using errcode = '40001';\r\n    end if;\r\n  end if;\r\n\r\n  update public.bookings\r\n     set status = 'cancelled',\r\n         end_reason = case when v_early then 'user_cancelled_early'\r\n                           else 'user_cancelled_late' end,\r\n         ended_at = v_now,\r\n         ticket_refunded = v_early,\r\n         partner_rewarded = not v_early,\r\n         updated_at = v_now\r\n   where id = p_booking_id and status = 'confirmed'\r\n     and ticket_refunded = false and partner_rewarded = false;\r\n  if not found then\r\n    raise exception 'Booking changed during cancellation.' using errcode = '40001';\r\n  end if;\r\n\r\n  update public.availability_slots\r\n     set status = 'available', updated_at = v_now\r\n   where id = v_booking.slot_id\r\n     and partner_id = v_booking.partner_user_id\r\n     and status = 'booked';\r\n  if not found then\r\n    raise exception 'Availability slot changed during cancellation.' using errcode = '40001';\r\n  end if;\r\n\r\n  return pg_catalog.jsonb_build_object(\r\n    'success', true, 'already_cancelled', false,\r\n    'cancellation_type', case when v_early then 'early' else 'late' end,\r\n    'ticket_refunded', v_early, 'partner_rewarded', not v_early,\r\n    'ticket_count', v_ticket_count\r\n  );\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "",
+      "proname": "capture_booking_matching_snapshot",
+      "definition": "CREATE OR REPLACE FUNCTION public.capture_booking_matching_snapshot()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare pref jsonb; languages text[]; support text;\r\nbegin\r\n  if tg_op='INSERT' then\r\n    -- Never trust a client-supplied score/snapshot (including privileged entry paths).\r\n    new.matching_snapshot:=null;\r\n    return new;\r\n  end if;\r\n  if new.matching_snapshot is distinct from old.matching_snapshot then\r\n    raise exception 'Matching snapshot is server-owned.' using errcode='42501';\r\n  end if;\r\n  if old.matching_snapshot is not null and (new.conversation_brief is distinct from old.conversation_brief or new.language is distinct from old.language or new.learner_id is distinct from old.learner_id or new.partner_id is distinct from old.partner_id) then\r\n    raise exception 'Confirmed matching choices are immutable.' using errcode='42501';\r\n  end if;\r\n  if old.status='pending' and new.status='confirmed' and new.conversation_brief ? 'schema_version' then\r\n    if auth.uid() is distinct from new.learner_id or not new.ticket_deducted or\r\n       not coalesce(public.dayo_booking_preferences_v1_valid(new.conversation_brief),false) then\r\n      raise exception 'Canonical participant confirmation required.' using errcode='42501';\r\n    end if;\r\n    if new.language is null or new.language not in ('en','es','fr','ko') or not exists(select 1 from public.profiles where id=new.partner_id and role='partner' for share) then\r\n      raise exception 'Partner no longer eligible.' using errcode='23514';\r\n    end if;\r\n    select c.conversation_languages,c.korean_support_level into languages,support\r\n      from public.partner_capabilities c where c.partner_id=new.partner_id for share;\r\n    if not found or not coalesce(new.language=any(languages),false) or\r\n       (new.conversation_brief->>'korean_support_preference'='required' and coalesce(support,'') not in ('conversational','fluent')) then\r\n      raise exception 'Partner capability mismatch.' using errcode='23514';\r\n    end if;\r\n    select conversation_preferences into pref from public.partner_profile_details where partner_id=new.partner_id for share;\r\n    new.matching_snapshot:=public.dayo_matching_snapshot_v1(new.language,new.conversation_brief,pref);\r\n  end if;\r\n  return new;\r\nend $function$\n"
+    },
+    {
+      "args": "p_booking_id uuid, p_event_type text",
+      "proname": "claim_booking_notification",
+      "definition": "CREATE OR REPLACE FUNCTION public.claim_booking_notification(p_booking_id uuid DEFAULT NULL::uuid, p_event_type text DEFAULT NULL::text)\n RETURNS SETOF booking_notification_log\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_key text;\r\nbegin\r\n  -- Both scoped participant delivery and a server-only retry worker use this lock.\r\n  update public.booking_notification_log n set status = 'needs_review', last_error = 'retry_limit_or_window_expired', lease_token = null, lease_until = null\r\n    where (p_booking_id is null or n.booking_id = p_booking_id)\r\n      and (p_event_type is null or n.event_type = p_event_type)\r\n      and n.status in ('pending', 'failed', 'sending')\r\n      and (n.lease_until is null or n.lease_until < pg_catalog.now())\r\n      and (n.attempts >= 10 or n.first_attempt_at <= pg_catalog.now() - interval '23 hours');\r\n  update public.booking_notification_log n set status = 'skipped', last_error = 'event_superseded', lease_token = null, lease_until = null\r\n    from public.bookings b\r\n    where n.booking_id = b.id\r\n      and (p_booking_id is null or n.booking_id = p_booking_id)\r\n      and (p_event_type is null or n.event_type = p_event_type)\r\n      and n.status in ('pending', 'failed', 'sending')\r\n      and (n.lease_until is null or n.lease_until < pg_catalog.now())\r\n      and (b.learner_id::text is distinct from n.snapshot->>'learner_id'\r\n        or b.partner_user_id::text is distinct from n.snapshot->>'partner_user_id'\r\n        or (n.event_type = 'booking_confirmed' and (b.status is distinct from 'confirmed' or b.ticket_deducted is distinct from true))\r\n        or (n.event_type = 'booking_cancelled' and (b.status is distinct from 'cancelled' or not coalesce(b.end_reason in ('user_cancelled_early', 'user_cancelled_late'), false))));\r\n  select n.event_key into v_key from public.booking_notification_log n\r\n    where (p_booking_id is null or n.booking_id = p_booking_id)\r\n      and (p_event_type is null or n.event_type = p_event_type)\r\n      and n.status in ('pending', 'failed', 'sending')\r\n      and n.next_attempt_at <= pg_catalog.now()\r\n      and (n.lease_until is null or n.lease_until < pg_catalog.now())\r\n    order by n.created_at, n.event_key\r\n    limit 1 for update skip locked;\r\n  if v_key is null then return; end if;\r\n  return query update public.booking_notification_log n\r\n    set status = 'sending', attempts = n.attempts + 1, lease_token = pg_catalog.gen_random_uuid(), lease_until = pg_catalog.now() + interval '2 minutes'\r\n    where n.event_key = v_key returning n.*;\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "p_booking_id uuid, p_end_reason text",
+      "proname": "complete_learner_session",
+      "definition": "CREATE OR REPLACE FUNCTION public.complete_learner_session(p_booking_id uuid, p_end_reason text DEFAULT 'normal'::text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_actor_id uuid := auth.uid();\r\n  v_learner_id uuid;\r\n  v_status text;\r\n  v_scheduled_at timestamptz;\r\n  v_partner_rewarded boolean;\r\n  v_existing_reason text;\r\n  v_end_reason text := coalesce(nullif(btrim(p_end_reason), ''), 'normal');\r\nbegin\r\n  if v_actor_id is null then\r\n    return jsonb_build_object('success', false, 'message', '로그인이 필요합니다.');\r\n  end if;\r\n\r\n  if p_booking_id is null then\r\n    return jsonb_build_object('success', false, 'message', '세션을 찾을 수 없습니다.');\r\n  end if;\r\n\r\n  select learner_id, status, scheduled_at, partner_rewarded, end_reason\r\n    into v_learner_id, v_status, v_scheduled_at, v_partner_rewarded, v_existing_reason\r\n    from public.bookings\r\n   where id = p_booking_id\r\n   for update;\r\n\r\n  if not found or v_learner_id is null or v_learner_id <> v_actor_id then\r\n    return jsonb_build_object('success', false, 'message', '학습자 본인의 세션만 종료할 수 있습니다.');\r\n  end if;\r\n\r\n  if v_end_reason = 'normal' then\r\n    if v_status not in ('confirmed', 'completed') then\r\n      return jsonb_build_object('success', false, 'message', '정상 완료할 수 있는 예약 상태가 아닙니다.');\r\n    end if;\r\n\r\n    if v_scheduled_at is null or now() < v_scheduled_at + interval '25 minutes' then\r\n      return jsonb_build_object('success', false, 'message', '라이브 대화 시간이 종료된 후에 완료할 수 있습니다.');\r\n    end if;\r\n\r\n    if v_status = 'completed'\r\n       and not coalesce(v_partner_rewarded, false)\r\n       and coalesce(v_existing_reason, '') <> 'normal' then\r\n      return jsonb_build_object('success', false, 'message', '정상 완료로 변경할 수 없는 종료 상태입니다.');\r\n    end if;\r\n\r\n    update public.bookings\r\n       set status = case when coalesce(partner_rewarded, false) then 'completed' else status end,\r\n           end_reason = case\r\n             when end_reason is null or end_reason = '' or end_reason = 'normal' then 'normal'\r\n             else end_reason\r\n           end,\r\n           ended_at = coalesce(ended_at, now()),\r\n           completed_at = case\r\n             when coalesce(partner_rewarded, false) then coalesce(completed_at, now())\r\n             else completed_at\r\n           end,\r\n           updated_at = now()\r\n     where id = p_booking_id\r\n       and learner_id = v_actor_id;\r\n\r\n    return jsonb_build_object(\r\n      'success', true,\r\n      'status', case when coalesce(v_partner_rewarded, false) then 'completed' else v_status end,\r\n      'awaiting_partner_reward', not coalesce(v_partner_rewarded, false)\r\n    );\r\n  end if;\r\n\r\n  if v_status = 'completed' then\r\n    return jsonb_build_object('success', true, 'status', 'completed');\r\n  end if;\r\n\r\n  update public.bookings\r\n     set status = 'completed',\r\n         end_reason = v_end_reason,\r\n         ended_at = coalesce(ended_at, now()),\r\n         completed_at = coalesce(completed_at, now()),\r\n         updated_at = now()\r\n   where id = p_booking_id\r\n     and learner_id = v_actor_id;\r\n\r\n  return jsonb_build_object('success', true, 'status', 'completed');\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "p_booking_id uuid, p_partner_user_id uuid, p_reward_amount integer",
+      "proname": "complete_session_and_reward_partner",
+      "definition": "CREATE OR REPLACE FUNCTION public.complete_session_and_reward_partner(p_booking_id uuid, p_partner_user_id uuid, p_reward_amount integer DEFAULT 6000)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_actor_id uuid := auth.uid();\r\n  v_booking_partner_id uuid;\r\n  v_booking_status text;\r\n  v_scheduled_at timestamptz;\r\n  v_partner_rewarded boolean;\r\n  v_end_reason text;\r\n  v_ended_at timestamptz;\r\n  v_profile_role text;\r\n  v_points integer;\r\n  v_ledger_partner_id uuid;\r\n  v_ledger_amount integer;\r\n  v_has_partner_media boolean := false;\r\n  v_reward_amount constant integer := 6000;\r\nbegin\r\n  if v_actor_id is null then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'unauthorized',\r\n      'message', '濡쒓렇?몄씠 ?꾩슂?⑸땲??'\r\n    );\r\n  end if;\r\n\r\n  if p_booking_id is null\r\n     or p_partner_user_id is null\r\n     or p_partner_user_id is distinct from v_actor_id then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'partner_identity_mismatch',\r\n      'message', '?뚰듃??蹂몄씤留?蹂댁긽??諛쏆쓣 ???덉뒿?덈떎.'\r\n    );\r\n  end if;\r\n\r\n  select\r\n    bookings.partner_user_id,\r\n    bookings.status,\r\n    bookings.scheduled_at,\r\n    bookings.partner_rewarded,\r\n    bookings.end_reason,\r\n    bookings.ended_at\r\n  into\r\n    v_booking_partner_id,\r\n    v_booking_status,\r\n    v_scheduled_at,\r\n    v_partner_rewarded,\r\n    v_end_reason,\r\n    v_ended_at\r\n  from public.bookings\r\n  where bookings.id = p_booking_id\r\n  for update;\r\n\r\n  if not found then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'booking_not_found',\r\n      'message', '?ㅼ젣 ?덉빟 ID瑜?李얠쓣 ???놁뒿?덈떎.'\r\n    );\r\n  end if;\r\n\r\n  if v_booking_partner_id is null\r\n     or v_booking_partner_id is distinct from v_actor_id then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'booking_partner_mismatch',\r\n      'message', '?덉빟???뚰듃???뺣낫媛 ?쇱튂?섏? ?딆뒿?덈떎.'\r\n    );\r\n  end if;\r\n\r\n  select profiles.role, coalesce(profiles.point_balance, 0)\r\n  into v_profile_role, v_points\r\n  from public.profiles\r\n  where profiles.id = v_actor_id;\r\n\r\n  if not found or v_profile_role is distinct from 'partner' then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'partner_profile_required',\r\n      'message', '?뚰듃???꾨줈?꾩쓣 李얠쓣 ???놁뒿?덈떎.'\r\n    );\r\n  end if;\r\n\r\n  select rewards.partner_id, rewards.reward_amount\r\n  into v_ledger_partner_id, v_ledger_amount\r\n  from public.partner_session_rewards as rewards\r\n  where rewards.booking_id = p_booking_id;\r\n\r\n  if v_ledger_partner_id is not null\r\n     and v_ledger_partner_id is distinct from v_actor_id then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'reward_state_conflict',\r\n      'needs_review', true,\r\n      'message', '蹂댁긽 湲곕줉 ?뺤씤???꾩슂?⑸땲??'\r\n    );\r\n  end if;\r\n\r\n  -- NULL is outside the canonical NOT NULL contract. Never infer that it is\r\n  -- unpaid, because the historical reward state cannot be proven safely.\r\n  if v_partner_rewarded is null then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'reward_state_conflict',\r\n      'needs_review', true,\r\n      'evidence', 'booking_reward_flag_null',\r\n      'message', '?덉빟??partner_rewarded ?곹깭媛 鍮꾩뼱 ?덉뼱 蹂댁긽 ?щ? ?뺤씤???꾩슂?⑸땲??'\r\n    );\r\n  end if;\r\n\r\n  -- A true flag without a ledger is a legacy reward completed before 071.\r\n  if v_partner_rewarded is true and v_ledger_partner_id is null then\r\n    return jsonb_build_object(\r\n      'success', true,\r\n      'already_rewarded', true,\r\n      'legacy_reward', true,\r\n      'reward_amount', v_reward_amount,\r\n      'rewarded_points', v_reward_amount,\r\n      'updated_points', coalesce(v_points, 0),\r\n      'booking_status', 'completed'\r\n    );\r\n  end if;\r\n\r\n  -- A true flag with the assigned partner's ledger is normal idempotency.\r\n  if v_partner_rewarded is true and v_ledger_partner_id is not null then\r\n    return jsonb_build_object(\r\n      'success', true,\r\n      'already_rewarded', true,\r\n      'legacy_reward', false,\r\n      'reward_amount', v_ledger_amount,\r\n      'rewarded_points', v_ledger_amount,\r\n      'updated_points', coalesce(v_points, 0),\r\n      'booking_status', 'completed'\r\n    );\r\n  end if;\r\n\r\n  -- A ledger without the committed booking flag is ambiguous. It may reflect\r\n  -- a manual or partial write, so neither retry payment nor repair the flag.\r\n  if v_partner_rewarded is false and v_ledger_partner_id is not null then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'reward_state_conflict',\r\n      'needs_review', true,\r\n      'evidence', 'ledger_present_booking_flag_false',\r\n      'message', '蹂댁긽 ledger媛 ?덉?留??덉빟??partner_rewarded媛 false?낅땲?? ?ㅼ젣 ?ъ씤??吏湲??щ?瑜??뺤씤??二쇱꽭??'\r\n    );\r\n  end if;\r\n\r\n  if v_booking_status <> 'confirmed'\r\n     and not (v_booking_status = 'completed' and v_end_reason = 'normal') then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'booking_not_rewardable',\r\n      'message', '蹂댁긽?????덈뒗 ?덉빟 ?곹깭媛 ?꾨떃?덈떎.'\r\n    );\r\n  end if;\r\n\r\n  if v_scheduled_at is null or now() < v_scheduled_at + interval '25 minutes' then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'session_in_progress',\r\n      'message', '?쇱씠釉?????쒓컙??醫낅즺???꾩뿉 蹂댁긽諛쏆쓣 ???덉뒿?덈떎.'\r\n    );\r\n  end if;\r\n\r\n  if v_end_reason is distinct from 'normal' or v_ended_at is null then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'evidence_insufficient',\r\n      'needs_review', true,\r\n      'evidence', 'learner_normal_completion_missing',\r\n      'message', '?숈뒿?먯쓽 ?뺤긽 ?꾨즺 湲곕줉???뺤씤?????놁뒿?덈떎.'\r\n    );\r\n  end if;\r\n\r\n  select exists (\r\n    select 1\r\n    from public.session_events as events\r\n    where events.booking_id = p_booking_id\r\n      and events.actor_user_id = v_actor_id\r\n      and events.event_type = 'media_connected'\r\n  ) into v_has_partner_media;\r\n\r\n  if not v_has_partner_media then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'evidence_insufficient',\r\n      'needs_review', true,\r\n      'evidence', 'partner_media_connected_missing',\r\n      'message', '?뚰듃?덉쓽 ?몄뀡 李몄뿬 湲곕줉???뺤씤?????놁뒿?덈떎.'\r\n    );\r\n  end if;\r\n\r\n  -- p_reward_amount remains in the signature for compatibility only.\r\n  -- The client cannot influence the server-owned reward amount.\r\n  select profiles.point_balance\r\n  into v_points\r\n  from public.profiles\r\n  where profiles.id = v_actor_id\r\n    and profiles.role = 'partner'\r\n  for update;\r\n\r\n  if not found then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'partner_profile_required',\r\n      'message', '?뚰듃???꾨줈?꾩쓣 李얠쓣 ???놁뒿?덈떎.'\r\n    );\r\n  end if;\r\n\r\n  insert into public.partner_session_rewards (\r\n    booking_id,\r\n    partner_id,\r\n    reward_amount\r\n  ) values (\r\n    p_booking_id,\r\n    v_actor_id,\r\n    v_reward_amount\r\n  );\r\n\r\n  update public.profiles\r\n  set point_balance = coalesce(point_balance, 0) + v_reward_amount,\r\n      updated_at = now()\r\n  where id = v_actor_id\r\n    and role = 'partner'\r\n  returning point_balance into v_points;\r\n\r\n  if not found then\r\n    raise exception 'Partner profile state changed while rewarding the session.'\r\n      using errcode = '40001';\r\n  end if;\r\n\r\n  update public.bookings\r\n  set status = 'completed',\r\n      partner_rewarded = true,\r\n      completed_at = coalesce(completed_at, now()),\r\n      updated_at = now()\r\n  where id = p_booking_id\r\n    and partner_user_id = v_actor_id\r\n    and partner_rewarded is false;\r\n\r\n  if not found then\r\n    raise exception 'Booking reward state changed while completing the session.'\r\n      using errcode = '40001';\r\n  end if;\r\n\r\n  return jsonb_build_object(\r\n    'success', true,\r\n    'already_rewarded', false,\r\n    'legacy_reward', false,\r\n    'reward_amount', v_reward_amount,\r\n    'rewarded_points', v_reward_amount,\r\n    'updated_points', v_points,\r\n    'booking_status', 'completed'\r\n  );\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "p_learner_id uuid, p_booking_id uuid",
+      "proname": "confirm_booking_with_cutoff_cleanup",
+      "definition": "CREATE OR REPLACE FUNCTION public.confirm_booking_with_cutoff_cleanup(p_learner_id uuid, p_booking_id uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_actor_id uuid := auth.uid();\r\n  v_booking public.bookings%rowtype;\r\n  v_slot_time text;\r\n  v_scheduled_at timestamptz;\r\nbegin\r\n  if v_actor_id is null or p_learner_id is distinct from v_actor_id\r\n     or p_booking_id is null then\r\n    raise exception 'Learner booking access is required.' using errcode = '42501';\r\n  end if;\r\n\r\n  -- Serialize confirmation, retries and cleanup for this exact booking.\r\n  select * into v_booking\r\n    from public.bookings\r\n   where id = p_booking_id\r\n   for update;\r\n  if not found then\r\n    return pg_catalog.jsonb_build_object('success', false, 'code', 'booking_not_found',\r\n      'message', '?덉빟 ?뺣낫瑜?李얠쓣 ???놁뒿?덈떎.');\r\n  end if;\r\n  if v_booking.learner_id is distinct from v_actor_id then\r\n    raise exception 'Learner booking access is required.' using errcode = '42501';\r\n  end if;\r\n\r\n  -- Check before the ticket lookup as well: a cutoff-crossed pending row\r\n  -- must not linger merely because confirmation reports another failure first.\r\n  if v_booking.status = 'pending' and not public.dayo_can_bypass_booking_lead_time() then\r\n    select pg_catalog.btrim(slot_time) into v_slot_time\r\n      from public.availability_slots\r\n     where id = v_booking.slot_id;\r\n    if v_slot_time ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}[T ][0-9]{2}:[0-9]{2}'\r\n       and v_slot_time not like 'weekly:%' then\r\n      begin\r\n        if v_slot_time ~* '(Z|[+-][0-9]{2}(:[0-9]{2}|[0-9]{2})?)$' then\r\n          v_scheduled_at := v_slot_time::timestamptz;\r\n        else\r\n          v_scheduled_at := v_slot_time::timestamp at time zone 'Asia/Seoul';\r\n        end if;\r\n      exception when others then\r\n        v_scheduled_at := null;\r\n      end;\r\n    end if;\r\n    if v_scheduled_at is not null\r\n       and v_scheduled_at < pg_catalog.clock_timestamp() + interval '4 hours' then\r\n      delete from public.bookings b\r\n       where b.id = p_booking_id\r\n         and b.learner_id = v_actor_id\r\n         and b.status = 'pending'\r\n         and b.ticket_deducted = false\r\n         and b.ticket_refunded = false\r\n         and b.partner_rewarded = false\r\n         and not exists (\r\n           select 1 from public.ticket_allocations a where a.booking_id = b.id\r\n         );\r\n      if not found then\r\n        raise exception 'Cutoff cleanup found an inconsistent pending booking.'\r\n          using errcode = '23514';\r\n      end if;\r\n      return pg_catalog.jsonb_build_object('success', false,\r\n        'code', 'booking_window_closed',\r\n        'message', '?덉빟 媛???쒓컙??吏?ъ뼱?? ?ㅻⅨ ?쒓컙???좏깮??二쇱꽭??');\r\n    end if;\r\n  end if;\r\n\r\n  begin\r\n    return public.deduct_ticket_and_confirm_booking(p_learner_id, p_booking_id);\r\n  exception when check_violation then\r\n    -- This handler's subtransaction rolls back lot, allocation and cache writes\r\n    -- made by confirmation before the 065 trigger rejected its status update.\r\n    if sqlerrm <> 'New bookings require at least four hours before the session.' then\r\n      raise;\r\n    end if;\r\n\r\n    -- Never delete a confirmed booking, an allocation or another user's row.\r\n    delete from public.bookings b\r\n     where b.id = p_booking_id\r\n       and b.learner_id = v_actor_id\r\n       and b.status = 'pending'\r\n       and b.ticket_deducted = false\r\n       and b.ticket_refunded = false\r\n       and b.partner_rewarded = false\r\n       and not exists (\r\n         select 1 from public.ticket_allocations a where a.booking_id = b.id\r\n       );\r\n    if not found then\r\n      raise exception 'Cutoff cleanup found an inconsistent pending booking.'\r\n        using errcode = '23514';\r\n    end if;\r\n\r\n    return pg_catalog.jsonb_build_object('success', false,\r\n      'code', 'booking_window_closed',\r\n      'message', '?덉빟 媛???쒓컙??吏?ъ뼱?? ?ㅻⅨ ?쒓컙???좏깮??二쇱꽭??');\r\n  end;\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "",
+      "proname": "dayo_is_admin",
+      "definition": "CREATE OR REPLACE FUNCTION public.dayo_is_admin()\n RETURNS boolean\n LANGUAGE sql\n STABLE SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\n  select auth.uid() is not null\r\n     and exists (\r\n       select 1\r\n       from public.profiles\r\n       where id = auth.uid()\r\n         and role = 'admin'\r\n     );\r\n$function$\n"
+    },
+    {
+      "args": "p_learner_id uuid, p_booking_id uuid",
+      "proname": "deduct_ticket_and_confirm_booking",
+      "definition": "CREATE OR REPLACE FUNCTION public.deduct_ticket_and_confirm_booking(p_learner_id uuid, p_booking_id uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_actor_id uuid := auth.uid();\r\n  v_profile_id uuid;\r\n  v_tickets integer;\r\n  v_status text;\r\n  v_deducted boolean;\r\n  v_slot_id uuid;\r\n  v_booking_learner uuid;\r\n  v_booking_partner uuid;\r\n  v_booking_partner_user uuid;\r\n  v_slot_partner uuid;\r\n  v_slot_status text;\r\n  v_slot_time text;\r\n  v_scheduled_at timestamptz;\r\n  v_allocation_id uuid;\r\n  v_allocated_owner uuid;\r\n  v_lot_id uuid;\r\nbegin\r\n  if v_actor_id is null then\r\n    return pg_catalog.jsonb_build_object('success', false, 'message', '濡쒓렇?몄씠 ?꾩슂?⑸땲??');\r\n  end if;\r\n\r\n  if p_learner_id is null\r\n     or p_booking_id is null\r\n     or p_learner_id <> v_actor_id then\r\n    return pg_catalog.jsonb_build_object('success', false, 'message', '?숈뒿??蹂몄씤留??덉빟???뺤젙?????덉뒿?덈떎.');\r\n  end if;\r\n\r\n  select learner_id, partner_id, partner_user_id, slot_id, status, ticket_deducted\r\n    into v_booking_learner, v_booking_partner, v_booking_partner_user,\r\n         v_slot_id, v_status, v_deducted\r\n    from public.bookings\r\n   where id = p_booking_id\r\n   for update;\r\n\r\n  if not found then\r\n    return pg_catalog.jsonb_build_object('success', false, 'message', '?ㅼ젣 ?덉빟 ID瑜?李얠쓣 ???놁뒿?덈떎.');\r\n  end if;\r\n\r\n  if v_booking_learner is null or v_booking_learner <> v_actor_id then\r\n    return pg_catalog.jsonb_build_object('success', false, 'message', '?덉빟 ?뚯쑀?먭? ?쇱튂?섏? ?딆뒿?덈떎.');\r\n  end if;\r\n\r\n  if v_status in ('confirmed', 'completed') then\r\n    if not coalesce(v_deducted, false) then\r\n      raise exception 'Confirmed booking has no ticket deduction.' using errcode = '23514';\r\n    end if;\r\n\r\n    select a.id, l.user_id\r\n      into v_allocation_id, v_allocated_owner\r\n      from public.ticket_allocations a\r\n      join public.ticket_lots l on l.id = a.ticket_lot_id\r\n     where a.booking_id = p_booking_id\r\n     for update of a;\r\n\r\n    if v_allocation_id is null then\r\n      if not exists (\r\n        select 1 from public.ticket_consumption_pre_cutover_bookings\r\n         where booking_id = p_booking_id\r\n      ) then\r\n        raise exception 'Confirmed booking has no ticket allocation.' using errcode = '23514';\r\n      end if;\r\n    elsif v_allocated_owner <> v_actor_id then\r\n      raise exception 'Booking ticket allocation belongs to another user.' using errcode = '23514';\r\n    end if;\r\n\r\n    select ticket_count into v_tickets\r\n      from public.profiles where id = v_actor_id;\r\n    return pg_catalog.jsonb_build_object(\r\n      'success', true, 'remaining_tickets', v_tickets,\r\n      'message', '?대? ?뺤젙???덉빟?낅땲??'\r\n    );\r\n  end if;\r\n\r\n  if v_status <> 'pending' then\r\n    return pg_catalog.jsonb_build_object('success', false, 'remaining_tickets', v_tickets,\r\n      'message', '?뺤젙?????덈뒗 ?덉빟 ?곹깭媛 ?꾨떃?덈떎.');\r\n  end if;\r\n\r\n  if coalesce(v_deducted, false) then\r\n    raise exception 'Pending booking already has a ticket deduction.' using errcode = '23514';\r\n  end if;\r\n\r\n  -- 049's trigger also enforces this at the status update. Check early so\r\n  -- ordinary users cannot consume a lot while pre-open booking is disabled.\r\n\r\n  if v_slot_id is null then\r\n    return pg_catalog.jsonb_build_object('success', false, 'remaining_tickets', v_tickets,\r\n      'message', '?덉빟 ?쒓컙 ?뺣낫瑜??뺤씤?????놁뒿?덈떎.');\r\n  end if;\r\n\r\n  if v_booking_partner is null\r\n     or v_booking_partner_user is null\r\n     or v_booking_partner <> v_booking_partner_user then\r\n    return pg_catalog.jsonb_build_object('success', false, 'remaining_tickets', v_tickets,\r\n      'message', '?덉빟 ?뚰듃???뺣낫媛 ?쇱튂?섏? ?딆뒿?덈떎.');\r\n  end if;\r\n\r\n  select partner_id, status, slot_time\r\n    into v_slot_partner, v_slot_status, v_slot_time\r\n    from public.availability_slots\r\n   where id = v_slot_id\r\n   for update;\r\n\r\n  if not found then\r\n    return pg_catalog.jsonb_build_object('success', false, 'remaining_tickets', v_tickets,\r\n      'message', '?덉빟 ?쒓컙??李얠쓣 ???놁뒿?덈떎.');\r\n  end if;\r\n\r\n  if v_slot_status <> 'available' then\r\n    return pg_catalog.jsonb_build_object('success', false, 'remaining_tickets', v_tickets,\r\n      'message', '?대? ?덉빟?섏뿀嫄곕굹 ?좏깮?????녿뒗 ?쒓컙?낅땲??');\r\n  end if;\r\n\r\n  if v_slot_partner <> v_booking_partner_user then\r\n    return pg_catalog.jsonb_build_object('success', false, 'remaining_tickets', v_tickets,\r\n      'message', '?덉빟 ?쒓컙???뚰듃???뺣낫媛 ?쇱튂?섏? ?딆뒿?덈떎.');\r\n  end if;\r\n\r\n  v_slot_time := pg_catalog.btrim(v_slot_time);\r\n\r\n  if v_slot_time is null or v_slot_time = '' then\r\n    return pg_catalog.jsonb_build_object('success', false, 'remaining_tickets', v_tickets,\r\n      'message', '?덉빟 ?쒓컙 ?뺤떇???뺤씤?????놁뒿?덈떎.');\r\n  end if;\r\n\r\n  if v_slot_time like 'weekly:%' then\r\n    return pg_catalog.jsonb_build_object('success', false, 'remaining_tickets', v_tickets,\r\n      'message', '諛섎났 媛?μ떆媛??쒗뵆由우? ?ㅼ젣 ?덉빟???ъ슜?????놁뒿?덈떎.');\r\n  end if;\r\n\r\n  if v_slot_time !~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}[T ]' then\r\n    return pg_catalog.jsonb_build_object('success', false, 'remaining_tickets', v_tickets,\r\n      'message', '?덉빟 ?쒓컙 ?뺤떇???뺤씤?????놁뒿?덈떎.');\r\n  end if;\r\n\r\n  begin\r\n    if v_slot_time ~* '(Z|[+-][0-9]{2}(:[0-9]{2}|[0-9]{2})?)$' then\r\n      v_scheduled_at := v_slot_time::timestamptz;\r\n    else\r\n      v_scheduled_at := v_slot_time::timestamp at time zone 'Asia/Seoul';\r\n    end if;\r\n  exception when others then\r\n    return pg_catalog.jsonb_build_object('success', false, 'remaining_tickets', v_tickets,\r\n      'message', '?덉빟 ?쒓컙 ?뺤떇???뺤씤?????놁뒿?덈떎.');\r\n  end;\r\n\r\n  -- Check the booking allocation before selecting a lot. A pending booking\r\n  -- with an allocation is inconsistent, never an idempotent confirmation.\r\n  select id into v_allocation_id\r\n    from public.ticket_allocations\r\n   where booking_id = p_booking_id\r\n   for update;\r\n  if found then\r\n    raise exception 'Pending booking already has a ticket allocation.' using errcode = '23514';\r\n  end if;\r\n\r\n  -- Issuance locks the profile before touching lots. Taking the same lock\r\n  -- before the FIFO lot prevents grant/consumption deadlocks and double spend.\r\n  select id into v_profile_id\r\n    from public.profiles\r\n   where id = v_actor_id\r\n   for update;\r\n  if not found then\r\n    return pg_catalog.jsonb_build_object('success', false, 'message', '?꾨줈?꾩쓣 李얠쓣 ???놁뒿?덈떎.');\r\n  end if;\r\n\r\n  select id into v_lot_id\r\n    from public.ticket_lots\r\n   where user_id = v_actor_id\r\n     and quantity_remaining > 0\r\n     and (expires_at is null or expires_at > pg_catalog.now())\r\n   order by expires_at asc nulls last, issued_at asc nulls last, id asc\r\n   limit 1\r\n   for update;\r\n\r\n  if v_lot_id is null then\r\n    return pg_catalog.jsonb_build_object('success', false, 'remaining_tickets', 0,\r\n      'message', '蹂댁쑀 ?곗폆??遺議깊빀?덈떎.');\r\n  end if;\r\n\r\n  update public.ticket_lots\r\n     set quantity_remaining = quantity_remaining - 1,\r\n         updated_at = pg_catalog.now()\r\n   where id = v_lot_id\r\n     and user_id = v_actor_id\r\n     and quantity_remaining > 0\r\n     and (expires_at is null or expires_at > pg_catalog.now());\r\n  if not found then\r\n    raise exception 'Ticket lot changed while confirming the booking.' using errcode = '40001';\r\n  end if;\r\n\r\n  insert into public.ticket_allocations (booking_id, ticket_lot_id, quantity)\r\n  values (p_booking_id, v_lot_id, 1);\r\n\r\n  v_tickets := public.refresh_ticket_balance_cache(v_actor_id);\r\n\r\n  update public.bookings\r\n     set status = 'confirmed',\r\n         ticket_deducted = true,\r\n         scheduled_at = v_scheduled_at,\r\n         updated_at = pg_catalog.now()\r\n   where id = p_booking_id\r\n     and learner_id = v_actor_id\r\n     and status = 'pending'\r\n     and ticket_deducted = false;\r\n  if not found then\r\n    raise exception 'Booking confirmation state changed while deducting a ticket.'\r\n      using errcode = '40001';\r\n  end if;\r\n\r\n  update public.availability_slots\r\n     set status = 'booked',\r\n         updated_at = pg_catalog.now()\r\n   where id = v_slot_id\r\n     and partner_id = v_booking_partner_user\r\n     and status = 'available';\r\n  if not found then\r\n    raise exception 'Availability slot state changed while confirming the booking.'\r\n      using errcode = '40001';\r\n  end if;\r\n\r\n  return pg_catalog.jsonb_build_object(\r\n    'success', true,\r\n    'remaining_tickets', v_tickets,\r\n    'message', '?덉빟???뺤젙?섏뿀?듬땲??'\r\n  );\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "p_learner_id uuid, p_booking_id uuid, p_slot_id uuid, p_partner_id uuid",
+      "proname": "deduct_ticket_and_confirm_booking",
+      "definition": "CREATE OR REPLACE FUNCTION public.deduct_ticket_and_confirm_booking(p_learner_id uuid, p_booking_id uuid, p_slot_id uuid, p_partner_id uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_actor_id uuid := auth.uid();\r\n  v_slot_id uuid;\r\n  v_partner_id uuid;\r\nbegin\r\n  if v_actor_id is null or p_learner_id is null or p_learner_id <> v_actor_id then\r\n    return pg_catalog.jsonb_build_object('success', false,\r\n      'message', '?숈뒿??蹂몄씤留??덉빟???뺤젙?????덉뒿?덈떎.');\r\n  end if;\r\n\r\n  select slot_id, partner_user_id\r\n    into v_slot_id, v_partner_id\r\n    from public.bookings\r\n   where id = p_booking_id\r\n     and learner_id = v_actor_id\r\n   for update;\r\n\r\n  if found then\r\n    if p_slot_id is not null and p_slot_id is distinct from v_slot_id then\r\n      return pg_catalog.jsonb_build_object('success', false,\r\n        'message', '?덉빟 ?쒓컙 ?뺣낫媛 ?쇱튂?섏? ?딆뒿?덈떎.');\r\n    end if;\r\n    if p_partner_id is not null and p_partner_id is distinct from v_partner_id then\r\n      return pg_catalog.jsonb_build_object('success', false,\r\n        'message', '?덉빟 ?뚰듃???뺣낫媛 ?쇱튂?섏? ?딆뒿?덈떎.');\r\n    end if;\r\n  end if;\r\n\r\n  return public.deduct_ticket_and_confirm_booking(p_learner_id, p_booking_id);\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "",
+      "proname": "enforce_booking_four_hour_minimum",
+      "definition": "CREATE OR REPLACE FUNCTION public.enforce_booking_four_hour_minimum()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_slot_time text;\r\n  v_scheduled_at timestamptz;\r\nbegin\r\n  if tg_op = 'INSERT' then\r\n    if new.status = 'pending' then\r\n      select pg_catalog.btrim(slot_time) into v_slot_time\r\n        from public.availability_slots\r\n       where id = new.slot_id;\r\n      if v_slot_time is null or v_slot_time !~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}[T ][0-9]{2}:[0-9]{2}'\r\n         or v_slot_time like 'weekly:%' then\r\n        raise exception 'A concrete booking slot is required.' using errcode = '23514';\r\n      end if;\r\n      begin\r\n        if v_slot_time ~* '(Z|[+-][0-9]{2}(:[0-9]{2}|[0-9]{2})?)$' then\r\n          v_scheduled_at := v_slot_time::timestamptz;\r\n        else\r\n          v_scheduled_at := v_slot_time::timestamp at time zone 'Asia/Seoul';\r\n        end if;\r\n      exception when others then\r\n        raise exception 'Booking slot time is invalid.' using errcode = '22007';\r\n      end;\r\n    elsif new.status = 'confirmed' then\r\n      v_scheduled_at := new.scheduled_at;\r\n    else\r\n      return new;\r\n    end if;\r\n  elsif tg_op = 'UPDATE' then\r\n    if (old.status = 'pending' and new.status = 'confirmed')\r\n       or (old.status = 'confirmed' and new.status = 'confirmed'\r\n           and new.scheduled_at is distinct from old.scheduled_at) then\r\n      v_scheduled_at := new.scheduled_at;\r\n    else\r\n      return new;\r\n    end if;\r\n  else\r\n    return new;\r\n  end if;\r\n\r\n  if v_scheduled_at is null then\r\n    raise exception 'A scheduled booking time is required.' using errcode = '23514';\r\n  end if;\r\n\r\n  -- Reuse 049's existing pre-open internal/admin/service test gate. This\r\n  -- exempts only the lead time, not the concrete slot requirement above.\r\n  if not public.dayo_can_bypass_booking_lead_time()\r\n     and v_scheduled_at < pg_catalog.clock_timestamp() + interval '4 hours' then\r\n    raise exception 'New bookings require at least four hours before the session.'\r\n      using errcode = '23514';\r\n  end if;\r\n  return new;\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "",
+      "proname": "enforce_booking_monthly_window",
+      "definition": "CREATE OR REPLACE FUNCTION public.enforce_booking_monthly_window()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare v_start timestamptz;v_day date;v_today date:=(clock_timestamp() at time zone 'Asia/Seoul')::date;v_override public.partner_availability_overrides;v_partner uuid;\r\nbegin\r\n  if tg_op='UPDATE' and not ((old.status='pending' and new.status='confirmed') or (new.status in ('pending','confirmed') and (new.slot_id is distinct from old.slot_id or new.scheduled_at is distinct from old.scheduled_at))) then return new;end if;\r\n  if new.status not in ('pending','confirmed') then return new;end if;\r\n  select public.availability_kst_start(slot_time),partner_id into v_start,v_partner from public.availability_slots where id=new.slot_id;\r\n  if v_start is null then raise exception 'Concrete slot required' using errcode='23514';end if;\r\n  v_day:=(v_start at time zone 'Asia/Seoul')::date;\r\n  if v_day<v_today or v_day>v_today+29 then raise exception 'Bookings open through the next 30 KST days' using errcode='23514';end if;\r\n  select * into v_override from public.partner_availability_overrides where partner_id=v_partner and date=v_day;\r\n  if v_override.mode='closed' or (v_override.mode='custom' and not(to_char(v_start at time zone 'Asia/Seoul','HH24:MI')=any(v_override.custom_slots))) then raise exception 'This date is no longer open' using errcode='23514';end if;\r\n  return new;\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "",
+      "proname": "enqueue_booking_notification",
+      "definition": "CREATE OR REPLACE FUNCTION public.enqueue_booking_notification()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_event text;\r\n  v_snapshot jsonb;\r\nbegin\r\n  if old.status = 'pending' and new.status = 'confirmed' and new.ticket_deducted is true then\r\n    v_event := 'booking_confirmed';\r\n  elsif old.status = 'confirmed' and new.status = 'cancelled'\r\n    and new.end_reason in ('user_cancelled_early', 'user_cancelled_late') then\r\n    v_event := 'booking_cancelled';\r\n  else\r\n    return new;\r\n  end if;\r\n  if new.learner_id is null or new.partner_user_id is null or new.scheduled_at is null then\r\n    raise exception 'Incomplete booking notification identity';\r\n  end if;\r\n  v_snapshot := pg_catalog.jsonb_build_object(\r\n    'learner_id', new.learner_id, 'partner_user_id', new.partner_user_id,\r\n    'scheduled_at', new.scheduled_at, 'language', new.language,\r\n    'end_reason', new.end_reason, 'ticket_refunded', new.ticket_refunded,\r\n    'partner_rewarded', new.partner_rewarded\r\n  );\r\n  insert into public.booking_notification_log(event_key, booking_id, event_type, recipient_role, recipient_user_id, snapshot)\r\n  values (v_event || ':' || new.id::text || ':partner', new.id, v_event, 'partner', new.partner_user_id, v_snapshot)\r\n  on conflict (booking_id, event_type, recipient_role) do nothing;\r\n  if v_event = 'booking_confirmed' then\r\n    insert into public.booking_notification_log(event_key, booking_id, event_type, recipient_role, recipient_user_id, snapshot)\r\n    values (v_event || ':' || new.id::text || ':learner', new.id, v_event, 'learner', new.learner_id, v_snapshot)\r\n    on conflict (booking_id, event_type, recipient_role) do nothing;\r\n  end if;\r\n  return new;\r\nexception when others then\r\n  -- Notification enqueue failures must not roll back booking/ticket/cancellation.\r\n  -- Monitor this code in database logs; no email or token is included.\r\n  raise warning 'DAYO_BOOKING_NOTIFICATION_ENQUEUE_FAILED SQLSTATE=%', sqlstate;\r\n  return new;\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "p_partner_ids uuid[]",
+      "proname": "get_booking_calendar_slots",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_booking_calendar_slots(p_partner_ids uuid[])\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare v_partner uuid;v_today date:=(clock_timestamp() at time zone 'Asia/Seoul')::date;v_result jsonb;\r\nbegin\r\n  if auth.uid() is null then raise exception 'Login required' using errcode='42501';end if;\r\n  if p_partner_ids is null or cardinality(p_partner_ids)>100 then raise exception 'Invalid partner selection' using errcode='22023';end if;\r\n  for v_partner in select distinct p.id from public.profiles p where p.id=any(p_partner_ids) and p.role='partner' order by p.id loop\r\n    perform public.refresh_partner_monthly_slots(v_partner,false);\r\n  end loop;\r\n  -- A single JSON result avoids PostgREST's default row cap truncating calendar dates.\r\n  select coalesce(jsonb_agg(jsonb_build_object('id',s.id,'partner_id',s.partner_id,'slot_time',s.slot_time,'status',s.status)\r\n    order by public.availability_kst_start(s.slot_time),s.partner_id,s.id),'[]'::jsonb) into v_result\r\n    from public.availability_slots s join public.profiles p on p.id=s.partner_id\r\n    where s.partner_id=any(p_partner_ids) and p.role='partner' and s.status='available'\r\n      and public.availability_kst_start(s.slot_time)>clock_timestamp()\r\n      and (public.availability_kst_start(s.slot_time) at time zone 'Asia/Seoul')::date between v_today and v_today+29\r\n      and not exists(select 1 from public.bookings b where b.partner_id=s.partner_id and b.status='confirmed' and b.scheduled_at=public.availability_kst_start(s.slot_time));\r\n  return v_result;\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "p_booking_id uuid",
+      "proname": "get_partner_booking_brief",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_partner_booking_brief(p_booking_id uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_learner_id uuid;\r\n  v_language text;\r\n  v_brief jsonb;\r\n  v_nickname text;\r\n  v_email text;\r\nbegin\r\n  if auth.uid() is null or p_booking_id is null then\r\n    return null;\r\n  end if;\r\n\r\n  select b.learner_id, b.language, b.conversation_brief\r\n    into v_learner_id, v_language, v_brief\r\n  from public.bookings b\r\n  where b.id = p_booking_id\r\n    and b.partner_user_id = auth.uid()\r\n    and b.status = 'confirmed';\r\n\r\n  if not found then\r\n    return null;\r\n  end if;\r\n\r\n  select p.nickname, p.email\r\n    into v_nickname, v_email\r\n  from public.profiles p\r\n  where p.id = v_learner_id or p.user_id = v_learner_id\r\n  order by case when p.id = v_learner_id then 0 else 1 end\r\n  limit 1;\r\n\r\n  v_nickname := nullif(pg_catalog.btrim(v_nickname), '');\r\n  if v_nickname is null\r\n     or pg_catalog.strpos(v_nickname, '@') > 0\r\n     or v_nickname ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'\r\n     or (v_email is not null\r\n         and pg_catalog.lower(v_nickname) = pg_catalog.split_part(pg_catalog.lower(v_email), '@', 1)) then\r\n    v_nickname := 'DayO User';\r\n  end if;\r\n\r\n  return pg_catalog.jsonb_build_object(\r\n    'learner_display_name', v_nickname,\r\n    'language', v_language,\r\n    'conversation_brief', v_brief\r\n  );\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "",
+      "proname": "get_partner_monthly_schedule",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_partner_monthly_schedule()\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare v_uid uuid:=auth.uid();v_today date:=(clock_timestamp() at time zone 'Asia/Seoul')::date;v_result jsonb;\r\nbegin\r\n  if v_uid is null or not exists(select 1 from public.profiles where id=v_uid and role='partner') then raise exception 'Partner access required' using errcode='42501';end if;\r\n  perform public.refresh_partner_monthly_slots(v_uid,false);\r\n  select jsonb_build_object('start',v_today,'end',v_today+29,\r\n    'weekly',coalesce((select jsonb_agg(jsonb_build_object('dayId',split_part(substr(slot_time,8),'|',1),'time',split_part(slot_time,'|',2))) from public.availability_slots where partner_id=v_uid and slot_time like 'weekly:%'),'[]'::jsonb),\r\n    'overrides',coalesce((select jsonb_agg(to_jsonb(o)) from public.partner_availability_overrides o where partner_id=v_uid and date between v_today and v_today+29),'[]'::jsonb),\r\n    'slots',coalesce((select jsonb_agg(jsonb_build_object('id',s.id,'slot_time',s.slot_time,'status',s.status,'reserved',exists(select 1 from public.bookings b where b.status='confirmed' and (b.slot_id=s.id or (b.partner_id=s.partner_id and b.scheduled_at=public.availability_kst_start(s.slot_time)))))) from public.availability_slots s where partner_id=v_uid and (public.availability_kst_start(slot_time) at time zone 'Asia/Seoul')::date between v_today and v_today+29),'[]'::jsonb)) into v_result;\r\n  return v_result;\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "p_event_id uuid, p_booking_id uuid, p_event_type text, p_payload jsonb",
+      "proname": "log_session_event",
+      "definition": "CREATE OR REPLACE FUNCTION public.log_session_event(p_event_id uuid, p_booking_id uuid, p_event_type text, p_payload jsonb DEFAULT '{}'::jsonb)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_actor_id uuid := auth.uid();\r\n  v_learner_id uuid;\r\n  v_partner_user_id uuid;\r\n  v_booking_status text;\r\n  v_role text;\r\n  v_event_type text := btrim(coalesce(p_event_type, ''));\r\n  v_input jsonb := coalesce(p_payload, '{}'::jsonb);\r\n  v_payload jsonb := '{}'::jsonb;\r\n  v_card_id text;\r\n  v_category text;\r\n  v_source text;\r\n  v_reason text;\r\n  v_items jsonb := '[]'::jsonb;\r\n  v_inserted integer := 0;\r\nbegin\r\n  if v_actor_id is null then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'unauthorized'\r\n    );\r\n  end if;\r\n\r\n  if public.dayo_is_admin() then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'admin_preview_not_loggable'\r\n    );\r\n  end if;\r\n\r\n  if p_event_id is null or p_booking_id is null then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'invalid_event_identity'\r\n    );\r\n  end if;\r\n\r\n  if v_event_type not in (\r\n    'room_entered',\r\n    'media_connected',\r\n    'talk_card_shown',\r\n    'word_help_clicked',\r\n    'session_ended'\r\n  ) then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'invalid_event_type'\r\n    );\r\n  end if;\r\n\r\n  if jsonb_typeof(v_input) <> 'object' then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'invalid_payload'\r\n    );\r\n  end if;\r\n\r\n  if octet_length(v_input::text) > 4096 then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'payload_too_large'\r\n    );\r\n  end if;\r\n\r\n  select\r\n    learner_id,\r\n    partner_user_id,\r\n    status\r\n  into\r\n    v_learner_id,\r\n    v_partner_user_id,\r\n    v_booking_status\r\n  from public.bookings\r\n  where id = p_booking_id;\r\n\r\n  if not found then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'booking_not_found'\r\n    );\r\n  end if;\r\n\r\n  if v_actor_id = v_learner_id then\r\n    v_role := 'learner';\r\n  elsif v_actor_id = v_partner_user_id then\r\n    v_role := 'partner';\r\n  else\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'not_booking_participant'\r\n    );\r\n  end if;\r\n\r\n  if v_event_type = 'session_ended' then\r\n    if v_booking_status not in ('confirmed', 'completed', 'tech_issue') then\r\n      return jsonb_build_object(\r\n        'success', false,\r\n        'code', 'booking_status_not_loggable'\r\n      );\r\n    end if;\r\n  elsif v_booking_status <> 'confirmed' then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'code', 'booking_status_not_loggable'\r\n    );\r\n  end if;\r\n\r\n  if v_event_type in ('room_entered', 'media_connected') then\r\n    v_payload := jsonb_build_object(\r\n      'role', v_role\r\n    );\r\n\r\n  elsif v_event_type = 'talk_card_shown' then\r\n    if v_role <> 'partner' then\r\n      return jsonb_build_object(\r\n        'success', false,\r\n        'code', 'partner_event_only'\r\n      );\r\n    end if;\r\n\r\n    v_card_id := left(\r\n      btrim(coalesce(v_input ->> 'card_id', '')),\r\n      120\r\n    );\r\n\r\n    v_category := left(\r\n      btrim(coalesce(v_input ->> 'category', '')),\r\n      80\r\n    );\r\n\r\n    if v_card_id = '' or v_category = '' then\r\n      return jsonb_build_object(\r\n        'success', false,\r\n        'code', 'invalid_talk_card_payload'\r\n      );\r\n    end if;\r\n\r\n    v_payload := jsonb_build_object(\r\n      'card_id', v_card_id,\r\n      'category', v_category\r\n    );\r\n\r\n  elsif v_event_type = 'word_help_clicked' then\r\n    v_source := btrim(coalesce(v_input ->> 'source', ''));\r\n\r\n    if v_source not in ('ai', 'fallback') then\r\n      return jsonb_build_object(\r\n        'success', false,\r\n        'code', 'invalid_word_help_source'\r\n      );\r\n    end if;\r\n\r\n    if jsonb_typeof(v_input -> 'items') <> 'array' then\r\n      return jsonb_build_object(\r\n        'success', false,\r\n        'code', 'invalid_word_help_items'\r\n      );\r\n    end if;\r\n\r\n    select coalesce(\r\n      jsonb_agg(\r\n        jsonb_build_object(\r\n          'text',\r\n          left(\r\n            btrim(coalesce(item.value ->> 'text', '')),\r\n            160\r\n          ),\r\n          'ko',\r\n          left(\r\n            btrim(coalesce(item.value ->> 'ko', '')),\r\n            160\r\n          )\r\n        )\r\n        order by item.ordinality\r\n      ),\r\n      '[]'::jsonb\r\n    )\r\n    into v_items\r\n    from (\r\n      select\r\n        value,\r\n        ordinality\r\n      from jsonb_array_elements(v_input -> 'items') with ordinality\r\n      where jsonb_typeof(value) = 'object'\r\n        and btrim(coalesce(value ->> 'text', '')) <> ''\r\n        and btrim(coalesce(value ->> 'ko', '')) <> ''\r\n      order by ordinality\r\n      limit 6\r\n    ) as item;\r\n\r\n    if jsonb_array_length(v_items) = 0 then\r\n      return jsonb_build_object(\r\n        'success', false,\r\n        'code', 'empty_word_help_items'\r\n      );\r\n    end if;\r\n\r\n    v_payload := jsonb_build_object(\r\n      'source', v_source,\r\n      'items', v_items\r\n    );\r\n\r\n  elsif v_event_type = 'session_ended' then\r\n    v_reason := btrim(coalesce(v_input ->> 'reason', ''));\r\n\r\n    if v_reason not in ('normal', 'personal', 'tech_issue') then\r\n      return jsonb_build_object(\r\n        'success', false,\r\n        'code', 'invalid_end_reason'\r\n      );\r\n    end if;\r\n\r\n    v_payload := jsonb_build_object(\r\n      'role', v_role,\r\n      'reason', v_reason\r\n    );\r\n  end if;\r\n\r\n  insert into public.session_events (\r\n    id,\r\n    booking_id,\r\n    event_type,\r\n    actor_user_id,\r\n    payload\r\n  )\r\n  values (\r\n    p_event_id,\r\n    p_booking_id,\r\n    v_event_type,\r\n    v_actor_id,\r\n    v_payload\r\n  )\r\n  on conflict (id) do nothing;\r\n\r\n  get diagnostics v_inserted = row_count;\r\n\r\n  return jsonb_build_object(\r\n    'success', true,\r\n    'event_id', p_event_id,\r\n    'inserted', v_inserted = 1\r\n  );\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "p_booking_id uuid, p_report jsonb",
+      "proname": "merge_learner_session_report",
+      "definition": "CREATE OR REPLACE FUNCTION public.merge_learner_session_report(p_booking_id uuid, p_report jsonb DEFAULT '{}'::jsonb)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_actor_id uuid := auth.uid();\r\n  v_booking_learner_id uuid;\r\n  v_booking_partner_id uuid;\r\n  v_booking_partner_user_id uuid;\r\n  v_booking_partner_name text;\r\n  v_key_expressions jsonb;\r\n  v_word_help jsonb;\r\n  v_feedback jsonb;\r\n  v_quiz_score integer;\r\n  v_rating numeric;\r\n  v_report_id uuid;\r\nbegin\r\n  if v_actor_id is null or p_booking_id is null then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'message', '로그인된 예약 정보를 확인할 수 없습니다.'\r\n    );\r\n  end if;\r\n\r\n  p_report := coalesce(p_report, '{}'::jsonb);\r\n\r\n  select\r\n    bookings.learner_id,\r\n    bookings.partner_id,\r\n    bookings.partner_user_id,\r\n    bookings.partner_name\r\n  into\r\n    v_booking_learner_id,\r\n    v_booking_partner_id,\r\n    v_booking_partner_user_id,\r\n    v_booking_partner_name\r\n  from public.bookings\r\n  where bookings.id = p_booking_id\r\n    and bookings.learner_id = v_actor_id\r\n    and bookings.status in ('confirmed', 'completed')\r\n  for share;\r\n\r\n  if not found\r\n     or v_booking_learner_id is null\r\n     or v_booking_partner_user_id is null then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'message', '학습자 본인의 완료 가능한 예약만 저장할 수 있습니다.'\r\n    );\r\n  end if;\r\n\r\n  v_key_expressions := case\r\n    when jsonb_typeof(p_report -> 'key_expressions') = 'array'\r\n      then p_report -> 'key_expressions'\r\n    else '[]'::jsonb\r\n  end;\r\n\r\n  v_word_help := case\r\n    when jsonb_typeof(p_report -> 'word_help') = 'array'\r\n      then p_report -> 'word_help'\r\n    else '[]'::jsonb\r\n  end;\r\n\r\n  v_feedback := case\r\n    when jsonb_typeof(p_report -> 'feedback') = 'array'\r\n      then p_report -> 'feedback'\r\n    else '[]'::jsonb\r\n  end;\r\n\r\n  v_quiz_score := case\r\n    when jsonb_typeof(p_report -> 'quiz_score') = 'number'\r\n      then (p_report ->> 'quiz_score')::integer\r\n    else null\r\n  end;\r\n\r\n  v_rating := case\r\n    when jsonb_typeof(p_report -> 'rating') = 'number'\r\n      then (p_report ->> 'rating')::numeric\r\n    else null\r\n  end;\r\n\r\n  insert into public.session_reports as existing (\r\n    booking_id,\r\n    learner_id,\r\n    partner_id,\r\n    partner_user_id,\r\n    partner_name,\r\n    summary,\r\n    key_expressions,\r\n    quiz_score,\r\n    word_help,\r\n    feedback,\r\n    rating,\r\n    spoken_sentence\r\n  ) values (\r\n    p_booking_id,\r\n    v_booking_learner_id,\r\n    v_booking_partner_id,\r\n    v_booking_partner_user_id,\r\n    v_booking_partner_name,\r\n    nullif(btrim(p_report ->> 'summary'), ''),\r\n    v_key_expressions,\r\n    v_quiz_score,\r\n    v_word_help,\r\n    v_feedback,\r\n    v_rating,\r\n    nullif(btrim(p_report ->> 'spoken_sentence'), '')\r\n  )\r\n  on conflict (booking_id) do update\r\n    set learner_id = excluded.learner_id,\r\n        partner_id = excluded.partner_id,\r\n        partner_user_id = excluded.partner_user_id,\r\n        partner_name = coalesce(excluded.partner_name, existing.partner_name),\r\n        summary = excluded.summary,\r\n        key_expressions = excluded.key_expressions,\r\n        quiz_score = excluded.quiz_score,\r\n        word_help = excluded.word_help,\r\n        feedback = excluded.feedback,\r\n        rating = excluded.rating,\r\n        spoken_sentence =\r\n          coalesce(excluded.spoken_sentence, existing.spoken_sentence)\r\n  returning id into v_report_id;\r\n\r\n  return jsonb_build_object(\r\n    'success', true,\r\n    'report_id', v_report_id,\r\n    'learner_id', v_booking_learner_id\r\n  );\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "p_booking_id uuid, p_report jsonb",
+      "proname": "merge_partner_session_report",
+      "definition": "CREATE OR REPLACE FUNCTION public.merge_partner_session_report(p_booking_id uuid, p_report jsonb DEFAULT '{}'::jsonb)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_actor_id uuid := auth.uid();\r\n  v_booking_learner_id uuid;\r\n  v_booking_partner_id uuid;\r\n  v_booking_partner_user_id uuid;\r\n  v_booking_partner_name text;\r\n  v_report_id uuid;\r\nbegin\r\n  if v_actor_id is null or p_booking_id is null then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'message', '로그인된 예약 정보를 확인할 수 없습니다.'\r\n    );\r\n  end if;\r\n\r\n  p_report := coalesce(p_report, '{}'::jsonb);\r\n\r\n  select\r\n    bookings.learner_id,\r\n    bookings.partner_id,\r\n    bookings.partner_user_id,\r\n    bookings.partner_name\r\n  into\r\n    v_booking_learner_id,\r\n    v_booking_partner_id,\r\n    v_booking_partner_user_id,\r\n    v_booking_partner_name\r\n  from public.bookings\r\n  where bookings.id = p_booking_id\r\n    and bookings.partner_user_id = v_actor_id\r\n    and bookings.status in ('confirmed', 'completed')\r\n  for share;\r\n\r\n  if not found\r\n     or v_booking_learner_id is null\r\n     or v_booking_partner_user_id is null\r\n     or v_booking_partner_user_id <> v_actor_id then\r\n    return jsonb_build_object(\r\n      'success', false,\r\n      'message', '예약된 파트너 본인만 저장할 수 있습니다.'\r\n    );\r\n  end if;\r\n\r\n  insert into public.session_reports as existing (\r\n    booking_id,\r\n    learner_id,\r\n    partner_id,\r\n    partner_user_id,\r\n    partner_name,\r\n    spoken_sentence,\r\n    keyword,\r\n    illust_url,\r\n    partner_comment,\r\n    stamp\r\n  ) values (\r\n    p_booking_id,\r\n    v_booking_learner_id,\r\n    v_booking_partner_id,\r\n    v_booking_partner_user_id,\r\n    v_booking_partner_name,\r\n    nullif(btrim(p_report ->> 'spoken_sentence'), ''),\r\n    nullif(btrim(p_report ->> 'keyword'), ''),\r\n    nullif(btrim(p_report ->> 'illust_url'), ''),\r\n    nullif(btrim(p_report ->> 'partner_comment'), ''),\r\n    nullif(btrim(p_report ->> 'stamp'), '')\r\n  )\r\n  on conflict (booking_id) do update\r\n    set learner_id = excluded.learner_id,\r\n        partner_id = excluded.partner_id,\r\n        partner_user_id = excluded.partner_user_id,\r\n        partner_name = coalesce(excluded.partner_name, existing.partner_name),\r\n        spoken_sentence = coalesce(excluded.spoken_sentence, existing.spoken_sentence),\r\n        keyword = coalesce(excluded.keyword, existing.keyword),\r\n        illust_url = coalesce(excluded.illust_url, existing.illust_url),\r\n        partner_comment = coalesce(excluded.partner_comment, existing.partner_comment),\r\n        stamp = coalesce(excluded.stamp, existing.stamp)\r\n  returning id into v_report_id;\r\n\r\n  return jsonb_build_object(\r\n    'success', true,\r\n    'report_id', v_report_id,\r\n    'learner_id', v_booking_learner_id\r\n  );\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "p_partner uuid, p_replace_default boolean, p_only_date date",
+      "proname": "refresh_partner_monthly_slots",
+      "definition": "CREATE OR REPLACE FUNCTION public.refresh_partner_monthly_slots(p_partner uuid, p_replace_default boolean DEFAULT false, p_only_date date DEFAULT NULL::date)\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare v_today date:=(clock_timestamp() at time zone 'Asia/Seoul')::date; v_day date; v_mode text; v_times text[];\r\n  v_time text; v_start timestamptz; v_active boolean; v_dow text; v_existing uuid;\r\nbegin\r\n  perform pg_catalog.pg_advisory_xact_lock(pg_catalog.hashtextextended(p_partner::text,83));\r\n  select role='partner' into v_active from public.profiles where id=p_partner;\r\n  for v_day in select (v_today+i)::date from generate_series(0,29) i where p_only_date is null or v_today+i=p_only_date loop\r\n    v_mode:=null;v_times:='{}';\r\n    select mode,custom_slots into v_mode,v_times from public.partner_availability_overrides where partner_id=p_partner and date=v_day;\r\n    if v_mode is null or v_mode='default' then\r\n      v_dow:=(array['sun','mon','tue','wed','thu','fri','sat'])[extract(dow from v_day)::integer+1];\r\n      select coalesce(array_agg(distinct split_part(slot_time,'|',2)),'{}') into v_times from public.availability_slots\r\n        where partner_id=p_partner and slot_time like 'weekly:'||v_dow||'|%'\r\n          and split_part(slot_time,'|',2) ~ '^(08:30|09:(00|30)|1[0-9]:(00|30)|2[0-2]:(00|30)|23:00)$';\r\n    elsif v_mode='closed' then v_times:='{}'; end if;\r\n    -- Row predicates are rechecked after booking RPC locks; never mutate booked slots.\r\n    if v_mode in ('closed','custom') or p_replace_default then\r\n      update public.availability_slots s set status='hidden',updated_at=now()\r\n        where s.partner_id=p_partner and s.status='available'\r\n          and (public.availability_kst_start(s.slot_time) at time zone 'Asia/Seoul')::date=v_day\r\n          and public.availability_kst_start(s.slot_time)>clock_timestamp()\r\n          and not(to_char(public.availability_kst_start(s.slot_time) at time zone 'Asia/Seoul','HH24:MI')=any(v_times));\r\n    end if;\r\n    if coalesce(v_active,false) then\r\n      foreach v_time in array coalesce(v_times,'{}') loop\r\n        v_start:=(v_day+v_time::time) at time zone 'Asia/Seoul';\r\n        if v_start<=clock_timestamp() or exists(select 1 from public.bookings b where b.partner_id=p_partner and b.status='confirmed' and b.scheduled_at=v_start) then continue; end if;\r\n        select s.id into v_existing from public.availability_slots s where s.partner_id=p_partner and public.availability_kst_start(s.slot_time)=v_start order by s.id limit 1 for update;\r\n        if found then\r\n          update public.availability_slots set status='available',updated_at=now() where id=v_existing and status='hidden';\r\n        else\r\n          insert into public.availability_slots(partner_id,slot_time,status) values(p_partner,to_char(v_start at time zone 'Asia/Seoul','YYYY-MM-DD\"T\"HH24:MI:SS'),'available') on conflict(partner_id,slot_time) do nothing;\r\n        end if;\r\n      end loop;\r\n    end if;\r\n  end loop;\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "p_booking_id uuid, p_reason text",
+      "proname": "refund_booking_ticket",
+      "definition": "CREATE OR REPLACE FUNCTION public.refund_booking_ticket(p_booking_id uuid, p_reason text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_actor_id uuid := auth.uid();\r\n  v_learner_id uuid;\r\n  v_partner_id uuid;\r\n  v_deducted boolean;\r\n  v_refunded boolean;\r\n  v_allocation public.ticket_allocations%rowtype;\r\n  v_lot public.ticket_lots%rowtype;\r\n  v_has_allocation boolean;\r\n  v_ticket_count integer;\r\nbegin\r\n  if v_actor_id is null or p_booking_id is null or p_reason is null\r\n     or p_reason not in ('tech_issue', 'safety_report') then\r\n    raise exception 'Invalid booking refund request.' using errcode = '42501';\r\n  end if;\r\n\r\n  select learner_id, partner_user_id, ticket_deducted, ticket_refunded\r\n    into v_learner_id, v_partner_id, v_deducted, v_refunded\r\n    from public.bookings\r\n   where id = p_booking_id\r\n   for update;\r\n\r\n  if not found\r\n     or (v_actor_id is distinct from v_learner_id\r\n         and v_actor_id is distinct from v_partner_id) then\r\n    raise exception 'Booking participant access is required.' using errcode = '42501';\r\n  end if;\r\n\r\n  select * into v_allocation\r\n    from public.ticket_allocations\r\n   where booking_id = p_booking_id\r\n   for update;\r\n  v_has_allocation := found;\r\n\r\n  if not v_has_allocation then\r\n    if coalesce(v_refunded, false) and not coalesce(v_deducted, false) then\r\n      raise exception 'Booking refund state has no ticket deduction.' using errcode = '23514';\r\n    end if;\r\n\r\n    if coalesce(v_deducted, false) then\r\n      if not exists (\r\n        select 1 from public.ticket_consumption_pre_cutover_bookings\r\n         where booking_id = p_booking_id\r\n      ) then\r\n        raise exception 'Deducted booking has no ticket allocation.' using errcode = '23514';\r\n      end if;\r\n\r\n      select ticket_count into v_ticket_count\r\n        from public.profiles where id = v_learner_id;\r\n\r\n      -- 054 discarded every fake legacy entitlement. Historical bookings\r\n      -- cannot restore a lot that never had an allocation. Keep the session\r\n      -- incident report, but require explicit admin review for compensation.\r\n      return pg_catalog.jsonb_build_object(\r\n        'refunded', coalesce(v_refunded, false),\r\n        'already_refunded', coalesce(v_refunded, false),\r\n        'refund_unavailable', not coalesce(v_refunded, false),\r\n        'refund_code', 'historical_no_allocation',\r\n        'ticket_count', v_ticket_count\r\n      );\r\n    end if;\r\n\r\n    select ticket_count into v_ticket_count\r\n      from public.profiles where id = v_learner_id;\r\n    return pg_catalog.jsonb_build_object(\r\n      'refunded', false, 'already_refunded', false,\r\n      'refund_unavailable', false, 'ticket_count', v_ticket_count\r\n    );\r\n  end if;\r\n\r\n  if not coalesce(v_deducted, false) then\r\n    raise exception 'Ticket allocation exists without booking deduction.' using errcode = '23514';\r\n  end if;\r\n\r\n  -- 055 grants and 056 consumption lock profile before lot. Match that order\r\n  -- after booking/allocation to prevent a grant/refund deadlock.\r\n  perform 1 from public.profiles where id = v_learner_id for update;\r\n  if not found then\r\n    raise exception 'Learner profile not found.' using errcode = 'P0002';\r\n  end if;\r\n\r\n  select * into v_lot\r\n    from public.ticket_lots\r\n   where id = v_allocation.ticket_lot_id\r\n   for update;\r\n  if not found or v_lot.user_id is distinct from v_learner_id\r\n     or v_allocation.quantity is distinct from 1 then\r\n    raise exception 'Ticket allocation does not belong to the learner lot.' using errcode = '23514';\r\n  end if;\r\n\r\n  if coalesce(v_refunded, false) is distinct from (v_allocation.refunded_at is not null) then\r\n    raise exception 'Booking and allocation refund state disagree.' using errcode = '23514';\r\n  end if;\r\n\r\n  if v_allocation.refunded_at is not null then\r\n    select ticket_count into v_ticket_count\r\n      from public.profiles where id = v_learner_id;\r\n    return pg_catalog.jsonb_build_object(\r\n      'refunded', true, 'already_refunded', true,\r\n      'refund_unavailable', false, 'ticket_count', v_ticket_count\r\n    );\r\n  end if;\r\n\r\n  if v_lot.quantity_remaining >= v_lot.quantity_issued then\r\n    raise exception 'Original ticket lot has no room for a refund.' using errcode = '23514';\r\n  end if;\r\n\r\n  update public.ticket_lots\r\n     set quantity_remaining = quantity_remaining + 1,\r\n         updated_at = pg_catalog.now()\r\n   where id = v_lot.id\r\n     and quantity_remaining < quantity_issued;\r\n  if not found then\r\n    raise exception 'Ticket lot changed while refunding.' using errcode = '40001';\r\n  end if;\r\n\r\n  update public.ticket_allocations\r\n     set refunded_at = pg_catalog.now(),\r\n         refund_reason = p_reason\r\n   where id = v_allocation.id\r\n     and booking_id = p_booking_id\r\n     and refunded_at is null;\r\n  if not found then\r\n    raise exception 'Ticket allocation changed while refunding.' using errcode = '40001';\r\n  end if;\r\n\r\n  update public.bookings\r\n     set ticket_refunded = true,\r\n         updated_at = pg_catalog.now()\r\n   where id = p_booking_id\r\n     and ticket_refunded = false;\r\n  if not found then\r\n    raise exception 'Booking refund state changed.' using errcode = '40001';\r\n  end if;\r\n\r\n  -- The helper excludes expired lots, so an expired restore remains in audit\r\n  -- history without granting a new usable ticket or extending its expiry.\r\n  v_ticket_count := public.refresh_ticket_balance_cache(v_learner_id);\r\n\r\n  return pg_catalog.jsonb_build_object(\r\n    'refunded', true, 'already_refunded', false,\r\n    'refund_unavailable', false, 'ticket_count', v_ticket_count\r\n  );\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "p_booking_id uuid",
+      "proname": "report_session_tech_issue",
+      "definition": "CREATE OR REPLACE FUNCTION public.report_session_tech_issue(p_booking_id uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\nbegin\r\n  return pg_catalog.jsonb_build_object(\r\n    'success', false, 'code', 'issue_details_required',\r\n    'message', '臾몄젣 ?좏삎???좏깮???좉퀬??二쇱꽭??'\r\n  );\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "p_booking_id uuid, p_issue_type text, p_detail text",
+      "proname": "report_session_tech_issue",
+      "definition": "CREATE OR REPLACE FUNCTION public.report_session_tech_issue(p_booking_id uuid, p_issue_type text, p_detail text DEFAULT NULL::text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_actor_id uuid := auth.uid();\r\n  v_booking public.bookings%rowtype;\r\n  v_existing public.session_tech_issue_reports%rowtype;\r\n  v_now timestamptz := pg_catalog.now();\r\n  v_issue_type text := pg_catalog.btrim(coalesce(p_issue_type, ''));\r\n  v_detail text := nullif(pg_catalog.btrim(coalesce(p_detail, '')), '');\r\n  v_role text;\r\n  v_evidence jsonb;\r\n  v_end_reason text;\r\nbegin\r\n  if v_actor_id is null or p_booking_id is null then\r\n    return pg_catalog.jsonb_build_object('success', false, 'code', 'not_participant');\r\n  end if;\r\n  if v_issue_type not in (\r\n    'cannot_hear_partner', 'partner_cannot_hear_me',\r\n    'cannot_see_partner', 'partner_cannot_see_me',\r\n    'connection_unstable', 'counterpart_absent', 'other'\r\n  ) or (v_detail is not null and pg_catalog.char_length(v_detail) > 300) then\r\n    return pg_catalog.jsonb_build_object('success', false, 'code', 'invalid_issue');\r\n  end if;\r\n\r\n  select * into v_booking from public.bookings\r\n   where id = p_booking_id\r\n     and (learner_id = v_actor_id or partner_user_id = v_actor_id)\r\n   for update;\r\n  if not found then\r\n    return pg_catalog.jsonb_build_object('success', false, 'code', 'not_participant');\r\n  end if;\r\n  v_role := case when v_booking.learner_id = v_actor_id then 'learner' else 'partner' end;\r\n\r\n  select * into v_existing from public.session_tech_issue_reports\r\n   where booking_id = p_booking_id and reporter_user_id = v_actor_id;\r\n  if found then\r\n    return pg_catalog.jsonb_build_object(\r\n      'success', true, 'decision', v_existing.decision,\r\n      'issue_type', v_existing.issue_type, 'already_reported', true,\r\n      'refunded', v_booking.ticket_refunded,\r\n      'partner_rewarded', v_booking.partner_rewarded\r\n    );\r\n  end if;\r\n\r\n  if (v_booking.status = 'cancelled'\r\n      and coalesce(v_booking.end_reason, '') not in (\r\n        'tech_issue_review', 'partner_no_show_review', 'learner_no_show_review'\r\n      ))\r\n     or v_booking.end_reason in ('user_cancelled_early', 'user_cancelled_late') then\r\n    return pg_catalog.jsonb_build_object('success', false, 'code', 'booking_cancelled');\r\n  end if;\r\n  if v_booking.status = 'tech_issue' and v_booking.end_reason = 'tech_issue' then\r\n    return pg_catalog.jsonb_build_object(\r\n      'success', true, 'decision', 'approved', 'already_reported', true,\r\n      'refunded', v_booking.ticket_refunded,\r\n      'partner_rewarded', v_booking.partner_rewarded\r\n    );\r\n  end if;\r\n  if v_booking.ticket_refunded is true then\r\n    return pg_catalog.jsonb_build_object('success', false, 'code', 'already_refunded');\r\n  end if;\r\n  -- A second participant can add their own report while review is pending.\r\n  if not (v_booking.status = 'confirmed'\r\n          and v_booking.ended_at is null\r\n          and v_booking.completed_at is null\r\n          and nullif(pg_catalog.btrim(v_booking.end_reason), '') is null)\r\n     and not (v_booking.status = 'cancelled'\r\n              and v_booking.end_reason in (\r\n                'tech_issue_review', 'partner_no_show_review', 'learner_no_show_review'\r\n              )) then\r\n    return pg_catalog.jsonb_build_object('success', false, 'code', 'booking_terminal');\r\n  end if;\r\n  if v_booking.scheduled_at is null\r\n     or v_now < v_booking.scheduled_at - interval '5 minutes'\r\n     or v_now > v_booking.scheduled_at + interval '10 minutes' then\r\n    return pg_catalog.jsonb_build_object(\r\n      'success', false, 'code', 'tech_issue_window_closed',\r\n      'message', '湲곗닠 臾몄젣 ?먮룞 泥섎━ 媛???쒓컙???꾨떃?덈떎. ?꾩????꾩슂?섎㈃ 臾몄쓽??二쇱꽭??'\r\n    );\r\n  end if;\r\n\r\n  select pg_catalog.jsonb_build_object(\r\n    'learner_room_entered', count(*) filter (\r\n      where event_type = 'room_entered' and actor_user_id = v_booking.learner_id),\r\n    'partner_room_entered', count(*) filter (\r\n      where event_type = 'room_entered' and actor_user_id = v_booking.partner_user_id),\r\n    'learner_media_connected', count(*) filter (\r\n      where event_type = 'media_connected' and actor_user_id = v_booking.learner_id),\r\n    'partner_media_connected', count(*) filter (\r\n      where event_type = 'media_connected' and actor_user_id = v_booking.partner_user_id)\r\n  ) into v_evidence\r\n  from public.session_events where booking_id = p_booking_id\r\n    and event_type in ('room_entered', 'media_connected');\r\n\r\n  -- Review is deliberately conservative: 048 has no verifiable failed-media\r\n  -- event, and an absent best-effort success event is not failure evidence.\r\n  v_end_reason := case\r\n    when v_booking.status = 'cancelled' then v_booking.end_reason\r\n    when v_issue_type = 'counterpart_absent' and v_role = 'learner'\r\n      then 'partner_no_show_review'\r\n    when v_issue_type = 'counterpart_absent' and v_role = 'partner'\r\n      then 'learner_no_show_review'\r\n    else 'tech_issue_review'\r\n  end;\r\n\r\n  insert into public.session_tech_issue_reports (\r\n    booking_id, reporter_user_id, reporter_role, issue_type, detail,\r\n    reported_at, scheduled_at, decision, evidence\r\n  ) values (\r\n    p_booking_id, v_actor_id, v_role, v_issue_type, v_detail,\r\n    v_now, v_booking.scheduled_at, 'manual_review', v_evidence\r\n  );\r\n\r\n  if v_booking.status = 'confirmed' then\r\n    -- A cancelled booking is terminal for room entry and cannot be rewarded\r\n    -- by the normal 045 completion RPC while review is pending.\r\n    -- completed_at stays null because this was not a completed conversation.\r\n    update public.bookings\r\n       set status = 'cancelled', end_reason = v_end_reason,\r\n           ended_at = v_now, updated_at = v_now\r\n     where id = p_booking_id and status = 'confirmed'\r\n       and ended_at is null and completed_at is null\r\n       and nullif(pg_catalog.btrim(end_reason), '') is null;\r\n    if not found then\r\n      raise exception 'Booking changed while reporting a tech issue.' using errcode = '40001';\r\n    end if;\r\n  end if;\r\n\r\n  return pg_catalog.jsonb_build_object(\r\n    'success', true, 'decision', 'manual_review',\r\n    'issue_type', v_issue_type, 'end_reason', v_end_reason,\r\n    'refunded', false, 'partner_rewarded', false,\r\n    'no_show_candidate', v_issue_type = 'counterpart_absent'\r\n  );\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "p_report_id uuid, p_refund_user boolean, p_reward_partner boolean, p_resolution_reason text",
+      "proname": "resolve_tech_issue_report",
+      "definition": "CREATE OR REPLACE FUNCTION public.resolve_tech_issue_report(p_report_id uuid, p_refund_user boolean, p_reward_partner boolean, p_resolution_reason text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_admin_id uuid := auth.uid();\r\n  v_reason text := pg_catalog.btrim(coalesce(p_resolution_reason, ''));\r\n  v_booking_id uuid;\r\n  v_booking public.bookings%rowtype;\r\n  v_report public.session_tech_issue_reports%rowtype;\r\n  v_allocation public.ticket_allocations%rowtype;\r\n  v_lot public.ticket_lots%rowtype;\r\n  v_ticket_count integer;\r\n  v_partner_points integer;\r\n  v_decision text;\r\n  v_end_reason text;\r\n  v_resolved_count integer;\r\nbegin\r\n  if v_admin_id is null or not public.dayo_is_admin() then\r\n    raise exception 'Admin access is required.' using errcode = '42501';\r\n  end if;\r\n  if p_report_id is null or p_refund_user is null or p_reward_partner is null\r\n     or v_reason = '' or pg_catalog.char_length(v_reason) > 1000 then\r\n    raise exception 'Report, both decisions, and a reason (1-1000 characters) are required.'\r\n      using errcode = '22023';\r\n  end if;\r\n\r\n  -- 060 reporter flow locks booking before touching its report. Resolve in\r\n  -- the same order to avoid a reporter/admin deadlock. Booking lock also\r\n  -- serializes resolutions initiated from either participant's report row.\r\n  select booking_id into v_booking_id\r\n    from public.session_tech_issue_reports where id = p_report_id;\r\n  if not found then\r\n    return pg_catalog.jsonb_build_object('success', false, 'code', 'report_not_found');\r\n  end if;\r\n  select * into v_booking from public.bookings\r\n   where id = v_booking_id for update;\r\n  if not found then\r\n    raise exception 'Technical incident booking is missing.' using errcode = '23514';\r\n  end if;\r\n  select * into v_report from public.session_tech_issue_reports\r\n   where id = p_report_id and booking_id = v_booking_id for update;\r\n  if not found then\r\n    raise exception 'Technical incident changed during resolution.' using errcode = '40001';\r\n  end if;\r\n  if v_report.decision <> 'manual_review'\r\n     or exists (\r\n       select 1 from public.session_tech_issue_reports\r\n        where booking_id = v_booking_id and decision <> 'manual_review'\r\n     ) then\r\n    return pg_catalog.jsonb_build_object('success', false, 'code', 'already_resolved');\r\n  end if;\r\n  if v_booking.status is distinct from 'cancelled'\r\n     or v_booking.end_reason not in (\r\n       'tech_issue_review', 'partner_no_show_review', 'learner_no_show_review'\r\n     ) or v_booking.ended_at is null or v_booking.completed_at is not null then\r\n    return pg_catalog.jsonb_build_object('success', false, 'code', 'booking_not_in_review');\r\n  end if;\r\n  if v_booking.ticket_refunded is distinct from false\r\n     or v_booking.partner_rewarded is distinct from false then\r\n    raise exception 'Booking has already been refunded or rewarded.' using errcode = '23514';\r\n  end if;\r\n\r\n  select * into v_allocation from public.ticket_allocations\r\n   where booking_id = v_booking_id for update;\r\n  if found then\r\n    if v_allocation.quantity is distinct from 1 or v_allocation.refunded_at is not null\r\n       or v_allocation.refund_reason is not null then\r\n      raise exception 'Ticket allocation is already refunded or inconsistent.'\r\n        using errcode = '23514';\r\n    end if;\r\n  elsif p_refund_user then\r\n    raise exception 'Cannot refund a booking without its original allocation.'\r\n      using errcode = '23514';\r\n  end if;\r\n\r\n  if p_refund_user then\r\n    if v_booking.ticket_deducted is distinct from true then\r\n      raise exception 'Booking has no deducted ticket.' using errcode = '23514';\r\n    end if;\r\n    -- Match 055-057 lock order: booking, allocation, learner profile, lot.\r\n    perform 1 from public.profiles where id = v_booking.learner_id for update;\r\n    if not found then\r\n      raise exception 'Learner profile is missing.' using errcode = 'P0002';\r\n    end if;\r\n    select * into v_lot from public.ticket_lots\r\n     where id = v_allocation.ticket_lot_id for update;\r\n    if not found or v_lot.user_id is distinct from v_booking.learner_id\r\n       or v_lot.quantity_remaining >= v_lot.quantity_issued then\r\n      raise exception 'Original ticket lot cannot be restored.' using errcode = '23514';\r\n    end if;\r\n    update public.ticket_lots\r\n       set quantity_remaining = quantity_remaining + 1,\r\n           updated_at = pg_catalog.now()\r\n     where id = v_lot.id and quantity_remaining < quantity_issued;\r\n    if not found then\r\n      raise exception 'Ticket lot changed during resolution.' using errcode = '40001';\r\n    end if;\r\n    update public.ticket_allocations\r\n       set refunded_at = pg_catalog.now(),\r\n           refund_reason = 'tech_issue_manual_approved'\r\n     where id = v_allocation.id and refunded_at is null;\r\n    if not found then\r\n      raise exception 'Allocation changed during resolution.' using errcode = '40001';\r\n    end if;\r\n    -- The original expires_at is untouched; an already-expired lot does not\r\n    -- become a newly usable ticket when its quantity is restored.\r\n    v_ticket_count := public.refresh_ticket_balance_cache(v_booking.learner_id);\r\n  end if;\r\n\r\n  if p_reward_partner then\r\n    if v_booking.partner_user_id is null then\r\n      raise exception 'Booking partner is missing.' using errcode = '23514';\r\n    end if;\r\n    select point_balance into v_partner_points from public.profiles\r\n     where id = v_booking.partner_user_id and role = 'partner' for update;\r\n    if not found then\r\n      raise exception 'Partner profile is missing.' using errcode = 'P0002';\r\n    end if;\r\n    update public.profiles\r\n       set point_balance = coalesce(point_balance, 0) + 6000,\r\n           updated_at = pg_catalog.now()\r\n     where id = v_booking.partner_user_id and role = 'partner'\r\n     returning point_balance into v_partner_points;\r\n    if not found then\r\n      raise exception 'Partner reward changed during resolution.' using errcode = '40001';\r\n    end if;\r\n  end if;\r\n\r\n  v_decision := case when p_refund_user or p_reward_partner then 'approved' else 'rejected' end;\r\n  v_end_reason := case\r\n    when v_booking.end_reason = 'partner_no_show_review' then 'partner_no_show_resolved'\r\n    when v_booking.end_reason = 'learner_no_show_review' then 'learner_no_show_resolved'\r\n    when v_decision = 'approved' then 'tech_issue_approved'\r\n    else 'tech_issue_rejected'\r\n  end;\r\n  -- Resolution changes the financial flags and reason, never the cancelled\r\n  -- terminal status or completed_at of this non-completed conversation.\r\n  update public.bookings\r\n     set ticket_refunded = p_refund_user,\r\n         partner_rewarded = p_reward_partner,\r\n         end_reason = v_end_reason,\r\n         updated_at = pg_catalog.now()\r\n   where id = v_booking_id and status = 'cancelled'\r\n     and end_reason = v_booking.end_reason\r\n     and ticket_refunded = false and partner_rewarded = false;\r\n  if not found then\r\n    raise exception 'Booking changed during resolution.' using errcode = '40001';\r\n  end if;\r\n\r\n  -- Resolve both participant reports together: a second report ID cannot\r\n  -- later award the same booking a second ticket or another 6,000P.\r\n  update public.session_tech_issue_reports\r\n     set decision = v_decision,\r\n         user_refund_decision = p_refund_user,\r\n         partner_reward_decision = p_reward_partner,\r\n         resolution_reason = v_reason,\r\n         resolved_by = v_admin_id,\r\n         resolved_at = pg_catalog.now()\r\n   where booking_id = v_booking_id and decision = 'manual_review';\r\n  get diagnostics v_resolved_count = row_count;\r\n  if v_resolved_count < 1 then\r\n    raise exception 'No pending report remained for resolution.' using errcode = '40001';\r\n  end if;\r\n\r\n  return pg_catalog.jsonb_build_object(\r\n    'success', true, 'booking_id', v_booking_id,\r\n    'decision', v_decision, 'user_refunded', p_refund_user,\r\n    'partner_rewarded', p_reward_partner,\r\n    'ticket_count', v_ticket_count, 'partner_points', v_partner_points,\r\n    'end_reason', v_end_reason, 'reports_resolved', v_resolved_count\r\n  );\r\nend;\r\n$function$\n"
+    },
+    {
+      "args": "",
+      "proname": "sync_confirmed_booking_preferences",
+      "definition": "CREATE OR REPLACE FUNCTION public.sync_confirmed_booking_preferences()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\nbegin\r\n  if old.status='pending' and new.status='confirmed' and new.matching_snapshot is not null then\r\n    insert into public.user_conversation_preferences(user_id,interests,language,korean_support_preference,conversation_style,purposes,source_booking_id)\r\n      values(new.learner_id,array(select jsonb_array_elements_text(new.conversation_brief->'interests')),new.language,\r\n        new.conversation_brief->>'korean_support_preference',new.conversation_brief->>'conversation_style',\r\n        array(select jsonb_array_elements_text(new.conversation_brief->'purposes')),new.id)\r\n      on conflict(user_id) do update set interests=excluded.interests,language=excluded.language,\r\n        korean_support_preference=excluded.korean_support_preference,conversation_style=excluded.conversation_style,\r\n        purposes=excluded.purposes,source_booking_id=excluded.source_booking_id\r\n      where user_conversation_preferences.source_booking_id is null or\r\n        exists(select 1 from public.bookings b where b.id=user_conversation_preferences.source_booking_id and (b.created_at,b.id)<=(new.created_at,new.id));\r\n  end if;\r\n  return new;\r\nend $function$\n"
+    },
+    {
+      "args": "p_booking_id uuid, p_transcript jsonb, p_started_at timestamp with time zone, p_ended_at timestamp with time zone",
+      "proname": "upsert_session_transcript",
+      "definition": "CREATE OR REPLACE FUNCTION public.upsert_session_transcript(p_booking_id uuid, p_transcript jsonb, p_started_at timestamp with time zone, p_ended_at timestamp with time zone)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_actor_id uuid := auth.uid();\r\n  v_learner_id uuid;\r\n  v_partner_profile_id uuid;\r\n  v_partner_user_id uuid;\r\n  v_scheduled_at timestamptz;\r\n  v_session_window_start timestamptz;\r\n  v_session_window_end timestamptz;\r\n  v_participant_role text;\r\n  v_clean_transcript jsonb;\r\n  v_item jsonb;\r\n  v_item_timestamp timestamptz;\r\n  v_session_log_id uuid;\r\nbegin\r\n  if v_actor_id is null then\r\n    return pg_catalog.jsonb_build_object(\r\n      'success', false,\r\n      'code', 'auth_required',\r\n      'message', '濡쒓렇?몄씠 ?꾩슂?⑸땲??'\r\n    );\r\n  end if;\r\n\r\n  if p_booking_id is null then\r\n    return pg_catalog.jsonb_build_object(\r\n      'success', false,\r\n      'code', 'invalid_booking_id',\r\n      'message', '?덉빟 ID媛 ?꾩슂?⑸땲??'\r\n    );\r\n  end if;\r\n\r\n  select bookings.learner_id, bookings.partner_id, bookings.partner_user_id, bookings.scheduled_at\r\n    into v_learner_id, v_partner_profile_id, v_partner_user_id, v_scheduled_at\r\n    from public.bookings\r\n   where bookings.id = p_booking_id;\r\n\r\n  if not found then\r\n    return pg_catalog.jsonb_build_object(\r\n      'success', false,\r\n      'code', 'booking_not_found',\r\n      'message', '?덉빟??李얠쓣 ???놁뒿?덈떎.'\r\n    );\r\n  end if;\r\n\r\n  if v_learner_id is null or v_partner_profile_id is null or v_partner_user_id is null then\r\n    return pg_catalog.jsonb_build_object(\r\n      'success', false,\r\n      'code', 'booking_identity_incomplete',\r\n      'message', '?덉빟 李몄뿬???뺣낫媛 ?꾩쟾?섏? ?딆뒿?덈떎.'\r\n    );\r\n  end if;\r\n\r\n  if v_actor_id = v_learner_id then\r\n    v_participant_role := 'learner';\r\n  elsif v_actor_id = v_partner_user_id then\r\n    v_participant_role := 'partner';\r\n  else\r\n    return pg_catalog.jsonb_build_object(\r\n      'success', false,\r\n      'code', 'not_booking_participant',\r\n      'message', '???덉빟??李몄뿬?먮쭔 ???湲곕줉????ν븷 ???덉뒿?덈떎.'\r\n    );\r\n  end if;\r\n\r\n  if p_transcript is null or pg_catalog.jsonb_typeof(p_transcript) <> 'array' then\r\n    return pg_catalog.jsonb_build_object(\r\n      'success', false,\r\n      'code', 'invalid_transcript',\r\n      'message', '???湲곕줉? JSON 諛곗뿴?댁뼱???⑸땲??'\r\n    );\r\n  end if;\r\n\r\n  if pg_catalog.jsonb_array_length(p_transcript) > 1000\r\n     or pg_catalog.octet_length(p_transcript::pg_catalog.text) > 1048576 then\r\n    return pg_catalog.jsonb_build_object(\r\n      'success', false,\r\n      'code', 'transcript_too_large',\r\n      'message', '???湲곕줉 ?ш린 ?쒗븳??珥덇낵?덉뒿?덈떎.'\r\n    );\r\n  end if;\r\n\r\n  v_session_window_start := v_scheduled_at - interval '5 minutes';\r\n  v_session_window_end := v_scheduled_at + interval '35 minutes';\r\n\r\n  if v_scheduled_at is null\r\n     or p_started_at is null\r\n     or p_ended_at is null\r\n     or p_ended_at < p_started_at\r\n     or p_started_at < v_session_window_start\r\n     or p_started_at > v_session_window_end\r\n     or p_ended_at < v_session_window_start\r\n     or p_ended_at > v_session_window_end then\r\n    return pg_catalog.jsonb_build_object(\r\n      'success', false,\r\n      'code', 'invalid_session_window',\r\n      'message', '?몄뀡 ?쒖옉/醫낅즺 ?쒓컖???뺤씤??二쇱꽭??'\r\n    );\r\n  end if;\r\n\r\n  -- Malformed/out-of-window rows are omitted. Missing or invalid timestamps\r\n  -- are never inferred or clamped, and browser speaker labels never determine\r\n  -- participant identity.\r\n  v_clean_transcript := '[]'::pg_catalog.jsonb;\r\n  for v_item in\r\n    select items.item\r\n      from pg_catalog.jsonb_array_elements(p_transcript) with ordinality as items(item, ordinality)\r\n     order by items.ordinality\r\n  loop\r\n    if pg_catalog.jsonb_typeof(v_item) <> 'object'\r\n       or pg_catalog.jsonb_typeof(v_item -> 'speaker') <> 'string'\r\n       or pg_catalog.lower(pg_catalog.btrim(v_item ->> 'speaker')) <> v_participant_role\r\n       or pg_catalog.jsonb_typeof(v_item -> 'text') <> 'string'\r\n       or pg_catalog.char_length(pg_catalog.btrim(v_item ->> 'text')) not between 1 and 4000\r\n       or pg_catalog.jsonb_typeof(v_item -> 'timestamp') <> 'string'\r\n       or pg_catalog.btrim(v_item ->> 'timestamp') !~\r\n         '^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}([.][0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$' then\r\n      continue;\r\n    end if;\r\n\r\n    begin\r\n      v_item_timestamp := (v_item ->> 'timestamp')::pg_catalog.timestamptz;\r\n    exception when others then\r\n      continue;\r\n    end;\r\n\r\n    if v_item_timestamp < v_session_window_start\r\n       or v_item_timestamp > v_session_window_end then\r\n      continue;\r\n    end if;\r\n\r\n    v_clean_transcript := v_clean_transcript || pg_catalog.jsonb_build_array(v_item);\r\n  end loop;\r\n\r\n  insert into public.session_logs (\r\n    booking_id,\r\n    participant_id,\r\n    participant_role,\r\n    learner_id,\r\n    partner_id,\r\n    user_id,\r\n    room_id,\r\n    transcript,\r\n    started_at,\r\n    ended_at,\r\n    updated_at\r\n  ) values (\r\n    p_booking_id,\r\n    v_actor_id,\r\n    v_participant_role,\r\n    v_learner_id,\r\n    v_partner_profile_id,\r\n    v_actor_id,\r\n    p_booking_id::pg_catalog.text,\r\n    v_clean_transcript,\r\n    p_started_at,\r\n    p_ended_at,\r\n    pg_catalog.now()\r\n  )\r\n  on conflict (booking_id, participant_role)\r\n    where booking_id is not null and participant_role is not null\r\n  do update set\r\n    participant_id = excluded.participant_id,\r\n    learner_id = excluded.learner_id,\r\n    partner_id = excluded.partner_id,\r\n    user_id = excluded.user_id,\r\n    room_id = excluded.room_id,\r\n    transcript = excluded.transcript,\r\n    started_at = excluded.started_at,\r\n    ended_at = excluded.ended_at,\r\n    updated_at = pg_catalog.now()\r\n  returning session_logs.id into v_session_log_id;\r\n\r\n  return pg_catalog.jsonb_build_object(\r\n    'success', true,\r\n    'session_log_id', v_session_log_id,\r\n    'booking_id', p_booking_id,\r\n    'participant_id', v_actor_id,\r\n    'participant_role', v_participant_role,\r\n    'partner_id', v_partner_profile_id,\r\n    'item_count', pg_catalog.jsonb_array_length(v_clean_transcript)\r\n  );\r\nend\r\n$function$\n"
+    },
+    {
+      "args": "p_partner_id uuid",
+      "proname": "get_admin_partner_availability",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_admin_partner_availability(p_partner_id uuid)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare\r\n  v_now timestamptz := clock_timestamp();\r\n  v_today date := (v_now at time zone 'Asia/Seoul')::date;\r\n  v_available jsonb;\r\n  v_slots jsonb;\r\n  v_languages text[];\r\nbegin\r\n  if auth.uid() is null or not public.dayo_is_admin() then\r\n    raise exception 'Admin access required' using errcode='42501';\r\n  end if;\r\n  if p_partner_id is null or not exists (\r\n    select 1 from public.profiles where id=p_partner_id and role='partner'\r\n  ) then raise exception 'Partner profile not found' using errcode='P0002'; end if;\r\n  v_available := public.get_booking_calendar_slots(array[p_partner_id]);\r\n  select conversation_languages into v_languages from public.partner_capabilities\r\n    where partner_id=p_partner_id;\r\n  select coalesce(jsonb_agg(row order by starts_at,status),'[]'::jsonb) into v_slots\r\n  from (\r\n    select jsonb_build_object('id',x->>'id','slot_time',x->>'slot_time','status','available') row,\r\n      public.availability_kst_start(x->>'slot_time') starts_at, 'available' status\r\n    from jsonb_array_elements(v_available) x\r\n    where public.availability_kst_start(x->>'slot_time') >= v_now + interval '4 hours'\r\n      and coalesce(v_languages && array['en','es','fr','ko']::text[],false)\r\n      and not exists (select 1 from public.bookings b where b.status='confirmed'\r\n        and (b.slot_id=(x->>'id')::uuid or (b.partner_id=p_partner_id\r\n          and b.scheduled_at=public.availability_kst_start(x->>'slot_time'))))\r\n    union all\r\n    select jsonb_build_object('id',s.id,'slot_time',s.slot_time,'status','booked'),\r\n      public.availability_kst_start(s.slot_time), 'booked'\r\n    from public.availability_slots s\r\n    where s.partner_id=p_partner_id\r\n      and public.availability_kst_start(s.slot_time)>v_now\r\n      and (public.availability_kst_start(s.slot_time) at time zone 'Asia/Seoul')::date between v_today and v_today+29\r\n      and (s.status='booked' or exists (select 1 from public.bookings b where b.status='confirmed'\r\n        and (b.slot_id=s.id or (b.partner_id=p_partner_id and b.scheduled_at=public.availability_kst_start(s.slot_time)))))\r\n  ) effective;\r\n  return jsonb_build_object('partner_id',p_partner_id,'start',v_today,'end',v_today+29,\r\n    'as_of',v_now,'min_lead_hours',4,'capability_configured',coalesce(v_languages && array['en','es','fr','ko']::text[],false),\r\n    'slots',v_slots);\r\nend;\r\n$function$\n"
+    }
+  ]
+}

@@ -72,7 +72,7 @@ function usePartnerRows() {
     const ids = profiles.map((row) => row.user_id || row.id).filter(Boolean);
     const [bookings, slots, settlements] = await Promise.all([
       ids.length
-        ? supabase.from("bookings").select("partner_user_id, status, rating, scheduled_at").in("partner_user_id", ids)
+        ? supabase.from("bookings").select("partner_user_id, status, rating, scheduled_at").in("partner_user_id", ids).eq("is_test_session", false)
         : Promise.resolve({ data: [], error: null }),
       ids.length
         ? supabase.from("availability_slots").select("partner_id, status").in("partner_id", ids)

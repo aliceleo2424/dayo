@@ -36,6 +36,7 @@ export type PartnerProfile = {
 };
 
 type PartnerSession = {
+  is_test_session: boolean;
   id: string;
   learner_id: string | null;
   learner_name: string;
@@ -185,9 +186,9 @@ export function PartnerDetailModal({
     void (async () => {
       const uid = current.user_id || current.id;
       const bookingSelects = [
-        "id, learner_id, scheduled_at, status, rating, review",
-        "id, learner_id, scheduled_at, status, rating",
-        "id, learner_id, scheduled_at, status",
+        "id, learner_id, scheduled_at, status, rating, review, is_test_session",
+        "id, learner_id, scheduled_at, status, rating, is_test_session",
+        "id, learner_id, scheduled_at, status, is_test_session",
         "*",
       ];
       let bookingRows: Record<string, unknown>[] = [];
@@ -218,6 +219,7 @@ export function PartnerDetailModal({
         return {
           id: String(row.id || ""),
           learner_id: learnerId || null,
+          is_test_session: row.is_test_session === true,
           learner_name: learner?.name || (learnerLookupFailed ? "유저 정보를 불러오지 못했습니다." : "유저 정보 없음"),
           learner_email: learner?.email ?? null,
           learner_provider: learner?.provider || "unknown",
@@ -306,13 +308,13 @@ export function PartnerDetailModal({
   const metrics = useMemo(() => {
     const now = new Date();
     const thisMonth = sessions.filter((session) => {
-      if (!session.scheduled_at) return false;
+      if (session.is_test_session || !session.scheduled_at) return false;
       const date = new Date(session.scheduled_at);
       return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
     });
     const pending = thisMonth.reduce((sum, session) => sum + statusDetail(session.status).delta, 0);
-    const penalties = sessions.filter((session) => String(session.status) === "partner_noshow");
-    const ratings = sessions.map((session) => session.rating).filter((value): value is number => value != null && value > 0);
+    const penalties = sessions.filter((session) => !session.is_test_session && String(session.status) === "partner_noshow");
+    const ratings = sessions.filter(session => !session.is_test_session).map((session) => session.rating).filter((value): value is number => value != null && value > 0);
     return {
       pending: Math.max(0, pending),
       penaltyTotal: penalties.length * 10000,
@@ -501,12 +503,12 @@ export function PartnerDetailModal({
                       <article key={session.id} className="rounded-xl border p-4">
                         <div className="flex flex-wrap items-start justify-between gap-2">
                           <div>
-                            <p className="font-semibold">{formatSessionDateTime(session.scheduled_at)} <span className="text-xs font-normal text-muted-foreground">(30분 세션)</span></p>
+                            <div className="font-semibold">{session.is_test_session && <Badge>TEST</Badge>} {formatSessionDateTime(session.scheduled_at)} <span className="text-xs font-normal text-muted-foreground">(30분 세션)</span></div>
                             <SessionLearnerIdentity session={session} />
                           </div>
                           <Badge variant={detail.variant}>{detail.label}</Badge>
                         </div>
-                        <p className="mt-2 text-xs text-muted-foreground">{detail.detail}</p>
+                        <p className="mt-2 text-xs text-muted-foreground">{session.is_test_session ? "테스트 세션 · 보상/정산 제외" : detail.detail}</p>
                         <p className="mt-2 text-sm">{session.rating == null ? "평가 없음" : `★ ${session.rating.toFixed(1)}`}{session.review ? ` (“${session.review}”)` : ""}</p>
                         <Button
                           className="mt-3"

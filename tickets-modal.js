@@ -536,9 +536,9 @@
       } catch (e) { /* orders table may be missing */ }
 
       try {
-        var bookingRes = await client.from('bookings').select('id, status').eq('learner_id', userId).limit(20);
+        var bookingRes = await client.from('bookings').select('id, status').eq('learner_id', userId).eq('is_test_session', false).limit(20);
         if (bookingRes.error) {
-          bookingRes = await client.from('bookings').select('id, status').eq('user_id', userId).limit(20);
+          bookingRes = await client.from('bookings').select('id, status').eq('user_id', userId).eq('is_test_session', false).limit(20);
         }
         var bookings = (bookingRes && bookingRes.data) || [];
         anyBooking = bookings.length > 0;
