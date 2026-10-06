@@ -536,7 +536,7 @@
       if (booking.status === 'confirmed' && booking.partner_user_id === partnerBriefUserId && start.getTime() > Date.now()) {
         var cancel = document.createElement('button');
         cancel.type = 'button';
-        cancel.className = 'partner-upcoming-prepare partner-booking-cancel';
+        cancel.className = 'partner-booking-cancel';
         if (!document.getElementById('partner-cancellation-button-style')) {
           var cancelStyle = document.createElement('style');
           cancelStyle.id = 'partner-cancellation-button-style';
