@@ -1,5 +1,5 @@
 /* Images only. Public URLs only; service credentials stay on the server. */
-const lib = require('./_lib/profile-image');
+const lib = require('./profile-image');
 function json(res, status, value) { res.statusCode = status; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.end(JSON.stringify(value)); }
 function createHandler(makeClient = lib.client) {
   return async function handler(req, res) {

@@ -33,7 +33,7 @@ async function start(){
   if(url.pathname==='/qa-legacy.webp'){res.setHeader('Content-Type','image/webp');return res.end(await sharp(fixture).webp().toBuffer());}
   if(url.pathname==='/qa-provider.webp'){res.setHeader('Content-Type','image/webp');return res.end(await sharp({create:{width:100,height:100,channels:3,background:'#F8F0E3'}}).webp().toBuffer());}
   if(url.pathname==='/qa-photo.png'){res.setHeader('Content-Type','image/png');return res.end(fixture);}
-  if(url.pathname==='/api/profile-image'){
+  if(url.pathname==='/api/partner-application-upload' && url.searchParams.get('action')==='profile-image'){
    if(req.method==='POST'){let raw='';for await(const part of req)raw+=part;if(req.headers.authorization!=='Bearer local-fixture-only')throw Error('fixture_auth');const result=await lib.normalize(JSON.parse(raw));const id=crypto.randomUUID();current={bytes:result.data,url:'/qa-assets/'+id+'.webp',version:id};res.setHeader('Content-Type','application/json');return res.end(JSON.stringify({avatar_url:current.url,version:id}));}
    if(req.method==='DELETE'&&req.headers.authorization==='Bearer local-fixture-only'){current=null;res.setHeader('Content-Type','application/json');return res.end(JSON.stringify({avatar_url:null}));}
    res.statusCode=405;return res.end();

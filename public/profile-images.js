@@ -45,7 +45,7 @@
  async function upload(prepared,expectedUserId){
   var auth=await session();if(expectedUserId&&auth.user.id!==expectedUserId)throw Error('sign_in_required');
   var response,result;
-  try{response=await fetch('/api/profile-image',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+auth.access_token},body:JSON.stringify({mime:prepared.mime,base64:prepared.base64})});result=await response.json();}catch(_){throw Error('image_save_unconfirmed');}
+  try{response=await fetch('/api/partner-application-upload?action=profile-image',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+auth.access_token},body:JSON.stringify({mime:prepared.mime,base64:prepared.base64})});result=await response.json();}catch(_){throw Error('image_save_unconfirmed');}
   if(!response.ok||!safe(result.avatar_url))throw Error(result.error||'failed');
   var next=await session();if(next.user.id!==auth.user.id)throw Error('sign_in_required');return result;
  }

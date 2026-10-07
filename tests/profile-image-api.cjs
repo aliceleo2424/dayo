@@ -1,7 +1,7 @@
 const assert=require('node:assert/strict');
 const sharp=require('sharp');
 const lib=require('../api/_lib/profile-image');
-const {createHandler}=require('../api/profile-image');
+const {createHandler}=require('../api/_lib/profile-image-handler');
 const owner='11111111-1111-4111-8111-111111111111',other='22222222-2222-4222-8222-222222222222',asset='33333333-3333-4333-8333-333333333333';
 async function run(){
  const png=await sharp({create:{width:1600,height:800,channels:3,background:'#5F7D63'}}).png().toBuffer();
