@@ -103,6 +103,17 @@
   }
 
 
+  function letterTopics(speech) {
+    var safe=speech.filter(function(r){return r.speaker==='learner'&&meaningful(r)&&!greeting(r.text)&&!brokenASR(r.text);});
+    var grouped=stories(safe,{interests:[],cards:[]},'letter_source',{}),chosen=new Set();
+    return grouped.map(function(t){
+      var candidates=safe.filter(function(r){return t.source_utterance_ids.includes(r.id);}),first=expressions(candidates)[0];
+      if(!first||chosen.has(first.source_utterance_id))return null;
+      chosen.add(first.source_utterance_id);
+      return {id:first.source_utterance_id,label:t.en,quote:first.text,source_utterance_ids:t.source_utterance_ids};
+    }).filter(Boolean).slice(0,3);
+  }
+
   var STORY_VERSION = 'transcript_stories_v3';
   var storyRules = [
     ['food_cafe','맛집·카페','Food & cafés',/\b(caf[eé]s?|coffee|latte|espresso|cappuccino|food|foods|restaurants?|cook|cooking|noodles?|dumplings?|recipes?|flavo[u]?rs?|sweet|spicy|vanilla)\b/i],
@@ -322,5 +333,5 @@
     if (help.length) html += '<details class="recap-help"><summary>' + esc(l.help) + '</summary><p>' + help.map(function (x) { return esc(x.text); }).join(' · ') + '</p><small>' + esc(l.helpNote) + '</small></details>';
     return html + '</section>';
   }
-  return { VERSION: VERSION, language: language, words: words, rows: rows, sourceVersion: sourceVersion, build: build, saved: saved, mergeFeedback: mergeFeedback, render: render, renderActions: renderActions, renderRatio: renderRatio, labels: labels, questions: questions, quizDuration: quizDuration, volumeHistory: volumeHistory };
+  return { VERSION: VERSION, language: language, words: words, rows: rows, sourceVersion: sourceVersion, build: build, letterTopics: letterTopics, saved: saved, mergeFeedback: mergeFeedback, render: render, renderActions: renderActions, renderRatio: renderRatio, labels: labels, questions: questions, quizDuration: quizDuration, volumeHistory: volumeHistory };
 });

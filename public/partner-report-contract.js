@@ -56,8 +56,11 @@
   ranked=ranked.filter(function(candidate){return !ranked.some(function(other){return (other.rule.suppresses||[]).includes(candidate.rule.id);});});
   return ranked.sort(function(a,b){return b.score-a.score||a.index-b.index;}).slice(0,3).map(function(item){return item.rule.label;});
  }
+ var memoryThemes={cafe_coffee:'a small café memory centered on a coffee cup, with a quiet table corner',cafe_busy:'a café table corner with a gentle suggestion of a busy café using abstract chairs, no people',cafe_rabbit:'a café memory and a subtle symbolic rabbit motif on the paper margin, not a real rabbit inside a café',cafe_coffee_busy:'a café memory centered on a coffee cup, with a gentle suggestion of a busy café using abstract chairs',cafe_coffee_rabbit:'a café memory centered on a coffee cup and a subtle symbolic rabbit motif on the paper margin; the rabbit is a remembered topic, not a real rabbit in a café',cafe_busy_rabbit:'a café memory with abstract chairs suggesting a busy café and a subtle symbolic rabbit motif, not a real rabbit in a café',cafe_coffee_busy_rabbit:'a café memory centered on a coffee cup, a subtle symbolic rabbit motif on the paper margin, and a gentle suggestion of a busy café using abstract chairs; the rabbit is not a real rabbit in a café'};
+ function storyIllustrations(topics){var safe=(Array.isArray(topics)?topics:[]).filter(t=>t&&typeof t.quote==='string'&&Array.isArray(t.source_utterance_ids)&&t.source_utterance_ids.includes(t.id));var cafe=safe.some(t=>t.label==='Food & cafés'&&/\bcaf[eé]s?\b/i.test(t.quote));if(!cafe)return [];var words=safe.flatMap(t=>t.words||t.nouns||[]);var coffee=words.includes('coffee'),busy=words.includes('crowded'),rabbit=safe.some(t=>t.label==='Pets'&&/\brabbits?\b/i.test(t.quote));if(!coffee&&!busy&&!rabbit)return [];var theme='cafe'+(coffee?'_coffee':'')+(busy?'_busy':'')+(rabbit?'_rabbit':'');return [{theme:theme,label:'Today’s conversation memory',concept_key:theme}];}
+ function illustrationKey(theme){return memoryThemes[theme]?theme:null;}
  function illustrationConcept(theme){
-  var safe=safeKeyword(theme);if(!safe)return '';
+  var safe=safeKeyword(theme);if(!safe)return '';if(memoryThemes[safe])return memoryThemes[safe];
   var normalized=topicText(safe),exact=themeRules.find(function(rule){return topicText(rule.label)===normalized;});
   if(exact)return exact.concept;
   var supported=themeRules.find(function(rule){return supports(rule,normalized);});if(supported)return supported.concept;
@@ -67,9 +70,9 @@
   return subjects[normalized]||'';
  }
  function illustrationUrl(keyword,seed){var concept=illustrationConcept(keyword);if(!concept)return null;
-  var prompt='A simple warm editorial illustration inspired by '+concept+'. Warm cream, sage and soft coral mood. Cozy minimal composition. No text, no typography, no letters, no speech bubbles.';
+  var prompt='Warm watercolor and colored pencil on soft paper: '+concept+'. Ivory #FFFBF4, sage #5F7D63, beige #F8F0E3, warm brown. Contemporary editorial diary/postcard mood, simple focal composition. No photorealism, stock scene, anime, chibi, mascot, 3D, neon, faces, text, letters or logos.';
   return 'https://image.pollinations.ai/prompt/'+encodeURIComponent(prompt)+'?width=400&height=400&nologo=true&seed='+encodeURIComponent(seed||1);
  }
- var api={treats:Object.freeze(treats),templates:templates,note:note,suggestions:suggestions,safeKeyword:safeKeyword,illustrationConcept:illustrationConcept,illustrationUrl:illustrationUrl};
+ var api={illustrationAvailable:false,treats:Object.freeze(treats),templates:templates,note:note,suggestions:suggestions,safeKeyword:safeKeyword,illustrationConcept:illustrationConcept,illustrationUrl:illustrationUrl,storyIllustrations:storyIllustrations,illustrationKey:illustrationKey};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.DayOPartnerReportContract=api;
 })(typeof window!=='undefined'?window:this);

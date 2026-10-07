@@ -1,6 +1,7 @@
 /* Read-only canonical recap for the authenticated learner's own booking.
  * Partner raw speech never leaves this server. No new env, RPC, grants or writes. */
 const recap = require('../public/conversation-recap.js');
+const partnerLetter = require('./_lib/partner-letter.js');
 const uuid = v => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
 function json(res, status, body) { res.statusCode = status; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', 'private, no-store'); res.end(JSON.stringify(body)); }
 function originAllowed(origin, vercelUrl) {
@@ -19,18 +20,25 @@ function createHandler({ env = process.env, fetchImpl = fetch } = {}) {
     const token = /^Bearer ([A-Za-z0-9._-]+)$/.exec(String(req.headers && req.headers.authorization || ''));
     if (!token) return json(res, 401, { error: 'auth_required' });
     let input; try { input = await body(req); } catch (_) { return json(res, 400, { error: 'invalid_request' }); }
-    if (!input || Array.isArray(input) || !uuid(input.booking_id) || Object.keys(input).some(k => !['booking_id', 'learner_version'].includes(k))) return json(res, 400, { error: 'invalid_request' });
+    if (!input || Array.isArray(input) || !uuid(input.booking_id) || Object.keys(input).some(k => !['booking_id', 'learner_version', 'action', 'topic_id', 'source_version'].includes(k))) return json(res, 400, { error: 'invalid_request' });
     if (input.learner_version != null && (typeof input.learner_version !== 'string' || input.learner_version.length > 100)) return json(res, 400, { error: 'invalid_request' });
     const url = String(env.NEXT_PUBLIC_SUPABASE_URL || env.SUPABASE_URL || '').trim().replace(/\/rest\/v1\/?$/i, '').replace(/\/+$/, '');
     const anon = String(env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
     if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url) || !anon) return json(res, 503, { error: 'source_unavailable' });
-    const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 6500);
+    const partnerAction = ['partner_letter_topics', 'partner_letter_blocks', 'partner_illustration_status'].includes(input.action);
+    if (input.action && !partnerAction) return json(res, 400, { error: 'invalid_request' });
+    if (!partnerAction && Object.keys(input).some(k => !['booking_id','learner_version'].includes(k))) return json(res,400,{error:'invalid_request'});
+    const controller = new AbortController(), timer = setTimeout(() => controller.abort(), partnerAction ? 45000 : 6500);
     const headers = { apikey: anon, Authorization: 'Bearer ' + token[1] };
     async function read(route, h = headers) { const result = await fetchImpl(url + route, { headers: h, signal: controller.signal }); if (!result.ok) throw Error('read'); return result.json(); }
     try {
       const auth = await fetchImpl(url + '/auth/v1/user', { headers, signal: controller.signal });
       if (!auth.ok) return json(res, 401, { error: 'auth_required' });
       const user = await auth.json(); if (!uuid(user.id)) return json(res, 401, { error: 'auth_required' });
+      if (partnerAction) {
+        const result = await partnerLetter.handle({input, read, user, env, signal:controller.signal, fetchImpl});
+        return json(res,result.status,result.body);
+      }
       // Ownership checked with the user's JWT/RLS BEFORE any privileged read.
       const bookings = await read('/rest/v1/bookings?' + new URLSearchParams({ id: 'eq.' + input.booking_id, learner_id: 'eq.' + user.id, select: 'id,learner_id,partner_user_id,language,status,scheduled_at,is_test_session', limit: '1' }));
       const booking = Array.isArray(bookings) && bookings[0];

@@ -41,11 +41,10 @@ assert(Array.from(w.document.querySelectorAll('.pr-optional')).every(n=>n.tagNam
 const note=w.document.getElementById('popup-partner-comment');note.value='I loved hearing your stories. Next time, let’s talk about travel.';note.dispatchEvent(new w.Event('input'));
 assert.equal(w.DayOPartnerReport.payload().partnerComment,note.value);
 assert.deepEqual(JSON.parse(JSON.stringify(w.DayOPartnerReport.payload())),{partnerComment:note.value,stamp:null,keyword:null,illustUrl:null},'message-only Letter requires no optional fields');
-// Existing optional values still reach the unchanged payload; no forced nulling.
+// Unverified/manual image themes cannot create a new illustration.
 w.document.getElementById('pr-custom-keyword').value='pottery';w.document.getElementById('pr-use-keyword').click();
-const image=w.document.getElementById('pr-illustration');Object.defineProperty(image,'naturalWidth',{value:400});image.onload();
-const payload=w.DayOPartnerReport.payload();assert.equal(payload.keyword,'pottery');assert(payload.illustUrl.startsWith('https://'));
-assert.deepEqual(Object.keys(payload).sort(),['illustUrl','keyword','partnerComment','stamp']);
+const payload=w.DayOPartnerReport.payload();assert.equal(payload.illustUrl,null);
+assert.deepEqual(Object.keys(payload).filter(k=>payload[k]!==undefined).sort(),['illustUrl','keyword','partnerComment','stamp']);
 const recapBefore=JSON.stringify(recap),afterLetter=reportUI.renderDetail({...report,partner_comment:payload.partnerComment},'ko');
 assert(afterLetter.includes('Next time'));assert.equal(JSON.stringify(recap),recapBefore,'letter rendering cannot mutate recap');
 assert(afterLetter.includes('1/3'));dom.window.close();
