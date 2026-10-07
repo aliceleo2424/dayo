@@ -4,6 +4,71 @@
   var mounted = false, nextState = null, speakingState = null;
   function copy(key) { return window.DayOI18n.tf('mypage.dashboard.' + key); }
   function byId(id) { return document.getElementById(id); }
+  // My Page-only identity presentation. Shared Partner/Room image resolution stays unchanged.
+  var photoOwner = '', photoValue = '';
+  function userAvatar(value, user) {
+    var resolver = window.DayOProfileImageURL;
+    var uploaded = resolver && resolver.resolve(value);
+    if (uploaded) return uploaded;
+    var meta = user && user.user_metadata || {};
+    var provider = user && user.app_metadata && user.app_metadata.provider;
+    var identities = user && user.identities || [];
+    var social = provider === 'google' || provider === 'kakao' || identities.some(function (identity) {
+      return identity.provider === 'google' || identity.provider === 'kakao';
+    });
+    var image = social && resolver && resolver.resolve(meta.profile_image || meta.avatar_url || meta.picture);
+    if (image) return image;
+    for (var i = 0; i < identities.length; i++) {
+      if (!['google', 'kakao'].includes(identities[i].provider)) continue;
+      var data = identities[i].identity_data || {};
+      image = resolver && resolver.resolve(data.profile_image || data.avatar_url || data.picture);
+      if (image) return image;
+    }
+    return '';
+  }
+  function userInitial(user) {
+    var profile = window._dayoAuthProfile;
+    var own = user && profile && profile._authUserId === user.id;
+    var meta = user && user.user_metadata || {};
+    var name = [own && profile.nickname, own && profile.user_name, meta.nickname, meta.full_name, meta.name].map(function (value) { return String(value || '').trim(); }).find(function (value) { return !!value; }) || '';
+    return Array.from(name)[0] ? Array.from(name)[0].toUpperCase() : '';
+  }
+  function paintUserAvatar(element, user, value) {
+    if (!element) return;
+    var url = userAvatar(value, user), initial = url ? '' : userInitial(user);
+    var key = url || 'initial:' + initial;
+    if (element.classList.contains('ms-avatar') && element.dataset.dayoUserAvatar === key && element.textContent === initial) return;
+    element.dataset.dayoUserAvatar = key;
+    element.style.backgroundImage = url ? 'url(' + JSON.stringify(url) + ')' : '';
+    element.style.backgroundSize = 'cover';
+    element.style.backgroundPosition = 'center';
+    element.classList.toggle('has-photo', !!url);
+    if (element.classList.contains('ms-avatar')) element.textContent = initial;
+    var label = element.querySelector('span');
+    if (label) { label.textContent = initial; label.hidden = !!url; }
+  }
+  function renderIdentity() {
+    var user = window._dayoAuthUser, profile = window._dayoAuthProfile;
+    var own = user && profile && profile._authUserId === user.id;
+    var heading = byId('ud-current-nickname');
+    if (heading) heading.textContent = own ? String(profile.nickname || '').trim() : '';
+    document.querySelectorAll('.topbar .ms-profile .ms-avatar').forEach(function (avatar) {
+      if (user) paintUserAvatar(avatar, user, photoOwner === user.id ? photoValue : own && profile.avatar_url);
+      else { avatar.style.backgroundImage = ''; delete avatar.dataset.dayoUserAvatar; }
+    });
+  }
+  window.DayOUserAvatar = {
+    resolve: userAvatar, paint: paintUserAvatar,
+    setPhoto: function (userId, value) { photoOwner = userId; photoValue = value || ''; renderIdentity(); }
+  };
+  document.addEventListener('dayo:authprofile', renderIdentity);
+  document.addEventListener('dayo:authchange', renderIdentity);
+  document.addEventListener('dayo:profile-image-saved', function (event) {
+    window.DayOUserAvatar.setPhoto(event.detail.userId, event.detail.avatarUrl);
+  });
+  document.querySelectorAll('.topbar [data-mode-switch]').forEach(function (slot) {
+    new MutationObserver(renderIdentity).observe(slot, { childList: true, subtree: true });
+  });
   function applyCopy() {
     document.querySelectorAll('[data-ud-copy]').forEach(function (node) {
       var key = node.getAttribute('data-ud-copy');
@@ -93,7 +158,7 @@
       });
     });
     byId('ud-empty-book').addEventListener('click', function () { byId('main-action-btn').click(); });
-    applyCopy(); renderSpeaking(); restoreTab();
+    applyCopy(); renderIdentity(); renderSpeaking(); restoreTab();
   }
   document.addEventListener('dayo:mypage-next', function (event) { nextState = event.detail; renderNext(); });
   document.addEventListener('dayo:mypage-speaking', function (event) { speakingState = event.detail; renderSpeaking(); });

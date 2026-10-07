@@ -573,7 +573,7 @@
     'mypage.dashboard.yourTickets': { KO: "내 티켓", EN: "Your tickets" },
     'mypage.dashboard.buyTickets': { KO: "티켓 구매 / 충전", EN: "Buy / recharge tickets" },
     'mypage.dashboard.nickname': { KO: "닉네임", EN: "Nickname" },
-    'mypage.dashboard.nicknameHint': { KO: "DayO에서 표시되는 이름을 관리해요.", EN: "Manage how your name appears on DayO." },
+    'mypage.dashboard.nicknameHint': { KO: "DayO에서 표시되는 이름", EN: "Your display name on DayO" },
     'mypage.dashboard.language': { KO: "화면 언어", EN: "Interface language" },
     'mypage.booking.cancel': { KO: '예약 취소', EN: 'Cancel' },
     'mypage.booking.additional': { KO: '예정된 대화 · {when}', EN: 'Upcoming chat · {when}' },
