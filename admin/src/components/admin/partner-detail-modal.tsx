@@ -1,4 +1,6 @@
 "use client";
+import { PartnerPayoutDialog } from "@/components/admin/partner-payout-dialog";
+import { fetchPartnerPayoutSummaries } from "@/lib/partner-payouts";
 import { ProfileImage } from "@/components/admin/profile-image";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -159,7 +161,10 @@ export function PartnerDetailModal({
 }) {
   const [sessions, setSessions] = useState<PartnerSession[]>([]);
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
-  const [settledTotal, setSettledTotal] = useState(0);
+  const [settledTotal, setSettledTotal] = useState<number | null>(null);
+  const [payoutOffsets, setPayoutOffsets] = useState<number | null>(null);
+  const [payoutOpen, setPayoutOpen] = useState(false);
+  const [recordedBalance, setRecordedBalance] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -174,13 +179,16 @@ export function PartnerDetailModal({
   const capabilityEpochRef = useRef(0);
   const capabilitySaveRef = useRef(new Set<string>());
 
-  const points = Number(partner?.point_balance || 0);
+  useEffect(() => { setPayoutOpen(false); }, [open, partner?.id]);
+
+  const points = recordedBalance ?? Number(partner?.point_balance || 0);
 
   useEffect(() => {
     if (!open || !partner) return;
     const current = partner;
     let cancelled = false;
     setLoading(true);
+    setSettledTotal(null); setPayoutOffsets(null); setRecordedBalance(null);
     setMessage("");
     setSessions([]);
     setLedger([]);
@@ -238,9 +246,12 @@ export function PartnerDetailModal({
         };
       });
 
-      const [credits, settlements] = await Promise.all([
+      const [credits, payoutSummary] = await Promise.all([
         supabase.from("credit_ledgers").select("*").eq("user_id", uid).order("created_at", { ascending: false }).limit(100),
-        supabase.from("settlement_logs").select("*").or(`partner_user_id.eq.${uid},partner_profile_id.eq.${current.id}`).order("created_at", { ascending: false }),
+        fetchPartnerPayoutSummaries(current.id).catch(error => {
+          if (!cancelled) setMessage(error instanceof Error ? error.message : "정산 현황 조회 실패");
+          return null;
+        }),
       ]);
       const creditRows = ((credits.data || []) as Record<string, unknown>[]).map((row) => ({
         id: String(row.id || ""),
@@ -250,21 +261,13 @@ export function PartnerDetailModal({
         balance_after: row.balance_after == null ? null : Number(row.balance_after),
         note: String(row.reason || "메모 없음"),
       }));
-      const settlementRows = ((settlements.data || []) as Record<string, unknown>[]).map((row) => ({
-        id: String(row.id || ""),
-        created_at: (row.created_at as string | null) || null,
-        label: "정산 송금 완료",
-        delta: -Math.abs(Number(row.points_settled || 0)),
-        balance_after: 0,
-        note: String(row.note || "계좌 입금 완료"),
-      }));
-
       if (!cancelled) {
         setSessions(sessionRows);
-        setLedger([...creditRows, ...settlementRows].sort((a, b) =>
+        setLedger(creditRows.sort((a, b) =>
           new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
         ));
-        setSettledTotal(((settlements.data || []) as Record<string, unknown>[]).reduce((sum, row) => sum + Number(row.amount_krw || 0), 0));
+        setSettledTotal(payoutSummary?.[0]?.paid_total ?? null);
+        setPayoutOffsets(payoutSummary?.[0]?.total_offset_amount ?? null);
         setLoading(false);
       }
     })();
@@ -378,22 +381,6 @@ export function PartnerDetailModal({
     }
   }
 
-  async function settle() {
-    if (!partner || points <= 0) return;
-    if (!window.confirm(`${formatCurrency(points)} 송금을 완료 처리할까요?`)) return;
-    setBusy(true);
-    const uid = partner.user_id || partner.id;
-    const rpc = await supabase.rpc("settle_partner_payout", { p_partner_user_id: uid });
-    const data = rpc.data as { success?: boolean; message?: string } | null;
-    setBusy(false);
-    if (rpc.error || !data?.success) {
-      setMessage(rpc.error?.message || data?.message || "정산 처리에 실패했습니다.");
-      return;
-    }
-    setSettledTotal((total) => total + points);
-    onSettled?.(partner.id, 0);
-    setMessage(data.message || "정산 송금 완료 처리되었습니다.");
-  }
 
   return (
     <>
@@ -475,9 +462,9 @@ export function PartnerDetailModal({
 
               <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 {[
-                  ["이번 달 정산 예정액", formatCurrency(metrics.pending)],
-                  ["누적 정산 완료 송금액", formatCurrency(settledTotal)],
-                  ["누적 패널티 차감액", `-${formatCurrency(metrics.penaltyTotal)} (${metrics.penaltyCount}건)`],
+                  ["미지급 적립 포인트", formatCurrency(points)],
+                  ["누적 지급 기록액", settledTotal == null ? "확인 필요" : formatCurrency(settledTotal)],
+                  ["누적 보상 상계액", payoutOffsets == null ? "확인 필요" : `-${formatCurrency(payoutOffsets)}`],
                   ["파트너 평균 평점", metrics.avgRating == null ? "— (0명 평가)" : `★ ${metrics.avgRating.toFixed(1)} (${metrics.ratingCount}명 평가)`],
                 ].map(([label, value], index) => (
                   <Card key={label}>
@@ -537,7 +524,7 @@ export function PartnerDetailModal({
 
                 <TabsContent value="ledger" className="mt-4">
                   <div className="mb-3 flex justify-end">
-                    <Button variant="coral" disabled={busy || points <= 0} onClick={() => void settle()}>포인트 수동 정산 / 지급 완료</Button>
+                    <Button variant="outline" onClick={() => setPayoutOpen(true)}>정산 내역 / 지급 기록</Button>
                   </div>
                   {!ledger.length ? (
                     <p className="rounded-xl border border-dashed py-12 text-center text-sm text-muted-foreground">정산 장부 내역이 없습니다.</p>
@@ -585,6 +572,12 @@ export function PartnerDetailModal({
             </div>
           )}
         </DialogContent>
+      <PartnerPayoutDialog partnerId={payoutOpen ? partner?.id || null : null} onClose={() => setPayoutOpen(false)}
+        onRecorded={result => {
+          setRecordedBalance(result.updated_balance); onSettled?.(partner!.id, result.updated_balance);
+          void fetchPartnerPayoutSummaries(partner!.id).then(rows => { setSettledTotal(rows[0]?.paid_total ?? null); setPayoutOffsets(rows[0]?.total_offset_amount ?? null); })
+            .catch(() => setMessage("지급 기록은 저장됐지만 합계를 새로 불러오지 못했습니다."));
+        }}/>
       </Dialog>
       <SessionTranscriptModal open={!!selectedSession} session={selectedSession} onClose={() => setSelectedSession(null)} />
     </>

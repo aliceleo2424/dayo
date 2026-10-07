@@ -2,6 +2,8 @@
 import { ProfileImage } from "@/components/admin/profile-image";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { PartnerPayoutDialog } from "@/components/admin/partner-payout-dialog";
+import { fetchPartnerPayoutSummaries, payoutStatusLabel, type PayoutSummary } from "@/lib/partner-payouts";
 import { fetchPartnerProfiles } from "@/lib/admin-data";
 import { supabase } from "@/lib/supabase";
 import { formatCurrency } from "@/lib/utils";
@@ -18,8 +20,6 @@ type PartnerRow = PartnerProfile & {
   completed_sessions: number;
   month_completed_sessions: number;
   penalty_points: number;
-  final_payout: number;
-  settled_total: number;
 };
 
 const STATUS_META: Record<string, { label: string; variant: "success" | "warning" | "default" }> = {
@@ -33,12 +33,6 @@ function statusMeta(status?: string | null) {
   return STATUS_META[String(status || "active").toLowerCase()] || STATUS_META.active;
 }
 
-function bankLine(row: PartnerProfile) {
-  const account = String(row.bank_account || "").trim();
-  const masked = account.length > 4 ? `${account.slice(0, 3)}-****-${account.slice(-3)}` : account;
-  return [row.bank_name, masked].filter(Boolean).join(" · ") || "계좌 미등록";
-}
-
 function emptyRow(row: PartnerProfile): PartnerRow {
   return {
     ...row,
@@ -48,8 +42,6 @@ function emptyRow(row: PartnerProfile): PartnerRow {
     completed_sessions: 0,
     month_completed_sessions: 0,
     penalty_points: 0,
-    final_payout: 0,
-    settled_total: 0,
   };
 }
 
@@ -71,14 +63,13 @@ function usePartnerRows() {
 
     const profiles = ((result.data || []) as unknown as PartnerProfile[]).map(emptyRow);
     const ids = profiles.map((row) => row.user_id || row.id).filter(Boolean);
-    const [bookings, slots, settlements] = await Promise.all([
+    const [bookings, slots] = await Promise.all([
       ids.length
         ? supabase.from("bookings").select("partner_user_id, status, rating, scheduled_at").in("partner_user_id", ids).eq("is_test_session", false)
         : Promise.resolve({ data: [], error: null }),
       ids.length
         ? supabase.from("availability_slots").select("partner_id, status").in("partner_id", ids)
         : Promise.resolve({ data: [], error: null }),
-      supabase.from("settlement_logs").select("partner_user_id, partner_profile_id, amount_krw"),
     ]);
 
     setRows(profiles.map((profile) => {
@@ -94,13 +85,9 @@ function usePartnerRows() {
       const monthCompleted = monthBookings.filter((row) => String(row.status) === "completed").length;
       const monthLearnerNoShow = monthBookings.filter((row) => String(row.status) === "learner_noshow").length;
       const monthPartnerNoShow = monthBookings.filter((row) => String(row.status) === "partner_noshow").length;
-      const calculatedPayout = Math.max(0, (monthCompleted + monthLearnerNoShow) * 6000 - monthPartnerNoShow * 10000);
       const ratings = partnerBookings
         .map((row) => Number(row.rating))
         .filter((value) => Number.isFinite(value) && value > 0);
-      const settled = ((settlements.data || []) as Record<string, unknown>[])
-        .filter((row) => String(row.partner_user_id || "") === uid || String(row.partner_profile_id || "") === profile.id)
-        .reduce((sum, row) => sum + Number(row.amount_krw || 0), 0);
       return {
         ...profile,
         average_rating: ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0,
@@ -111,8 +98,6 @@ function usePartnerRows() {
         completed_sessions: partnerBookings.filter((row) => String(row.status) === "completed").length,
         month_completed_sessions: monthCompleted + monthLearnerNoShow,
         penalty_points: monthPartnerNoShow * 10000,
-        final_payout: calculatedPayout || Math.max(0, Number(profile.point_balance || 0)),
-        settled_total: settled,
       };
     }));
     setLoading(false);
@@ -201,85 +186,44 @@ export function PartnerManagementTable() {
 }
 
 export function PartnerSettlementTable() {
-  const { rows, setRows, loading, error } = usePartnerRows();
-  const [busyId, setBusyId] = useState("");
+  const [rows, setRows] = useState<PayoutSummary[]>([]);
+  const [loading, setLoading] = useState(true), [error, setError] = useState("");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const load = useCallback(async () => {
+    setLoading(true); setError("");
+    try { setRows(await fetchPartnerPayoutSummaries()); }
+    catch (err) { setRows([]); setError(err instanceof Error ? err.message : "정산 조회 실패"); }
+    finally { setLoading(false); }
+  }, []);
+  useEffect(() => { void load(); }, [load]);
   const summary = useMemo(() => ({
-    pending: rows.reduce((sum, row) => sum + Number(row.final_payout || 0), 0),
-    settled: rows.reduce((sum, row) => sum + Number(row.settled_total || 0), 0),
-    unresolved: rows.filter((row) => Number(row.final_payout || 0) > 0).length,
+    pending: rows.filter(row => row.can_record).reduce((sum,row) => sum + row.amount, 0),
+    settled: rows.reduce((sum,row) => sum + row.paid_total, 0),
+    unresolved: rows.filter(row => row.status === "unpaid" || row.status === "needs_review").length,
   }), [rows]);
-
-  async function settle(row: PartnerRow) {
-    if (!window.confirm(`${partnerName(row)} 파트너의 ${formatCurrency(Number(row.point_balance || 0))} 송금을 완료 처리할까요?`)) return;
-    setBusyId(row.id);
-    const uid = row.user_id || row.id;
-    const rpc = await supabase.rpc("settle_partner_payout", { p_partner_user_id: uid });
-    const data = rpc.data as { success?: boolean; message?: string } | null;
-    if (rpc.error || !data?.success) {
-      window.alert(rpc.error?.message || data?.message || "정산 처리에 실패했습니다.");
-    } else {
-      setRows((prev) => prev.map((item) => item.id === row.id
-        ? { ...item, settled_total: item.settled_total + Number(item.point_balance || 0), point_balance: 0, final_payout: 0 }
-        : item));
-    }
-    setBusyId("");
-  }
-
-  const columns: Column<PartnerRow & Record<string, unknown>>[] = [
-    { key: "nickname", header: "파트너명", sortable: true, render: (row) => partnerName(row as PartnerProfile) },
-    { key: "bank", header: "정산 은행 / 계좌", render: (row) => bankLine(row as PartnerProfile) },
-    { key: "month_completed_sessions", header: "완료 세션수", sortable: true, render: (row) => `${Number(row.month_completed_sessions || 0)}회` },
-    { key: "point_balance", header: "적립 포인트", sortable: true, render: (row) => `${Number(row.point_balance || 0).toLocaleString("ko-KR")} P` },
-    { key: "penalty_points", header: "패널티 차감", sortable: true, render: (row) => <span className="text-rose-600">-{Number(row.penalty_points || 0).toLocaleString("ko-KR")} P</span> },
-    { key: "final_payout", header: "최종 지급액", render: (row) => <strong>{formatCurrency(Number(row.final_payout || 0))}</strong> },
-    {
-      key: "status", header: "정산 상태",
-      render: (row) => Number(row.final_payout || 0) > 0
-        ? <Badge variant="warning">대기</Badge>
-        : <Badge variant="success">지급완료</Badge>,
-    },
-    {
-      key: "settle", header: "처리",
-      render: (row) => (
-        <Button
-          size="sm"
-          variant="coral"
-          disabled={busyId === row.id || Number(row.point_balance || 0) <= 0}
-          onClick={() => void settle(row as PartnerRow)}
-        >
-          송금 완료 처리
-        </Button>
-      ),
-    },
+  const columns: Column<PayoutSummary & Record<string, unknown>>[] = [
+    { key: "partner_name", header: "파트너명", sortable: true },
+    { key: "session_count", header: "미지급 완료 세션", render: row => `${row.session_count}회` },
+    { key: "point_balance", header: "미지급 포인트", render: row => `${row.point_balance.toLocaleString("ko-KR")} P` },
+    { key: "offset_amount", header: "반영된 패널티 상계", render: row => formatCurrency(row.offset_amount) },
+    { key: "amount", header: "최종 지급액", render: row => row.status === "needs_review" ? "확인 필요" : <strong>{formatCurrency(row.amount)}</strong> },
+    { key: "status", header: "정산 상태", render: row => <Badge variant={row.status === "paid" ? "success" : row.status === "no_rewards" ? "default" : "warning"}>{payoutStatusLabel(row.status)}</Badge> },
+    { key: "paid_total", header: "누적 지급액", render: row => formatCurrency(row.paid_total) },
+    { key: "record", header: "처리 / 이력", render: row => <Button size="sm" variant="outline" onClick={() => setSelectedId(row.partner_user_id)}>정산 내역 / 지급 기록</Button> },
   ];
-
-  return (
-    <div className="space-y-5">
-      <section className="grid gap-4 md:grid-cols-3">
-        {[
-          ["이번 달 총 지급 예정액", formatCurrency(summary.pending)],
-          ["누적 정산 완료액", formatCurrency(summary.settled)],
-          ["미처리 건수", `${summary.unresolved}건`],
-        ].map(([label, value]) => (
-          <Card key={label}>
-            <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">{label}</CardTitle></CardHeader>
-            <CardContent><p className="text-2xl font-bold">{value}</p></CardContent>
-          </Card>
-        ))}
-      </section>
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
-      {loading ? <div className="h-40 animate-pulse rounded-xl bg-muted" /> : !rows.length ? (
-        <PartnerEmpty message="정산 대상 파트너가 없습니다." />
-      ) : (
-        <DataTable
-          data={rows as (PartnerRow & Record<string, unknown>)[]}
-          columns={columns}
-          searchKeys={["nickname", "user_name", "email", "bank_name", "account_holder"]}
-          exportFilename="partner-settlements.csv"
-        />
-      )}
-    </div>
-  );
+  return <div className="space-y-5">
+    <section className="grid gap-4 md:grid-cols-3">
+      {[["미지급 보상 총 지급 예정액",formatCurrency(summary.pending)],["누적 지급 기록액",formatCurrency(summary.settled)],["미처리 / 확인 필요",`${summary.unresolved}건`]].map(([label,value]) => <Card key={label}>
+        <CardHeader className="pb-2"><CardTitle className="text-sm text-muted-foreground">{label}</CardTitle></CardHeader>
+        <CardContent><p className="text-2xl font-bold">{value}</p></CardContent></Card>)}
+    </section>
+    <p className="text-sm text-muted-foreground">미지급 보상 근거와 포인트 잔액을 대조합니다. 실제 지급 후 방법·대상·일시를 기록해 주세요.</p>
+    {error ? <div role="alert"><p className="text-sm text-red-600">{error}</p><Button variant="outline" onClick={() => void load()}>다시 불러오기</Button></div> : null}
+    {loading ? <div className="h-40 animate-pulse rounded-xl bg-muted"/> : !error && !rows.length ? <PartnerEmpty message="정산 대상 파트너가 없습니다."/> : !error ? <DataTable
+      data={rows as (PayoutSummary & Record<string, unknown>)[]} columns={columns}
+      searchKeys={["partner_name"]} exportFilename="partner-payout-summary.csv"/> : null}
+    <PartnerPayoutDialog partnerId={selectedId} onClose={() => setSelectedId(null)} onRecorded={() => { void load(); }}/>
+  </div>;
 }
 
 /** Backward-compatible export. */
