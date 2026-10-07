@@ -8,6 +8,8 @@
   <script src="supabase-env.js"></script>
   <script src="supabase-client.js?v=20260921-session-persistence"></script>
   <script src="partner-reward.js?v=20260928-reward-reliability"></script>
+  <link rel="stylesheet" href="partner-pre-session.css?v=20261007">
+  <script src="partner-pre-session.js?v=20261007"></script>
   <link rel="stylesheet" href="conversation-insights.css?v=20260928-conversation-story">
   <style>
     body:not(.room-access-granted) .studio { visibility: hidden; }
@@ -68,6 +70,15 @@
         try { return localStorage.getItem('dayo_active_booking_id') || ''; } catch (e) { return ''; }
       }
       function showAccess(state) {
+        if (state.allowed && !state.observer && (state.adminTest ? state.previewRole : state.role) === 'partner') {
+          return window.DayOPartnerPreSession.request(state).then(function (completed) {
+            return publishAccess(completed ? state : { allowed: false,
+              title: 'Conversation entry cancelled', message: 'Return to the Partner Lounge and enter when you are ready.' });
+          });
+        }
+        return publishAccess(state);
+      }
+      function publishAccess(state) {
         window.DayORoomAccess = state;
         var render = function () {
           if (state.allowed && !window.__dayoInAppBlocked) {

@@ -1,0 +1,34 @@
+dialog.partner-pre-session {
+  box-sizing: border-box;
+  width: min(480px, calc(100% - 24px));
+  max-width: none;
+  max-height: calc(100dvh - 24px);
+  margin: auto;
+  padding: 0;
+  border: 1px solid #d4e0cf;
+  border-radius: 20px;
+  background: #fffcfa;
+  color: #5c4a42;
+  box-shadow: 0 18px 60px #352b2533;
+  font: 16px/1.5 "Quicksand", system-ui, sans-serif;
+  overflow: hidden;
+}
+.partner-pre-session::backdrop { background: #352b2580; }
+.partner-pre-session form { display: flex; flex-direction: column; max-height: calc(100dvh - 26px); }
+.partner-pre-session header { flex-shrink: 0; padding: 20px 22px 12px; }
+.partner-pre-session h2 { margin: 0 0 6px; font-size: 23px; line-height: 1.3; }
+.partner-pre-session p { margin: 0; font-size: 15px; line-height: 1.5; }
+.partner-pre-session-list { overflow-y: auto; overscroll-behavior: contain; padding: 0 22px 12px; }
+.partner-pre-session-list label { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; cursor: pointer; }
+.partner-pre-session-list input { flex: 0 0 20px; width: 20px; height: 20px; margin: 2px 0 0; accent-color: #456450; }
+.partner-pre-session-list span { min-width: 0; overflow-wrap: anywhere; }
+.partner-pre-session footer { display: flex; gap: 10px; flex-shrink: 0; padding: 14px 22px max(16px, env(safe-area-inset-bottom)); border-top: 1px solid #e5dcd2; background: #fffcfa; }
+.partner-pre-session button { min-height: 46px; border: 1px solid #d4e0cf; border-radius: 12px; padding: 10px 12px; font: inherit; font-weight: 700; cursor: pointer; background: #fff; color: #456450; }
+.partner-pre-session [data-enter] { flex: 1; background: #456450; color: #fff; }
+.partner-pre-session button:disabled { background: #e7eee5; color: #667661; cursor: default; }
+.partner-pre-session :focus-visible { outline: 3px solid #456450; outline-offset: 3px; }
+@media (max-width: 400px) {
+  .partner-pre-session header { padding: 18px 18px 10px; }
+  .partner-pre-session-list { padding-inline: 18px; }
+  .partner-pre-session footer { padding-inline: 18px; gap: 8px; }
+}
