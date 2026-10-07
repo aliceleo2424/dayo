@@ -31,7 +31,7 @@ assert.match(room, /track\.addEventListener\('unmute'[\s\S]*clearTimeout\(remote
 assert.match(room, /id="remoteReconnectButton"[\s\S]*다시 연결하기/);
 assert.match(room, /25000 - pendingFor/);
 assert.match(room, /function retryParticipantConnection\(\)[\s\S]*endParticipantCall\(activeCall, 0\)[\s\S]*scheduleHostCall\(0\)/);
-assert.match(room, /showRemoteAudioUnlock\(\)[\s\S]*소리 켜기/);
+assert.match(room, /showRemoteAudioUnlock\(\)[\s\S]*room\.connection\.enableAudio/);
 assert.match(room, /function resumeRemotePlayback\(\)[\s\S]*attempt\.then\(hideRemotePending\)\.catch\(function/);
 
 assert.match(roomLive, /recognition\.lang = 'en-US'/);

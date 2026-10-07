@@ -54,6 +54,28 @@
   }
 
   var DICT = {
+    'room.connection.connecting': { KO: "상대방과 연결 중이에요", EN: "Connecting you" },
+    'room.connection.wait': { KO: "잠시만 기다려 주세요.", EN: "Please wait a moment." },
+    'room.connection.waitingOther': { KO: "상대방의 입장을 기다리고 있어요.", EN: "Waiting for the other person to join." },
+    'room.connection.delayedTitle': { KO: "연결이 늦어지고 있어요", EN: "Connection is taking longer than usual" },
+    'room.connection.delayedBody': { KO: "연결이 늦어지고 있어요. 잠시 더 기다려 주세요.", EN: "We’re still trying to connect you. Please wait a little longer." },
+    'room.connection.reconnect': { KO: "다시 연결하기", EN: "Reconnect" },
+    'room.connection.reconnecting': { KO: "다시 연결 중이에요", EN: "Reconnecting" },
+    'room.connection.recovering': { KO: "연결을 다시 안정화하고 있어요.", EN: "We’re restoring your connection." },
+    'room.connection.retrying': { KO: "연결을 다시 시도하고 있어요.", EN: "We’re trying to connect you again." },
+    'room.connection.audioPrompt': { KO: "화면을 한 번 눌러 상대방 소리를 켜주세요.", EN: "Tap to hear the other person." },
+    'room.connection.enableAudio': { KO: "소리 켜기", EN: "Enable sound" },
+    'room.connection.mediaPermission': { KO: "카메라 및 마이크 권한을 허용해 주세요.", EN: "Please allow access to your camera and microphone." },
+    'room.connection.cameraChecking': { KO: "카메라 연결 확인 중…", EN: "Checking your camera…" },
+    'room.connection.micChecking': { KO: "마이크 연결 확인 중…", EN: "Checking your microphone…" },
+    'room.connection.cameraReady': { KO: "카메라 미리보기가 준비됐어요.", EN: "Your camera preview is ready." },
+    'room.connection.cameraUnavailable': { KO: "카메라를 확인하지 못했어요.", EN: "We couldn’t detect your camera." },
+    'room.connection.micReady': { KO: "마이크 연결됨 · 한 문장 말해보세요.", EN: "Microphone connected. Try saying a sentence." },
+    'room.connection.micUnavailable': { KO: "마이크를 확인하지 못했어요.", EN: "We couldn’t detect your microphone." },
+    'room.connection.micDetected': { KO: "마이크 입력이 감지됐어요.", EN: "Microphone input detected." },
+    'room.connection.micInputUnavailable': { KO: "마이크 입력을 확인하지 못했어요.", EN: "We couldn’t detect microphone input." },
+    'room.connection.cameraPermission': { KO: "카메라 권한을 확인해 주세요.", EN: "Please check your camera permissions." },
+    'room.connection.micPermission': { KO: "마이크 권한을 확인해 주세요.", EN: "Please check your microphone permissions." },
     /* Room UI locale is separate from shared conversation content. */
     "room.nextQuestion": { KO: "💡 다음 질문 추천", EN: "💡 Next question" },
     "room.nextQuestionTitle": { KO: "✨ 다음 질문 추천", EN: "✨ Next question" },

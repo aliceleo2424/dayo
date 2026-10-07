@@ -3545,8 +3545,8 @@
       <p class="device-preflight__lead">영상·마이크 권한과 음성 인식은 서로 별개예요. 대화 전에 각각 확인해 주세요.</p>
       <video class="device-preflight__video" id="devicePreflightVideo" playsinline muted autoplay aria-label="내 카메라 미리보기"></video>
       <div class="device-preflight__checks" aria-live="polite">
-        <div class="device-preflight__check" id="devicePreflightCamera">카메라 연결 확인 중…</div>
-        <div class="device-preflight__check" id="devicePreflightMic">마이크 연결 확인 중…</div>
+        <div class="device-preflight__check" id="devicePreflightCamera" data-i18n="room.connection.cameraChecking">카메라 연결 확인 중…</div>
+        <div class="device-preflight__check" id="devicePreflightMic" data-i18n="room.connection.micChecking">마이크 연결 확인 중…</div>
         <div class="device-preflight__check" id="devicePreflightStt">음성 인식 테스트를 시작해 주세요.</div>
       </div>
       <div class="device-preflight__phrase">“Hello, nice to meet you.”</div>
@@ -3753,9 +3753,9 @@
               <div class="tutor-placeholder-sub partner-status-sub video-center-desc" id="center-status-text" data-i18n="room.chatting">원어민 대화 파트너와 대화 중</div>
             </div>
             <div class="remote-connection-state" id="remoteConnectionState" role="status" aria-live="polite" hidden>
-              <strong id="remoteConnectionTitle">상대방과 연결 중이에요</strong>
-              <span id="remoteConnectionDetail">잠시만 기다려 주세요.</span>
-              <button type="button" id="remoteReconnectButton" hidden>다시 연결하기</button>
+              <strong id="remoteConnectionTitle" data-i18n="room.connection.connecting">상대방과 연결 중이에요</strong>
+              <span id="remoteConnectionDetail" data-i18n="room.connection.wait">잠시만 기다려 주세요.</span>
+              <button type="button" id="remoteReconnectButton" data-i18n="room.connection.reconnect" hidden>다시 연결하기</button>
             </div>
           </div>
 
@@ -4126,30 +4126,40 @@
       setupVideoElement(localVideo, true);
       setupVideoElement(remoteVideo, false);
 
+      function setConnectionCopy(node, key) {
+        if (!node) return;
+        node.setAttribute('data-i18n', key);
+        if (window.DayOI18n) node.textContent = window.DayOI18n.t(key);
+      }
+
       function waitingDetail() {
         return currentRole === 'partner'
-          ? '상대방의 입장을 기다리고 있어요.'
-          : '잠시만 기다려 주세요.';
+          ? 'room.connection.waitingOther'
+          : 'room.connection.wait';
       }
 
       function showRemotePending(detail) {
         if (!remoteConnectionState || isObserver) return;
         if (!remotePendingSince) remotePendingSince = Date.now();
         remoteConnectionState.hidden = false;
-        if (remoteConnectionDetail) remoteConnectionDetail.textContent = detail || waitingDetail();
+        setConnectionCopy(document.getElementById('remoteConnectionTitle'),
+          detail === 'room.connection.recovering' || detail === 'room.connection.retrying'
+            ? 'room.connection.reconnecting' : 'room.connection.connecting');
+        setConnectionCopy(remoteConnectionDetail, detail || waitingDetail());
         clearTimeout(remoteConnectionDelayTimer);
         clearTimeout(remoteRetryActionTimer);
         var pendingFor = Date.now() - remotePendingSince;
         remoteConnectionDelayTimer = setTimeout(function () {
           if (!remoteConnectionState.hidden && remoteConnectionDetail) {
-            remoteConnectionDetail.textContent = '연결이 늦어지고 있어요. 잠시 더 기다려 주세요.';
+            setConnectionCopy(document.getElementById('remoteConnectionTitle'), 'room.connection.delayedTitle');
+            setConnectionCopy(remoteConnectionDetail, 'room.connection.delayedBody');
           }
         }, Math.max(0, 12000 - pendingFor));
         remoteRetryActionTimer = setTimeout(function () {
           if (!remoteConnectionState.hidden && remoteReconnectButton) {
             remoteReconnectButton.hidden = false;
             remoteReconnectButton.dataset.action = 'reconnect';
-            remoteReconnectButton.textContent = '다시 연결하기';
+            setConnectionCopy(remoteReconnectButton, 'room.connection.reconnect');
           }
         }, Math.max(0, 25000 - pendingFor));
       }
@@ -4170,10 +4180,11 @@
         clearTimeout(remoteRetryActionTimer);
         remotePendingSince = 0;
         remoteConnectionState.hidden = false;
-        if (remoteConnectionDetail) remoteConnectionDetail.textContent = '화면을 한 번 눌러 상대방 소리를 켜주세요.';
+        setConnectionCopy(document.getElementById('remoteConnectionTitle'), 'room.connection.connecting');
+        setConnectionCopy(remoteConnectionDetail, 'room.connection.audioPrompt');
         remoteReconnectButton.hidden = false;
         remoteReconnectButton.dataset.action = 'audio';
-        remoteReconnectButton.textContent = '소리 켜기';
+        setConnectionCopy(remoteReconnectButton, 'room.connection.enableAudio');
       }
 
       function clearRemotePresentation() {
@@ -4218,7 +4229,7 @@
       function scheduleRemoteRecovery(call, reason) {
         if (!call || activeCall !== call || destroyed) return;
         clearTimeout(remoteHealthTimer);
-        showRemotePending('연결을 다시 안정화하고 있어요.');
+        showRemotePending('room.connection.recovering');
         remoteHealthTimer = setTimeout(function () {
           if (participantCallNeedsRecovery(call, reason)) {
             console.warn('[DayO Media] restarting participant call:', reason);
@@ -4231,7 +4242,7 @@
 
       function retryParticipantConnection() {
         hideRemotePending();
-        showRemotePending('연결을 다시 시도하고 있어요.');
+        showRemotePending('room.connection.retrying');
         if (activeCall) {
           endParticipantCall(activeCall, 0);
           return;
@@ -4746,7 +4757,7 @@
             return;
           }
           if (type === 'peer-unavailable' && currentRole !== 'partner') {
-            showRemotePending('상대방의 입장을 기다리고 있어요.');
+            showRemotePending('room.connection.waitingOther');
             scheduleHostCall();
           }
           if (type === 'disconnected' && typeof instance.reconnect === 'function') {
@@ -4815,7 +4826,7 @@
           createParticipantPeer();
         } catch (err) {
           console.error('카메라/마이크 접근 오류:', err);
-          alert('카메라 및 마이크 권한을 허용해 주세요.');
+          alert(window.DayOI18n.t('room.connection.mediaPermission'));
         }
       }
 

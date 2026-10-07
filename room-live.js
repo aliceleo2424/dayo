@@ -357,6 +357,12 @@
     return document.getElementById(id);
   }
 
+  function setPreflightConnectionCheck(id, key, state) {
+    var node = preflightNode(id);
+    if (node) node.setAttribute('data-i18n', key);
+    setPreflightCheck(id, t(key), state);
+  }
+
   function setPreflightCheck(id, text, state) {
     var node = preflightNode(id);
     if (!node) return;
@@ -399,11 +405,11 @@
         }
         if (Math.sqrt(energy / data.length) > 0.018) {
           preflightMicDetected = true;
-          setPreflightCheck('devicePreflightMic', '마이크 입력이 감지됐어요.', 'is-ok');
+          setPreflightConnectionCheck('devicePreflightMic', 'room.connection.micDetected', 'is-ok');
         }
       }, 120);
     } catch (error) {
-      setPreflightCheck('devicePreflightMic', '마이크 입력을 확인하지 못했어요.', 'is-warn');
+      setPreflightConnectionCheck('devicePreflightMic', 'room.connection.micInputUnavailable', 'is-warn');
     }
   }
 
@@ -445,11 +451,11 @@
         previewPlay.catch(function () { /* muted preview */ });
       }
     }
-    setPreflightCheck('devicePreflightCamera',
-      videoTrack && videoTrack.readyState === 'live' ? '카메라 미리보기가 준비됐어요.' : '카메라를 확인하지 못했어요.',
+    setPreflightConnectionCheck('devicePreflightCamera',
+      videoTrack && videoTrack.readyState === 'live' ? 'room.connection.cameraReady' : 'room.connection.cameraUnavailable',
       videoTrack && videoTrack.readyState === 'live' ? 'is-ok' : 'is-warn');
-    setPreflightCheck('devicePreflightMic',
-      audioTrack && audioTrack.readyState === 'live' ? '마이크 연결됨 · 한 문장 말해보세요.' : '마이크를 확인하지 못했어요.',
+    setPreflightConnectionCheck('devicePreflightMic',
+      audioTrack && audioTrack.readyState === 'live' ? 'room.connection.micReady' : 'room.connection.micUnavailable',
       audioTrack && audioTrack.readyState === 'live' ? '' : 'is-warn');
     if (window.__dayoPreflightStarted && preflightTimer) startPreflightMeter(stream);
   }
@@ -547,8 +553,8 @@
         attachPreflightStream(stream);
       } else if (attempts >= 40) {
         clearInterval(streamWait);
-        setPreflightCheck('devicePreflightCamera', '카메라 권한을 확인해 주세요.', 'is-warn');
-        setPreflightCheck('devicePreflightMic', '마이크 권한을 확인해 주세요.', 'is-warn');
+        setPreflightConnectionCheck('devicePreflightCamera', 'room.connection.cameraPermission', 'is-warn');
+        setPreflightConnectionCheck('devicePreflightMic', 'room.connection.micPermission', 'is-warn');
       }
     }, 250);
   }
