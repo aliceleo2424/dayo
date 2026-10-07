@@ -35,7 +35,7 @@
       result[key]=allowed.filter(function (id) {return values.includes(id);});
     });return result;
   }
-  var contract=Object.freeze({catalog:catalog,empty:empty,validate:validate});
+  var contract=Object.freeze({catalog:catalog,empty:empty,validate:validate,openEditor:openEditor});
   if(typeof module==='object'&&module.exports)module.exports=contract;
   if(!root||!root.document)return;
   root.DayOPartnerConversationProfile=contract;
@@ -65,6 +65,10 @@
     ].join('');document.head.append(style);
   }
 
+  function openEditor() {
+    var editor=section && section.querySelector('details'); if(!editor)return false;
+    editor.open=true; section.scrollIntoView({block:'center'}); editor.querySelector('input,button').focus(); return true;
+  }
   var section,activeId=null,activeProfile=null,readDraft=null;
   function clear(){if(section)section.remove();section=null;activeId=activeProfile=null;readDraft=null;}
   async function mount(user,profile,draft,keepOpen){
@@ -90,7 +94,7 @@
     }
     if(activeId!==currentUser||section!==loading)return;
     loading.remove();
-    var original=JSON.stringify(saved),ko=document.documentElement.lang==='ko',inputs=[];
+    var originalValue=validate(saved),original=JSON.stringify(originalValue),ko=document.documentElement.lang==='ko',inputs=[];
     if(draft)saved=validate(draft);
     function text(koText,enText){return ko?koText:enText;}
     function el(tag,copy,className){var n=document.createElement(tag);if(copy)n.textContent=copy;if(className)n.className=className;return n;}
@@ -98,6 +102,7 @@
     var details=el('details'),summary=el('summary',text('대화 프로필','Conversation profile'));
     details.open=keepOpen===undefined?Object.keys(catalog).every(function (group) {return !saved[group].length;}):keepOpen;
     details.append(summary,el('p',text('잘 맞는 대화 목적·관심사·스타일을 골라 주세요. 복수 선택할 수 있어요.','Choose the conversations, interests and styles that suit you. Multiple selections are welcome.'),'pcv-hint'));
+    details.append(el('p',text('관심사는 대화할 때 즐기는 주제예요. 최대 4개를 선택해 주세요.','Choose up to 4 topics you enjoy talking about.'),'pcv-hint'));
     var groups={comfortable_purposes:text('잘 맞는 대화 목적','Conversation goals that suit you'),interests:text('관심사 · 최대 4개','Interests · up to 4'),conversation_styles:text('대화 스타일','Conversation styles')};
     Object.keys(catalog).forEach(function (group) {
       var fieldset=el('fieldset'),legend=el('legend',groups[group]),chips=el('div',null,'pcv-chips');
@@ -123,10 +128,19 @@
         var client=root.supabaseClient;if(!client)throw new Error('Session unavailable.');
         var session=await client.auth.getSession(),current=session.data&&session.data.session&&session.data.session.user;
         if(!current||current.id!==expected||activeId!==expected||section!==currentSection||!activeProfile||activeProfile.role!=='partner')throw new Error(text('세션이 변경됐습니다. 다시 로그인해 주세요.','Session changed. Please sign in again.'));
-        var value=payload(),result=await client.rpc('save_partner_conversation_preferences',{p_preferences:value});
+        var value=payload();
+        var latest=await client.from('partner_profile_details').select('conversation_preferences').eq('partner_id',expected).maybeSingle();
+        if(latest.error || !latest.data)throw new Error(text('현재 대화 프로필을 확인하지 못했어요. 다시 시도해 주세요.','Could not confirm the current conversation profile. Please retry.'));
+        var fresh=latest.data.conversation_preferences ? validate(latest.data.conversation_preferences) : originalValue;
+        Object.keys(catalog).forEach(function(group){if(JSON.stringify(value[group])===JSON.stringify(originalValue[group]))value[group]=fresh[group];});
+        var beforeSave=await client.auth.getSession();
+        if(activeId!==expected || section!==currentSection || !beforeSave.data.session || beforeSave.data.session.user.id!==expected)throw new Error(text('세션이 변경됐습니다. 다시 로그인해 주세요.','Session changed. Please sign in again.'));
+        var result=await client.rpc('save_partner_conversation_preferences',{p_preferences:validate(value)});
         if(result.error)throw new Error(text('저장하지 못했어요. 다시 시도해 주세요.','Could not save. Please retry.'));
         if(activeId!==expected||section!==currentSection)return;
-        original=JSON.stringify(validate(result.data));
+        originalValue=validate(result.data);original=JSON.stringify(originalValue);
+        inputs.forEach(function(input){input.checked=originalValue[input.name].includes(input.value);});update();
+        document.dispatchEvent(new CustomEvent('dayo:partner-detailschanged',{detail:{source:'conversation'}}));
         status.textContent=text('대화 프로필을 저장했어요. 다음 로그인에서도 유지됩니다.','Conversation profile saved. It will be restored when you sign in again.');
       }catch(error){if(section===currentSection)status.textContent=error.message;}
       finally{if(section===currentSection)save.disabled=JSON.stringify(payload())===original;}
@@ -135,6 +149,11 @@
   }
   function start(){
     document.addEventListener('dayo:partner-authorized',function(event){var d=event.detail||{};mount(d.user,d.profile);});
+    document.addEventListener('dayo:partner-detailschanged',function(event){
+      if(event.detail && event.detail.source==='completion' && activeId && section && !section.querySelector('details')){
+        var user={id:activeId},profile=activeProfile;clear();mount(user,profile);
+      }
+    });
     if(root.supabaseClient&&root.supabaseClient.auth.onAuthStateChange)root.supabaseClient.auth.onAuthStateChange(function(event,session){if(!session||!session.user||session.user.id!==activeId)clear();});
     document.addEventListener('dayo:langchange',function(){var user=activeId&&{id:activeId},profile=activeProfile,draft=readDraft&&readDraft(),open=section&&section.querySelector('details').open;clear();if(user)mount(user,profile,draft,open);});
     mount(root.__dayoPartnerAuthUser,root.__dayoPartnerProfileGate);

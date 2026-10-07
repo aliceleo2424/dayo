@@ -104,7 +104,7 @@
     var payValue=document.createElement('p');payValue.className='stat-value';payValue.textContent='…';payCard.append(payLabel,payValue);stats.append(payCard);
     var profilePanel=panel('pd-profile',[profile],[profileInfo]);
     // Owner-only persistent conversation preferences, loaded after the Lounge is mounted.
-    var conversationProfile=document.createElement('script');conversationProfile.src='partner-conversation-profile.js';document.head.append(conversationProfile);
+    var conversationProfile=document.createElement('script');conversationProfile.src='partner-conversation-profile.js';conversationProfile.addEventListener('load',showProfileDetails);document.head.append(conversationProfile);
     var past=card('Past Sessions','지난 대화','Loading recorded conversations…','대화 기록을 불러오는 중…');
     var pastList=document.createElement('ul');pastList.className='pd-past-list';past.append(pastList);
     var pastPartnerId=null,pastRun=0,pastRows=[];
@@ -154,6 +154,8 @@
     rules.append(action('Open Earnings →','Earnings 보기 →',function(){select('pd-earnings');}));
     earnings.append(action('Pay & Bonus Rules →','수익 · 보너스 규정 →',function(){select('pd-resources');rules.scrollIntoView({block:'start'});}));
     rules.append(label('h3','Availability & session updates','예약 가능 시간 · 세션 처리'),label('p','Open and update actual booking slots in Sessions. Review cancellation and technical issue outcomes there. Conversation entry follows the existing booking window.','Sessions에서 실제 예약 슬롯을 열고 수정할 수 있습니다. 취소·기술 문제 처리 결과도 같은 탭에서 확인하세요. 대화 입장은 기존 예약 기준을 따릅니다.'),action('Open Sessions →','Sessions 보기 →',function(){select('pd-sessions');}));
+    var editDetails=document.createElement('button');editDetails.type='button';editDetails.className='dashboard-primary-link';editDetails.textContent=document.documentElement.lang==='ko'?'상세 정보 수정':'Edit details';editDetails.hidden=true;
+    editDetails.addEventListener('click',function(){document.dispatchEvent(new CustomEvent('dayo:edit-partner-details'));});profileInfo.append(editDetails);
     var completion=card('Partner profile','파트너 프로필','Loading completion status…','완료 상태를 불러오는 중…');
     var completionValue=completion.querySelector('p');profilePanel.querySelectorAll('.pd-column')[1].prepend(completion);
     var bonusSummary=card('Bonuses','보너스','Referral rewards and partner benefits','추천 리워드와 파트너 혜택');
@@ -190,6 +192,7 @@
     new MutationObserver(syncEarnings).observe(document.getElementById('statMonthCount'),{childList:true,characterData:true,subtree:true});syncEarnings();
     var detailsRun=0;
     async function showProfileDetails(){
+      editDetails.hidden=true;
       var run=++detailsRun,ko=document.documentElement.lang==='ko';
       actionRow=undefined;actionProfile=undefined;openSlots=undefined;actionFailed=false;paintAction();
       profileInfo.querySelector('p').textContent=ko?'프로필 정보를 불러오는 중…':'Loading profile details…';completionValue.textContent=ko?'완료 상태를 불러오는 중…':'Loading completion status…';
@@ -199,7 +202,7 @@
         if(!user)throw new Error('signed out');
         var roleResult=await client.from('profiles').select('role,bio,avatar_url').eq('id',user.id).maybeSingle();
         if(roleResult.error||!roleResult.data||roleResult.data.role!=='partner')throw new Error('not partner');
-        if(run!==detailsRun)return;actionProfile=roleResult.data;paintAction();
+        if(run!==detailsRun)return;editDetails.hidden=false;editDetails.textContent=ko?'상세 정보 수정':'Edit details';actionProfile=roleResult.data;paintAction();
         if(pastPartnerId!==user.id){pastPartnerId=user.id;loadPast(user.id);}
         var result=await client.from('partner_profile_details').select('*').eq('partner_id',user.id).maybeSingle();
         if(run!==detailsRun)return;if(result.error)throw result.error;
@@ -220,9 +223,16 @@
         var value=profileInfo.querySelector('p');value.textContent='';
         if(!row){value.textContent=ko?'프로필 보완에서 언어와 위치 정보를 입력해 주세요.':'Complete your profile to add languages and location.';return;}
         var fields=[['Native languages','모국어',(row.native_languages||[]).join(', ')],['Other languages','기타 언어',(row.other_languages||[]).map(function(x){return x.language+' · '+x.level;}).join(', ')],['Session languages','진행 언어',(row.session_languages||[]).join(', ')],['Location','위치',[row.country,row.city].filter(Boolean).join(' · ')||row.location_status],['Visa','비자',row.visa_type==='not_applicable_overseas'?'N/A · overseas':row.visa_type],['Korean level','한국어 수준',row.korean_level],['Rough weekly capacity','주당 예상 세션',row.weekly_session_capacity]];
+        var topics=row.conversation_preferences && row.conversation_preferences.schema_version===1 ? row.conversation_preferences.interests : [];
+        var conversation=window.DayOPartnerConversationProfile;
+        if (topics && topics.length && conversation) {
+          var chips=document.createElement('span');chips.className='pd-interest-chips';chips.setAttribute('aria-label',ko?'관심사':'Interests');
+          topics.forEach(function(key){var item=conversation.catalog.interests.find(function(x){return x[0]===key;});var chip=document.createElement('span');chip.className='pd-interest-chip';chip.textContent=item?item[ko?1:2]:key;chips.append(chip);});value.append(chips);
+        }
         fields.forEach(function(f){if(f[2]){var line=document.createElement('span');line.className='dashboard-detail-line';line.textContent=(ko?f[1]:f[0])+': '+f[2];value.append(line);}});
       }catch(_){if(run!==detailsRun)return;if(actionProfile===undefined){pastPartnerId=null;++pastRun;pastRows=[];paintPast();}actionFailed=true;paintAction();profileInfo.querySelector('p').textContent=ko?'프로필 정보를 불러오지 못했어요. 라운지 기능은 계속 이용할 수 있습니다.':'Profile details could not load. Lounge features remain available.';completionValue.textContent=ko?'프로필에서 상태 확인':'Check status in Profile';}
     }
+    document.addEventListener('dayo:partner-detailschanged',showProfileDetails);
     document.addEventListener('dayo:availabilitychanged',showProfileDetails);
     showProfileDetails();document.addEventListener('dayo:partner-authorized',showProfileDetails);
     if(window.supabaseClient&&window.supabaseClient.auth.onAuthStateChange)window.supabaseClient.auth.onAuthStateChange(function(){setTimeout(showProfileDetails,0);});
