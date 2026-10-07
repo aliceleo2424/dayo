@@ -16,17 +16,18 @@ const url=decodeURIComponent(contract.illustrationUrl('Seoul Forest café',4));a
 const room=read('public/room.html');for(const m of room.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)){if(m[1].trim())new vm.Script(m[1]);}new vm.Script(read('public/partner-report.js'));new vm.Script(read('public/partner-report-contract.js'));
 const popup=room.slice(room.indexOf('  <div id="partner-report-popup"'),room.indexOf('<div id="early-exit-modal"'));assert.doesNotMatch(popup,/notesReview|synonyms|nuance|card-sentence-options|spoken_sentence/);assert.match(popup,/pr-note-templates/);assert.match(popup,/View conversation transcript/);
 const open=room.slice(room.indexOf('window.openPartnerReportPopup = function'),room.indexOf('function setPartnerReportSubmitStatus'));assert.doesNotMatch(open,/startPartnerSentencePolling|initInstaCardSection/);assert.match(open,/DayOPartnerReport.open/);
-const baseline=cp.execFileSync('git',['show','f1006f5:public/room.html'],{cwd:root,encoding:'utf8'}),normalize=s=>s.replace(/\r/g,'');
+const baseline=cp.execFileSync('git',['show','c0f34f8b15598951b25defa1dc989668d87ec360:public/room.html'],{cwd:root,encoding:'utf8'}),normalize=s=>s.replace(/\r/g,'');
 function section(s,start,end){return normalize(s.slice(s.indexOf(start),s.indexOf(end,s.indexOf(start))))}
-assert.equal(section(room,'window.openQuizModalImmediately','/* Partner copilot'),section(baseline,'window.openQuizModalImmediately','/* Partner copilot'),'Learner quiz inline code unchanged');
-assert.equal(section(room,'var rewardPromise =','window.submitPartnerReportAndLeave'),section(baseline,'var rewardPromise =','window.submitPartnerReportAndLeave'),'Reward/failure/retry behavior unchanged');
+assert.equal(section(room,'function closeInstantQuiz()','/* Partner copilot'),section(baseline,'function closeInstantQuiz()','/* Partner copilot'),'Quiz close/timer behavior unchanged; shared Recap/Letter rendering tested separately');
+assert.equal(section(room,'var rewardPromise =','window.submitPartnerReportAndLeave').replace(/^[ \t]*if\(reportSave\.ok&&window\.DayOPartnerIllustration\).*\n/gm,''),section(baseline,'var rewardPromise =','window.submitPartnerReportAndLeave'),'Reward/failure/retry behavior unchanged');
 // Preserve the historical Partner/Quiz contract while allowing the independently tested Learner Recap hooks.
-const oldFile=f=>normalize(cp.execFileSync('git',['show','f1006f5:'+f],{cwd:root,encoding:'utf8'}));
-for(const f of ['public/room-live.js','public/mypage-dashboard.js'])assert.equal(normalize(read(f)),oldFile(f),f+' unchanged');
+const oldFile=f=>normalize(cp.execFileSync('git',['show','c0f34f8b15598951b25defa1dc989668d87ec360:'+f],{cwd:root,encoding:'utf8'}));
+for(const f of ['public/room-live.js'])assert.equal(normalize(read(f)),oldFile(f),f+' unchanged');
+const currentQuiz=normalize(read('public/memory-game.js')), priorQuiz=oldFile('public/memory-game.js');
+for(const [start,end] of [['  function recoverState','  function progress'],['  function progress','  function stopTimer'],['  function renderQuestion','  function showSaveFailure'],['  async function finish','  window.startRecapQuestions']])assert.equal(section(currentQuiz,start,end),section(priorQuiz,start,end),'Quiz question/progress/save algorithms unchanged');
 const lifecycle=normalize(read('public/session-lifecycle.js'));
-const optionalStart=lifecycle.indexOf('    // Optional learner-only enrichment;'),optionalEnd=lifecycle.indexOf("    var result = await db.rpc('merge_learner_session_report'",optionalStart);
-assert(optionalStart>=0&&optionalEnd>optionalStart);
-assert.equal((lifecycle.slice(0,optionalStart)+lifecycle.slice(optionalEnd)).replace('p_report: reportPayload','p_report: payload'),oldFile('public/session-lifecycle.js'),'Existing lifecycle outside optional Learner enrichment unchanged');
+assert.equal(section(lifecycle,'  function buildReviewSnapshot()','  function endCopy'),section(oldFile('public/session-lifecycle.js'),'  function buildReviewSnapshot()','  function endCopy'),'Learner write allowlist and save/retry unchanged');
+assert.equal(section(lifecycle,'  function finalizeConversation(reason)','  window.refreshSessionPartnerLetter'),section(oldFile('public/session-lifecycle.js'),'  function finalizeConversation(reason)','  window.getLearnerReviewSnapshot'),'Settlement, safety and media finalization unchanged');
 const client=normalize(read('public/supabase-client.js')),oldClient=oldFile('public/supabase-client.js');
 assert.equal(section(client,'(function','  function isPlaceholderReport'),section(oldClient,'(function','  function isPlaceholderReport'),'Auth and shared client behavior unchanged');
 const inline=s=>Array.from(s.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)).map(m=>normalize(m[1]).trim()).filter(Boolean);

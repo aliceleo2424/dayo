@@ -4,7 +4,8 @@ const { createHandler } = require('../api/conversation-recap.js');
 const B = '44444444-4444-4444-8444-444444444444', L = '11111111-1111-4111-8111-111111111111', P = '22222222-2222-4222-8222-222222222222', OTHER = '55555555-5555-4555-8555-555555555555';
 const source = f => fs.readFileSync(path.join(root, 'public', f), 'utf8');
 const plain = o => JSON.parse(JSON.stringify(o));
-const row = (text, speaker = 'learner', id = text) => ({ id, text, speaker, timestamp: '2026-10-05T05:01:00Z' });
+let nextRow = 0;
+const row = (text, speaker = 'learner', id = 'fixture-utterance-' + nextRow++) => ({ id, text, speaker, timestamp: '2026-10-05T05:01:00Z' });
 const log = (speech, role = 'learner') => ({ id: role + '-source', booking_id: B, participant_id: role === 'learner' ? L : P, participant_role: role, transcript: speech });
 const build = (own, other, lang = 'en') => model.build({ bookingId: B, learnerId: L, partnerId: P, language: lang, learnerLog: log(own), partnerLog: other == null ? null : log(other, 'partner') });
 const own = [row('The crowded restaurant had delicious food.'), row('We enjoyed a quiet café after our trip.'), row('Yeah.'), row('um uh really like')];
@@ -16,10 +17,10 @@ assert.deepEqual(full.word_expansion.map(w => w.word), ['crowded', 'delicious', 
 assert(!full.expressions.some(x => /spacious|Yeah|um uh/.test(x.text)));
 assert(full.expressions.every(e => own.some(r => e.text === r.text)));
 assert(full.topics.length <= 3); assert(full.questions.length >= 1 && full.questions.length <= 6);
-assert(full.questions.every(q => full.word_expansion.some(w => w.word === q.word) && q.options.filter(x => x === q.answer).length === 1));
+assert(full.questions.every(q => own.some(r => model.words(r.text).map(w => w.toLowerCase()).includes(q.word)) && q.options.filter(x => x === q.answer).length === 1));
 for (const [ratio, expected] of [[60, 'speaking'], [55, 'speaking'], [45, 'balanced'], [35, 'balanced'], [25, 'listening']]) {
   const r = build([row(Array(ratio).fill('hello').join(' '))], [row(Array(100 - ratio).fill('hello').join(' '), 'partner')]);
-  assert.equal(r.interpretation, expected); assert(!/점|등급/.test(model.render(r, 'ko')));
+  assert.equal(r.interpretation, 'insufficient', 'unknown STT coverage is not an absolute participation assessment'); assert(!/점|등급/.test(model.render(r, 'ko')));
 }
 const emptyWords = build([row('yeah uh the like')], partner);
 assert.equal(emptyWords.word_expansion.length, 0); assert.equal(emptyWords.questions.length, 0);
@@ -71,7 +72,7 @@ async function serverChecks() {
   assert.equal(partnerRead.searchParams.get('participant_id'), 'eq.' + P);
   assert.equal(partnerRead.searchParams.get('participant_role'), 'eq.partner');
   assert(partner.every(item => !JSON.stringify(r.body).includes(item.text)), 'Partner original utterances never enter the response');
-  assert(!JSON.stringify(r.body).includes('partner-source'), 'Partner source record identity stays server-side');
+  assert(r.body.recap.topics.flatMap(t=>t.supporting_sources).filter(s=>s.role==='partner').every(s=>s.log_id==='partner-source'), 'Only exact Partner source IDs are permitted in provenance, never raw speech');
   assert.equal(r.body.recap.metrics.partner_word_count, 5, 'only Partner aggregate counts are exposed');
   for (const opt of [{ noAuth: true }, { authFail: true }]) assert.equal((await api(opt)).status, 401);
   const outsider = await api({ outsider: true }); assert.equal(outsider.status, 403); assert.equal(outsider.calls.length, 2, 'ownership denied before privileged read');
@@ -137,7 +138,7 @@ async function lifecycleChecks() {
     const report = b.window.getLearnerReviewSnapshot(), recap = model.saved({ ...plain(report), booking_id: B });
     assert.equal(recap.source.fingerprint, frozen.recap.source.fingerprint); assert.equal(b.opened, 1, 'recap shown before optional questions');
     assert.equal(b.window.__dayoReviewReportSaved, true);
-    b.window.startRecapQuestions(); assert(b.nodes['memory-game-title'].textContent.includes('단어 리캡'));
+    b.window.startRecapQuestions(); assert(b.nodes['memory-game-title'].textContent.includes('오늘의 단어 퀴즈'));
     let stored = JSON.parse(b.store.getItem('dayo_recap_state:' + B)); assert(stored.fingerprint);
     b.nodes['word-pool-container'].children[0].handlers.click();
     b.nodes['word-pool-container'].children.at(-1).handlers.click();
@@ -178,7 +179,7 @@ async function main() {
   await serverChecks(); await lifecycleChecks(); await databaseChecks();
   const report = require('../public/user-conversation-report.js');
   const html = report.renderDetail({ ...saved, language: 'en', partner_name: 'Partner', partner_comment: 'Kind note', stamp: 'cookie', quiz_score: 100 }, 'ko');
-  assert(html.includes('오늘의 대화 리캡')); assert(!/100%|100점|퀴즈 결과|More natural/.test(html)); assert(html.includes('Kind note'));
+  assert(html.includes('오늘의 대화 기록')); assert(!/100%|100점|퀴즈 결과|More natural/.test(html)); assert(html.includes('Kind note'));
   for (const f of ['conversation-recap.js', 'conversation-recap.css', 'room-live.js', 'learner-expressions.js', 'session-lifecycle.js', 'memory-game.js', 'room.html', 'mypage.html', 'user-conversation-report.js', 'conversation-insights.js']) assert.equal(fs.readFileSync(path.join(root, f), 'utf8').replace(/\r/g, ''), source(f).replace(/\r/g, ''), f + ' mirror');
   assert(!source('session-lifecycle.js').includes('DayOLearnerLanguageRecap.enrichReview'), 'legacy AI sentence feedback disconnected');
   assert(source('conversation-insights.js').includes("box.querySelector('.dayo-recap')"), 'no browser-local graph injected into recap');

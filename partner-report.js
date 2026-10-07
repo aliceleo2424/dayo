@@ -1,6 +1,6 @@
 (function(){
  'use strict';
- var contract=window.DayOPartnerReportContract,root,context={},selectedKeyword='',imageUrl=null,request=0,timer=null,initialized=false,selectedTemplate='',noteEdited=false;
+ var contract=window.DayOPartnerReportContract,root,context={},selectedKeyword='',imageUrl=null,request=0,timer=null,initialized=false,selectedTemplate='',noteEdited=false,letterBooking='';
  function el(id){return document.getElementById(id);}
  function selectButtons(container,value){container.querySelectorAll('button').forEach(function(button){button.setAttribute('aria-pressed',String(button.dataset.value===value));});}
  function setImageStatus(text){el('pr-image-status').textContent=text;}
@@ -54,8 +54,9 @@
  function open(data){
   mount();if(!initialized)return;context=data||{};
   syncTopicTemplate();
-  paintSuggestions();if(!selectedTemplate&&!el('popup-partner-comment').value)selectTemplate('a');
-  var ko=window.DayOI18n&&window.DayOI18n.getLang&&window.DayOI18n.getLang()==='ko';
+  if(letterBooking && letterBooking!==context.bookingId){el('popup-partner-comment').value='';selectedTemplate='';noteEdited=false;}
+  letterBooking=context.bookingId||'';paintSuggestions();
+  var ko=window.DayOI18n&&window.DayOI18n.getLang&&window.DayOI18n.getLang().toLowerCase()==='ko';
   el('pr-title').textContent=ko?'파트너 레터':'Partner Letter';
   root.querySelector('.pr-intro').textContent=ko?'오늘의 대화를 떠올리며 짧은 메시지를 남겨 주세요.':'Leave a short, warm message about today’s conversation.';
   el('btn-final-partner-submit').textContent=ko?'메시지 보내고 마치기':'Send letter and finish';

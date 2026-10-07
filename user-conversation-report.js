@@ -1,7 +1,7 @@
 /* Read-only presentation; report ownership and persistence remain unchanged. */
 (function(root,factory){var api=factory(typeof module==='object'&&module.exports?require('./partner-report-contract.js'):root.DayOPartnerReportContract,typeof module==='object'&&module.exports?require('./learner-expressions.js'):root.DayOLearnerExpressions,typeof module==='object'&&module.exports?require('./conversation-recap.js'):root.DayOConversationRecap);if(typeof module==='object'&&module.exports)module.exports=api;if(root)root.DayOUserConversationReport=api;})(typeof window!=='undefined'?window:globalThis,function(contract,learner,conversationRecap){
 'use strict';
-var labels={en:{with:'Conversation with ',human:'From Your Conversation Partner',note:'A little note from ',treat:'Today’s Treat',theme:'Today’s conversation',recap:'Your Language Recap',summary:'Conversation recap',said:'You said',natural:'More natural',expressions:'Useful expressions',quiz:'Quiz result',help:'Words you looked up',saved:'Save this report',close:'Close',open:'View recap',record:'Conversation record'},ko:{with:'대화 파트너 · ',human:'파트너가 전하는 이야기',note:'작은 메시지 · ',treat:'오늘의 Treat',theme:'오늘 나눈 이야기',recap:'나의 언어 기록',summary:'대화 돌아보기',said:'내가 한 말',natural:'더 자연스럽게',expressions:'다시 써볼 표현',quiz:'퀴즈 결과',help:'찾아본 단어',saved:'대화 카드 저장',close:'닫기',open:'리캡 보기',record:'대화 기록'}};
+var labels={en:{with:'Conversation with ',human:'From Your Conversation Partner',note:'A little note from ',treat:'Today’s Treat',theme:'Today’s conversation',recap:'Your Language Recap',summary:'Conversation recap',said:'You said',natural:'More natural',expressions:'Useful expressions',quiz:'Quiz result',help:'Words you looked up',saved:'Save this report',close:'Close',open:'View recap',record:'Conversation record'},ko:{with:'대화 파트너 · ',human:'파트너가 전하는 이야기',note:'작은 메시지 · ',treat:'오늘의 Treat',theme:'오늘 나눈 이야기',recap:'나의 언어 기록',summary:'대화 돌아보기',said:'내가 한 말',natural:'더 자연스럽게',expressions:'다시 써볼 표현',quiz:'퀴즈 결과',help:'찾아본 단어',saved:'대화 카드 저장',close:'닫기',open:'대화 기록 보기',record:'대화 기록'}};
 var icons={americano:'☕',green_tea:'🍵',vanilla_latte:'☕',cookie:'🍪',croissant:'🥐',macaron:'🍬'};
 function text(value){return typeof value==='string'?value.trim():'';}
 function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
@@ -20,24 +20,74 @@ function expressions(r){var seen={};var fixed=corrections(r).flatMap(function(x)
 function summary(r){var s=text(r.summary);return s?(s.match(/[^.!?。！？]+[.!?。！？]*(?:\s|$)/g)||[s]).slice(0,3).join('').trim():'';}
 function quiz(r){var v=r.quiz_score;return v!=null&&v!==''&&Number.isFinite(Number(v))&&Number(v)>=0&&Number(v)<=100?Number(v)+'%':'';}
 function imageURL(v){var s=text(v);if(!(/^https?:\/\//i.test(s)||/^\/(?!\/)/.test(s)))return '';var path;try{path=new URL(s,'https://www.dayotalk.com').pathname;}catch(e){return '';}return /\/images\/logo(?:[-_][^/]*)?\.(?:png|jpe?g|webp|svg)$/i.test(path)?'':s;}
-function hideIllustration(img){img.hidden=true;img.onerror=null;var block=img.closest('.ucr-block'),section=img.closest('.ucr-human');if(!block.querySelector('.ucr-theme'))block.hidden=true;if(Array.from(section.querySelectorAll('.ucr-block')).every(function(b){return b.hidden;})){section.hidden=true;var button=section.parentElement.querySelector('.ucr-primary');if(button)button.hidden=true;}}
+function hideIllustration(img){img.hidden=true;img.onerror=null;var block=img.closest('.ucr-block');if(block&&!block.querySelector('.ucr-theme'))block.hidden=true;}
 function heading(title,content){return content?'<div class="ucr-block"><h4>'+esc(title)+'</h4>'+content+'</div>':'';}
-function renderDetail(r,locale){r=r||{};var l=labels[locale]||labels.en,name=nickname(r,locale),t=treat(r),img=imageURL(r.illust_url),theme=text(r.keyword),note=text(r.partner_comment);
-var human=heading(l.note+name,note?'<blockquote>'+esc(note)+'</blockquote>':'<p class="ucr-letter-pending">'+(locale==='ko'?'파트너가 메시지를 준비 중이에요.':'Your partner is preparing a message.')+'</p>');
-var keepsake=heading(l.treat,t?'<div class="ucr-treat"><span aria-hidden="true">'+icons[t.code]+'</span><div><strong>'+esc(t.label)+'</strong><p>'+esc(t.meaning)+'</p></div></div>':'');
-keepsake+=heading(l.theme,(theme?'<p class="ucr-theme">'+esc(theme)+'</p>':'')+(img?'<img class="ucr-illustration" hidden onload="this.hidden=false" src="'+esc(img)+'" alt="" referrerpolicy="no-referrer" onerror="DayOUserConversationReport.hideIllustration(this)">':''));
-if(keepsake)human+='<details class="ucr-keepsake"><summary>'+(locale==='ko'?'대화 기념 보기':'View conversation keepsake')+'</summary>'+keepsake+'</details>';
+
+
+
+
+function renderLetter(r,locale){r=r||{};var name=nickname(r,locale),img=imageURL(r.illust_url),theme=conversationRecap.saved(r)?'':text(r.keyword),note=text(r.partner_comment);
+var human=note?'<blockquote>'+esc(note)+'</blockquote>':'<p class="ucr-letter-pending">'+(locale==='ko'?'파트너가 메시지를 준비 중이에요.':'Your partner is preparing a message.')+'</p>';
+// Canonical stories already show grounded topics. Keep legacy theme and valid image; stored Treat is untouched.
+if(theme||img)human+='<div class="ucr-block ucr-letter-theme">'+(theme?'<p class="ucr-theme">'+esc(theme)+'</p>':'')+(img?'<img class="ucr-illustration" hidden onload="this.hidden=false" src="'+esc(img)+'" alt="" referrerpolicy="no-referrer" onerror="DayOUserConversationReport.hideIllustration(this)">':'')+'</div>';
+return '<section id="insta-card-capture" class="ucr-section ucr-human"><h3>Letter from '+esc(name)+'</h3>'+human+'</section>';}
+function renderLegacy(r,locale){
+var l=labels[locale]||labels.en, parts=heading(l.summary,summary(r)?'<p>'+esc(summary(r))+'</p>':'');
+parts+=heading(l.expressions,expressions(r).map(function(x){return '<p>'+esc(x.expression)+'</p>';}).join(''));
+parts+=heading(l.quiz,quiz(r)?'<p>'+esc(quiz(r))+'</p>':'');
+return parts?'<section class="ucr-section ucr-recap" data-legacy-report><h3>'+esc(l.recap)+'</h3>'+parts+'</section>':conversationRecap.render(null,locale);
+}
+function renderImmediate(r,locale,options){r=r||{};var access=typeof window!=='undefined'&&window.DayORoomAccess;if(access&&access.allowed===true&&access.bookingId===r.booking_id){r=Object.assign({},r);if(!text(r.partner_name))r.partner_name=access.partnerName||'';if(!text(r.created_at))r.created_at=access.scheduledAt||'';if(!text(r.language))r.language=access.language||'';}return conversationRecap.render(conversationRecap.saved(r),locale,Object.assign({wordHelp:r.word_help,hideQuizAction:!!(options&&options.interactive)},options||{}))+renderLetter(r,locale)+(options&&options.interactive&&!options.hideActions?conversationRecap.renderActions(conversationRecap.saved(r),locale):'');}
+function sameStoredData(a,b){
+function ordered(v){if(Array.isArray(v))return v.map(ordered);if(v&&typeof v==='object')return Object.fromEntries(Object.keys(v).sort().map(function(k){return [k,ordered(v[k])];}));return v;}
+return JSON.stringify(ordered(a))===JSON.stringify(ordered(b));
+}
+async function refreshRecapPresentation(db,report,fetchImpl){
+var stored=conversationRecap.saved(report);
+if(!stored||(stored.quality_version===3&&stored.ratio_quality&&stored.ratio_quality.version===1)||!stored.source.fingerprint||!db.auth.getSession)return report;
+try{
+ var session=await db.auth.getSession(),token=session.data&&session.data.session&&session.data.session.access_token;
+ if(session.error||!token)return report;
+ var send=fetchImpl||(typeof fetch==='function'?fetch:null);if(!send)return report;
+ var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},7000);
+ try{
+  var response=await send('/api/conversation-recap',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({booking_id:report.booking_id,learner_version:stored.source.learner_version}),signal:controller.signal});
+  if(!response.ok)return report;
+  var payload=await response.json(),fresh=payload&&payload.recap;
+  if(!fresh||fresh.booking_id!==report.booking_id||fresh.generator!==stored.generator||fresh.schema_version!==stored.schema_version||fresh.quality_version!==3||!fresh.source||fresh.source.fingerprint!==stored.source.fingerprint||!sameStoredData(fresh.questions,stored.questions)||!sameStoredData(fresh.metrics,stored.metrics))return report;
+  var display=Object.assign({},stored);['topics','expressions','word_expansion','interpretation','comment','quality_version','story_source_version','ratio_quality'].forEach(function(k){display[k]=fresh[k];});
+  // Presentation only: preserve stored progress, source, counts, history and all other report fields.
+  return Object.assign({},report,{feedback:conversationRecap.mergeFeedback(report.feedback,display)});
+ }finally{clearTimeout(timer);}
+}catch(_){return report;}
+}
+async function fetchLatest(db,bookingId,fetchImpl){
+if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(bookingId||'') || !db)throw Error('report-identity');
+var auth=await db.auth.getUser(),user=auth.data&&auth.data.user;if(auth.error||!user)throw Error('report-auth');
+var result=await db.from('session_reports').select('*').eq('booking_id',bookingId).eq('learner_id',user.id).maybeSingle();
+if(result.error)throw Error('report-unavailable');
+if(result.data&&(result.data.booking_id!==bookingId||result.data.learner_id!==user.id))throw Error('report-identity');
+return result.data?refreshRecapPresentation(db,result.data,fetchImpl):null;
+}
+function withLatestContent(cached,latest){
+if(!cached||!latest||cached.booking_id!==latest.booking_id)throw Error('report-identity');
+var result=Object.assign({},cached);
+['id','partner_comment','stamp','keyword','illust_url','summary','key_expressions','quiz_score','word_help','feedback'].forEach(function(k){if(Object.prototype.hasOwnProperty.call(latest,k))result[k]=latest[k];});
+if(text(latest.partner_name))result.partner_name=latest.partner_name;
+return result;
+}
+function renderDetail(r,locale){r=r||{};var l=labels[locale]||labels.en,name=nickname(r,locale),t=treat(r),img=imageURL(r.illust_url),note=text(r.partner_comment);
 var value=conversationRecap.saved(r);
 if(!value&&Array.isArray(r.__dayoLearnerTranscript)&&r.__dayoLearnerSourceLogId){
   value=conversationRecap.build({bookingId:r.booking_id,learnerId:'authenticated-learner',language:r.language,
     learnerLog:{id:r.__dayoLearnerSourceLogId,booking_id:r.booking_id,participant_id:'authenticated-learner',participant_role:'learner',transcript:r.__dayoLearnerTranscript}});
 }
-var recap=conversationRecap.render(value,locale,{wordHelp:conversationRecap.saved(r)?r.word_help:[]});
+var recap=value?conversationRecap.render(value,locale,{wordHelp:r.word_help}):renderLegacy(r,locale);
 if(value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(r.booking_id||'') && value.questions && value.questions.length && !(value.progress && value.progress.reason)) {
-  recap+='<a class="recap-primary" href="session-recap.html?bookingId='+encodeURIComponent(r.booking_id)+'">'+(locale==='ko'?'단어 리캡 이어보기':'Continue word recap')+'</a>';
+  recap+='<a class="recap-primary" href="session-recap.html?bookingId='+encodeURIComponent(r.booking_id)+'">'+(locale==='ko'?'단어 퀴즈 이어보기':'Continue the word quiz')+'</a>';
 }
 
-return '<article class="ucr-detail" data-booking-id="'+esc(r.booking_id||'')+'"><header class="ucr-header"><p class="ucr-eyebrow">DayO · '+esc(l.record)+'</p><h3>'+esc(l.with+name)+'</h3><p class="ucr-meta">'+[date(r,locale),language(r)].filter(Boolean).map(esc).join(' · ')+'</p></header>'+recap+'<section id="insta-card-capture" class="ucr-section ucr-human"><h3>'+(locale==='ko'?'파트너 레터':'Partner Letter')+'</h3>'+human+'</section><footer class="ucr-actions">'+(note||t||img?'<button id="btn-save-card" class="ucr-primary btn-save-card" type="button" onclick="saveInstaCard(event)">'+(locale==='ko'?'이미지 저장':'Save image')+'</button>':'')+'<button type="button" onclick="closeReportDetailModal()">'+esc(l.close)+'</button></footer></article>';}
-function renderArchive(r,index,locale){r=r||{};var l=labels[locale]||labels.en,t=treat(r);return '<button class="mypage-report-item ucr-archive" type="button" onclick="openReportDetailModal(\'report-'+(index+1)+'\')"><span class="ucr-archive-content"><strong>'+esc(l.with+nickname(r,locale))+'</strong><span class="ucr-meta">'+[date(r,locale),language(r)].filter(Boolean).map(esc).join(' · ')+'</span>'+(text(r.keyword)?'<span class="ucr-archive-theme">'+esc(r.keyword)+'</span>':'')+'<span class="ucr-archive-badges">'+(t?'<span title="'+esc(t.meaning)+'">'+icons[t.code]+' '+esc(t.label)+'</span>':'')+(conversationRecap.saved(r)&&conversationRecap.saved(r).progress.total?'<span>'+esc(conversationRecap.labels(locale).mini)+' · '+esc(conversationRecap.saved(r).progress.completed+'/'+conversationRecap.saved(r).progress.total)+'</span>':'')+'</span></span><span class="ucr-archive-open">'+esc(l.open)+' →</span></button>';}
-return {hideIllustration:hideIllustration,renderDetail:renderDetail,renderArchive:renderArchive,corrections:corrections,expressions:expressions,summary:summary,quiz:quiz};
+return '<article class="ucr-detail" data-booking-id="'+esc(r.booking_id||'')+'"><header class="ucr-header"><p class="ucr-eyebrow">DayO · '+esc(l.record)+'</p><h3>'+esc(l.with+name)+'</h3><p class="ucr-meta">'+[date(r,locale),language(r)].filter(Boolean).map(esc).join(' · ')+'</p></header>'+recap+renderLetter(r,locale)+'<footer class="ucr-actions">'+(note||img?'<button id="btn-save-card" class="ucr-primary btn-save-card" type="button" onclick="saveInstaCard(event)">'+(locale==='ko'?'이미지 저장':'Save image')+'</button>':'')+'<button type="button" onclick="closeReportDetailModal()">'+esc(l.close)+'</button></footer></article>';}
+function renderArchive(r,index,locale){r=r||{};var l=labels[locale]||labels.en,t=treat(r);return '<button class="mypage-report-item ucr-archive" type="button" onclick="openReportDetailModal(\'report-'+(index+1)+'\')"><span class="ucr-archive-content"><strong>'+esc(l.with+nickname(r,locale))+'</strong><span class="ucr-meta">'+[date(r,locale),language(r)].filter(Boolean).map(esc).join(' · ')+'</span>'+(text(r.keyword)?'<span class="ucr-archive-theme">'+esc(r.keyword)+'</span>':'')+'<span class="ucr-archive-badges">'+(conversationRecap.saved(r)&&conversationRecap.saved(r).progress.total?'<span>'+esc(conversationRecap.labels(locale).mini)+' · '+esc(conversationRecap.saved(r).progress.completed+'/'+conversationRecap.saved(r).progress.total)+'</span>':'')+'</span></span><span class="ucr-archive-open">'+esc(l.open)+' →</span></button>';}
+return {refreshRecapPresentation:refreshRecapPresentation,withLatestContent:withLatestContent,renderImmediate:renderImmediate,renderLetter:renderLetter,fetchLatest:fetchLatest,hideIllustration:hideIllustration,renderDetail:renderDetail,renderArchive:renderArchive,corrections:corrections,expressions:expressions,summary:summary,quiz:quiz};
 });

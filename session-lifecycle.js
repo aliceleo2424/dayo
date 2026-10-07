@@ -6,6 +6,7 @@
   var submittingTechIssue = false;
   var sessionEndedEventLogged = false;
   var reviewSource = null;
+  var partnerLetterSnapshot = null;
   var reviewSourcePromise = null;
   var reviewSourceBookingId = '';
   var reviewSavePromise = null;
@@ -105,6 +106,7 @@
     if (reviewSourceBookingId !== ctx.bookingId) {
       reviewSourceBookingId = ctx.bookingId;
       reviewSource = null;
+      partnerLetterSnapshot = null;
       reviewSourcePromise = null;
       window.__dayoReviewReportSaved = false;
       window.__dayoLearnerReportPayload = null;
@@ -132,6 +134,7 @@
         var previous = reportResult.data;
         if (previous && (previous.booking_id !== ctx.bookingId || previous.learner_id !== ctx.learnerId)) throw new Error('report-identity');
         window.__dayoLearnerReportPayload = previous || null;
+        partnerLetterSnapshot = previous || null;
         var row = result && result.data;
         if (result.error || !row || !row.id || row.booking_id !== ctx.bookingId ||
             row.participant_id !== ctx.learnerId || row.participant_role !== 'learner' ||
@@ -600,9 +603,22 @@
   window.persistSessionReviewReport = persistReviewReport;
   window.prepareSessionReviewSource = prepareReviewSource;
   window.getCanonicalReviewSource = canonicalReviewSource;
+  window.refreshSessionPartnerLetter = async function () {
+    var ctx=context();
+    if(!ctx.bookingId || !window.DayOUserConversationReport) return false;
+    try {
+      var latest=await window.DayOUserConversationReport.fetchLatest(client(),ctx.bookingId);
+      if(context().bookingId!==ctx.bookingId) return false;
+      partnerLetterSnapshot=latest;
+      return true;
+    } catch (_) { return false; }
+  };
   window.getLearnerReviewSnapshot = function () {
-    return canonicalReviewSource().available && window.__dayoReviewReportSaved && window.__dayoLearnerReportPayload
+    var ctx=context(), latest=partnerLetterSnapshot && partnerLetterSnapshot.booking_id===ctx.bookingId ? partnerLetterSnapshot : {};
+    var learnerPayload=canonicalReviewSource().available && window.__dayoReviewReportSaved && window.__dayoLearnerReportPayload
       ? window.__dayoLearnerReportPayload : buildReviewSnapshot();
+    return Object.assign({booking_id:ctx.bookingId},learnerPayload,{partner_comment:latest.partner_comment||'',stamp:latest.stamp||null,
+      keyword:latest.keyword||null,illust_url:latest.illust_url||null,partner_name:latest.partner_name||''});
   };
   window.finalizeLearnerQuiz = async function () {
     if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {

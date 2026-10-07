@@ -3940,7 +3940,7 @@
       <div id="answer-slot-container" style="min-height: 52px; border-bottom: 2px dashed #E2E8F0; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; align-items: center; padding-bottom: 12px; margin-bottom: 24px;"></div>
       <div id="word-pool-container" style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 24px;"></div>
       <button type="button" id="quiz-skip-btn" onclick="skipToRecordCard()" style="background: transparent; border: none; font-size: 12px; color: #999; text-decoration: underline; cursor: pointer; font-family: inherit;">
-        리캡으로 돌아가기
+        대화 기록으로 돌아가기
       </button>
     </div>
   </div>
@@ -3949,7 +3949,7 @@
   <div class="rq-overlay" id="quiz-modal" data-view="viewTalkRecord" hidden>
     <div class="quiz-modal-card talk-record-card" role="dialog" aria-modal="true" aria-labelledby="quizModalTitle">
       <header class="quiz-modal-head">
-        <p class="quiz-modal-kicker" id="quizModalTitle">오늘의 대화 리캡</p>
+        <p class="quiz-modal-kicker" id="quizModalTitle">오늘의 대화 기록</p>
         <button class="rq-close" type="button" id="rqClose" aria-label="닫기">✕</button>
       </header>
       <div class="insta-card-export-wrap">
@@ -3958,7 +3958,7 @@
         </div>
         <div class="talk-record-actions">
           <button hidden type="button" class="rq-cta btn-save-card" id="btn-save-talk-card" onclick="window.saveInstaCard && window.saveInstaCard(event)">리캡 이미지 저장</button>
-          <button class="rq-cta rq-cta-secondary" type="button" id="quiz-done-btn">마이페이지로 이동</button>
+          <button class="rq-cta rq-cta-secondary" type="button" id="quiz-done-btn" hidden>마이페이지</button>
         </div>
       </div>
     </div>
@@ -3983,8 +3983,11 @@
   <script src="turn-ice.js?v=20260930-cloudflare-turn"></script>
   <script src="room-live.js?v=20261005-conversation-recap"></script>
   <script src="learner-expressions.js?v=20261005-conversation-recap"></script>
-  <script src="conversation-recap.js?v=20261005-recap-integration"></script>
-  <link rel="stylesheet" href="conversation-recap.css?v=20261005-recap-integration">
+  <script src="conversation-recap.js?v=20261007-hotfix"></script>
+  <script src="partner-report-contract.js"></script>
+  <script src="user-conversation-report.js?v=20261007-hotfix"></script>
+  <link rel="stylesheet" href="user-conversation-report.css?v=20261007-hotfix">
+  <link rel="stylesheet" href="conversation-recap.css?v=20261007-hotfix">
   <script>
     (function () {
       var view = document.getElementById('partner-room-interests');
@@ -6480,7 +6483,9 @@
         if (!report) return;
         var locale = String(window.DayOI18n && window.DayOI18n.getLang ? window.DayOI18n.getLang() : document.documentElement.lang || 'ko').toLowerCase();
         var recap = window.DayOConversationRecap.saved(Object.assign({ booking_id: window.DayORoomAccess && window.DayORoomAccess.bookingId }, report));
-        quizContainer.innerHTML = window.DayOConversationRecap.render(recap, locale, { interactive: true, hideTitle: true, wordHelp: report.word_help });
+                quizContainer.innerHTML = window.DayOUserConversationReport.renderImmediate(Object.assign({booking_id:window.DayORoomAccess.bookingId},report), locale, { interactive: true, hideTitle: true, hideActions: true });
+        quizContainer.innerHTML += '<button type="button" class="ucr-report-refresh" onclick="refreshCurrentRecapLetter()">' + (locale==='ko'?'파트너 메시지 새로 불러오기':'Refresh partner message') + '</button><p id="recap-letter-status" class="ucr-report-status" role="status"></p>';
+        quizContainer.innerHTML += window.DayOConversationRecap.renderActions(recap, locale);
         var titleEl = document.getElementById('quizModalTitle');
         if (titleEl) titleEl.textContent = window.DayOConversationRecap.labels(locale).title;
 
@@ -6495,6 +6500,11 @@
         if (window.DayOScrollLock) window.DayOScrollLock.lock();
       };
 
+      window.refreshCurrentRecapLetter = async function () {
+        var ok=await window.refreshSessionPartnerLetter();
+        window.openQuizModalImmediately();
+        if(!ok){var node=document.getElementById('recap-letter-status');if(node)node.textContent=String(window.DayOI18n.getLang()).toLowerCase()==='ko'?'메시지를 불러오지 못했어요. 다시 시도해 주세요.':'Could not load the message. Please try again.';}
+      };
       function closeInstantQuiz() {
         var quizModal = document.getElementById('quiz-modal') || document.getElementById('quizModal') || document.getElementById('reviewQuizModal');
         var wasOpen = !!(quizModal && (quizModal.classList.contains('is-open') || !quizModal.hidden));
@@ -6535,7 +6545,7 @@
       });
     })();
   </script>
-  <script src="memory-game.js?v=20261005-recap-integration"></script>
+  <script src="memory-game.js?v=20261007-hotfix"></script>
   <script>
     /* Partner copilot — on-demand host question prompter (partner role only) */
     (function partnerQuestionPrompter() {
@@ -7418,7 +7428,7 @@
 
   <div id="partner-report-popup" style="display:none;position:fixed;inset:0;z-index:99999999;justify-content:center;align-items:center" role="dialog" aria-modal="true" aria-labelledby="pr-title">
     <div class="pr-dialog">
-      <header><h2 id="pr-title">Partner Letter</h2><p class="pr-intro">Leave a short, warm message about today’s conversation.</p></header>
+      <header><h2 id="pr-title">Partner Letter</h2><p class="pr-intro">Mention one story from today, add a short reaction, and invite the next conversation.</p></header>
       <section class="pr-section"><h3>Your message</h3><label class="pr-field">Your note<textarea id="popup-partner-comment" rows="3" maxlength="1000" placeholder="Leave a warm note. You can edit any template."></textarea></label><details class="pr-note-starters"><summary>Use a message starter (optional)</summary><p class="pr-hint">Choose a message, then make it your own.</p><div class="pr-chips" id="pr-note-templates" aria-label="Note templates"></div><label class="pr-field" id="pr-recommendation-field" hidden>Recommendation<input type="text" id="pr-recommendation" maxlength="120" placeholder="Place, food or activity"></label></details></section>
       <details class="pr-section pr-optional"><summary>Add a Treat (optional)</summary><p class="pr-hint">Choose one Treat that matches today’s conversation.</p><div id="pr-treats" class="pr-treats"></div><label class="pr-choice pr-none"><input type="radio" name="popup_stamp" value="" checked><span>No Treat</span></label><div hidden id="pr-treat-icons"><svg data-pr-treat-icon viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M15 20h32v25a8 8 0 0 1-8 8H23a8 8 0 0 1-8-8Z" fill="#F8E8D2" stroke="#8C6048" stroke-width="3"/><path d="M19 24h24v8H19z" fill="#6F4937"/><path d="M47 27h4a8 8 0 0 1 0 16h-4" fill="none" stroke="#8C6048" stroke-width="3"/></svg><svg data-pr-treat-icon viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M14 23h34v21a9 9 0 0 1-9 9H23a9 9 0 0 1-9-9Z" fill="#EDF3D8" stroke="#71845A" stroke-width="3"/><path d="M19 27h24v8H19z" fill="#A8BE78"/><path d="M48 29h4a7 7 0 0 1 0 14h-4" fill="none" stroke="#71845A" stroke-width="3"/></svg><svg data-pr-treat-icon viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M19 12h26l-3 42H22Z" fill="#FFF4D9" stroke="#A77452" stroke-width="3"/><path d="M21 29h22l-1 13H22z" fill="#C58A63"/><path d="M22 20h21l-1 9H22z" fill="#F6D9A7"/></svg><svg data-pr-treat-icon viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><circle cx="32" cy="33" r="21" fill="#D9A66F" stroke="#8B6043" stroke-width="3"/><circle cx="24" cy="24" r="3" fill="#75503A"/><circle cx="40" cy="29" r="3" fill="#75503A"/><circle cx="29" cy="42" r="3" fill="#75503A"/><circle cx="43" cy="44" r="2.5" fill="#75503A"/></svg><svg data-pr-treat-icon viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M11 39c6-18 14-25 21-25s15 7 21 25c-6 10-14 14-21 14S17 49 11 39Z" fill="#E7B96C" stroke="#9A683D" stroke-width="3"/><path d="M21 21c3 8 3 18 0 27M32 15c3 11 3 27 0 38M43 21c-3 8-3 18 0 27" fill="none" stroke="#C3894E" stroke-width="2.5"/></svg><svg data-pr-treat-icon viewBox="0 0 64 64" width="38" height="38" aria-hidden="true"><path d="M15 29c1-11 8-17 17-17s16 6 17 17Z" fill="#E8AFC0" stroke="#936276" stroke-width="3"/><path d="M15 37c1 11 8 17 17 17s16-6 17-17Z" fill="#E8AFC0" stroke="#936276" stroke-width="3"/><rect x="14" y="28" width="36" height="10" rx="5" fill="#FFF2D9" stroke="#936276" stroke-width="3"/></svg></div></details>
       <details class="pr-section pr-optional"><summary>Add a conversation keepsake (optional)</summary><div class="pr-keyword-layout"><div><p id="pr-keyword-hint" class="pr-hint"></p><div id="pr-keyword-options" class="pr-chips" aria-label="Suggested conversation themes"></div><div id="pr-custom-keyword-field" hidden><label class="pr-field">Write a short topic or phrase<input type="text" id="pr-custom-keyword" maxlength="60" placeholder="e.g. Seoul Forest cafés"></label><button type="button" id="pr-use-keyword">Use theme</button></div><p id="pr-keyword-value" class="pr-hint" aria-live="polite"></p></div><figure class="pr-preview"><img id="pr-illustration" alt="Conversation keepsake illustration" hidden><figcaption id="pr-image-status" aria-live="polite">Choose a theme for your illustration. Image generation is optional.</figcaption><button type="button" id="pr-image-retry">Try illustration again</button></figure></div></details>
@@ -7494,7 +7504,7 @@
     <button id="safety-report-submit" type="button" onclick="submitSafetyReport()" style="width:100%;margin-top:16px;padding:13px;border:0;border-radius:12px;background:#E11D48;color:#FFFFFF;font-size:14px;font-weight:800;cursor:pointer;">신고 전송하기</button>
   </div>
 </div>
-<script src="session-lifecycle.js?v=20261005-recap-integration"></script>
+<script src="session-lifecycle.js?v=20261007-hotfix"></script>
 <script src="conversation-insights.js?v=20261005-recap-integration"></script>
   <script src="partner-report-contract.js"></script>
   <script src="partner-report.js?v=20261005-recap-integration"></script>

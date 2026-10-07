@@ -1324,7 +1324,7 @@
     'room.recapRecoveryRetry': { KO: "다시 시도", EN: "Try again" },
     'room.recapRecoveryLoading': { KO: "저장된 대화 기록을 불러오고 있어요.", EN: "Loading your saved conversation record." },
     'room.recapRecoveryError': { KO: "저장된 대화 기록을 불러오지 못했어요. 본인 계정으로 로그인한 뒤 다시 시도해 주세요.", EN: "Your saved conversation record could not be loaded. Sign in to your account and try again." },
-    'room.recapBack': { KO: "리캡으로 돌아가기", EN: "Back to recap" },
+    'room.recapBack': { KO: "대화 기록으로 돌아가기", EN: "Back to recap" },
     'room.endTechIssue': { KO: '🛠️ 음성/연결 오류로 종료', EN: '🛠️ Audio or connection issue' },
     'room.end': {
       KO: '🚪 세션 종료', EN: '🚪 End Session', ZH: '🚪 结束会话', JA: '🚪 セッション終了', FR: '🚪 Terminer', ES: '🚪 Terminar'

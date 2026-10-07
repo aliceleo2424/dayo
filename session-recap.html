@@ -11,13 +11,13 @@ button,a{font:inherit}button{min-height:44px}a{color:#5F7D63}#quiz-content-box:e
 #word-pool-container{display:grid;gap:10px}.recap-option,.recap-primary{white-space:normal;overflow-wrap:anywhere}
 .recap-primary{display:inline-block;text-decoration:none}#recovery-status{line-height:1.6}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-env.js"></script><script src="supabase-client.js"></script><script src="i18n.js"></script><script src="learner-expressions.js"></script><script src="conversation-recap.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-env.js"></script><script src="supabase-client.js"></script><script src="i18n.js"></script><script src="learner-expressions.js"></script><script src="conversation-recap.js"></script><script src="partner-report-contract.js"></script><script src="user-conversation-report.js"></script><link rel="stylesheet" href="user-conversation-report.css">
 </head><body><main><header><strong>DayO</strong><a href="mypage.html" data-i18n="nav.mypage">마이페이지</a></header>
 <p id="recovery-status" role="status"></p><button id="recovery-retry" hidden type="button" data-i18n="room.recapRecoveryRetry">다시 시도</button>
 <section id="quiz-modal"><div id="quiz-content-box"></div></section></main>
 <div id="memory-game-modal" hidden><section class="review-panel" role="dialog" aria-modal="true" aria-labelledby="memory-game-title">
 <h3 id="memory-game-title"></h3><p><span id="game-round-badge"></span> <span id="review-quiz-timer" hidden></span></p>
-<p id="game-kr-meaning"></p><div id="word-pool-container"></div><button class="recap-primary" id="quiz-skip-btn" type="button" onclick="skipToRecordCard()" data-i18n="room.recapBack">리캡으로 돌아가기</button>
+<p id="game-kr-meaning"></p><div id="word-pool-container"></div><button class="recap-primary" id="quiz-skip-btn" type="button" onclick="skipToRecordCard()" data-i18n="room.recapBack">대화 기록으로 돌아가기</button>
 </section></div>
 <script>
 window.DayORoomAccess={allowed:false};window.dayoSessionEnded=true;
@@ -26,8 +26,10 @@ window.openQuizModalImmediately=function(){
   document.getElementById('quiz-modal').hidden=false;
   var report=window.getLearnerReviewSnapshot();
   var recap=DayOConversationRecap.saved(Object.assign({booking_id:DayORoomAccess.bookingId},report));
-  document.getElementById('quiz-content-box').innerHTML=DayOConversationRecap.render(recap,String(DayOI18n.getLang()).toLowerCase(),{interactive:true,wordHelp:report.word_help});
+  var locale=String(DayOI18n.getLang()).toLowerCase();
+  document.getElementById('quiz-content-box').innerHTML=DayOUserConversationReport.renderImmediate(Object.assign({booking_id:DayORoomAccess.bookingId},report),locale,{interactive:true,hideActions:true})+'<button type="button" class="ucr-report-refresh" onclick="refreshCurrentRecapLetter()">'+(locale==='ko'?'파트너 메시지 새로 불러오기':'Refresh partner message')+'</button><p id="recap-letter-status" role="status"></p>'+DayOConversationRecap.renderActions(recap,locale);
 };
+window.refreshCurrentRecapLetter=async function(){var ok=await refreshSessionPartnerLetter();openQuizModalImmediately();if(!ok)document.getElementById('recap-letter-status').textContent=String(DayOI18n.getLang()).toLowerCase()==='ko'?'메시지를 불러오지 못했어요. 다시 시도해 주세요.':'Could not load the message. Please try again.';};
 window.showToast=function(message){document.getElementById('recovery-status').textContent=message;};
 </script><script src="session-lifecycle.js"></script><script src="memory-game.js"></script>
 <script>

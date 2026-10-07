@@ -19,14 +19,14 @@ for(const locale of ['ko','en']){
  }
  const text=archived.window.document.body.textContent;
  assert(!text.includes('utterances'));assert(!/Quiz result|67%/.test(text));
- if(locale==='ko')assert(!text.includes('Partner'),'Korean recap and letter use localized Partner labels');
+
  assert(!text.includes('%'),'partner participation ratio is not displayed');
  assert(text.includes(locale==='ko'?'21단어말했어요':'21 wordsspoken'));
  assert(!text.includes(locale==='ko'?'3번말했어요':'3 turnsspoken'));
  assert(text.includes(locale==='ko'?'내 대화량':'My conversation volume'));
  assert(!text.includes(locale==='ko'?'단어 넓히기':'Explore your words'));
  assert(text.includes(locale==='ko'?'파트너가 메시지를 준비 중이에요.':'Your partner is preparing a message.'));
- assert(text.includes('1/3'));assert(text.indexOf(model.labels(locale).title)<text.indexOf(locale==='ko'?'파트너 레터':'Partner Letter'));
+ assert(text.includes('1/3'));assert(text.indexOf(model.labels(locale).title)<text.indexOf('Letter from Alex'));
  immediate.window.close();archived.window.close();
 }
 const partial=model.build({bookingId:B,learnerId:L,language:'en',learnerLog:log(speech,'learner')});

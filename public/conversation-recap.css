@@ -13,5 +13,13 @@
 #quiz-modal #quizModalTitle{color:#5F7D63}
 #quiz-modal #btn-save-talk-card[hidden]{display:none!important}
 
-/* Learner-only word volume; no partner participation comparison. */
+/* Own word volume and adequate recorded-speech ratio. */
 .recap-volume .recap-metrics{grid-template-columns:minmax(0,1fr)}.recap-volume .recap-spoken{display:flex;align-items:baseline;gap:7px;padding:10px 12px}.recap-volume-change{margin-top:7px!important;color:#5F7D63}.recap-volume-chart{display:block;width:100%;max-width:320px;height:84px;margin:8px 0 2px;overflow:visible}.recap-volume-chart polyline{fill:none;stroke:#5F7D63;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}.recap-volume-chart circle{fill:#5F7D63}.recap-volume-chart .recap-volume-axis{fill:none;stroke:#e8dfd1;stroke-width:1}.recap-volume-basis{display:block;margin-top:6px}
+
+.recap-interpretation small{display:block;font-size:12px;line-height:1.5;color:#74685f;margin-top:6px}.recap-word{padding:12px;border:1px solid #e8dfd1;background:#F8F0E3;border-radius:12px;overflow-wrap:anywhere}.recap-word+.recap-word{margin-top:8px}.recap-word p{margin:6px 0;line-height:1.5}.recap-word small{font-size:12px;color:#74685f}
+
+.recap-story+.recap-story{margin-top:10px}.recap-story .recap-expression{margin:6px 0 0}.recap-actions{display:flex;gap:8px;margin-top:14px}.recap-actions>.recap-primary{flex:1 1 0;width:0;min-width:0;min-height:46px;margin:0;padding:10px 8px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.4}#quiz-modal #quiz-done-btn[hidden]{display:none!important}
+
+#quiz-modal .talk-record-actions:has(#quiz-done-btn[hidden]){display:none}
+
+.recap-ratio{margin-top:12px}.recap-ratio>p{color:#51433c}.recap-ratio-labels{display:flex;justify-content:space-between;gap:12px;margin:7px 0 5px;font-size:12px;color:#51433c}.recap-ratio-bar{height:8px;background:#d8cdbc;border-radius:8px;overflow:hidden}.recap-ratio-bar>span{display:block;height:100%;background:#5F7D63}.recap-quiz>.recap-word{margin-top:8px}

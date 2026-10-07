@@ -2,7 +2,7 @@
 (function () {
   'use strict';
   var originalOpen = window.openQuizModalImmediately;
-  var state = null, questions = [], timer = null, opening = null, finalizing = false;
+  var state = null, questions = [], timer = null, opening = null, finalizing = false, reviewing = false;
   function locale() { return String(window.DayOI18n && window.DayOI18n.getLang ? window.DayOI18n.getLang() : document.documentElement.lang || 'ko').toLowerCase(); }
   function labels() { return window.DayOConversationRecap.labels(locale()); }
   function bookingId() { return String(window.DayORoomAccess && window.DayORoomAccess.bookingId || ''); }
@@ -76,7 +76,7 @@
     var box = document.getElementById('quiz-content-box');
     if (!box || box.querySelector && box.querySelector('[data-recap-save-status]')) return;
     var notice = document.createElement('p'); notice.className = 'recap-save-status'; notice.setAttribute('data-recap-save-status', ''); notice.setAttribute('role', 'status');
-    notice.textContent = locale() === 'ko' ? '리캡을 저장하지 못했어요. 다시 저장해 주세요.' : 'Your recap could not be saved. Please try again.';
+    notice.textContent = locale() === 'ko' ? '대화 기록을 저장하지 못했어요. 다시 저장해 주세요.' : 'Your recap could not be saved. Please try again.';
     box.appendChild(notice);
     box.appendChild(button(locale() === 'ko' ? '기록 다시 저장하기' : 'Retry saving', async function () { if (await save()) originalOpen(); }));
   }
@@ -93,7 +93,7 @@
     var report = window.getLearnerReviewSnapshot && window.getLearnerReviewSnapshot();
     var recap = window.DayOConversationRecap.saved(Object.assign({ booking_id: bookingId() }, report));
     if (!recap || !recap.supported || !recap.questions.length) return;
-    questions = recap.questions;
+    reviewing = false; questions = recap.questions;
     var fingerprint = window.DayOLearnerExpressions.contentFingerprint(bookingId(), recap.source.learner_version || recap.source.fingerprint, questions);
     state = recoverState(recap, fingerprint);
     if (state.ended || state.currentIndex >= questions.length) { if (typeof originalOpen === 'function') originalOpen(); return; }
@@ -109,6 +109,20 @@
       if (!remaining) finish('timeout');
     }
     stopTimer(); clock(); if (!state.ended) timer = setInterval(clock, 1000);
+  };
+  window.reviewRecapQuestions = function () {
+    if(blocked())return;
+    var report=window.getLearnerReviewSnapshot && window.getLearnerReviewSnapshot();
+    var recap=window.DayOConversationRecap.saved(Object.assign({booking_id:bookingId()},report));
+    if(!recap || !recap.questions.length)return;
+    reviewing=true;stopTimer();
+    var record=document.getElementById('quiz-modal');if(record){record.hidden=true;record.classList.remove('is-open');record.style.removeProperty('display');if(window.DayOScrollLock)window.DayOScrollLock.unlock();}
+    var title=document.getElementById('memory-game-title');if(title)title.textContent=labels().mini;
+    var badge=document.getElementById('game-round-badge');if(badge)badge.textContent=(recap.progress.completed||0)+'/'+recap.questions.length+' '+labels().completed;
+    var hint=document.getElementById('game-kr-meaning');if(hint)hint.textContent='';
+    var pool=document.getElementById('word-pool-container');if(!pool)return;pool.innerHTML='';
+    recap.questions.forEach(function(q){var p=document.createElement('p');p.className='recap-answer';p.textContent=q.word+' · '+(q.type==='synonym'?(locale()==='ko'?'유사어':'Synonym'):(locale()==='ko'?'반의어':'Antonym'))+' · '+q.answer;pool.appendChild(p);});
+    modal(true);
   };
   async function openRecap() {
     if (blocked()) { if (typeof originalOpen === 'function') originalOpen(); return; }
@@ -136,6 +150,11 @@
   // cannot replace the canonical source. Reconstruction is no longer rendered.
   window.startMemoryGame = openRecap;
   window.startMultiMemoryGame = openRecap;
-  window.skipToRecordCard = function () { return finish('skip'); };
-  document.addEventListener('click', function (event) { if (event.target.closest && event.target.closest('[data-recap-start]')) window.startRecapQuestions(); });
+  window.skipToRecordCard = function () { if(reviewing){reviewing=false;modal(false);if(typeof originalOpen==='function')originalOpen();return;}return finish('skip'); };
+  document.addEventListener('click', function (event) {
+    if(!event.target.closest)return;
+    if(event.target.closest('[data-recap-start]'))window.startRecapQuestions();
+    if(event.target.closest('[data-recap-review]'))window.reviewRecapQuestions();
+    if(event.target.closest('[data-recap-home]')){var done=document.getElementById('quiz-done-btn');if(done)done.click();else window.location.href='mypage.html';}
+  });
 })();
