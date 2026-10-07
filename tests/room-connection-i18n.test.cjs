@@ -97,7 +97,7 @@ async function main() {
       await page.addScriptTag({content:harness});
       await page.evaluate(({role,lang})=>{
         currentRole=role;document.body.setAttribute('data-dayo-role',role);
-        document.body.classList.toggle('partner-mode',role==='partner');
+        document.body.classList.toggle('theme-partner',role==='partner');
         DayOI18n.setLang(lang,false);showRemotePending(waitingDetail());
         setConnectionCopy(document.getElementById('remoteConnectionTitle'),'room.connection.delayedTitle');
         setConnectionCopy(remoteConnectionDetail,'room.connection.delayedBody');
@@ -106,6 +106,10 @@ async function main() {
       },{role,lang});
       const bounds=await page.locator('#remoteConnectionState').boundingBox();
       assert.ok(bounds && bounds.x>=0 && bounds.x+bounds.width<=width+1,'status fits '+width);
+      if (width === 390) {
+        const pip = await page.locator('#selfPip').boundingBox();
+        assert.ok(pip && bounds.y + bounds.height <= pip.y, 'status stays above camera preview');
+      }
       const button=await page.locator('#remoteReconnectButton').boundingBox();
       assert.ok(button && button.x>=bounds.x && button.x+button.width<=bounds.x+bounds.width+1,'button fits');
       assert.equal(await page.locator('#remoteConnectionState').evaluate(el=>el.scrollWidth<=el.clientWidth),true,'text fits');
