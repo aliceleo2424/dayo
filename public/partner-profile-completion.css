@@ -9,3 +9,16 @@
  .pcp-form p{margin-block:8px;line-height:1.5}
  .pcp-actions{padding:10px 0;gap:7px}.pcp-status:empty{min-height:0;margin:0}
 }
+
+/* Conversation editing lives inside the single details dialog. */
+.partner-conversation-profile .pcv-chips{display:flex;flex-wrap:wrap;gap:7px;min-width:0}
+.partner-conversation-profile .pcv-chip{display:flex;align-items:center;gap:7px;max-width:100%;box-sizing:border-box;min-height:44px;padding:8px 11px;border:1px solid #C9D7E3;border-radius:12px;cursor:pointer;font-size:.9rem;line-height:1.4}
+.partner-conversation-profile .pcv-chip input{width:17px;height:17px;flex:0 0 auto;margin:0;accent-color:#466A8A}
+.partner-conversation-profile .pcv-chip span{min-width:0;overflow-wrap:anywhere}
+.partner-conversation-profile .pcv-chip:has(input:checked){background:#EAF0F5;border-color:#466A8A;color:#365773}
+.partner-conversation-profile .pcv-chip:has(input:disabled){opacity:.55;cursor:default}
+.partner-conversation-profile .pcv-styles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.pcp-form .partner-conversation-profile fieldset{border:0;margin:16px 0;padding:0}
+.pcp-form .partner-conversation-profile legend{font-size:.94rem;margin-bottom:8px}
+.pcp-form .pcv-count{color:#466A8A;font-size:.85rem}
+@media(max-width:520px){.partner-conversation-profile .pcv-styles{grid-template-columns:1fr}.pcp-actions{flex-direction:row}.pcp-actions button{width:auto;flex:1;padding-inline:10px}}

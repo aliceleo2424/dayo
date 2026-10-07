@@ -239,19 +239,17 @@ async function candidateCaching(){
  assert.equal(current[0].id,partner);checks++;
 }
 async function partnerUI(){
- let stored=plain(prefs),writes=0,authListener;
- const dom=new JSDOM('<html lang="ko"><body><div id="partner-dashboard-section"><div class="profile-card"></div></div></body></html>',{url:'https://dayotalk.com/partner',runScripts:'outside-only'}),w=dom.window;
- w.__dayoPartnerAuthUser={id:partner};w.__dayoPartnerProfileGate={role:'partner'};
- w.supabaseClient={auth:{getSession:async()=>({data:{session:{user:{id:partner}}}}),onAuthStateChange:fn=>{authListener=fn;}},from:name=>{assert.equal(name,'partner_profile_details');return {select(fields){assert.equal(fields,'conversation_preferences');return this},eq(k,id){assert.equal(k,'partner_id');assert.equal(id,partner);return this},maybeSingle:async()=>({data:{conversation_preferences:stored}})};},rpc:async(name,args)=>{assert.equal(name,'save_partner_conversation_preferences');stored=plain(args.p_preferences);writes++;return {data:stored};}};
- w.eval(read('public/partner-conversation-profile.js'));w.document.dispatchEvent(new w.Event('DOMContentLoaded'));await new Promise(r=>setTimeout(r,30));
- check(!!w.document.querySelector('.pcv-save'),'production UI mounted without localhost gate');
- check(w.getComputedStyle(w.document.querySelector('.partner-conversation-profile')).gridColumn==='1/-1','new profile spans existing two-column host');
- check(w.getComputedStyle(w.document.querySelector('.pcv-chips')).flexWrap==='wrap','preference chips wrap within profile width');
- check(w.document.querySelector('input[value="music"]').checked,'DB preferences restored');
- const chip=w.document.querySelector('input[value="movies"]');chip.checked=true;chip.dispatchEvent(new w.Event('change'));w.document.querySelector('.pcv-save').click();await new Promise(r=>setTimeout(r,20));check(writes===1&&stored.interests.includes('movies'),'save calls owner RPC');
- authListener('SIGNED_OUT',null);check(!w.document.querySelector('.partner-conversation-profile'),'logout clears Partner draft');
- w.document.dispatchEvent(new w.CustomEvent('dayo:partner-authorized',{detail:{user:{id:partner},profile:{role:'partner'}}}));await new Promise(r=>setTimeout(r,20));check(w.document.querySelector('input[value="movies"]').checked,'relogin/new view reads persistent DB state');
- w.supabaseClient.rpc=async()=>({error:{message:'offline'}});const more=w.document.querySelector('input[value="games"]');more.checked=true;more.dispatchEvent(new w.Event('change'));w.document.querySelector('.pcv-save').click();await new Promise(r=>setTimeout(r,20));check(/다시 시도/.test(w.document.querySelector('.pcv-status').textContent),'save failure reports retry without fake success');
+ let stored=plain(prefs),writes=0,owner=partner;
+ const dom=new JSDOM('<html lang="ko"><body><fieldset id="editor"></fieldset></body></html>',{url:'https://dayotalk.com/partner',runScripts:'outside-only'}),w=dom.window;
+ w.supabaseClient={auth:{getSession:async()=>({data:{session:{user:{id:owner}}}})},from:name=>{assert.equal(name,'partner_profile_details');return {select(fields){assert.equal(fields,'conversation_preferences');return this},eq(k,id){assert.equal(k,'partner_id');assert.equal(id,partner);return this},maybeSingle:async()=>({data:{conversation_preferences:stored}})};},rpc:async(name,args)=>{assert.equal(name,'save_partner_conversation_preferences');stored=plain(args.p_preferences);writes++;return {data:stored};}};
+ w.eval(read('public/partner-conversation-profile.js'));
+ const host=w.document.querySelector('#editor'),editor=w.DayOPartnerConversationProfile.mountEditor(host,stored);
+ check(w.document.querySelector('.pcv-save')===null,'no duplicate standalone save CTA');
+ check(w.document.querySelector('input[value="music"]').checked,'DB preferences prefilled in unified editor');
+ const chip=w.document.querySelector('input[value="movies"]');chip.checked=true;chip.dispatchEvent(new w.Event('change'));await editor.save(partner,()=>true);check(writes===1&&stored.interests.includes('movies'),'unified save calls existing owner RPC');
+ owner=other;await assert.rejects(editor.save(partner,()=>true),/Session changed|세션이 변경/);check(writes===1,'changed owner cannot save another Partner preferences');owner=partner;
+ const fresh=w.document.createElement('fieldset');w.document.body.append(fresh);w.DayOPartnerConversationProfile.mountEditor(fresh,stored);check(fresh.querySelector('input[value="movies"]').checked,'fresh editor uses persistent values');
+ w.supabaseClient.rpc=async()=>({error:{message:'offline'}});await assert.rejects(editor.save(partner,()=>true),/다시 시도/);checks++;
  check(w.localStorage.length===0,'localStorage is not production source of truth');dom.window.close();
 }
 // Reuse the audited production contract in alpha tests without executing old-policy cases.

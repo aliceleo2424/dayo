@@ -38,6 +38,8 @@
   function canonical(value) { var text = String(value || '').trim(); return languages.slice(0,-1).find(function (l) { return l.toLowerCase() === text.toLowerCase(); }) || text; }
   function openForm() {
     if (!currentUser || busy || photoChecking) return;
+    var conversation = window.DayOPartnerConversationProfile;
+    if (!conversation) { if (window.showToast) window.showToast('Profile editor is loading. Please try again.'); return; }
     if (dialog) dialog.remove();
     var editing = !!(details && details.completed_at);
     dialog = document.createElement('dialog'); dialog.className = 'pcp-dialog'; dialog.setAttribute('aria-labelledby','pcp-title');
@@ -49,7 +51,7 @@
       '<h3>Which language(s) could you host DayO sessions in?</h3><p class="pcp-hint">Choose from your native languages and other languages rated Conversational or higher.</p><div class="pcp-choices" id="pcp-session"></div>' +
       '<label class="pcp-field">Korean level<select name="korean_level" required><option value="">Choose your Korean level</option><option value="none">None</option><option value="basic">Basic</option><option value="conversational">Conversational</option><option value="advanced">Advanced</option><option value="native">Native / near-native</option></select></label></fieldset>' +
       '<fieldset><legend>Weekly capacity</legend><label class="pcp-field">About how many DayO sessions would you usually like to host per week?<select name="weekly_session_capacity" aria-describedby="pcp-capacity-hint" required><option value="">Choose your capacity</option><option value="1-2">1–2</option><option value="3-5">3–5</option><option value="6-10">6–10</option><option value="10+">10+</option></select></label><p class="pcp-hint" id="pcp-capacity-hint">This is just a rough estimate — you can change your actual availability anytime.</p></fieldset>' +
-      (editing ? '<fieldset><legend>Conversation interests</legend><p class="pcp-interest-summary"></p><button type="button" class="pcp-secondary pcp-edit-conversation">Edit conversation profile</button><p class="pcp-hint">Choose up to 4 topics you enjoy talking about in your conversation profile.</p></fieldset>' : '') +
+      '<fieldset id="pcp-conversation"></fieldset>' +
       (details && details.partner_guide_acknowledged_at ? '<p class="pcp-guide-complete">✓ Partner Guide completed</p><input type="checkbox" name="guide_acknowledged" hidden disabled checked>' : '<fieldset><legend>Partner Guide</legend><p>Before hosting sessions, please read the DayO Partner Guide.</p><a href="/partner-guide" target="_blank" rel="noopener">View Partner Guide ↗</a><label class="pcp-ack"><input type="checkbox" name="guide_acknowledged" required>I have read the DayO Partner Guide and understand how to create a comfortable conversation.</label></fieldset>') +
       '<p class="pcp-status" role="alert" aria-live="polite"></p><div class="pcp-actions"><button type="button" class="pcp-secondary pcp-cancel">Not now</button><button type="submit" class="pcp-primary">'+(editing ? 'Save changes' : 'Save Partner Profile')+'</button></div></form>';
     document.body.append(dialog);
@@ -73,18 +75,8 @@
       managed.textContent='Location type and visa are managed by DayO. Contact DayO if they need to change.';
       dialog.querySelector('#pcp-location').append(managed);
     }
-    if (editing) {
-      var preferences = saved.conversation_preferences, topics = preferences && preferences.schema_version===1 ? preferences.interests : [];
-      var conversation = window.DayOPartnerConversationProfile;
-      dialog.querySelector('.pcp-interest-summary').textContent=(topics || []).map(function(key){var item=conversation && conversation.catalog.interests.find(function(x){return x[0]===key;});return item ? item[2] : key;}).join(' · ') || 'No topics selected yet.';
-      dialog.querySelector('.pcp-edit-conversation').addEventListener('click',function(){
-        if (busy) return;
-        if (!window.DayOPartnerConversationProfile || !window.DayOPartnerConversationProfile.openEditor()) {
-          form.querySelector('.pcp-status').textContent='Conversation profile is not ready. Close this form and retry in Profile.'; return;
-        }
-        close(); window.DayOPartnerConversationProfile.openEditor();
-      });
-    }
+    var conversationEditor = conversation.mountEditor(dialog.querySelector('#pcp-conversation'),saved.conversation_preferences);
+    var savedDetailsPayload = null;
     function selected(group) {
       return Array.from(form.querySelectorAll('input[name="' + group + '_choice"]:checked')).map(function (input) { return input.value === 'Other' ? canonical(form.elements[group + '_custom'].value) : input.value; }).filter(Boolean);
     }
@@ -129,20 +121,30 @@
       if (saved.visa_type) { delete payload.visa_type; delete payload.location_status; }
       if (!payload.native_languages.length || !payload.session_languages.length) { status.textContent = 'Choose at least one native language and session language.'; return; }
       if (new Set(payload.native_languages.map(function (l) { return l.toLowerCase(); })).size !== payload.native_languages.length || selected('other').some(function (l) { return payload.native_languages.some(function (n) { return n.toLowerCase() === l.toLowerCase(); }); })) { status.textContent = 'Choose each language once, without repeating a native language under other languages.'; return; }
-      var userId = currentUser.id, saveRun = generation, button = form.querySelector('[type="submit"]');
-      busy = true; button.disabled = true; button.textContent = 'Saving…'; status.textContent = '';
+      try { conversationEditor.read(); } catch (_) { status.textContent = 'Check your conversation profile selections. Choose up to 4 interests.'; return; }
+      var userId = currentUser.id, saveRun = generation, button = form.querySelector('[type="submit"]'), stage = 'details';
+      var payloadKey = JSON.stringify(payload);
+      busy = true; form.inert = true; button.disabled = true; button.textContent = 'Saving…'; status.textContent = '';
       try {
         var session = await window.supabaseClient.auth.getSession();
         if (!session.data.session || session.data.session.user.id !== userId) throw new Error('Session changed. Please reopen profile setup.');
-        var result = await window.supabaseClient.rpc('save_partner_profile_completion',{p_details:payload});
-        if (result.error || !complete(result.data)) throw new Error('Could not save your profile. Please try again.');
-        if (saveRun !== generation) return;
-        details = result.data; document.dispatchEvent(new CustomEvent('dayo:partner-detailschanged',{detail:{source:'completion'}})); if (banner) { banner.remove(); banner = null; }
+        if (savedDetailsPayload !== payloadKey) {
+          var result = await window.supabaseClient.rpc('save_partner_profile_completion',{p_details:payload});
+          if (result.error || !complete(result.data)) throw new Error('Could not save your profile details. Please try again.');
+          if (saveRun !== generation) return;
+          details = result.data; savedDetailsPayload = payloadKey;
+          document.dispatchEvent(new CustomEvent('dayo:partner-detailschanged',{detail:{source:'completion'}}));
+          if (banner) { banner.remove(); banner = null; }
+        }
+        stage = 'conversation';
+        var preferences = await conversationEditor.save(userId,function(){return saveRun===generation && currentUser && currentUser.id===userId && form.isConnected;});
+        if (saveRun !== generation || !preferences) return;
+        details.conversation_preferences = preferences;
         form.replaceChildren();
         var title = document.createElement('h3'), text = document.createElement('p'), done = document.createElement('button');
-        title.textContent = editing ? 'Your Partner Profile is updated!' : 'Your Partner Profile is ready!'; title.tabIndex = -1; text.textContent = 'Thanks! You’re all set for DayO conversations.'; done.type = 'button'; done.className = 'pcp-primary'; done.textContent = 'Go to Partner Lounge'; done.addEventListener('click',close); form.append(title,text,done); title.focus();
-      } catch (error) { if (saveRun === generation) status.textContent = error.message; }
-      finally { busy = false; if (button.isConnected) { button.disabled = false; button.textContent = editing ? 'Save changes' : 'Save Partner Profile'; } }
+        title.textContent = editing ? 'Your Partner Profile is updated!' : 'Your Partner Profile is ready!'; title.tabIndex = -1; text.textContent = 'Thanks! You’re all set for DayO conversations.'; done.type = 'button'; done.className = 'pcp-primary'; done.textContent = 'Go to Partner Lounge'; done.addEventListener('click',close); form.append(title,text,done); form.inert = false; title.focus();
+      } catch (error) { if (saveRun === generation) status.textContent = stage === 'conversation' ? 'Profile details saved. Conversation profile was not saved. '+error.message : error.message; }
+      finally { busy = false; form.inert = false; if (button.isConnected) { button.disabled = false; button.textContent = editing ? 'Save changes' : 'Save Partner Profile'; } }
     });
     refreshLanguages(); dialog.showModal();
   }

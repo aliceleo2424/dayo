@@ -70,7 +70,7 @@
     var calendar=schedule.querySelector('#gcalSync'),calendarCard;
     if(calendar){calendarCard=document.createElement('section');calendarCard.className='card pd-calendar-card';calendarCard.hidden=true;calendarCard.setAttribute('aria-label','Google Calendar');calendarCard.append(calendar);}
     function card(en,ko,copyEn,copyKo){var n=document.createElement('article');n.className='dashboard-card';n.append(label('h2',en,ko),label('p',copyEn,copyKo));return n;}
-    var profileInfo=card('Your partner details','파트너 상세 정보','Loading profile details…','프로필 정보를 불러오는 중…');
+    var profileInfo=card('Partner Profile','파트너 프로필','Loading profile details…','프로필 정보를 불러오는 중…');
     var actionCenter=card('Action Center','Action Center','Checking your next step…','다음 할 일을 확인하는 중…');actionCenter.id='pd-action-center';
     var actionCopy=actionCenter.querySelector('p'),checklist=document.createElement('ul');checklist.className='pd-checklist';actionCenter.append(checklist);
     var availabilityAlert=card('No availability open','열린 예약 시간이 없어요','Open dates to receive bookings.','예약을 받을 날짜를 열어 주세요.');availabilityAlert.id='pd-availability-alert';availabilityAlert.hidden=true;
@@ -155,7 +155,7 @@
     earnings.append(action('Pay & Bonus Rules →','수익 · 보너스 규정 →',function(){select('pd-resources');rules.scrollIntoView({block:'start'});}));
     rules.append(label('h3','Availability & session updates','예약 가능 시간 · 세션 처리'),label('p','Open and update actual booking slots in Sessions. Review cancellation and technical issue outcomes there. Conversation entry follows the existing booking window.','Sessions에서 실제 예약 슬롯을 열고 수정할 수 있습니다. 취소·기술 문제 처리 결과도 같은 탭에서 확인하세요. 대화 입장은 기존 예약 기준을 따릅니다.'),action('Open Sessions →','Sessions 보기 →',function(){select('pd-sessions');}));
     var editDetails=document.createElement('button');editDetails.type='button';editDetails.className='dashboard-primary-link';editDetails.textContent=document.documentElement.lang==='ko'?'상세 정보 수정':'Edit details';editDetails.hidden=true;
-    editDetails.addEventListener('click',function(){document.dispatchEvent(new CustomEvent('dayo:edit-partner-details'));});profileInfo.append(editDetails);
+    editDetails.addEventListener('click',function(){document.dispatchEvent(new CustomEvent('dayo:edit-partner-details'));});profileInfo.querySelector('h2').after(editDetails);
     var completion=card('Partner profile','파트너 프로필','Loading completion status…','완료 상태를 불러오는 중…');
     var completionValue=completion.querySelector('p');profilePanel.querySelectorAll('.pd-column')[1].prepend(completion);
     var bonusSummary=card('Bonuses','보너스','Referral rewards and partner benefits','추천 리워드와 파트너 혜택');
@@ -223,13 +223,18 @@
         var value=profileInfo.querySelector('p');value.textContent='';
         if(!row){value.textContent=ko?'프로필 보완에서 언어와 위치 정보를 입력해 주세요.':'Complete your profile to add languages and location.';return;}
         var fields=[['Native languages','모국어',(row.native_languages||[]).join(', ')],['Other languages','기타 언어',(row.other_languages||[]).map(function(x){return x.language+' · '+x.level;}).join(', ')],['Session languages','진행 언어',(row.session_languages||[]).join(', ')],['Location','위치',[row.country,row.city].filter(Boolean).join(' · ')||row.location_status],['Visa','비자',row.visa_type==='not_applicable_overseas'?'N/A · overseas':row.visa_type],['Korean level','한국어 수준',row.korean_level],['Rough weekly capacity','주당 예상 세션',row.weekly_session_capacity]];
-        var topics=row.conversation_preferences && row.conversation_preferences.schema_version===1 ? row.conversation_preferences.interests : [];
-        var conversation=window.DayOPartnerConversationProfile;
-        if (topics && topics.length && conversation) {
-          var chips=document.createElement('span');chips.className='pd-interest-chips';chips.setAttribute('aria-label',ko?'관심사':'Interests');
-          topics.forEach(function(key){var item=conversation.catalog.interests.find(function(x){return x[0]===key;});var chip=document.createElement('span');chip.className='pd-interest-chip';chip.textContent=item?item[ko?1:2]:key;chips.append(chip);});value.append(chips);
-        }
         fields.forEach(function(f){if(f[2]){var line=document.createElement('span');line.className='dashboard-detail-line';line.textContent=(ko?f[1]:f[0])+': '+f[2];value.append(line);}});
+        var preferences=row.conversation_preferences,conversation=window.DayOPartnerConversationProfile;
+        if(preferences && preferences.schema_version===1 && conversation){
+          [['comfortable_purposes','Goals','대화 목적'],['interests','Interests','관심사'],['conversation_styles','Conversation styles','대화 스타일']].forEach(function(group){
+            var chips=document.createElement('span');chips.className='pd-interest-chips';chips.setAttribute('aria-label',ko?group[2]:group[1]);
+            var title=document.createElement('strong');title.textContent=(ko?group[2]:group[1])+': ';chips.append(title);
+            (preferences[group[0]]||[]).forEach(function(key){var item=conversation.catalog[group[0]].find(function(x){return x[0]===key;});var chip=document.createElement('span');chip.className='pd-interest-chip';chip.textContent=item?item[ko?1:2]:key;chips.append(chip);});
+            if(!(preferences[group[0]]||[]).length)chips.append(document.createTextNode(ko?'선택 없음':'None selected'));
+            value.append(chips);
+          });
+        }
+
       }catch(_){if(run!==detailsRun)return;if(actionProfile===undefined){pastPartnerId=null;++pastRun;pastRows=[];paintPast();}actionFailed=true;paintAction();profileInfo.querySelector('p').textContent=ko?'프로필 정보를 불러오지 못했어요. 라운지 기능은 계속 이용할 수 있습니다.':'Profile details could not load. Lounge features remain available.';completionValue.textContent=ko?'프로필에서 상태 확인':'Check status in Profile';}
     }
     document.addEventListener('dayo:partner-detailschanged',showProfileDetails);
