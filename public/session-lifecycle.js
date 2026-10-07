@@ -5,6 +5,7 @@
   var submittingSafety = false;
   var submittingTechIssue = false;
   var sessionEndedEventLogged = false;
+  var sessionEndedEventPromise = null;
   var reviewSource = null;
   var partnerLetterSnapshot = null;
   var reviewSourcePromise = null;
@@ -48,12 +49,23 @@
   }
 
   function logSessionEndedEvent(reason) {
+    if (sessionEndedEventPromise) return sessionEndedEventPromise;
     var access = window.DayORoomAccess;
     if (sessionEndedEventLogged || !access || !access.allowed || access.adminTest || access.observer ||
         (access.role !== 'user' && access.role !== 'partner') || !access.bookingId ||
-        typeof window.logSessionEvent !== 'function') return;
-    sessionEndedEventLogged = true;
-    window.logSessionEvent('session_ended', { reason: reason });
+        typeof window.logSessionEvent !== 'function') return Promise.resolve({ ok: true, skipped: true });
+    var participantId = access.role === 'user' ? access.learnerId : access.partnerId;
+    sessionEndedEventPromise = (async function () {
+      try {
+        var state = await window.DayORoomSessionState.load(client(), access.bookingId, participantId);
+        if (state.session_ended) { sessionEndedEventLogged = true; return { ok: true, skipped: true }; }
+        // Same participant + booking uses one request ID, including separate-tab retries.
+        var result = await window.logSessionEvent('session_ended', { reason: reason }, state.end_event_id);
+        sessionEndedEventLogged = !!(result && result.ok);
+        return result || { ok: false };
+      } catch (_) { return { ok: false }; }
+    })();
+    return sessionEndedEventPromise.finally(function () { if (!sessionEndedEventLogged) sessionEndedEventPromise = null; });
   }
 
   async function authUser() {
@@ -136,6 +148,17 @@
         window.__dayoLearnerReportPayload = previous || null;
         partnerLetterSnapshot = previous || null;
         var row = result && result.data;
+        if (result.error) throw result.error;
+        var saved = window.DayOConversationRecap.saved(previous);
+        if (window.DayORoomAccess.recapOnly && saved) {
+          if (row && (row.booking_id !== ctx.bookingId || row.participant_id !== ctx.learnerId || row.participant_role !== 'learner')) throw new Error('log-identity');
+          window.__dayoReviewReportSaved = true;
+          window.__dayoQuizProgress = saved.progress;
+          window.__dayoQuizScore = previous.quiz_score;
+          reviewSource = Object.freeze({ bookingId: ctx.bookingId, sourceId: saved.source.learner_log_id,
+            version: saved.source.learner_version, rows: Object.freeze(row ? window.DayOConversationRecap.rows(row, ctx.bookingId, ctx.learnerId, 'learner') : []), recap: saved, available: true });
+          return reviewSource;
+        }
         if (result.error || !row || !row.id || row.booking_id !== ctx.bookingId ||
             row.participant_id !== ctx.learnerId || row.participant_role !== 'learner' ||
             !Array.isArray(row.transcript) || context().bookingId !== ctx.bookingId) return canonicalReviewSource();
@@ -171,7 +194,7 @@
         return reviewSource;
       } catch (error) {
         console.warn('[DayO Review] canonical source unavailable');
-        return canonicalReviewSource();
+        return Object.assign({}, canonicalReviewSource(), { error: 'load_failed' });
       }
     })();
     reviewSourcePromise = pending;
@@ -447,7 +470,7 @@
     window.__dayoSessionEndReason = reason;
     if (window.DayOSessionTimer && window.DayOSessionTimer.stopForConversationEnd) window.DayOSessionTimer.stopForConversationEnd();
     if (window.closeEarlyExitModal) window.closeEarlyExitModal();
-    logSessionEndedEvent(reason);
+    var endEvent = logSessionEndedEvent(reason);
     try { sessionStorage.setItem('dayo_conversation_ended:' + ctx.bookingId + ':' + (partner ? 'partner' : 'user'), '1'); } catch (_) {}
     conversationEndPromise = (async function () {
       // Existing bounded final STT flush; no new segmentation/pause algorithm.
@@ -467,6 +490,8 @@
         try { if (!await persistReviewReport()) toast(endCopy('recapSaveRetry')); }
         catch (_) { toast(endCopy('recapSaveRetry')); }
       }
+      try { if (!(await reviewDeadline(endEvent)).ok) toast(endCopy('endStateSaveRetry')); }
+      catch (_) { toast(endCopy('endStateSaveRetry')); }
       // Preserve existing settlement contracts. Recovery never calls this path.
       if (!partner && ctx.bookingId && client()) {
         try {

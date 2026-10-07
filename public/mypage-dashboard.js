@@ -137,15 +137,39 @@
     return i18n('mypage.session.mdTime', { m: m, d: d, time: timeLabel });
   }
 
-  function minutesUntil(iso) {
-    if (!iso) return null;
-    var parsed = new Date(iso);
-    if (isNaN(parsed.getTime())) {
-      parsed = new Date(String(iso).replace(' ', 'T'));
-    }
-    if (isNaN(parsed.getTime())) return null;
-    return Math.round((parsed.getTime() - Date.now()) / 60000);
+  var nextConversationTiming = null;
+  var nextConversationTimer = null;
+
+  function nextConversationState(session, now) {
+    var raw = String(session && session.scheduledAt || '').trim();
+    // Same zoned booking timestamp and -5/+30 minute boundaries as room access.
+    var start = /(?:Z|[+-]\d{2}:\d{2})$/i.test(raw) ? Date.parse(raw) : NaN;
+    if (!Number.isFinite(start) || !session || !session.bookingId) return { key: 'badge', allowed: false };
+    if (session.internalTest) return { key: 'ready', allowed: true };
+    var remaining = start - now;
+    if (remaining > 5 * 60000) return { key: 'countdown', minutes: Math.ceil(remaining / 60000), allowed: false,
+      delay: remaining - (Math.ceil(remaining / 60000) - 1) * 60000 };
+    if (remaining > 0) return { key: 'ready', allowed: true, delay: remaining };
+    if (now < start + 30 * 60000) return { key: 'live', allowed: true, delay: start + 30 * 60000 - now };
+    return { key: 'expired', allowed: false };
   }
+
+  function refreshNextConversationTiming() {
+    if (nextConversationTimer) clearTimeout(nextConversationTimer);
+    nextConversationTimer = null;
+    var state = nextConversationState(nextConversationTiming, Date.now());
+    var badge = document.getElementById('urgent-session-badge');
+    var button = document.querySelector('#urgent-session-banner button[onclick="enterStudio()"]');
+    if (badge) badge.textContent = i18n('mypage.urgent.' + state.key, { minutes: state.minutes });
+    if (button) button.disabled = !state.allowed;
+    if (state.delay && !document.hidden) {
+      nextConversationTimer = setTimeout(refreshNextConversationTiming, Math.max(1, Math.min(60000, state.delay)));
+    }
+    return state;
+  }
+
+  document.addEventListener('visibilitychange', refreshNextConversationTiming);
+  window.addEventListener('focus', refreshNextConversationTiming);
 
   function readLocalNextSession() {
     try {
@@ -263,6 +287,8 @@
     var futureBookings = [];
     var confirmedBookingId = '';
     syncRoomEntryLinks('');
+    nextConversationTiming = null;
+    refreshNextConversationTiming();
     var supabase = window.supabaseClient;
     var userId = (window._dayoAuthUser && window._dayoAuthUser.id) || '';
     if (supabase) {
@@ -314,6 +340,8 @@
               scheduledAt: upcoming.scheduled_at,
               bookingId: upcoming.id,
               language: upcoming.language,
+              internalTest: userId === '131a43d2-8a90-41bb-a17a-2217b1ef283f' &&
+                (upcoming.partner_user_id === '1bc0eab5-9399-4da8-a90c-145ab0c4409d' || upcoming.partner_id === '1bc0eab5-9399-4da8-a90c-145ab0c4409d'),
               purposes: session && session.purposes
             };
           }
@@ -340,11 +368,8 @@
       ? formatSessionWhen(session.date + 'T' + session.timeLabel + ':00')
       : formatSessionWhen(session.scheduledAt);
     if (titleEl) titleEl.textContent = i18n('mypage.urgent.titleFormat', { name: session.partnerName, when: when });
-    var mins = minutesUntil(session.scheduledAt);
-    if (badgeEl) {
-      if (mins != null && mins <= 30 && mins >= 0) badgeEl.textContent = i18n('mypage.urgent.soon');
-      else badgeEl.textContent = i18n('mypage.urgent.badge');
-    }
+    nextConversationTiming = { bookingId: confirmedBookingId, scheduledAt: session.scheduledAt, internalTest: session.internalTest === true };
+    refreshNextConversationTiming();
     if (metaEl) {
       var purpose = purposeLabel(session.purposes);
       metaEl.textContent = (purpose ? i18n('mypage.urgent.purposePrefix', { purpose: purpose }) : '') + i18n('mypage.urgent.meta');
@@ -548,6 +573,7 @@
   }
 
   window.enterStudio = function () {
+    if (window.__dayoUpcomingBookingId && nextConversationTiming && !refreshNextConversationTiming().allowed) return;
     var bookingId = window.__dayoUpcomingBookingId || '';
     if (bookingId) {
       window.location.href = roomUrl(bookingId);

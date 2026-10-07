@@ -7,6 +7,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-env.js"></script>
   <script src="supabase-client.js?v=20260921-session-persistence"></script>
+  <script src="room-session-state.js"></script>
   <script src="partner-reward.js?v=20260928-reward-reliability"></script>
   <link rel="stylesheet" href="partner-pre-session.css?v=20261007">
   <script src="partner-pre-session.js?v=20261007"></script>
@@ -87,9 +88,11 @@
             return;
           }
           var message = document.getElementById('room-access-message');
-          if (message) message.textContent = state.message;
+          if (message) message.textContent = state.messageKey && window.DayOI18n ? window.DayOI18n.t(state.messageKey, state.copyLang) : state.message;
           var title = document.getElementById('room-access-title');
-          if (title) title.textContent = state.title;
+          if (title) title.textContent = state.titleKey && window.DayOI18n ? window.DayOI18n.t(state.titleKey, state.copyLang) : state.title;
+          var link = document.getElementById('room-access-link');
+          if (link && state.link) { link.href = state.link; link.textContent = window.DayOI18n ? window.DayOI18n.t(state.linkKey, state.copyLang) : state.linkLabel; }
         };
         if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', render, { once: true });
         else render();
@@ -135,11 +138,18 @@
           if (!booking || (!observerRequested && !isParticipant)) {
             return showAccess({ allowed: false, title: '이 대화에 참여할 수 없어요.', message: '본인이 예약하거나 배정받은 대화인지 확인해 주세요.' });
           }
-          var endedHere = false;
-          try { endedHere = sessionStorage.getItem('dayo_conversation_ended:' + booking.id + ':' + (booking.learner_id === user.id ? 'user' : 'partner')) === '1'; } catch (_) {}
-          if (booking.learner_id === user.id && ['confirmed', 'completed'].includes(booking.status) && (endedHere || booking.status === 'completed')) {
-            window.location.replace('session-recap.html?bookingId=' + encodeURIComponent(booking.id));
-            return showAccess({ allowed: false, title: '대화 기록을 불러오고 있어요.', message: '' });
+          // A persisted participant end event closes the room independently of settlement.
+          if (!observerRequested && isParticipant) {
+            var endState = await window.DayORoomSessionState.load(db, booking.id, user.id);
+            if (endState.session_ended && ['confirmed', 'completed'].includes(booking.status)) {
+              if (booking.learner_id === user.id) {
+                window.location.replace('session-recap.html?bookingId=' + encodeURIComponent(booking.id));
+                return showAccess({ allowed: false, title: '대화 기록을 불러오고 있어요.', message: '' });
+              }
+              return showAccess({ allowed: false, sessionEnded: true, titleKey: 'room.endedTitle', messageKey: 'room.partnerEndedBody',
+                copyLang: 'EN', title: 'This conversation has ended.', message: 'Your saved conversation is preserved. Return to Partner Lounge to review the session.',
+                link: 'partner.html#pd-sessions', linkKey: 'room.backToPartnerLounge', linkLabel: 'Back to Partner Lounge' });
+            }
           }
           if (booking.status !== 'confirmed') {
             var ended = ['completed', 'cancelled', 'tech_issue', 'safety_reported'].includes(booking.status);
@@ -3539,7 +3549,7 @@
 </head>
 <body class="is-room theme-learner">
   <div id="room-access-screen" role="status" aria-live="polite">
-    <div class="room-access-box"><h1 id="room-access-title">대화방 입장 확인 중</h1><p id="room-access-message">로그인과 예약 정보를 확인하고 있어요.</p><a href="index.html">메인으로 돌아가기</a></div>
+    <div class="room-access-box"><h1 id="room-access-title">대화방 입장 확인 중</h1><p id="room-access-message">로그인과 예약 정보를 확인하고 있어요.</p><a id="room-access-link" href="index.html">메인으로 돌아가기</a></div>
   </div>
   <section class="device-preflight" id="devicePreflight" role="dialog" aria-modal="true" aria-labelledby="devicePreflightTitle" hidden>
     <div class="device-preflight__card">

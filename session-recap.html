@@ -11,7 +11,7 @@ button,a{font:inherit}button{min-height:44px}a{color:#5F7D63}#quiz-content-box:e
 #word-pool-container{display:grid;gap:10px}.recap-option,.recap-primary{white-space:normal;overflow-wrap:anywhere}
 .recap-primary{display:inline-block;text-decoration:none}#recovery-status{line-height:1.6}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-env.js"></script><script src="supabase-client.js"></script><script src="i18n.js"></script><script src="learner-expressions.js"></script><script src="conversation-recap.js"></script><script src="partner-report-contract.js"></script><script src="user-conversation-report.js"></script><link rel="stylesheet" href="user-conversation-report.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-env.js"></script><script src="supabase-client.js"></script><script src="i18n.js"></script><script src="room-session-state.js"></script><script src="learner-expressions.js"></script><script src="conversation-recap.js"></script><script src="partner-report-contract.js"></script><script src="user-conversation-report.js"></script><link rel="stylesheet" href="user-conversation-report.css">
 </head><body><main><header><strong>DayO</strong><a href="mypage.html" data-i18n="nav.mypage">마이페이지</a></header>
 <p id="recovery-status" role="status"></p><button id="recovery-retry" hidden type="button" data-i18n="room.recapRecoveryRetry">다시 시도</button>
 <section id="quiz-modal"><div id="quiz-content-box"></div></section></main>
@@ -42,19 +42,28 @@ window.showToast=function(message){document.getElementById('recovery-status').te
       retry.hidden=true;status.textContent=DayOI18n.t('room.recapRecoveryLoading');
       try{
         var id=new URLSearchParams(location.search).get('bookingId');
-        if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id||''))throw Error('identity');
-        var db=window.supabaseClient,auth=await db.auth.getUser(),user=auth.data&&auth.data.user;
+        if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id||''))throw Error('access_denied');
+        var db=window.supabaseClient;
+        if(!db||!db.auth)throw Error('load_failed');
+        var auth=await db.auth.getUser(),user=auth.data&&auth.data.user;
+        if(auth.error&&(auth.error.status>=500||auth.error.name==='AuthRetryableFetchError'))throw Error('load_failed');
         if(auth.error||!user)throw Error('auth');
         var result=await db.from('bookings').select('id,learner_id,partner_user_id,status,language,ended_at')
           .eq('id',id).eq('learner_id',user.id).maybeSingle(),b=result.data;
-        var endedHere=sessionStorage.getItem('dayo_conversation_ended:'+id+':user')==='1';
-        if(result.error||!b||b.id!==id||b.learner_id!==user.id||!['confirmed','completed'].includes(b.status)||
-           (b.status==='confirmed'&&!b.ended_at&&!endedHere))throw Error('not-ended-own-booking');
+        if(result.error)throw Error('load_failed');
+        if(!b||b.id!==id||b.learner_id!==user.id)throw Error('access_denied');
+        if(!['confirmed','completed'].includes(b.status))throw Error('recap_pending');
+        var endState=await DayORoomSessionState.load(db,id,user.id);
+        if(!endState.session_ended)throw Error('recap_pending');
         window.DayORoomAccess={allowed:true,recapOnly:true,role:'user',bookingId:id,learnerId:user.id,partnerId:b.partner_user_id,language:b.language};
         var source=await prepareSessionReviewSource();
-        if(!source.available)throw Error('record-unavailable');
+        if(!source.available)throw Error(source.error||'recap_pending');
         status.textContent='';await openQuizModalImmediately();
-      }catch(_){status.textContent=DayOI18n.t('room.recapRecoveryError');retry.hidden=false;}
+      }catch(error){
+        window.DayORoomAccess={allowed:false};
+        var messages={auth:'recapRecoveryAuth',access_denied:'recapRecoveryDenied',recap_pending:'recapRecoveryPending'};
+        status.textContent=DayOI18n.t('room.'+(messages[error.code||error.message]||'recapRecoveryError'));retry.hidden=false;
+      }
     })();
     try{await pending;}finally{pending=null;}
   }

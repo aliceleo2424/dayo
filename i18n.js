@@ -641,6 +641,10 @@
     'mypage.urgent.soon': {
       KO: '🚨 30분 후 시작', EN: '🚨 Starts in 30 min', ZH: '🚨 30分钟后开始', JA: '🚨 30分後に開始', FR: '🚨 Débute dans 30 min', ES: '🚨 Empieza en 30 min'
     },
+    'mypage.urgent.countdown': { KO: '{minutes}분 후 시작', EN: 'Starts in {minutes} min' },
+    'mypage.urgent.ready': { KO: '입장 가능', EN: 'Ready to enter' },
+    'mypage.urgent.live': { KO: '대화 시작 · 입장 가능', EN: 'Conversation started · You can enter' },
+    'mypage.urgent.expired': { KO: '입장 시간 종료', EN: 'Entry window closed' },
     'mypage.urgent.empty': {
       KO: '예약된 대화가 없습니다', EN: 'No booked conversation yet', ZH: '暂无预约对话', JA: '予約された会話はありません', FR: 'Aucune conversation réservée', ES: 'Aún no hay conversación reservada'
     },
@@ -1334,7 +1338,14 @@
     'room.recapSaveRetry': { KO: "리캡을 저장하지 못했어요. 리캡 화면에서 다시 저장해 주세요.", EN: "Your recap could not be saved. Please retry from the recap screen." },
     'room.recapRecoveryRetry': { KO: "다시 시도", EN: "Try again" },
     'room.recapRecoveryLoading': { KO: "저장된 대화 기록을 불러오고 있어요.", EN: "Loading your saved conversation record." },
-    'room.recapRecoveryError': { KO: "저장된 대화 기록을 불러오지 못했어요. 본인 계정으로 로그인한 뒤 다시 시도해 주세요.", EN: "Your saved conversation record could not be loaded. Sign in to your account and try again." },
+    'room.recapRecoveryError': { KO: "저장된 대화 기록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.", EN: "Your saved conversation record could not be loaded. Please try again." },
+    'room.recapRecoveryAuth': { KO: "로그인한 뒤 대화 기록을 확인해 주세요.", EN: "Please sign in to view your recap." },
+    'room.recapRecoveryDenied': { KO: "이 대화 기록에 접근할 권한이 없어요.", EN: "You do not have access to this conversation record." },
+    'room.recapRecoveryPending': { KO: "아직 대화 기록을 준비하지 못했어요. 잠시 후 다시 확인해 주세요.", EN: "Your recap is not ready yet. Please check again shortly." },
+    'room.endStateSaveRetry': { KO: "종료 기록을 저장하지 못했어요. 잠시 후 저장 상태를 다시 확인해 주세요.", EN: "The end record could not be saved. Please check the saved record again shortly." },
+    'room.endedTitle': { KO: "이미 종료된 대화예요.", EN: "This conversation has ended." },
+    'room.partnerEndedBody': { KO: "지금까지의 대화 기록은 보존돼요. 파트너 라운지에서 세션을 확인해 주세요.", EN: "Your saved conversation is preserved. Return to Partner Lounge to review the session." },
+    'room.backToPartnerLounge': { KO: "파트너 라운지로 돌아가기", EN: "Back to Partner Lounge" },
     'room.recapBack': { KO: "대화 기록으로 돌아가기", EN: "Back to recap" },
     'room.endTechIssue': { KO: '🛠️ 음성/연결 오류로 종료', EN: '🛠️ Audio or connection issue' },
     'room.end': {
