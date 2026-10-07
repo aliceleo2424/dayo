@@ -1,5 +1,6 @@
 /* Exact-booking source, approved minimal Gemini draft selection, no report writes. */
 const recap=require('../../public/conversation-recap.js');
+const {createHash}=require('node:crypto');
 const VERSION='dayo_partner_letter_v1';
 const provider=require('./partner-letter-gemini.js');
 function compose(value,topic,model){return provider.guard(value,topic).map(b=>({...b,source_utterance_id:topic.id,generator:VERSION,model}));}
@@ -16,8 +17,13 @@ async function handle({input,read,user,env,signal,draftGenerator,fetchImpl}){
  if(!key)return {status:503,body:{error:'source_unavailable'}};
  if(input.action==='partner_illustration_status'){
   if(Object.keys(input).some(k=>!['booking_id','action'].includes(k)))return {status:400,body:{error:'invalid_request'}};
-  const reports=await read('/rest/v1/session_reports?'+new URLSearchParams({booking_id:'eq.'+b.id,select:'booking_id',limit:'1'}),{apikey:key,Authorization:'Bearer '+key});
-  return {status:200,body:{exists:Array.isArray(reports)&&reports.some(r=>r.booking_id===b.id)}};
+  const reports=await read('/rest/v1/session_reports?'+new URLSearchParams({booking_id:'eq.'+b.id,select:'booking_id,partner_user_id,partner_comment',limit:'1'}),{apikey:key,Authorization:'Bearer '+key});
+  if(!Array.isArray(reports))throw new Error('status_check_failed');
+  const report=reports.find(r=>r.booking_id===b.id);
+  const letter=report?String(report.partner_comment||'').replace(/\r\n?/g,'\n').trim():'';
+  // A mismatched/unattributed existing Letter is not evidence of no Letter.
+  if(report&&((report.partner_user_id&&report.partner_user_id!==user.id)||(letter&&report.partner_user_id!==user.id)))throw new Error('status_check_failed');
+  return {status:200,body:{exists:!!report,letter_sent:!!letter,letter_digest:letter?createHash('sha256').update(letter,'utf8').digest('hex'):null}};
  }
  const logs=await read('/rest/v1/session_logs?'+new URLSearchParams({booking_id:'eq.'+b.id,participant_id:'eq.'+b.learner_id,participant_role:'eq.learner',select:'id,booking_id,participant_id,participant_role,transcript',limit:'1'}),{apikey:key,Authorization:'Bearer '+key});
  const log=Array.isArray(logs)&&logs[0],rows=recap.rows(log,b.id,b.learner_id,'learner');

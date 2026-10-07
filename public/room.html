@@ -7010,7 +7010,7 @@
       if (window.DayOLive && typeof window.DayOLive.getTranscript === 'function') {
         try { rows = window.DayOLive.getTranscript() || rows; } catch (_) {}
       }
-      return {language:access.language || '', transcript:rows,talkCard:window.DayOCurrentTalkCard || null,topic:typeof access.topic === 'string' ? access.topic : ''};
+      return {bookingId:access.bookingId || '', language:access.language || '', transcript:rows,talkCard:window.DayOCurrentTalkCard || null,topic:typeof access.topic === 'string' ? access.topic : ''};
     }
 
     window.openPartnerReportPopup = function () {
@@ -7021,141 +7021,222 @@
       }
       if (typeof window.hydratePopupTranscriptList === 'function') window.hydratePopupTranscriptList();
       if (window.DayOPartnerReport) window.DayOPartnerReport.open(partnerReportContext());
+      window.restorePartnerLetterState();
     };
 
-    function setPartnerReportSubmitStatus(message, success) {
+    function setPartnerReportSubmitStatus(code, success) {
+      // Only local, stable categories enter the DOM, never RPC message text.
       var status = document.getElementById('partner-report-submit-status');
+      partnerLetterStatus = {code:code, success:success};
       if (!status) return;
-      var text = String(message || '');
-      if (/^room\.partnerReport\./.test(text)) {
-        var translated = window.DayOI18n && typeof window.DayOI18n.t === 'function' ? window.DayOI18n.t(text) : '';
-        var fallback = {
-          'room.partnerReport.success': 'Report submitted successfully!',
-          'room.partnerReport.saving': 'Submitting your report…',
-          'room.partnerReport.preview': 'This is a preview. No report was submitted.',
-          'room.partnerReport.invalidBooking': 'This booking could not be verified. Please reopen the conversation.',
-          'room.partnerReport.rewardUnavailable': 'Reward processing could not be completed. Please try again.'
-        };
-        text = translated && !/^room\.partnerReport\./.test(translated) ? translated : (fallback[text] || 'Please try submitting your report again.');
-      }
-      status.textContent = text;
-      status.hidden = !message;
+      status.textContent = partnerLetterCopy(code);
+      status.hidden = !code;
       status.style.color = success ? '#166534' : '#BE123C';
     }
-
+    window.partnerLetterLocale = function () {
+      var current = window.DayOI18n && window.DayOI18n.getLang ? window.DayOI18n.getLang() : 'EN';
+      var saved = '';
+      try { saved = localStorage.getItem('dayo_lang') || ''; } catch (_) {}
+      // Ignore i18n's implicit KO default, honor persisted manual choice.
+      return String(current).toUpperCase() === 'KO' && String(saved).toUpperCase() === 'KO' ? 'KO' : 'EN';
+    };
+    var partnerLetterMessages = {
+      checking:['Checking your Letter…','레터 저장 상태를 확인하고 있어요…'],
+      sending:['Sending your Letter…','레터를 보내고 있어요…'],
+      preview:['This is a preview. No Letter was sent.','미리보기입니다. 레터를 보내지 않았어요.'],
+      invalid_booking:['This booking could not be verified. Please reopen the conversation.','예약을 확인하지 못했습니다. 대화를 다시 열어 주세요.'],
+      validation:['Write a Letter of 1–1,000 characters before sending.','1~1,000자 이내로 레터를 작성해 주세요.'],
+      letter_save_failed:['We couldn’t send your Letter. Your draft is still here. Please try again.','레터를 보내지 못했습니다. 작성한 내용은 그대로 있어요. 다시 시도해 주세요.'],
+      status_check_failed:['We couldn’t confirm the status. Your draft is still here. Check status before trying to send again.','저장 상태를 확인하지 못했습니다. 작성한 내용은 그대로 있어요. 다시 보내기 전에 상태를 확인해 주세요.'],
+      not_sent:['No saved Letter was found for this session. You can try sending your draft again.','이 세션에 저장된 레터가 없습니다. 작성한 레터를 다시 보내실 수 있어요.'],
+      sent_checking:['Letter sent. Checking session status…','레터를 보냈어요. 세션 상태를 확인하고 있어요…'],
+      sent:['Letter sent.','레터를 보냈어요.'],
+      already_sent:['Your Letter has already been sent.','이미 레터를 보냈어요.'],
+      different_saved:['This session already has a saved Letter. Nothing was overwritten.','이 세션에는 이미 저장된 레터가 있습니다. 기존 내용을 덮어쓰지 않았어요.'],
+      finish_failed:['Your Letter was sent. Session completion needs review. You can return to Partner Lounge.','레터를 보냈어요. 세션 완료 상태는 확인이 필요합니다. 파트너 라운지로 돌아가실 수 있어요.'],
+      reward_status_unavailable:['Your Letter was sent, but we couldn’t confirm your earnings yet. You can check them in Partner Lounge.','레터를 보냈어요. 보상 상태는 아직 확인하지 못했습니다. 파트너 라운지에서 확인해 주세요.'],
+      sent_status_unavailable:['Your Letter was sent, but we couldn’t check the latest status. You can return to Partner Lounge.','레터를 보냈어요. 최신 상태는 확인하지 못했습니다. 파트너 라운지로 돌아가실 수 있어요.'],
+      send_button:['Send letter and finish','메시지 보내고 마치기'],
+      sent_button:['Letter sent','레터 전송 완료'],
+      check_button:['Check status','상태 다시 확인'],
+      lounge:['Return to Partner Lounge','파트너 라운지로 돌아가기']
+    };
+    var partnerLetterStatus = null;
+    var partnerReportSubmitPending = false;
+    var partnerReportSubmitComplete = false;
+    var partnerLetterStatusUnknown = false;
+    function partnerLetterCopy(code) {
+      var pair = partnerLetterMessages[code] || partnerLetterMessages.status_check_failed;
+      return pair[window.partnerLetterLocale() === 'KO' ? 1 : 0];
+    }
     function setPartnerReportSubmitBusy(busy) {
       var button = document.getElementById('btn-final-partner-submit');
       if (!button) return;
       button.disabled = !!busy;
+      button.setAttribute('aria-busy', String(partnerReportSubmitPending));
       button.style.opacity = busy ? '0.65' : '1';
+      button.textContent = partnerLetterCopy(partnerReportSubmitComplete ? 'sent_button' : partnerLetterStatusUnknown ? 'check_button' : 'send_button');
     }
-
-    var partnerReportSubmitPending = false;
-    var partnerReportSubmitComplete = false;
-
+    function finishPartnerLetterUI(code, navigate) {
+      partnerReportSubmitComplete = true;
+      partnerLetterStatusUnknown = false;
+      setPartnerReportSubmitBusy(true);
+      setPartnerReportSubmitStatus(code, true);
+      var status = document.getElementById('partner-report-submit-status');
+      var link = document.getElementById('partner-letter-lounge-link');
+      if (!link && status) {
+        link = document.createElement('a'); link.id = 'partner-letter-lounge-link';
+        link.href = 'partner.html#pd-sessions'; status.insertAdjacentElement('afterend', link);
+      }
+      if (link) link.textContent = partnerLetterCopy('lounge');
+      try { localStorage.setItem('dayo_current_mode', 'PARTNER'); } catch (_) {}
+      if (navigate !== false) setTimeout(function () { window.location.href = 'partner.html#pd-sessions'; }, 1200);
+    }
+    function letterStatusUnknown() {
+      partnerLetterStatusUnknown = true;
+      setPartnerReportSubmitStatus('status_check_failed', false);
+    }
+    async function partnerLetterIdentity() {
+      var access = window.DayORoomAccess || {};
+      var auth = window.supabaseClient && await window.supabaseClient.auth.getUser();
+      var user = auth && auth.data && auth.data.user;
+      if (!user || !access.allowed || access.role !== 'partner' || user.id !== access.partnerId ||
+          !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(access.bookingId || '')) throw new Error('invalid_booking');
+      return {bookingId:access.bookingId, partnerId:user.id};
+    }
+    async function existingPartnerLetter(bookingId) {
+      // Own exact Partner API; report SELECT remains denied by existing RLS.
+      var session = await window.supabaseClient.auth.getSession();
+      var token = session && session.data && session.data.session && session.data.session.access_token;
+      if (!token) throw new Error('status_check_failed');
+      var controller = new AbortController(), timeout;
+      try {
+        timeout = setTimeout(function () { controller.abort(); }, 10000);
+        var response = await fetch('/api/conversation-recap', {
+          method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer ' + token},
+          body:JSON.stringify({action:'partner_illustration_status', booking_id:bookingId}), signal:controller.signal
+        });
+        if (!response.ok) throw new Error('status_check_failed');
+        var state = await response.json();
+        if (!state || typeof state.letter_sent !== 'boolean' ||
+            (state.letter_sent && !/^[a-f0-9]{64}$/.test(state.letter_digest || ''))) throw new Error('status_check_failed');
+        return state;
+      } finally { clearTimeout(timeout); }
+    }
+    async function partnerLetterDigest(text) {
+      var bytes = new TextEncoder().encode(String(text || '').replace(/\r\n?/g, '\n').trim());
+      var digest = await window.crypto.subtle.digest('SHA-256', bytes);
+      return Array.from(new Uint8Array(digest)).map(function (b) { return b.toString(16).padStart(2, '0'); }).join('');
+    }
+    window.restorePartnerLetterState = async function () {
+      if (partnerReportSubmitPending || partnerReportSubmitComplete || (window.DayORoomAccess || {}).adminTest) return;
+      partnerReportSubmitPending = true; setPartnerReportSubmitBusy(true);
+      setPartnerReportSubmitStatus('checking', true);
+      try {
+        var identity = await partnerLetterIdentity();
+        var state = await existingPartnerLetter(identity.bookingId);
+        if (state.letter_sent) finishPartnerLetterUI('already_sent', false);
+        else { partnerLetterStatusUnknown = false; setPartnerReportSubmitStatus('not_sent', true); }
+      } catch (error) {
+        if (error && error.message === 'invalid_booking') setPartnerReportSubmitStatus('invalid_booking', false);
+        else letterStatusUnknown();
+      } finally {
+        partnerReportSubmitPending = false; setPartnerReportSubmitBusy(partnerReportSubmitComplete);
+      }
+    };
+    document.addEventListener('dayo:langchange', function () {
+      if (partnerLetterStatus) setPartnerReportSubmitStatus(partnerLetterStatus.code, partnerLetterStatus.success);
+      setPartnerReportSubmitBusy(partnerReportSubmitPending || partnerReportSubmitComplete);
+      var link = document.getElementById('partner-letter-lounge-link');
+      if (link) link.textContent = partnerLetterCopy('lounge');
+    });
+    async function checkPartnerFinishAfterLetter(bookingId, partnerId) {
+      // Settlement RPC and TEST suppression unchanged; never display message.
+      var timeout;
+      try {
+        var request = window.DayOPartnerReward
+          ? Promise.resolve().then(function () { return window.DayOPartnerReward.complete(bookingId, partnerId); })
+            .catch(function () { return {success:false, code:'rpc_error'}; })
+          : Promise.resolve({success:false, code:'client_unavailable'});
+        return await Promise.race([request, new Promise(function (resolve) {
+          timeout = setTimeout(function () { resolve({success:false, code:'finish_pending'}); }, 8000);
+        })]);
+      } finally { clearTimeout(timeout); }
+    }
     window.executePartnerPayoutAndExit = async function () {
       if (partnerReportSubmitPending || partnerReportSubmitComplete) return;
+      // Unknown outcome retries a READ, not a WRITE.
+      if (partnerLetterStatusUnknown) { await window.restorePartnerLetterState(); return; }
       if (window.isObserverRoomMode && window.isObserverRoomMode()) return;
-      partnerReportSubmitPending = true;
+      partnerReportSubmitPending = true; setPartnerReportSubmitBusy(true);
       try {
         stopPartnerSentencePolling();
         if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
-          setPartnerReportSubmitBusy(true);
-          setPartnerReportSubmitStatus(t('room.partnerReport.preview'), true);
-          setTimeout(function () { window.location.href = 'index.html?mode=partner'; }, 1200);
-          return;
+          setPartnerReportSubmitStatus('preview', true);
+          setTimeout(function () { window.location.href = 'index.html?mode=partner'; }, 1200); return;
         }
-        window.dayoSessionEnded = true;
-        setPartnerReportSubmitBusy(true);
-        setPartnerReportSubmitStatus(t('room.partnerReport.saving'), true);
-
-        var cardData = window.DayOPartnerReport ? window.DayOPartnerReport.payload() : {
-          sentence: null,
-          keyword: null,
-          illustUrl: null,
-          partnerComment: (document.getElementById('popup-partner-comment') || {}).value || '',
-          stamp: (document.querySelector('input[name="popup_stamp"]:checked') || {}).value || null
-        };
-        cardData.partnerComment = (document.getElementById('popup-partner-comment') || {}).value || cardData.partnerComment || '';
+        var identity = await partnerLetterIdentity();
+        var bookingId = identity.bookingId, partnerId = identity.partnerId;
+        setPartnerReportSubmitStatus('checking', true);
+        var existing = await existingPartnerLetter(bookingId);
+        if (existing.letter_sent) { finishPartnerLetterUI('already_sent'); return; }
+        var cardData = window.DayOPartnerReport ? window.DayOPartnerReport.payload() : {};
+        var field = document.getElementById('popup-partner-comment');
+        cardData.partnerComment = String(field ? field.value : cardData.partnerComment || '').trim();
+        if (!cardData.partnerComment || cardData.partnerComment.length > 1000) {
+          setPartnerReportSubmitStatus('validation', false); return;
+        }
+        var expectedDigest = await partnerLetterDigest(cardData.partnerComment);
         var selectedTreat = document.querySelector('input[name="popup_stamp"]:checked');
         cardData.stamp = selectedTreat && selectedTreat.value ? selectedTreat.value : null;
         cardData.approvedAt = new Date().toISOString();
-
-        var user = null;
-        if (window.supabaseClient) {
-          try {
-            var authRes = await window.supabaseClient.auth.getUser();
-            user = authRes && authRes.data && authRes.data.user;
-          } catch (e) { user = null; }
-        }
-
-        var bookingId = window.DayORoomAccess && window.DayORoomAccess.bookingId || '';
-        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(bookingId)) {
-          setPartnerReportSubmitStatus(t('room.partnerReport.invalidBooking'), false);
-          setPartnerReportSubmitBusy(false);
-          return;
-        }
-
+        window.dayoSessionEnded = true;
+        setPartnerReportSubmitStatus('sending', true);
         if (window.DayOPartnerIllustration) window.DayOPartnerIllustration.reportSubmitting(bookingId, cardData.illustrationToken);
-        var rewardPromise = user && user.id && window.DayOPartnerReward
-          ? Promise.resolve().then(function () { return window.DayOPartnerReward.complete(bookingId, user.id); }).catch(function (error) {
-              return { success: false, code: 'rpc_error', error: error };
-            })
-          : Promise.resolve({ success: false, code: 'invalid_identity' });
-        var transcriptPromise = Promise.resolve().then(persistTranscript).catch(function (error) {
-          return { ok: false, error: error };
-        });
-        var reportPromise = user && typeof window.persistSessionReport === 'function'
-          ? Promise.resolve().then(function () { return window.persistSessionReport(cardData); }).catch(function (error) {
-              return { ok: false, error: error };
-            })
-          : Promise.resolve({ ok: false, skipped: true });
-        var outcomes = await Promise.all([rewardPromise, transcriptPromise, reportPromise]);
-        var rewardResult = outcomes[0] || {};
-        var transcriptSave = outcomes[1] || {};
-        var reportSave = outcomes[2] || {};
-        if (reportSave.ok && window.DayOPartnerIllustration) window.DayOPartnerIllustration.reportSaved(bookingId, cardData.illustrationToken).catch(function () {});
-
-        if (!transcriptSave.ok) {
-          console.error('[DayO Partner] transcript was not saved', transcriptSave.error);
+        var transcriptPromise = Promise.resolve().then(persistTranscript).catch(function () { return {ok:false}; });
+        var reportSave;
+        try { reportSave = typeof window.persistSessionReport === 'function' ? await window.persistSessionReport(cardData) : {ok:false}; }
+        catch (_) { reportSave = {ok:false}; }
+        if (!reportSave || !reportSave.ok) {
+          // Lost acknowledgement can follow a committed save: read back now.
+          var recovered = await existingPartnerLetter(bookingId);
+          if (!recovered.letter_sent) { setPartnerReportSubmitStatus('letter_save_failed', false); return; }
+          if (recovered.letter_digest !== expectedDigest) { finishPartnerLetterUI('different_saved'); return; }
         }
-        if (!reportSave.ok) {
-          console.error('[DayO Partner] report was not saved', reportSave.error);
-        }
-
-        if (rewardResult.success !== true) {
-          var needsReview = rewardResult.needs_review === true || rewardResult.code === 'evidence_insufficient';
-          setPartnerReportSubmitStatus(
-            needsReview ? '세션 확인이 필요합니다.' : (rewardResult.message || t('room.partnerReport.rewardUnavailable')),
-            false
-          );
-          setPartnerReportSubmitBusy(false);
-          return;
-        }
-
-        if (!reportSave.ok) {
-          setPartnerReportSubmitStatus('보상은 정상 처리되었습니다. 리포트 저장을 다시 시도해 주세요.', false);
-          setPartnerReportSubmitBusy(false);
-          return;
-        }
-
-        if (!transcriptSave.ok) {
-          setPartnerReportSubmitStatus('보상과 리포트는 정상 처리되었습니다. 대화 기록 저장을 다시 시도해 주세요.', false);
-          setPartnerReportSubmitBusy(false);
-          return;
-        }
-
-        console.log('✨ 파트너 리포트와 보상 처리 완료');
+        // A server save ACK or exact content read-back is the success boundary.
         partnerReportSubmitComplete = true;
-        setPartnerReportSubmitStatus(t('room.partnerReport.success'), true);
-        try { localStorage.setItem('dayo_current_mode', 'PARTNER'); } catch (e) {}
-        setTimeout(function () { window.location.href = 'partner.html'; }, 1200);
+        setPartnerReportSubmitStatus('sent_checking', true);
+        if (window.DayOPartnerIllustration) {
+          try { Promise.resolve(window.DayOPartnerIllustration.reportSaved(bookingId, cardData.illustrationToken)).catch(function () {}); } catch (_) {}
+        }
+        var finish = await checkPartnerFinishAfterLetter(bookingId, partnerId);
+        var code = 'sent';
+        if (!finish || finish.success !== true) {
+          try {
+            var confirmed = await existingPartnerLetter(bookingId);
+            if (!confirmed.letter_sent) {
+              partnerReportSubmitComplete = false;
+              setPartnerReportSubmitStatus('letter_save_failed', false); return;
+            }
+            if (confirmed.letter_digest !== expectedDigest) code = 'different_saved';
+            else code = finish && (finish.needs_review === true || finish.code === 'evidence_insufficient') ? 'finish_failed' : 'reward_status_unavailable';
+          } catch (_) {
+            // Successful save ACK remains known even if a later read fails.
+            code = 'sent_status_unavailable';
+          }
+        }
+        transcriptPromise.then(function (result) {
+          if (!result || !result.ok) console.warn('[DayO Partner] transcript save could not be confirmed');
+        });
+        finishPartnerLetterUI(code);
+      } catch (error) {
+        if (partnerReportSubmitComplete) finishPartnerLetterUI('sent_status_unavailable');
+        else if (error && error.message === 'invalid_booking') setPartnerReportSubmitStatus('invalid_booking', false);
+        else letterStatusUnknown();
       } finally {
-        partnerReportSubmitPending = false;
-        setPartnerReportSubmitBusy(partnerReportSubmitComplete);
+        partnerReportSubmitPending = false; setPartnerReportSubmitBusy(partnerReportSubmitComplete);
       }
     };
-
     window.submitPartnerReportAndLeave = window.executePartnerPayoutAndExit;
 
     window.handleHeaderExitClick = function () {

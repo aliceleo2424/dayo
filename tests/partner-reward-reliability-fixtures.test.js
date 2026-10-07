@@ -62,11 +62,11 @@ const pointUpdate = migration.indexOf('update public.profiles', ledgerInsert);
 const bookingUpdate = migration.indexOf('update public.bookings', pointUpdate);
 assert.ok(ledgerInsert > 0 && pointUpdate > ledgerInsert && bookingUpdate > pointUpdate, 'new reward transaction order must remain ledger -> points -> booking');
 
-// Frontend contract: reward, transcript, and report start independently.
-assert.match(roomSource, /Promise\.all\(\[rewardPromise, transcriptPromise, reportPromise\]\)/);
-assert.match(roomSource, /보상은 정상 처리되었습니다\. 리포트 저장을 다시 시도해 주세요\./);
-assert.match(roomSource, /세션 확인이 필요합니다\./);
-
+// ADD2: Letter saved is the success boundary, before the existing finish RPC.
+assert.doesNotMatch(roomSource, /Promise\.all\(\[rewardPromise, transcriptPromise, reportPromise\]\)/);
+assert.match(roomSource, /partnerReportSubmitComplete = true;[\s\S]*setPartnerReportSubmitStatus\('sent_checking'[\s\S]*await checkPartnerFinishAfterLetter/);
+assert.match(roomSource, /Your Letter was sent\. Session completion needs review/);
+assert.doesNotMatch(roomSource.slice(roomSource.indexOf('window.executePartnerPayoutAndExit ='),roomSource.indexOf('window.submitPartnerReportAndLeave =')), /rewardResult\.message/);
 const now = Date.parse('2026-09-28T12:00:00Z');
 const eligibleBooking = {
   id: '11111111-1111-4111-8111-111111111111',
