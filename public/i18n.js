@@ -54,6 +54,17 @@
   }
 
   var DICT = {
+    'partner.prep.loading': { KO: '이 예약의 대화 정보를 불러오는 중입니다.', EN: 'Loading conversation preferences for this booking…' },
+    'partner.prep.unavailable': { KO: '이 예약의 대화 정보를 불러오지 못했습니다. 준비하기를 다시 열어 주세요.', EN: 'Could not load preferences for this booking. Please reopen Prepare.' },
+    'partner.prep.requests': { KO: '요청사항', EN: 'Special requests' },
+    'partner.prep.title': { KO: "대화 정보", EN: "Conversation Brief" },
+    'partner.prep.empty': { KO: "이 예약에 저장된 대화 선호 정보가 없습니다.", EN: "No conversation preferences are available for this booking." },
+    'partner.prep.snapshot': { KO: "이번 대화에서 유저가 원하는 내용을 확인해 주세요.", EN: "Here’s what your user would like for this conversation." },
+    'partner.prep.chatStyle': { KO: "유저가 선호하는 대화 스타일", EN: "Your user’s preferred conversation style" },
+    'partner.prep.koreanHelp': { KO: "한국어 도움", EN: "Korean help" },
+    'partner.prep.helpAny': { KO: "상관없어요", EN: "Any" },
+    'partner.prep.helpRequired': { KO: "필요해요", EN: "Needed" },
+    'partner.prep.encourage': { KO: "칭찬과 응원을 많이 해주는 파트너", EN: "Plenty of praise and encouragement" },
     'room.connection.connecting': { KO: "상대방과 연결 중이에요", EN: "Connecting you" },
     'room.connection.wait': { KO: "잠시만 기다려 주세요.", EN: "Please wait a moment." },
     'room.connection.waitingOther': { KO: "상대방의 입장을 기다리고 있어요.", EN: "Waiting for the other person to join." },

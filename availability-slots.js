@@ -296,38 +296,42 @@
 
   function partnerBriefLabels(data) {
     var display = String((data && data.learner_display_name) || '').trim();
-    if (!display || /[@+]/.test(display) || /^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(display)) display = t('partner.upcoming.userFallback');
+    if (!display || /[@+]/.test(display) || /(?:\d[\s().-]*){7,}/.test(display) || /^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(display)) display = t('partner.upcoming.userFallback');
     var languageId = data && data.language;
     var language = bookingOptionLabel('book.lang.', languageId, ['en', 'es', 'fr', 'ko', 'ja', 'zh', 'vi', 'de', 'it', 'ru']);
     var brief = data && data.conversation_brief;
     if (!brief || typeof brief !== 'object' || Array.isArray(brief)) brief = {};
-    var purposes = Array.isArray(brief.purposes) ? brief.purposes.map(function (id) {
+    var purposeLabels = Array.isArray(brief.purposes) ? brief.purposes.map(function (id) {
       if (id === 'work_school') return !window.DayOI18n || window.DayOI18n.getLang() === 'KO' ? '일 · 학교 생활' : 'Work & school life';
       return bookingOptionLabel('book.purpose.', id, ['travel', 'opic', 'abroad', 'casual']);
-    }).filter(Boolean).join(' · ') : '';
-    var interests = Array.isArray(brief.interests) ? brief.interests.map(function (id) {
+    }).filter(Boolean) : [];
+    var purposes = purposeLabels.join(' · ');
+    var interestLabels = Array.isArray(brief.interests) ? brief.interests.map(function (id) {
       return bookingOptionLabel('book.interest.', id, [
         'drama', 'movies', 'youtube', 'music', 'travel', 'food_cafe',
         'exercise', 'games', 'fashion_beauty', 'pets', 'books_webtoon', 'work_school'
       ]);
-    }).filter(Boolean).join(' · ') : '';
-    return { display: display, language: language, languageId: languageId, values: {
+    }).filter(Boolean) : [];
+    var interests = interestLabels.join(' · ');
+    var values = {
       purposes: purposes,
       interests: interests,
       chat_style: brief.schema_version === 1
-        ? (brief.conversation_style === 'encourage' ? (!window.DayOI18n || window.DayOI18n.getLang() === 'KO' ? '칭찬 · 응원' : 'Praise & encouragement')
+        ? (brief.conversation_style === 'encourage' ? t('partner.prep.encourage')
           : bookingOptionLabel('book.style.', brief.conversation_style, ['slow', 'fast', 'correct']))
         : bookingOptionLabel('chatPrefs.style.', brief.chat_style, ['casual', 'correct', 'interview']),
       chat_request: bookingOptionLabel('chatPrefs.request.', brief.chat_request, ['praise', 'gentle', 'encourage']),
       partner_preference: brief.schema_version === 1 ? '' : bookingOptionLabel('book.style.', brief.partner_preference, ['slow', 'fast', 'correct', 'korean']),
       korean_support_preference: brief.schema_version === 1
-        ? (brief.korean_support_preference === 'required' ? (!window.DayOI18n || window.DayOI18n.getLang() === 'KO' ? '한국어 도움이 필요해요' : 'Korean support preferred')
-          : brief.korean_support_preference === 'any' ? (!window.DayOI18n || window.DayOI18n.getLang() === 'KO' ? '상관없어요' : 'Either is fine') : '')
+        ? (brief.korean_support_preference === 'required' ? t('partner.prep.helpRequired')
+          : brief.korean_support_preference === 'any' ? t('partner.prep.helpAny') : '')
         : ''
-    } };
+    };
+    return { display: display, language: language, languageId: languageId, values: values,
+      chips: { purposes: purposeLabels, interests: interestLabels, chat_style: values.chat_style ? [values.chat_style] : [] } };
   }
 
-  function renderBriefRows(briefView, values) {
+  function renderBriefRows(briefView, values, chips) {
     if (!briefView) return;
     var visible = false;
     Object.keys(values).forEach(function (key) {
@@ -344,8 +348,16 @@
       }
       if (!row) return;
       row.hidden = !values[key];
+      var content = row.querySelector('dd');
+      content.replaceChildren();
       if (values[key]) {
-        row.querySelector('dd').textContent = values[key];
+        if (chips && chips[key]) {
+          chips[key].forEach(function (text) {
+            var chip = document.createElement('span');
+            chip.className = 'booking-prep-chip'; chip.textContent = text;
+            content.appendChild(chip);
+          });
+        } else content.textContent = values[key];
         visible = true;
       }
     });
@@ -378,13 +390,19 @@
     var name = document.getElementById('booking-prep-name');
     var briefView = document.getElementById('booking-prep-brief');
     var briefData = null;
+    var briefState = 'loading';
     function renderPrep() {
       document.getElementById('booking-prep-time').textContent = formatUpcomingDay(start, false) + ' ' + pad(start.getHours()) + ':' + pad(start.getMinutes());
       var labels = partnerBriefLabels(briefData || { language: booking.language });
       name.textContent = t(labels.language ? 'partner.upcoming.conversationFormat' : 'partner.upcoming.conversationNoLanguage', {
         name: labels.display, language: labels.language
       });
-      renderBriefRows(briefView, labels.values);
+      renderBriefRows(briefView, labels.values, labels.chips);
+      var emptyBrief = document.getElementById('booking-prep-empty');
+      if (emptyBrief) {
+        emptyBrief.hidden = briefView && !briefView.hidden;
+        emptyBrief.textContent = t('partner.prep.' + briefState);
+      }
       updateEntry();
     }
     function updateEntry() {
@@ -414,11 +432,16 @@
     var close = modal.querySelector('[data-close-modal]');
     if (close) close.focus();
     getPartnerBookingBrief(supabase, booking.id).then(function (data) {
-      if (request !== partnerPrepRequest || !data || typeof data !== 'object') return;
-      briefData = data;
+      if (request !== partnerPrepRequest) return;
+      briefData = data && typeof data === 'object' && !Array.isArray(data) ? data : null;
+      briefState = 'empty';
       renderPrep();
     }).catch(function (error) {
-      if (request === partnerPrepRequest) console.warn('[DayO] booking brief unavailable', error);
+      if (request === partnerPrepRequest) {
+        briefState = 'unavailable';
+        renderPrep();
+        console.warn('[DayO] booking brief unavailable', error);
+      }
     });
   }
 

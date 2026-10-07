@@ -2087,7 +2087,7 @@
   <style>#photoBtn{color:#5F7D63;background:#F8F0E3}#photoBtn:hover{background:#E8EEDF}</style>
   <script src="profile-image-resolver.js"></script>
   <script src="profile-images.js"></script>
-  <link rel="stylesheet" href="partner-dashboard.css">
+  <link rel="stylesheet" href="partner-dashboard.css?v=20261007-prepare">
   <script src="dashboard-tabs.js" defer></script>
   <script src="partner-dashboard.js" defer></script>
   <link rel="stylesheet" href="availability-calendar.css">
@@ -2378,22 +2378,25 @@
   </main>
 
   <div class="modal-overlay" id="bookingPrepModal">
-    <div class="modal booking-prep-modal" role="dialog" aria-modal="true" aria-labelledby="booking-prep-name">
+    <div class="modal booking-prep-modal" role="dialog" aria-modal="true" aria-labelledby="bookingPrepTitle">
       <div class="modal-head">
-        <h2 class="card-title booking-prep-name" id="booking-prep-name"></h2>
+        <h2 class="card-title" id="bookingPrepTitle" data-i18n="partner.prep.title">Conversation Brief</h2>
         <button class="modal-close" type="button" data-close-modal aria-label="닫기" data-i18n="partner.photoModal.closeAria" data-i18n-attr="aria-label">✕</button>
       </div>
       <p class="booking-prep-time" id="booking-prep-time"></p>
+      <p class="booking-prep-name" id="booking-prep-name"></p>
+      <p id="booking-prep-empty" class="booking-prep-note" data-i18n="partner.prep.empty">No conversation preferences are available for this booking.</p>
       <div class="partner-upcoming-hero-brief" id="booking-prep-brief" hidden>
+        <p class="booking-prep-note" data-i18n="partner.prep.snapshot">Here’s what your user would like for this conversation.</p>
         <dl class="partner-upcoming-hero-details">
           <div class="partner-upcoming-hero-detail" data-brief-field="purposes" hidden><dt data-i18n="partner.upcoming.purposes">대화 목적</dt><dd></dd></div>
           <div class="partner-upcoming-hero-detail" data-brief-field="interests" hidden><dt data-i18n="partner.upcoming.interests">최근 관심사</dt><dd></dd></div>
-          <div class="partner-upcoming-hero-detail" data-brief-field="chat_style" hidden><dt data-i18n="partner.upcoming.chatStyle">대화 스타일</dt><dd></dd></div>
-          <div class="partner-upcoming-hero-detail" data-brief-field="chat_request" hidden><dt data-i18n="partner.upcoming.chatRequest">요청사항</dt><dd></dd></div>
+          <div class="partner-upcoming-hero-detail" data-brief-field="chat_style" hidden><dt data-i18n="partner.prep.chatStyle">유저가 선호하는 대화 스타일</dt><dd></dd></div>
+          <div class="partner-upcoming-hero-detail" data-brief-field="chat_request" hidden><dt data-i18n="partner.prep.requests">요청사항</dt><dd></dd></div>
+          <div class="partner-upcoming-hero-detail" data-brief-field="korean_support_preference" hidden><dt data-i18n="partner.prep.koreanHelp">Korean help</dt><dd></dd></div>
           <div class="partner-upcoming-hero-detail" data-brief-field="partner_preference" hidden><dt data-i18n="partner.upcoming.partnerPreference">파트너 조건</dt><dd></dd></div>
         </dl>
       </div>
-      <p class="booking-prep-info" data-i18n="partner.upcoming.enterEarly">Entry opens 5 minutes before start</p>
       <button class="partner-upcoming-hero-action booking-prep-action" id="booking-prep-enter" type="button" disabled>5분 전부터 입장 가능</button>
     </div>
   </div>
@@ -3087,7 +3090,7 @@
       ]);
     };
   </script>
-  <script src="i18n.js?v=20260914-recruit"></script>
+  <script src="i18n.js?v=20261007-prepare"></script>
   <script>
     (function lockPartnerRecruitCopy() {
       var COPY = {
@@ -3153,7 +3156,7 @@
   <script src="materials.js"></script>
   <script src="supabase-env.js"></script>
   <script src="availability-calendar.js"></script>
-  <script src="availability-slots.js"></script>
+  <script src="availability-slots.js?v=20261007-prepare"></script>
   <script src="partner-monthly-availability.js" defer></script>
   <script type="module" src="profile-store.js?v=20260916-auth-strict"></script>
   <script>

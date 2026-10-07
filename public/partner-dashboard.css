@@ -308,3 +308,18 @@ body.theme-partner,body.partner-page-body,body.partner-page,body.is-partner-loun
 .partner-booking-cancel{min-height:44px;padding:9px 14px;border-radius:9px;font-family:inherit;font-size:12px;font-weight:700;line-height:1.4;white-space:nowrap;box-sizing:border-box;cursor:pointer}
 .partner-booking-cancel:focus-visible{outline:2px solid var(--partner-dark,#466A8A);outline-offset:3px}
 .partner-booking-cancel:disabled{opacity:.65;cursor:not-allowed}
+
+/* Prepare actions share one fixed column, independent of optional card content. */
+.partner-upcoming-side{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:44px 44px;align-content:start;align-self:start;gap:8px;width:128px}
+.partner-upcoming-side .partner-upcoming-prepare,.partner-upcoming-side .partner-booking-cancel{width:100%;height:44px;min-height:44px;margin:0;box-sizing:border-box}
+#partner-dashboard-section .dashboard-next .partner-upcoming-side{align-self:start;width:128px}
+#partner-dashboard-section .dashboard-next .partner-upcoming-main{align-items:start}
+.booking-prep-modal .partner-upcoming-hero-detail{grid-template-columns:1fr;gap:6px;margin-bottom:12px}
+.booking-prep-modal .partner-upcoming-hero-detail dd{display:flex;flex-wrap:wrap;gap:6px;overflow-wrap:anywhere}
+.booking-prep-chip{display:inline-block;padding:5px 9px;border:1px solid var(--partner-border,#DADDD5);border-radius:999px;background:var(--partner-soft,#F2F5EF);font-size:12px;line-height:1.5;max-width:100%;box-sizing:border-box}
+.booking-prep-note{font-size:12px;line-height:1.5;color:var(--muted);margin:0 0 16px}
+
+.partner-upcoming-all-list .partner-upcoming-row{grid-template-columns:minmax(0,1fr) 128px;align-items:start}
+.partner-upcoming-all-list .partner-upcoming-kind,.partner-upcoming-all-list .partner-upcoming-summary{display:none}
+.partner-upcoming-all-list .partner-upcoming-main{grid-column:1;grid-row:1;display:flex;flex-direction:column;align-items:flex-start;gap:4px}
+.partner-upcoming-all-list .partner-upcoming-side{grid-column:2;grid-row:1}
