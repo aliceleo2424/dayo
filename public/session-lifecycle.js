@@ -9,6 +9,7 @@
   var reviewSourcePromise = null;
   var reviewSourceBookingId = '';
   var reviewSavePromise = null;
+  var conversationEndPromise = null;
   window.__dayoWordHelpHistory = [];
   window.__dayoWordHelpBookingId = '';
 
@@ -113,9 +114,11 @@
     var pending = (async function () {
       try {
         var live = window.DayOLive;
-        if (!live || typeof live.finalizeTranscript !== 'function') return canonicalReviewSource();
-        var saved = await reviewDeadline(live.finalizeTranscript());
-        if (!saved || !saved.ok) return canonicalReviewSource();
+        // Recovery reads canonical DB records; it never opens media or settles a booking.
+        if (!window.DayORoomAccess.recapOnly) {
+          if (!live || typeof live.finalizeTranscript !== 'function') return canonicalReviewSource();
+          await reviewDeadline(live.finalizeTranscript());
+        }
         var user = await authUser();
         var db = client();
         if (!db || !user || user.id !== ctx.learnerId) return canonicalReviewSource();
@@ -123,6 +126,12 @@
           .select('id, booking_id, participant_id, participant_role, transcript')
           .eq('booking_id', ctx.bookingId).eq('participant_id', ctx.learnerId)
           .eq('participant_role', 'learner').maybeSingle());
+        var reportResult = await reviewDeadline(db.from('session_reports').select('*')
+          .eq('booking_id', ctx.bookingId).eq('learner_id', ctx.learnerId).maybeSingle());
+        if (reportResult.error) throw reportResult.error;
+        var previous = reportResult.data;
+        if (previous && (previous.booking_id !== ctx.bookingId || previous.learner_id !== ctx.learnerId)) throw new Error('report-identity');
+        window.__dayoLearnerReportPayload = previous || null;
         var row = result && result.data;
         if (result.error || !row || !row.id || row.booking_id !== ctx.bookingId ||
             row.participant_id !== ctx.learnerId || row.participant_role !== 'learner' ||
@@ -146,6 +155,15 @@
           }
         } catch (_) { /* Canonical learner recap remains available without server enrichment. */ }
         if (context().bookingId !== ctx.bookingId) return canonicalReviewSource();
+        var storedRecap = recapApi.saved(previous);
+        if (storedRecap && storedRecap.source.learner_version === version &&
+            JSON.stringify(storedRecap.questions) === JSON.stringify(recap.questions)) {
+          // A transient enrichment failure cannot erase already-saved Partner aggregates.
+          if (storedRecap.source.partner_available && !recap.source.partner_available) recap = storedRecap;
+          recap = Object.assign({}, recap, { progress: storedRecap.progress });
+          window.__dayoQuizProgress = storedRecap.progress;
+          window.__dayoQuizScore = previous.quiz_score;
+        }
         reviewSource = Object.freeze({ bookingId: ctx.bookingId, sourceId: row.id, version: version, rows: Object.freeze(rows), recap: recap, available: true });
         return reviewSource;
       } catch (error) {
@@ -347,8 +365,8 @@
       summary: window.DayOConversationRecap.labels('ko')[recap.comment] || '',
       key_expressions: recap.expressions.map(function (item) { return item.text; }),
       spoken_sentence: recap.expressions.length ? recap.expressions[0].text : null,
-      quiz_score: window.__dayoQuizScore == null ? null : Number(window.__dayoQuizScore),
-      word_help: wordHelpHistory(),
+      quiz_score: window.__dayoQuizScore == null ? (existing && existing.quiz_score == null ? null : existing && existing.quiz_score) : Number(window.__dayoQuizScore),
+      word_help: wordHelpHistory().length ? wordHelpHistory() : existing && existing.word_help || [],
       feedback: window.DayOConversationRecap.mergeFeedback(existing && existing.feedback || selectedFeedback(), recap)
     };
   }
@@ -383,6 +401,7 @@
     }
     var rating = document.querySelectorAll('.star-btn.active').length;
     if (rating > 0) payload.rating = rating;
+    else if (window.__dayoLearnerReportPayload) payload.rating = window.__dayoLearnerReportPayload.rating;
     var reportPayload = payload;
     var result = await db.rpc('merge_learner_session_report', {
       p_booking_id: ctx.bookingId,
@@ -401,40 +420,76 @@
     return true;
   }
 
+  function endCopy(key) {
+    return window.DayOI18n ? window.DayOI18n.t('room.' + key) : key;
+  }
+
+  function updateEndConfirmation() {
+    var partner = window.isPartnerRoomMode && window.isPartnerRoomMode();
+    var values = { 'early-exit-title': partner ? 'partnerEndTitle' : 'userEndTitle',
+      'early-exit-body': partner ? 'partnerEndBody' : 'userEndBody',
+      'early-exit-continue': 'continueConversation',
+      'early-exit-confirm': partner ? 'partnerEndConfirm' : 'userEndConfirm' };
+    Object.keys(values).forEach(function (id) {
+      var node = document.getElementById(id); if (node) node.textContent = endCopy(values[id]);
+    });
+  }
+
+  function finalizeConversation(reason) {
+    if (isObserver() || window.DayORoomAccess && window.DayORoomAccess.recapOnly) return Promise.resolve(false);
+    if (conversationEndPromise) return conversationEndPromise;
+    var ctx = context(), partner = window.isPartnerRoomMode && window.isPartnerRoomMode();
+    window.dayoSessionEnded = true;
+    window.isEarlyExit = false;
+    window.__dayoSessionEndReason = reason;
+    if (window.DayOSessionTimer && window.DayOSessionTimer.stopForConversationEnd) window.DayOSessionTimer.stopForConversationEnd();
+    if (window.closeEarlyExitModal) window.closeEarlyExitModal();
+    logSessionEndedEvent(reason);
+    try { sessionStorage.setItem('dayo_conversation_ended:' + ctx.bookingId + ':' + (partner ? 'partner' : 'user'), '1'); } catch (_) {}
+    conversationEndPromise = (async function () {
+      // Existing bounded final STT flush; no new segmentation/pause algorithm.
+      var mediaStopped = false;
+      try {
+        var live = window.DayOLive;
+        if (live && live.flushTranscript) {
+          await reviewDeadline(live.flushTranscript());
+          stopMedia(); mediaStopped = true;
+        }
+        var transcript = live && live.finalizeTranscript
+          ? await reviewDeadline(live.finalizeTranscript()) : await persistTranscript();
+        if (!transcript || !transcript.ok) toast(endCopy('transcriptSaveRetry'));
+      } catch (_) { toast(endCopy('transcriptSaveRetry')); }
+      finally { if (!mediaStopped) stopMedia(); }
+      if (!partner && !(window.DayORoomAccess && window.DayORoomAccess.adminTest)) {
+        try { if (!await persistReviewReport()) toast(endCopy('recapSaveRetry')); }
+        catch (_) { toast(endCopy('recapSaveRetry')); }
+      }
+      // Preserve existing settlement contracts. Recovery never calls this path.
+      if (!partner && ctx.bookingId && client()) {
+        try {
+          var result = await reviewDeadline(client().rpc('complete_learner_session', {
+            p_booking_id: ctx.bookingId, p_end_reason: reason
+          }));
+          if (result.error || !result.data || !result.data.success) console.warn('[DayO] completion was not accepted');
+        } catch (_) { console.warn('[DayO] completion request failed'); }
+      }
+      try { sessionStorage.setItem('dayo_conversation_ended:' + ctx.bookingId + ':' + (partner ? 'partner' : 'user'), '1'); } catch (_) {}
+      window.__dayoEndPrepared = true;
+      if (typeof window.handleSessionEndRouting === 'function') await window.handleSessionEndRouting();
+      else if (partner && window.openPartnerReportPopup) window.openPartnerReportPopup();
+      else if (window.openQuizModalImmediately) await window.openQuizModalImmediately();
+      document.dispatchEvent(new CustomEvent('dayo:session-ended', { detail: { reason: reason, finalized: true } }));
+      return true;
+    })();
+    return conversationEndPromise;
+  }
+
   async function personalExit() {
     if (isObserver()) return;
     if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
-      stopMedia();
-      window.location.href = 'index.html';
-      return;
+      stopMedia(); window.location.href = 'index.html'; return;
     }
-    var ctx = context();
-    logSessionEndedEvent('personal');
-    if (typeof window.closeEarlyExitModal === 'function') window.closeEarlyExitModal();
-    window.isEarlyExit = false;
-    persistTranscript().then(function (transcriptResult) {
-      if (!transcriptResult || !transcriptResult.ok) {
-        console.error('[DayO Session] early-exit transcript was not stored remotely', transcriptResult && transcriptResult.error);
-        toast('대화 기록을 서버에 저장하지 못해 이 기기에 임시 보관했어요.');
-      }
-    }).catch(function (error) {
-      console.error('[DayO Session] early-exit transcript save failed', error);
-    });
-    if (ctx.bookingId && client()) {
-      var result = await client().rpc('complete_learner_session', {
-        p_booking_id: ctx.bookingId,
-        p_end_reason: 'personal'
-      });
-      if (result.error) console.warn('[DayO] complete session failed', result.error);
-    }
-    stopMedia();
-    window.dayoSessionEnded = true;
-    window.__dayoSessionEndRouted = true;
-    if (typeof window.openQuizModalImmediately === 'function') {
-      window.openQuizModalImmediately();
-    } else {
-      window.location.href = 'mypage.html';
-    }
+    return finalizeConversation('personal');
   }
 
   async function submitTechIssueReport() {
@@ -558,27 +613,12 @@
     return persistReviewReport();
   };
 
-  document.addEventListener('dayo:session-ended', async function () {
-    logSessionEndedEvent('normal');
-    if ((window.isPartnerRoomMode && window.isPartnerRoomMode()) ||
-        (window.isObserverRoomMode && window.isObserverRoomMode())) return;
-    var ctx = context();
-    // Persist independently of opening or dismissing the recap/rating UI.
-    var recapSave = persistReviewReport().then(function (saved) {
-      if (!saved) toast('리캡을 저장하지 못했어요. 리캡 화면에서 다시 저장해 주세요.');
-      return saved;
-    }).catch(function () {
-      toast('리캡을 저장하지 못했어요. 리캡 화면에서 다시 저장해 주세요.');
-      return false;
-    });
-    if (ctx.bookingId && client()) {
-      var result = await client().rpc('complete_learner_session', {
-        p_booking_id: ctx.bookingId,
-        p_end_reason: 'normal'
-      });
-      if (result.error) console.warn('[DayO] timed completion update failed', result.error);
-    }
-    await recapSave;
+  window.finalizeSessionConversation = finalizeConversation;
+  window.updateEndConfirmation = updateEndConfirmation;
+  document.addEventListener('dayo:langchange', updateEndConfirmation);
+  document.addEventListener('dayo:session-ended', function (event) {
+    if (event && event.detail && event.detail.finalized) return;
+    return finalizeConversation('normal');
   });
 
   window.handleUserQuizComplete = async function () {

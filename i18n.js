@@ -1289,6 +1289,21 @@
     'room.share': {
       KO: '🖥️ 화면 공유', EN: '🖥️ Share Screen', ZH: '🖥️ 共享屏幕', JA: '🖥️ 画面共有', FR: '🖥️ Partager l\'écran', ES: '🖥️ Compartir pantalla'
     },
+    'room.userEndTitle': { KO: "대화를 마칠까요?", EN: "End the conversation?" },
+    'room.userEndBody': { KO: "지금 통화를 끝내도 지금까지의 대화 기록은 남아요.\n종료 후 리캡에서 다시 볼 수 있어요.", EN: "Your conversation record will remain when you end the call.\nYou can revisit it in your recap afterwards." },
+    'room.userEndConfirm': { KO: "통화 종료 후 리캡 보기", EN: "End call and view recap" },
+    'room.partnerEndTitle': { KO: "통화를 마칠까요?", EN: "End the call?" },
+    'room.partnerEndBody': { KO: "지금까지의 대화 기록은 남아요. 통화 종료 후 파트너 레터를 작성할 수 있어요.", EN: "The conversation record will remain. You can write your Partner Letter after ending the call." },
+    'room.partnerEndConfirm': { KO: "통화 종료 후 레터 작성", EN: "End call and write a letter" },
+    'room.continueConversation': { KO: "계속 대화하기", EN: "Keep talking" },
+    'room.autoEndNotice': { KO: "곧 대화가 마무리돼요. 인사를 나누시면 시간이 끝난 뒤 자동으로 다음 화면으로 안내해 드릴게요.", EN: "Your conversation is almost over. Say your goodbyes; we’ll guide you to the next screen automatically when time is up." },
+    'room.transcriptSaveRetry': { KO: "대화 기록을 서버에 저장하지 못했어요. 이 기기의 기록을 유지하고 다시 저장해 주세요.", EN: "Your conversation could not be saved to the server. The record is kept on this device; please retry." },
+    'room.recapSaveRetry': { KO: "리캡을 저장하지 못했어요. 리캡 화면에서 다시 저장해 주세요.", EN: "Your recap could not be saved. Please retry from the recap screen." },
+    'room.recapRecoveryRetry': { KO: "다시 시도", EN: "Try again" },
+    'room.recapRecoveryLoading': { KO: "저장된 대화 기록을 불러오고 있어요.", EN: "Loading your saved conversation record." },
+    'room.recapRecoveryError': { KO: "저장된 대화 기록을 불러오지 못했어요. 본인 계정으로 로그인한 뒤 다시 시도해 주세요.", EN: "Your saved conversation record could not be loaded. Sign in to your account and try again." },
+    'room.recapBack': { KO: "리캡으로 돌아가기", EN: "Back to recap" },
+    'room.endTechIssue': { KO: '🛠️ 음성/연결 오류로 종료', EN: '🛠️ Audio or connection issue' },
     'room.end': {
       KO: '🚪 세션 종료', EN: '🚪 End Session', ZH: '🚪 结束会话', JA: '🚪 セッション終了', FR: '🚪 Terminer', ES: '🚪 Terminar'
     },

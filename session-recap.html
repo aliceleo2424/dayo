@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DayO · Conversation recap</title>
+<link rel="stylesheet" href="conversation-recap.css"><link rel="stylesheet" href="english-typography.css">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#FFFBF4;color:#4B4038;font-family:'Gowun Dodum',sans-serif}
+main{width:min(680px,100%);margin:0 auto;padding:24px 16px 40px}header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+button,a{font:inherit}button{min-height:44px}a{color:#5F7D63}#quiz-content-box:empty{display:none}
+#memory-game-modal{position:fixed;inset:0;z-index:10;align-items:center;justify-content:center;padding:16px;background:rgba(50,43,36,.45)}
+#memory-game-modal[hidden]{display:none!important}.review-panel{width:min(520px,100%);max-height:calc(100dvh - 32px);overflow:auto;padding:20px;border-radius:20px;background:#FFFBF4}
+#word-pool-container{display:grid;gap:10px}.recap-option,.recap-primary{white-space:normal;overflow-wrap:anywhere}
+.recap-primary{display:inline-block;text-decoration:none}#recovery-status{line-height:1.6}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="supabase-env.js"></script><script src="supabase-client.js"></script><script src="i18n.js"></script><script src="learner-expressions.js"></script><script src="conversation-recap.js"></script>
+</head><body><main><header><strong>DayO</strong><a href="mypage.html" data-i18n="nav.mypage">마이페이지</a></header>
+<p id="recovery-status" role="status"></p><button id="recovery-retry" hidden type="button" data-i18n="room.recapRecoveryRetry">다시 시도</button>
+<section id="quiz-modal"><div id="quiz-content-box"></div></section></main>
+<div id="memory-game-modal" hidden><section class="review-panel" role="dialog" aria-modal="true" aria-labelledby="memory-game-title">
+<h3 id="memory-game-title"></h3><p><span id="game-round-badge"></span> <span id="review-quiz-timer" hidden></span></p>
+<p id="game-kr-meaning"></p><div id="word-pool-container"></div><button class="recap-primary" id="quiz-skip-btn" type="button" onclick="skipToRecordCard()" data-i18n="room.recapBack">리캡으로 돌아가기</button>
+</section></div>
+<script>
+window.DayORoomAccess={allowed:false};window.dayoSessionEnded=true;
+window.isPartnerRoomMode=function(){return false;};window.isObserverRoomMode=function(){return false;};
+window.openQuizModalImmediately=function(){
+  document.getElementById('quiz-modal').hidden=false;
+  var report=window.getLearnerReviewSnapshot();
+  var recap=DayOConversationRecap.saved(Object.assign({booking_id:DayORoomAccess.bookingId},report));
+  document.getElementById('quiz-content-box').innerHTML=DayOConversationRecap.render(recap,String(DayOI18n.getLang()).toLowerCase(),{interactive:true,wordHelp:report.word_help});
+};
+window.showToast=function(message){document.getElementById('recovery-status').textContent=message;};
+</script><script src="session-lifecycle.js"></script><script src="memory-game.js"></script>
+<script>
+(function(){
+  var pending=null;
+  async function recover(){
+    if(pending)return pending;
+    pending=(async function(){
+      var status=document.getElementById('recovery-status'),retry=document.getElementById('recovery-retry');
+      retry.hidden=true;status.textContent=DayOI18n.t('room.recapRecoveryLoading');
+      try{
+        var id=new URLSearchParams(location.search).get('bookingId');
+        if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id||''))throw Error('identity');
+        var db=window.supabaseClient,auth=await db.auth.getUser(),user=auth.data&&auth.data.user;
+        if(auth.error||!user)throw Error('auth');
+        var result=await db.from('bookings').select('id,learner_id,partner_user_id,status,language,ended_at')
+          .eq('id',id).eq('learner_id',user.id).maybeSingle(),b=result.data;
+        var endedHere=sessionStorage.getItem('dayo_conversation_ended:'+id+':user')==='1';
+        if(result.error||!b||b.id!==id||b.learner_id!==user.id||!['confirmed','completed'].includes(b.status)||
+           (b.status==='confirmed'&&!b.ended_at&&!endedHere))throw Error('not-ended-own-booking');
+        window.DayORoomAccess={allowed:true,recapOnly:true,role:'user',bookingId:id,learnerId:user.id,partnerId:b.partner_user_id,language:b.language};
+        var source=await prepareSessionReviewSource();
+        if(!source.available)throw Error('record-unavailable');
+        status.textContent='';await openQuizModalImmediately();
+      }catch(_){status.textContent=DayOI18n.t('room.recapRecoveryError');retry.hidden=false;}
+    })();
+    try{await pending;}finally{pending=null;}
+  }
+  document.getElementById('recovery-retry').addEventListener('click',recover);
+  document.addEventListener('dayo:langchange',function(){if(DayORoomAccess.allowed)window.openQuizModalImmediately();});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',recover);else recover();
+})();
+</script></body></html>

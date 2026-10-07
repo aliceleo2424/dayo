@@ -124,6 +124,12 @@
           if (!booking || (!observerRequested && !isParticipant)) {
             return showAccess({ allowed: false, title: '이 대화에 참여할 수 없어요.', message: '본인이 예약하거나 배정받은 대화인지 확인해 주세요.' });
           }
+          var endedHere = false;
+          try { endedHere = sessionStorage.getItem('dayo_conversation_ended:' + booking.id + ':' + (booking.learner_id === user.id ? 'user' : 'partner')) === '1'; } catch (_) {}
+          if (booking.learner_id === user.id && ['confirmed', 'completed'].includes(booking.status) && (endedHere || booking.status === 'completed')) {
+            window.location.replace('session-recap.html?bookingId=' + encodeURIComponent(booking.id));
+            return showAccess({ allowed: false, title: '대화 기록을 불러오고 있어요.', message: '' });
+          }
           if (booking.status !== 'confirmed') {
             var ended = ['completed', 'cancelled', 'tech_issue', 'safety_reported'].includes(booking.status);
             return showAccess({ allowed: false, title: ended ? '이미 종료된 대화예요.' : '아직 입장할 수 없는 예약이에요.', message: '마이페이지에서 예약 상태를 확인해 주세요.' });
@@ -4953,7 +4959,7 @@
       function showOneMinWarning() {
         if (warned1Min) return;
         warned1Min = true;
-        showWrapUpAlert('1분 남았어요 · 마지막 인사를 나눠 주세요');
+        showWrapUpAlert(window.DayOI18n ? window.DayOI18n.t('room.autoEndNotice') : '곧 대화가 마무리돼요. 인사를 나누시면 시간이 끝난 뒤 자동으로 다음 화면으로 안내해 드릴게요.');
         el.classList.add('is-warning');
         playWrapUpChime();
       }
@@ -4979,8 +4985,11 @@
         var wrapState = document.getElementById('sessionWrapState');
         if (wrapBanner) wrapBanner.hidden = true;
         if (wrapState) wrapState.hidden = true;
-        hangUpCallOnly();
-        document.dispatchEvent(new CustomEvent('dayo:session-ended'));
+        if (window.finalizeSessionConversation) window.finalizeSessionConversation('normal');
+        else {
+          hangUpCallOnly();
+          document.dispatchEvent(new CustomEvent('dayo:session-ended'));
+        }
       }
 
       function syncWithScheduledTime(now) {
@@ -5034,6 +5043,18 @@
       });
 
       window.DayOSessionTimer = {
+        stopForConversationEnd: function () {
+          sessionEnded = true;
+          remainingSeconds = 0;
+          render();
+          el.classList.remove('is-warning');
+          if (tickInterval) clearInterval(tickInterval);
+          tickInterval = null;
+          clearTimeout(showWrapUpAlert._timer);
+          ['sessionWrapBanner', 'sessionWrapState'].forEach(function (id) {
+            var node = document.getElementById(id); if (node) node.hidden = true;
+          });
+        },
         getRemainingSeconds: function () { return remainingSeconds; },
         endSession: endSession,
         skipToEnd: skipToEnd
@@ -6146,6 +6167,7 @@
     };
 
     function handleSessionEndRouting(result) {
+      if (window.finalizeSessionConversation && !window.__dayoEndPrepared) return;
       if (window.__dayoSessionEndRouted) return;
       window.__dayoSessionEndRouted = true;
       window.dayoSessionEnded = true;
@@ -6211,7 +6233,7 @@
 
       // The recap is the normal post-session screen; saving is automatic.
       if (!window.isEarlyExit && typeof window.openQuizModalImmediately === 'function') {
-        window.openQuizModalImmediately();
+        return window.openQuizModalImmediately();
       }
     }
 
@@ -7094,6 +7116,7 @@
         ? window.DayOSessionTimer.getRemainingSeconds()
         : 0;
       if (remaining > 0) {
+        if (window.updateEndConfirmation) window.updateEndConfirmation();
         var earlyModal = document.getElementById('early-exit-modal');
         if (earlyModal) earlyModal.style.setProperty('display', 'flex', 'important');
         return;
@@ -7117,7 +7140,8 @@
         return;
       }
 
-      if (typeof window.handleSessionEndRouting === 'function') window.handleSessionEndRouting();
+      if (window.finalizeSessionConversation) window.finalizeSessionConversation('normal');
+      else if (typeof window.handleSessionEndRouting === 'function') window.handleSessionEndRouting();
     };
 
     window.closeEarlyExitModal = function () {
@@ -7379,25 +7403,24 @@
     </div>
   </div>
 
-<div id="early-exit-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 99999999; justify-content: center; align-items: center; padding: 20px;">
-  <div style="background: #FFFFFF; width: 100%; max-width: 420px; border-radius: 20px; padding: 26px 22px; text-align: center; box-shadow: 0 16px 40px rgba(0,0,0,0.3); border: 1.5px solid #EDE4D5;">
+<div id="early-exit-modal" role="dialog" aria-modal="true" aria-labelledby="early-exit-title" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 99999999; justify-content: center; align-items: center; padding: 20px;">
+  <div style="max-height: calc(100dvh - 40px); overflow-y: auto; box-sizing: border-box; background: #FFFBF4; width: 100%; max-width: 420px; border-radius: 20px; padding: 26px 22px; text-align: center; box-shadow: 0 16px 40px rgba(0,0,0,0.3); border: 1.5px solid #EDE4D5;">
     <div style="font-size: 32px; margin-bottom: 8px;">☕</div>
-    <div style="font-size: 17px; font-weight: 800; color: #3E4A42; margin-bottom: 6px;">아직 대화 시간이 남아있어요!</div>
-    <p style="font-size: 12.5px; color: #55635A; line-height: 1.5; margin-bottom: 18px;">
-      지금 나가시면 남은 시간과 관계없이 대화가 종료되며 <strong>이용권 1회가 정상 차감</strong>돼요.
-    </p>
+    <div id="early-exit-title" style="font-size: 17px; font-weight: 800; color: #3E4A42; margin-bottom: 6px;">대화를 마칠까요?</div>
+    <p id="early-exit-body" style="font-size: 12.5px; color: #55635A; line-height: 1.5; margin-bottom: 18px; white-space: pre-line;">지금 통화를 끝내도 지금까지의 대화 기록은 남아요.
+종료 후 리캡에서 다시 볼 수 있어요.</p>
 
     <div style="display: flex; flex-direction: column; gap: 8px;">
-      <button type="button" onclick="closeEarlyExitModal()" style="width: 100%; padding: 13px; background: #9AB89E; color: #FFFFFF; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer;">
+      <button type="button" id="early-exit-continue" onclick="closeEarlyExitModal()" style="width: 100%; padding: 13px; background: #9AB89E; color: #FFFFFF; border: none; border-radius: 12px; font-size: 14px; font-weight: 800; cursor: pointer;">
         계속 대화하기
       </button>
-      <button type="button" onclick="confirmEarlyExit()" style="width: 100%; padding: 11px; background: #F8FAF9; color: #6E7A72; border: 1px solid #EDE4D5; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer;">
-        사정이 있어 종료하기
+      <button type="button" id="early-exit-confirm" onclick="confirmEarlyExit()" style="width: 100%; min-height: 44px; padding: 11px; background: #F8FAF9; color: #6E7A72; border: 1px solid #EDE4D5; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer;">
+        통화 종료 후 리캡 보기
       </button>
     </div>
 
     <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed #EDE4D5; display: flex; justify-content: center; font-size: 11.5px;">
-      <a href="javascript:void(0)" onclick="openTechIssueModal()" style="color: #4F7460; font-weight: 700; text-decoration: underline;">🛠️ 음성/연결 오류로 종료</a>
+      <a href="javascript:void(0)" onclick="openTechIssueModal()" data-i18n="room.endTechIssue" style="color: #4F7460; font-weight: 700; text-decoration: underline;">🛠️ 음성/연결 오류로 종료</a>
     </div>
   </div>
 </div>

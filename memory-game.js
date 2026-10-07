@@ -14,13 +14,28 @@
     node.hidden = !show; node.style.display = show ? 'flex' : 'none';
     if (window.DayOScrollLock) window.DayOScrollLock[show ? 'lock' : 'unlock']();
   }
+  function recoverState(recap, fingerprint) {
+    var recovered; try { recovered = JSON.parse(sessionStorage.getItem(key()) || 'null'); } catch (_) { recovered = null; }
+    var result = window.DayOLearnerExpressions.normalizeQuizState(recovered, questions.length, fingerprint);
+    // DB progress is the floor, including after a fresh login on another device.
+    var saved = recap.progress || {};
+    if (Number.isInteger(saved.completed) && saved.completed >= 0 && saved.completed <= questions.length && saved.completed >= result.completed) {
+      result.completed = saved.completed; result.currentIndex = Math.max(result.currentIndex, saved.completed);
+      if (saved.reason) { result.ended = true; result.endReason = saved.reason; }
+    }
+    return result;
+  }
   function progress() {
     return { completed: state ? state.completed : 0, total: questions.length, reason: state && state.endReason || null };
   }
   function sync() {
-    window.__dayoQuizProgress = progress();
+    var next = progress(), source = window.getCanonicalReviewSource && window.getCanonicalReviewSource();
+    var prior = window.__dayoQuizProgress || source && source.recap && source.recap.progress;
+    var unchanged = prior && JSON.stringify(prior) === JSON.stringify(next);
+    window.__dayoQuizProgress = next;
+    if (unchanged && window.__dayoReviewReportSaved) { write(); return; }
     window.__dayoQuizScore = questions.length ? Math.round(window.__dayoQuizProgress.completed / questions.length * 100) : null;
-    window.__dayoReviewReportSaved = false; window.__dayoLearnerReportPayload = null;
+    window.__dayoReviewReportSaved = false;
     window.__dayoReviewRevision = (window.__dayoReviewRevision || 0) + 1;
     write();
   }
@@ -46,6 +61,7 @@
         Array.from(pool.querySelectorAll('button')).forEach(function (node) { node.disabled = true; });
         b.setAttribute('aria-pressed', 'true');
         state.completed = Math.max(state.completed, state.currentIndex + 1); sync();
+        save().then(function (saved) { if (!saved) showSaveFailure(); });
         var note = document.createElement('p'); note.className = 'recap-answer'; note.setAttribute('role', 'status');
         note.textContent = q.word + ' · ' + q.answer; pool.appendChild(note);
         pool.appendChild(button(locale() === 'ko' ? '계속 보기' : 'Continue', function () { state.currentIndex += 1; write(); renderQuestion(); }));
@@ -78,9 +94,8 @@
     var recap = window.DayOConversationRecap.saved(Object.assign({ booking_id: bookingId() }, report));
     if (!recap || !recap.supported || !recap.questions.length) return;
     questions = recap.questions;
-    var fingerprint = window.DayOLearnerExpressions.contentFingerprint(bookingId(), recap.source.fingerprint, questions);
-    var recovered; try { recovered = JSON.parse(sessionStorage.getItem(key()) || 'null'); } catch (_) { recovered = null; }
-    state = window.DayOLearnerExpressions.normalizeQuizState(recovered, questions.length, fingerprint);
+    var fingerprint = window.DayOLearnerExpressions.contentFingerprint(bookingId(), recap.source.learner_version || recap.source.fingerprint, questions);
+    state = recoverState(recap, fingerprint);
     if (state.ended || state.currentIndex >= questions.length) { if (typeof originalOpen === 'function') originalOpen(); return; }
     state.startedAt = state.startedAt || Date.now(); write(); sync();
     var record = document.getElementById('quiz-modal');
@@ -105,10 +120,9 @@
       if (bookingId() !== requested) return;
       var source = window.getCanonicalReviewSource && window.getCanonicalReviewSource();
       questions = source && source.recap ? source.recap.questions : [];
-      var recovered; try { recovered = JSON.parse(sessionStorage.getItem(key()) || 'null'); } catch (_) { recovered = null; }
       if (questions.length) {
-        var fingerprint = window.DayOLearnerExpressions.contentFingerprint(requested, source.recap.source.fingerprint, questions);
-        state = window.DayOLearnerExpressions.normalizeQuizState(recovered, questions.length, fingerprint); sync();
+        var fingerprint = window.DayOLearnerExpressions.contentFingerprint(requested, source.recap.source.learner_version || source.recap.source.fingerprint, questions);
+        state = recoverState(source.recap, fingerprint); sync();
       } else { state = null; window.__dayoQuizProgress = { completed: 0, total: 0, reason: 'insufficient' }; window.__dayoQuizScore = null; }
       await save();
       if (typeof originalOpen === 'function') originalOpen();

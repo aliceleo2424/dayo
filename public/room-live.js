@@ -614,7 +614,31 @@
     };
     var savingRevision = transcriptRevision;
     if (store && typeof store.saveSessionLog === 'function') {
-      transcriptSavePromise = store.saveSessionLog(canonicalTranscript, extra).then(done).catch(function (err) {
+      // Re-entry must never replace a longer canonical record with an empty/local subset.
+      transcriptSavePromise = (async function () {
+        var db = window.supabaseClient;
+        if (!db) throw new Error('canonical-transcript-read-unavailable');
+        var role = canonicalParticipantRole(access);
+        var participantId = role === 'learner' ? access.learnerId : access.partnerId;
+        var read = await withTimeout(db.from('session_logs')
+          .select('id, booking_id, participant_id, participant_role, transcript, started_at, ended_at')
+          .eq('booking_id', access.bookingId).eq('participant_id', participantId)
+          .eq('participant_role', role).maybeSingle(), 10000);
+        if (read.error) throw read.error;
+        var existing = read.data;
+        if (existing && (existing.booking_id !== access.bookingId || existing.participant_id !== participantId ||
+            existing.participant_role !== role || !Array.isArray(existing.transcript))) throw new Error('canonical-transcript-identity');
+        var seen = new Set();
+        canonicalTranscript = canonicalTranscriptSnapshot(existing ? existing.transcript : [], access)
+          .concat(canonicalTranscript).filter(function (row) {
+            var key = row.id + '\n' + row.timestamp;
+            if (seen.has(key)) return false;
+            seen.add(key); return true;
+          }).sort(function (a, b) { return Date.parse(a.timestamp) - Date.parse(b.timestamp); });
+        if (existing && Date.parse(existing.started_at) < Date.parse(extra.startedAt)) extra.startedAt = existing.started_at;
+        if (existing && Date.parse(existing.ended_at) > Date.parse(extra.endedAt)) extra.endedAt = existing.ended_at;
+        return store.saveSessionLog(canonicalTranscript, extra);
+      })().then(done).catch(function (err) {
         return done({ ok: false, local: true, transcript: serialized, error: err });
       }).then(function (result) {
         transcriptSavePromise = null;
@@ -1502,6 +1526,7 @@
     suggestWords: suggestWords,
     suggestSentences: suggestSentences,
     saveTranscript: saveTranscript,
+    flushTranscript: stopSpeech,
     finalizeTranscript: function () { return stopSpeech().then(saveTranscript); }
   };
 

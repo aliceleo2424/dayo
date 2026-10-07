@@ -100,10 +100,10 @@ function browser(options = {}) {
   const window = { DayORoomAccess: { allowed: true, role: 'user', bookingId: B, learnerId: L, partnerId: P, language: 'en' },
     DayORoomAccessReady: { then() {} }, DayOConversationRecap: model, DayOLearnerExpressions: learner, SpeechRecognition: Recognition, localStorage: store,
     addEventListener() {}, logSessionEvent() {}, isPartnerRoomMode() { return this.DayORoomAccess.role === 'partner'; },
-    openQuizModalImmediately() { opened++; },
+    openQuizModalImmediately() { opened++; }, handleSessionEndRouting() {},
     DayOProfileStore: { async saveSessionLog(speech, extra) { snapshots.push(plain(speech)); calls.push('save'); if (options.saveHook) await options.saveHook(snapshots.length); canonical = { ...log(plain(speech)), id: 'canonical-source', booking_id: extra.bookingId }; return { ok: true }; } },
     supabaseClient: { auth: { async getUser() { return { data: { user: { id: L } } }; }, async getSession() { return { data: { session: { access_token: 'test.token' } } }; } },
-      from(table) { const filters = []; return { select() { assert.equal(table, 'session_logs'); return this; }, eq(k, v) { filters.push([k, v]); return this; }, async maybeSingle() { calls.push('read'); assert.deepEqual(filters, [['booking_id', B], ['participant_id', L], ['participant_role', 'learner']]); return options.readFailure ? { error: {} } : { data: options.wrongBooking ? { ...canonical, booking_id: OTHER } : plain(canonical) }; } }; },
+      from(table) { const filters = []; return { select() { assert(['session_logs','session_reports'].includes(table)); return this; }, eq(k, v) { filters.push([k, v]); return this; }, async maybeSingle() { if(table==='session_reports')return {data:null}; calls.push('read'); assert.deepEqual(filters, [['booking_id', B], ['participant_id', L], ['participant_role', 'learner']]); return options.readFailure ? { error: {} } : { data: options.wrongBooking ? { ...canonical, booking_id: OTHER } : canonical ? plain(canonical) : null }; } }; },
       async rpc(name, args) { if(name==='complete_learner_session'){calls.push('complete');return {data:{success:true}};} calls.push('report'); assert.equal(name, 'merge_learner_session_report'); if(options.reportHook)await options.reportHook(); if(options.reportFail)return {error:{message:'synthetic failure'}}; window.savedPayload = plain(args.p_report); return { data: { success: true } }; } }
   };
   const context = vm.createContext({ window, document: { documentElement: { lang: 'ko' }, readyState: 'loading', visibilityState: 'visible', getElementById: id => nodes[id] || null, querySelector: () => null, querySelectorAll: () => [], createElement: element, addEventListener(type,fn) { (events[type] ||= []).push(fn); }, dispatchEvent() {} }, localStorage: store, sessionStorage: store, navigator: {}, AbortController, CustomEvent: function () {}, setTimeout: later, clearTimeout, setInterval: () => null, clearInterval, Date, Math, Promise, console: { log() {}, warn() {}, error() {} },
@@ -129,7 +129,7 @@ async function lifecycleChecks() {
     await b.window.DayOLive.saveTranscript(); b.window.DayOLive.hangUp();
     const frozen = await b.window.prepareSessionReviewSource();
     assert.equal(frozen.rows.length, 2); assert.equal(b.snapshots.length, 2, 'late final is included in remote save');
-    assert.deepEqual(b.calls, ['save', 'save', 'read', 'api']);
+    assert.deepEqual(b.calls, ['read', 'save', 'read', 'save', 'read', 'api']);
     b.window.sessionTranscript.push(row('Not part of the canonical snapshot.')); b.store.setItem('last_session_transcript', JSON.stringify([row('Wrong booking local content.')]));
     recognition.emit('Callback after finalization.'); assert.equal(b.window.DayOLive.getTranscript().length, 2);
     assert.equal(await b.window.prepareSessionReviewSource(), frozen);
@@ -151,7 +151,7 @@ async function lifecycleChecks() {
   }
   const fallback = browser({ apiFail: true }); try { fallback.start().emit(own[0].text); fallback.window.DayOLive.hangUp(); await fallback.window.startMemoryGameFromSession(); const r = model.saved({ ...plain(fallback.window.getLearnerReviewSnapshot()), booking_id: B }); assert.equal(r.metrics.user_word_count, 6); assert.equal(r.metrics.user_participation_ratio, null); assert(fallback.calls.includes('report')); } finally { fallback.stop(); }
   let release; const race = browser({ saveHook: n => n === 1 ? new Promise(r => release = r) : Promise.resolve() });
-  try { const r = race.start(); r.emit(own[0].text); const saving = race.window.DayOLive.saveTranscript(); r.emit(own[1].text); release(); await saving; assert.equal(race.snapshots.length, 2, 'in-flight revision is resaved'); } finally { race.stop(); }
+  try { const r = race.start(); r.emit(own[0].text); const saving = race.window.DayOLive.saveTranscript(); r.emit(own[1].text); await new Promise(setImmediate); release(); await saving; assert.equal(race.snapshots.length, 2, 'in-flight revision is resaved'); } finally { race.stop(); }
 }
 async function databaseChecks() {
   const { PGlite } = require('@electric-sql/pglite'); const db = new PGlite();
