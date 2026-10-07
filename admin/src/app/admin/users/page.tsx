@@ -1,4 +1,5 @@
 "use client";
+import { ProfileImage } from "@/components/admin/profile-image";
 
 import { useCallback, useEffect, useState } from "react";
 import { AdminHeader } from "@/components/admin/header";
@@ -127,10 +128,10 @@ export default function UsersPage() {
       render: (row) => (
         <button
           type="button"
-          className="font-medium text-coral hover:underline"
+          className="inline-flex items-center gap-2 font-medium text-coral hover:underline"
           onClick={() => openDrawer(row)}
         >
-          {row.name}
+          <ProfileImage avatarUrl={row.avatar_url} size={32} />{row.name}
         </button>
       ),
     },

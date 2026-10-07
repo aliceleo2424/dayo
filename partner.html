@@ -2064,12 +2064,29 @@
     .dayo-avatar-option:focus, .dayo-avatar-option[aria-pressed="true"] { outline:2px solid #555; }
     .dayo-avatar-option img { width:100%; aspect-ratio:1; object-fit:cover; border-radius:50%; }
     #photoModal .modal { max-height:90dvh; overflow-y:auto; }
+    #photoModal .modal { background:#FFFBF4!important; border:1px solid #F8F0E3; }
+    #photoModal #uploadDrop { background:#F8F0E3; border-color:rgba(95,125,99,.4); }
+    #photoModal .upload-preview { background-color:#FFFBF4; box-shadow:0 10px 22px rgba(95,125,99,.12); }
+    #photoModal .modal-close { background:#F8F0E3; }
+    #photoModal .modal-close:hover { color:#5F7D63; }
+    #photoModal #uploadBtn, #photoModal #photo-save-btn { background:#5F7D63!important; color:#fff; box-shadow:none; }
+    #photoModal #uploadBtn:hover:not(:disabled), #photoModal #photo-save-btn:hover:not(:disabled) { background:#5F7D63!important; filter:brightness(.94); }
+    #photoModal #uploadBtn:active:not(:disabled), #photoModal #photo-save-btn:active:not(:disabled) { background:#5F7D63!important; box-shadow:none; }
+    #photoModal button:focus-visible { outline:2px solid #5F7D63; outline-offset:3px; }
+    #photoModal .dayo-avatar-option[aria-pressed="true"] { border-color:#5F7D63; outline-color:#5F7D63; background:#F8F0E3; }
+    #partner-photo-status { color:var(--muted); line-height:1.6; }
+    #profileAvatar span, #photoPreview span { display:none; }
+    #profileAvatar, #photoPreview { background-color:#F8F0E3; }
+    #partner-dashboard-section #photoBtn { background:#5F7D63; color:#FFFBF4; border-color:#5F7D63; }
     #profileAvatar span, #photoPreview span { font-weight:600; font-size:32px; }
     @media(max-width:480px) { .dayo-avatar-grid {grid-template-columns:repeat(2,minmax(0,1fr));} }
   </style>
   <link rel="stylesheet" href="partner-profile-completion.css">
   <script src="partner-profile-fields.js"></script>
   <script src="partner-avatar-options.js"></script>
+  <style>#photoBtn{color:#5F7D63;background:#F8F0E3}#photoBtn:hover{background:#E8EEDF}</style>
+  <script src="profile-image-resolver.js"></script>
+  <script src="profile-images.js"></script>
   <link rel="stylesheet" href="partner-dashboard.css">
   <script src="dashboard-tabs.js" defer></script>
   <script src="partner-dashboard.js" defer></script>
@@ -2227,7 +2244,7 @@
           <button type="button" class="partner-verify-badge" id="partner-status-toggle" aria-pressed="true" data-i18n="partner.status.active">🟢 활동중</button>
         </div>
         <p class="avatar-intro" id="partner-bio-preview" data-empty-text="한 줄 소개를 입력해 주세요 ☕" data-i18n="partner.intro.empty" data-i18n-attr="data-empty-text"></p>
-        <button class="photo-btn" type="button" id="photoBtn" data-i18n="partner.profile.photoChange">📷 사진 변경</button>
+        <button class="photo-btn" type="button" id="photoBtn">📷 사진 변경</button>
       </div>
 
       <div>
@@ -2396,19 +2413,19 @@
       <div class="modal-head">
         <div>
           <h2 class="card-title" id="photoModalTitle">Change Photo</h2>
-          <p class="card-subtitle">Choose a DayO avatar or upload your photo.</p>
+          <p class="card-subtitle" id="profile-photo-hint">Upload your profile photo. Large photos are reduced before saving.</p>
         </div>
         <button class="modal-close" type="button" data-close-modal data-i18n="partner.photoModal.closeAria" data-i18n-attr="aria-label" aria-label="닫기">✕</button>
       </div>
 
-      <section class="dayo-avatar-picker" aria-label="Choose a DayO avatar"><h3>Choose a DayO avatar</h3><div id="dayo-avatar-grid" class="dayo-avatar-grid"></div><p id="dayo-avatar-empty">DayO avatars will be available soon.</p></section>
+      <section class="dayo-avatar-picker" aria-label="Choose a DayO avatar" hidden><h3>Choose a DayO avatar</h3><div id="dayo-avatar-grid" class="dayo-avatar-grid"></div><p id="dayo-avatar-empty">DayO avatars will be available soon.</p></section>
       <div>
         <div class="upload-drop" id="uploadDrop">
           <div class="upload-preview" id="photoPreview" role="img" data-i18n="partner.photoModal.previewAria" data-i18n-attr="aria-label" aria-label="업로드한 프로필 사진 미리보기">
-            <span class="upload-preview-empty" aria-hidden="true">D</span>
+            <span class="upload-preview-empty" aria-hidden="true" hidden></span>
           </div>
           <p class="upload-title">Upload your photo</p>
-          <p class="upload-hint">JPG, PNG or WebP · up to 2 MB. Preview your photo before saving.</p>
+          <p class="upload-hint" id="profile-photo-size">JPG, PNG or WebP · saved up to 2 MB · max 1200 px.</p>
           <div class="upload-actions">
             <button class="photo-upload-btn" type="button" id="uploadBtn" >Upload your photo</button>
           </div>
@@ -2747,10 +2764,16 @@
     document.getElementById('uploadBtn').addEventListener('click', () => photoInput.click());
 
     const avatarOptions = window.DayOPartnerAvatars;
+    const profileImages = window.DayOProfileImages;
+    function displayedPartnerPhoto(){return profileImages.resolve(window.__dayoPartnerProfile&&window.__dayoPartnerProfile.avatar_url);}
+    let preparedPhoto = null;
     const photoStatus = document.getElementById('partner-photo-status');
+    let photoStatusCode='';
+    function photoMessage(code){photoStatusCode=code;photoStatus.textContent=code?profileImages.text(code):'';}
     let photoReadGeneration = 0, photoHasNewSelection = false, photoReading = false, photoSaving = false;
     function updatePhotoSaveState() { document.getElementById('photo-save-btn').disabled = photoSaving || photoReading || !photoHasNewSelection; }
-    function previewAvatar(url, newlySelected) { pendingAvatarUrl = url; if (newlySelected) photoHasNewSelection = !!avatarOptions.imageUrl(url) && url !== avatarOptions.imageUrl(window.__dayoPartnerProfile && window.__dayoPartnerProfile.avatar_url); updatePhotoSaveState(); avatarOptions.paint(photoPreview,url,savedNickname); document.querySelectorAll('.dayo-avatar-option').forEach(button => button.setAttribute('aria-pressed',String(button.dataset.avatarPath === url))); }
+    function paintProfilePhoto(element,url){url=profileImages.resolve(url,'');avatarOptions.paint(element,url,'');var label=element.querySelector('span');if(label){label.textContent='';label.hidden=true;}}
+    function previewAvatar(url, newlySelected) { pendingAvatarUrl = url; if (newlySelected) photoHasNewSelection = !!avatarOptions.imageUrl(url) && url !== avatarOptions.imageUrl(window.__dayoPartnerProfile && window.__dayoPartnerProfile.avatar_url); updatePhotoSaveState(); paintProfilePhoto(photoPreview,url); document.querySelectorAll('.dayo-avatar-option').forEach(button => button.setAttribute('aria-pressed',String(button.dataset.avatarPath === url))); }
     const avatarGrid = document.getElementById('dayo-avatar-grid');
     avatarOptions.options.forEach(item => {
       const button = document.createElement('button'), image = document.createElement('img');
@@ -2759,18 +2782,21 @@
       button.addEventListener('click', () => { ++photoReadGeneration; photoReading = false; previewAvatar(item.path,true); photoStatus.textContent = item.label+' selected. Save to use this avatar.'; }); avatarGrid.append(button);
     });
     document.getElementById('dayo-avatar-empty').hidden = avatarOptions.options.length > 0;
-    photoInput.addEventListener('change', () => {
+    photoInput.addEventListener('change', async () => {
       const file = photoInput.files && photoInput.files[0], run = ++photoReadGeneration;
       photoInput.value = ''; photoReading = false; updatePhotoSaveState(); if (!file) return;
-      if (!avatarOptions.validUpload(file)) { photoStatus.textContent = 'Choose a JPG, PNG or WebP image up to 2 MB.'; return; }
-      photoReading = true; updatePhotoSaveState(); photoStatus.textContent = 'Reading photo…';
-      const reader = new FileReader(); reader.onerror = () => { if(run===photoReadGeneration){photoReading=false;updatePhotoSaveState();photoStatus.textContent='Could not read this image.';} };
-      reader.onload = () => {
-        const image = new Image();
-        image.onerror = () => { if(run===photoReadGeneration){photoReading=false;updatePhotoSaveState();photoStatus.textContent='Could not read this image.';} };
-        image.onload = () => { if(run!==photoReadGeneration)return; photoReading=false;updatePhotoSaveState(); if (!image.naturalWidth || !image.naturalHeight || image.naturalWidth * image.naturalHeight > 40000000) { photoStatus.textContent='Choose an image with at most 40 megapixels.'; return; } previewAvatar(String(reader.result),true); photoStatus.textContent='Photo ready. Save to use this photo.'; };
-        image.src = String(reader.result);
-      }; reader.readAsDataURL(file);
+      photoHasNewSelection = false;
+      photoReading = true; updatePhotoSaveState(); photoMessage('preparing');
+      try {
+        const prepared = await profileImages.prepare(file);
+        if(run!==photoReadGeneration){profileImages.release(prepared.preview);return;}
+        if(preparedPhoto)profileImages.release(preparedPhoto.preview);
+        preparedPhoto=prepared;
+        pendingAvatarUrl=prepared.preview; photoHasNewSelection=true;
+        photoPreview.classList.add('has-photo');photoPreview.style.backgroundImage='url('+JSON.stringify(prepared.preview)+')';
+        photoMessage('ready');
+      } catch(error) { if(run===photoReadGeneration)photoMessage(error.message); }
+      finally { if(run===photoReadGeneration){photoReading=false;updatePhotoSaveState();} }
     });
 
     async function savePartnerAvatar() {
@@ -2780,18 +2806,14 @@
       var user = userRes && userRes.data && userRes.data.user;
       if (userRes && userRes.error) throw userRes.error;
       if (!user) throw new Error('no session');
-      const avatarToSave = avatarOptions.imageUrl(pendingAvatarUrl);
-      if (!photoHasNewSelection || photoReading || !avatarToSave) throw new Error('Choose an avatar or upload your photo first.');
-      var payload = { avatar_url: avatarToSave };
-      var res = await client.from('profiles').update(payload).eq('id', user.id).select('id').maybeSingle();
-      if (res.error) {
-        console.error('[DayO] avatar update failed', res.error);
-        throw res.error;
-      }
-      if (!res.data) throw new Error('현재 로그인한 파트너 프로필을 찾을 수 없습니다.');
+      if (!photoHasNewSelection || photoReading || !preparedPhoto) throw new Error('choose');
+      photoMessage('saving');
+      const saved=await profileImages.upload(preparedPhoto,user.id),avatarToSave=saved.avatar_url;
       if (window.__dayoPartnerProfile) window.__dayoPartnerProfile.avatar_url = avatarToSave;
-      avatarOptions.paint(profileAvatar,avatarToSave,savedNickname); photoHasNewSelection=false;
-      showToast(t('partner.toast.photoSaved'));
+      paintProfilePhoto(profileAvatar,avatarToSave); photoHasNewSelection=false;
+      profileImages.release(preparedPhoto.preview);preparedPhoto=null;pendingAvatarUrl=avatarToSave;
+      document.dispatchEvent(new CustomEvent('dayo:profile-image-saved',{detail:{userId:user.id,avatarUrl:avatarToSave}}));
+      showToast(profileImages.text('saved'));
       return true;
     }
 
@@ -2805,11 +2827,11 @@
           await savePartnerAvatar();
           closeModal(document.getElementById('photoModal'));
         } catch (err) {
-          console.warn('[DayO] avatar save failed', err);
-          photoStatus.textContent = avatarOptions.imageUrl(pendingAvatarUrl) ? 'Could not save your photo. Please try again.' : 'Choose an avatar or upload your photo first.';
-          showToast(t('partner.toast.photoSaveFailed'));
+          photoMessage(err.message);
+          showToast(profileImages.text(err.message));
         } finally {
           photoSaving = false; updatePhotoSaveState(); photoControls.forEach(button => button.disabled = false);
+          document.getElementById('photo-save-btn').textContent=document.documentElement.lang==='ko'?'프로필 사진 저장':'Save profile image';
         }
       });
     }
@@ -2835,7 +2857,21 @@
       else document.body.style.overflow = '';
     }
 
-    document.getElementById('photoBtn').addEventListener('click', () => { ++photoReadGeneration; photoReading=false; photoHasNewSelection=false; previewAvatar(window.__dayoPartnerProfile && window.__dayoPartnerProfile.avatar_url || ''); photoStatus.textContent=''; openModal(photoModal); });
+    document.getElementById('photoBtn').addEventListener('click', () => { ++photoReadGeneration; if(preparedPhoto)profileImages.release(preparedPhoto.preview);preparedPhoto=null;photoReading=false;photoHasNewSelection=false;previewAvatar(displayedPartnerPhoto());photoMessage('');openModal(photoModal); });
+    function photoCopy(){
+      var ko=document.documentElement.lang==='ko';
+      document.getElementById('photoModalTitle').textContent=ko?'프로필 사진 변경':'Change Photo';
+      document.getElementById('profile-photo-hint').textContent=ko?'프로필 사진을 올려 주세요. 큰 사진은 저장 전에 줄여요.':'Upload your profile photo. Large photos are reduced before saving.';
+      document.getElementById('profile-photo-size').textContent=ko?'JPG, PNG, WebP · 저장 파일 최대 2MB · 최대 1200px':'JPG, PNG or WebP · saved up to 2 MB · max 1200 px.';
+      document.getElementById('uploadBtn').textContent=ko?'사진 선택':'Choose photo';
+      photoModal.querySelector('.upload-title').textContent=ko?'프로필 사진 선택':'Upload your photo';
+      photoPreview.setAttribute('aria-label',ko?'프로필 사진 미리보기':'Profile photo preview');
+      photoModal.querySelector('[data-close-modal]').setAttribute('aria-label',ko?'닫기':'Close');
+      document.getElementById('photo-save-btn').textContent=photoSaving?profileImages.text('saving'):(ko?'프로필 사진 저장':'Save profile image');
+      var button=document.getElementById('photoBtn');button.textContent=profileImages.hasPhoto(displayedPartnerPhoto())?(ko?'📷 사진 변경':'📷 Change Photo'):(ko?'📷 프로필 사진 추가':'📷 Add profile photo');
+      photoStatus.textContent=photoSaving?profileImages.text('saving'):photoReading?profileImages.text('preparing'):photoStatusCode?profileImages.text(photoStatusCode):'';
+    }
+    document.addEventListener('dayo:langchange',photoCopy);document.addEventListener('dayo:profile-image-saved',photoCopy);photoCopy();
     document.getElementById('historyBtn').addEventListener('click', () => {
       renderHistory();
       openModal(historyModal);
@@ -2928,9 +2964,10 @@
         introInput.value = bio;
         syncIntro();
       }
-      pendingAvatarUrl = avatarOptions.imageUrl(profile && profile.avatar_url);
-      avatarOptions.paint(profileAvatar,pendingAvatarUrl,nickname);
-      avatarOptions.paint(photoPreview,pendingAvatarUrl,nickname);
+      pendingAvatarUrl = avatarOptions.imageUrl(profileImages.resolve(profile && profile.avatar_url));
+      paintProfilePhoto(profileAvatar,pendingAvatarUrl);
+      paintProfilePhoto(photoPreview,pendingAvatarUrl);
+      photoCopy();
       if (profile && (profile.is_available === false || profile.partner_status === 'resting')) {
         partnerActive = false;
       } else if (profile && (profile.is_available === true || profile.partner_status === 'active')) {

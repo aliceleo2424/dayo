@@ -20,7 +20,7 @@
     checklist: function(row,profile,open) {
       return [
         {id:'profile',complete:row===undefined?null:!!(this.hasProfileFields(row)&&row.completed_at&&row.partner_guide_acknowledged_at)},
-        {id:'image',complete:profile===undefined?null:!!(window.DayOPartnerAvatars&&window.DayOPartnerAvatars.imageUrl(profile&&profile.avatar_url))},
+        {id:'image',complete:profile===undefined?null:!!(window.DayOProfileImages&&window.DayOProfileImages.hasPhoto(profile&&profile.avatar_url))},
         {id:'intro',complete:profile===undefined?null:!!String(profile&&profile.bio||'').trim()},
         {id:'guide',complete:row===undefined?null:!!(row&&row.partner_guide_acknowledged_at)},
         {id:'availability',complete:typeof open==='boolean'?open:null}
@@ -202,7 +202,7 @@
         if(!user)throw new Error('signed out');
         var roleResult=await client.from('profiles').select('role,bio,avatar_url').eq('id',user.id).maybeSingle();
         if(roleResult.error||!roleResult.data||roleResult.data.role!=='partner')throw new Error('not partner');
-        if(run!==detailsRun)return;editDetails.hidden=false;editDetails.textContent=ko?'상세 정보 수정':'Edit details';actionProfile=roleResult.data;paintAction();
+        if(run!==detailsRun)return;editDetails.hidden=false;editDetails.textContent=ko?'상세 정보 수정':'Edit details';actionProfile=Object.assign({},roleResult.data,{avatar_url:window.DayOProfileImages?window.DayOProfileImages.resolve(roleResult.data.avatar_url):roleResult.data.avatar_url});paintAction();
         if(pastPartnerId!==user.id){pastPartnerId=user.id;loadPast(user.id);}
         var result=await client.from('partner_profile_details').select('*').eq('partner_id',user.id).maybeSingle();
         if(run!==detailsRun)return;if(result.error)throw result.error;
@@ -234,6 +234,7 @@
     }
     document.addEventListener('dayo:partner-detailschanged',showProfileDetails);
     document.addEventListener('dayo:availabilitychanged',showProfileDetails);
+    document.addEventListener('dayo:profile-image-saved',showProfileDetails);
     showProfileDetails();document.addEventListener('dayo:partner-authorized',showProfileDetails);
     if(window.supabaseClient&&window.supabaseClient.auth.onAuthStateChange)window.supabaseClient.auth.onAuthStateChange(function(){setTimeout(showProfileDetails,0);});
     function placeCompletionBanner() {

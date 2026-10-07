@@ -1,4 +1,5 @@
 "use client";
+import { ProfileImage } from "@/components/admin/profile-image";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FileText, Mail, Minus, Plus, Ticket, X } from "lucide-react";
@@ -362,6 +363,7 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
         <header className="flex items-start justify-between gap-3 border-b px-5 py-4">
           <div className="min-w-0 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
+              <ProfileImage avatarUrl={user?.avatar_url} />
               <h2 className="truncate text-lg font-semibold text-[#292524]">{displayName || "회원"}</h2>
               <ProviderBadge provider={provider} />
               <Badge

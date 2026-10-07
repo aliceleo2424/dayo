@@ -261,10 +261,10 @@ export async function fetchDashboardKpis(): Promise<DashboardKpis> {
 
 export async function fetchPartnerProfiles() {
   const selects = [
-    "id, user_id, nickname, user_name, email, role, partner_status, nationality, visa_type, languages, bank_name, bank_account, account_holder, identity_number_masked, id_document_url, bank_document_url, point_balance, created_at",
-    "id, user_id, nickname, user_name, email, role, partner_status, visa_type, languages, bank_name, bank_account, account_holder, point_balance, created_at",
-    "id, user_id, nickname, user_name, email, role, visa_type, languages, bank_name, bank_account, account_holder, point_balance, created_at",
-    "id, user_id, nickname, user_name, email, role, point_balance, created_at",
+    "id, user_id, nickname, user_name, email, role, partner_status, nationality, visa_type, languages, bank_name, bank_account, account_holder, identity_number_masked, id_document_url, bank_document_url, point_balance, created_at, avatar_url",
+    "id, user_id, nickname, user_name, email, role, partner_status, visa_type, languages, bank_name, bank_account, account_holder, point_balance, created_at, avatar_url",
+    "id, user_id, nickname, user_name, email, role, visa_type, languages, bank_name, bank_account, account_holder, point_balance, created_at, avatar_url",
+    "id, user_id, nickname, user_name, email, role, point_balance, created_at, avatar_url",
   ];
 
   let last = await adminProfiles()

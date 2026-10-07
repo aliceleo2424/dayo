@@ -1,4 +1,5 @@
 "use client";
+import { ProfileImage } from "@/components/admin/profile-image";
 
 import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
@@ -141,6 +142,7 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
             <Card className="lg:col-span-1">
               <CardHeader><CardTitle>기본 정보</CardTitle></CardHeader>
               <CardContent className="space-y-3 text-sm">
+                <ProfileImage avatarUrl={user.avatar_url} size={64} />
                 <div>
                   <span className="text-muted-foreground">가입 채널</span>
                   <p className="mt-1"><ProviderBadge provider={user.provider} /></p>

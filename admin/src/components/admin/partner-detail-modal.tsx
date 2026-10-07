@@ -1,4 +1,5 @@
 "use client";
+import { ProfileImage } from "@/components/admin/profile-image";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/lib/supabase";
@@ -15,6 +16,7 @@ import { SessionTranscriptModal } from "@/components/admin/SessionTranscriptModa
 import { PartnerAvailabilitySection } from "@/components/admin/partner-availability";
 
 export type PartnerProfile = {
+  avatar_url?: string | null;
   id: string;
   user_id: string | null;
   nickname: string | null;
@@ -402,6 +404,7 @@ export function PartnerDetailModal({
           </DialogHeader>
           {partner && (
             <div className="min-w-0 space-y-5">
+              <ProfileImage avatarUrl={partner.avatar_url} size={64} />
               {partner.role === "partner" && <PartnerProfileCompletionSummary key={partner.id} partnerId={partner.id} />}
               <section className="grid gap-4 rounded-xl border bg-[#FAFAF9] p-4 sm:grid-cols-[1fr_auto]">
                 <div className="grid gap-2 text-sm sm:grid-cols-2">

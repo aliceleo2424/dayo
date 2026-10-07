@@ -1,0 +1,115 @@
+{
+  "policies": [
+    {
+      "mode": "PERMISSIVE",
+      "name": "Authenticated users can update",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "using": "(bucket_id = 'public-assets'::text)",
+      "command": "UPDATE"
+    },
+    {
+      "mode": "PERMISSIVE",
+      "name": "Authenticated users can upload",
+      "check": "(bucket_id = 'public-assets'::text)",
+      "roles": [
+        "authenticated"
+      ],
+      "using": null,
+      "command": "INSERT"
+    },
+    {
+      "mode": "PERMISSIVE",
+      "name": "Public Access",
+      "check": null,
+      "roles": [
+        "public"
+      ],
+      "using": "(bucket_id = 'public-assets'::text)",
+      "command": "SELECT"
+    },
+    {
+      "mode": "RESTRICTIVE",
+      "name": "conversation_posts_media_delete_admin",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "using": "((bucket_id <> 'public-assets'::text) OR (split_part(name, '/'::text, 1) <> 'magazine'::text) OR dayo_is_admin())",
+      "command": "DELETE"
+    },
+    {
+      "mode": "RESTRICTIVE",
+      "name": "conversation_posts_media_delete_anon",
+      "check": null,
+      "roles": [
+        "anon"
+      ],
+      "using": "((bucket_id <> 'public-assets'::text) OR (split_part(name, '/'::text, 1) <> 'magazine'::text))",
+      "command": "DELETE"
+    },
+    {
+      "mode": "RESTRICTIVE",
+      "name": "conversation_posts_media_insert_admin",
+      "check": "((bucket_id <> 'public-assets'::text) OR (split_part(name, '/'::text, 1) <> 'magazine'::text) OR dayo_is_admin())",
+      "roles": [
+        "authenticated"
+      ],
+      "using": null,
+      "command": "INSERT"
+    },
+    {
+      "mode": "RESTRICTIVE",
+      "name": "conversation_posts_media_insert_anon",
+      "check": "((bucket_id <> 'public-assets'::text) OR (split_part(name, '/'::text, 1) <> 'magazine'::text))",
+      "roles": [
+        "anon"
+      ],
+      "using": null,
+      "command": "INSERT"
+    },
+    {
+      "mode": "RESTRICTIVE",
+      "name": "conversation_posts_media_update_admin",
+      "check": "((bucket_id <> 'public-assets'::text) OR (split_part(name, '/'::text, 1) <> 'magazine'::text) OR dayo_is_admin())",
+      "roles": [
+        "authenticated"
+      ],
+      "using": "((bucket_id <> 'public-assets'::text) OR (split_part(name, '/'::text, 1) <> 'magazine'::text) OR dayo_is_admin())",
+      "command": "UPDATE"
+    },
+    {
+      "mode": "RESTRICTIVE",
+      "name": "conversation_posts_media_update_anon",
+      "check": "((bucket_id <> 'public-assets'::text) OR (split_part(name, '/'::text, 1) <> 'magazine'::text))",
+      "roles": [
+        "anon"
+      ],
+      "using": "((bucket_id <> 'public-assets'::text) OR (split_part(name, '/'::text, 1) <> 'magazine'::text))",
+      "command": "UPDATE"
+    },
+    {
+      "mode": "PERMISSIVE",
+      "name": "partner_application_media_admin_read",
+      "check": null,
+      "roles": [
+        "authenticated"
+      ],
+      "using": "((bucket_id = 'partner-application-videos'::text) AND dayo_is_admin())",
+      "command": "SELECT"
+    },
+    {
+      "mode": "RESTRICTIVE",
+      "name": "partner_application_media_fence",
+      "check": "(bucket_id <> 'partner-application-videos'::text)",
+      "roles": [
+        "anon",
+        "authenticated"
+      ],
+      "using": "((bucket_id <> 'partner-application-videos'::text) OR partner_application_media_admin_access(bucket_id, name))",
+      "command": "ALL"
+    }
+  ]
+}

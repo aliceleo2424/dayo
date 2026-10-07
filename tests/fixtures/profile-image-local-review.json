@@ -1,0 +1,102 @@
+{
+  "base_main": "99edf334391f0a747e47f08ab3938675c464265e",
+  "worktree": "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo",
+  "modified_this_turn": [
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\public\\partner.html",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\public\\partner-dashboard.js",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\public\\partner-profile-completion.js",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\public\\profile-images.js",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\public\\profile-image-resolver.js",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\public\\profile-image-editor.js",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\public\\booking-modal.js",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\public\\mypage.html",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\public\\room.html",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\partner.html",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\partner-dashboard.js",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\partner-profile-completion.js",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\profile-images.js",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\profile-image-resolver.js",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\profile-image-editor.js",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\booking-modal.js",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\mypage.html",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\room.html",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\supabase\\migrations\\097_profile_image_assets.sql",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\api\\profile-image.js",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\api\\_lib\\profile-image.js",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\scripts\\profile-image-storage-setup.cjs",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\admin\\public\\profile-image-resolver.js",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\admin\\public\\profile-image-resolver.d.ts",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\admin\\src\\components\\admin\\profile-image.tsx",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\admin\\src\\components\\admin\\UserDetailDrawer.tsx",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\admin\\src\\components\\admin\\partner-detail-modal.tsx",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\admin\\src\\lib\\admin-data.ts",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\admin\\src\\app\\admin\\users\\page.tsx",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\admin\\src\\app\\admin\\users\\[id]\\page.tsx",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\admin\\src\\app\\admin\\partners\\partner-payout-manager.tsx",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\tests\\profile-image-api.cjs",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\tests\\profile-image-database.cjs",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\tests\\profile-image-ui.cjs",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\tests\\profile-image-preview.cjs",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\tests\\profile-image-regressions.cjs"
+  ],
+  "retained_previous_draft": [
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\package.json",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\package-lock.json",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\tests\\fixtures\\profile-image-auth-live.sql",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\tests\\fixtures\\profile-image-completion-live.sql",
+    "C:\\Users\\Alice\\.codex\\worktrees\\partner-self-edit-integration\\dayo\\tests\\fixtures\\profile-image-storage-live.json"
+  ],
+  "unrelated_preserved": [
+    "primary checkout dirty files",
+    ".gitignore",
+    ".vercel/",
+    "partner-profile-fields.js and mirror"
+  ],
+  "buckets": {
+    "partner-profile-images": {
+      "public": true,
+      "file_size_limit": 2097152,
+      "allowed_mime_types": [
+        "image/webp"
+      ]
+    },
+    "user-profile-images": {
+      "public": true,
+      "file_size_limit": 2097152,
+      "allowed_mime_types": [
+        "image/webp"
+      ]
+    }
+  },
+  "preflight_md5": {
+    "save_partner_profile_completion(jsonb)": "f2bd651dafb500cd3a6d3c82a08927c4",
+    "handle_new_user()": "9e60737c03d5c2c63d4b754ba6f15e35",
+    "handle_social_user_signup()": "e2b6bcb0281bd357afbc952e77aed90b",
+    "get_partner_booking_brief(uuid)": "d2ee4114f6da40714cefa9b382a579f9"
+  },
+  "verification": {
+    "API_actual_decode": "PASS",
+    "PGlite_RPC_RLS": "PASS",
+    "UI_resolver_partner_user_admin": "PASS",
+    "098_self_edit_and_095_alpha_SQL": "PASS",
+    "production_room_regression_fixture": "PASS",
+    "smart_booking_recent_preferences": "PASS",
+    "TypeScript_noEmit": "PASS",
+    "diff_check": "PASS",
+    "local_browser_360_390_1280": "PASS"
+  },
+  "not_performed": [
+    "production migration",
+    "bucket creation",
+    "production Storage HTTP E2E",
+    "production image upload",
+    "commit",
+    "push",
+    "deploy"
+  ],
+  "preview": "http://127.0.0.1:3058/",
+  "screenshots": [
+    "C:/Users/Public/Documents/ESTsoft/CreatorTemp/profile-image-final-390.png",
+    "C:/Users/Public/Documents/ESTsoft/CreatorTemp/profile-image-final-1280.png"
+  ]
+}

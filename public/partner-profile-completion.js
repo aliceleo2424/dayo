@@ -2,7 +2,7 @@
   'use strict';
   var catalog = window.DayOPartnerFields, languages = catalog.languages;
   var levels = catalog.levels;
-  var banner, dialog, currentUser, details, generation = 0, busy = false;
+  var banner, dialog, currentUser, details, generation = 0, busy = false, photoChecking = false;
   function complete(row) {
     return !!(row && row.completed_at && row.partner_guide_acknowledged_at && row.location_status && row.visa_type && row.korean_level && row.weekly_session_capacity && row.native_languages && row.native_languages.length && row.session_languages && row.session_languages.length);
   }
@@ -37,7 +37,7 @@
   }
   function canonical(value) { var text = String(value || '').trim(); return languages.slice(0,-1).find(function (l) { return l.toLowerCase() === text.toLowerCase(); }) || text; }
   function openForm() {
-    if (!currentUser || busy) return;
+    if (!currentUser || busy || photoChecking) return;
     if (dialog) dialog.remove();
     var editing = !!(details && details.completed_at);
     dialog = document.createElement('dialog'); dialog.className = 'pcp-dialog'; dialog.setAttribute('aria-labelledby','pcp-title');
@@ -108,12 +108,23 @@
       }); hostLanguages();
     }
     ['native','other'].forEach(function (group) { dialog.querySelector('#pcp-' + group).addEventListener('change',refreshLanguages); form.elements[group + '_custom'].addEventListener('input',refreshLanguages); });
-    function close() { if (!busy && dialog) dialog.close(); }
+    function close() { if (!busy && !photoChecking && dialog) dialog.close(); }
     dialog.querySelector('.pcp-close').addEventListener('click',close); dialog.querySelector('.pcp-cancel').addEventListener('click',close);
-    dialog.addEventListener('cancel',function (event) { if (busy) event.preventDefault(); });
+    dialog.addEventListener('cancel',function (event) { if (busy || photoChecking) event.preventDefault(); });
     form.addEventListener('submit',async function (event) {
-      event.preventDefault(); if (busy || !form.reportValidity()) return;
+      event.preventDefault(); if (busy || photoChecking || !currentUser || !form.reportValidity()) return;
       var status = form.querySelector('.pcp-status'), fields = new FormData(form);
+      if (!details || !details.completed_at) {
+        var photoUser=currentUser.id, photoRun=generation, photo;
+        photoChecking=true;
+        try { photo=await window.supabaseClient.from('profiles').select('avatar_url').eq('id',photoUser).maybeSingle(); }
+        catch (_) { photo={error:true}; }
+        finally { photoChecking=false; }
+        if (!currentUser || photoRun!==generation || currentUser.id!==photoUser) return;
+        if (photo.error || !window.DayOProfileImages || !window.DayOProfileImages.hasPhoto(window.DayOProfileImages.resolve(photo.data && photo.data.avatar_url))) {
+          status.textContent=document.documentElement.lang==='ko'?'프로필 사진을 추가한 뒤 프로필을 완성해 주세요.':'Add your profile photo before completing your Partner Profile.';return;
+        }
+      }
       var payload = Object.assign(locationFields.read(),{native_languages:selected('native'),other_languages:proficiency(),session_languages:fields.getAll('session_languages'),korean_level:form.elements.korean_level.value,weekly_session_capacity:form.elements.weekly_session_capacity.value,guide_acknowledged:form.elements.guide_acknowledged.checked});
       if (saved.visa_type) { delete payload.visa_type; delete payload.location_status; }
       if (!payload.native_languages.length || !payload.session_languages.length) { status.textContent = 'Choose at least one native language and session language.'; return; }

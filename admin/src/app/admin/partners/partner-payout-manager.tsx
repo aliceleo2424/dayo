@@ -1,4 +1,5 @@
 "use client";
+import { ProfileImage } from "@/components/admin/profile-image";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchPartnerProfiles } from "@/lib/admin-data";
@@ -146,10 +147,11 @@ export function PartnerManagementTable() {
     {
       key: "nickname", header: "파트너명 / 이메일", sortable: true,
       render: (row) => (
-        <div>
+        <div className="flex items-center gap-2">
+          <ProfileImage avatarUrl={row.avatar_url} size={40} /><div>
           <p className="font-semibold">{partnerName(row as PartnerProfile)}</p>
           <p className="text-xs text-muted-foreground">{String(row.email || "이메일 미등록")}</p>
-        </div>
+        </div></div>
       ),
     },
     { key: "nationality", header: "국적 / 출신", render: (row) => String(row.nationality || "미등록") },

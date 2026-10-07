@@ -7,6 +7,10 @@
     return vars ? window.DayOI18n.tf(key, vars) : window.DayOI18n.t(key);
   }
 
+  function loadPhotoResolver() {
+    return window.DayOProfileImageURL ? Promise.resolve() : new Promise(function(resolve){var script=document.createElement('script');script.src='/profile-image-resolver.js';script.onload=resolve;script.onerror=resolve;document.head.appendChild(script);});
+  }
+
   var LANG_IDS = ['en', 'es', 'fr', 'ja', 'zh', 'vi', 'de', 'it', 'ru', 'ko'];
   var ACTIVE_LANG_IDS = ['en', 'es', 'fr', 'ko'];
   var PURPOSE_IDS = ['travel', 'work_school', 'abroad', 'casual'];
@@ -1285,9 +1289,8 @@
     el.partners.innerHTML = livePartners.map(function (partner) {
       var on = state.partner === partner.id;
       var badge = partner.isTest ? '<span class="bk-test-badge">🧪 상시 테스트 가능</span>' : '';
-      var avatar = partner.avatar_url
-        ? '<img src="' + escapeHtml(partner.avatar_url) + '" alt="">'
-        : escapeHtml(partner.initial || 'P');
+      var photo = window.DayOProfileImageURL && window.DayOProfileImageURL.resolve(partner.avatar_url);
+      var avatar = photo ? '<img src="' + escapeHtml(photo) + '" alt="" onerror="this.hidden=true">' : '';
       var meta = partner.isTest
         ? '화상 연결 테스트 시 언제든 선택할 수 있어요'
         : (partner.bio || partner.native_lang || '지금 대화 가능한 파트너');
@@ -1831,6 +1834,7 @@
   }
 
   function init() {
+    loadPhotoResolver().then(function(){if(livePartners.length)renderPartnerCards();});
     mount();
     document.addEventListener('click', function (e) {
       var trigger = findBookingTrigger(e.target);
