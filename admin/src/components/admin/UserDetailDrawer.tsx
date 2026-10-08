@@ -326,7 +326,7 @@ export function UserDetailDrawer({ open, user, onClose, onTicketChange }: Props)
       const response = await fetch("/api/send-welcome", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, nickname: displayName || "회원" }),
+        body: JSON.stringify({ email, nickname: displayName || "회원", recipientRole: user?.role }),
       });
       const result = await response.json().catch(() => ({})) as { error?: string };
       if (!response.ok) throw new Error(result.error || "웰컴 이메일 발송에 실패했습니다.");

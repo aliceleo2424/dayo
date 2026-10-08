@@ -233,7 +233,7 @@
       || (user.user_metadata && (user.user_metadata.nickname || user.user_metadata.user_name || user.user_metadata.name))
       || String(user.email).split('@')[0]
       || '회원';
-    var payload = JSON.stringify({ email: user.email, nickname: nickname, locale: emailInterfaceLocale() });
+    var payload = JSON.stringify({ email: user.email, nickname: nickname, locale: emailInterfaceLocale(), recipientRole: profile && profile.role });
     var urls = ['/api/send-welcome'];
     try {
       if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {

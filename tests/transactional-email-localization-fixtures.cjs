@@ -125,6 +125,11 @@ async function main() {
   profileRole='user';
   await admin.exports.POST({json:async()=>({email:'internal@fixture.test',nickname:'User'})});
   check(adminMail.html.includes('lang="ko"') && adminMail.to==='internal@fixture.test','Admin unknown User keeps KO/recipient');
+  delete adminSandbox.process.env.SUPABASE_SERVICE_ROLE_KEY;
+  await admin.exports.POST({json:async()=>({email:'internal@fixture.test',nickname:'Jen',recipientRole:'partner'})});
+  check(adminMail.html.includes('lang="en"') && !adminMail.text.includes('9,900'),'Existing Admin profile context supports Partner EN without new credentials');
+  check(read('admin/src/components/admin/UserDetailDrawer.tsx').includes('recipientRole: user?.role'),'Admin passes current exact profile role');
+  check(read('public/supabase-client.js').includes('recipientRole: profile && profile.role'),'Public fallback passes current exact profile role');
   for(const f of ['api/partner-application-notification.js','api/_lib/guidebook-delivery.js'])check(read(f).includes('reply_to: REPLY_TO'),'Other existing Resend route reply header');
   check(read('api/send-lead-email.js').includes('smtp.gmail.com'),'Legacy Gmail transport remains');
   // Byte-stable Resend wire body and the original timeout/idempotency transport.

@@ -7,10 +7,11 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, nickname, locale } = await req.json();
+    const { email, nickname, locale, recipientRole } = await req.json();
     if (!email) return NextResponse.json({ error: 'Email is required' }, { status: 400 });
-    // Read recipient preferences only; preserve the existing requested recipient.
-    let role = 'user';
+    // Existing profile context controls presentation only; never recipient selection or privileges.
+    // If configured, server profile data takes precedence over that UI context.
+    let role = recipientRole === 'partner' ? 'partner' : 'user';
     let metadata = {};
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
     const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
