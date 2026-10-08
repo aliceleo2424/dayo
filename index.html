@@ -2992,6 +2992,37 @@
       .dayo-cafe-landing .home-cta-btn { width: 100%; min-height: 54px; }
       .dayo-cafe-landing .hero-media { width: calc(100% + 2rem); }
     }
+    /* Landing conversation overview: tap/click disclosure, shared across viewports. */
+    .dayo-cafe-landing #how { padding: 2.75rem 0; }
+    .dayo-cafe-landing #how .landing-lead { margin-bottom: 1.25rem; }
+    .dayo-cafe-landing #how .landing-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .65rem; align-items: start; }
+    .dayo-cafe-landing #how .landing-steps > details { padding: 0; overflow: hidden; }
+    .dayo-cafe-landing #how summary { display: flex; align-items: center; gap: .55rem; padding: 1rem; margin: 0; cursor: pointer; list-style: none; min-height: 58px; box-sizing: border-box; }
+    .dayo-cafe-landing #how summary::-webkit-details-marker { display: none; }
+    .dayo-cafe-landing #how summary::after { content: '+'; margin-left: auto; color: #5F7D63; font-size: 1.3rem; flex: 0 0 auto; }
+    .dayo-cafe-landing #how details[open] > summary::after { content: '−'; }
+    .dayo-cafe-landing #how summary:focus-visible { outline: 2px solid #5F7D63; outline-offset: -4px; border-radius: 17px; }
+    .dayo-cafe-landing #how .journey-title { font-size: 1rem; }
+    .dayo-cafe-landing #how .journey-step { font-size: .75rem; color: #5F7D63; }
+    .dayo-cafe-landing #how .journey-desc { margin: 0; padding: 0 1rem 1rem; line-height: 1.65; }
+    .dayo-cafe-landing #how .journey-card:hover { transform: translateY(-1px); }
+    .dayo-cafe-landing #how .landing-subsection { margin-top: 1.5rem; }
+    .dayo-cafe-landing #how .topic-chips { gap: .5rem; margin-top: .8rem; }
+    .dayo-cafe-landing #how .topic-chip { padding: .5rem .75rem; border-color: #DDE8D9; background: #F8F0E3; font-weight: 600; max-width: 100%; box-sizing: border-box; }
+    .dayo-cafe-landing #how .topic-sample { margin: .65rem 0 0; color: #5F7D63; font-size: .88rem; }
+    .dayo-cafe-landing #how .session-ribbon { margin-top: 1.5rem; }
+    .dayo-cafe-landing .hero-title { text-wrap: balance; }
+    @media (max-width: 600px) {
+      .dayo-cafe-landing #how { padding: 2rem 0; }
+      .dayo-cafe-landing #how .landing-steps { grid-template-columns: 1fr; }
+      .dayo-cafe-landing #how summary { padding: .85rem 1rem; }
+      .dayo-cafe-landing #how .session-ribbon { font-size: .8rem; padding: .85rem .65rem; gap: .3rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .dayo-cafe-landing #how .journey-card { transition: none; }
+      .dayo-cafe-landing #how .journey-card:hover { transform: none; }
+      .dayo-cafe-landing #how .reveal { opacity: 1; transform: none; animation: none; }
+    }
     /* Speaking check: keep the modal aligned with the café landing palette. */
     #quizModal .modal { background: #FFFBF4; border: 1px solid #E7DDD0; border-radius: 20px; box-shadow: 0 18px 48px rgba(64,54,47,.16); color: #40362F; }
     #quizModal .modal-close { background: #F8F0E3; color: #506B55; }
@@ -3119,15 +3150,8 @@
             <img src="/images/dayo-cafe-hero-desktop.webp" alt="노트북으로 외국인과 화상 대화를 하며 웃는 여성" data-i18n="landing.hero.imageAlt" data-i18n-attr="alt" width="1536" height="864" fetchpriority="high">
           </picture>
           <div class="hero-copy">
-            <h1 class="hero-title">
-              <span class="hero-sr-only" data-i18n="landing.hero.title">외국인과 눈을 맞추며 대화가 돼요.</span>
-              <span class="hero-title-visible" aria-hidden="true">
-                <span data-i18n="landing.hero.titlePrefix">외국인과</span>
-                <span class="hero-title-rotator"><span class="hero-title-rotator-size" data-i18n="landing.hero.longest">눈을 맞추며</span><span data-hero-rotator>눈을 맞추며</span></span>
-                <span data-i18n="landing.hero.titleSuffix">대화가 돼요.</span>
-              </span>
-            </h1>
-            <p class="hero-subtitle" data-i18n="landing.hero.description">막히면 한국어로 말해도 괜찮은, 외국인 파트너와의 1:1 화상 대화</p>
+            <h1 class="hero-title" data-i18n="landing.hero.title">외국어로, 내 이야기를 시작해요.</h1>
+            <p class="hero-subtitle" data-i18n="landing.hero.description">외국인 Partner와 일상과 취향을 나누는 1:1 글로벌 대화.</p>
             <div class="cta-wrap">
               <button type="button" class="home-cta-btn" data-open-quiz data-i18n="landing.hero.testCta">무료로 스피킹 감각 확인하기</button>
               <div class="hero-secondary-actions">
@@ -3145,39 +3169,43 @@
       <div class="section-inner">
         <p class="section-label reveal" data-i18n="landing.how.label">이용 방법</p>
         <h2 class="section-title reveal" data-i18n="landing.how.title">DayO에서는 이렇게 대화해요</h2>
-        <p class="landing-lead reveal" data-i18n="landing.how.lead">시작할 이야기부터 막히는 순간의 표현, 대화 후 리캡까지 필요한 만큼만 가볍게 도움받아요.</p>
-        <div class="flow-grid">
-          <article class="journey-card reveal reveal-delay-1">
-            <div class="journey-card__head"><span class="journey-step">01</span><span class="journey-icon">🃏</span><h3 class="journey-title" data-i18n="landing.how.step1.title">이야기 카드</h3></div>
+        <p class="landing-lead reveal" data-i18n="landing.how.lead">대화가 쌓이면, 자신감도 쌓여요.</p>
+        <div class="flow-grid landing-steps">
+          <details class="journey-card reveal reveal-delay-1" name="landing-conversation-steps">
+            <summary class="journey-card__head"><span class="journey-step">01</span><span class="journey-icon">🃏</span><h3 class="journey-title" data-i18n="landing.how.step1.title">이야기 카드</h3></summary>
             <p class="journey-desc" data-i18n="landing.how.step1.desc">처음부터 대화 주제를 고민하지 않아도 돼요. 관심사에 맞는 질문 카드로 가볍게 시작해요.</p>
-          </article>
-          <article class="journey-card reveal reveal-delay-2">
-            <div class="journey-card__head"><span class="journey-step">02</span><span class="journey-icon">💬</span><h3 class="journey-title" data-i18n="landing.how.step2.title">외국인 파트너와 1:1 영어 대화</h3></div>
-            <p class="journey-desc" data-i18n="landing.how.step2.desc">세계 여러 나라에서 온 파트너와 서로의 일상과 취향을 나눠요.</p>
-          </article>
-          <article class="journey-card reveal reveal-delay-3">
-            <div class="journey-card__head"><span class="journey-step">03</span><span class="journey-icon">✨</span><h3 class="journey-title" data-i18n="landing.how.step3.title">AI 대화 도움</h3></div>
-            <p class="journey-desc" data-i18n="landing.how.step3.desc">필요한 순간 표현을 확인해요.</p>
-          </article>
-          <article class="journey-card reveal reveal-delay-3">
-            <div class="journey-card__head"><span class="journey-step">04</span><span class="journey-icon">📝</span><h3 class="journey-title" data-i18n="landing.how.step4.title">5분 AI 대화 리캡</h3></div>
-            <p class="journey-desc" data-i18n="landing.how.step4.desc">방금 나눈 대화는 짧은 후속 활동으로 돌아봐요.</p>
-          </article>
+          </details>
+          <details class="journey-card reveal reveal-delay-2" name="landing-conversation-steps">
+            <summary class="journey-card__head"><span class="journey-step">02</span><span class="journey-icon">💬</span><h3 class="journey-title" data-i18n="landing.how.step2.title">외국인 파트너와 1:1 대화</h3></summary>
+            <p class="journey-desc" data-i18n="landing.how.step2.desc">세계 여러 나라에서 온 Partner와 서로의 일상과 취향을 이야기해요.</p>
+          </details>
+          <details class="journey-card reveal reveal-delay-3" name="landing-conversation-steps">
+            <summary class="journey-card__head"><span class="journey-step">03</span><span class="journey-icon">✨</span><h3 class="journey-title" data-i18n="landing.how.step3.title">AI 대화 도움</h3></summary>
+            <p class="journey-desc" data-i18n="landing.how.step3.desc">말이 막히는 순간 필요한 표현과 자막을 참고해요.</p>
+          </details>
+          <details class="journey-card reveal reveal-delay-3" name="landing-conversation-steps">
+            <summary class="journey-card__head"><span class="journey-step">04</span><span class="journey-icon">📝</span><h3 class="journey-title" data-i18n="landing.how.step4.title">오늘의 대화 기록</h3></summary>
+            <p class="journey-desc" data-i18n="landing.how.step4.desc">오늘 나눈 이야기와 내 대화량, 실제로 한 말과 단어 퀴즈, Partner Letter로 대화를 남겨요.</p>
+          </details>
         </div>
 
         <div class="landing-subsection reveal" id="topics">
           <h3 data-i18n="landing.topics.title">오늘은 어떤 이야기를 나눌까요?</h3>
           <div class="topic-chips" aria-label="대화 주제 예시" data-i18n="landing.topics.aria" data-i18n-attr="aria-label">
-            <span class="topic-chip" data-i18n="landing.topics.daily">☕ 요즘 나의 일상</span>
-            <span class="topic-chip" data-i18n="landing.topics.korea">🇰🇷 한국에서 발견한 것들</span>
-            <span class="topic-chip" data-i18n="landing.topics.tastes">🎵 우리의 취향 비교</span>
+            <span class="topic-chip" data-i18n="landing.topics.food">🍜 오늘 먹은 것들</span>
+            <span class="topic-chip" data-i18n="landing.topics.cafe">☕ 요즘 자주 가는 카페</span>
+            <span class="topic-chip" data-i18n="landing.topics.travel">✈️ 당장 떠나고 싶은 곳</span>
+            <span class="topic-chip" data-i18n="landing.topics.animals">🐶 동물 이야기</span>
+            <span class="topic-chip" data-i18n="landing.topics.korea">🇰🇷 한국에서 신기했던 것</span>
+            <span class="topic-chip" data-i18n="landing.topics.balance">⚖️ 밸런스 게임</span>
           </div>
+          <p class="topic-sample" data-i18n="landing.topics.balanceQuestion">짜장면 vs 짬뽕, 당신의 선택은?</p>
         </div>
 
         <div class="session-ribbon reveal" aria-label="DayO 세션 구성" data-i18n="landing.session.aria" data-i18n-attr="aria-label">
           <span data-i18n="landing.session.interests">관심사 선택</span><span aria-hidden="true">→</span>
           <span data-i18n="landing.session.conversation">25분 대화</span><span aria-hidden="true">→</span>
-          <span data-i18n="landing.session.recap">5분 AI 리캡</span>
+          <span data-i18n="landing.session.recap">오늘의 대화 기록</span>
         </div>
 
         <div class="dayo-video-wrapper reveal">
@@ -3246,7 +3274,7 @@
       <div class="section-inner" style="text-align: center;">
         <p class="section-label reveal" data-i18n="landing.pricing.label">세션 티켓</p>
         <h2 class="section-title reveal" style="margin-bottom: 1.25rem;" data-i18n="landing.pricing.title">필요할 때 선택하는 티켓</h2>
-        <p class="reveal" style="color: var(--text-muted); margin-bottom: 1.75rem; line-height: 1.7; max-width: 44rem; margin-left: auto; margin-right: auto;" data-i18n="landing.pricing.description">25분 1:1 영어 대화 + 5분 AI 대화 리캡, 정기결제 없이 필요할 때 한 번씩 이용할 수 있어요.</p>
+        <p class="reveal" style="color: var(--text-muted); margin-bottom: 1.75rem; line-height: 1.7; max-width: 44rem; margin-left: auto; margin-right: auto;" data-i18n="landing.pricing.description">25분 1:1 대화와 5분 후속 활동. 정기결제 없이 필요할 때 이용해요.</p>
         <div class="ticket-price-row reveal">
           <button type="button" class="ticket-price-card ticket-price-card--trial" data-landing-ticket="trial">
             <strong data-i18n="landing.pricing.trialName">첫 세션 체험 할인권</strong>
@@ -3447,42 +3475,20 @@
     }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
     document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-    /* Landing title rotator */
+    /* Landing translations and conversation disclosure */
     function t(key, vars) {
       if (!window.DayOI18n) return key;
       return vars ? window.DayOI18n.tf(key, vars) : window.DayOI18n.t(key);
     }
-    const heroRotator = document.querySelector('[data-hero-rotator]');
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let heroPhraseIndex = 0;
-    let heroFadeTimer = null;
-    function renderHeroPhrase() {
-      if (heroRotator && window.DayOI18n) heroRotator.textContent = t('landing.hero.rotate.' + heroPhraseIndex);
-    }
-    renderHeroPhrase();
-    document.addEventListener('dayo:langchange', () => {
-      clearTimeout(heroFadeTimer);
-      if (heroRotator) heroRotator.classList.remove('is-changing');
-      renderHeroPhrase();
+    // Native details provide keyboard/tap access; enforce one open card on older browsers too.
+    document.querySelectorAll('#how .landing-steps > details').forEach(card => {
+      card.addEventListener('toggle', () => {
+        if (!card.open) return;
+        document.querySelectorAll('#how .landing-steps > details').forEach(other => {
+          if (other !== card) other.open = false;
+        });
+      });
     });
-    function syncReducedMotion() {
-      if (!reducedMotion.matches) return;
-      clearTimeout(heroFadeTimer);
-      heroPhraseIndex = 0;
-      if (heroRotator) heroRotator.classList.remove('is-changing');
-      renderHeroPhrase();
-    }
-    if (reducedMotion.addEventListener) reducedMotion.addEventListener('change', syncReducedMotion);
-    else if (reducedMotion.addListener) reducedMotion.addListener(syncReducedMotion);
-    setInterval(() => {
-      if (!heroRotator || reducedMotion.matches) return;
-      heroRotator.classList.add('is-changing');
-      heroFadeTimer = setTimeout(() => {
-        heroPhraseIndex = (heroPhraseIndex + 1) % 4;
-        renderHeroPhrase();
-        heroRotator.classList.remove('is-changing');
-      }, 220);
-    }, 2000);
 
     /* Free speaking sense test — five target languages, no proficiency grading */
     const QUIZ_LANGS = ['en', 'fr', 'ja', 'zh', 'es'];
