@@ -3998,6 +3998,7 @@
   <script src="partner-captions.js?v=20261004-partner-final"></script>
   <script>window.__dayoUsePeerJS = true;</script>
   <script src="turn-ice.js?v=20260930-cloudflare-turn"></script>
+  <script src="audio-quality-diagnostics.js?v=20261008-audio-qa"></script>
   <script src="room-live.js?v=20261005-conversation-recap"></script>
   <script src="learner-expressions.js?v=20261005-conversation-recap"></script>
   <script src="conversation-recap.js?v=20261007-hotfix"></script>
@@ -4077,6 +4078,7 @@
       let participantPeerRetryAttempts = 0;
       let destroyed = false;
       let partnerCaptions = null;
+      let audioDiagnostics = null;
       let observerGuestCall = null;
       let observerHostCall = null;
       let observerProbeTimer = 0;
@@ -4121,6 +4123,7 @@
 
       function bindCallIceTelemetry(call) {
         if (turnIceManager) turnIceManager.bindCall(call);
+        if (audioDiagnostics) audioDiagnostics.bind(call && call.peerConnection);
       }
 
       function isObserverPeerId(peerId) {
@@ -4236,6 +4239,7 @@
 
       function endParticipantCall(call, delay) {
         if (!call || activeCall !== call) return;
+        if (audioDiagnostics) audioDiagnostics.detach('closed');
         activeCall = null;
         if (partnerCaptions) partnerCaptions.setRemotePeer('');
         hostCallConnecting = false;
@@ -4254,6 +4258,7 @@
         showRemotePending('room.connection.recovering');
         remoteHealthTimer = setTimeout(function () {
           if (participantCallNeedsRecovery(call, reason)) {
+            if (audioDiagnostics) audioDiagnostics.event('recovery', reason);
             console.warn('[DayO Media] restarting participant call:', reason);
             endParticipantCall(call, 800);
           } else {
@@ -4327,6 +4332,7 @@
           return;
         }
         attempt.then(hideRemotePending).catch(function (e) {
+          if (audioDiagnostics) audioDiagnostics.event('playback_blocked');
           console.log('Autoplay waiting for touch gesture:', e);
           remoteVideo.muted = true;
           remoteVideo.play().catch(function () { /* ignore */ });
@@ -4334,6 +4340,7 @@
           if (remoteUnlockBound) return;
           remoteUnlockBound = true;
           var unlockPlay = function () {
+            if (audioDiagnostics) audioDiagnostics.event('playback_retry');
             remoteUnlockBound = false;
             setupVideoElement(remoteVideo, false);
             remoteVideo.play().then(hideRemotePending).catch(showRemoteAudioUnlock);
@@ -4801,6 +4808,15 @@
         currentRole = isObserver ? 'observer' : (access.adminTest ? access.previewRole : access.role);
         currentRoomId = access.roomId;
         HOST_ID = currentRoomId + '_host';
+        if (!audioDiagnostics && window.DayOAudioQualityDiagnostics) {
+          try {
+            audioDiagnostics = window.DayOAudioQualityDiagnostics.create({
+              access: access, optIn: new URLSearchParams(window.location.search).get('audioDiagnostics') === '1',
+              storage: window.sessionStorage, document: document, page: window
+            });
+            if (audioDiagnostics.enabled) window.DayOAudioDiagnostics = audioDiagnostics;
+          } catch (_) { /* QA diagnostics never block room entry */ }
+        }
         if (!partnerCaptions && window.DayOPartnerCaptions) {
           partnerCaptions = window.DayOPartnerCaptions.create({ access: access, render: function (state) {
             var box = document.getElementById('partnerCaption');
@@ -4840,6 +4856,7 @@
               video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
               audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
             });
+          if (audioDiagnostics) audioDiagnostics.captureLocal(localStream);
           bindLocalPip();
 
           participantPeerId = (currentRole === 'partner')
@@ -4855,6 +4872,7 @@
       function destroy() {
         destroyed = true;
         if (partnerCaptions) partnerCaptions.destroy();
+        if (audioDiagnostics) audioDiagnostics.destroy();
         clearTimeout(hostCallTimer);
         clearTimeout(participantPeerRetryTimer);
         clearTimeout(remoteConnectionDelayTimer);
