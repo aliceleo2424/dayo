@@ -57,13 +57,61 @@
     if(!memoryLoader)memoryLoader=new Promise(function(resolve,reject){var script=document.createElement('script');script.src='/memory-card.js';script.onload=function(){window.DayOMemoryCard?resolve(window.DayOMemoryCard):reject(Error('renderer'));};script.onerror=function(){memoryLoader=null;reject(Error('renderer'));};document.head.appendChild(script);});return memoryLoader;
   }
   function memoryLocale(){return !(window.DayOI18n&&String(window.DayOI18n.getLang()).toLowerCase()==='en');}
-  async function exportRenderedMemory(canvas,button){
-    var original=button&&button.innerHTML,ko=memoryLocale();if(button){button.disabled=true;button.textContent=ko?'저장 중…':'Saving…';}
-    try{var blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw Error('png');var file=new File([blob],'DayO_Memory_'+Date.now()+'.png',{type:'image/png'});
-      if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:'DayO Memory Card'});return;}catch(error){if(error&&error.name==='AbortError')return;}}
-      downloadPng(canvas);
-    }catch(_){alert(ko?'대화 카드를 저장하지 못했어요. 다시 시도해 주세요.':'Could not save your Memory Card. Please try again.');}
-    finally{restoreButton(button,original);}
+  function isMobileMemoryExport() {
+    if (navigator.userAgentData && navigator.userAgentData.mobile === true) return true;
+    return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '')
+      || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+  function memoryExportDeadline(start, milliseconds) {
+    return new Promise(function (resolve, reject) {
+      var timer = setTimeout(function () { reject(Error('memory-export-timeout')); }, milliseconds);
+      try {
+        Promise.resolve(start()).then(function (value) { clearTimeout(timer); resolve(value); },
+          function (error) { clearTimeout(timer); reject(error); });
+      } catch (error) { clearTimeout(timer); reject(error); }
+    });
+  }
+  async function exportRenderedMemory(canvas, button) {
+    if (button && button.disabled) return;
+    var original = button && button.innerHTML, ko = memoryLocale(), saved = false;
+    if (button) {
+      clearTimeout(button._dayoMemoryResetTimer);
+      button.disabled = true;
+      button.setAttribute('aria-busy', 'true');
+      button.textContent = ko ? '저장 중…' : 'Saving…';
+    }
+    try {
+      var shared = false;
+      if (isMobileMemoryExport() && typeof navigator.share === 'function'
+          && typeof navigator.canShare === 'function' && typeof File === 'function') {
+        try {
+          var blob = await memoryExportDeadline(function () {
+            return new Promise(function (resolve) { canvas.toBlob(resolve, 'image/png'); });
+          }, 5000);
+          if (!blob) throw Error('memory-export-png');
+          var file = new File([blob], 'DayO_Memory_' + Date.now() + '.png', {type: 'image/png'});
+          if (navigator.canShare({files: [file]})) {
+            await memoryExportDeadline(function () {
+              return navigator.share({files: [file], title: 'DayO Memory Card'});
+            }, 12000);
+            shared = true;
+          }
+        } catch (_) { /* Unsupported, rejected or timed-out sharing falls back to PNG download. */ }
+      }
+      if (!shared) downloadPng(canvas);
+      saved = true;
+    } catch (_) {
+      alert(ko ? '저장하지 못했어요. 다시 시도해주세요.' : 'Could not save your card. Please try again.');
+    } finally {
+      restoreButton(button, original);
+      if (button) {
+        button.removeAttribute('aria-busy');
+        if (saved) {
+          button.textContent = ko ? '저장 완료' : 'Saved';
+          button._dayoMemoryResetTimer = setTimeout(function () { restoreButton(button, original); }, 1500);
+        }
+      }
+    }
   }
   async function previewMemoryCard(host,button){
     var original=button&&button.innerHTML,ko=memoryLocale();if(document.querySelector('dialog.dayo-memory-preview'))return;
