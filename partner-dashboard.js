@@ -149,7 +149,7 @@
     resource('Conversation Guide · HOW TO TALK','Conversation Guide · 대화 진행 가이드','Help users feel comfortable and keep talking.','편안한 대화를 이어가는 방법.','/partner-guide');
     resource('Pay & Rules · HOW DAYO WORKS','Pay & Rules · 운영 규정','Session pay, bonuses, cancellations & partner standards.','세션 수익, 보너스, 취소 및 파트너 기준.','#pd-pay-rules');
     resource('Safety & Privacy','안전 · 개인정보','Keep conversations on DayO. Respect boundaries and avoid requesting private contact details.','대화는 DayO에서 진행하고, 상대의 경계와 개인 연락처를 존중해 주세요.','/privacy');
-    resource('Help / Contact','도움 · 운영 문의','For session issues, reporting and policy questions, contact DayO.','세션 문제, 신고 및 운영 규정은 DayO에 문의해 주세요.','mailto:dayo.speak@gmail.com');
+    resource('Help / Contact','도움 · 운영 문의','For session issues, reporting and policy questions, contact DayO.','세션 문제, 신고 및 운영 규정은 DayO에 문의해 주세요.','mailto:hello@dayotalk.com');
     var rules=card('Pay & Rules','Pay & Rules','Earnings shown here use the existing session-log estimate; they are not a confirmed payout statement. Check Earnings for your current summary. For cancellation, referral and reliability terms, contact DayO before relying on an amount.','표시된 수익은 기존 세션 기록 기반 추정치이며 확정 지급 내역이 아닙니다. Earnings에서 요약을 확인하세요. 취소·추천·Reliability Bonus의 적용 조건과 금액은 운영팀에 확인해 주세요.');rules.id='pd-pay-rules';
     rules.append(action('Open Earnings →','Earnings 보기 →',function(){select('pd-earnings');}));
     earnings.append(action('Pay & Bonus Rules →','수익 · 보너스 규정 →',function(){select('pd-resources');rules.scrollIntoView({block:'start'});}));

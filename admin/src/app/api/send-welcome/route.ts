@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     <!-- 하단 푸터 -->
     <tr>
       <td style="padding: 20px 32px; background-color: #FAF8F5; border-top: 1px solid #EFEAE4; text-align: center; font-size: 12px; color: #8A7E75; line-height: 1.6;">
-        문의: <a href="mailto:dayo.speak@gmail.com" style="color: #61564D; font-weight: 600; text-decoration: underline;">dayo.speak@gmail.com</a> | DayO 팀 드림<br>
+        문의: <a href="mailto:hello@dayotalk.com" style="color: #61564D; font-weight: 600; text-decoration: underline;">hello@dayotalk.com</a> | DayO 팀 드림<br>
         <span style="font-size: 11px; color: #ABA095;">본 메일은 DayO 회원가입 혜택 안내를 위해 발송되었습니다.</span>
       </td>
     </tr>

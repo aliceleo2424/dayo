@@ -19,7 +19,7 @@ const text = [
   '첫 외국어 대화가 조금 긴장된다면 처음부터 끝까지 다 읽지 않아도 괜찮아요.',
   '막히는 순간에 필요한 문장부터 골라보세요.', '', '가이드북 열기: ' + GUIDE, '',
   '이 메일은 요청하신 PDF 가이드북 전달용입니다. 마케팅 수신 동의로 사용하지 않습니다.',
-  '수신 동의 철회·이메일 정보 삭제 요청: dayo.speak@gmail.com'
+  '수신 동의 철회·이메일 정보 삭제 요청: hello@dayotalk.com'
 ].join('\n');
 const html = `<div style="background:#FFFBF4;padding:24px;color:#594842;font-family:Apple SD Gothic Neo,Malgun Gothic,sans-serif;line-height:1.7">
   <div style="max-width:560px;margin:auto;background:#F8F0E3;border:1px solid #E8DDBD;border-radius:20px;padding:28px">
@@ -29,7 +29,7 @@ const html = `<div style="background:#FFFBF4;padding:24px;color:#594842;font-fam
     <p>막히는 순간에 필요한 문장부터 골라보세요.</p>
     <p><a href="${GUIDE}" style="display:inline-block;background:#5F7D63;color:white;text-decoration:none;padding:12px 20px;border-radius:12px;font-weight:700">가이드북 열기</a></p>
     <p style="font-size:12px;color:#706259">요청하신 PDF 가이드북 전달용 메일입니다. 마케팅 수신 동의로 사용하지 않습니다.<br>
-    수신 동의 철회·이메일 정보 삭제 요청: <a href="mailto:dayo.speak@gmail.com" style="color:#4F7C59">dayo.speak@gmail.com</a></p>
+    수신 동의 철회·이메일 정보 삭제 요청: <a href="mailto:hello@dayotalk.com" style="color:#4F7C59">hello@dayotalk.com</a></p>
   </div>
 </div>`;
 

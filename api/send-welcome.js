@@ -62,7 +62,7 @@ function welcomeHtml(nickname) {
     '<p style="margin:0 0 20px;"><strong>첫 이용 9,900원 할인 혜택</strong>이 준비돼 있어요. 이용권은 결제 후 지급돼요.</p>' +
     '<p style="margin:0 0 24px;">예약 기능은 정식 오픈을 준비 중이에요. 먼저 DayO에서 대화 방식을 살펴보세요.</p>' +
     '<p style="margin:0 0 28px;text-align:center;"><a href="' + cta + '" style="display:inline-block;background:#FF755E;color:#ffffff;text-decoration:none;font-weight:800;border-radius:999px;padding:14px 22px;">DayO 둘러보기 ☕</a></p>' +
-    '<p style="margin:0;font-size:13px;color:#9A8580;">문의: <a href="mailto:dayo.speak@gmail.com" style="color:#9A8580;">dayo.speak@gmail.com</a> | DayO 팀 드림</p>' +
+    '<p style="margin:0;font-size:13px;color:#9A8580;">문의: <a href="mailto:hello@dayotalk.com" style="color:#9A8580;">hello@dayotalk.com</a> | DayO 팀 드림</p>' +
     '</td></tr><tr><td style="padding:0 24px 28px;"></td></tr></table></td></tr></table></body></html>';
 }
 
@@ -76,7 +76,7 @@ function welcomeText(nickname) {
     '첫 이용 9,900원 할인 혜택이 준비돼 있어요. 이용권은 결제 후 지급돼요.\n\n' +
     '예약 기능은 정식 오픈을 준비 중이에요. 먼저 DayO에서 대화 방식을 살펴보세요.\n\n' +
     '[DayO 둘러보기 ☕]\nhttps://www.dayotalk.com/#how\n\n---\n' +
-    '문의: dayo.speak@gmail.com | DayO 팀 드림';
+    '문의: hello@dayotalk.com | DayO 팀 드림';
 }
 
 module.exports = async function handler(req, res) {

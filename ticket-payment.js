@@ -95,7 +95,7 @@
   var PREOPEN_PAY_NOTICE =
     '현재 DayO 프리오픈 시범 운영 기간으로 결제 시스템 점검 중입니다 ☕\n' +
     '정식 오픈 시 등록하신 이메일로 가장 먼저 안내해 드릴게요!\n' +
-    '(문의: dayo.speak@gmail.com)';
+    '(문의: hello@dayotalk.com)';
 
   var PREOPEN_DEBUG_PREFIX = '[DayO PREOPEN DEBUG]';
 

@@ -75,7 +75,7 @@
       '    <p>' + copy.registration + ': 687-79-00609</p>',
       '    <p>' + copy.address + ': 서울특별시 강동구 고덕로 262, 720호<br>(명일동, 고덕역효성해링턴타워 더퍼스트)</p>',
       '    <p>' + copy.mailOrder + ': ' + copy.mailOrderNumber + '</p>',
-      '    <p>' + copy.email + ': <a href="mailto:dayo.speak@gmail.com">dayo.speak@gmail.com</a></p>',
+      '    <p>' + copy.email + ': <a href="mailto:hello@dayotalk.com">hello@dayotalk.com</a></p>',
       '    <p>' + copy.phone + ': <a href="tel:07080951988">070-8095-1988</a></p>',
       '    <p>' + copy.live + ': ' + copy.liveChannel + ' ‘DayO 돼요’</p>',
       '    <p>' + copy.hosting + ': Vercel Inc.</p>',
