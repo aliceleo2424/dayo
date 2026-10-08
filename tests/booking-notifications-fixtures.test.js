@@ -34,6 +34,7 @@ async function frontend() {
     getRpcClient: () => window.supabaseClient, readLocalNextSession: () => null, loadUrgentSessionBanner: async () => {},
     fetch: async (url, options) => { calls.push({ url, options }); throw new Error('fixture network failure'); } };
   vm.createContext(context);
+  vm.runInContext(source.slice(source.indexOf('  function emailInterfaceLocale'), source.indexOf('  var welcomeEmailBusy')), context);
   vm.runInContext(source.slice(source.indexOf('  function normalizeRpcPayload'), source.indexOf('  window.handleCompleteSession')), context);
   const id = uid(9999);
   check(await window.handleConfirmBooking(learner, id) === false && calls.length === 0, 'Real confirmation frontend does not notify on RPC failure');
@@ -270,7 +271,7 @@ async function main() {
     check(lateCancel.ticket_refunded === false && lateCancel.partner_rewarded === true, '4–6h actual no-refund/compensation contract');
     await invoke(late, learner, 'booking_cancelled');
     const lateMail = requests.find(r => r.key === `booking_cancelled:${late.id}:partner`).payload;
-    check(lateMail.text.includes('반환되지 않았습니다') && lateMail.text.includes('보상이 Partner에게 반영'), 'Cancellation text uses recorded flags');
+    check(lateMail.text.includes('ticket has not been returned') && lateMail.text.includes('compensation has been credited'), 'Cancellation text uses recorded flags');
     check((await deliver(late)).sent === 0, 'An unsent confirmation is suppressed after cancellation');
     const short = await booking(2, 1, internal);
     check((await confirm(short)).success, 'Existing internal <4h exception survives');

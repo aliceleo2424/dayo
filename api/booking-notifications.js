@@ -70,10 +70,12 @@ function createHandler(options = {}) {
       if (!UUID.test(String(bookingId || '')) || !['booking_confirmed', 'booking_cancelled'].includes(eventType)) {
         return json(res, 400, { ok: false, error: 'invalid_request' });
       }
+      let localeUserId = null;
       if (!worker) {
         const verified = await auth.auth.getUser(token[1]);
         const user = verified.data && verified.data.user;
         if (verified.error || !user) return json(res, 401, { ok: false, error: 'authentication_required' });
+        localeUserId = user.id;
         const found = await service.from('bookings').select('id,learner_id,partner_user_id,status,ticket_deducted,end_reason,is_test_session').eq('id', bookingId).maybeSingle();
         if (found.error) throw new Error('storage_unavailable');
         const booking = found.data;
@@ -85,7 +87,7 @@ function createHandler(options = {}) {
           : booking.status === 'cancelled' && ['user_cancelled_early', 'user_cancelled_late', 'partner_cancelled_early', 'partner_cancelled_late'].includes(booking.end_reason);
         if (!valid) return json(res, 409, { ok: false, error: 'event_not_committed' });
       }
-      const counts = await (options.dispatch || dispatch)(service, config, { bookingId, eventType });
+      const counts = await (options.dispatch || dispatch)(service, config, { bookingId, eventType }, { localeUserId, locale: req.headers['x-dayo-ui-language'] });
       return json(res, 202, { ok: true, ...counts });
     } catch (_) {
       // This endpoint never creates/cancels bookings, consumes tickets or rewards partners.

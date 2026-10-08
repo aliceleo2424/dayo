@@ -1,3 +1,4 @@
+const { REPLY_TO, sender } = require('./transactional-email');
 // Guidebook delivery and optional marketing consent are independent.
 const { createHash, randomUUID } = require('node:crypto');
 const GUIDE = 'https://www.dayotalk.com/guidebook/level-1';
@@ -39,7 +40,7 @@ module.exports = async function guidebook(body, email, res, { json, getSupabase 
   }
   if (body.consent !== true) return json(res, 400, { ok: false, error: 'consent-required' });
   const apiKey = String(process.env.RESEND_API_KEY || '').trim();
-  const from = String(process.env.RESEND_FROM || 'DayO <hello@dayotalk.com>').trim();
+  const from = sender(process.env.RESEND_FROM);
   if (!apiKey || !process.env.SUPABASE_SERVICE_ROLE_KEY || !from || /[\r\n]/.test(from)) {
     return json(res, 503, { ok: false, error: 'delivery-unavailable' });
   }
@@ -73,7 +74,7 @@ module.exports = async function guidebook(body, email, res, { json, getSupabase 
         'Content-Type': 'application/json',
         'Idempotency-Key': 'guidebook/level-1/' + createHash('sha256').update(email).digest('hex')
       },
-      body: JSON.stringify({ from, to: [email], subject: SUBJECT, text: text + '\n광고성 이메일 수신 거부: ' + unsubscribe, html: html.replace('</div>\n</div>', '<p style="font-size:12px"><a href="' + unsubscribe + '" style="color:#4F7C59">수신 거부</a></p></div>\n</div>'), tags: [{ name: 'source', value: SOURCE }] }),
+      body: JSON.stringify({ from, reply_to: REPLY_TO, to: [email], subject: SUBJECT, text: text + '\n광고성 이메일 수신 거부: ' + unsubscribe, html: html.replace('</div>\n</div>', '<p style="font-size:12px"><a href="' + unsubscribe + '" style="color:#4F7C59">수신 거부</a></p></div>\n</div>'), tags: [{ name: 'source', value: SOURCE }] }),
       signal: AbortSignal.timeout(7000)
     });
     if (!response.ok) throw Error('delivery-failed');

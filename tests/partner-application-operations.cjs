@@ -104,7 +104,7 @@ async function endpoint() {
       assert.equal(name,'finish_partner_application_notification'); assert.equal(args.p_lease_token,job.lease_token); acknowledgements++;locked=false;
       sent=!!args.p_provider_id;errorCode=args.p_error;return {data:true};
     } };
-  } } : require(name), fetch:async (url,options) => {
+  } } : name === './_lib/transactional-email' ? require('../api/_lib/transactional-email') : require(name), fetch:async (url,options) => {
     assert.equal(url,'https://api.resend.com/emails'); assert.equal(options.headers['Idempotency-Key'],'partner-application/'+id);
     calls++;sentPayload=JSON.parse(options.body);return {ok:!fail,status:fail?503:200,json:async()=>({id:'fixture-resend'})};
   } };
@@ -120,7 +120,7 @@ async function endpoint() {
   fail=false;
   const response=await request({type:'INSERT',schema:'public',table:'partner_application_notifications',record:{application_id:id,payload:{full_name:'Forged',email:'private@example.invalid',intro_video_path:'secret-video'}}});
   assert.equal(response.statusCode,200); assert.equal(sent,true); assert.equal(acknowledgements,2);
-  assert.deepEqual(sentPayload.to,['operator@example.invalid']);assert.equal(sentPayload.subject,'[DayO] New Partner Application — Jane Applicant / English, Japanese');
+  assert.equal(sentPayload.reply_to,'hello@dayotalk.com');assert.deepEqual(sentPayload.to,['operator@example.invalid']);assert.equal(sentPayload.subject,'[DayO] New Partner Application — Jane Applicant / English, Japanese');
   assert(sentPayload.text.includes('?application='+id));assert(sentPayload.text.includes('Overseas'));assert(sentPayload.text.includes('Not applicable'));
   for(const privateValue of ['private@example.invalid','secret-video','fixture-service-key','fixture-api-key','Forged']) assert(!JSON.stringify(sentPayload).includes(privateValue));
   await request(); assert.equal(calls,2,'Already sent job must not send again');

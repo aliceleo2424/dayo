@@ -22,7 +22,7 @@ async function prepareWelcome(req, body) {
   const email = String(user.email || '').trim().toLowerCase();
   if (body.email && String(body.email).trim().toLowerCase() !== email) throw unavailable('email mismatch', 403);
   const service = createClient(url, key, options);
-  const result = await service.from('profiles').select('nickname,user_name,welcome_email_sent')
+  const result = await service.from('profiles').select('nickname,user_name,welcome_email_sent,role')
     .eq('id', user.id).maybeSingle();
   if (result.error || !result.data) throw unavailable('welcome verification unavailable');
   const profile = result.data;
@@ -31,7 +31,7 @@ async function prepareWelcome(req, body) {
   const eligible = Number.isFinite(created) && created <= Date.now() && Date.now() - created < 48 * 60 * 60 * 1000;
   const nickname = String(profile.nickname || profile.user_name || '').trim();
   const display = !nickname || nickname.includes('@') || nickname.toLowerCase() === email.split('@')[0] ? '회원' : nickname;
-  return { service, userId: user.id, email, nickname: display, skip: profile.welcome_email_sent === true || !eligible };
+  return { service, userId: user.id, email, nickname: display, role: profile.role, metadata: user.user_metadata || {}, skip: profile.welcome_email_sent === true || !eligible };
 }
 
 async function markWelcomeSent(context) {

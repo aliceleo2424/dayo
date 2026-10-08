@@ -1,3 +1,4 @@
+const { REPLY_TO, sender } = require('./_lib/transactional-email');
 // Database Webhook receiver. Never called by, or awaited by, the public form.
 const { createClient } = require('@supabase/supabase-js');
 const { createHash, timingSafeEqual } = require('node:crypto');
@@ -25,7 +26,7 @@ module.exports = async function handler(req, res) {
   if (typeof id !== 'string' || !UUID.test(id)) return respond(res, 400, { error: 'Invalid application ID.' });
   const to = String(process.env.PARTNER_APPLICATION_NOTIFICATION_TO || '').trim();
   // Same sender as the existing send-welcome Resend integration.
-  const from = String(process.env.RESEND_FROM || 'DayO <hello@dayotalk.com>').trim();
+  const from = sender(process.env.RESEND_FROM);
   const apiKey = String(process.env.RESEND_API_KEY || '').trim();
   const key = String(process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
   const url = String(process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim().replace(/\/rest\/v1\/?$/i, '').replace(/\/+$/, '');
@@ -55,7 +56,7 @@ module.exports = async function handler(req, res) {
     ].join('\n');
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST', headers: { Authorization: 'Bearer ' + apiKey, 'Content-Type': 'application/json', 'Idempotency-Key': 'partner-application/' + id },
-      body: JSON.stringify({ from, to: [to], subject: ('[DayO] New Partner Application — ' + line(app.full_name) + ' / ' + languages).slice(0, 256), text }),
+      body: JSON.stringify({ from, reply_to: REPLY_TO, to: [to], subject: ('[DayO] New Partner Application — ' + line(app.full_name) + ' / ' + languages).slice(0, 256), text }),
       signal: AbortSignal.timeout(8000),
     });
     if (!response.ok) throw new Error('provider_' + response.status);

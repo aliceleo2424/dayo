@@ -183,6 +183,14 @@
     } catch (e) { /* ignore */ }
   }
 
+  function emailInterfaceLocale() {
+    try {
+      var value = window.DayOI18n && typeof window.DayOI18n.getLang === 'function'
+        ? window.DayOI18n.getLang() : window.localStorage.getItem('dayo_lang');
+      return String(value || '').toLowerCase() === 'en' ? 'en' : 'ko';
+    } catch (_) { return 'ko'; }
+  }
+
   var welcomeEmailBusy = {};
 
   function welcomeEmailSentKey(userId) {
@@ -225,7 +233,7 @@
       || (user.user_metadata && (user.user_metadata.nickname || user.user_metadata.user_name || user.user_metadata.name))
       || String(user.email).split('@')[0]
       || '회원';
-    var payload = JSON.stringify({ email: user.email, nickname: nickname });
+    var payload = JSON.stringify({ email: user.email, nickname: nickname, locale: emailInterfaceLocale() });
     var urls = ['/api/send-welcome'];
     try {
       if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
@@ -586,7 +594,7 @@
       if (!session || !session.access_token) return;
       fetch('/api/booking-notifications', {
         method: 'POST',
-        headers: { Authorization: 'Bearer ' + session.access_token, 'Content-Type': 'application/json' },
+        headers: { Authorization: 'Bearer ' + session.access_token, 'Content-Type': 'application/json', 'X-DayO-UI-Language': emailInterfaceLocale() },
         body: JSON.stringify({ bookingId: bookingId, event: eventType }),
         keepalive: true
       }).then(function (response) {

@@ -1,6 +1,6 @@
 'use strict';
 
-const FROM = 'DayO <hello@dayotalk.com>';
+const { FROM, REPLY_TO, locale, recipientLocale, renderEmail } = require('./transactional-email');
 const RETRY_WINDOW_MS = 23 * 60 * 60 * 1000;
 const LANGUAGES = { en: '영어', ko: '한국어', es: '스페인어', fr: '프랑스어', ja: '일본어', zh: '중국어', vi: '베트남어', de: '독일어', it: '이탈리아어', ru: '러시아어' };
 
@@ -28,17 +28,28 @@ function displayName(value, email) {
   return name;
 }
 
-function buildMessage(row, recipient, partnerName) {
+function buildMessage(row, recipient, partnerName, language = row.recipient_role === 'partner' ? 'en' : 'ko') {
   const s = row.snapshot;
   const partner = row.recipient_role === 'partner';
+  const en = language === 'en';
   const cancelled = row.event_type === 'booking_cancelled';
-  const time = kstTime(s.scheduled_at);
-  const language = LANGUAGES[s.language] || '예약에서 확인해 주세요';
+  const canonicalTime = kstTime(s.scheduled_at); // One validated instant, converted once to KST.
+  const [, year, month, day, clock] = canonicalTime.match(/^(\d{4})년 (\d{2})월 (\d{2})일 (\d{2}:\d{2})/);
+  const date = en ? year + '-' + month + '-' + day : year + '년 ' + month + '월 ' + day + '일';
+  const languagesEN = {en:'English',ko:'Korean',es:'Spanish',fr:'French',ja:'Japanese',zh:'Chinese',vi:'Vietnamese',de:'German',it:'Italian',ru:'Russian'};
+  const spokenLanguage = (en ? languagesEN : LANGUAGES)[s.language] || (en ? 'See your booking' : '예약에서 확인해 주세요');
   const link = 'https://www.dayotalk.com/' + (partner ? 'partner' : 'mypage');
   const place = partner ? 'Partner Lounge' : 'My Page';
-  let subject;
+  const title = cancelled ? (en ? 'Session cancelled' : '대화 예약 취소') : (en ? 'Session booked' : '대화 예약 완료');
   let intro;
-  const lines = [`날짜·시작 시간: ${time}`, `대화 언어: ${language}`];
+  const lines = [
+    (en ? 'Status: ' : '예약 상태: ') + (cancelled ? (en ? 'Cancelled' : '취소됨') : (en ? 'Confirmed' : '예약됨')),
+    (en ? 'Date: ' : '날짜: ') + date,
+    (en ? 'Start time: ' : '시작 시간: ') + clock,
+    (en ? 'Time zone: ' : '시간대: ') + 'KST (UTC+09:00)',
+    en ? 'Conversation: 25 minutes' : '대화 시간: 25분',
+    (en ? 'Conversation language: ' : '대화 언어: ') + spokenLanguage
+  ];
   if (cancelled) {
     if (['partner_cancelled_early', 'partner_cancelled_late'].includes(s.end_reason)) {
       if (s.cancelled_by !== 'partner' || s.ticket_refunded !== true || s.partner_rewarded !== false ||
@@ -46,46 +57,40 @@ function buildMessage(row, recipient, partnerName) {
           !Number.isInteger(s.penalty_amount) || (s.late_cancel ? s.penalty_amount <= 0 : s.penalty_amount !== 0)) {
         throw new Error('invalid_cancellation_state');
       }
-      const reasons = { schedule_change: '갑작스러운 일정 변경', health: '건강 문제', school_exam: '학교/시험 일정',
-        technical: '인터넷·기기 문제', personal: '개인 사정', other: '기타' };
-      subject = partner ? '[DayO 돼요] 대화 예약 취소가 완료됐어요' : '[DayO 돼요] 예약된 대화가 취소됐어요';
-      intro = partner ? '아래 대화 예약의 취소가 완료됐어요.' :
-        s.public_reason === 'schedule_change' ? '파트너 일정 변경으로 예약이 취소되었습니다.' : '파트너 사정으로 예약이 취소되었습니다.';
+      const reasons = en ? {schedule_change:'Unexpected schedule change',health:'Health reasons',school_exam:'School or exam schedule',technical:'Internet or device issues',personal:'Personal reasons',other:'Other'} :
+        {schedule_change:'갑작스러운 일정 변경',health:'건강 문제',school_exam:'학교/시험 일정',technical:'인터넷·기기 문제',personal:'개인 사정',other:'기타'};
+      intro = partner ? (en ? 'Your session below has been cancelled.' : '아래 대화 예약의 취소가 완료됐어요.') :
+        s.public_reason === 'schedule_change' ? (en ? 'Your booked session has been cancelled due to a change in your partner’s schedule.' : '파트너 일정 변경으로 예약이 취소되었습니다.') :
+        (en ? 'Your booked session has been cancelled due to your partner’s circumstances.' : '파트너 사정으로 예약이 취소되었습니다.');
       if (partner) {
         if (!Object.hasOwn(reasons, s.reason_code)) throw new Error('invalid_cancellation_state');
-        lines.push('취소 사유: ' + reasons[s.reason_code]);
-        lines.push(s.late_cancel ? `늦은 취소 패널티: ${s.penalty_amount.toLocaleString('ko-KR')}P` : '별도 패널티가 적용되지 않습니다.');
-        if (s.late_cancel) lines.push('기존 잔액은 차감하지 않고 향후 정상 대화 보상에서 상계됩니다.');
+        lines.push((en ? 'Cancellation reason: ' : '취소 사유: ') + reasons[s.reason_code]);
+        lines.push(s.late_cancel ? (en ? 'Late cancellation penalty: ' : '늦은 취소 패널티: ') + s.penalty_amount.toLocaleString(en ? 'en-US' : 'ko-KR') + 'P' :
+          (en ? 'No separate penalty applies.' : '별도 패널티가 적용되지 않습니다.'));
+        if (s.late_cancel) lines.push(en ? 'Your current balance is unchanged. The penalty will be offset against future eligible conversation earnings.' : '기존 잔액은 차감하지 않고 향후 정상 대화 보상에서 상계됩니다.');
       }
-      lines.push('사용한 원래 티켓 1장이 반환되었습니다. 기존 유효기간이 유지됩니다.');
-      if (!partner) lines.push('My Page에서 반환된 티켓을 확인하고 다른 대화를 예약해 주세요.');
+      lines.push(en ? 'The user’s original ticket has been returned with its original expiry date.' : '사용한 원래 티켓 1장이 반환되었습니다. 기존 유효기간이 유지됩니다.');
+      if (!partner) lines.push(en ? 'Check your returned ticket and book another conversation in My Page.' : 'My Page에서 반환된 티켓을 확인하고 다른 대화를 예약해 주세요.');
     } else {
       if (s.ticket_refunded !== (s.end_reason === 'user_cancelled_early') ||
           s.partner_rewarded !== (s.end_reason === 'user_cancelled_late')) throw new Error('invalid_cancellation_state');
-      subject = '[DayO 돼요] 대화 예약이 취소됐어요';
-      intro = 'User가 아래 대화 예약을 취소했어요.';
-      lines.push(s.ticket_refunded ? 'User의 사용 티켓이 반환되었습니다.' : 'User의 사용 티켓은 반환되지 않았습니다.');
-      lines.push(s.partner_rewarded ? '취소 보상이 Partner에게 반영되었습니다.' : '이번 취소에는 Partner 보상이 적용되지 않았습니다.');
+      intro = en ? 'The user has cancelled the session below.' : 'User가 아래 대화 예약을 취소했어요.';
+      lines.push(s.ticket_refunded ? (en ? 'The user’s ticket has been returned.' : 'User의 사용 티켓이 반환되었습니다.') : (en ? 'The user’s ticket has not been returned.' : 'User의 사용 티켓은 반환되지 않았습니다.'));
+      lines.push(s.partner_rewarded ? (en ? 'Cancellation compensation has been credited to the partner.' : '취소 보상이 Partner에게 반영되었습니다.') : (en ? 'No partner compensation applies to this cancellation.' : '이번 취소에는 Partner 보상이 적용되지 않았습니다.'));
     }
   } else {
-    subject = partner ? '[DayO 돼요] 새로운 대화가 예약됐어요' : '[DayO 돼요] 대화 예약이 완료됐어요';
-    intro = partner ? 'DayO User와의 1:1 글로벌 대화가 예약됐어요.' : '1:1 글로벌 대화 예약이 완료됐어요.';
-    if (!partner) lines.push(`Partner: ${partnerName}`);
-    lines.push('대화 시작 5분 전부터 입장할 수 있어요.');
+    intro = partner ? (en ? 'A new 1:1 global conversation with a DayO user is confirmed.' : 'DayO User와의 1:1 글로벌 대화가 예약됐어요.') : (en ? 'Your 1:1 global conversation is confirmed.' : '1:1 글로벌 대화 예약이 완료됐어요.');
+    if (!partner) lines.push('Partner: ' + partnerName);
+    lines.push(en ? 'You can enter the room 5 minutes before the start.' : '대화 시작 5분 전부터 입장할 수 있어요.');
   }
-  lines.push(`${place}에서 예약을 확인해 주세요.`);
-  const text = `${intro}\n\n${lines.join('\n')}\n\n${place}: ${link}\nDayO 돼요`;
-  const html = '<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>' +
-    '<body style="margin:0;background:#fff8f3;color:#483c36;font-family:Arial,sans-serif">' +
-    '<table role="presentation" width="100%"><tr><td align="center" style="padding:24px 12px">' +
-    '<table role="presentation" width="100%" style="max-width:560px;background:#fff;border:1px solid #ffd1dc;border-radius:20px"><tr><td style="padding:28px 24px">' +
-    '<p style="color:#e25a42;font-weight:bold">DayO 돼요</p>' +
-    '<h1 style="font-size:23px;line-height:1.4">' + escapeHtml(subject.replace('[DayO 돼요] ', '')) + '</h1>' +
-    '<p style="line-height:1.6">' + escapeHtml(intro) + '</p>' +
-    lines.map(line => '<p style="line-height:1.6;margin:10px 0">' + escapeHtml(line) + '</p>').join('') +
-    '<p style="margin-top:24px"><a href="' + link + '" style="display:inline-block;background:#ff755e;color:#fff;padding:12px 20px;border-radius:12px;text-decoration:none">' + place + '에서 확인</a></p>' +
-    '</td></tr></table></td></tr></table></body></html>';
-  return { from: FROM, to: [recipient], reply_to: 'dayo.speak@gmail.com', subject, text, html };
+  lines.push(en ? 'Check your booking in ' + place + '.' : place + '에서 예약을 확인해 주세요.');
+  // Retries preserve the original event: never describe a retried confirmation as a new update.
+  const subject = partner && en ? (cancelled ? '⚠️ [DayO] Session Cancelled — ' : '📅 [DayO] New Session Booked — ') + date + ', ' + clock :
+    '[DayO] ' + title + ' — ' + date + ', ' + clock;
+  const cta = en ? (partner ? 'View My Schedule' : 'View My Booking') : '예약 확인하기';
+  return {from: FROM, to: [recipient], reply_to: REPLY_TO, subject,
+    text: [intro, '', ...lines, '', cta + ': ' + link, (en ? 'Contact: ' : '문의: ') + REPLY_TO, 'DayO'].join('\n'),
+    html: renderEmail({language, title, intro, lines, link, cta})};
 }
 
 function makeStore(service) {
@@ -110,6 +115,18 @@ function makeStore(service) {
       const user = result.data.user;
       if (user.id !== id || !user.email_confirmed_at || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(user.email || ''))) throw new Error('verified_email_unavailable');
       return user;
+    },
+    async previousLocale(row) {
+      if (row.event_type !== 'booking_cancelled' || row.recipient_role === 'partner') return null;
+      // Reuse this exact recipient/booking's already frozen confirmation, not another person's locale.
+      try {
+        const result = await service.from('booking_notification_log').select('delivery_payload')
+          .eq('booking_id', row.booking_id).eq('recipient_user_id', row.recipient_user_id)
+          .eq('event_type', 'booking_confirmed').maybeSingle();
+        if (result.error) return null;
+        const match = String(result.data?.delivery_payload?.html || '').match(/<html\s+lang=["'](en|ko)["']/i);
+        return match ? match[1].toLowerCase() : null;
+      } catch (_) { return null; } // Unknown locale must not block an existing notification.
     },
     async partnerName(id, email) {
       const profile = await checked(service.from('profiles').select('nickname').eq('id', id).maybeSingle());
@@ -160,7 +177,9 @@ async function dispatch(service, config, scope, options = {}) {
           const partner = await store.user(row.snapshot.partner_user_id);
           name = await store.partnerName(partner.id, partner.email);
         }
-        payload = buildMessage(row, recipient.email, name);
+        let requestedLocale = options.localeUserId === row.recipient_user_id ? locale(options.locale) : null;
+        if (!requestedLocale && store.previousLocale) requestedLocale = await store.previousLocale(row);
+        payload = buildMessage(row, recipient.email, name, recipientLocale(row.recipient_role, recipient.user_metadata, requestedLocale));
         await store.save(row, { delivery_payload: payload });
       }
       if (firstAttempt && now() - new Date(firstAttempt).getTime() >= RETRY_WINDOW_MS) {
