@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
+import { ConversationPartnerFeedback } from "./ConversationPartnerFeedback";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -493,6 +494,7 @@ export function SessionTranscriptModal({ open, session, onClose }: Props) {
 
           <aside className="min-h-0 overflow-y-auto bg-[#FAFAF9] p-4">
             <BookingCsNoteEditor key={session.id} session={detail || session} />
+            <ConversationPartnerFeedback key={session.id} bookingId={session.id} />
             <h3 className="mb-3 text-sm font-semibold text-[#44403C]">AI 분석 요약 & 세션 리포트</h3>
             {sessionLoading ? (
               <div className="h-40 animate-pulse rounded-xl bg-muted" />
