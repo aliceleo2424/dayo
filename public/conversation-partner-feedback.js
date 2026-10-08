@@ -1,9 +1,9 @@
 /* Optional feedback is independent of recap rendering and settlement. */
 (function(){
  'use strict';
- var GOOD=["spoke_slowly","waited_for_me","helped_with_words","helped_with_expressions","asked_good_questions","made_me_comfortable","kept_conversation_going"],REQUESTS=["speak_more_slowly","speak_more_quickly","wait_more","correct_more","help_more_with_words","speak_more","listen_more","ask_more_questions"],dialog=null,sequence=0,offered={},partnerRun=0;
+ var GOOD=["spoke_slowly","waited_for_me","helped_with_words","helped_with_expressions","asked_good_questions","made_me_comfortable","kept_conversation_going","shared_new_stories"],REQUESTS=["speak_more_slowly","speak_more_quickly","wait_more","correct_more","help_more_with_words","speak_more","listen_more","ask_more_questions"],dialog=null,sequence=0,offered={},partnerRun=0;
  // The full catalogs above remain valid for historical Partner feedback.
- var GOOD_CHOICES=['spoke_slowly','waited_for_me','asked_good_questions','made_me_comfortable'],REQUEST_CHOICES=['speak_more_slowly','speak_more_quickly','wait_more','correct_more','speak_more','ask_more_questions'];
+ var GOOD_CHOICES=['spoke_slowly','waited_for_me','asked_good_questions','made_me_comfortable','shared_new_stories'],REQUEST_CHOICES=['speak_more_slowly','speak_more_quickly','wait_more','correct_more','speak_more','ask_more_questions'];
  function text(key,partner){var i=window.DayOI18n;var lang=partner?(document.documentElement.lang==='ko'?'KO':'EN'):(i?i.getLang():'KO');return i?i.t('conversationFeedback.'+key,lang):key;}
  function node(tag,value,cls){var n=document.createElement(tag);if(value)n.textContent=value;if(cls)n.className=cls;return n;}
  function button(key,handler,cls,partner){var b=node('button',text(key,partner),cls);b.type='button';b.addEventListener('click',handler);return b;}

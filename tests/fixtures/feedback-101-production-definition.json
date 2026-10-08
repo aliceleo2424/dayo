@@ -1,0 +1,14 @@
+{
+  "acl": [
+    "postgres=X/postgres",
+    "authenticated=X/postgres"
+  ],
+  "hash": "4b0857ee82204efe06a8a2b2fd01d7e4",
+  "name": "save_conversation_partner_feedback",
+  "config": [
+    "search_path=\"\""
+  ],
+  "signature": "p_booking_id uuid, p_good text[], p_requests text[], p_private_admin_note text",
+  "definition": "CREATE OR REPLACE FUNCTION public.save_conversation_partner_feedback(p_booking_id uuid, p_good text[], p_requests text[], p_private_admin_note text DEFAULT NULL::text)\n RETURNS jsonb\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO ''\nAS $function$\r\ndeclare u uuid:=auth.uid(); b public.bookings%rowtype; g text[]; r text[]; note text; row public.conversation_partner_feedback%rowtype;\r\nbegin\r\n if u is null then raise exception 'feedback_unauthorized' using errcode='42501'; end if;\r\n select * into b from public.bookings where id=p_booking_id;\r\n if not found or b.learner_id is distinct from u or b.partner_user_id is null or b.status not in ('confirmed','completed') then\r\n  raise exception 'feedback_not_allowed' using errcode='42501';\r\n end if;\r\n if not coalesce((public.get_room_session_state(b.id)->>'session_ended')::boolean,false) then\r\n  raise exception 'feedback_session_not_ended' using errcode='42501';\r\n end if;\r\n if cardinality(p_good)>64 or cardinality(p_requests)>64 or\r\n    not(coalesce(p_good,'{}') <@ array['spoke_slowly','waited_for_me','helped_with_words','helped_with_expressions','asked_good_questions','made_me_comfortable','kept_conversation_going']::text[]) or not(coalesce(p_requests,'{}') <@ array['speak_more_slowly','speak_more_quickly','wait_more','correct_more','help_more_with_words','speak_more','listen_more','ask_more_questions']::text[]) or\r\n    array_position(p_good,null) is not null or array_position(p_requests,null) is not null then\r\n  raise exception 'feedback_invalid_key' using errcode='22023';\r\n end if;\r\n select coalesce(array_agg(v order by v),'{}') into g from (select distinct unnest(p_good) v) s;\r\n select coalesce(array_agg(v order by v),'{}') into r from (select distinct unnest(p_requests) v) s;\r\n note:=nullif(btrim(p_private_admin_note),'');\r\n if char_length(note)>1000 or (cardinality(g)+cardinality(r)=0 and note is null) then\r\n  raise exception 'feedback_invalid_content' using errcode='22023';\r\n end if;\r\n insert into public.conversation_partner_feedback(booking_id,user_id,partner_user_id,good,requests,private_admin_note)\r\n values(b.id,u,b.partner_user_id,g,r,note)\r\n on conflict(booking_id,user_id) do update set good=excluded.good,requests=excluded.requests,\r\n  private_admin_note=excluded.private_admin_note,updated_at=now()\r\n returning * into row;\r\n return to_jsonb(row);\r\nend;$function$\n",
+  "security_definer": true
+}
