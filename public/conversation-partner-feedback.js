@@ -2,18 +2,20 @@
 (function(){
  'use strict';
  var GOOD=["spoke_slowly","waited_for_me","helped_with_words","helped_with_expressions","asked_good_questions","made_me_comfortable","kept_conversation_going"],REQUESTS=["speak_more_slowly","speak_more_quickly","wait_more","correct_more","help_more_with_words","speak_more","listen_more","ask_more_questions"],dialog=null,sequence=0,offered={},partnerRun=0;
+ // The full catalogs above remain valid for historical Partner feedback.
+ var GOOD_CHOICES=['spoke_slowly','waited_for_me','asked_good_questions','made_me_comfortable'],REQUEST_CHOICES=['speak_more_slowly','speak_more_quickly','wait_more','correct_more','speak_more','ask_more_questions'];
  function text(key,partner){var i=window.DayOI18n;var lang=partner?(document.documentElement.lang==='ko'?'KO':'EN'):(i?i.getLang():'KO');return i?i.t('conversationFeedback.'+key,lang):key;}
  function node(tag,value,cls){var n=document.createElement(tag);if(value)n.textContent=value;if(cls)n.className=cls;return n;}
  function button(key,handler,cls,partner){var b=node('button',text(key,partner),cls);b.type='button';b.addEventListener('click',handler);return b;}
  function access(){var a=window.DayORoomAccess;return a&&a.allowed&&!a.observer&&!a.adminTest&&a.role==='user'&&/^[0-9a-f-]{36}$/i.test(a.bookingId||'')?a:null;}
  async function rpc(name,args){var c=window.supabaseClient;if(!c)throw new Error('unavailable');var timer;try{return await Promise.race([Promise.resolve(c.rpc(name,args)).then(function(r){if(r.error)throw new Error('unavailable');return r.data;}),new Promise(function(_,reject){timer=setTimeout(function(){reject(new Error('timeout'));},8000);})]);}finally{clearTimeout(timer);}}
  function close(){sequence++;if(dialog){dialog.close();dialog.remove();dialog=null;}}
- async function open(){var a=access();if(!a||dialog)return;var id=a.bookingId,run=++sequence;
+ async function open(){var a=access();if(!a||dialog)return;var id=a.bookingId,run=++sequence,legacyGood=[],legacyRequests=[];
   var d=node('dialog',null,'cpf-dialog');dialog=d;d.setAttribute('aria-labelledby','cpf-title');
   var title=node('h2',text('title'));title.id='cpf-title';d.append(title,node('p',text('hint'),'cpf-hint'));
   var form=node('div',null,'cpf-form');d.append(form);
   function group(key,keys){var f=node('fieldset'),legend=node('legend',text(key));f.append(legend);var chips=node('div',null,'cpf-chips');keys.forEach(function(k){var label=node('label',null,'cpf-chip');var input=node('input');input.type='checkbox';input.name=key;input.value=k;label.append(input,node('span',text(key+'.'+k)));chips.append(label);});f.append(chips);form.append(f);}
-  group('good',GOOD);group('requests',REQUESTS);
+  group('good',GOOD_CHOICES);group('requests',REQUEST_CHOICES);
   var privateBox=node('details',null,'cpf-private'),summary=node('summary',text('private')),note=node('textarea');note.maxLength=1000;note.rows=3;note.setAttribute('aria-label',text('private'));privateBox.append(summary,node('p',text('privateHint')),note);form.append(privateBox);
   var status=node('p',text('loading'),'cpf-status');status.setAttribute('role','status');
   var actions=node('div',null,'cpf-actions'),save=button('save',submit,'cpf-primary'),skip=button('skip',close,'cpf-secondary'),retry=button('retry',load,'cpf-secondary');retry.hidden=true;save.disabled=true;form.querySelectorAll('input,textarea').forEach(function(n){n.disabled=true;});
@@ -21,9 +23,12 @@
   function active(){return run===sequence&&dialog===d&&access()&&access().bookingId===id;}
   function enable(value){form.querySelectorAll('input,textarea').forEach(function(n){n.disabled=!value;});save.disabled=!value;}
   async function load(){retry.hidden=true;status.textContent=text('loading');enable(false);try{var row=await rpc('get_my_conversation_partner_feedback',{p_booking_id:id});if(!active())return;
+    // Preserve saved legacy choices without offering them in the new form.
+    legacyGood=row&&Array.isArray(row.good)?row.good.filter(function(k){return GOOD.indexOf(k)>=0&&GOOD_CHOICES.indexOf(k)<0;}):[];
+    legacyRequests=row&&Array.isArray(row.requests)?row.requests.filter(function(k){return REQUESTS.indexOf(k)>=0&&REQUEST_CHOICES.indexOf(k)<0;}):[];
     form.querySelectorAll('input').forEach(function(n){n.checked=!!(row&&Array.isArray(row[n.name])&&row[n.name].indexOf(n.value)>=0);});note.value=row&&row.private_admin_note||'';status.textContent='';enable(true);
    }catch(_){if(active()){status.textContent=text('loadError');retry.hidden=false;}}}
-  async function submit(){if(save.disabled)return;var g=Array.from(form.querySelectorAll('input[name="good"]:checked')).map(function(n){return n.value;}),r=Array.from(form.querySelectorAll('input[name="requests"]:checked')).map(function(n){return n.value;});if(!g.length&&!r.length&&!note.value.trim()){close();return;}
+  async function submit(){if(save.disabled)return;var g=Array.from(form.querySelectorAll('input[name="good"]:checked')).map(function(n){return n.value;}).concat(legacyGood),r=Array.from(form.querySelectorAll('input[name="requests"]:checked')).map(function(n){return n.value;}).concat(legacyRequests);if(!g.length&&!r.length&&!note.value.trim()){close();return;}
    enable(false);status.textContent=text('saving');try{await rpc('save_conversation_partner_feedback',{p_booking_id:id,p_good:g,p_requests:r,p_private_admin_note:note.value.trim()||null});if(active())close();}
    catch(_){if(active()){status.textContent=text('saveError');enable(true);}}}
   load();
