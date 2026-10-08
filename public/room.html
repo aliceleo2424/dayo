@@ -5858,6 +5858,7 @@
       if (!access.allowed) return;
       await initTalkCardContext(access);
       talkCardContextReady = true;
+      updateTalkCategoryTabs();
       var controller = canControlTalkCards();
       document.querySelectorAll('[data-talk-cat]').forEach(function (btn) {
         btn.disabled = !controller;
