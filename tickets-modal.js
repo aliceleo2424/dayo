@@ -237,8 +237,48 @@
     '.tk-policy__list strong,.tk-consent a,.tk-consent [data-terms-mini],.tk-consent [data-refund-mini]{color:#506B55;}',
     '.tk-consent input{accent-color:#5F7D63;}',
     '.tk-notice__kicker{color:#506B55;}',
+    '.tk-price-reference{margin:0 0 1rem;padding:.85rem 1rem;border:1px solid #DDE8D9;border-radius:14px;background:#F1F5EE;}',
+    '.tk-price-reference p{margin:0;font-size:.85rem;line-height:1.6;color:#40362F;overflow-wrap:break-word;}',
+    '.tk-price-reference .tk-price-note{margin-top:.3rem;font-size:.75rem;color:#6B625B;}',
+    '.tk-price-unit{margin:.25rem 0 0;color:#5F7D63;line-height:1.5;}',
+    '.tk-dayo-saving{display:block;font-size:.72rem;font-weight:500;color:#6B625B;}',
+    '.tk-price-compare{margin:.2rem 0 0;font-size:.76rem;line-height:1.5;color:#506B55;}',
     '@media (max-width:860px){.tk-banner__copy{flex:0 1 auto;}}'
   ].join('');
+
+  // Hypothetical example, not a DayO list price or a market average.
+  var COMPARISON_HOURLY_WON = 50000;
+  var COMPARISON_SESSION_WON = COMPARISON_HOURLY_WON / 2;
+  function priceText(n) {
+    var value = Number(n).toLocaleString('ko-KR');
+    return window.DayOI18n && window.DayOI18n.getLang() === 'EN' ? '₩' + value : value + '원';
+  }
+  function priceDetails(plan) {
+    if (!plan || plan.id === 'admin_test_1000') return '';
+    var amount = Number(plan.priceValue), count = Number(plan.tickets);
+    if (!Number.isFinite(amount) || amount <= 0 || !Number.isFinite(count) || count <= 0) return '';
+    var exactUnit = amount / count, unit = Math.round(exactUnit / 10) * 10;
+    var copy = t(exactUnit === unit ? 'tickets.price.unit' : 'tickets.price.unitApprox', { price: priceText(unit) });
+    var single = findPlan('single');
+    var saving = plan.benefit && single && Number(single.priceValue) > exactUnit
+      ? '<span class="tk-dayo-saving">' + t('tickets.price.dayoSaving', { percent: Math.round((1 - exactUnit / Number(single.priceValue)) * 100) }) + '</span>' : '';
+    var comparison = exactUnit < COMPARISON_SESSION_WON
+      ? '<p class="tk-price-compare">' + t('tickets.price.lower', { percent: Math.round((1 - exactUnit / COMPARISON_SESSION_WON) * 100) }) + '</p>' : '';
+    return '<p class="tk-card__benefit tk-price-unit">' + copy + saving + '</p>' + comparison;
+  }
+  function pricePlanText(plan, field) {
+    if (!window.DayOI18n || window.DayOI18n.getLang() !== 'EN' || plan.id === 'admin_test_1000') return plan[field] || '';
+    var names = { trial: 'trialName', single: 'singleName', pack3: 'threeName', pack11: 'elevenName' };
+    var key = field === 'title' && names[plan.id] ? 'landing.pricing.' + names[plan.id] : 'tickets.price.' + plan.id + '.' + field;
+    var value = t(key);
+    return value && value !== key ? value : plan[field] || '';
+  }
+  function updatePriceReference() {
+    if (!el.overlay) return;
+    var title = el.overlay.querySelector('[data-tk-price-reference]'), note = el.overlay.querySelector('[data-tk-price-note]');
+    if (title) title.textContent = t('tickets.price.reference', { hourly: priceText(COMPARISON_HOURLY_WON), reference: priceText(COMPARISON_SESSION_WON) });
+    if (note) note.textContent = t('tickets.price.note');
+  }
 
   var el = {};
   var lastFocused = null;
@@ -300,8 +340,8 @@
 
   function planCard(plan) {
     if (!plan) return '';
-    var badge = plan.badge ? '<span class="tk-badge">' + plan.badge + '</span>' : '';
-    var benefit = plan.benefit ? '<p class="tk-card__benefit">' + plan.benefit + '</p>' : '';
+    var badge = plan.badge ? '<span class="tk-badge">' + pricePlanText(plan, 'badge') + '</span>' : '';
+    var benefit = priceDetails(plan);
     var cls = 'tk-card';
     if (plan.id === 'pack3') cls += ' tk-card--starter';
     if (plan.id === 'pack11') cls += ' tk-card--best';
@@ -309,26 +349,27 @@
     return '' +
       '<article class="' + cls + '" data-plan="' + plan.id + '">' +
         badge +
-        '<h3 class="tk-card__title">' + plan.title + '</h3>' +
-        '<p class="tk-card__price">' + plan.price + '</p>' +
-        '<p class="tk-card__meta">' + plan.meta + '</p>' +
+        '<h3 class="tk-card__title">' + pricePlanText(plan, 'title') + '</h3>' +
+        '<p class="tk-card__price">' + priceText(plan.priceValue) + '</p>' +
+        '<p class="tk-card__meta">' + pricePlanText(plan, 'meta') + '</p>' +
         benefit +
-        '<p class="tk-card__copy">' + plan.copy + '</p>' +
+        '<p class="tk-card__copy">' + pricePlanText(plan, 'copy') + '</p>' +
         '<div class="tk-card__cta">' + buyButton(plan) + '</div>' +
       '</article>';
   }
 
   function bannerCard(plan) {
     if (!plan) return '';
-    var badge = plan.badge ? '<span class="tk-badge">' + plan.badge + '</span>' : '';
+    var badge = plan.badge ? '<span class="tk-badge">' + pricePlanText(plan, 'badge') + '</span>' : '';
     return '' +
       '<article class="tk-banner" data-plan="' + plan.id + '">' +
         '<div class="tk-banner__copy">' +
           badge +
-          '<h3 class="tk-card__title">' + plan.title + '</h3>' +
-          '<p class="tk-card__price">' + plan.price + '</p>' +
-          '<p class="tk-card__meta">' + plan.meta + '</p>' +
-          '<p class="tk-card__copy">' + plan.copy + '</p>' +
+          '<h3 class="tk-card__title">' + pricePlanText(plan, 'title') + '</h3>' +
+          '<p class="tk-card__price">' + priceText(plan.priceValue) + '</p>' +
+          '<p class="tk-card__meta">' + pricePlanText(plan, 'meta') + '</p>' +
+          '<p class="tk-card__copy">' + pricePlanText(plan, 'copy') + '</p>' +
+          priceDetails(plan) +
         '</div>' +
         '<div class="tk-card__cta">' + buyButton(plan) + '</div>' +
       '</article>';
@@ -337,9 +378,9 @@
   function singleRow(plan) {
     if (!plan) return '';
     return '' +
-      '<p class="tk-single__ask">' + plan.copy + '</p>' +
+      '<p class="tk-single__ask">' + (plan.id === 'single' ? t('tickets.price.single.copy') : pricePlanText(plan, 'copy')) + '</p>' +
       '<div class="tk-single__row">' +
-        '<p class="tk-single__name">' + plan.title + ' | ' + plan.price + '</p>' +
+        '<div><p class="tk-single__name">' + pricePlanText(plan, 'title') + ' | ' + priceText(plan.priceValue) + '</p>' + priceDetails(plan) + '</div>' +
         buyButton(plan) +
       '</div>';
   }
@@ -350,9 +391,9 @@
       '<article class="tk-used" data-plan="trial-used">' +
         '<div class="tk-banner__copy">' +
           '<span class="tk-badge">🔒 1회 혜택 사용 완료</span>' +
-          '<h3 class="tk-card__title">' + plan.title + '</h3>' +
-          '<p class="tk-card__price">' + plan.price + '</p>' +
-          '<p class="tk-card__meta">' + plan.meta + '</p>' +
+          '<h3 class="tk-card__title">' + pricePlanText(plan, 'title') + '</h3>' +
+          '<p class="tk-card__price">' + priceText(plan.priceValue) + '</p>' +
+          '<p class="tk-card__meta">' + pricePlanText(plan, 'meta') + '</p>' +
         '</div>' +
         '<div class="tk-card__cta">' +
           buyButton(plan, { disabled: true, cta: '이미 1회 한정 특별 혜택을 이용하셨습니다 ☕' }) +
@@ -361,6 +402,7 @@
   }
 
   function renderPlans() {
+    updatePriceReference();
     // Normal purchases collect all required consent in checkout; keep the admin-test DOM contract.
     var legacyConsent = el.overlay && el.overlay.querySelector('.tk-consent');
     if (legacyConsent) legacyConsent.style.display = adminPaymentTestVisible ? '' : 'none';
@@ -398,6 +440,7 @@
           '<p class="tk-sub">1회 30분 세션 (25분 대화 + 5분 퀴즈) · 약정 없이 필요할 만큼만</p>' +
         '</div>' +
         '<div class="tk-body">' +
+          '<aside class="tk-price-reference"><p data-tk-price-reference></p><p class="tk-price-note" data-tk-price-note></p></aside>' +
           '<div data-tk-banner></div>' +
           '<div class="tk-grid" data-tk-grid></div>' +
           '<div class="tk-single" data-tk-single></div>' +
