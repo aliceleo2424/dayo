@@ -162,3 +162,230 @@
     {"id":"legacy-food-006","category":"food","questionKo":"카페에서 항상 시키는 시그니처 메뉴가 있나요?","questionEn":"What do you usually order at a cafe?","followupsKo":["그 메뉴를 자주 고르는 이유는 무엇인가요?","새로운 메뉴도 가끔 시도하나요?"],"followupsEn":["Why is that your usual order?","Do you sometimes try something new?"],"tags":["legacy","food"]}
   ];
 })();
+
+/* Selection metadata only. Ambiguous cards remain in the broad pool. */
+(function(){
+  var direct={"daily-003":["work_school"],"daily-012":["exercise"],"daily-014":["food_cafe"],"daily-016":["fashion_beauty"],"taste-002":["movies","drama"],"taste-003":["music"],"taste-004":["books_webtoon"],"taste-006":["pets"],"taste-007":["travel"],"taste-008":["food_cafe"],"taste-009":["food_cafe"],"taste-012":["fashion_beauty"],"taste-019":["travel"],"korea-life-004":["food_cafe"],"korea-life-005":["food_cafe"],"korea-life-013":["food_cafe"],"korea-life-014":["music"],"korea-life-016":["work_school"],"korea-life-018":["food_cafe"],"culture-005":["food_cafe"],"culture-006":["food_cafe"],"culture-010":["food_cafe"],"culture-014":["food_cafe"],"culture-015":["food_cafe"],"korea-trip-008":["travel","food_cafe"],"korea-trip-016":["travel","food_cafe"],"world-trip-008":["travel","food_cafe"],"legacy-daily-002":["movies"],"legacy-travel-002":["travel","food_cafe"]};
+  window.DayOTalkCards.forEach(function(card){
+    card.deck='conversation';card.active=true;
+    card.interestKeys=direct[card.id]||(card.category==='food'?['food_cafe']:(['korea-trip','world-trip'].indexOf(card.category)!==-1?['travel']:[]));
+  });
+  window.DayOTalkCards.push.apply(window.DayOTalkCards,[
+  {
+    "id": "balance-001",
+    "category": "balance",
+    "deck": "balance",
+    "interestKeys": [],
+    "active": true,
+    "questionKo": "짜장면과 짬뽕, 어느 쪽을 고를까요?",
+    "questionEn": "Jajangmyeon or jjamppong?",
+    "followupsKo": [
+      "왜 그쪽을 골랐나요?",
+      "관련해서 기억나는 경험이 있나요?"
+    ],
+    "followupsEn": [
+      "Why would you choose that?",
+      "Is there an experience that comes to mind?"
+    ],
+    "tags": []
+  },
+  {
+    "id": "balance-002",
+    "category": "balance",
+    "deck": "balance",
+    "interestKeys": [],
+    "active": true,
+    "questionKo": "바다 여행과 도시 여행, 어느 쪽이 좋아요?",
+    "questionEn": "Beach trip or city trip?",
+    "followupsKo": [
+      "왜 그쪽을 골랐나요?",
+      "관련해서 기억나는 경험이 있나요?"
+    ],
+    "followupsEn": [
+      "Why would you choose that?",
+      "Is there an experience that comes to mind?"
+    ],
+    "tags": []
+  },
+  {
+    "id": "balance-003",
+    "category": "balance",
+    "deck": "balance",
+    "interestKeys": [],
+    "active": true,
+    "questionKo": "커피 포기와 디저트 포기, 어느 쪽을 고를까요?",
+    "questionEn": "Give up coffee or give up desserts?",
+    "followupsKo": [
+      "왜 그쪽을 골랐나요?",
+      "관련해서 기억나는 경험이 있나요?"
+    ],
+    "followupsEn": [
+      "Why would you choose that?",
+      "Is there an experience that comes to mind?"
+    ],
+    "tags": []
+  },
+  {
+    "id": "balance-004",
+    "category": "balance",
+    "deck": "balance",
+    "interestKeys": [],
+    "active": true,
+    "questionKo": "아침형 인간과 야행성, 어느 쪽이 좋아요?",
+    "questionEn": "Early bird or night owl?",
+    "followupsKo": [
+      "왜 그쪽을 골랐나요?",
+      "관련해서 기억나는 경험이 있나요?"
+    ],
+    "followupsEn": [
+      "Why would you choose that?",
+      "Is there an experience that comes to mind?"
+    ],
+    "tags": []
+  },
+  {
+    "id": "balance-005",
+    "category": "balance",
+    "deck": "balance",
+    "interestKeys": [],
+    "active": true,
+    "questionKo": "계획 여행과 즉흥 여행, 어느 쪽이 좋아요?",
+    "questionEn": "Planned trip or spontaneous trip?",
+    "followupsKo": [
+      "왜 그쪽을 골랐나요?",
+      "관련해서 기억나는 경험이 있나요?"
+    ],
+    "followupsEn": [
+      "Why would you choose that?",
+      "Is there an experience that comes to mind?"
+    ],
+    "tags": []
+  },
+  {
+    "id": "balance-006",
+    "category": "balance",
+    "deck": "balance",
+    "interestKeys": [],
+    "active": true,
+    "questionKo": "친구 100명과 친한 친구 3명, 어느 쪽이 좋아요?",
+    "questionEn": "One hundred friends or three close friends?",
+    "followupsKo": [
+      "왜 그쪽을 골랐나요?",
+      "관련해서 기억나는 경험이 있나요?"
+    ],
+    "followupsEn": [
+      "Why would you choose that?",
+      "Is there an experience that comes to mind?"
+    ],
+    "tags": []
+  },
+  {
+    "id": "balance-007",
+    "category": "balance",
+    "deck": "balance",
+    "interestKeys": [],
+    "active": true,
+    "questionKo": "집에서 쉬기와 밖에서 놀기, 어느 쪽이 좋아요?",
+    "questionEn": "Relax at home or go out?",
+    "followupsKo": [
+      "왜 그쪽을 골랐나요?",
+      "관련해서 기억나는 경험이 있나요?"
+    ],
+    "followupsEn": [
+      "Why would you choose that?",
+      "Is there an experience that comes to mind?"
+    ],
+    "tags": []
+  },
+  {
+    "id": "balance-008",
+    "category": "balance",
+    "deck": "balance",
+    "interestKeys": [],
+    "active": true,
+    "questionKo": "여름만 살기와 겨울만 살기, 어느 쪽을 고를까요?",
+    "questionEn": "Only summer or only winter?",
+    "followupsKo": [
+      "왜 그쪽을 골랐나요?",
+      "관련해서 기억나는 경험이 있나요?"
+    ],
+    "followupsEn": [
+      "Why would you choose that?",
+      "Is there an experience that comes to mind?"
+    ],
+    "tags": []
+  },
+  {
+    "id": "balance-009",
+    "category": "balance",
+    "deck": "balance",
+    "interestKeys": [],
+    "active": true,
+    "questionKo": "영화만 보기와 음악만 듣기, 어느 쪽을 고를까요?",
+    "questionEn": "Only watch movies or only listen to music?",
+    "followupsKo": [
+      "왜 그쪽을 골랐나요?",
+      "관련해서 기억나는 경험이 있나요?"
+    ],
+    "followupsEn": [
+      "Why would you choose that?",
+      "Is there an experience that comes to mind?"
+    ],
+    "tags": []
+  },
+  {
+    "id": "balance-010",
+    "category": "balance",
+    "deck": "balance",
+    "interestKeys": [],
+    "active": true,
+    "questionKo": "매운 음식 포기와 단 음식 포기, 어느 쪽을 고를까요?",
+    "questionEn": "Give up spicy food or give up sweet food?",
+    "followupsKo": [
+      "왜 그쪽을 골랐나요?",
+      "관련해서 기억나는 경험이 있나요?"
+    ],
+    "followupsEn": [
+      "Why would you choose that?",
+      "Is there an experience that comes to mind?"
+    ],
+    "tags": []
+  },
+  {
+    "id": "balance-011",
+    "category": "balance",
+    "deck": "balance",
+    "interestKeys": [],
+    "active": true,
+    "questionKo": "여행에서 사진 많이 찍기와 눈으로만 즐기기, 어느 쪽이 좋아요?",
+    "questionEn": "Take lots of travel photos or enjoy the view without photos?",
+    "followupsKo": [
+      "왜 그쪽을 골랐나요?",
+      "관련해서 기억나는 경험이 있나요?"
+    ],
+    "followupsEn": [
+      "Why would you choose that?",
+      "Is there an experience that comes to mind?"
+    ],
+    "tags": []
+  },
+  {
+    "id": "balance-012",
+    "category": "balance",
+    "deck": "balance",
+    "interestKeys": [],
+    "active": true,
+    "questionKo": "한 달간 배달 금지와 카페 금지, 어느 쪽을 고를까요?",
+    "questionEn": "No food delivery or no cafés for a month?",
+    "followupsKo": [
+      "왜 그쪽을 골랐나요?",
+      "관련해서 기억나는 경험이 있나요?"
+    ],
+    "followupsEn": [
+      "Why would you choose that?",
+      "Is there an experience that comes to mind?"
+    ],
+    "tags": []
+  }
+]);
+})();

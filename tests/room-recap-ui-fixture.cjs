@@ -12,8 +12,10 @@ const styles=Array.from(room.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/g),m=>m
 const markup=room.slice(room.indexOf('  <div class="studio">'),room.indexOf('  <!-- Word Help Bottom Sheet -->'));
 const category=room.match(/var TALK_CARD_CATEGORY_LABELS = (\{[\s\S]*?\n    \});/)[1];
 const groups=room.match(/var TALK_CARD_GROUPS = (\{[\s\S]*?\n    \});/)[1];
-const uiCode=`var micBtn=document.getElementById('micBtn'),camBtn=document.getElementById('camBtn');
+const uiCode=`${read('public/talk-card-selection.js')}
+var talkCardContextReady=true;function markTalkCardVisible(){}
+var micBtn=document.getElementById('micBtn'),camBtn=document.getElementById('camBtn');
 var talkCardData=window.DayOTalkCards, TALK_CARD_GROUPS=${groups},TALK_CARD_CATEGORY_LABELS=${category},talkCardState={category:'daily',index:0,updatedAt:1};
-${functions(scripts,['t','ctrlBtnLabel','setCtrlBtnContent','renderHelpBtnLabels','liveApi','renderMicLabel','renderCamLabel','getLocalMediaStream','getLocalVideoTrack','canControlTalkCards','cardsForTalkCategory','pickNextTalkIndex','renderTalkCardQuestion'])}
+${functions(scripts,['t','ctrlBtnLabel','setCtrlBtnContent','renderHelpBtnLabels','liveApi','renderMicLabel','renderCamLabel','getLocalMediaStream','getLocalVideoTrack','canControlTalkCards','cardsForTalkCategory','renderTalkCardQuestion'])}
 renderMicLabel();renderCamLabel();renderHelpBtnLabels();renderTalkCardQuestion(false);`;
 module.exports={room,styles,markup,scripts,functions,uiCode,read};

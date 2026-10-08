@@ -1,0 +1,48 @@
+const path=require('node:path'),root=path.join(__dirname,'..'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
+const fs=require('node:fs'),assert=require('node:assert/strict'),{PGlite}=require('@electric-sql/pglite');
+const U='11111111-1111-4111-8111-111111111111',P='22222222-2222-4222-8222-222222222222',X='33333333-3333-4333-8333-333333333333';
+const ids=Array.from({length:7},(_,i)=>`44444444-4444-4444-8444-${String(i+1).padStart(12,'0')}`);
+(async()=>{const d=new PGlite();try{
+await d.exec(`create role anon;create role authenticated;create role service_role;create schema auth;
+create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+create function public.dayo_is_admin() returns boolean language sql stable as $$select false$$;
+create table bookings(id uuid primary key,learner_id uuid,partner_user_id uuid,status text,scheduled_at timestamptz,ended_at timestamptz,is_test_session boolean,matching_snapshot jsonb);`);
+await d.exec(read('supabase/migrations/048_add_session_event_logging.sql'));
+await d.exec(read('supabase/migrations/048_add_session_event_logging.sql').match(/create or replace function public.log_session_event[\s\S]*?\$\$;/i)[0]);
+for(let i=0;i<ids.length;i++)await d.query('insert into bookings values($1,$2,$3,$4,$5,$5,$6,$7)',[ids[i],i===6?X:U,P,i===0?'confirmed':'completed',`2026-10-0${7-i}T00:00:00Z`,i===1,{scoring_version:1,user:{schema_version:1,interests:['food_cafe','travel']}}]);
+await d.exec(read('supabase/migrations/100_room_session_end_state.sql'));
+await d.exec("create function save_conversation_partner_feedback(uuid,text[],text[],text) returns jsonb language sql as $$select '{}'::jsonb$$");
+const security=(await d.query("select relacl::text acl from pg_class where oid='session_events'::regclass")).rows[0].acl;
+const feedback=(await d.query("select md5(pg_get_functiondef('save_conversation_partner_feedback(uuid,text[],text[],text)'::regprocedure)) h")).rows[0].h;
+const baseline=(await d.query("select md5(pg_get_functiondef('log_session_event(uuid,uuid,text,jsonb)'::regprocedure)) h")).rows[0].h;
+// Local PG formatting/version and harmless fixture-only feedback stub differ; production guards stay fixed.
+const proposal=read('supabase/migrations/103_talk_card_context.sql').replace('b3a2576d6e28649cef96aef40f64e452',baseline).replace('92dde179702e9e7974b673b23a41f765',feedback).replace('{postgres=arwdDxtm/postgres,service_role=arwdDxtm/postgres,authenticated=r/postgres}',security);
+await d.exec(proposal);
+const actor=async u=>{await d.exec('reset role');await d.query("select set_config('request.jwt.claim.sub',$1,false)",[u]);await d.exec('set role authenticated');};
+const payload={card_id:'food-003',category:'food',group:'auto',selection_source:'primary',topic_keys:['food_cafe'],order:1,transcript:'MUST NOT STORE'};
+const event='55555555-5555-4555-8555-555555555555';
+await actor(U);await assert.rejects(d.query('select present_talk_card($1,$2,$3)',[event,ids[0],payload]),/not_booking_partner/);
+await actor(X);await assert.rejects(d.query('select get_talk_card_context($1)',[ids[0]]),/not_booking_participant/);
+await actor(P);assert.equal((await d.query('select present_talk_card($1,$2,$3) f',[event,ids[0],payload])).rows[0].f.inserted,true);
+assert.equal((await d.query('select present_talk_card($1,$2,$3) f',[event,ids[0],payload])).rows[0].f.inserted,false);
+await assert.rejects(d.query('select present_talk_card($1,$2,$3)',[event,ids[0],{...payload,topic_keys:['invented']}]),/invalid_topic_keys/);
+await assert.rejects(d.query('select present_talk_card($1,$2,$3)',[event,ids[0],{...payload,card_id:'food-004'}]),/event_identity_conflict/);
+await d.exec('reset role');
+for(let i=1;i<ids.length;i++)await d.query("insert into session_events values(gen_random_uuid(),$1,'talk_card_shown',$2,$3,now())",[ids[i],P,{version:2,presented:true,card_id:'history-'+i}]);
+await d.query("insert into session_events values(gen_random_uuid(),$1,'talk_card_shown',$2,'{\"card_id\":\"legacy-hidden\"}',now())",[ids[0],P]);
+await actor(U);const c=(await d.query('select get_talk_card_context($1) c',[ids[0]])).rows[0].c;
+assert.deepEqual(c.interests,['food_cafe','travel']);assert.deepEqual(c.used_card_ids,['food-003']);
+assert.equal(c.current.card_id,'food-003');assert(!('transcript' in c.current));assert.deepEqual(c.recent_card_ids.sort(),['history-2','history-3','history-4']);
+assert.equal((await d.query('select count(*) n from session_events')).rows[0].n,0);
+await d.exec('reset role');
+await d.query("insert into session_events values(gen_random_uuid(),$1,'talk_card_shown',$2,$3,now()+interval '1 minute')",[ids[0],P,{version:2,presented:true,card_id:'late-old',order:1,transcript:'PRIVATE'}]);
+await d.query("insert into session_events values(gen_random_uuid(),$1,'talk_card_shown',$2,$3,now())",[ids[0],P,{version:2,presented:true,card_id:'newest',order:2,transcript:'PRIVATE'}]);
+await actor(U);const restored=(await d.query('select get_talk_card_context($1) c',[ids[0]])).rows[0].c;
+assert.equal(restored.current.card_id,'newest','late retry must not replace the newest card');assert(!('transcript' in restored.current));
+ // RLS still admin-only.
+await d.exec('reset role;set role anon');await assert.rejects(d.query('select get_talk_card_context($1)',[ids[0]]),/permission denied/);
+await d.exec('reset role');assert.equal((await d.query("select md5(pg_get_functiondef('log_session_event(uuid,uuid,text,jsonb)'::regprocedure)) h")).rows[0].h,baseline);
+assert.equal((await d.query('select count(*) n from bookings')).rows[0].n,7);
+await assert.rejects(d.exec(proposal),/already exists/);
+console.log('PASS proposal: exact participants only; Partner-only idempotent presentation; snapshot only; recent 3 completed, TEST excluded; legacy hidden ignored; payload whitelist; anon/outsider blocked; existing logger/RLS/bookings unchanged; replay rejected');
+}finally{await d.close();}})().catch(e=>{console.error(e);process.exitCode=1;});
