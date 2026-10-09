@@ -3009,9 +3009,7 @@
     .dayo-cafe-landing #how .landing-subsection { margin-top: 1.5rem; }
     .dayo-cafe-landing #how .topic-chips { gap: .5rem; margin-top: .8rem; }
     .dayo-cafe-landing #how .topic-chip { padding: .5rem .75rem; border-color: #DDE8D9; background: #F8F0E3; font-weight: 600; max-width: 100%; box-sizing: border-box; }
-    .dayo-cafe-landing #how .topic-sample { margin: .65rem 0 0; color: #5F7D63; font-size: .88rem; }
     .dayo-cafe-landing #how .session-ribbon { margin-top: 1.5rem; }
-    .dayo-cafe-landing .hero-title { text-wrap: balance; }
     @media (max-width: 600px) {
       .dayo-cafe-landing #how { padding: 2rem 0; }
       .dayo-cafe-landing #how .landing-steps { grid-template-columns: 1fr; }
@@ -3150,8 +3148,15 @@
             <img src="/images/dayo-cafe-hero-desktop.webp" alt="노트북으로 외국인과 화상 대화를 하며 웃는 여성" data-i18n="landing.hero.imageAlt" data-i18n-attr="alt" width="1536" height="864" fetchpriority="high">
           </picture>
           <div class="hero-copy">
-            <h1 class="hero-title" data-i18n="landing.hero.title">외국어로, 내 이야기를 시작해요.</h1>
-            <p class="hero-subtitle" data-i18n="landing.hero.description">외국인 Partner와 일상과 취향을 나누는 1:1 글로벌 대화.</p>
+            <h1 class="hero-title">
+              <span class="hero-sr-only" data-i18n="landing.hero.title">외국인과 눈을 맞추며 대화가 돼요.</span>
+              <span class="hero-title-visible" aria-hidden="true">
+                <span data-i18n="landing.hero.titlePrefix">외국인과</span>
+                <span class="hero-title-rotator"><span class="hero-title-rotator-size" data-i18n="landing.hero.longest">눈을 맞추며</span><span data-hero-rotator>눈을 맞추며</span></span>
+                <span data-i18n="landing.hero.titleSuffix">대화가 돼요.</span>
+              </span>
+            </h1>
+            <p class="hero-subtitle" data-i18n="landing.hero.description">막히면 한국어로 말해도 괜찮은, 외국인 파트너와의 1:1 화상 대화</p>
             <div class="cta-wrap">
               <button type="button" class="home-cta-btn" data-open-quiz data-i18n="landing.hero.testCta">무료로 스피킹 감각 확인하기</button>
               <div class="hero-secondary-actions">
@@ -3199,7 +3204,6 @@
             <span class="topic-chip" data-i18n="landing.topics.korea">🇰🇷 한국에서 신기했던 것</span>
             <span class="topic-chip" data-i18n="landing.topics.balance">⚖️ 밸런스 게임</span>
           </div>
-          <p class="topic-sample" data-i18n="landing.topics.balanceQuestion">짜장면 vs 짬뽕, 당신의 선택은?</p>
         </div>
 
         <div class="session-ribbon reveal" aria-label="DayO 세션 구성" data-i18n="landing.session.aria" data-i18n-attr="aria-label">
@@ -3480,6 +3484,38 @@
       if (!window.DayOI18n) return key;
       return vars ? window.DayOI18n.tf(key, vars) : window.DayOI18n.t(key);
     }
+    const heroRotator = document.querySelector('[data-hero-rotator]');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let heroPhraseIndex = 0;
+    let heroFadeTimer = null;
+    function renderHeroPhrase() {
+      if (heroRotator && window.DayOI18n) heroRotator.textContent = t('landing.hero.rotate.' + heroPhraseIndex);
+    }
+    renderHeroPhrase();
+    document.addEventListener('dayo:langchange', () => {
+      clearTimeout(heroFadeTimer);
+      if (heroRotator) heroRotator.classList.remove('is-changing');
+      renderHeroPhrase();
+    });
+    function syncReducedMotion() {
+      if (!reducedMotion.matches) return;
+      clearTimeout(heroFadeTimer);
+      heroPhraseIndex = 0;
+      if (heroRotator) heroRotator.classList.remove('is-changing');
+      renderHeroPhrase();
+    }
+    if (reducedMotion.addEventListener) reducedMotion.addEventListener('change', syncReducedMotion);
+    else if (reducedMotion.addListener) reducedMotion.addListener(syncReducedMotion);
+    setInterval(() => {
+      if (!heroRotator || reducedMotion.matches) return;
+      heroRotator.classList.add('is-changing');
+      heroFadeTimer = setTimeout(() => {
+        heroPhraseIndex = (heroPhraseIndex + 1) % 4;
+        renderHeroPhrase();
+        heroRotator.classList.remove('is-changing');
+      }, 220);
+    }, 2000);
+
     // Native details provide keyboard/tap access; enforce one open card on older browsers too.
     document.querySelectorAll('#how .landing-steps > details').forEach(card => {
       card.addEventListener('toggle', () => {
