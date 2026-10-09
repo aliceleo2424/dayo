@@ -64,20 +64,8 @@
       if (unit.textContent !== unitText) unit.textContent = unitText;
     }
 
-    var benefit = document.querySelector('[data-coupon-wallet] [data-coupon-code="WELCOME_9900"]');
-    if (benefit) {
-      var title = benefit.querySelector('.coupon-item__title');
-      var button = benefit.querySelector('.primary-btn');
-      var titleText = i18n('mypage.welcomeBenefit.title');
-      var buttonText = i18n('mypage.welcomeBenefit.cta');
-      if (title && title.textContent !== titleText) title.textContent = titleText;
-      if (button && button.textContent !== buttonText) button.textContent = buttonText;
-      benefit.querySelectorAll('.coupon-item__price span, .coupon-item__price strong').forEach(function (price) {
-        var amount = price.textContent.trim().replace(/^₩/, '').replace(/원$/, '');
-        if (!/^[\d,]+$/.test(amount)) return;
-        var display = window.DayOI18n && window.DayOI18n.getLang() === 'EN' ? '₩' + amount : amount + '원';
-        if (price.textContent !== display) price.textContent = display;
-      });
+    if (window.DayOTickets && typeof window.DayOTickets.renderTrialSalesSurfaces === 'function') {
+      window.DayOTickets.renderTrialSalesSurfaces();
     }
 
     var monthly = document.getElementById('dayo-monthly-story-host');

@@ -9,7 +9,7 @@ for (const file of ['index.html', 'tickets-modal.js']) {
   assert.equal(fs.readFileSync(path.join(root, file), 'utf8'), fs.readFileSync(path.join(root, 'public', file), 'utf8'));
 }
 const plans = vm.runInNewContext(modal.slice(modal.indexOf('var PLANS = ['), modal.indexOf('  var CSS =')) + '\nPLANS');
-const expected = [['trial', 9900], ['single', 19900], ['starter3', 54900], ['light11', 179000]];
+const expected = [['single', 19900], ['starter3', 54900], ['light11', 179000]];
 const cards = [...html.matchAll(/<button type="button" class="ticket-price-card[^\"]*" data-landing-ticket="([^\"]+)">([\s\S]*?)<\/button>/g)];
 assert.deepEqual(cards.map(card => card[1]), expected.map(row => row[0]));
 for (const [id, price] of expected) {
@@ -17,6 +17,8 @@ for (const [id, price] of expected) {
   assert.equal(plan.priceValue, price);
   assert.ok(cards.find(card => card[1] === id)[2].includes(price.toLocaleString('ko-KR')));
 }
+assert.ok(html.includes('data-landing-ticket="trial" hidden style="display:none"></button>'));
+assert.equal(plans.find(plan => plan.id === 'trial').priceValue,9900);
 const partners = html.slice(html.indexOf('<!-- Partners -->'), html.indexOf('<!-- Tickets + CTA -->'));
 assert.equal((partners.match(/<article class="journey-card/g) || []).length, 3);
 assert.ok(!/data-landing-ticket|data-booking-open|onclick|tabindex|role="button"/.test(partners));
@@ -30,18 +32,19 @@ const code = modal.slice(modal.indexOf('  var landingSelectionPending'), modal.i
 (async () => {
   let used = false, notices = 0, reads = 0, purchases = [];
   const ctx = { couponState: { trialUsed: false },
+    canShowTrialPurchase: () => false,
     findPlan: id => plans.find(plan => plan.id === id || plan.payId === id),
-    loadCoupons: async () => { reads++; ctx.couponState.trialUsed = used; },
+    refreshTrialEligibility: async () => { reads++; ctx.couponState.trialUsed = used; },
     open: () => notices++, completePurchase: async plan => purchases.push(plan.payId || plan.id) };
   vm.createContext(ctx); vm.runInContext(code, ctx);
   for (const [id] of expected) await ctx.selectLandingPlan(id);
   assert.deepEqual(purchases, expected.map(row => row[0]));
-  assert.equal(reads, 1);
+  assert.equal(reads, 0);
   used = true; await ctx.selectLandingPlan('trial');
-  assert.equal(purchases.length, 4, 'used trial must never enter checkout');
+  assert.equal(purchases.length, 3, 'unconfirmed trial must never enter checkout');
   assert.equal(notices, 1, 'reuse existing product guidance');
   await ctx.selectLandingPlan('admin_test_1000'); await ctx.selectLandingPlan('unknown');
-  assert.equal(purchases.length, 4);
+  assert.equal(purchases.length, 3);
   let release;
   ctx.completePurchase = () => new Promise(resolve => { release = resolve; });
   const pending = ctx.selectLandingPlan('single');
@@ -53,5 +56,5 @@ const code = modal.slice(modal.indexOf('  var landingSelectionPending'), modal.i
   assert.ok(payment.includes('if (!session || !session.user)'));
   assert.ok(payment.includes('openLogin()'));
   assert.ok(payment.includes('contact = await checkout.open(session, selectedProduct)'));
-  console.log('PASS landing cards: canonical mapping/prices, trial-used guard, duplicate selection, existing requestPay/login/checkout entry, native keyboard buttons, CTA preservation, informational partners, responsive hover/reduced-motion, mirrors');
+  console.log('PASS landing cards: canonical mapping/prices, unconfirmed-trial guard, duplicate selection, existing requestPay/login/checkout entry, native keyboard buttons, CTA preservation, informational partners, responsive hover/reduced-motion, mirrors');
 })().catch(error => { console.error(error); process.exitCode = 1; });

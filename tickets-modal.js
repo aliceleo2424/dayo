@@ -237,53 +237,42 @@
     '.tk-policy__list strong,.tk-consent a,.tk-consent [data-terms-mini],.tk-consent [data-refund-mini]{color:#506B55;}',
     '.tk-consent input{accent-color:#5F7D63;}',
     '.tk-notice__kicker{color:#506B55;}',
-    '.tk-price-reference{margin:0 0 1rem;padding:.85rem 1rem;border:1px solid #DDE8D9;border-radius:14px;background:#F1F5EE;}',
-    '.tk-price-reference p{margin:0;font-size:.85rem;line-height:1.6;color:#40362F;overflow-wrap:break-word;}',
-    '.tk-price-reference .tk-price-note{margin-top:.3rem;font-size:.75rem;color:#6B625B;}',
     '.tk-price-unit{margin:.25rem 0 0;color:#5F7D63;line-height:1.5;}',
-    '.tk-dayo-saving{display:block;font-size:.72rem;font-weight:500;color:#6B625B;}',
     '.tk-price-compare{margin:.2rem 0 0;font-size:.76rem;line-height:1.5;color:#506B55;}',
-    '@media (max-width:860px){.tk-banner__copy{flex:0 1 auto;}}'
+    '@media (max-width:860px){.tk-banner__copy{flex:0 1 auto;}}',
+    "\n.tk-eligibility{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px;font-size:12px;line-height:1.6;color:#64776B}.tk-eligibility button{font:inherit;border:1px solid #5F7D63;border-radius:8px;background:white;color:#435F4C;padding:6px 10px;cursor:pointer}\n.tk-modal{max-width:900px;background:#FFFBF4;color:#263F35;border-color:#DDE5D9;box-shadow:0 18px 48px rgba(38,63,53,.12)}\n.tk-head{padding:20px 24px 12px;text-align:left;background:none}.tk-eyebrow{color:#5F7D63}.tk-title{white-space:pre-line;font-size:24px;line-height:1.3;color:#263F35;max-width:650px}.tk-sub{margin:8px 0 0;max-width:650px;white-space:pre-line;font-weight:400;color:#64776B}.tk-perks{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:#435F4C;margin:10px 0 0;padding:0;list-style:none}.tk-perks li:before{content:'✓';display:inline-block;background:#EEF3EA;border-radius:50%;padding:2px 5px;margin-right:5px}\n.tk-body{padding:8px 24px 18px}.tk-section-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 12px;font-size:16px}.tk-section-heading small{font-size:12px;font-weight:400;color:#64776B}\n.tk-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.tk-grid .tk-choice{flex-direction:column}.tk-grid .tk-choice__content{flex:initial}.tk-choice{position:relative;display:flex;min-width:0;cursor:pointer;padding:14px;border:1px solid #DDE5D9;border-radius:17px;background:white;gap:12px;align-items:stretch;text-align:left;box-sizing:border-box}.tk-choice__content{min-width:0;flex:1}.tk-choice__top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.tk-choice .tk-card__title{margin:0;color:#263F35;font-size:17px}.tk-choice .tk-card__copy{text-wrap:balance;margin:5px 0 0;font-weight:400;color:#64776B}.tk-choice input{flex:0 0 auto;width:18px;height:18px;margin:0;accent-color:#5F7D63;position:absolute;right:18px;top:20px}.tk-choice:has(input:focus-visible){outline:3px solid #5F7D63;outline-offset:3px}.tk-choice.is-selected{border:2px solid #5F7D63;padding:13px;background:#F4F6E9}.tk-choice.is-selected input{right:17px;top:19px}\n.tk-choice__price{margin:14px 0 0}.tk-total-label{font-size:12px;color:#64776B;margin:0 0 5px}.tk-choice .tk-card__price{font-size:26px;color:#263F35;margin:0;line-height:1.2;white-space:nowrap}.tk-price-unit{font-size:12px;font-weight:400;color:#64776B;margin:7px 0 0;line-height:1.6}.tk-price-compare{font-size:12px;font-weight:700;color:#5F7D63;margin:14px 0 0;line-height:1.5}.tk-choice .tk-badge{background:#EEF3EA;color:#5F7D63;border:0;border-radius:5px;font-size:11px;padding:3px 6px}.tk-choice__top{padding-right:20px}\n.tk-choice--trial{margin-bottom:12px;align-items:center;background:#F8F8ED}.tk-choice--trial .tk-choice__price{margin:0 40px 0 0;text-align:right}.tk-trial-kicker{font-size:12px;color:#5F7D63;font-weight:700;margin:0 0 10px}.tk-choice--33{margin-top:12px;align-items:center;background:#F8FAF5}.tk-choice--33 .tk-choice__price{margin:0 40px 0 0;text-align:right}.tk-choice--33 .tk-price-compare{margin-top:8px}.tk-price-footnote{font-size:12px;line-height:1.7;color:#64776B;margin:12px 0 0}\n.tk-experience{margin:16px 0;padding-top:14px;border-top:1px solid #DDE5D9}.tk-experience h3{font-size:17px;margin:0 0 18px}.tk-experience__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}.tk-experience__item{display:flex;gap:14px}.tk-experience__item em{color:#5F7D63;font-family:Georgia,serif}.tk-experience strong{font-size:14px}.tk-experience p{font-size:13px;line-height:1.7;color:#64776B;margin:5px 0 0}\n.tk-comparison{border:1px solid #DDE5D9;border-radius:16px;background:white;margin:20px 0}.tk-comparison>summary{cursor:pointer;padding:20px;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px}.tk-comparison>summary:after{content:'+';font-size:22px}.tk-comparison[open]>summary:after{content:'−'}.tk-comparison summary small{display:block;font-size:12px;color:#64776B;margin-top:6px;line-height:1.6}.tk-comparison__body{border-top:1px solid #DDE5D9;padding:20px}.tk-comparison__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.tk-comparison__card{padding:18px;background:#F8FAF5;border:1px solid #E0E7DB;border-radius:14px;min-width:0}.tk-comparison__card:first-child{background:#EEF3EA;border-color:#C2D2BE}.tk-comparison__card h4{margin:0 0 6px}.tk-comparison__card dl{font-size:13px;line-height:1.7;margin:12px 0 0}.tk-comparison__card dt{font-weight:700;margin:10px 0 3px}.tk-comparison__card dd{margin:0;color:#52685A;white-space:pre-line}.tk-comparison__card p{font-size:12px;color:#64776B;margin:0}.tk-comparison a{color:#506B55;text-underline-offset:3px;overflow-wrap:anywhere}.tk-sources{font-size:12px;line-height:1.7;margin-top:12px}.tk-sources li{margin:8px 0}.tk-comparison__note{font-size:12px;color:#64776B;line-height:1.7;margin:0 0 14px}\n.tk-footer{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:12px 24px calc(12px + env(safe-area-inset-bottom));border-top:1px solid #CDD9C8;background:#FFFBF4}.tk-footer__price{font-size:24px;font-weight:800;margin:4px 0}.tk-footer small{font-size:12px;color:#64776B;line-height:1.6}.tk-footer__action{min-width:220px;max-width:50%}.tk-footer .tk-buy{white-space:normal;padding:13px 18px}.tk-footer__policy{display:block;margin-top:8px;border:0;background:none;color:#64776B;text-decoration:underline;font:inherit;font-size:12px;cursor:pointer;text-align:right;width:100%}.tk-policy{background:white;border-color:#DDE5D9;margin:18px 0 0}.tk-policy summary{cursor:pointer;font-weight:700}.tk-policy__list{margin-top:16px}.tk-used{margin-top:12px}.tk-used .tk-card__cta{display:none}.tk-single:empty{display:none}.tk-single{border:0;background:none;padding:0}.tk-admin-test{margin:18px 0}.tk-close{z-index:3}\n.tk-modal [hidden]{display:none!important}.tk-modal button:focus-visible,.tk-modal summary:focus-visible,.tk-modal a:focus-visible{outline:3px solid #5F7D63;outline-offset:3px}\n.tk-footer{box-sizing:border-box}.tk-footer>div:first-child{min-width:0;flex:1}.tk-footer__action{flex:0 1 48%;min-width:0}.tk-footer small{overflow-wrap:anywhere}.tk-footer .tk-buy{box-sizing:border-box;max-width:100%;min-width:0;overflow-wrap:anywhere}.tk-experience>summary{cursor:pointer;font-size:14px;font-weight:700;line-height:1.6}.tk-experience__grid{margin-top:12px}\n@media(max-width:680px){.tk-overlay{padding:8px}.tk-modal{max-height:96dvh;border-radius:22px}.tk-head{padding:16px 14px 10px}.tk-title{font-size:22px;padding-right:26px}.tk-sub{font-size:13px;line-height:1.8;margin-top:14px}.tk-perks{gap:6px;font-size:11px;margin-top:14px}.tk-body{padding:6px 14px 16px}.tk-grid{grid-template-columns:1fr;gap:8px}.tk-grid .tk-choice{flex-direction:row}.tk-section-heading{font-size:14px;gap:8px}.tk-section-heading small{font-size:11px;max-width:110px;text-align:right}.tk-choice{padding:12px;align-items:center;gap:10px}.tk-choice.is-selected{padding:11px}.tk-choice__top{padding-right:0}.tk-choice .tk-card__title{font-size:15px}.tk-choice .tk-card__copy{font-size:12px;line-height:1.6}.tk-choice input{top:50%;right:13px;transform:translateY(-50%)}.tk-choice.is-selected input{top:50%;right:12px}.tk-choice__price,.tk-choice--trial .tk-choice__price,.tk-choice--33 .tk-choice__price{margin:0 25px 0 0;text-align:right;flex:0 0 auto;max-width:53%}.tk-choice .tk-card__price{font-size:24px}.tk-choice .tk-price-unit{font-size:11px}.tk-choice .tk-price-compare{font-size:11px;margin-top:8px}.tk-total-label{font-size:11px}.tk-trial-kicker{font-size:11px;margin-bottom:7px}.tk-choice--33{margin-top:8px}.tk-price-footnote{font-size:11px}.tk-experience{margin-top:22px}.tk-experience__grid{grid-template-columns:1fr;gap:18px}.tk-experience h3{font-size:16px}.tk-comparison>summary,.tk-comparison__body{padding:16px}.tk-comparison__grid{grid-template-columns:1fr}.tk-footer{padding:12px 16px calc(12px + env(safe-area-inset-bottom));gap:12px}.tk-footer__action{min-width:0;width:52%;max-width:52%}.tk-footer__price{font-size:23px}.tk-footer small{font-size:11px}.tk-footer .tk-buy{font-size:12px;padding:12px 10px}.tk-footer__policy{font-size:10px}.tk-experience__item{gap:14px}.tk-close{width:36px;height:36px;top:10px;right:10px}}\n"
   ].join('');
 
-  // Hypothetical example, not a DayO list price or a market average.
-  var COMPARISON_HOURLY_WON = 50000;
-  var COMPARISON_SESSION_WON = COMPARISON_HOURLY_WON / 2;
   function priceText(n) {
     var value = Number(n).toLocaleString('ko-KR');
     return window.DayOI18n && window.DayOI18n.getLang() === 'EN' ? '₩' + value : value + '원';
   }
   function priceDetails(plan) {
-    if (!plan || plan.id === 'admin_test_1000') return '';
+    if (!plan || plan.id === 'admin_test_1000' || plan.id === 'trial') return '';
     var amount = Number(plan.priceValue), count = Number(plan.tickets);
     if (!Number.isFinite(amount) || amount <= 0 || !Number.isFinite(count) || count <= 0) return '';
-    var exactUnit = amount / count, unit = Math.round(exactUnit / 10) * 10;
-    var copy = t(exactUnit === unit ? 'tickets.price.unit' : 'tickets.price.unitApprox', { price: priceText(unit) });
-    var single = findPlan('single');
-    var saving = plan.benefit && single && Number(single.priceValue) > exactUnit
-      ? '<span class="tk-dayo-saving">' + t('tickets.price.dayoSaving', { percent: Math.round((1 - exactUnit / Number(single.priceValue)) * 100) }) + '</span>' : '';
-    var comparison = exactUnit < COMPARISON_SESSION_WON
-      ? '<p class="tk-price-compare">' + t('tickets.price.lower', { percent: Math.round((1 - exactUnit / COMPARISON_SESSION_WON) * 100) }) + '</p>' : '';
-    return '<p class="tk-card__benefit tk-price-unit">' + copy + saving + '</p>' + comparison;
+    var exactUnit = amount / count;
+    var copy = t(exactUnit === Math.round(exactUnit) ? 'tickets.price.unit' : 'tickets.price.unitApprox', { price: priceText(Math.round(exactUnit)) });
+    var single = findPlan('single'), saving = single ? Number(single.priceValue) * count - amount : 0;
+    return '<p class="tk-price-unit">' + (count > 1 ? t('tickets.v2.totalCount', { count: count }) + ' · ' : '') + copy + '</p>' +
+      (saving > 0 ? '<p class="tk-price-compare">' + t('tickets.v2.saving', { count: count, saving: priceText(saving) }) + '</p>' : '');
   }
   function pricePlanText(plan, field) {
-    if (!window.DayOI18n || window.DayOI18n.getLang() !== 'EN' || plan.id === 'admin_test_1000') return plan[field] || '';
-    var names = { trial: 'trialName', single: 'singleName', pack3: 'threeName', pack11: 'elevenName' };
-    var key = field === 'title' && names[plan.id] ? 'landing.pricing.' + names[plan.id] : 'tickets.price.' + plan.id + '.' + field;
-    var value = t(key);
-    return value && value !== key ? value : plan[field] || '';
-  }
-  function updatePriceReference() {
-    if (!el.overlay) return;
-    var title = el.overlay.querySelector('[data-tk-price-reference]'), note = el.overlay.querySelector('[data-tk-price-note]');
-    if (title) title.textContent = t('tickets.price.reference', { hourly: priceText(COMPARISON_HOURLY_WON), reference: priceText(COMPARISON_SESSION_WON) });
-    if (note) note.textContent = t('tickets.price.note');
+    if (plan.id === 'admin_test_1000') return plan[field] || '';
+    return t('tickets.v2.' + plan.id + '.' + field);
   }
 
   var el = {};
   var lastFocused = null;
   var toastTimer = null;
   var buying = false;
+  var selectedPlanId = null;
+  var trialState = { status: 'loading', userId: null };
+  var trialReadVersion = 0;
+  var trialReadPromise = null;
+  var trialReadController = null;
+  var trialAuthBound = false;
+  var trialAuthTimer = null;
   var adminPaymentTestVisible = false;
   var couponState = {
     unusedWelcome: null,
@@ -340,130 +329,219 @@
 
   function planCard(plan) {
     if (!plan) return '';
-    var badge = plan.badge ? '<span class="tk-badge">' + pricePlanText(plan, 'badge') + '</span>' : '';
-    var benefit = priceDetails(plan);
-    var cls = 'tk-card';
-    if (plan.id === 'pack3') cls += ' tk-card--starter';
-    if (plan.id === 'pack11') cls += ' tk-card--best';
-    if (plan.id === 'pack33') cls += ' tk-card--deal';
-    return '' +
-      '<article class="' + cls + '" data-plan="' + plan.id + '">' +
-        badge +
-        '<h3 class="tk-card__title">' + pricePlanText(plan, 'title') + '</h3>' +
-        '<p class="tk-card__price">' + priceText(plan.priceValue) + '</p>' +
-        '<p class="tk-card__meta">' + pricePlanText(plan, 'meta') + '</p>' +
-        benefit +
-        '<p class="tk-card__copy">' + pricePlanText(plan, 'copy') + '</p>' +
-        '<div class="tk-card__cta">' + buyButton(plan) + '</div>' +
-      '</article>';
-  }
-
-  function bannerCard(plan) {
-    if (!plan) return '';
-    var badge = plan.badge ? '<span class="tk-badge">' + pricePlanText(plan, 'badge') + '</span>' : '';
-    return '' +
-      '<article class="tk-banner" data-plan="' + plan.id + '">' +
-        '<div class="tk-banner__copy">' +
-          badge +
-          '<h3 class="tk-card__title">' + pricePlanText(plan, 'title') + '</h3>' +
-          '<p class="tk-card__price">' + priceText(plan.priceValue) + '</p>' +
-          '<p class="tk-card__meta">' + pricePlanText(plan, 'meta') + '</p>' +
-          '<p class="tk-card__copy">' + pricePlanText(plan, 'copy') + '</p>' +
-          priceDetails(plan) +
-        '</div>' +
-        '<div class="tk-card__cta">' + buyButton(plan) + '</div>' +
-      '</article>';
+    var badge = plan.id === 'pack11' ? '<span class="tk-badge">10+1</span>' : '';
+    var cls = 'tk-choice' + (plan.id === 'trial' ? ' tk-choice--trial' : plan.id === 'pack33' ? ' tk-choice--33' : '');
+    return '<label class="' + cls + '" data-plan="' + plan.id + '">' +
+      '<input type="radio" name="tkPlan" value="' + plan.id + '" aria-label="' + pricePlanText(plan, 'title') + ', ' + priceText(plan.priceValue) + '">' +
+      '<div class="tk-choice__content">' + (plan.id === 'trial' ? '<p class="tk-trial-kicker">' + t('tickets.v2.trial.badge') + '</p>' : '') +
+      '<div class="tk-choice__top"><h3 class="tk-card__title">' + pricePlanText(plan, 'title') + '</h3>' + badge + '</div>' +
+      '<p class="tk-card__copy">' + pricePlanText(plan, 'copy') + '</p></div>' +
+      '<div class="tk-choice__price"><p class="tk-total-label">' + t('tickets.v2.total') + '</p><p class="tk-card__price">' + priceText(plan.priceValue) + '</p>' + priceDetails(plan) + '</div></label>';
   }
 
   function singleRow(plan) {
-    if (!plan) return '';
-    return '' +
-      '<p class="tk-single__ask">' + (plan.id === 'single' ? t('tickets.price.single.copy') : pricePlanText(plan, 'copy')) + '</p>' +
-      '<div class="tk-single__row">' +
-        '<div><p class="tk-single__name">' + pricePlanText(plan, 'title') + ' | ' + priceText(plan.priceValue) + '</p>' + priceDetails(plan) + '</div>' +
-        buyButton(plan) +
-      '</div>';
+    return '<div class="tk-single__row"><p>' + plan.title + ' | ' + priceText(plan.priceValue) + '</p>' + buyButton(plan) + '</div>';
   }
 
-  function usedTrialCard(plan) {
-    if (!plan) return '';
-    return '' +
-      '<article class="tk-used" data-plan="trial-used">' +
-        '<div class="tk-banner__copy">' +
-          '<span class="tk-badge">🔒 1회 혜택 사용 완료</span>' +
-          '<h3 class="tk-card__title">' + pricePlanText(plan, 'title') + '</h3>' +
-          '<p class="tk-card__price">' + priceText(plan.priceValue) + '</p>' +
-          '<p class="tk-card__meta">' + pricePlanText(plan, 'meta') + '</p>' +
-        '</div>' +
-        '<div class="tk-card__cta">' +
-          buyButton(plan, { disabled: true, cta: '이미 1회 한정 특별 혜택을 이용하셨습니다 ☕' }) +
-        '</div>' +
-      '</article>';
+  function canShowTrialPurchase() {
+    return trialState.status === 'eligible';
+  }
+
+  function trialStatusMarkup() {
+    if (trialState.status === 'loading') return t('tickets.v2.eligibility.loading');
+    if (trialState.status === 'loggedout') return t('tickets.v2.eligibility.loggedout');
+    if (trialState.status === 'error') return '<span>' + t('tickets.v2.eligibility.error') + '</span> <button type="button" data-tk-eligibility-retry>' + t('tickets.v2.eligibility.retry') + '</button>';
+    return '';
+  }
+
+  function renderTrialSalesSurfaces() {
+    var visible = canShowTrialPurchase();
+    var trial = findPlan('trial');
+    document.querySelectorAll('#pricing [data-landing-ticket="trial"]').forEach(function (node) {
+      node.hidden = !visible;
+      node.style.display = visible ? '' : 'none';
+      var markup = visible ? '<strong>' + t('landing.pricing.trialName') + '</strong><span>' + priceText(trial.priceValue) + ' · ' + t('tickets.v2.totalCount', { count: trial.tickets }) + '</span><small>' + t('landing.pricing.trialBenefit') + '</small>' : '';
+      if (node.innerHTML !== markup) node.innerHTML = markup;
+    });
+    document.querySelectorAll('[data-coupon-wallet]').forEach(function (wallet) {
+      wallet.setAttribute('data-trial-eligible', visible ? 'true' : 'false');
+      var proposals = wallet.querySelectorAll('[data-coupon-code="WELCOME_9900"], [data-coupon-code="WELCOME9900"]');
+      if (!visible) {
+        proposals.forEach(function (node) { node.remove(); });
+        if (!wallet.children.length) wallet.hidden = true;
+        return;
+      }
+      var proposal = proposals[0];
+      if (!proposal) {
+        proposal = document.createElement('article');
+        proposal.className = 'coupon-item';
+        proposal.setAttribute('data-coupon-code', 'WELCOME_9900');
+        wallet.appendChild(proposal);
+      }
+      Array.prototype.slice.call(proposals, 1).forEach(function (node) { node.remove(); });
+      var markup = '<p class="coupon-item__title">' + t('mypage.welcomeBenefit.title') + '</p><p class="coupon-item__price"><strong>' + priceText(trial.priceValue) + '</strong></p><button type="button" class="primary-btn" data-tickets-open>' + t('mypage.welcomeBenefit.cta') + '</button>';
+      if (proposal.innerHTML !== markup) proposal.innerHTML = markup;
+      wallet.hidden = false;
+    });
+  }
+
+  function invalidateTrialEligibility(status) {
+    ++trialReadVersion;
+    if (trialReadController) trialReadController.abort();
+    trialReadController = null;
+    trialReadPromise = null;
+    trialState = { status: status || 'loading', userId: null };
+    renderPlans();
+  }
+
+  function refreshTrialEligibility(force) {
+    if (trialReadPromise && !force) return trialReadPromise;
+    if (force) invalidateTrialEligibility('loading');
+    var version = ++trialReadVersion;
+    trialState = { status: 'loading', userId: null };
+    renderPlans();
+    var controller = new AbortController();
+    trialReadController = controller;
+    var timeout;
+    var timedOut = new Promise(function (_, reject) {
+      timeout = setTimeout(function () { controller.abort(); reject(new Error('trial-eligibility-timeout')); }, 10000);
+    });
+    var work = (async function () {
+      var client = getSupabase();
+      if (!client || !client.auth || typeof client.auth.getSession !== 'function') {
+        // Authentication restoration may not have loaded yet: do not claim logout or eligibility.
+        throw new Error('trial-auth-unavailable');
+      }
+      var sessionResult = await client.auth.getSession();
+      if (sessionResult.error) throw new Error('trial-auth-unavailable');
+      var session = sessionResult.data && sessionResult.data.session;
+      if (!session || !session.user) return { status: 'loggedout', userId: null };
+      if (!session.access_token) throw new Error('trial-auth-unavailable');
+      var response = await fetch('/api/ticket-payment', {
+        method: 'POST', cache: 'no-store', signal: controller.signal,
+        headers: { Authorization: 'Bearer ' + session.access_token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'trial_eligibility' })
+      });
+      var data = await response.json();
+      if (!response.ok || data.ok !== true || typeof data.eligible !== 'boolean') throw new Error('trial-eligibility-unavailable');
+      // Even if an auth event was missed, an old account response cannot be applied to the current account.
+      var current = await client.auth.getSession();
+      if (current.error) throw new Error('trial-auth-unavailable');
+      var currentSession = current.data && current.data.session;
+      if (!currentSession || !currentSession.user || currentSession.user.id !== session.user.id) throw new Error('trial-auth-changed');
+      return { status: data.eligible ? 'eligible' : 'ineligible', userId: session.user.id };
+    })();
+    trialReadPromise = Promise.race([work, timedOut]).then(function (result) {
+      if (version !== trialReadVersion) return;
+      trialState = result;
+      renderPlans();
+    }).catch(function (error) {
+      if (version !== trialReadVersion) return;
+      trialState = { status: error.message === 'trial-auth-changed' ? 'loading' : 'error', userId: null };
+      renderPlans();
+      if (error.message === 'trial-auth-changed') setTimeout(function () { refreshTrialEligibility(); }, 0);
+    }).finally(function () {
+      clearTimeout(timeout);
+      if (version === trialReadVersion) {
+        trialReadPromise = null;
+        trialReadController = null;
+      }
+    });
+    return trialReadPromise;
+  }
+
+  function scheduleTrialAuthRefresh(loggedOut) {
+    invalidateTrialEligibility(loggedOut ? 'loggedout' : 'loading');
+    clearTimeout(trialAuthTimer);
+    // Never await another Supabase auth call inside its synchronous auth callback.
+    trialAuthTimer = setTimeout(function () { refreshTrialEligibility(); }, 0);
+  }
+
+  function bindTrialAuthListener() {
+    var client = getSupabase();
+    if (trialAuthBound || !client || !client.auth || typeof client.auth.onAuthStateChange !== 'function') return;
+    trialAuthBound = true;
+    client.auth.onAuthStateChange(function (event, session) {
+      if (event === 'TOKEN_REFRESHED') return;
+      scheduleTrialAuthRefresh(!session || !session.user);
+    });
+  }
+
+  // Presentation state only. The checkout receives the original plan through buyButton/completePurchase.
+  function syncSelection() {
+    var plan = findPlan(selectedPlanId);
+    if (!plan) return;
+    el.overlay.querySelectorAll('input[name="tkPlan"]').forEach(function (input) {
+      input.checked = input.value === selectedPlanId;
+      input.closest('.tk-choice').classList.toggle('is-selected', input.checked);
+    });
+    el.overlay.querySelector('[data-tk-selection]').textContent = pricePlanText(plan, 'title') + ' / ' + t('tickets.v2.total');
+    el.overlay.querySelector('[data-tk-total]').textContent = priceText(plan.priceValue);
+    el.overlay.querySelector('[data-tk-action]').innerHTML = buyButton(plan, { cta: t('tickets.v2.continue', { price: priceText(plan.priceValue) }) });
   }
 
   function renderPlans() {
-    updatePriceReference();
-    // Normal purchases collect all required consent in checkout; keep the admin-test DOM contract.
-    var legacyConsent = el.overlay && el.overlay.querySelector('.tk-consent');
+    if (!el.overlay) return;
+    el.overlay.querySelectorAll('[data-tk-copy]').forEach(function (node) { node.textContent = t(node.getAttribute('data-tk-copy')); });
+    el.overlay.querySelector('[data-tk-close]').setAttribute('aria-label', t('tickets.v2.close'));
+    var legacyConsent = el.overlay.querySelector('.tk-consent');
     if (legacyConsent) legacyConsent.style.display = adminPaymentTestVisible ? '' : 'none';
-    var used = !!couponState.trialUsed;
-    if (el.banner) {
-      el.banner.hidden = used;
-      el.banner.innerHTML = used ? '' : bannerCard(findPlan('trial'));
-    }
-    if (el.grid) {
-      el.grid.innerHTML = [findPlan('pack3'), findPlan('pack11'), findPlan('pack33')].map(planCard).join('');
-    }
-    if (el.single) {
-      var singleHtml = singleRow(findPlan('single'));
-      if (adminPaymentTestVisible) {
-        singleHtml += '<div class="tk-admin-test" data-tk-admin-test>' +
-          '<span class="tk-badge">ADMIN TEST</span>' +
-          singleRow(findPlan('admin_test_1000')) +
-        '</div>';
-      }
-      el.single.innerHTML = singleHtml;
-    }
-    if (el.used) {
-      el.used.hidden = !used;
-      el.used.innerHTML = used ? usedTrialCard(findPlan('trial')) : '';
-    }
+    var trialVisible = canShowTrialPurchase();
+    var statusNode = el.overlay.querySelector('[data-tk-eligibility]');
+    var statusMarkup = trialStatusMarkup();
+    statusNode.hidden = !statusMarkup;
+    statusNode.innerHTML = statusMarkup;
+    renderTrialSalesSurfaces();
+    if (el.banner) { el.banner.hidden = !trialVisible; el.banner.innerHTML = trialVisible ? planCard(findPlan('trial')) : ''; }
+    if (el.grid) el.grid.innerHTML = [findPlan('single'), findPlan('pack3'), findPlan('pack11')].map(planCard).join('');
+    el.overlay.querySelector('[data-tk-large]').innerHTML = planCard(findPlan('pack33'));
+    if (el.single) el.single.innerHTML = adminPaymentTestVisible ? '<div class="tk-admin-test" data-tk-admin-test><span class="tk-badge">ADMIN TEST</span>' + singleRow(findPlan('admin_test_1000')) + '</div>' : '';
+    if (el.used) { el.used.hidden = true; el.used.innerHTML = ''; }
+    if (!selectedPlanId || (selectedPlanId === 'trial' && !trialVisible)) selectedPlanId = trialVisible ? 'trial' : 'single';
+    syncSelection();
+    el.overlay.querySelector('[data-tk-experience]').innerHTML = experienceMarkup();
+    el.overlay.querySelector('[data-tk-comparison-body]').innerHTML = comparisonMarkup();
+    el.overlay.querySelector('[data-tk-price-footnote]').textContent = t('tickets.v2.priceNote', { single: priceText(findPlan('single').priceValue) });
+  }
+
+  function copyNode(tag, key, cls) { return '<' + tag + (cls ? ' class="' + cls + '"' : '') + ' data-tk-copy="' + key + '">' + t(key) + '</' + tag + '>'; }
+  function experienceMarkup() {
+    return '<summary>' + t('tickets.v2.experience.title') + '</summary><div class="tk-experience__grid">' + [1, 2, 3].map(function (n) {
+      return '<div class="tk-experience__item"><em>0' + n + '</em><div><strong>' + t('tickets.v2.experience.' + n + '.title') + '</strong><p>' + t('tickets.v2.experience.' + n + '.copy') + '</p></div></div>';
+    }).join('') + '</div><p class="tk-price-footnote">' + t('tickets.v2.experience.note') + '</p>';
+  }
+  var COMPARISON_SOURCES = [
+    ['Cambly — Private+', 'https://studentsupport.cambly.com/hc/ko/articles/19045434656013-나에게-맞는-플랜-선택하기'],
+    ['Cambly — weekly plans', 'https://studentsupport.cambly.com/hc/ko/articles/360000312583-플랜-작동-방식'],
+    ['Preply — subscription / trial', 'https://help.preply.com/en/articles/4966680-how-does-my-preply-subscription-work'],
+    ['Episoden — free / conditions', 'https://www.episoden.com/faq/1-2'],
+    ['Episoden — Buddy / extensions', 'https://www.episoden.com/faq/3-6'],
+    ['Episoden — 1:1 / Host Room', 'https://www.episoden.com/en/faq/1-13'],
+    ['Episoden — Host Room', 'https://www.episoden.com/faq/1-12']
+  ];
+  function comparisonMarkup() {
+    var vars = { single: priceText(findPlan('single').priceValue) };
+    return '<p class="tk-comparison__note">' + t('tickets.v2.comparison.intro') + '</p><div class="tk-comparison__grid">' +
+      ['dayo', 'cambly', 'preply', 'episoden'].map(function (service) {
+        return '<article class="tk-comparison__card"><h4>' + t('tickets.v2.comparison.' + service + '.name') + '</h4><p>' + t('tickets.v2.comparison.' + service + '.about') + '</p><dl>' +
+          ['regular', 'partner', 'conversation'].map(function (field) {
+            return '<dt>' + t('tickets.v2.comparison.' + field) + '</dt><dd>' + t('tickets.v2.comparison.' + service + '.' + field, vars) + '</dd>';
+          }).join('') + '</dl></article>';
+      }).join('') + '</div><p class="tk-price-footnote">' + t('tickets.v2.comparison.note') + '</p><details class="tk-sources"><summary>' + t('tickets.v2.comparison.sources') + '</summary><ol>' +
+      COMPARISON_SOURCES.map(function (source) { return '<li><a target="_blank" rel="noopener noreferrer" href="' + source[1] + '">' + source[0] + '</a></li>'; }).join('') + '</ol></details>';
   }
 
   function buildMarkup() {
-    return '' +
-      '<div class="tk-modal" role="dialog" aria-modal="true" aria-labelledby="tkTitle">' +
-        '<button type="button" class="tk-close" data-tk-close aria-label="닫기">✕</button>' +
-        '<div class="tk-head">' +
-          '<p class="tk-eyebrow">TICKETS</p>' +
-          '<h2 class="tk-title" id="tkTitle">DayO 세션 이용권 ☕️</h2>' +
-          '<p class="tk-sub">1회 30분 세션 (25분 대화 + 5분 퀴즈) · 약정 없이 필요할 만큼만</p>' +
-        '</div>' +
-        '<div class="tk-body">' +
-          '<aside class="tk-price-reference"><p data-tk-price-reference></p><p class="tk-price-note" data-tk-price-note></p></aside>' +
-          '<div data-tk-banner></div>' +
-          '<div class="tk-grid" data-tk-grid></div>' +
-          '<div class="tk-single" data-tk-single></div>' +
-          '<div data-tk-used></div>' +
-          '<div class="tk-consent">' +
-            '<label for="tkRefundAgree">' +
-              '<input type="checkbox" id="tkRefundAgree" name="tkRefundAgree">' +
-              '<span>[필수] 취소 및 환불 규정을 확인하였으며 이에 동의합니다. ' +
-                '<button type="button" data-refund-mini data-terms-check="#tkRefundAgree" onclick="event.preventDefault();event.stopPropagation();if(window.openRefundMiniModal){window.openRefundMiniModal(\'#tkRefundAgree\');}return false;">보기</button>' +
-              '</span>' +
-            '</label>' +
-          '</div>' +
-          '<aside class="tk-policy" aria-label="세션 규정 및 이용 안내">' +
-            '<p class="tk-policy__title">세션 규정 및 이용 안내</p>' +
-            '<ul class="tk-policy__list">' +
-              '<li>📌 <strong>유효기간:</strong> 티켓은 발급일로부터 90일 동안 사용할 수 있어요.</li>' +
-              '<li>🔄 <strong>예약 취소:</strong> 대화 시작까지 6시간 초과 남았을 때 취소하면 사용한 티켓이 원래 유효기간으로 반환됩니다.</li>' +
-              '<li>⏰ <strong>시작까지 6시간 이하 남았을 때 취소:</strong> 취소는 가능하지만 티켓이 반환되지 않습니다. 신규 예약은 시작 4시간 전까지만 가능합니다.</li>' +
-              '<li>💌 DayO 또는 파트너 사정으로 대화가 진행되지 못한 경우에는 별도 환불 기준에 따라 티켓이 반환됩니다.</li>' +
-            '</ul>' +
-          '</aside>' +
-        '</div>' +
-      '</div>';
+    return '<div class="tk-modal" role="dialog" aria-modal="true" aria-labelledby="tkTitle">' +
+      '<button type="button" class="tk-close" data-tk-close>✕</button><div class="tk-head">' +
+      copyNode('p', 'tickets.v2.eyebrow', 'tk-eyebrow') + '<h2 class="tk-title" id="tkTitle" data-tk-copy="tickets.v2.title">' + t('tickets.v2.title') + '</h2>' +
+      copyNode('p', 'tickets.v2.subtitle', 'tk-sub') + '<ul class="tk-perks">' + [1, 2, 3].map(function (n) { return copyNode('li', 'tickets.v2.perk.' + n); }).join('') + '</ul></div>' +
+      '<div class="tk-body"><h3 class="tk-section-heading">' + copyNode('span', 'tickets.v2.choose') + copyNode('small', 'tickets.v2.duration') + '</h3>' +
+      '<div class="tk-eligibility" data-tk-eligibility role="status" aria-live="polite" hidden></div><div data-tk-banner></div><div class="tk-grid" data-tk-grid></div><div data-tk-large></div><p class="tk-price-footnote" data-tk-price-footnote></p><div class="tk-single" data-tk-single></div><div data-tk-used></div>' +
+      '<details class="tk-experience" data-tk-experience></details><details class="tk-comparison"><summary><span>' + copyNode('strong', 'tickets.v2.comparison.title') + copyNode('small', 'tickets.v2.comparison.subtitle') + '</span></summary><div class="tk-comparison__body" data-tk-comparison-body></div></details>' +
+      '<div class="tk-consent"><label for="tkRefundAgree"><input type="checkbox" id="tkRefundAgree" name="tkRefundAgree"><span>' + copyNode('span', 'tickets.v2.consent') + ' <button type="button" data-refund-mini data-terms-check="#tkRefundAgree">' + t('tickets.v2.view') + '</button></span></label></div>' +
+      '<details class="tk-policy"><summary data-tk-copy="tickets.v2.policy.title">' + t('tickets.v2.policy.title') + '</summary><ul class="tk-policy__list">' + [1, 2, 3, 4].map(function (n) { return copyNode('li', 'tickets.v2.policy.' + n); }).join('') + '</ul></details></div>' +
+      '<footer class="tk-footer"><div><small data-tk-selection></small><p class="tk-footer__price" data-tk-total></p>' + copyNode('small', 'tickets.v2.noRenewal') + '</div><div class="tk-footer__action"><div data-tk-action></div><button type="button" class="tk-footer__policy" data-tk-policy-link data-tk-copy="tickets.v2.policy.title">' + t('tickets.v2.policy.title') + '</button></div></footer></div>';
   }
 
   function showToast(message, opts) {
@@ -649,7 +727,7 @@
     else document.body.style.overflow = 'hidden';
     var closeBtn = el.overlay.querySelector('[data-tk-close]');
     if (closeBtn) closeBtn.focus();
-    loadCoupons();
+    refreshTrialEligibility(true);
     loadAdminPaymentTestAccess();
   }
 
@@ -706,7 +784,7 @@
 
   async function completePurchase(plan) {
     if (buying || !plan) return;
-    if (plan.id === 'trial' && couponState.trialUsed) return;
+    if (plan.id === 'trial' && !canShowTrialPurchase()) return;
     var payId = plan.payId || plan.id;
     if (typeof window.requestPay === 'function') {
       return window.requestPay(payId);
@@ -745,6 +823,7 @@
 
   function bindEvents() {
     el.overlay.addEventListener('click', function (e) {
+      if (e.target.closest('[data-tk-eligibility-retry]')) { refreshTrialEligibility(); return; }
       if (e.target.closest('[data-tk-notice-close]')) {
         hideNotice();
         return;
@@ -753,6 +832,8 @@
     });
 
     el.overlay.addEventListener('change', function (e) {
+      var choice = e.target.closest('input[name="tkPlan"]');
+      if (choice) { selectedPlanId = choice.value; syncSelection(); return; }
       var box = e.target.closest('[data-tk-coupon]');
       if (!box) return;
       couponState.applyWelcome = !!box.checked;
@@ -760,6 +841,8 @@
     });
 
     el.overlay.addEventListener('click', function (e) {
+      var policyLink = e.target.closest('[data-tk-policy-link]');
+      if (policyLink) { var policy = el.overlay.querySelector('.tk-policy'); policy.open = true; policy.scrollIntoView({ block: 'nearest' }); policy.querySelector('summary').focus(); return; }
       var refundView = e.target.closest('[data-refund-mini], [data-open-refund-mini]');
       if (refundView) {
         e.preventDefault();
@@ -785,6 +868,12 @@
     });
 
     document.addEventListener('keydown', function (e) {
+      if (e.key === 'Tab' && el.overlay.classList.contains('is-open')) {
+        var focusable = Array.from(el.overlay.querySelectorAll('button:not(:disabled), input:not(:disabled), a[href], summary')).filter(function (node) { return node.getClientRects().length > 0; });
+        var first = focusable[0], last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
       if (e.key !== 'Escape') return;
       if (el.notice && el.notice.classList.contains('is-open')) {
         hideNotice();
@@ -793,13 +882,17 @@
       if (el.overlay.classList.contains('is-open')) close();
     });
 
-    document.addEventListener('dayo:couponchange', function (event) {
-      var rows = event.detail && event.detail.coupons;
-      if (el.overlay && el.overlay.classList.contains('is-open') && Array.isArray(rows)) loadCoupons(rows);
+    document.addEventListener('dayo:couponchange', function () { renderTrialSalesSurfaces(); refreshTrialEligibility(); });
+    document.addEventListener('dayo:ticketpurchase', function () { refreshTrialEligibility(true); });
+    document.addEventListener('dayo:authchange', function (event) { bindTrialAuthListener(); scheduleTrialAuthRefresh(event.detail && event.detail.loggedIn === false); });
+    document.addEventListener('dayo:authprofile', function () { bindTrialAuthListener(); scheduleTrialAuthRefresh(false); });
+    document.addEventListener('dayo:langchange', renderPlans);
+    window.addEventListener('focus', function () { refreshTrialEligibility(); });
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') refreshTrialEligibility(); });
+    window.addEventListener('storage', function (event) {
+      if (!event.key || /^sb-.*-auth-token$/.test(event.key)) scheduleTrialAuthRefresh(false);
     });
-    document.addEventListener('dayo:langchange', function () {
-      if (el.overlay && el.overlay.classList.contains('is-open')) renderPlans();
-    });
+    bindTrialAuthListener();
   }
 
   function openFromQuery() {
@@ -870,9 +963,9 @@
     landingSelectionPending = true;
     try {
       if (plan.id === 'trial') {
-        await loadCoupons();
-        if (couponState.trialUsed) {
-          open(); // Reuse the existing used-trial and regular-product guidance.
+        await refreshTrialEligibility(true);
+        if (!canShowTrialPurchase()) {
+          open(); // Unconfirmed trial eligibility cannot activate a sales CTA.
           return;
         }
       }
@@ -912,7 +1005,9 @@
       toast: showToast,
       ensureRefundConsent: ensureRefundConsent,
       hasRefundConsent: hasRefundConsent,
-      isTrialUsed: function () { return !!couponState.trialUsed; }
+      isTrialUsed: function () { return trialState.status === 'ineligible'; },
+      refreshTrialEligibility: refreshTrialEligibility,
+      renderTrialSalesSurfaces: renderTrialSalesSurfaces
     };
     window.openTicketModal = open;
     window.closeTicketModal = close;
@@ -920,7 +1015,7 @@
       open();
     };
     openFromQuery();
-    loadCoupons();
+    refreshTrialEligibility();
     loadAdminPaymentTestAccess();
   }
 

@@ -263,6 +263,8 @@
     if (window.DayOTicketWallet && typeof window.DayOTicketWallet.syncUI === 'function') {
       window.DayOTicketWallet.syncUI(result.ticket_count);
     }
+    // Refresh trial presentation only; UI listeners cannot block payment settlement.
+    try { document.dispatchEvent(new CustomEvent('dayo:ticketpurchase')); } catch (error) { /* non-blocking */ }
     return result;
   }
 

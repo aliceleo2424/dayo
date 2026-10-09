@@ -9,10 +9,12 @@ async function page(mode=''){
   const html=read('tests/fixtures/checkout-browser.html').replace(/<script src="[^"]+"><\/script>/g,'');
   const dom=new JSDOM(html,{url:'http://localhost/?mode='+mode,runScripts:'dangerously',virtualConsole:new VirtualConsole()});
   for(const name of ['tickets-modal.js','ticket-payment.js','checkout-preparation.js','terms-mini-modal.js'])dom.window.eval(read('public/'+name));
-  dom.window.document.querySelector('[data-tickets-open]').click();await tick();
+  const fetchCheckout=dom.window.fetch;dom.window.fetch=async(url,opts)=>JSON.parse(opts.body).action==='trial_eligibility'?{ok:true,json:async()=>({ok:true,eligible:true})}:fetchCheckout(url,opts);
+  await tick();dom.window.document.querySelector('[data-tickets-open]').click();await dom.window.DayOTickets.refreshTrialEligibility();await tick();
   return dom;
 }
-async function openTrial(dom){dom.window.document.querySelector('[data-tk-buy="trial"]').click();await tick();}
+async function choose(dom,plan){const doc=dom.window.document;doc.querySelector('input[name="tkPlan"][value="'+plan+'"]').click();const cta=doc.querySelector('[data-tk-buy="'+plan+'"]');cta.click();cta.click();await tick();}
+async function openTrial(dom){await choose(dom,'trial');}
 function fill(dom,name,value,start=value.length,end=start){const el=dom.window.document.querySelector('[name="'+name+'"]');el.value=value;if(el.type==='tel')el.setSelectionRange(start,end);el.dispatchEvent(new dom.window.Event('input',{bubbles:true}));return el;}
 function all(dom){const el=dom.window.document.querySelector('[data-ck-all]');el.click();}
 async function main(){
@@ -42,7 +44,7 @@ async function main(){
   dom=await page('saved-contact');await openTrial(dom);assert.equal(dom.window.document.querySelector('[name=contact_email]').value,'saved@example.invalid');dom.window.close();
   for(const mode of ['contact-fail','read-fail']){dom=await page(mode);await openTrial(dom);if(mode==='contact-fail'){fill(dom,'mobile_phone','01012345678');all(dom);dom.window.document.querySelector('.ck-pay').click();await tick();}assert.ok(dom.window.document.querySelector('.ck-form'));assert.equal(dom.window.document.querySelector('#fixture-result').textContent,'');assert.match(dom.window.document.querySelector('.ck-error').textContent,/연락처/);dom.window.close();}
   // Every public SKU reaches mock PortOne with the prepared amount unchanged.
-  for(const [plan,amount] of [['single',19900],['pack3',54900],['pack11',179000],['pack33',499000]]){dom=await page();dom.window.document.querySelector('[data-tk-buy="'+plan+'"]').click();await tick();fill(dom,'mobile_phone','01012345678');all(dom);dom.window.document.querySelector('.ck-pay').click();await tick();await tick();assert.equal(JSON.parse(dom.window.document.querySelector('#fixture-result').textContent).amount,amount);dom.window.close();}
+  for(const [plan,amount] of [['single',19900],['pack3',54900],['pack11',179000],['pack33',499000]]){dom=await page();await choose(dom,plan);fill(dom,'mobile_phone','01012345678');all(dom);dom.window.document.querySelector('.ck-pay').click();await tick();await tick();assert.equal(JSON.parse(dom.window.document.querySelector('#fixture-result').textContent).amount,amount);dom.window.close();}
   console.log('PASS DOM checkout: prefill/edit/reopen, paste/caret/deletion, all/mixed consent, invalid contact, save failure, no preferences, five SKU mock PG amounts/order sequence');
 }
 main().catch(e=>{console.error(e);process.exitCode=1;});

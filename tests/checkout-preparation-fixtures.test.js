@@ -46,15 +46,15 @@ async function main(){
     const plans=vm.runInNewContext(modal.slice(from,to)+'\nPLANS');
     for(const [id,amount] of [['trial',9900],['single',19900],['pack3',54900],['pack11',179000],['pack33',499000]])assert.equal(plans.find(p=>p.id===id).priceValue,amount);
     const baseline=name=>execFileSync('git',['-c','safe.directory='+root.replace(/\\/g,'/'),'show','HEAD:'+name],{cwd:root,encoding:'utf8'}).replace(/\r\n/g,'\n');
-    const api=read('api/ticket-payment.js');assert.equal(api.slice(api.indexOf('async function finalize(')),baseline('api/ticket-payment.js').slice(baseline('api/ticket-payment.js').indexOf('async function finalize(')));
+    const api=read('api/ticket-payment.js');assert.equal(api.slice(api.indexOf('async function finalize('),api.indexOf('module.exports =')),baseline('api/ticket-payment.js').slice(baseline('api/ticket-payment.js').indexOf('async function finalize('),baseline('api/ticket-payment.js').indexOf('module.exports =')));
     for(const name of ['supabase/migrations/075_enforce_welcome_trial_entitlement.sql','public/room.html','public/room-live.js'])assert.equal(read(name),baseline(name),name+' changed');
-    // Reviewed Security/Monthly integration changes are intentional. Keep exact
+    // PRICE-02 baseline 9b8a5ce: verified unchanged Security/Monthly files. Keep exact
     // whole-file integrity, rather than weakening this to substring assertions.
     const integrated={
-      'public/profile-store.js':'4353643e65ab191d0fed00c8b19016e690ccd781ec3b3564b34e1142571bb6a1',
-      'public/booking-modal.js':'16ca7758616cb119d2332da14ce179fa51243e9db07f3a6121b03b824509f2da',
-      'public/availability-slots.js':'808ce5b3cd55a6ba981f1468e72d308f3e906d4c1a95dd8db1e8f7351439ce31',
-      'public/partner.html':'4426657a908fd50d49094a3d32a8eab785cebf52ccaa6b4f3ea9264e9c2196e7'
+      'public/profile-store.js':'3ac895a5c16e5f0955ff8621172ef6b50a172b150130443f3b36316930c96e3e',
+      'public/booking-modal.js':'45f3c4dd61c7abe99c9a583a1278f77f52ca34b937ef36ed7bdc6c696aa059ad',
+      'public/availability-slots.js':'bba14ee7f8fdfa449177ab8dfdc2eb8d2ed5c98bb59310d424a74459920f6d78',
+      'public/partner.html':'d6b0099db2aef35a9853a5fa14eea3be1e84f95c21e67c89852aedf1db1b33d2'
     };
     for(const [name,hash] of Object.entries(integrated))assert.equal(require('node:crypto').createHash('sha256').update(read(name)).digest('hex'),hash,name+' reviewed integration changed');
   });

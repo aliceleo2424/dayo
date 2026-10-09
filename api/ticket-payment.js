@@ -534,6 +534,30 @@ function merchantUid(productKey) {
 
 // The real ticket products are available to authenticated customers during pre-open.
 // The temporary 1,000 KRW E2E product remains restricted to verified admins.
+// Read-only snapshot of the existing 044/075 trial purchase predicates.
+// Final purchase authorization stays in prepare/finalize and the 075 DB triggers.
+async function trialEligibility(service, user) {
+  var profileResult = await service.from('profiles').select('has_welcome_coupon')
+    .eq('id', user.id).maybeSingle();
+  if (profileResult.error) return { status: 503, body: { ok: false, error: 'trial-eligibility-unavailable' } };
+  if (!profileResult.data || profileResult.data.has_welcome_coupon !== true) {
+    return { status: 200, body: { ok: true, eligible: false } };
+  }
+
+  // PostgREST .or() twice would overwrite the same query parameter: group both predicates.
+  // Match lower(status), exact product_key, the legacy amount+count pair, and case-sensitive Korean LIKE.
+  var trialOrder = 'or(product_key.eq.trial,and(amount.eq.9900,ticket_count.eq.1),product_name.like.%체험%)';
+  var completedTrial = ['paid', 'complete', 'completed'].map(function (status) {
+    return 'and(status.ilike.' + status + ',' + trialOrder + ')';
+  }).join(',');
+  var orderResult = await service.from('orders').select('id').eq('user_id', user.id)
+    .or(completedTrial).limit(1);
+  if (orderResult.error || !Array.isArray(orderResult.data)) {
+    return { status: 503, body: { ok: false, error: 'trial-eligibility-unavailable' } };
+  }
+  return { status: 200, body: { ok: true, eligible: orderResult.data.length === 0 } };
+}
+
 async function prepare(service, user, body) {
   console.log('[DayO PAYMENT TEST DEBUG]', 'PREPARE_REQUEST', {
     payment_test: body.payment_test,
@@ -690,7 +714,11 @@ module.exports = async function handler(req, res) {
     var body = await readBody(req);
     var action = String(body.action || '').trim();
     var result;
-    if (action === 'portone_find') result = await portoneFind(config, clients.service, user, body);
+    if (action === 'trial_eligibility') {
+      res.setHeader('Cache-Control', 'no-store');
+      result = await trialEligibility(clients.service, user);
+    }
+    else if (action === 'portone_find') result = await portoneFind(config, clients.service, user, body);
     else if (action === 'portone_probe') result = await portoneProbe(config, clients.service, user, body);
     else if (action === 'prepare') result = await prepare(clients.service, user, body);
     else if (action === 'finalize') result = await finalize(config, clients.service, user, body);
