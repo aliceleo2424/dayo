@@ -26,11 +26,11 @@ async function run(){
    w.DayOI18n.setLang(locale==='KO'?'EN':'KO');await settled('language switch');
    w.DayOTickets.open();await ui.ready();w.DayOTickets.close();w.DayOTickets.open();await ui.ready();await settled('modal reopen');
    ui.setAccount('purchased');await new Promise(r=>setTimeout(r,5));await ui.ready();await settled('paid-unused account');assert(!d.querySelector('[data-coupon-code=WELCOME_9900]'));
-   ui.setAccount('used');await new Promise(r=>setTimeout(r,5));await ui.ready();await settled('used account');assert(!d.querySelector('input[value=trial]'));
+   ui.setAccount('used');await new Promise(r=>setTimeout(r,5));await ui.ready();await settled('used account');assert(!d.querySelector('input[value=trial]:not(:disabled)'));
    ui.setAccount('loggedout');await new Promise(r=>setTimeout(r,5));await ui.ready();await settled('logout');assert(!d.querySelector('[data-coupon-code=WELCOME_9900]'));
    ui.setAccount('eligible');await new Promise(r=>setTimeout(r,5));await ui.ready();await settled('login');assert(d.querySelector('[data-coupon-code=WELCOME_9900]'));
    ui.setReply(async()=>({ok:false,json:async()=>({ok:false,error:'synthetic-failure'})}));await ui.refresh(true);await settled('API failure');assert(d.querySelector('[data-tk-eligibility-retry]'));
-   ui.setReply(null);d.querySelector('[data-tk-eligibility-retry]').click();await ui.ready();await settled('API retry');assert(d.querySelector('input[value=trial]'));
+   ui.setReply(null);d.querySelector('[data-tk-eligibility-retry]').click();await ui.ready();await settled('API retry');assert(d.querySelector('input[value=trial]:not(:disabled)'));
    for(const id of ['trial','single','pack3','pack11','pack33'])assert(d.querySelector('input[value='+id+']'));
    assert.equal(d.querySelector('#order-history').textContent,'9,900원 과거 결제');
    console.log('PASS My Page observer '+locale+': zero writes at rest, node preservation, legitimate rerender/locale/auth/account/paid-used/error-retry/modal transitions settle.');

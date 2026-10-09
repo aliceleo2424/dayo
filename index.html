@@ -3280,23 +3280,28 @@
         <h2 class="section-title reveal" style="margin-bottom: 1.25rem;" data-i18n="landing.pricing.title">필요할 때 선택하는 티켓</h2>
         <p class="reveal" style="color: var(--text-muted); margin-bottom: 1.75rem; line-height: 1.7; max-width: 44rem; margin-left: auto; margin-right: auto;" data-i18n="landing.pricing.description">25분 1:1 대화와 5분 후속 활동. 정기결제 없이 필요할 때 이용해요.</p>
         <div class="ticket-price-row reveal">
-          <button type="button" class="ticket-price-card ticket-price-card--trial" data-landing-ticket="trial" hidden style="display:none"></button>
+          <button type="button" class="ticket-price-card ticket-price-card--trial" data-landing-ticket="trial" disabled>
+            <strong data-i18n="tickets.v2.trial.title">첫 체험 · 1회</strong>
+            <small data-i18n="tickets.v2.eligibility.loading">체험 구매 자격을 확인하고 있어요.</small>
+          </button>
           <button type="button" class="ticket-price-card" data-landing-ticket="single">
-            <strong data-i18n="landing.pricing.singleName">깔끔한 1회 티켓</strong>
-            <span data-i18n="landing.pricing.singlePrice">19,900원 · 1회</span>
-            <small data-i18n="landing.pricing.singleBenefit">약정 없이 필요할 때 딱 한 번</small>
+            <strong data-i18n="tickets.v2.single.title">1회권</strong>
+            <small data-i18n="tickets.v2.single.copy">필요한 날, 한 번 더</small>
           </button>
           <button type="button" class="ticket-price-card" data-landing-ticket="starter3">
-            <strong data-i18n="landing.pricing.threeName">산뜻한 3회 패키지</strong>
-            <span data-i18n="landing.pricing.threePrice">54,900원 · 회당 약 18,300원</span>
-            <small data-i18n="landing.pricing.threeBenefit">부담 없는 3주 루틴</small>
+            <strong data-i18n="tickets.v2.pack3.title">3회권</strong>
+            <small data-i18n="tickets.v2.pack3.copy">가볍게 이어가기</small>
           </button>
           <button type="button" class="ticket-price-card" data-landing-ticket="light11">
-            <strong data-i18n="landing.pricing.elevenName">가벼운 11 패키지</strong>
-            <span data-i18n="landing.pricing.elevenPrice">179,000원 · BEST 1회 보너스</span>
-            <small data-i18n="landing.pricing.elevenBenefit">회당 약 16,270원 (10+1회)</small>
+            <strong data-i18n="tickets.v2.pack11.title">11회권</strong>
+            <small data-i18n="tickets.v2.pack11.copy">꾸준히 나누고 싶은 이야기</small>
+          </button>
+          <button type="button" class="ticket-price-card" data-landing-ticket="full33">
+            <strong data-i18n="tickets.v2.pack33.title">33회권</strong>
+            <small data-i18n="tickets.v2.pack33.copy">더 자주 대화한다면</small>
           </button>
         </div>
+        <button type="button" data-landing-trial-retry hidden data-i18n="tickets.v2.eligibility.retry">다시 확인</button>
         <div class="reveal" style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center;">
           <button type="button" class="header-cta" style="display: inline-flex; border: none; font-family: inherit; cursor: pointer;" data-booking-open data-i18n="landing.pricing.book">📅 대화 세션 예약하기</button>
           <button type="button" class="header-cta" style="display: inline-flex; border: none; font-family: inherit; cursor: pointer;" data-tickets-open data-i18n="landing.pricing.buy">세션 티켓 충전하기 💳</button>

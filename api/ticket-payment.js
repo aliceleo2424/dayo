@@ -540,8 +540,8 @@ async function trialEligibility(service, user) {
   var profileResult = await service.from('profiles').select('has_welcome_coupon')
     .eq('id', user.id).maybeSingle();
   if (profileResult.error) return { status: 503, body: { ok: false, error: 'trial-eligibility-unavailable' } };
-  if (!profileResult.data || profileResult.data.has_welcome_coupon !== true) {
-    return { status: 200, body: { ok: true, eligible: false } };
+  if (!profileResult.data) {
+    return { status: 200, body: { ok: true, eligible: false, trial_status: 'ineligible' } };
   }
 
   // PostgREST .or() twice would overwrite the same query parameter: group both predicates.
@@ -555,7 +555,35 @@ async function trialEligibility(service, user) {
   if (orderResult.error || !Array.isArray(orderResult.data)) {
     return { status: 503, body: { ok: false, error: 'trial-eligibility-unavailable' } };
   }
-  return { status: 200, body: { ok: true, eligible: orderResult.data.length === 0 } };
+  if (!orderResult.data.length) {
+    var eligible = profileResult.data.has_welcome_coupon === true;
+    return { status: 200, body: { ok: true, eligible: eligible, trial_status: eligible ? 'eligible' : 'ineligible' } };
+  }
+  // Purchase proof is independent of usage. Only a non-refunded allocation of this
+  // user's paid trial lot to their completed, non-TEST booking proves completion.
+  var trialStatus = 'trial_paid';
+  try {
+    var lots = await service.from('ticket_lots').select('id').eq('user_id', user.id)
+      .eq('source', 'purchase').eq('source_id', orderResult.data[0].id);
+    if (lots.error || !Array.isArray(lots.data)) throw new Error('trial-completion-unavailable');
+    if (lots.data.length) {
+      var allocations = await service.from('ticket_allocations').select('booking_id')
+        .in('ticket_lot_id', lots.data.map(function (lot) { return lot.id; })).is('refunded_at', null);
+      if (allocations.error || !Array.isArray(allocations.data)) throw new Error('trial-completion-unavailable');
+      if (allocations.data.length) {
+        var completed = await service.from('bookings').select('id').eq('learner_id', user.id)
+          .in('id', allocations.data.map(function (allocation) { return allocation.booking_id; }))
+          .eq('status', 'completed').eq('is_test_session', false).not('completed_at', 'is', null).limit(1);
+        if (completed.error || !Array.isArray(completed.data)) throw new Error('trial-completion-unavailable');
+        if (completed.data.length) trialStatus = 'trial_completed';
+      }
+    }
+  } catch (_) {
+    // Do not infer usage from coupon flags, balance, or unrelated sessions.
+    // The paid order still proves the benefit was applied and blocks repurchase.
+    console.warn('[DayO trial eligibility] completion evidence unavailable');
+  }
+  return { status: 200, body: { ok: true, eligible: false, trial_status: trialStatus } };
 }
 
 async function prepare(service, user, body) {

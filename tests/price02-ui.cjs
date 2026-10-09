@@ -16,7 +16,7 @@ const stripAction=x=>x.replace(/if \(action === 'trial_eligibility'\) \{[\s\S]*?
 assert.equal(stripAction(api.slice(api.indexOf('module.exports ='))),apiOld.slice(apiOld.indexOf('module.exports =')));
 const payment=read('public/ticket-payment.js').replace(/    \/\/ Refresh trial presentation only; UI listeners cannot block payment settlement\.\n    try \{ document\.dispatchEvent\(new CustomEvent\('dayo:ticketpurchase'\)\); \} catch \(error\) \{ \/\* non-blocking \*\/ \}\n/,'');
 assert.equal(payment,old('public/ticket-payment.js'));
-const strip=s=>s.split('\n').filter(l=>!/^\s*['"]tickets\.v2\./.test(l)&&!/^\s*"tickets\.price\.(reference|note|lower|dayoSaving)":/.test(l)).join('\n');
+const strip=s=>s.split('\n').filter(l=>!/^\s*['"]tickets\.v2\./.test(l)&&!l.includes("'landing.pricing.trialSignup':")&&!/^\s*"tickets\.price\.(reference|note|lower|dayoSaving)":/.test(l)).join('\n');
 // PRICE-02 excludes landing Hero copy/design. Only this explicit restoration may differ from e1e92af.
 const heroGood=p=>cp.execFileSync('git',['show','810a3316aa8747acdc77acf8346c2ed2442d6695:'+p],{cwd:root,encoding:'utf8'}).replace(/\r\n/g,'\n');
 const heroLine=(source,key)=>source.split('\n').find(l=>l.includes("'"+key+"':"));
@@ -34,8 +34,9 @@ assert.equal((heroPage.match(/class="topic-chip"/g)||[]).length,6,'approved topi
 // The release baseline already contains the approved landing restoration.
 const releaseBase='9b8a5ce26efe598d7c46ce0fa9445369efea5410';
 const releaseFile=p=>cp.execFileSync('git',['show',releaseBase+':'+p],{cwd:root,encoding:'utf8'}).replace(/\r\n/g,'\n');
-const trialSlot=/<button type="button" class="ticket-price-card ticket-price-card--trial" data-landing-ticket="trial"[^>]*>[\s\S]*?<\/button>/;
-assert.equal(heroPage.replace(trialSlot,'TRIAL_ELIGIBILITY_SLOT'),releaseFile('public/index.html').replace(trialSlot,'TRIAL_ELIGIBILITY_SLOT'),'latest main landing changed outside trial visibility');
+// PRICE-03 may change only the ticket choices; the remainder of the landing stays exact.
+const trialSlot=/<div class="ticket-price-row reveal">[\s\S]*?(?=        <div class="reveal" style="display: flex;)/;
+assert.equal(heroPage.replace(trialSlot,'TRIAL_ELIGIBILITY_SLOT'),releaseFile('public/index.html').replace(trialSlot,'TRIAL_ELIGIBILITY_SLOT'),'latest main landing changed outside ticket choices');
 assert.equal(strip(i18n),strip(releaseFile('public/i18n.js')),'latest main non-ticket i18n changed');
 assert(src.includes('.tk-footer .tk-buy{box-sizing:border-box;max-width:100%;min-width:0;overflow-wrap:anywhere}'));
 assert(src.includes('<details class="tk-experience"'));

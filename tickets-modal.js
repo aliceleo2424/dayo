@@ -241,13 +241,15 @@
     '.tk-price-compare{margin:.2rem 0 0;font-size:.76rem;line-height:1.5;color:#506B55;}',
     '@media (max-width:860px){.tk-banner__copy{flex:0 1 auto;}}',
     "\n.tk-eligibility{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px;font-size:12px;line-height:1.6;color:#64776B}.tk-eligibility button{font:inherit;border:1px solid #5F7D63;border-radius:8px;background:white;color:#435F4C;padding:6px 10px;cursor:pointer}\n.tk-modal{max-width:900px;background:#FFFBF4;color:#263F35;border-color:#DDE5D9;box-shadow:0 18px 48px rgba(38,63,53,.12)}\n.tk-head{padding:20px 24px 12px;text-align:left;background:none}.tk-eyebrow{color:#5F7D63}.tk-title{white-space:pre-line;font-size:24px;line-height:1.3;color:#263F35;max-width:650px}.tk-sub{margin:8px 0 0;max-width:650px;white-space:pre-line;font-weight:400;color:#64776B}.tk-perks{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:#435F4C;margin:10px 0 0;padding:0;list-style:none}.tk-perks li:before{content:'✓';display:inline-block;background:#EEF3EA;border-radius:50%;padding:2px 5px;margin-right:5px}\n.tk-body{padding:8px 24px 18px}.tk-section-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 12px;font-size:16px}.tk-section-heading small{font-size:12px;font-weight:400;color:#64776B}\n.tk-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.tk-grid .tk-choice{flex-direction:column}.tk-grid .tk-choice__content{flex:initial}.tk-choice{position:relative;display:flex;min-width:0;cursor:pointer;padding:14px;border:1px solid #DDE5D9;border-radius:17px;background:white;gap:12px;align-items:stretch;text-align:left;box-sizing:border-box}.tk-choice__content{min-width:0;flex:1}.tk-choice__top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.tk-choice .tk-card__title{margin:0;color:#263F35;font-size:17px}.tk-choice .tk-card__copy{text-wrap:balance;margin:5px 0 0;font-weight:400;color:#64776B}.tk-choice input{flex:0 0 auto;width:18px;height:18px;margin:0;accent-color:#5F7D63;position:absolute;right:18px;top:20px}.tk-choice:has(input:focus-visible){outline:3px solid #5F7D63;outline-offset:3px}.tk-choice.is-selected{border:2px solid #5F7D63;padding:13px;background:#F4F6E9}.tk-choice.is-selected input{right:17px;top:19px}\n.tk-choice__price{margin:14px 0 0}.tk-total-label{font-size:12px;color:#64776B;margin:0 0 5px}.tk-choice .tk-card__price{font-size:26px;color:#263F35;margin:0;line-height:1.2;white-space:nowrap}.tk-price-unit{font-size:12px;font-weight:400;color:#64776B;margin:7px 0 0;line-height:1.6}.tk-price-compare{font-size:12px;font-weight:700;color:#5F7D63;margin:14px 0 0;line-height:1.5}.tk-choice .tk-badge{background:#EEF3EA;color:#5F7D63;border:0;border-radius:5px;font-size:11px;padding:3px 6px}.tk-choice__top{padding-right:20px}\n.tk-choice--trial{margin-bottom:12px;align-items:center;background:#F8F8ED}.tk-choice--trial .tk-choice__price{margin:0 40px 0 0;text-align:right}.tk-trial-kicker{font-size:12px;color:#5F7D63;font-weight:700;margin:0 0 10px}.tk-choice--33{margin-top:12px;align-items:center;background:#F8FAF5}.tk-choice--33 .tk-choice__price{margin:0 40px 0 0;text-align:right}.tk-choice--33 .tk-price-compare{margin-top:8px}.tk-price-footnote{font-size:12px;line-height:1.7;color:#64776B;margin:12px 0 0}\n.tk-experience{margin:16px 0;padding-top:14px;border-top:1px solid #DDE5D9}.tk-experience h3{font-size:17px;margin:0 0 18px}.tk-experience__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}.tk-experience__item{display:flex;gap:14px}.tk-experience__item em{color:#5F7D63;font-family:Georgia,serif}.tk-experience strong{font-size:14px}.tk-experience p{font-size:13px;line-height:1.7;color:#64776B;margin:5px 0 0}\n.tk-comparison{border:1px solid #DDE5D9;border-radius:16px;background:white;margin:20px 0}.tk-comparison>summary{cursor:pointer;padding:20px;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px}.tk-comparison>summary:after{content:'+';font-size:22px}.tk-comparison[open]>summary:after{content:'−'}.tk-comparison summary small{display:block;font-size:12px;color:#64776B;margin-top:6px;line-height:1.6}.tk-comparison__body{border-top:1px solid #DDE5D9;padding:20px}.tk-comparison__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.tk-comparison__card{padding:18px;background:#F8FAF5;border:1px solid #E0E7DB;border-radius:14px;min-width:0}.tk-comparison__card:first-child{background:#EEF3EA;border-color:#C2D2BE}.tk-comparison__card h4{margin:0 0 6px}.tk-comparison__card dl{font-size:13px;line-height:1.7;margin:12px 0 0}.tk-comparison__card dt{font-weight:700;margin:10px 0 3px}.tk-comparison__card dd{margin:0;color:#52685A;white-space:pre-line}.tk-comparison__card p{font-size:12px;color:#64776B;margin:0}.tk-comparison a{color:#506B55;text-underline-offset:3px;overflow-wrap:anywhere}.tk-sources{font-size:12px;line-height:1.7;margin-top:12px}.tk-sources li{margin:8px 0}.tk-comparison__note{font-size:12px;color:#64776B;line-height:1.7;margin:0 0 14px}\n.tk-footer{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:12px 24px calc(12px + env(safe-area-inset-bottom));border-top:1px solid #CDD9C8;background:#FFFBF4}.tk-footer__price{font-size:24px;font-weight:800;margin:4px 0}.tk-footer small{font-size:12px;color:#64776B;line-height:1.6}.tk-footer__action{min-width:220px;max-width:50%}.tk-footer .tk-buy{white-space:normal;padding:13px 18px}.tk-footer__policy{display:block;margin-top:8px;border:0;background:none;color:#64776B;text-decoration:underline;font:inherit;font-size:12px;cursor:pointer;text-align:right;width:100%}.tk-policy{background:white;border-color:#DDE5D9;margin:18px 0 0}.tk-policy summary{cursor:pointer;font-weight:700}.tk-policy__list{margin-top:16px}.tk-used{margin-top:12px}.tk-used .tk-card__cta{display:none}.tk-single:empty{display:none}.tk-single{border:0;background:none;padding:0}.tk-admin-test{margin:18px 0}.tk-close{z-index:3}\n.tk-modal [hidden]{display:none!important}.tk-modal button:focus-visible,.tk-modal summary:focus-visible,.tk-modal a:focus-visible{outline:3px solid #5F7D63;outline-offset:3px}\n.tk-footer{box-sizing:border-box}.tk-footer>div:first-child{min-width:0;flex:1}.tk-footer__action{flex:0 1 48%;min-width:0}.tk-footer small{overflow-wrap:anywhere}.tk-footer .tk-buy{box-sizing:border-box;max-width:100%;min-width:0;overflow-wrap:anywhere}.tk-experience>summary{cursor:pointer;font-size:14px;font-weight:700;line-height:1.6}.tk-experience__grid{margin-top:12px}\n@media(max-width:680px){.tk-overlay{padding:8px}.tk-modal{max-height:96dvh;border-radius:22px}.tk-head{padding:16px 14px 10px}.tk-title{font-size:22px;padding-right:26px}.tk-sub{font-size:13px;line-height:1.8;margin-top:14px}.tk-perks{gap:6px;font-size:11px;margin-top:14px}.tk-body{padding:6px 14px 16px}.tk-grid{grid-template-columns:1fr;gap:8px}.tk-grid .tk-choice{flex-direction:row}.tk-section-heading{font-size:14px;gap:8px}.tk-section-heading small{font-size:11px;max-width:110px;text-align:right}.tk-choice{padding:12px;align-items:center;gap:10px}.tk-choice.is-selected{padding:11px}.tk-choice__top{padding-right:0}.tk-choice .tk-card__title{font-size:15px}.tk-choice .tk-card__copy{font-size:12px;line-height:1.6}.tk-choice input{top:50%;right:13px;transform:translateY(-50%)}.tk-choice.is-selected input{top:50%;right:12px}.tk-choice__price,.tk-choice--trial .tk-choice__price,.tk-choice--33 .tk-choice__price{margin:0 25px 0 0;text-align:right;flex:0 0 auto;max-width:53%}.tk-choice .tk-card__price{font-size:24px}.tk-choice .tk-price-unit{font-size:11px}.tk-choice .tk-price-compare{font-size:11px;margin-top:8px}.tk-total-label{font-size:11px}.tk-trial-kicker{font-size:11px;margin-bottom:7px}.tk-choice--33{margin-top:8px}.tk-price-footnote{font-size:11px}.tk-experience{margin-top:22px}.tk-experience__grid{grid-template-columns:1fr;gap:18px}.tk-experience h3{font-size:16px}.tk-comparison>summary,.tk-comparison__body{padding:16px}.tk-comparison__grid{grid-template-columns:1fr}.tk-footer{padding:12px 16px calc(12px + env(safe-area-inset-bottom));gap:12px}.tk-footer__action{min-width:0;width:52%;max-width:52%}.tk-footer__price{font-size:23px}.tk-footer small{font-size:11px}.tk-footer .tk-buy{font-size:12px;padding:12px 10px}.tk-footer__policy{font-size:10px}.tk-experience__item{gap:14px}.tk-close{width:36px;height:36px;top:10px;right:10px}}\n"
+    ,'#pricing .ticket-price-card--trial{grid-column:1/-1}#pricing .ticket-price-card:disabled{background:#F1F2EF;border-color:#D4D7D0;color:#6B706B;cursor:not-allowed;box-shadow:none}#pricing .ticket-price-card:disabled:hover{transform:none}#pricing .ticket-landing-total{display:block;color:#263F35;font-size:1.25rem;font-weight:700;margin-top:8px}#pricing .tk-price-unit,#pricing .tk-price-compare{font-size:12px;line-height:1.6;margin:8px 0 0}#pricing .ticket-price-card:focus-visible{outline:3px solid #5F7D63;outline-offset:3px}#pricing [data-landing-trial-retry]{margin:0 0 16px;padding:8px 14px;border:1px solid #5F7D63;background:#FFFBF4;color:#435F4C;border-radius:8px;font:inherit;cursor:pointer}#pricing [hidden]{display:none!important}'
+    ,'.tk-choice--disabled{background:#F1F2EF;border-color:#D4D7D0;cursor:not-allowed}.tk-choice--disabled .tk-card__title,.tk-choice--disabled .tk-card__price,.tk-choice--disabled .tk-trial-kicker{color:#6B706B}.tk-trial-unavailable{margin:8px 0 0;color:#626862;font-size:12px;line-height:1.6}'
   ].join('');
 
   function priceText(n) {
     var value = Number(n).toLocaleString('ko-KR');
     return window.DayOI18n && window.DayOI18n.getLang() === 'EN' ? '₩' + value : value + '원';
   }
-  function priceDetails(plan) {
+  function priceDetails(plan, savingKey) {
     if (!plan || plan.id === 'admin_test_1000' || plan.id === 'trial') return '';
     var amount = Number(plan.priceValue), count = Number(plan.tickets);
     if (!Number.isFinite(amount) || amount <= 0 || !Number.isFinite(count) || count <= 0) return '';
@@ -255,7 +257,7 @@
     var copy = t(exactUnit === Math.round(exactUnit) ? 'tickets.price.unit' : 'tickets.price.unitApprox', { price: priceText(Math.round(exactUnit)) });
     var single = findPlan('single'), saving = single ? Number(single.priceValue) * count - amount : 0;
     return '<p class="tk-price-unit">' + (count > 1 ? t('tickets.v2.totalCount', { count: count }) + ' · ' : '') + copy + '</p>' +
-      (saving > 0 ? '<p class="tk-price-compare">' + t('tickets.v2.saving', { count: count, saving: priceText(saving) }) + '</p>' : '');
+      (saving > 0 ? '<p class="tk-price-compare">' + t(savingKey || 'tickets.v2.saving', { count: count, saving: priceText(saving) }) + '</p>' : '');
   }
   function pricePlanText(plan, field) {
     if (plan.id === 'admin_test_1000') return plan[field] || '';
@@ -327,15 +329,17 @@
       '</button>';
   }
 
-  function planCard(plan) {
+  function planCard(plan, disabled) {
     if (!plan) return '';
-    var badge = plan.id === 'pack11' ? '<span class="tk-badge">10+1</span>' : '';
+    disabled = disabled === true;
+    var badge = plan.id === 'pack11' ? '<span class="tk-badge">10+1</span>' : plan.id === 'trial' && disabled && trialCompletionBadge() ? '<span class="tk-badge">' + trialCompletionBadge() + '</span>' : '';
     var cls = 'tk-choice' + (plan.id === 'trial' ? ' tk-choice--trial' : plan.id === 'pack33' ? ' tk-choice--33' : '');
-    return '<label class="' + cls + '" data-plan="' + plan.id + '">' +
-      '<input type="radio" name="tkPlan" value="' + plan.id + '" aria-label="' + pricePlanText(plan, 'title') + ', ' + priceText(plan.priceValue) + '">' +
+    if (disabled) cls += ' tk-choice--disabled';
+    return '<label class="' + cls + '" data-plan="' + plan.id + '"' + (disabled ? ' aria-disabled="true"' : '') + '>' +
+      '<input type="radio" name="tkPlan" value="' + plan.id + '"' + (disabled ? ' disabled aria-disabled="true" aria-describedby="tkTrialUnavailable"' : '') + ' aria-label="' + pricePlanText(plan, 'title') + ', ' + priceText(plan.priceValue) + '">' +
       '<div class="tk-choice__content">' + (plan.id === 'trial' ? '<p class="tk-trial-kicker">' + t('tickets.v2.trial.badge') + '</p>' : '') +
       '<div class="tk-choice__top"><h3 class="tk-card__title">' + pricePlanText(plan, 'title') + '</h3>' + badge + '</div>' +
-      '<p class="tk-card__copy">' + pricePlanText(plan, 'copy') + '</p></div>' +
+      '<p class="tk-card__copy">' + pricePlanText(plan, 'copy') + '</p>' + (disabled ? '<p class="tk-trial-unavailable" id="tkTrialUnavailable">' + trialUnavailableCopy() + '</p>' : '') + '</div>' +
       '<div class="tk-choice__price"><p class="tk-total-label">' + t('tickets.v2.total') + '</p><p class="tk-card__price">' + priceText(plan.priceValue) + '</p>' + priceDetails(plan) + '</div></label>';
   }
 
@@ -345,6 +349,16 @@
 
   function canShowTrialPurchase() {
     return trialState.status === 'eligible';
+  }
+
+  function trialUnavailableCopy() {
+    return t(trialState.trialStatus === 'trial_paid' || trialState.trialStatus === 'trial_completed' ? 'tickets.v2.trial.appliedNotice' : 'tickets.v2.eligibility.unavailable');
+  }
+
+  function trialCompletionBadge() {
+    if (trialState.trialStatus === 'trial_completed') return t('tickets.v2.trial.completed');
+    if (trialState.trialStatus === 'trial_paid') return t('tickets.v2.trial.applied');
+    return '';
   }
 
   function trialStatusMarkup() {
@@ -361,16 +375,27 @@
     if (node.innerHTML !== expected.innerHTML) node.innerHTML = expected.innerHTML;
   }
 
+  function renderLandingTicketCards() {
+    document.querySelectorAll('#pricing [data-landing-ticket]').forEach(function (node) {
+      var plan = findPlan(node.getAttribute('data-landing-ticket'));
+      if (!plan) return;
+      var isTrial = plan.id === 'trial';
+      var disabled = isTrial && trialState.status !== 'eligible' && trialState.status !== 'loggedout';
+      if (node.hidden) node.hidden = false;
+      if (node.style.display) node.style.display = '';
+      if (node.disabled !== disabled) node.disabled = disabled;
+      if (node.getAttribute('aria-disabled') !== String(disabled)) node.setAttribute('aria-disabled', String(disabled));
+      var note = !isTrial ? pricePlanText(plan, 'copy') : trialState.status === 'ineligible' ? trialUnavailableCopy() : trialState.status === 'eligible' ? t('landing.pricing.trialBenefit') : trialState.status === 'loggedout' ? t('landing.pricing.trialSignup') : trialState.status === 'error' ? t('tickets.v2.eligibility.error') : t('tickets.v2.eligibility.loading');
+      setTrialMarkupIfChanged(node, '<strong>' + pricePlanText(plan, 'title') + '</strong>' + (isTrial && trialCompletionBadge() ? '<small>' + trialCompletionBadge() + '</small>' : '') + '<span class="ticket-landing-total">' + priceText(plan.priceValue) + '</span><small>' + note + '</small>' + priceDetails(plan, 'tickets.v2.landingSaving'));
+    });
+    var retry = document.querySelector('#pricing [data-landing-trial-retry]');
+    if (retry && retry.hidden !== (trialState.status !== 'error')) retry.hidden = trialState.status !== 'error';
+  }
+
   function renderTrialSalesSurfaces() {
     var visible = canShowTrialPurchase();
     var trial = findPlan('trial');
-    document.querySelectorAll('#pricing [data-landing-ticket="trial"]').forEach(function (node) {
-      if (node.hidden !== !visible) node.hidden = !visible;
-      var display = visible ? '' : 'none';
-      if (node.style.display !== display) node.style.display = display;
-      var markup = visible ? '<strong>' + t('landing.pricing.trialName') + '</strong><span>' + priceText(trial.priceValue) + ' · ' + t('tickets.v2.totalCount', { count: trial.tickets }) + '</span><small>' + t('landing.pricing.trialBenefit') + '</small>' : '';
-      setTrialMarkupIfChanged(node, markup);
-    });
+    renderLandingTicketCards();
     document.querySelectorAll('[data-coupon-wallet]').forEach(function (wallet) {
       var eligibility = visible ? 'true' : 'false';
       if (wallet.getAttribute('data-trial-eligible') !== eligibility) wallet.setAttribute('data-trial-eligible', eligibility);
@@ -438,7 +463,7 @@
       if (current.error) throw new Error('trial-auth-unavailable');
       var currentSession = current.data && current.data.session;
       if (!currentSession || !currentSession.user || currentSession.user.id !== session.user.id) throw new Error('trial-auth-changed');
-      return { status: data.eligible ? 'eligible' : 'ineligible', userId: session.user.id };
+      return { status: data.eligible ? 'eligible' : 'ineligible', userId: session.user.id, trialStatus: !data.eligible && ['trial_paid', 'trial_completed'].indexOf(data.trial_status) !== -1 ? data.trial_status : null };
     })();
     trialReadPromise = Promise.race([work, timedOut]).then(function (result) {
       if (version !== trialReadVersion) return;
@@ -496,12 +521,13 @@
     var legacyConsent = el.overlay.querySelector('.tk-consent');
     if (legacyConsent) legacyConsent.style.display = adminPaymentTestVisible ? '' : 'none';
     var trialVisible = canShowTrialPurchase();
+    var showTrialCard = trialVisible || trialState.status === 'ineligible';
     var statusNode = el.overlay.querySelector('[data-tk-eligibility]');
     var statusMarkup = trialStatusMarkup();
     statusNode.hidden = !statusMarkup;
     statusNode.innerHTML = statusMarkup;
     renderTrialSalesSurfaces();
-    if (el.banner) { el.banner.hidden = !trialVisible; el.banner.innerHTML = trialVisible ? planCard(findPlan('trial')) : ''; }
+    if (el.banner) { el.banner.hidden = !showTrialCard; el.banner.innerHTML = showTrialCard ? planCard(findPlan('trial'), !trialVisible) : ''; }
     if (el.grid) el.grid.innerHTML = [findPlan('single'), findPlan('pack3'), findPlan('pack11')].map(planCard).join('');
     el.overlay.querySelector('[data-tk-large]').innerHTML = planCard(findPlan('pack33'));
     if (el.single) el.single.innerHTML = adminPaymentTestVisible ? '<div class="tk-admin-test" data-tk-admin-test><span class="tk-badge">ADMIN TEST</span>' + singleRow(findPlan('admin_test_1000')) + '</div>' : '';
@@ -842,6 +868,7 @@
 
     el.overlay.addEventListener('change', function (e) {
       var choice = e.target.closest('input[name="tkPlan"]');
+      if (choice && choice.disabled) return;
       if (choice) { selectedPlanId = choice.value; syncSelection(); return; }
       var box = e.target.closest('[data-tk-coupon]');
       if (!box) return;
@@ -964,31 +991,34 @@
     open();
   }
 
-  var landingSelectionPending = false;
   async function selectLandingPlan(id) {
-    if (landingSelectionPending || ['trial', 'single', 'starter3', 'light11'].indexOf(id) === -1) return;
+    if (id === 'trial') {
+      if (trialState.status !== 'eligible' && trialState.status !== 'loggedout') return;
+      var trialUser = trialState.userId;
+      open();
+      await refreshTrialEligibility();
+      if (trialUser && trialState.userId === trialUser && canShowTrialPurchase() && el.overlay.classList.contains('is-open')) {
+        selectedPlanId = 'trial';
+        syncSelection();
+      }
+      return;
+    }
+    if (['single', 'starter3', 'light11', 'full33'].indexOf(id) === -1) return;
     var plan = findPlan(id);
     if (!plan) return;
-    landingSelectionPending = true;
-    try {
-      if (plan.id === 'trial') {
-        await refreshTrialEligibility(true);
-        if (!canShowTrialPurchase()) {
-          open(); // Unconfirmed trial eligibility cannot activate a sales CTA.
-          return;
-        }
-      }
-      await completePurchase(plan);
-    } finally { landingSelectionPending = false; }
+    selectedPlanId = plan.id;
+    syncSelection();
+    open();
   }
 
   function init() {
     mount();
     document.addEventListener('click', function (e) {
+      if (e.target.closest('#pricing [data-landing-trial-retry]')) { refreshTrialEligibility(true); return; }
       var card = e.target.closest('#pricing [data-landing-ticket]');
       if (card) {
         e.preventDefault();
-        selectLandingPlan(card.getAttribute('data-landing-ticket'));
+        if (!card.disabled) selectLandingPlan(card.getAttribute('data-landing-ticket'));
         return;
       }
       var trigger = e.target.closest('[data-tickets-open]');
