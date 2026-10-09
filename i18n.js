@@ -276,7 +276,7 @@
     'landing.how.step1.title': { KO: '이야기 카드', EN: 'Conversation cards' },
     'landing.how.step1.desc': { KO: '처음부터 대화 주제를 고민하지 않아도 돼요. 관심사에 맞는 질문 카드로 가볍게 시작해요.', EN: 'No need to invent a topic from scratch. Start naturally with a question card based on your interests.' },
     'landing.how.step2.title': { KO: '외국인 파트너와 1:1 대화', EN: '1:1 conversation with an international Partner' },
-    'landing.how.step2.desc': { KO: '세계 여러 나라에서 온 Partner와 서로의 일상과 취향을 이야기해요.', EN: 'Share everyday life and interests with Partners from around the world.' },
+    'landing.how.step2.desc': { KO: '세계 여러 나라에서 온 대화 상대와 서로의 일상과 취향을 이야기해요. 한국어가 가능한 외국인들도 있어요.', EN: 'Share everyday life and interests with Partners from around the world.' },
     'landing.how.step3.title': { KO: 'AI 대화 도움', EN: 'AI conversation help' },
     'landing.how.step3.desc': { KO: '말이 막히는 순간 필요한 표현과 자막을 참고해요.', EN: 'Find a useful phrase or check the captions when you get stuck.' },
     'landing.how.step4.title': { KO: '오늘의 대화 기록', EN: 'Today’s conversation record' },
