@@ -354,21 +354,30 @@
     return '';
   }
 
+  function setTrialMarkupIfChanged(node, markup) {
+    // Compare browser-normalized HTML: bare data attributes/entities serialize differently.
+    var expected = document.createElement('template');
+    expected.innerHTML = markup;
+    if (node.innerHTML !== expected.innerHTML) node.innerHTML = expected.innerHTML;
+  }
+
   function renderTrialSalesSurfaces() {
     var visible = canShowTrialPurchase();
     var trial = findPlan('trial');
     document.querySelectorAll('#pricing [data-landing-ticket="trial"]').forEach(function (node) {
-      node.hidden = !visible;
-      node.style.display = visible ? '' : 'none';
+      if (node.hidden !== !visible) node.hidden = !visible;
+      var display = visible ? '' : 'none';
+      if (node.style.display !== display) node.style.display = display;
       var markup = visible ? '<strong>' + t('landing.pricing.trialName') + '</strong><span>' + priceText(trial.priceValue) + ' · ' + t('tickets.v2.totalCount', { count: trial.tickets }) + '</span><small>' + t('landing.pricing.trialBenefit') + '</small>' : '';
-      if (node.innerHTML !== markup) node.innerHTML = markup;
+      setTrialMarkupIfChanged(node, markup);
     });
     document.querySelectorAll('[data-coupon-wallet]').forEach(function (wallet) {
-      wallet.setAttribute('data-trial-eligible', visible ? 'true' : 'false');
+      var eligibility = visible ? 'true' : 'false';
+      if (wallet.getAttribute('data-trial-eligible') !== eligibility) wallet.setAttribute('data-trial-eligible', eligibility);
       var proposals = wallet.querySelectorAll('[data-coupon-code="WELCOME_9900"], [data-coupon-code="WELCOME9900"]');
       if (!visible) {
         proposals.forEach(function (node) { node.remove(); });
-        if (!wallet.children.length) wallet.hidden = true;
+        if (!wallet.children.length && !wallet.hidden) wallet.hidden = true;
         return;
       }
       var proposal = proposals[0];
@@ -379,9 +388,9 @@
         wallet.appendChild(proposal);
       }
       Array.prototype.slice.call(proposals, 1).forEach(function (node) { node.remove(); });
-      var markup = '<p class="coupon-item__title">' + t('mypage.welcomeBenefit.title') + '</p><p class="coupon-item__price"><strong>' + priceText(trial.priceValue) + '</strong></p><button type="button" class="primary-btn" data-tickets-open>' + t('mypage.welcomeBenefit.cta') + '</button>';
-      if (proposal.innerHTML !== markup) proposal.innerHTML = markup;
-      wallet.hidden = false;
+      var markup = '<p class="coupon-item__title">' + t('mypage.welcomeBenefit.title') + '</p><p class="coupon-item__price"><strong>' + priceText(trial.priceValue) + '</strong></p><button type="button" class="primary-btn" data-tickets-open="">' + t('mypage.welcomeBenefit.cta') + '</button>';
+      setTrialMarkupIfChanged(proposal, markup);
+      if (wallet.hidden) wallet.hidden = false;
     });
   }
 
