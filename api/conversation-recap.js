@@ -47,7 +47,14 @@ function createHandler({ env = process.env, fetchImpl = fetch } = {}) {
       const select = 'id,booking_id,participant_id,participant_role,transcript';
       const own = await read('/rest/v1/session_logs?' + new URLSearchParams({ booking_id: 'eq.' + booking.id, participant_id: 'eq.' + user.id, participant_role: 'eq.learner', select, limit: '1' }));
       const learnerLog = Array.isArray(own) && own[0];
-      if (!recap.rows(learnerLog, booking.id, user.id, 'learner')) return json(res, 200, { recap: null, status: 'no_canonical_source' });
+      let chatMessages=[],chatStatus='unavailable';
+      try {
+        const chatAbort=new AbortController(),chatTimer=setTimeout(()=>chatAbort.abort(),1200);
+        let messages;try{const result=await fetchImpl(url+'/rest/v1/booking_chat_messages?'+new URLSearchParams({booking_id:'eq.'+booking.id,select:'booking_id,id,sender_id,sender_role,text,created_at',order:'created_at.asc,id.asc',limit:'500'}),{headers,signal:chatAbort.signal});if(!result.ok)throw Error('chat-read');messages=await result.json();}finally{clearTimeout(chatTimer);}
+        if(!Array.isArray(messages))throw Error('chat-shape');
+        chatMessages=messages;chatStatus='available';
+      }catch(_){/* Chat failure never removes canonical speech or existing quiz. */}
+      if (!recap.rows(learnerLog, booking.id, user.id, 'learner') && !chatMessages.length) return json(res, 200, { recap: null, status: 'no_canonical_source' });
       let partnerLog = null;
       const key = String(env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
       if (key) {
@@ -90,7 +97,7 @@ function createHandler({ env = process.env, fetchImpl = fetch } = {}) {
         if (storedQuiz && storedQuiz.quiz_history_status === 'unavailable' && !storedQuiz.questions.length) storedQuiz = null;
         if (!storedQuiz) quizState = await quizHistory.load(read,booking,user.id);
       } catch (_) { /* Unknown history never authorizes repeated quiz targets. */ }
-      const value = recap.build({ bookingId: booking.id, learnerId: user.id, partnerId: booking.partner_user_id, language: booking.language, learnerLog, partnerLog, history, historyStatus, previousVolume, scheduledAt: booking.scheduled_at, isTestSession: booking.is_test_session === true, quizExcludedWords: quizState.words, quizHistoryStatus: quizState.status });
+      const value = recap.build({ chatMessages, chatStatus, bookingId: booking.id, learnerId: user.id, partnerId: booking.partner_user_id, language: booking.language, learnerLog, partnerLog, history, historyStatus, previousVolume, scheduledAt: booking.scheduled_at, isTestSession: booking.is_test_session === true, quizExcludedWords: quizState.words, quizHistoryStatus: quizState.status });
       if (storedQuiz) {
         value.word_expansion = storedQuiz.word_expansion;
         value.questions = storedQuiz.questions;

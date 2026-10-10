@@ -4003,6 +4003,7 @@
   <script src="learner-expressions.js?v=20261005-conversation-recap"></script>
   <script src="conversation-recap.js?v=20261007-hotfix"></script>
   <script src="partner-report-contract.js"></script>
+  <script src="session-chat.js"></script>
   <script src="user-conversation-report.js?v=20261007-hotfix"></script>
   <link rel="stylesheet" href="user-conversation-report.css?v=20261007-hotfix">
   <link rel="stylesheet" href="conversation-recap.css?v=20261007-hotfix">
@@ -5348,6 +5349,14 @@
       window.visualViewport.addEventListener('scroll', syncMobileVisualViewport, { passive: true });
     }
 
+    var savedChat = null, chatSending = false;
+    function canonicalChat() {
+      var a=window.DayORoomAccess;
+      if (!savedChat && a && a.allowed && !a.observer && !a.adminTest && window.DayOSessionChat && window.supabaseClient) {
+        savedChat=window.DayOSessionChat.create(window.supabaseClient,a,function(m,mine){appendMessageToChatUI(m.sender_role,m.sender_role==='partner'?'Partner':'User',m.text,mine);});
+      }
+      return savedChat;
+    }
     var chatChannel = null;
     var chatChannelReady = false;
     var pendingCardRequestId = '';
@@ -5388,14 +5397,8 @@
       var currentRoomId = resolveRoomChatId();
       chatChannel = supabase.channel('chat_room_' + currentRoomId);
       chatChannel.on('broadcast', { event: 'new_message' }, function (event) {
-        var payload = (event && event.payload) || {};
-        if (payload.clientId && payload.clientId === chatClientId) return;
-        appendMessageToChatUI(
-          payload.senderRole,
-          payload.senderName,
-          payload.message,
-          false
-        );
+        // Broadcast text and sender claims are never canonical evidence.
+        var chat=canonicalChat();if(chat)chat.load().catch(function(){});
       });
       chatChannel.on('broadcast', { event: 'talk_card_presented_ack' }, function(event) {
         recordUserPresentedTalkCard((event && event.payload) || {});
@@ -5423,6 +5426,7 @@
       chatChannel.subscribe(function (status) {
         chatChannelReady = status === 'SUBSCRIBED';
         if (!chatChannelReady) return;
+        var chat=canonicalChat();if(chat)chat.load().catch(function(){});
         if (isRealPartnerCardController()) { broadcastCurrentTalkCard('talk_card_change'); flushTalkCardEvents(); }
         else if (isLearnerCardViewer()) requestCurrentTalkCard();
       });
@@ -5524,36 +5528,22 @@
     }
     if (talkCardClose) talkCardClose.addEventListener('click', closeTalkCardPanel);
 
-    function handleSendMessage() {
-      var input = document.getElementById('chatInput')
-        || document.getElementById('chat-input')
-        || document.querySelector('.chat-input-box');
-      if (!input) return;
-      var text = String(input.value || '').trim();
-      if (!text) return;
-
-      var currentRole = resolveCurrentRole();
-      appendMessageToChatUI(currentRole, '나', text, true);
-
-      var channel = ensureChatChannel();
-      if (channel && typeof channel.send === 'function') {
-        try {
-          Promise.resolve(channel.send({
-            type: 'broadcast',
-            event: 'new_message',
-            payload: {
-              clientId: chatClientId,
-              senderRole: currentRole,
-              senderName: currentRole === 'partner' ? 'Partner' : 'User',
-              message: text,
-              timestamp: new Date().toISOString()
-            }
-          })).catch(function () { /* ignore broadcast errors */ });
-        } catch (sendErr) { /* ignore */ }
-      }
-
-      input.value = '';
+    async function handleSendMessage() {
+      var input=document.getElementById('chatInput');
+      if(!input||chatSending||!input.value.trim())return;
+      var text=input.value,chat=canonicalChat();if(!chat)return;
+      chatSending=true;input.setCustomValidity('');
+      var button=chatForm&&chatForm.querySelector('button[type="submit"]');if(button)button.disabled=true;
+      try {
+        var message=await chat.send(text);if(input.value===text)input.value='';
+        var channel=ensureChatChannel();
+        if(channel)Promise.resolve(channel.send({type:'broadcast',event:'new_message',payload:{messageId:message.id,bookingId:message.booking_id}})).catch(function(){});
+      }catch(_){
+        var ko=window.DayOI18n&&String(window.DayOI18n.getLang()).toLowerCase()==='ko';
+        input.setCustomValidity(ko?'메시지를 저장하지 못했어요. 대화 시간을 확인하고 다시 시도해 주세요.':'Could not save your message. Check the session time and try again.');input.reportValidity();
+      }finally{chatSending=false;if(button)button.disabled=false;}
     }
+    if(chatInput){chatInput.maxLength=1000;chatInput.addEventListener('input',function(){chatInput.setCustomValidity('');});}
 
     window.handleSendMessage = handleSendMessage;
     window.appendMessageToChatUI = appendMessageToChatUI;

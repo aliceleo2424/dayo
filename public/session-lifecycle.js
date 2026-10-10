@@ -147,6 +147,10 @@
         if (previous && (previous.booking_id !== ctx.bookingId || previous.learner_id !== ctx.learnerId)) throw new Error('report-identity');
         window.__dayoLearnerReportPayload = previous || null;
         partnerLetterSnapshot = previous || null;
+        var chatMessages=[],chatStatus='unavailable';
+        try {var chatResult=await reviewDeadline(db.from('booking_chat_messages').select('booking_id,id,sender_id,sender_role,text,created_at').eq('booking_id',ctx.bookingId).order('created_at').order('id').limit(500));
+          if(!chatResult.error&&Array.isArray(chatResult.data)){chatMessages=chatResult.data;chatStatus='available';}
+        }catch(_){/* Optional chat read cannot block speech Recap. */}
         var row = result && result.data;
         if (result.error) throw result.error;
         var saved = window.DayOConversationRecap.saved(previous);
@@ -156,16 +160,16 @@
           window.__dayoQuizProgress = saved.progress;
           window.__dayoQuizScore = previous.quiz_score;
           reviewSource = Object.freeze({ bookingId: ctx.bookingId, sourceId: saved.source.learner_log_id,
-            version: saved.source.learner_version, rows: Object.freeze(row ? window.DayOConversationRecap.rows(row, ctx.bookingId, ctx.learnerId, 'learner') : []), recap: saved, available: true });
+            version: saved.source.learner_version, rows: Object.freeze(row ? window.DayOConversationRecap.rows(row, ctx.bookingId, ctx.learnerId, 'learner') : []), recap: Object.assign({},saved,{chat:chatStatus!=='available'&&saved.chat?saved.chat:{version:1,status:chatStatus,messages:window.DayOConversationRecap.chatEvidence(chatMessages,ctx.bookingId,ctx.learnerId,ctx.partnerId),metrics:window.DayOConversationRecap.typedMetrics(window.DayOConversationRecap.chatEvidence(chatMessages,ctx.bookingId,ctx.learnerId,ctx.partnerId))}}), available: true });
           return reviewSource;
         }
-        if (result.error || !row || !row.id || row.booking_id !== ctx.bookingId ||
+        if (result.error || (!row && !chatMessages.length) || (row && (!row.id || row.booking_id !== ctx.bookingId ||
             row.participant_id !== ctx.learnerId || row.participant_role !== 'learner' ||
-            !Array.isArray(row.transcript) || context().bookingId !== ctx.bookingId) return canonicalReviewSource();
+            !Array.isArray(row.transcript))) || context().bookingId !== ctx.bookingId) return canonicalReviewSource();
         var recapApi = window.DayOConversationRecap;
-        var rows = recapApi.rows(row, ctx.bookingId, ctx.learnerId, 'learner').map(function (item) { return Object.freeze(item); });
+        var rows = (recapApi.rows(row, ctx.bookingId, ctx.learnerId, 'learner')||[]).map(function (item) { return Object.freeze(item); });
         var recap = recapApi.build({ bookingId: ctx.bookingId, learnerId: ctx.learnerId, partnerId: ctx.partnerId,
-          language: window.DayORoomAccess.language, learnerLog: row, quizHistoryStatus: 'unavailable' });
+          language: window.DayORoomAccess.language, learnerLog: row, chatMessages:chatMessages,chatStatus:chatStatus,quizHistoryStatus: 'unavailable' });
         var version = recap.source.learner_version;
         try {
           var session = await db.auth.getSession();
@@ -193,7 +197,7 @@
           window.__dayoQuizProgress = storedRecap.progress;
           window.__dayoQuizScore = previous.quiz_score;
         }
-        reviewSource = Object.freeze({ bookingId: ctx.bookingId, sourceId: row.id, version: version, rows: Object.freeze(rows), recap: recap, available: true });
+        reviewSource = Object.freeze({ bookingId: ctx.bookingId, sourceId: row ? row.id : '', version: version, rows: Object.freeze(rows), recap: recap, available: true });
         return reviewSource;
       } catch (error) {
         console.warn('[DayO Review] canonical source unavailable');

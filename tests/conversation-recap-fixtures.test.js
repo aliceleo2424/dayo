@@ -46,6 +46,7 @@ async function api(options = {}) {
     calls.push({ url, args });
     if (url.includes('/auth/v1/user')) return options.authFail ? { ok: false } : response({ id: options.authId || L });
     if (url.includes('/bookings?') && new URL(url).searchParams.has('order')) return response([]);
+    if (url.includes('/booking_chat_messages?')) {if(options.chatFail)throw Error('chat down');return response(options.chat||[]);}
     if (url.includes('/session_reports?')) return response([]);
     if (url.includes('/bookings?')) return response(options.outsider ? [] : [{ ...booking, ...options.booking }]);
     if (url.includes('/session_logs?')) {
@@ -61,15 +62,22 @@ async function api(options = {}) {
   return { status: res.statusCode, body: res.body, calls, headers: res.headers };
 }
 async function serverChecks() {
-  const r = await api(); assert.equal(r.status, 200); assert.equal(r.body.status, 'complete'); assert.deepEqual(r.body.recap, { ...full, volume_history:[], volume_history_status:'test_session', quiz_history_status:'available' });
+  const r = await api(); assert.equal(r.status, 200); assert.equal(r.body.status, 'complete'); assert.deepEqual(r.body.recap, { ...full, volume_history:[], volume_history_status:'test_session', quiz_history_status:'available',chat:{...full.chat,status:'available'} });
   assert(!JSON.stringify(r.body).includes('spacious hotel')); assert(!JSON.stringify(r.body).includes('synthetic-server-only'));
   assert.equal(r.calls[0].args.headers.Authorization, 'Bearer test.token');
   assert.equal(r.calls[1].args.headers.Authorization, 'Bearer test.token');
-  assert.equal(r.calls[3].args.headers.Authorization, 'Bearer synthetic-server-only');
+  const partnerCall=r.calls.find(c=>c.url.includes('participant_role=eq.partner'));
+  assert.equal(partnerCall.args.headers.Authorization, 'Bearer synthetic-server-only');
+  assert.equal(r.calls.find(c=>c.url.includes('/booking_chat_messages?')).args.headers.Authorization,'Bearer test.token');
+  const chatRow={booking_id:B,id:'chat-id',sender_id:L,sender_role:'learner',text:'The cafe was quiet.',created_at:own[0].timestamp};
+  const typed=await api({chat:[chatRow,{...chatRow,id:'other',booking_id:OTHER}]});
+  assert.equal(typed.body.recap.chat.messages.length,1);assert.equal(typed.body.recap.chat.messages[0].text,chatRow.text);
+  assert.deepEqual(typed.body.recap.metrics,r.body.recap.metrics);
+  const noChat=await api({chatFail:true});assert.deepEqual(noChat.body.recap.metrics,r.body.recap.metrics);assert.deepEqual(noChat.body.recap.questions,r.body.recap.questions);
   assert.equal(r.headers['Cache-Control'], 'private, no-store');
   assert(r.calls.every(c => !c.args.method || c.args.method === 'GET'), 'recap API performs read-only upstream requests');
   assert(!r.calls.some(c => c.url.includes('/rpc/')), 'recap API cannot call a mutation RPC');
-  const partnerRead = new URL(r.calls[3].url);
+  const partnerRead = new URL(partnerCall.url);
   assert.equal(partnerRead.searchParams.get('booking_id'), 'eq.' + B);
   assert.equal(partnerRead.searchParams.get('participant_id'), 'eq.' + P);
   assert.equal(partnerRead.searchParams.get('participant_role'), 'eq.partner');

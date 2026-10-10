@@ -244,6 +244,18 @@
     var me=(ko?'나':'Me')+' '+percent+'%',partner='Partner '+(100-percent)+'%';
     return '<div class="recap-ratio"><p>'+esc(line)+'</p><div class="recap-ratio-labels"><span>'+esc(me)+'</span><span>'+esc(partner)+'</span></div><div class="recap-ratio-bar" role="img" aria-label="'+esc(me+' / '+partner)+'"><span style="width:'+percent+'%"></span></div></div>';
   }
+  function chatEvidence(input,bookingId,userId,partnerId) {
+    var seen=new Set();
+    return (Array.isArray(input)?input:[]).filter(function(m){
+      if(!m||m.booking_id!==bookingId||!m.id||seen.has(m.id)||typeof m.text!=='string'||!m.text.trim()||m.text.length>1000||!Number.isFinite(Date.parse(m.created_at)))return false;
+      if(!((m.sender_id===userId&&m.sender_role==='learner')||(m.sender_id===partnerId&&m.sender_role==='partner')))return false;
+      seen.add(m.id);return true;
+    }).map(function(m){return {id:'chat:'+m.id,message_id:m.id,booking_id:bookingId,sender_id:m.sender_id,speaker:m.sender_role,text:m.text,timestamp:m.created_at,medium:'chat'};});
+  }
+  function typedMetrics(chat) {
+    var out={user_word_count:0,user_message_count:0,partner_word_count:0,partner_message_count:0};
+    chat.forEach(function(m){var prefix=m.speaker==='learner'?'user':'partner';out[prefix+'_message_count']++;out[prefix+'_word_count']+=(m.text.match(/[\p{L}\p{N}]+(?:['’][\p{L}\p{N}]+)*/gu)||[]).length;});return out;
+  }
   function build(options) {
     var o = options || {}, bookingId = String(o.bookingId || ''), lang = language(o.language);
     var userRows = rows(o.learnerLog, bookingId, o.learnerId, 'learner');
@@ -254,7 +266,10 @@
     var learnerWords = supported && userRows ? count(u) : null;
     var partnerWords = supported && partnerRows ? count(p) : null;
     var ratio = learnerWords != null && partnerWords != null && learnerWords + partnerWords > 0 ? learnerWords / (learnerWords + partnerWords) : null;
-    var expansion = supported && o.quizHistoryStatus !== 'unavailable' ? expand(u, o.quizExcludedWords) : [];
+    var chat=chatEvidence(o.chatMessages,bookingId,o.learnerId,o.partnerId);
+    var chatCandidates=chat.filter(function(m){return meaningful(m)&&learner.isQuizQualityCandidate(m.text)&&!/[0-9@]|https?:|www\.|\b(?:address|phone|password|passport|diagnosis|medication|bank|salary|credit card|social security)\b/i.test(m.text);});
+    var expansion = supported && o.quizHistoryStatus !== 'unavailable' ? expand(u.concat(chatCandidates), o.quizExcludedWords) : [];
+    expansion.forEach(function(v){v.source_evidence=u.concat(chatCandidates).filter(function(r){return v.source_utterance_ids.includes(r.id);}).map(function(r){return {id:r.id,role:r.speaker,medium:r.medium||'speech'};});});
     var learnerVersion = userRows ? sourceVersion(bookingId, o.learnerLog.id, u) : '';
     var partnerVersion = partnerRows ? sourceVersion(bookingId, o.partnerLog.id, p) : '';
     var fingerprint = learner.contentFingerprint(bookingId, VERSION, [lang, learnerVersion, partnerVersion]);
@@ -270,6 +285,7 @@
       interpretation: 'insufficient', quality_version: 3, story_source_version: storyVersion,
       ratio_quality: ratioQuality(supported?userRows:null,supported?partnerRows:null,o.learnerLog,o.partnerLog,fingerprint),
       comment: !supported ? 'unsupported' : !u.length || !learnerWords ? 'limited' : u.length >= 3 && learnerWords / u.length <= 4 ? 'short' : 'recorded',
+      chat: {version:1,status:o.chatStatus||'unavailable',metrics:typedMetrics(chat),messages:chat},
       topics: displayed, expressions: ex, word_expansion: expansion,
       ...(o.quizHistoryStatus ? { quiz_history_status: o.quizHistoryStatus } : {}),
       questions: questions(expansion), progress: { completed: 0, total: questions(expansion).length, reason: null }, ai: { status: 'not_required' } };
@@ -350,9 +366,18 @@
         html += '<section class="recap-section recap-quiz"><h4>'+esc(l.mini)+'</h4><p>'+esc(quizCopy)+'</p>'+vocabulary+quizAction+'</section>';
       }
     } else html += '<p>' + esc(l.unsupported) + '</p>';
+    if(r.chat&&r.chat.version===1&&r.chat.messages&&r.chat.messages.length){
+      var cm=r.chat.metrics,koChat=String(locale).toLowerCase()==='ko';
+      var messageMarkup=function(m){return '<p><small>'+esc(m.speaker==='learner'?(koChat?'나 · 채팅':'You · chat'):'Partner · chat')+'</small><br>'+esc(m.text)+'</p>';};
+      var chatTitle=koChat?'대화 중 채팅':'Session chat',preview=r.chat.messages.slice(0,3).map(messageMarkup).join(''),disclosure='';
+      if(r.chat.messages.length>3)disclosure='<details class="recap-chat-disclosure"><summary><span class="recap-chat-expand">'+(koChat?'전체 메시지 보기':'Show all messages')+'</span><span class="recap-chat-collapse">'+(koChat?'접기':'Show fewer')+'</span></summary><div class="recap-chat-scroll" tabindex="0" role="region" aria-label="'+esc(chatTitle)+'">'+r.chat.messages.map(messageMarkup).join('')+'</div></details>';
+      // Native disclosure changes presentation only. Saved messages, order and
+      // metrics stay untouched; opening it hides the three-message preview.
+      html+='<section class="recap-section recap-chat"><h4>'+esc(chatTitle)+'</h4><p>'+(koChat?'나':'You')+' · '+cm.user_message_count+(koChat?'개 메시지 · ':' messages · ')+cm.user_word_count+(koChat?'개 입력 단어':' typed words')+' / Partner · '+cm.partner_message_count+(koChat?'개 메시지 · ':' messages · ')+cm.partner_word_count+(koChat?'개 입력 단어':' typed words')+'</p>'+disclosure+'<div class="recap-chat-preview">'+preview+'</div></section>';
+    }
     var help = (Array.isArray(o.wordHelp) ? o.wordHelp : []).filter(function (x) { return x && typeof x.text === 'string' && x.text; }).slice(-6);
     if (help.length) html += '<details class="recap-help"><summary>' + esc(l.help) + '</summary><p>' + help.map(function (x) { return esc(x.text); }).join(' · ') + '</p><small>' + esc(l.helpNote) + '</small></details>';
     return html + '</section>';
   }
-  return { VERSION: VERSION, quizWordKey: quizWordKey, language: language, words: words, rows: rows, sourceVersion: sourceVersion, build: build, letterTopics: letterTopics, saved: saved, mergeFeedback: mergeFeedback, render: render, renderActions: renderActions, quizActionLabel: quizActionLabel, renderRatio: renderRatio, labels: labels, questions: questions, quizDuration: quizDuration, volumeHistory: volumeHistory };
+  return { VERSION: VERSION, chatEvidence: chatEvidence, typedMetrics: typedMetrics, quizWordKey: quizWordKey, language: language, words: words, rows: rows, sourceVersion: sourceVersion, build: build, letterTopics: letterTopics, saved: saved, mergeFeedback: mergeFeedback, render: render, renderActions: renderActions, quizActionLabel: quizActionLabel, renderRatio: renderRatio, labels: labels, questions: questions, quizDuration: quizDuration, volumeHistory: volumeHistory };
 });

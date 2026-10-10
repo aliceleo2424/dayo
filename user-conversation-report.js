@@ -54,7 +54,7 @@ return JSON.stringify(ordered(a))===JSON.stringify(ordered(b));
 }
 async function refreshRecapPresentation(db,report,fetchImpl){
 var stored=conversationRecap.saved(report);
-if(!stored||(stored.quality_version===3&&stored.ratio_quality&&stored.ratio_quality.version===1)||!stored.source.fingerprint||!db.auth.getSession)return report;
+if(!stored||!stored.source.fingerprint||!db.auth.getSession)return report;
 try{
  var session=await db.auth.getSession(),token=session.data&&session.data.session&&session.data.session.access_token;
  if(session.error||!token)return report;
@@ -66,6 +66,7 @@ try{
   var payload=await response.json(),fresh=payload&&payload.recap;
   if(!fresh||fresh.booking_id!==report.booking_id||fresh.generator!==stored.generator||fresh.schema_version!==stored.schema_version||fresh.quality_version!==3||!fresh.source||fresh.source.fingerprint!==stored.source.fingerprint||!sameStoredData(fresh.questions,stored.questions)||!sameStoredData(fresh.metrics,stored.metrics))return report;
   var display=Object.assign({},stored);['topics','expressions','word_expansion','interpretation','comment','quality_version','story_source_version','ratio_quality'].forEach(function(k){display[k]=fresh[k];});
+  if(fresh.chat&&fresh.chat.status==='available')display.chat=fresh.chat;
   // Presentation only: preserve stored progress, source, counts, history and all other report fields.
   return Object.assign({},report,{feedback:conversationRecap.mergeFeedback(report.feedback,display)});
  }finally{clearTimeout(timer);}
