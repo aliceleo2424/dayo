@@ -2,13 +2,13 @@
 (function () {
   'use strict';
   var originalOpen = window.openQuizModalImmediately;
-  var state = null, questions = [], timer = null, opening = null, finalizing = false, reviewing = false;
+  var state = null, questions = [], timer = null, opening = null, finalizing = false, reviewing = false, practicing = false;
   function locale() { return String(window.DayOI18n && window.DayOI18n.getLang ? window.DayOI18n.getLang() : document.documentElement.lang || 'ko').toLowerCase(); }
   function labels() { return window.DayOConversationRecap.labels(locale()); }
   function bookingId() { return String(window.DayORoomAccess && window.DayORoomAccess.bookingId || ''); }
   function blocked() { return window.isPartnerRoomMode && window.isPartnerRoomMode() || window.isObserverRoomMode && window.isObserverRoomMode(); }
   function key() { return 'dayo_recap_state:' + bookingId(); }
-  function write() { if (state) try { sessionStorage.setItem(key(), JSON.stringify(state)); } catch (_) { /* optional recovery */ } }
+  function write() { if (practicing) return; if (state) try { sessionStorage.setItem(key(), JSON.stringify(state)); } catch (_) { /* optional recovery */ } }
   function modal(show) {
     var node = document.getElementById('memory-game-modal'); if (!node) return;
     node.hidden = !show; node.style.display = show ? 'flex' : 'none';
@@ -29,6 +29,7 @@
     return { completed: state ? state.completed : 0, total: questions.length, reason: state && state.endReason || null };
   }
   function sync() {
+    if (practicing) return;
     var next = progress(), source = window.getCanonicalReviewSource && window.getCanonicalReviewSource();
     var prior = window.__dayoQuizProgress || source && source.recap && source.recap.progress;
     var unchanged = prior && JSON.stringify(prior) === JSON.stringify(next);
@@ -69,6 +70,7 @@
     });
   }
   async function save() {
+    if (practicing) return true;
     try { return typeof window.finalizeLearnerQuiz === 'function' && await window.finalizeLearnerQuiz(); } catch (_) { return false; }
   }
   function showSaveFailure() {
@@ -82,20 +84,28 @@
   }
   async function finish(reason) {
     if (!state || finalizing) return;
+    if (practicing) {
+      stopTimer(); state.ended=true; state.endReason=reason; practicing=false; modal(false);
+      if (typeof originalOpen==='function') originalOpen();
+      return;
+    }
     finalizing = true; stopTimer(); state.ended = true; state.endReason = reason; sync();
     await save(); finalizing = false; modal(false);
     if (typeof originalOpen === 'function') originalOpen();
     // A failed save is retryable from the recap itself; never hides the base recap.
     showSaveFailure();
   }
-  window.startRecapQuestions = function () {
+  window.startRecapQuestions = function (options) {
     if (blocked()) return;
     var report = window.getLearnerReviewSnapshot && window.getLearnerReviewSnapshot();
     var recap = window.DayOConversationRecap.saved(Object.assign({ booking_id: bookingId() }, report));
     if (!recap || !recap.supported || !recap.questions.length) return;
+    var replay=!!(options && options.practice);
+    if (replay && !(recap.progress && (recap.progress.reason==='completed' || recap.progress.completed>=recap.questions.length))) return;
+    practicing=replay;
     reviewing = false; questions = recap.questions;
     var fingerprint = window.DayOLearnerExpressions.contentFingerprint(bookingId(), recap.source.learner_version || recap.source.fingerprint, questions);
-    state = recoverState(recap, fingerprint);
+    state = replay ? {completed:0,currentIndex:0,startedAt:Date.now(),ended:false,endReason:null} : recoverState(recap, fingerprint);
     if (state.ended || state.currentIndex >= questions.length) { if (typeof originalOpen === 'function') originalOpen(); return; }
     state.startedAt = state.startedAt || Date.now(); write(); sync();
     var record = document.getElementById('quiz-modal');
@@ -115,7 +125,7 @@
     var report=window.getLearnerReviewSnapshot && window.getLearnerReviewSnapshot();
     var recap=window.DayOConversationRecap.saved(Object.assign({booking_id:bookingId()},report));
     if(!recap || !recap.questions.length)return;
-    reviewing=true;stopTimer();
+    practicing=false;reviewing=true;stopTimer();
     var record=document.getElementById('quiz-modal');if(record){record.hidden=true;record.classList.remove('is-open');record.style.removeProperty('display');if(window.DayOScrollLock)window.DayOScrollLock.unlock();}
     var title=document.getElementById('memory-game-title');if(title)title.textContent=labels().mini;
     var badge=document.getElementById('game-round-badge');if(badge)badge.textContent=(recap.progress.completed||0)+'/'+recap.questions.length+' '+labels().completed;
@@ -127,6 +137,7 @@
   async function openRecap() {
     if (blocked()) { if (typeof originalOpen === 'function') originalOpen(); return; }
     if (opening) return opening;
+    if (practicing) { stopTimer(); practicing=false; modal(false); if(typeof originalOpen==='function')originalOpen(); return; }
     stopTimer();
     var requested = bookingId();
     opening = (async function () {
@@ -155,6 +166,7 @@
     if(!event.target.closest)return;
     if(event.target.closest('[data-recap-start]'))window.startRecapQuestions();
     if(event.target.closest('[data-recap-review]'))window.reviewRecapQuestions();
+    if(event.target.closest('[data-recap-replay]'))window.startRecapQuestions({practice:true});
     if(event.target.closest('[data-recap-home]')){var done=document.getElementById('quiz-done-btn');if(done)done.click();else window.location.href='mypage.html';}
   });
 })();

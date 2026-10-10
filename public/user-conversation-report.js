@@ -100,10 +100,8 @@ if(!value&&Array.isArray(r.__dayoLearnerTranscript)&&r.__dayoLearnerSourceLogId)
   value=conversationRecap.build({bookingId:r.booking_id,learnerId:'authenticated-learner',language:r.language,
     learnerLog:{id:r.__dayoLearnerSourceLogId,booking_id:r.booking_id,participant_id:'authenticated-learner',participant_role:'learner',transcript:r.__dayoLearnerTranscript}});
 }
-var recap=value?conversationRecap.render(value,locale,{wordHelp:r.word_help}):renderLegacy(r,locale);
-if(value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(r.booking_id||'') && value.questions && value.questions.length && !(value.progress && value.progress.reason)) {
-  recap+='<a class="recap-primary" href="session-recap.html?bookingId='+encodeURIComponent(r.booking_id)+'">'+(locale==='ko'?'단어 퀴즈 이어보기':'Continue the word quiz')+'</a>';
-}
+var quizHref=value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(r.booking_id||'') && value.questions && value.questions.length ? 'session-recap.html?bookingId='+encodeURIComponent(r.booking_id) : '';
+var recap=value?conversationRecap.render(value,locale,{wordHelp:r.word_help,quizHref:quizHref}):renderLegacy(r,locale);
 
 return '<article class="ucr-detail" data-booking-id="'+esc(r.booking_id||'')+'"'+memoryAttribute(r,locale)+'><header class="ucr-header"><p class="ucr-eyebrow">DayO · '+esc(l.record)+'</p><h3>'+esc(l.with+name)+'</h3><p class="ucr-meta">'+[date(r,locale),language(r)].filter(Boolean).map(esc).join(' · ')+'</p></header>'+recap+renderLetter(r,locale)+'<footer class="ucr-actions">'+'<button type="button" onclick="closeReportDetailModal()">'+esc(l.close)+'</button></footer></article>';}
 function renderArchive(r,index,locale){r=r||{};var l=labels[locale]||labels.en,t=treat(r);return '<button class="mypage-report-item ucr-archive" type="button" onclick="openReportDetailModal(\'report-'+(index+1)+'\')"><span class="ucr-archive-content"><strong>'+esc(l.with+nickname(r,locale))+'</strong><span class="ucr-meta">'+[date(r,locale),language(r)].filter(Boolean).map(esc).join(' · ')+'</span>'+(text(r.keyword)?'<span class="ucr-archive-theme">'+esc(r.keyword)+'</span>':'')+'<span class="ucr-archive-badges">'+(conversationRecap.saved(r)&&conversationRecap.saved(r).progress.total?'<span>'+esc(conversationRecap.labels(locale).mini)+' · '+esc(conversationRecap.saved(r).progress.completed+'/'+conversationRecap.saved(r).progress.total)+'</span>':'')+'</span></span><span class="ucr-archive-open">'+esc(l.open)+' →</span></button>';}

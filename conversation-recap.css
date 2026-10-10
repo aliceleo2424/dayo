@@ -23,3 +23,11 @@
 #quiz-modal .talk-record-actions:has(#quiz-done-btn[hidden]){display:none}
 
 .recap-ratio{margin-top:12px}.recap-ratio>p{color:#51433c}.recap-ratio-labels{display:flex;justify-content:space-between;gap:12px;margin:7px 0 5px;font-size:12px;color:#51433c}.recap-ratio-bar{height:8px;background:#d8cdbc;border-radius:8px;overflow:hidden}.recap-ratio-bar>span{display:block;height:100%;background:#5F7D63}.recap-quiz>.recap-word{margin-top:8px}
+
+
+.recap-quiz-entry{display:flex;align-items:center;justify-content:center;width:fit-content;text-decoration:none;line-height:1.4;margin-top:12px}
+.recap-quiz{padding-bottom:14px}
+
+/* Results-only rows: interactive answer choices keep their existing styling. */
+#memory-game-modal #word-pool-container:has(>.recap-answer):not(:has(>button)){display:grid;gap:8px}
+#memory-game-modal #word-pool-container:has(>.recap-answer):not(:has(>button))>.recap-answer{margin:0;padding:12px 14px;border:1px solid #e8dfd1;border-radius:12px;background:#F8F0E3;color:#51433c;font-size:14px;line-height:1.6;overflow-wrap:anywhere}

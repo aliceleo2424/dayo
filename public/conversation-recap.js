@@ -172,9 +172,13 @@
     if(content.length<3) speech.forEach(function(r){if(content.length<3 && r.id && greeting(r.text) && !content.some(function(e){return normalizeSpeech(e.text)===normalizeSpeech(r.text);})) content.push({text:r.text,source_utterance_id:r.id,source_timestamp:r.timestamp,greeting_fallback:true});});
     return content.slice(0,3).map(function(e){return Object.assign({},e,{source_log_id:logId,source_role:'learner',source_version:version,topic_keys:topics.filter(function(t){return t.source_utterance_ids.includes(e.source_utterance_id);}).map(function(t){return t.key;})});});
   }
+  function quizActionLabel(recap, locale) {
+    var l=labels(locale),p=recap && recap.progress || {};
+    return p.reason==='completed' || (p.total>0 && p.completed>=p.total) ? l.retry : p.reason ? l.review : p.completed>0 ? l.resume : l.open;
+  }
   function renderActions(recap, locale) {
     var l=labels(locale),done=recap && recap.progress && recap.progress.reason;
-    return '<div class="recap-actions">'+(recap && recap.questions && recap.questions.length ? '<button type="button" class="recap-primary" '+(done?'data-recap-review':'data-recap-start')+'>'+esc(done?l.review:l.open)+'</button>':'')+'<button type="button" class="recap-primary" data-recap-home>'+esc(l.home)+'</button></div>';
+    return '<div class="recap-actions">'+(recap && recap.questions && recap.questions.length ? '<button type="button" class="recap-primary" '+(done?(recap.progress.reason==='completed' || recap.progress.completed>=recap.progress.total?'data-recap-replay':'data-recap-review'):'data-recap-start')+'>'+esc(quizActionLabel(recap,locale))+'</button>':'')+'<button type="button" class="recap-primary" data-recap-home>'+esc(l.home)+'</button></div>';
   }
   function quizWordKey(value) {
     return typeof value === 'string' ? value.normalize('NFKC').trim().replace(/\s+/g, ' ').toLowerCase() : '';
@@ -281,8 +285,8 @@
   }
   function esc(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
   var copy = {
-    ko: { title: '오늘의 대화 기록', words: '내가 말한 양', utterances: '내가 말한 문장', participation: '대화 참여', missing: '기록 확인 중', ratioMissing: '두 사람의 기록이 필요해요', basis: '기록된 단어 기준 · 문장 수는 STT 발화 단위예요.', speaking: ['오늘은 많이 말했어요', '내 이야기를 길게 이어간 순간이 많았어요.'], balanced: ['균형 있게 대화했어요', '듣고 말하는 흐름이 자연스럽게 이어졌어요.'], listening: ['오늘은 많이 들었어요', '파트너 이야기를 충분히 듣고 반응하는 대화였어요.'], insufficient: ['기록된 발화를 돌아봐요', '참여 비율은 두 사람의 기록이 있을 때 표시돼요.'], limited: '기록된 발화가 많지 않아요.', short: '짧게 주고받는 대화가 많았어요.', recorded: '오늘 나눈 이야기를 기록했어요.', unsupported: '이 언어의 리캡은 아직 지원하지 않아요. 대화 기록은 그대로 보존돼요.', topics: '오늘의 이야기', expressions: '내가 실제로 쓴 표현', expansion: '대화에서 만난 단어', synonyms: '비슷한 말', antonyms: '반대말', example: '예문', mini: '오늘의 단어 퀴즈', help: 'AI 표현 도움에서 본 표현', helpNote: '클릭하거나 복사한 표현이에요. 실제로 말한 표현과는 구분해요.', completed: '완료', open: '단어 퀴즈 도전', review: '퀴즈 다시 보기', home: '마이페이지', me: '나', synonym: '와 가장 가까운 표현은?', antonym: '와 반대되는 표현은?', unavailable: '저장된 대화 기록을 확인할 수 없어요.' },
-    en: { title: 'Today’s conversation recap', words: 'Words I said', utterances: 'My utterances', participation: 'Participation', missing: 'Checking the record', ratioMissing: 'Both records are needed', basis: 'Based on recorded words · utterances follow STT segments.', speaking: ['You shared a lot today', 'There were many moments when you continued your story.'], balanced: ['A balanced conversation', 'Listening and speaking flowed naturally.'], listening: ['You listened a lot today', 'You took time to listen and respond to your partner.'], insufficient: ['Looking back at your conversation', 'Participation needs both participants’ records.'], limited: 'There are only a few recorded utterances.', short: 'There were many short exchanges.', recorded: 'Your conversation is recorded.', unsupported: 'Recaps for this language are not supported yet. Your record is preserved.', topics: 'Topics that came up', expressions: 'Expressions I actually used', expansion: 'Words from your conversation', synonyms: 'Similar words', antonyms: 'Opposite words', example: 'Example', mini: 'Today’s word quiz', help: 'Expressions viewed in AI Word Help', helpNote: 'Expressions you clicked or copied, separate from what you actually said.', completed: 'completed', open: 'Try the word quiz', review: 'Review the quiz', home: 'My Page', me: 'Me', synonym: ': which expression has a similar meaning?', antonym: ': which expression has the opposite meaning?', unavailable: 'The saved conversation record is unavailable.' }
+    ko: { title: '오늘의 대화 기록', words: '내가 말한 양', utterances: '내가 말한 문장', participation: '대화 참여', missing: '기록 확인 중', ratioMissing: '두 사람의 기록이 필요해요', basis: '기록된 단어 기준 · 문장 수는 STT 발화 단위예요.', speaking: ['오늘은 많이 말했어요', '내 이야기를 길게 이어간 순간이 많았어요.'], balanced: ['균형 있게 대화했어요', '듣고 말하는 흐름이 자연스럽게 이어졌어요.'], listening: ['오늘은 많이 들었어요', '파트너 이야기를 충분히 듣고 반응하는 대화였어요.'], insufficient: ['기록된 발화를 돌아봐요', '참여 비율은 두 사람의 기록이 있을 때 표시돼요.'], limited: '기록된 발화가 많지 않아요.', short: '짧게 주고받는 대화가 많았어요.', recorded: '오늘 나눈 이야기를 기록했어요.', unsupported: '이 언어의 리캡은 아직 지원하지 않아요. 대화 기록은 그대로 보존돼요.', topics: '오늘의 이야기', expressions: '내가 실제로 쓴 표현', expansion: '대화에서 만난 단어', synonyms: '비슷한 말', antonyms: '반대말', example: '예문', mini: '오늘의 단어 퀴즈', help: 'AI 표현 도움에서 본 표현', helpNote: '클릭하거나 복사한 표현이에요. 실제로 말한 표현과는 구분해요.', completed: '완료', open: '단어 퀴즈 도전', resume: '단어 퀴즈 이어하기', retry: '단어 퀴즈 다시하기', review: '퀴즈 다시 보기', home: '마이페이지', me: '나', synonym: '와 가장 가까운 표현은?', antonym: '와 반대되는 표현은?', unavailable: '저장된 대화 기록을 확인할 수 없어요.' },
+    en: { title: 'Today’s conversation recap', words: 'Words I said', utterances: 'My utterances', participation: 'Participation', missing: 'Checking the record', ratioMissing: 'Both records are needed', basis: 'Based on recorded words · utterances follow STT segments.', speaking: ['You shared a lot today', 'There were many moments when you continued your story.'], balanced: ['A balanced conversation', 'Listening and speaking flowed naturally.'], listening: ['You listened a lot today', 'You took time to listen and respond to your partner.'], insufficient: ['Looking back at your conversation', 'Participation needs both participants’ records.'], limited: 'There are only a few recorded utterances.', short: 'There were many short exchanges.', recorded: 'Your conversation is recorded.', unsupported: 'Recaps for this language are not supported yet. Your record is preserved.', topics: 'Topics that came up', expressions: 'Expressions I actually used', expansion: 'Words from your conversation', synonyms: 'Similar words', antonyms: 'Opposite words', example: 'Example', mini: 'Today’s word quiz', help: 'Expressions viewed in AI Word Help', helpNote: 'Expressions you clicked or copied, separate from what you actually said.', completed: 'completed', open: 'Try the word quiz', resume: 'Continue the word quiz', retry: 'Try Quiz Again', review: 'Review the quiz', home: 'My Page', me: 'Me', synonym: ': which expression has a similar meaning?', antonym: ': which expression has the opposite meaning?', unavailable: 'The saved conversation record is unavailable.' }
   };
   function labels(locale) { return copy[String(locale || '').toLowerCase() === 'ko' ? 'ko' : 'en']; }
   function renderVolume(r, locale) {
@@ -325,18 +329,30 @@
       var progress = r.progress || { completed: 0, total: 0 };
       if ((r.questions || []).length && progress.total) {
         var quizCopy = progress.reason==='completed' && progress.completed===progress.total ? (ko?'단어 퀴즈 완료':'Word quiz completed')+' · '+progress.completed+'/'+progress.total : progress.total+(ko?'문제':' questions')+(progress.completed?' · '+progress.completed+'/'+progress.total+' '+l.completed:'');
-        var vocabulary = (r.word_expansion || []).slice(0,2).map(function(v){
-          var quote=quotes.find(function(e){return !e.greeting_fallback && (v.source_utterance_ids || []).includes(e.source_utterance_id) && words(e.text).some(function(w){return w.toLowerCase()===v.word;});});
+        var quizWords=new Set((r.questions || []).map(function(q){return quizWordKey(q.word);})),displayedWords=new Set();
+        var vocabulary = (r.word_expansion || []).filter(function(v){var key=quizWordKey(v.word);if(!quizWords.has(key) || displayedWords.has(key))return false;displayedWords.add(key);return true;}).slice(0,3).map(function(v){
+          // Only saved, source-linked learner evidence; no Partner transcript fetch.
+          var quote=quotes.find(function(e){
+            var confidence=e.asr_confidence;
+            return !e.greeting_fallback && !e.uncertain && !e.ambiguous &&
+              (confidence==null || Number.isFinite(Number(confidence)) && Number(confidence)>=0.85) &&
+              (!e.booking_id || e.booking_id===r.booking_id) &&
+              meaningful({id:e.source_utterance_id,text:e.text}) && learner.isQuizQualityCandidate(e.text) &&
+              !/[0-9@]|https?:|www\.|\b(?:address|phone|password|passport|diagnosis|medication|bank|salary|credit card|social security)\b/i.test(e.text) &&
+              (v.source_utterance_ids || []).includes(e.source_utterance_id) &&
+              words(e.text).some(function(w){return quizWordKey(w)===quizWordKey(v.word);});
+          });
           return '<div class="recap-word"><strong>'+esc(v.word)+'</strong>'+(ko?'<span> · '+esc(v.meaning_ko)+'</span>':'')+
             '<p>'+esc(l.synonyms)+': '+esc((v.synonyms||[]).slice(0,2).join(' · '))+'</p><p>'+esc(l.antonyms)+': '+esc((v.antonyms||[]).slice(0,2).join(' · '))+'</p>'+
-            (quote?'<small>'+(ko?'오늘 대화에서':'From today’s conversation')+'</small><p class="recap-word-quote">“'+esc(quote.text)+'”</p>':'')+'</div>';
+            (quote?'<small>'+(ko?'오늘 대화에서 · 나':'From today’s conversation · You')+'</small><p class="recap-word-quote">“'+esc(quote.text)+'”</p>':'')+'</div>';
         }).join('');
-        html += '<section class="recap-section recap-quiz"><h4>'+esc(l.mini)+'</h4><p>'+esc(quizCopy)+'</p>'+vocabulary+(o.interactive && !o.hideQuizAction && !progress.reason ? '<button class="recap-primary" type="button" data-recap-start>'+esc(l.open)+'</button>':'')+'</section>';
+        var quizAction=o.quizHref ? '<a class="recap-primary recap-quiz-entry" href="'+esc(o.quizHref)+'">'+esc(quizActionLabel(r,locale))+'</a>' : o.interactive && !o.hideQuizAction && !progress.reason ? '<button class="recap-primary recap-quiz-entry" type="button" data-recap-start>'+esc(quizActionLabel(r,locale))+'</button>' : '';
+        html += '<section class="recap-section recap-quiz"><h4>'+esc(l.mini)+'</h4><p>'+esc(quizCopy)+'</p>'+vocabulary+quizAction+'</section>';
       }
     } else html += '<p>' + esc(l.unsupported) + '</p>';
     var help = (Array.isArray(o.wordHelp) ? o.wordHelp : []).filter(function (x) { return x && typeof x.text === 'string' && x.text; }).slice(-6);
     if (help.length) html += '<details class="recap-help"><summary>' + esc(l.help) + '</summary><p>' + help.map(function (x) { return esc(x.text); }).join(' · ') + '</p><small>' + esc(l.helpNote) + '</small></details>';
     return html + '</section>';
   }
-  return { VERSION: VERSION, quizWordKey: quizWordKey, language: language, words: words, rows: rows, sourceVersion: sourceVersion, build: build, letterTopics: letterTopics, saved: saved, mergeFeedback: mergeFeedback, render: render, renderActions: renderActions, renderRatio: renderRatio, labels: labels, questions: questions, quizDuration: quizDuration, volumeHistory: volumeHistory };
+  return { VERSION: VERSION, quizWordKey: quizWordKey, language: language, words: words, rows: rows, sourceVersion: sourceVersion, build: build, letterTopics: letterTopics, saved: saved, mergeFeedback: mergeFeedback, render: render, renderActions: renderActions, quizActionLabel: quizActionLabel, renderRatio: renderRatio, labels: labels, questions: questions, quizDuration: quizDuration, volumeHistory: volumeHistory };
 });
