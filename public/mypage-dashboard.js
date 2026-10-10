@@ -530,12 +530,10 @@
     var closeBtn = modal.querySelector('.card-detail-close');
     if (closeBtn && closeBtn.focus) closeBtn.focus();
     if(report && report.booking_id && window.DayOUserConversationReport && window.supabaseClient && body){
-      var status=document.createElement('p'),retry=document.createElement('button'),ko=String(window.DayOI18n.getLang()).toLowerCase()==='ko';
+      var status=document.createElement('p'),ko=String(window.DayOI18n.getLang()).toLowerCase()==='ko';
       status.className='ucr-report-status';status.setAttribute('role','status');
-      retry.type='button';retry.className='ucr-report-refresh';retry.textContent=ko?'최신 리포트 불러오기':'Refresh report';
-      retry.onclick=function(){openReportDetailModal(key);};
       var loading=ko?'최신 리포트를 확인하고 있어요.':'Checking the latest report.';
-      status.textContent=loading;body.append(status,retry);
+      status.textContent=loading;body.append(status);
       try{
         var latest=await window.DayOUserConversationReport.fetchLatest(window.supabaseClient,report.booking_id);
         if(version!==reportOpenVersion)return;
@@ -543,7 +541,7 @@
           report=window.DayOUserConversationReport.withLatestContent(report,latest);
           reports[idx]=report;
           body.innerHTML=window.renderReportDetailHtml(report);
-          status.textContent='';body.append(status,retry);
+          status.textContent='';body.append(status);
         }else status.textContent=ko?'저장된 리포트를 확인할 수 없어요.':'The saved report is unavailable.';
       }catch(_){if(version===reportOpenVersion)status.textContent=ko?'최신 리포트를 불러오지 못했어요. 다시 시도해 주세요.':'Could not load the latest report. Please try again.';}
     }
