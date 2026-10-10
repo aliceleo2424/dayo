@@ -1,0 +1,320 @@
+[
+  {
+    "udt": "uuid",
+    "name": "id",
+    "type": "uuid",
+    "table": "bookings"
+  },
+  {
+    "udt": "uuid",
+    "name": "learner_id",
+    "type": "uuid",
+    "table": "bookings"
+  },
+  {
+    "udt": "uuid",
+    "name": "partner_id",
+    "type": "uuid",
+    "table": "bookings"
+  },
+  {
+    "udt": "uuid",
+    "name": "slot_id",
+    "type": "uuid",
+    "table": "bookings"
+  },
+  {
+    "udt": "varchar",
+    "name": "status",
+    "type": "character varying",
+    "table": "bookings"
+  },
+  {
+    "udt": "bool",
+    "name": "ticket_deducted",
+    "type": "boolean",
+    "table": "bookings"
+  },
+  {
+    "udt": "timestamptz",
+    "name": "created_at",
+    "type": "timestamp with time zone",
+    "table": "bookings"
+  },
+  {
+    "udt": "timestamptz",
+    "name": "updated_at",
+    "type": "timestamp with time zone",
+    "table": "bookings"
+  },
+  {
+    "udt": "timestamptz",
+    "name": "ended_at",
+    "type": "timestamp with time zone",
+    "table": "bookings"
+  },
+  {
+    "udt": "uuid",
+    "name": "partner_user_id",
+    "type": "uuid",
+    "table": "bookings"
+  },
+  {
+    "udt": "timestamptz",
+    "name": "scheduled_at",
+    "type": "timestamp with time zone",
+    "table": "bookings"
+  },
+  {
+    "udt": "bool",
+    "name": "partner_rewarded",
+    "type": "boolean",
+    "table": "bookings"
+  },
+  {
+    "udt": "bool",
+    "name": "ticket_refunded",
+    "type": "boolean",
+    "table": "bookings"
+  },
+  {
+    "udt": "text",
+    "name": "end_reason",
+    "type": "text",
+    "table": "bookings"
+  },
+  {
+    "udt": "timestamptz",
+    "name": "completed_at",
+    "type": "timestamp with time zone",
+    "table": "bookings"
+  },
+  {
+    "udt": "text",
+    "name": "partner_name",
+    "type": "text",
+    "table": "bookings"
+  },
+  {
+    "udt": "text",
+    "name": "language",
+    "type": "text",
+    "table": "bookings"
+  },
+  {
+    "udt": "numeric",
+    "name": "rating",
+    "type": "numeric",
+    "table": "bookings"
+  },
+  {
+    "udt": "jsonb",
+    "name": "conversation_brief",
+    "type": "jsonb",
+    "table": "bookings"
+  },
+  {
+    "udt": "jsonb",
+    "name": "matching_snapshot",
+    "type": "jsonb",
+    "table": "bookings"
+  },
+  {
+    "udt": "bool",
+    "name": "is_test_session",
+    "type": "boolean",
+    "table": "bookings"
+  },
+  {
+    "udt": "uuid",
+    "name": "id",
+    "type": "uuid",
+    "table": "session_logs"
+  },
+  {
+    "udt": "uuid",
+    "name": "user_id",
+    "type": "uuid",
+    "table": "session_logs"
+  },
+  {
+    "udt": "text",
+    "name": "room_id",
+    "type": "text",
+    "table": "session_logs"
+  },
+  {
+    "udt": "jsonb",
+    "name": "transcript",
+    "type": "jsonb",
+    "table": "session_logs"
+  },
+  {
+    "udt": "jsonb",
+    "name": "feedback",
+    "type": "jsonb",
+    "table": "session_logs"
+  },
+  {
+    "udt": "timestamptz",
+    "name": "created_at",
+    "type": "timestamp with time zone",
+    "table": "session_logs"
+  },
+  {
+    "udt": "uuid",
+    "name": "booking_id",
+    "type": "uuid",
+    "table": "session_logs"
+  },
+  {
+    "udt": "uuid",
+    "name": "participant_id",
+    "type": "uuid",
+    "table": "session_logs"
+  },
+  {
+    "udt": "text",
+    "name": "participant_role",
+    "type": "text",
+    "table": "session_logs"
+  },
+  {
+    "udt": "uuid",
+    "name": "learner_id",
+    "type": "uuid",
+    "table": "session_logs"
+  },
+  {
+    "udt": "uuid",
+    "name": "partner_id",
+    "type": "uuid",
+    "table": "session_logs"
+  },
+  {
+    "udt": "timestamptz",
+    "name": "started_at",
+    "type": "timestamp with time zone",
+    "table": "session_logs"
+  },
+  {
+    "udt": "timestamptz",
+    "name": "ended_at",
+    "type": "timestamp with time zone",
+    "table": "session_logs"
+  },
+  {
+    "udt": "timestamptz",
+    "name": "updated_at",
+    "type": "timestamp with time zone",
+    "table": "session_logs"
+  },
+  {
+    "udt": "uuid",
+    "name": "id",
+    "type": "uuid",
+    "table": "session_reports"
+  },
+  {
+    "udt": "uuid",
+    "name": "booking_id",
+    "type": "uuid",
+    "table": "session_reports"
+  },
+  {
+    "udt": "uuid",
+    "name": "learner_id",
+    "type": "uuid",
+    "table": "session_reports"
+  },
+  {
+    "udt": "text",
+    "name": "partner_name",
+    "type": "text",
+    "table": "session_reports"
+  },
+  {
+    "udt": "text",
+    "name": "spoken_sentence",
+    "type": "text",
+    "table": "session_reports"
+  },
+  {
+    "udt": "text",
+    "name": "keyword",
+    "type": "text",
+    "table": "session_reports"
+  },
+  {
+    "udt": "text",
+    "name": "illust_url",
+    "type": "text",
+    "table": "session_reports"
+  },
+  {
+    "udt": "text",
+    "name": "partner_comment",
+    "type": "text",
+    "table": "session_reports"
+  },
+  {
+    "udt": "text",
+    "name": "stamp",
+    "type": "text",
+    "table": "session_reports"
+  },
+  {
+    "udt": "timestamptz",
+    "name": "created_at",
+    "type": "timestamp with time zone",
+    "table": "session_reports"
+  },
+  {
+    "udt": "uuid",
+    "name": "partner_id",
+    "type": "uuid",
+    "table": "session_reports"
+  },
+  {
+    "udt": "uuid",
+    "name": "partner_user_id",
+    "type": "uuid",
+    "table": "session_reports"
+  },
+  {
+    "udt": "text",
+    "name": "summary",
+    "type": "text",
+    "table": "session_reports"
+  },
+  {
+    "udt": "jsonb",
+    "name": "key_expressions",
+    "type": "jsonb",
+    "table": "session_reports"
+  },
+  {
+    "udt": "int4",
+    "name": "quiz_score",
+    "type": "integer",
+    "table": "session_reports"
+  },
+  {
+    "udt": "jsonb",
+    "name": "word_help",
+    "type": "jsonb",
+    "table": "session_reports"
+  },
+  {
+    "udt": "jsonb",
+    "name": "feedback",
+    "type": "jsonb",
+    "table": "session_reports"
+  },
+  {
+    "udt": "numeric",
+    "name": "rating",
+    "type": "numeric",
+    "table": "session_reports"
+  }
+]

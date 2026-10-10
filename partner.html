@@ -2089,6 +2089,8 @@
   <script src="profile-images.js"></script>
   <link rel="stylesheet" href="partner-dashboard.css?v=20261007-prepare">
   <script src="dashboard-tabs.js" defer></script>
+  <link rel="stylesheet" href="partner-privacy.css">
+  <script src="partner-privacy.js" defer></script>
   <script src="partner-dashboard.js" defer></script>
   <link rel="stylesheet" href="availability-calendar.css">
   <link rel="stylesheet" href="/english-typography.css?v=20261005-en">
@@ -2263,8 +2265,9 @@
               <label class="field-label" for="nickname" data-i18n="partner.profile.nickname">닉네임</label>
               <button class="mini-btn" type="button" id="historyBtn" data-i18n="partner.profile.history">📜 변경 이력</button>
             </div>
-            <input class="input" id="nickname" name="nickname" value="" placeholder="DayO 파트너" autocomplete="nickname" data-i18n="partner.profile.nicknamePlaceholder">
+            <input class="input" id="nickname" name="nickname" maxlength="50" value="" placeholder="DayO 파트너" autocomplete="nickname" data-i18n="partner.profile.nicknamePlaceholder">
           </div>
+          <div id="partner-public-name-policy" class="partner-public-name-policy"></div>
           <div class="field field--wide">
             <label class="field-label" for="partner-bio-input" data-i18n="partner.profile.intro">한 줄 소개</label>
             <textarea class="textarea" id="partner-bio-input" name="intro" rows="3"
@@ -2691,6 +2694,8 @@
       }
       var nickname = nicknameInput ? nicknameInput.value.trim() : '';
       var bio = introInput ? introInput.value.trim() : '';
+      try { await window.DayOPartnerPrivacy.saveName(client, nickname); }
+      catch (privacyError) { showToast(privacyError.message); return; }
       var payload = {
         nickname: nickname || defaultPartnerName(),
         bio: bio
@@ -2983,6 +2988,7 @@
         nicknameHistory.unshift({ name: savedNickname, date: formatToday() });
         renderHistory();
       }
+      window.DayOPartnerPrivacy.mountName(getPartnerSupabaseClient(), nicknameInput);
     }
 
     async function fetchPartnerProfile(session) {

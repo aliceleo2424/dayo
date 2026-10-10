@@ -129,8 +129,17 @@ function makeStore(service) {
       } catch (_) { return null; } // Unknown locale must not block an existing notification.
     },
     async partnerName(id, email) {
-      const profile = await checked(service.from('profiles').select('nickname').eq('id', id).maybeSingle());
-      return displayName(profile && profile.nickname, email);
+      // Use the same Partner public-name policy; never expose a legal-name fallback.
+      try {
+        const result = await service.from('partner_public_identity').select('public_name,confirmed_at').eq('partner_id', id).maybeSingle();
+        if (result.error) return 'DayO Partner';
+        if (result.data?.confirmed_at) return displayName(result.data.public_name, email);
+        if (!result.data) {
+          const initialized = await service.rpc('get_partner_public_name', { p_partner_id: id });
+          if (!initialized.error) return displayName(initialized.data, email);
+        }
+        return 'DayO Partner';
+      } catch (_) { return 'DayO Partner'; }
     }
   };
 }

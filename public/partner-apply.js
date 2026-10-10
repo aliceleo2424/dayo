@@ -2,6 +2,9 @@
   'use strict';
   var form = document.getElementById('application-form'), button = document.getElementById('submit-button'), status = document.getElementById('form-status');
   var busy = false, uploaded = null;
+  var referralInput=form.elements.referral_code,sharedCode=new URLSearchParams(location.search).get('ref');
+  if(sharedCode&&window.DayOPartnerPrivacy.codePattern.test(sharedCode.toUpperCase()))referralInput.value=sharedCode.toUpperCase();
+  referralInput.addEventListener('input',function(){referralInput.value=referralInput.value.toUpperCase();});
   var catalog = window.DayOPartnerFields, languages = catalog.languages;
   var locationContainer = document.getElementById('partner-location-fields');
   locationContainer.innerHTML = catalog.locationMarkup();
@@ -98,6 +101,7 @@
     var video = form.elements.intro_video.files[0];
     busy = true; button.disabled = true; button.textContent = 'Submitting…';
     try {
+      payload.referral_code=await window.DayOPartnerPrivacy.validateReferral(window.supabaseClient,payload.referral_code);
       await validateFile(video, 'video'); status.textContent = 'Uploading your private files…';
       var media = await uploadFiles(video); payload.media_upload_id = media.id; payload.intro_video_path = media.video.path;
       // No returning SELECT: anonymous applicants still have INSERT permission only.

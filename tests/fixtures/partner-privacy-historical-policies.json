@@ -1,0 +1,110 @@
+[
+  {
+    "cmd": "INSERT",
+    "qual": null,
+    "roles": [
+      "authenticated"
+    ],
+    "tablename": "bookings",
+    "permissive": "PERMISSIVE",
+    "policyname": "bookings_insert_own_pending",
+    "schemaname": "public",
+    "with_check": "((learner_id = auth.uid()) AND (EXISTS ( SELECT 1\n FROM profiles\n WHERE ((profiles.id = auth.uid()) AND ((profiles.role)::text = ANY ((ARRAY['user'::character varying, 'learner'::character varying, 'admin'::character varying])::text[]))))) AND ((status)::text = 'pending'::text) AND (partner_user_id = partner_id) AND (ticket_deducted = false) AND (partner_rewarded = false) AND (ticket_refunded = false) AND (ended_at IS NULL) AND (completed_at IS NULL) AND (end_reason IS NULL) AND (rating IS NULL))"
+  },
+  {
+    "cmd": "SELECT",
+    "qual": "dayo_is_admin()",
+    "roles": [
+      "authenticated"
+    ],
+    "tablename": "bookings",
+    "permissive": "PERMISSIVE",
+    "policyname": "bookings_select_admin",
+    "schemaname": "public",
+    "with_check": null
+  },
+  {
+    "cmd": "SELECT",
+    "qual": "((learner_id = auth.uid()) OR (partner_user_id = auth.uid()))",
+    "roles": [
+      "authenticated"
+    ],
+    "tablename": "bookings",
+    "permissive": "PERMISSIVE",
+    "policyname": "bookings_select_participant",
+    "schemaname": "public",
+    "with_check": null
+  },
+  {
+    "cmd": "UPDATE",
+    "qual": "((learner_id = auth.uid()) AND (EXISTS ( SELECT 1\n FROM profiles\n WHERE ((profiles.id = auth.uid()) AND ((profiles.role)::text = ANY ((ARRAY['user'::character varying, 'learner'::character varying])::text[]))))))",
+    "roles": [
+      "authenticated"
+    ],
+    "tablename": "bookings",
+    "permissive": "PERMISSIVE",
+    "policyname": "bookings_update_own_rating",
+    "schemaname": "public",
+    "with_check": "((learner_id = auth.uid()) AND (EXISTS ( SELECT 1\n FROM profiles\n WHERE ((profiles.id = auth.uid()) AND ((profiles.role)::text = ANY ((ARRAY['user'::character varying, 'learner'::character varying])::text[]))))))"
+  },
+  {
+    "cmd": "SELECT",
+    "qual": "(id = ( SELECT auth.uid() AS uid))",
+    "roles": [
+      "authenticated"
+    ],
+    "tablename": "profiles",
+    "permissive": "PERMISSIVE",
+    "policyname": "profiles_select_canonical_owner",
+    "schemaname": "public",
+    "with_check": null
+  },
+  {
+    "cmd": "UPDATE",
+    "qual": "(id = ( SELECT auth.uid() AS uid))",
+    "roles": [
+      "authenticated"
+    ],
+    "tablename": "profiles",
+    "permissive": "PERMISSIVE",
+    "policyname": "profiles_update_canonical_owner",
+    "schemaname": "public",
+    "with_check": "(id = ( SELECT auth.uid() AS uid))"
+  },
+  {
+    "cmd": "SELECT",
+    "qual": "((participant_id = auth.uid()) OR ((booking_id IS NULL) AND (user_id = auth.uid())) OR dayo_is_admin())",
+    "roles": [
+      "authenticated"
+    ],
+    "tablename": "session_logs",
+    "permissive": "PERMISSIVE",
+    "policyname": "session_logs_select_owner_or_admin",
+    "schemaname": "public",
+    "with_check": null
+  },
+  {
+    "cmd": "SELECT",
+    "qual": "dayo_is_admin()",
+    "roles": [
+      "authenticated"
+    ],
+    "tablename": "session_reports",
+    "permissive": "PERMISSIVE",
+    "policyname": "session_reports_select_admin",
+    "schemaname": "public",
+    "with_check": null
+  },
+  {
+    "cmd": "SELECT",
+    "qual": "(((booking_id IS NOT NULL) AND (EXISTS ( SELECT 1\n FROM bookings\n WHERE ((bookings.id = session_reports.booking_id) AND (bookings.learner_id = auth.uid()))))) OR ((booking_id IS NULL) AND (learner_id = auth.uid())))",
+    "roles": [
+      "authenticated"
+    ],
+    "tablename": "session_reports",
+    "permissive": "PERMISSIVE",
+    "policyname": "session_reports_select_learner",
+    "schemaname": "public",
+    "with_check": null
+  }
+]

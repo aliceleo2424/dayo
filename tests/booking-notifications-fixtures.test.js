@@ -67,6 +67,7 @@ async function main() {
     await db.exec(`
       create role anon; create role authenticated; create role service_role bypassrls;
       create schema auth;
+      create table partner_public_identity(partner_id uuid primary key,public_name text,confirmed_at timestamptz);
       create table auth.users(id uuid primary key, email text, email_confirmed_at timestamptz);
       create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
       create function auth.role() returns text language sql stable as $$ select current_setting('request.jwt.claim.role',true) $$;
@@ -86,7 +87,7 @@ async function main() {
         where user_id=p_user_id and (expires_at is null or expires_at>now());
         update public.profiles set ticket_count=n where id=p_user_id; return n; end $$;
       grant usage on schema public,auth to authenticated,service_role;
-      grant select on profiles,bookings,auth.users to service_role;
+      grant select on profiles,bookings,auth.users,partner_public_identity to service_role;
       grant select on profiles,bookings to authenticated;
       grant insert on bookings to authenticated;
     `);
@@ -151,6 +152,7 @@ async function main() {
       await owner();
       return (await db.query('select * from bookings where id=$1', [id])).rows[0];
     }
+    await db.query('insert into partner_public_identity values($1,$2,now())',[partner,'Jen & Co']);
     // Small PostgREST adapter exercises the real SQL claim and conditional updates.
     const userLookups = [];
     const service = {
@@ -166,7 +168,7 @@ async function main() {
         } catch (error) { return { data: null, error }; }
       },
       from(table) {
-        assert.ok(['bookings', 'profiles', 'booking_notification_log'].includes(table));
+        assert.ok(['bookings', 'profiles', 'partner_public_identity', 'booking_notification_log'].includes(table));
         const filters = [], values = [];
         let columns = '*', updates;
         return {
@@ -324,7 +326,7 @@ async function main() {
     const mailA = requests.filter(r => r.key.startsWith('booking_confirmed:' + a.id));
     check(mailA.every(r => !r.payload.text.includes('Private User Name') && !r.payload.text.includes('@fixture.test')), 'Body reveals no learner private name or participant email');
     const learnerMail = mailA.find(r => r.payload.to[0] === 'user@fixture.test').payload;
-    check(learnerMail.text.includes('Jen <b>') && learnerMail.html.includes('Jen &lt;b&gt;'), 'Partner display name is escaped in HTML');
+    check(learnerMail.text.includes('Jen & Co') && learnerMail.html.includes('Jen &amp; Co'), 'Partner display name is escaped in HTML');
     const requestsBeforeOutsider = requests.length;
     check((await invoke(e, learner)).statusCode === 404 && requests.length === requestsBeforeOutsider, 'Other booking participants cannot access this booking or trigger its mail');
     check((await invoke(e, outsider, 'booking_confirmed', { email: 'attacker@fixture.test' })).statusCode === 400, 'Client cannot override recipient email');

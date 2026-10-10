@@ -183,7 +183,7 @@
               var partnerProfile = (partnerProfiles.data || []).find(function (row) {
                 return row && (row.user_id === booking.partner_user_id || row.id === booking.partner_id);
               });
-              var nickname = String((partnerProfile && partnerProfile.nickname) || '').trim();
+              var nickname = partnerProfile && partnerProfile.public_name_ready === true ? String(partnerProfile.nickname || '').trim() : '';
               if (nickname && !/[@+]/.test(nickname)) partnerDisplayName = nickname;
             }
           } catch (nameError) { /* name lookup must not block room access */ }

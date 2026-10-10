@@ -5,7 +5,7 @@ var labels={en:{with:'Conversation with ',human:'From Your Conversation Partner'
 var icons={americano:'☕',green_tea:'🍵',vanilla_latte:'☕',cookie:'🍪',croissant:'🥐',macaron:'🍬'};
 function text(value){return typeof value==='string'?value.trim():'';}
 function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
-function nickname(r,locale){var s=text(r.partner_name);return s&&!/[@+]|https?:\/\/|www\./i.test(s)?s:(locale==='ko'?'DayO 파트너':'DayO Partner');}
+function nickname(r,locale){var s=r.__dayoPublicNameVerified===true?text(r.partner_name):'';return s&&!/[@+]|https?:\/\/|www\./i.test(s)?s:(locale==='ko'?'DayO 파트너':'DayO Partner');}
 function date(r,locale){if(!r.created_at)return '';var d=new Date(r.created_at);return isNaN(d.getTime())?'':d.toLocaleString(locale==='ko'?'ko-KR':'en-US',{timeZone:'Asia/Seoul',year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})+' KST';}
 function language(r){var v=text(r.language);return ({en:'EN · English',english:'EN · English',es:'ES · Spanish',spanish:'ES · Spanish',fr:'FR · French',french:'FR · French',ko:'KO · Korean',korean:'KO · Korean'})[v.toLowerCase()]||v;}
 function treat(r){return contract&&contract.treats.find(function(t){return t.code===r.stamp;});}
@@ -47,7 +47,7 @@ parts+=heading(l.expressions,expressions(r).map(function(x){return '<p>'+esc(x.e
 parts+=heading(l.quiz,quiz(r)?'<p>'+esc(quiz(r))+'</p>':'');
 return parts?'<section class="ucr-section ucr-recap" data-legacy-report><h3>'+esc(l.recap)+'</h3>'+parts+'</section>':conversationRecap.render(null,locale);
 }
-function renderImmediate(r,locale,options){r=r||{};var access=typeof window!=='undefined'&&window.DayORoomAccess;if(access&&access.allowed===true&&access.bookingId===r.booking_id){r=Object.assign({},r);if(!text(r.partner_name))r.partner_name=access.partnerName||'';if(!text(r.created_at))r.created_at=access.scheduledAt||'';if(!text(r.language))r.language=access.language||'';}return conversationRecap.render(conversationRecap.saved(r),locale,Object.assign({wordHelp:r.word_help,hideQuizAction:!!(options&&options.interactive)},options||{}))+renderLetter(r,locale)+memoryAction(r,locale)+(options&&options.interactive&&!options.hideActions?conversationRecap.renderActions(conversationRecap.saved(r),locale):'');}
+function renderImmediate(r,locale,options){r=r||{};var access=typeof window!=='undefined'&&window.DayORoomAccess;if(access&&access.allowed===true&&access.bookingId===r.booking_id){r=Object.assign({},r);r.partner_name=access.partnerName||'DayO Partner';r.__dayoPublicNameVerified=true;if(!text(r.created_at))r.created_at=access.scheduledAt||'';if(!text(r.language))r.language=access.language||'';}return conversationRecap.render(conversationRecap.saved(r),locale,Object.assign({wordHelp:r.word_help,hideQuizAction:!!(options&&options.interactive)},options||{}))+renderLetter(r,locale)+memoryAction(r,locale)+(options&&options.interactive&&!options.hideActions?conversationRecap.renderActions(conversationRecap.saved(r),locale):'');}
 function sameStoredData(a,b){
 function ordered(v){if(Array.isArray(v))return v.map(ordered);if(v&&typeof v==='object')return Object.fromEntries(Object.keys(v).sort().map(function(k){return [k,ordered(v[k])];}));return v;}
 return JSON.stringify(ordered(a))===JSON.stringify(ordered(b));
@@ -77,13 +77,21 @@ var auth=await db.auth.getUser(),user=auth.data&&auth.data.user;if(auth.error||!
 var result=await db.from('session_reports').select('*').eq('booking_id',bookingId).eq('learner_id',user.id).maybeSingle();
 if(result.error)throw Error('report-unavailable');
 if(result.data&&(result.data.booking_id!==bookingId||result.data.learner_id!==user.id))throw Error('report-identity');
+if(result.data){
+ result.data.partner_name='DayO Partner';result.data.__dayoPublicNameVerified=false;
+ try{var profiles=await db.rpc('list_public_partner_profiles'),partnerId=result.data.partner_user_id;
+ var profile=!profiles.error&&partnerId&&Array.isArray(profiles.data)&&profiles.data.find(function(p){return p.id===partnerId||p.user_id===partnerId;});
+ if(profile&&profile.public_name_ready===true){result.data.partner_name=profile.nickname;result.data.__dayoPublicNameVerified=true;}
+ }catch(_){} // Fail closed for names; the report itself stays accessible.
+}
 return result.data?refreshRecapPresentation(db,result.data,fetchImpl):null;
 }
 function withLatestContent(cached,latest){
 if(!cached||!latest||cached.booking_id!==latest.booking_id)throw Error('report-identity');
 var result=Object.assign({},cached);
 ['id','partner_comment','stamp','keyword','illust_url','summary','key_expressions','quiz_score','word_help','feedback'].forEach(function(k){if(Object.prototype.hasOwnProperty.call(latest,k))result[k]=latest[k];});
-if(text(latest.partner_name))result.partner_name=latest.partner_name;
+result.partner_name=latest.__dayoPublicNameVerified===true?latest.partner_name:'DayO Partner';
+result.__dayoPublicNameVerified=latest.__dayoPublicNameVerified===true;
 return result;
 }
 function renderDetail(r,locale){r=r||{};var l=labels[locale]||labels.en,name=nickname(r,locale),t=treat(r),img=imageURL(r.illust_url),note=text(r.partner_comment);

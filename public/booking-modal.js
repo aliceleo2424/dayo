@@ -975,7 +975,7 @@
     if (!row) return null;
     var id = row.id;
     if (!id) return null;
-    var nickname = String(row.nickname || '').trim();
+    var nickname = row.public_name_ready === true ? String(row.nickname || '').trim() : '';
     var name = (nickname && !/[@+]/.test(nickname) ? nickname : '') || 'DayO Partner';
     var initial = String(name).charAt(0).toUpperCase() || 'P';
     return {

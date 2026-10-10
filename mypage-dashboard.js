@@ -319,7 +319,7 @@
                 }) || profiles.find(function (row) {
                   return row && upcoming.partner_id && String(row.id) === String(upcoming.partner_id);
                 });
-                var nickname = String((partnerProfile && partnerProfile.nickname) || '').trim();
+                var nickname = partnerProfile && partnerProfile.public_name_ready === true ? String(partnerProfile.nickname || '').trim() : '';
                 if (nickname && !/[@+]/.test(nickname)) partnerName = nickname;
               }
             } catch (nameError) { /* keep neutral name */ }

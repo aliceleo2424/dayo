@@ -782,7 +782,7 @@
   }
 
   function talkQuoteLabel(r) {
-    return String((r && r.partner_name) || '파트너').split(/\s+/)[0] || '파트너';
+    return r && r.__dayoPublicNameVerified === true ? String(r.partner_name || 'DayO Partner') : 'DayO Partner';
   }
 
   function talkQuoteText(r) {
@@ -1207,7 +1207,8 @@
           var profile = partnerProfiles && partnerProfiles.find(function (row) {
             return row && (row.user_id === partnerId || row.id === partnerId);
           });
-          var nickname = String((profile && profile.nickname) || '').trim();
+          var nickname = profile && profile.public_name_ready === true ? String(profile.nickname || '').trim() : '';
+          report.__dayoPublicNameVerified = !!nickname;
           report.partner_name = nickname && !/[@+]/.test(nickname) ? nickname : 'DayO Partner';
         });
       }

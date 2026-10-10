@@ -1231,7 +1231,7 @@
       ES: 'Mejora la info mostrada en reservas.'
     },
     'partner.profile.nickname': {
-      KO: '닉네임', EN: 'Nickname', ZH: '昵称', JA: 'ニックネーム', FR: 'Pseudo', ES: 'Apodo'
+      KO: '공개 이름', EN: 'Public display name', ZH: '昵称', JA: 'ニックネーム', FR: 'Pseudo', ES: 'Apodo'
     },
     'partner.profile.history': {
       KO: '📜 변경 이력', EN: '📜 History', ZH: '📜 变更记录', JA: '📜 変更履歴', FR: '📜 Historique', ES: '📜 Historial'
