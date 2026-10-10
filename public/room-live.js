@@ -40,7 +40,10 @@
   var sttResumePending = false;
   var sttMicAvailable = true;
   var sttGestureStartHandler = null;
-  var boundLocalAudioTracks = typeof WeakSet === 'function' ? new WeakSet() : null;
+  var localAudioBinding = null;
+  var recognitionRun = null;
+  var recognitionRunSeq = 0;
+  var sttStopWatchdog = 0;
   var preflightTimer = 0;
   var preflightMeterTimer = 0;
   var preflightAudioContext = null;
@@ -52,6 +55,10 @@
   var transcriptSaveResult = null;
   var transcriptFlushPromise = null;
   var transcriptFinalized = false;
+  var transcriptSavedFinal = false;
+  var transcriptSavingCheckpoint = false;
+  var transcriptCheckpointTimer = 0;
+  var transcriptCheckpointRetry = 15000;
 
   window.sessionTranscript = window.sessionTranscript || [];
   window.dayoSessionEnded = false;
@@ -280,27 +287,50 @@
     sttStartWatchdog = 0;
   }
 
+  function currentRecognitionRun(run) {
+    return recognitionRun === run && !run.closed && !transcriptFinalized;
+  }
+
+  function retireRecognitionRun(run) {
+    if (!run || recognitionRun !== run) return;
+    run.closed = true;
+    clearTimeout(sttStopWatchdog);
+    sttStopWatchdog = 0;
+    clearSttStartWatchdog();
+    sttOn = false;
+    sttStarting = false;
+    // Invalidate before abort: some browsers dispatch callbacks synchronously.
+    try { run.engine.abort(); } catch (e) { /* already ended / unsupported mock */ }
+  }
+
   function attemptSttStart(reason) {
-    if (!recognition || !shouldKeepSttAlive() || sttOn || sttStarting) return;
+    if (!shouldKeepSttAlive() || sttPermissionBlocked || sttOn || sttStarting || transcriptFinalized) return;
+    if (recognitionRun && !recognitionRun.closed && recognitionRun.stopping) {
+      sttResumePending = true;
+      return;
+    }
     if (document.visibilityState === 'hidden') {
       sttResumePending = true;
       return;
     }
+    createRecognitionRun();
+    if (!recognitionRun || recognitionRun.closed) return;
+    var run = recognitionRun;
     sttStarting = true;
     sttResumePending = false;
     if (reason && reason !== 'initial') recordSttState('stt_restart', { reason: reason });
     try {
-      recognition.start();
+      run.engine.start();
       clearSttStartWatchdog();
       sttStartWatchdog = setTimeout(function () {
-        if (!sttStarting || sttOn) return;
-        sttStarting = false;
+        if (!currentRecognitionRun(run) || !sttStarting || sttOn) return;
+        retireRecognitionRun(run);
         recordSttState('stt_error', { code: 'start_timeout' });
         scheduleSttRestart(800, 'start-timeout');
       }, 4000);
     } catch (error) {
-      sttStarting = false;
-      clearSttStartWatchdog();
+      retireRecognitionRun(run);
+      if (error && (error.name === 'NotAllowedError' || error.name === 'SecurityError')) sttPermissionBlocked = true;
       recordSttState('stt_error', { code: (error && error.name) || 'start_failed' });
       if (shouldKeepSttAlive() && !sttPermissionBlocked) scheduleSttRestart(800, 'start-failed');
     }
@@ -314,7 +344,7 @@
     }
     clearTimeout(sttRestartTimer);
     sttRestartTimer = setTimeout(function () {
-      if (!shouldKeepSttAlive() || !recognition) return;
+      if (!shouldKeepSttAlive() || sttPermissionBlocked) return;
       attemptSttStart(reason || 'scheduled');
     }, delayMs || 300);
   }
@@ -416,26 +446,39 @@
   function bindLocalAudioTrack(stream) {
     if (!stream || typeof stream.getAudioTracks !== 'function') return;
     var track = stream.getAudioTracks()[0];
-    if (!track || (boundLocalAudioTracks && boundLocalAudioTracks.has(track))) return;
-    if (boundLocalAudioTracks) boundLocalAudioTracks.add(track);
+    if (localAudioBinding && localAudioBinding.track === track) return;
+    if (localAudioBinding) {
+      ['mute', 'unmute', 'ended'].forEach(function (type) {
+        localAudioBinding.track.removeEventListener(type, localAudioBinding[type]);
+      });
+    }
+    localAudioBinding = null;
+    if (!track) { sttMicAvailable = false; pauseSpeech(); return; }
+    var binding = { track: track };
+    localAudioBinding = binding;
     sttMicAvailable = track.readyState === 'live' && !track.muted;
-    track.addEventListener('mute', function () {
+    binding.mute = function () {
+      if (localAudioBinding !== binding) return;
       sttMicAvailable = false;
       sttResumePending = true;
       recordSttState('stt_error', { code: 'mic_track_muted' });
       pauseSpeech();
-    });
-    track.addEventListener('unmute', function () {
-      sttMicAvailable = track.readyState === 'live';
+    };
+    binding.unmute = function () {
+      if (localAudioBinding !== binding) return;
+      sttMicAvailable = track.readyState === 'live' && !track.muted;
       if (sttMicAvailable && shouldKeepSttAlive()) scheduleSttRestart(180, 'mic-track-unmuted');
-    });
-    track.addEventListener('ended', function () {
+    };
+    binding.ended = function () {
+      if (localAudioBinding !== binding) return;
       sttMicAvailable = false;
       sttResumePending = false;
       clearTimeout(sttRestartTimer);
       recordSttState('stt_error', { code: 'mic_track_ended' });
       pauseSpeech();
-    });
+    };
+    ['mute', 'unmute', 'ended'].forEach(function (type) { track.addEventListener(type, binding[type]); });
+    if (sttMicAvailable && shouldKeepSttAlive() && recognitionRun) scheduleSttRestart(180, 'mic-track-replaced');
   }
 
   function attachPreflightStream(stream) {
@@ -564,8 +607,6 @@
     var cleaned = String(text || '').trim();
     if (!cleaned) return null;
     var role = speaker || 'learner';
-    var last = sessionTranscript[sessionTranscript.length - 1];
-    if (last && last.speaker === role && last.text === cleaned) return last;
     utteranceSeq += 1;
     var entry = {
       id: uuid(),
@@ -580,6 +621,7 @@
     appendTranscriptRowToViewer(entry);
     backupTranscriptLocal();
     document.dispatchEvent(new CustomEvent('dayo:transcript', { detail: entry }));
+    scheduleTranscriptCheckpoint();
     return entry;
   }
 
@@ -591,16 +633,34 @@
     return 'learner';
   }
 
-  function saveTranscript() {
+  function scheduleTranscriptCheckpoint(delay) {
+    if (transcriptCheckpointTimer || transcriptFinalized || hungUp || window.dayoSessionEnded ||
+        !canonicalParticipantRole(window.DayORoomAccess) || transcriptSavedRevision === transcriptRevision || !sessionTranscript.length) return;
+    transcriptCheckpointTimer = setTimeout(function () {
+      transcriptCheckpointTimer = 0;
+      if (transcriptFinalized || hungUp || window.dayoSessionEnded) return;
+      if (transcriptSavePromise) { scheduleTranscriptCheckpoint(); return; }
+      saveTranscript(true).then(function (result) {
+        transcriptCheckpointRetry = result && result.ok ? 15000 : Math.min(60000, transcriptCheckpointRetry * 2);
+        scheduleTranscriptCheckpoint(transcriptCheckpointRetry);
+      });
+    }, delay || 15000);
+  }
+
+  function saveTranscript(checkpoint) {
+    checkpoint = checkpoint === true;
     if ((hungUp || window.dayoSessionEnded) && !transcriptFinalized) {
-      return stopSpeech().then(saveTranscript);
+      return stopSpeech().then(function () { return saveTranscript(); });
     }
     if (transcriptSavePromise) {
+      var waitingForCheckpoint = transcriptSavingCheckpoint;
       return transcriptSavePromise.then(function (result) {
-        return result && result.ok && transcriptSavedRevision !== transcriptRevision ? saveTranscript() : result;
+        if (checkpoint) return result;
+        return waitingForCheckpoint || (result && result.ok && (transcriptSavedRevision !== transcriptRevision || !transcriptSavedFinal))
+          ? saveTranscript() : result;
       });
     }
-    if (transcriptSaveResult && transcriptSavedRevision === transcriptRevision) return Promise.resolve(transcriptSaveResult);
+    if (transcriptSaveResult && transcriptSavedRevision === transcriptRevision && (checkpoint || transcriptSavedFinal)) return Promise.resolve(transcriptSaveResult);
     var serialized = backupTranscriptLocal();
     var access = window.DayORoomAccess;
     if (!access || !access.allowed || access.adminTest || access.observer) {
@@ -609,7 +669,9 @@
     var canonicalTranscript = canonicalTranscriptSnapshot(serialized, access);
     var extra = {
       startedAt: sessionStartedAt,
-      endedAt: markSessionEnded(access),
+      // The RPC requires an envelope end; a checkpoint is captured-through,
+      // not a room/session completion timestamp.
+      endedAt: checkpoint ? new Date().toISOString() : markSessionEnded(access),
       bookingId: access.bookingId
     };
     var store = window.DayOProfileStore;
@@ -619,6 +681,7 @@
       return payload;
     };
     var savingRevision = transcriptRevision;
+    transcriptSavingCheckpoint = checkpoint;
     if (store && typeof store.saveSessionLog === 'function') {
       // Re-entry must never replace a longer canonical record with an empty/local subset.
       transcriptSavePromise = (async function () {
@@ -651,11 +714,12 @@
         if (result && result.ok) {
           transcriptSavedRevision = savingRevision;
           transcriptSaveResult = result;
+          transcriptSavedFinal = !checkpoint;
         }
         return result;
       });
       return transcriptSavePromise.then(function (result) {
-        return result && result.ok && transcriptSavedRevision !== transcriptRevision ? saveTranscript() : result;
+        return !checkpoint && result && result.ok && transcriptSavedRevision !== transcriptRevision ? saveTranscript() : result;
       });
     }
     return Promise.resolve(done({ ok: false, local: true, transcript: serialized }));
@@ -1218,6 +1282,11 @@
 
   function startSpeech(userInitiated) {
     if (isObserverRoomMode()) return;
+    if (micOn && shouldKeepSttAlive() && (!window.__dayoPreflightActive || userInitiated)) attemptSttStart('initial');
+  }
+
+  function createRecognitionRun() {
+    if (isObserverRoomMode()) return;
     var Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!Ctor) {
       console.warn('이 브라우저는 Web Speech API를 지원하지 않습니다 (사파리/크롬 권장).');
@@ -1226,14 +1295,11 @@
       return;
     }
 
-    if (recognition) {
-      window.dayoSTT = recognition;
-      if (micOn && shouldKeepSttAlive()) resumeSpeech();
-      return;
-    }
-
     try {
+      retireRecognitionRun(recognitionRun);
       recognition = new Ctor();
+      var run = { id: ++recognitionRunSeq, engine: recognition, closed: false, stopping: false, finals: new Set() };
+      recognitionRun = run;
       window.dayoSTT = recognition;
       recognition.continuous = true;
       recognition.interimResults = false;
@@ -1241,6 +1307,7 @@
       recognition.maxAlternatives = 1;
 
       recognition.onstart = function () {
+        if (!currentRecognitionRun(run) || run.stopping || !shouldKeepSttAlive()) return;
         clearSttStartWatchdog();
         sttStarting = false;
         sttOn = true;
@@ -1251,17 +1318,20 @@
       };
 
       recognition.onaudiostart = function () {
+        if (!currentRecognitionRun(run)) return;
         recordSttState('stt_audio_start');
       };
 
       recognition.onspeechstart = function () {
+        if (!currentRecognitionRun(run)) return;
         recordSttState('stt_speech_start');
       };
 
       recognition.onresult = function (event) {
-        if (transcriptFinalized) return;
+        if (!currentRecognitionRun(run)) return;
         for (var i = event.resultIndex; i < event.results.length; i++) {
-          if (!event.results[i].isFinal) continue;
+          if (!event.results[i].isFinal || run.finals.has(i)) continue;
+          run.finals.add(i);
           var chunk = event.results[i][0] && event.results[i][0].transcript;
           var finalText = String(chunk || '').trim();
           if (finalText) {
@@ -1276,6 +1346,7 @@
       };
 
       recognition.onerror = function (event) {
+        if (!currentRecognitionRun(run)) return;
         var err = event && event.error;
         clearSttStartWatchdog();
         sttStarting = false;
@@ -1284,6 +1355,8 @@
         console.warn('STT 일시 오류 (재시작 시도):', err);
         if (err === 'not-allowed' || err === 'service-not-allowed') {
           sttPermissionBlocked = true;
+          retireRecognitionRun(run);
+          clearTimeout(sttRestartTimer);
           setStatus(t('room.copilotListening'), false);
           return;
         }
@@ -1291,19 +1364,19 @@
       };
 
       recognition.onend = function () {
+        if (!currentRecognitionRun(run)) return;
         clearSttStartWatchdog();
         sttStarting = false;
         sttOn = false;
+        run.closed = true;
+        clearTimeout(sttStopWatchdog);
+        sttStopWatchdog = 0;
         recordSttState('stt_end');
         if (shouldKeepSttAlive()) scheduleSttRestart(250, 'recognition-ended');
       };
 
-      if (micOn && shouldKeepSttAlive() && (!window.__dayoPreflightActive || userInitiated)) {
-        attemptSttStart('initial');
-      }
     } catch (err) {
-      sttStarting = false;
-      sttOn = false;
+      retireRecognitionRun(recognitionRun);
       recordSttState('stt_error', { code: (err && err.name) || 'setup_failed' });
       setStatus(t('room.copilotListening'), false);
     }
@@ -1315,6 +1388,10 @@
     sttStarting = false;
     clearTimeout(sttRestartTimer);
     clearSttStartWatchdog();
+    clearTimeout(transcriptCheckpointTimer);
+    transcriptCheckpointTimer = 0;
+    clearTimeout(sttStopWatchdog);
+    sttStopWatchdog = 0;
     if (transcriptFlushPromise) return transcriptFlushPromise;
     transcriptFlushPromise = new Promise(function (resolve) {
       var timer;
@@ -1324,20 +1401,25 @@
         settled = true;
         clearTimeout(timer);
         transcriptFinalized = true;
-        if (recognition) recognition.onend = null;
+        retireRecognitionRun(recognitionRun);
         recordSttState('stt_end', { reason: reason });
         resolve();
       }
-      if (!recognition) { finish('session-stop'); return; }
-      var previousEnd = recognition.onend;
-      recognition.onend = function (event) {
-        if (typeof previousEnd === 'function') previousEnd.call(recognition, event);
+      var run = recognitionRun;
+      if (!run || run.closed) { finish('session-stop'); return; }
+      var previousEnd = run.engine.onend;
+      run.engine.onend = function (event) {
+        if (recognitionRun !== run || run.closed || settled) return;
+        if (typeof previousEnd === 'function') previousEnd.call(run.engine, event);
         finish('session-stop');
       };
       // Web Speech emits any final result before onend. Bound a stalled recognizer
       // and close the source there so later callbacks cannot diverge from the DB.
       timer = setTimeout(function () { finish('review-flush-timeout'); }, 2500);
-      try { recognition.stop(); } catch (e) { finish('session-stop'); }
+      if (!run.stopping) {
+        run.stopping = true;
+        try { run.engine.stop(); } catch (e) { finish('session-stop'); }
+      }
     });
     return transcriptFlushPromise;
   }
@@ -1346,8 +1428,18 @@
     sttOn = false;
     sttStarting = false;
     clearSttStartWatchdog();
-    if (!recognition) return;
-    try { recognition.stop(); } catch (e) { /* ignore */ }
+    clearTimeout(sttRestartTimer);
+    var run = recognitionRun;
+    if (!run || run.closed || run.stopping || transcriptFinalized) return;
+    run.stopping = true;
+    // Keep pending finals until end, but recover if a browser never emits end.
+    clearTimeout(sttStopWatchdog);
+    sttStopWatchdog = setTimeout(function () {
+      if (!currentRecognitionRun(run)) return;
+      retireRecognitionRun(run);
+      if (shouldKeepSttAlive()) scheduleSttRestart(180, 'stop-timeout');
+    }, 2500);
+    try { run.engine.stop(); } catch (e) { retireRecognitionRun(run); }
     setStatus(geminiOk ? t('room.copilotListening') : t('room.copilotListening'), false);
   }
 
@@ -1461,6 +1553,7 @@
       window.sessionTranscript = sessionTranscript.slice();
       utteranceSeq = 0;
       backupTranscriptLocal();
+      scheduleTranscriptCheckpoint();
       bindMobileSttBootstrap();
       initDevicePreflight();
       renderHints(demoHints(''));
@@ -1559,6 +1652,7 @@
       clearTimeout(sttRestartTimer);
       return;
     }
+    scheduleTranscriptCheckpoint();
     if (shouldKeepSttAlive() && (sttResumePending || !sttOn)) scheduleSttRestart(180, 'foreground');
   });
 

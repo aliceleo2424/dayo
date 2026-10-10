@@ -96,8 +96,8 @@ function browser(options = {}) {
   const later = (fn, delay) => { const t = setTimeout(fn, delay); timers.add(t); return t; };
   let canonical, recognition, opened = 0;
   class Recognition {
-    constructor() { recognition = this; } start() { if (this.onstart) this.onstart(); }
-    emit(text) { this.onresult({ resultIndex: 0, results: [Object.assign([{ transcript: text }], { isFinal: true })] }); }
+    constructor() { recognition = this; this.results = []; } start() { if (this.onstart) this.onstart(); }
+    emit(text) { const index = this.results.length; this.results.push(Object.assign([{ transcript: text }], { isFinal: true })); this.onresult({ resultIndex: index, results: this.results }); }
     stop() { if (!options.stalled) later(() => { if (options.finalText) this.emit(options.finalText); if (this.onend) this.onend(); }, 8); }
   }
   const window = { DayORoomAccess: { allowed: true, role: 'user', bookingId: B, learnerId: L, partnerId: P, language: 'en' },
