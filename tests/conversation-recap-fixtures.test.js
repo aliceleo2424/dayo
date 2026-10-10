@@ -40,11 +40,13 @@ const malicious = { ...full, expressions: [{ text: '<img src=x onerror=alert(1)>
 assert(!model.render(malicious, 'ko').includes('<img'));
 
 async function api(options = {}) {
-  const calls = [], booking = { id: B, learner_id: L, partner_user_id: P, language: 'en', status: 'completed' };
+  const calls = [], booking = { id: B, learner_id: L, partner_user_id: P, language: 'en', status: 'completed', scheduled_at: '2026-10-05T05:00:00Z', is_test_session: true };
   const response = data => ({ ok: true, json: async () => data });
   const fetchImpl = async (url, args) => {
     calls.push({ url, args });
     if (url.includes('/auth/v1/user')) return options.authFail ? { ok: false } : response({ id: options.authId || L });
+    if (url.includes('/bookings?') && new URL(url).searchParams.has('order')) return response([]);
+    if (url.includes('/session_reports?')) return response([]);
     if (url.includes('/bookings?')) return response(options.outsider ? [] : [{ ...booking, ...options.booking }]);
     if (url.includes('/session_logs?')) {
       if (url.includes('participant_role=eq.partner')) { if (options.partnerFail) throw Error('down'); return response(options.wrongPartner ? [{ ...log(partner, 'partner'), booking_id: OTHER }] : [{ ...log(partner, 'partner'), ...options.partnerLog }]); }
@@ -59,7 +61,7 @@ async function api(options = {}) {
   return { status: res.statusCode, body: res.body, calls, headers: res.headers };
 }
 async function serverChecks() {
-  const r = await api(); assert.equal(r.status, 200); assert.equal(r.body.status, 'complete'); assert.deepEqual(r.body.recap, full);
+  const r = await api(); assert.equal(r.status, 200); assert.equal(r.body.status, 'complete'); assert.deepEqual(r.body.recap, { ...full, volume_history:[], volume_history_status:'test_session', quiz_history_status:'available' });
   assert(!JSON.stringify(r.body).includes('spacious hotel')); assert(!JSON.stringify(r.body).includes('synthetic-server-only'));
   assert.equal(r.calls[0].args.headers.Authorization, 'Bearer test.token');
   assert.equal(r.calls[1].args.headers.Authorization, 'Bearer test.token');
@@ -104,7 +106,7 @@ function browser(options = {}) {
     openQuizModalImmediately() { opened++; }, handleSessionEndRouting() {},
     DayOProfileStore: { async saveSessionLog(speech, extra) { snapshots.push(plain(speech)); calls.push('save'); if (options.saveHook) await options.saveHook(snapshots.length); canonical = { ...log(plain(speech)), id: 'canonical-source', booking_id: extra.bookingId }; return { ok: true }; } },
     supabaseClient: { auth: { async getUser() { return { data: { user: { id: L } } }; }, async getSession() { return { data: { session: { access_token: 'test.token' } } }; } },
-      from(table) { const filters = []; return { select() { assert(['session_logs','session_reports'].includes(table)); return this; }, eq(k, v) { filters.push([k, v]); return this; }, async maybeSingle() { if(table==='session_reports')return {data:null}; calls.push('read'); assert.deepEqual(filters, [['booking_id', B], ['participant_id', L], ['participant_role', 'learner']]); return options.readFailure ? { error: {} } : { data: options.wrongBooking ? { ...canonical, booking_id: OTHER } : canonical ? plain(canonical) : null }; } }; },
+      from(table) { const filters = []; return { select() { assert(['session_logs','session_reports'].includes(table)); return this; }, eq(k, v) { filters.push([k, v]); return this; }, async maybeSingle() { if(table==='session_reports')return {data:options.savedReport || null}; calls.push('read'); assert.deepEqual(filters, [['booking_id', B], ['participant_id', L], ['participant_role', 'learner']]); return options.readFailure ? { error: {} } : { data: options.wrongBooking ? { ...canonical, booking_id: OTHER } : canonical ? plain(canonical) : null }; } }; },
       async rpc(name, args) { if(name==='complete_learner_session'){calls.push('complete');return {data:{success:true}};} calls.push('report'); assert.equal(name, 'merge_learner_session_report'); if(options.reportHook)await options.reportHook(); if(options.reportFail)return {error:{message:'synthetic failure'}}; window.savedPayload = plain(args.p_report); return { data: { success: true } }; } }
   };
   const context = vm.createContext({ window, document: { documentElement: { lang: 'ko' }, readyState: 'loading', visibilityState: 'visible', getElementById: id => nodes[id] || null, querySelector: () => null, querySelectorAll: () => [], createElement: element, addEventListener(type,fn) { (events[type] ||= []).push(fn); }, dispatchEvent() {} }, localStorage: store, sessionStorage: store, navigator: {}, AbortController, CustomEvent: function () {}, setTimeout: later, clearTimeout, setInterval: () => null, clearInterval, Date, Math, Promise, console: { log() {}, warn() {}, error() {} },
@@ -113,6 +115,10 @@ function browser(options = {}) {
   return { window, context, store, nodes, calls, snapshots, dispatch(type) {return Promise.all((events[type]||[]).map(fn=>fn()));}, start() { window.DayOLive.startSpeech(); return recognition; }, stop() { for (const t of timers) clearTimeout(t); }, get opened() { return opened; } };
 }
 async function lifecycleChecks() {
+  const previousQuiz={booking_id:B,learner_id:L,quiz_score:67,feedback:[{...full,progress:{completed:4,total:6,reason:'skip'}}]};
+  const recovery=browser({savedReport:previousQuiz,apiFail:true});
+  try { recovery.start().emit(own[0].text);recovery.window.DayOLive.hangUp();const loaded=await recovery.window.prepareSessionReviewSource();assert.deepEqual(plain(loaded.recap.questions),full.questions,'server unavailable restores exact stored targets');assert.deepEqual(plain(loaded.recap.progress),previousQuiz.feedback[0].progress,'stored completion survives history failure'); } finally { recovery.stop(); }
+
   const automatic = browser();
   try { automatic.start().emit(own[0].text); automatic.window.DayOLive.hangUp(); await automatic.dispatch('dayo:session-ended'); assert(automatic.window.savedPayload,'normal end saves without opening or clicking recap'); assert.equal(automatic.opened,0); assert(automatic.calls.includes('complete')); assert.equal(model.saved({...automatic.window.savedPayload,booking_id:B}).progress.completed,0); } finally { automatic.stop(); }
   const failed = browser({reportFail:true});

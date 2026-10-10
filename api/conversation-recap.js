@@ -2,6 +2,7 @@
  * Partner raw speech never leaves this server. No new env, RPC, grants or writes. */
 const recap = require('../public/conversation-recap.js');
 const partnerLetter = require('./_lib/partner-letter.js');
+const quizHistory = require('./_lib/quiz-history.js');
 const uuid = v => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
 function json(res, status, body) { res.statusCode = status; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', 'private, no-store'); res.end(JSON.stringify(body)); }
 function originAllowed(origin, vercelUrl) {
@@ -76,7 +77,26 @@ function createHandler({ env = process.env, fetchImpl = fetch } = {}) {
           }
         } catch (_) { historyStatus = 'unavailable'; }
       }
-      const value = recap.build({ bookingId: booking.id, learnerId: user.id, partnerId: booking.partner_user_id, language: booking.language, learnerLog, partnerLog, history, historyStatus, previousVolume, scheduledAt: booking.scheduled_at, isTestSession: booking.is_test_session === true });
+      // Restore persisted targets/progress; never regenerate an existing quiz on reload.
+      let storedQuiz = null, quizState = {status:'unavailable',words:[]};
+      try {
+        const reports = await read('/rest/v1/session_reports?' + new URLSearchParams({
+          booking_id:'eq.'+booking.id, learner_id:'eq.'+user.id,
+          select:'booking_id,learner_id,feedback',limit:'1'
+        }));
+        if (!Array.isArray(reports)) throw Error('report-shape');
+        const current = reports.find(r=>r.booking_id===booking.id && r.learner_id===user.id);
+        storedQuiz = recap.saved(current);
+        if (storedQuiz && storedQuiz.quiz_history_status === 'unavailable' && !storedQuiz.questions.length) storedQuiz = null;
+        if (!storedQuiz) quizState = await quizHistory.load(read,booking,user.id);
+      } catch (_) { /* Unknown history never authorizes repeated quiz targets. */ }
+      const value = recap.build({ bookingId: booking.id, learnerId: user.id, partnerId: booking.partner_user_id, language: booking.language, learnerLog, partnerLog, history, historyStatus, previousVolume, scheduledAt: booking.scheduled_at, isTestSession: booking.is_test_session === true, quizExcludedWords: quizState.words, quizHistoryStatus: quizState.status });
+      if (storedQuiz) {
+        value.word_expansion = storedQuiz.word_expansion;
+        value.questions = storedQuiz.questions;
+        value.progress = storedQuiz.progress;
+        value.quiz_history_status = storedQuiz.quiz_history_status || 'saved';
+      }
       if (input.learner_version && value.source.learner_version !== input.learner_version) return json(res, 409, { error: 'canonical_revision_changed' });
       return json(res, 200, { recap: value, status: partnerLog ? 'complete' : 'partner_record_unavailable' });
     } catch (_) { return json(res, 502, { error: 'source_unavailable' }); }

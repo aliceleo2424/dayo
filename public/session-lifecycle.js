@@ -150,7 +150,7 @@
         var row = result && result.data;
         if (result.error) throw result.error;
         var saved = window.DayOConversationRecap.saved(previous);
-        if (window.DayORoomAccess.recapOnly && saved) {
+        if (window.DayORoomAccess.recapOnly && saved && !(saved.quiz_history_status === 'unavailable' && !saved.questions.length)) {
           if (row && (row.booking_id !== ctx.bookingId || row.participant_id !== ctx.learnerId || row.participant_role !== 'learner')) throw new Error('log-identity');
           window.__dayoReviewReportSaved = true;
           window.__dayoQuizProgress = saved.progress;
@@ -165,7 +165,7 @@
         var recapApi = window.DayOConversationRecap;
         var rows = recapApi.rows(row, ctx.bookingId, ctx.learnerId, 'learner').map(function (item) { return Object.freeze(item); });
         var recap = recapApi.build({ bookingId: ctx.bookingId, learnerId: ctx.learnerId, partnerId: ctx.partnerId,
-          language: window.DayORoomAccess.language, learnerLog: row });
+          language: window.DayORoomAccess.language, learnerLog: row, quizHistoryStatus: 'unavailable' });
         var version = recap.source.learner_version;
         try {
           var session = await db.auth.getSession();
@@ -182,10 +182,13 @@
         } catch (_) { /* Canonical learner recap remains available without server enrichment. */ }
         if (context().bookingId !== ctx.bookingId) return canonicalReviewSource();
         var storedRecap = recapApi.saved(previous);
-        if (storedRecap && storedRecap.source.learner_version === version &&
-            JSON.stringify(storedRecap.questions) === JSON.stringify(recap.questions)) {
+        if (storedRecap && !(storedRecap.quiz_history_status === 'unavailable' && !storedRecap.questions.length)) {
+          // Persisted quiz vocabulary/results remain immutable, including after a failed history read.
+          recap = Object.assign({}, recap, { word_expansion: storedRecap.word_expansion,
+            questions: storedRecap.questions, progress: storedRecap.progress,
+            quiz_history_status: storedRecap.quiz_history_status || 'saved' });
           // A transient enrichment failure cannot erase already-saved Partner aggregates.
-          if (storedRecap.source.partner_available && !recap.source.partner_available) recap = storedRecap;
+          if (storedRecap.source.learner_version === version && storedRecap.source.partner_available && !recap.source.partner_available) recap = storedRecap;
           recap = Object.assign({}, recap, { progress: storedRecap.progress });
           window.__dayoQuizProgress = storedRecap.progress;
           window.__dayoQuizScore = previous.quiz_score;

@@ -176,7 +176,11 @@
     var l=labels(locale),done=recap && recap.progress && recap.progress.reason;
     return '<div class="recap-actions">'+(recap && recap.questions && recap.questions.length ? '<button type="button" class="recap-primary" '+(done?'data-recap-review':'data-recap-start')+'>'+esc(done?l.review:l.open)+'</button>':'')+'<button type="button" class="recap-primary" data-recap-home>'+esc(l.home)+'</button></div>';
   }
-  function expand(speech) {
+  function quizWordKey(value) {
+    return typeof value === 'string' ? value.normalize('NFKC').trim().replace(/\s+/g, ' ').toLowerCase() : '';
+  }
+  function expand(speech, excludedWords) {
+    var excluded = new Set((Array.isArray(excludedWords) ? excludedWords : []).map(quizWordKey));
     var frequency = {}, order = [];
     speech.forEach(function (r) { words(r.text).forEach(function (raw) {
       var word = raw.toLowerCase();
@@ -184,7 +188,7 @@
       if (!frequency[word]) order.push(word);
       frequency[word] = (frequency[word] || 0) + 1;
     }); });
-    return order.sort(function (a, b) { return frequency[b] - frequency[a]; }).filter(function (word) { return dictionary[word][1].length && dictionary[word][2].length; }).slice(0, 3).map(function (word) {
+    return order.sort(function (a, b) { return frequency[b] - frequency[a]; }).filter(function (word) { return !excluded.has(quizWordKey(word)) && dictionary[word][1].length && dictionary[word][2].length; }).slice(0, 3).map(function (word) {
       var v = dictionary[word];
       return { word: word, meaning_ko: v[0], synonyms: v[1].slice(0, 2), antonyms: v[2].slice(0, 2), example: v[3], source: 'curated_dictionary', source_utterance_ids: speech.filter(function (r) { return words(r.text).map(function (w) { return w.toLowerCase(); }).includes(word); }).map(function (r) { return r.id; }) };
     });
@@ -246,7 +250,7 @@
     var learnerWords = supported && userRows ? count(u) : null;
     var partnerWords = supported && partnerRows ? count(p) : null;
     var ratio = learnerWords != null && partnerWords != null && learnerWords + partnerWords > 0 ? learnerWords / (learnerWords + partnerWords) : null;
-    var expansion = supported ? expand(u) : [];
+    var expansion = supported && o.quizHistoryStatus !== 'unavailable' ? expand(u, o.quizExcludedWords) : [];
     var learnerVersion = userRows ? sourceVersion(bookingId, o.learnerLog.id, u) : '';
     var partnerVersion = partnerRows ? sourceVersion(bookingId, o.partnerLog.id, p) : '';
     var fingerprint = learner.contentFingerprint(bookingId, VERSION, [lang, learnerVersion, partnerVersion]);
@@ -263,6 +267,7 @@
       ratio_quality: ratioQuality(supported?userRows:null,supported?partnerRows:null,o.learnerLog,o.partnerLog,fingerprint),
       comment: !supported ? 'unsupported' : !u.length || !learnerWords ? 'limited' : u.length >= 3 && learnerWords / u.length <= 4 ? 'short' : 'recorded',
       topics: displayed, expressions: ex, word_expansion: expansion,
+      ...(o.quizHistoryStatus ? { quiz_history_status: o.quizHistoryStatus } : {}),
       questions: questions(expansion), progress: { completed: 0, total: questions(expansion).length, reason: null }, ai: { status: 'not_required' } };
   }
   function saved(report) {
@@ -333,5 +338,5 @@
     if (help.length) html += '<details class="recap-help"><summary>' + esc(l.help) + '</summary><p>' + help.map(function (x) { return esc(x.text); }).join(' · ') + '</p><small>' + esc(l.helpNote) + '</small></details>';
     return html + '</section>';
   }
-  return { VERSION: VERSION, language: language, words: words, rows: rows, sourceVersion: sourceVersion, build: build, letterTopics: letterTopics, saved: saved, mergeFeedback: mergeFeedback, render: render, renderActions: renderActions, renderRatio: renderRatio, labels: labels, questions: questions, quizDuration: quizDuration, volumeHistory: volumeHistory };
+  return { VERSION: VERSION, quizWordKey: quizWordKey, language: language, words: words, rows: rows, sourceVersion: sourceVersion, build: build, letterTopics: letterTopics, saved: saved, mergeFeedback: mergeFeedback, render: render, renderActions: renderActions, renderRatio: renderRatio, labels: labels, questions: questions, quizDuration: quizDuration, volumeHistory: volumeHistory };
 });
