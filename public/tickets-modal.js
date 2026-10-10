@@ -240,9 +240,10 @@
     '.tk-price-unit{margin:.25rem 0 0;color:#5F7D63;line-height:1.5;}',
     '.tk-price-compare{margin:.2rem 0 0;font-size:.76rem;line-height:1.5;color:#506B55;}',
     '@media (max-width:860px){.tk-banner__copy{flex:0 1 auto;}}',
-    "\n.tk-eligibility{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px;font-size:12px;line-height:1.6;color:#64776B}.tk-eligibility button{font:inherit;border:1px solid #5F7D63;border-radius:8px;background:white;color:#435F4C;padding:6px 10px;cursor:pointer}\n.tk-modal{max-width:900px;background:#FFFBF4;color:#263F35;border-color:#DDE5D9;box-shadow:0 18px 48px rgba(38,63,53,.12)}\n.tk-head{padding:20px 24px 12px;text-align:left;background:none}.tk-eyebrow{color:#5F7D63}.tk-title{white-space:pre-line;font-size:24px;line-height:1.3;color:#263F35;max-width:650px}.tk-sub{margin:8px 0 0;max-width:650px;white-space:pre-line;font-weight:400;color:#64776B}.tk-perks{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:#435F4C;margin:10px 0 0;padding:0;list-style:none}.tk-perks li:before{content:'✓';display:inline-block;background:#EEF3EA;border-radius:50%;padding:2px 5px;margin-right:5px}\n.tk-body{padding:8px 24px 18px}.tk-section-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 12px;font-size:16px}.tk-section-heading small{font-size:12px;font-weight:400;color:#64776B}\n.tk-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.tk-grid .tk-choice{flex-direction:column}.tk-grid .tk-choice__content{flex:initial}.tk-choice{position:relative;display:flex;min-width:0;cursor:pointer;padding:14px;border:1px solid #DDE5D9;border-radius:17px;background:white;gap:12px;align-items:stretch;text-align:left;box-sizing:border-box}.tk-choice__content{min-width:0;flex:1}.tk-choice__top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.tk-choice .tk-card__title{margin:0;color:#263F35;font-size:17px}.tk-choice .tk-card__copy{text-wrap:balance;margin:5px 0 0;font-weight:400;color:#64776B}.tk-choice input{flex:0 0 auto;width:18px;height:18px;margin:0;accent-color:#5F7D63;position:absolute;right:18px;top:20px}.tk-choice:has(input:focus-visible){outline:3px solid #5F7D63;outline-offset:3px}.tk-choice.is-selected{border:2px solid #5F7D63;padding:13px;background:#F4F6E9}.tk-choice.is-selected input{right:17px;top:19px}\n.tk-choice__price{margin:14px 0 0}.tk-total-label{font-size:12px;color:#64776B;margin:0 0 5px}.tk-choice .tk-card__price{font-size:26px;color:#263F35;margin:0;line-height:1.2;white-space:nowrap}.tk-price-unit{font-size:12px;font-weight:400;color:#64776B;margin:7px 0 0;line-height:1.6}.tk-price-compare{font-size:12px;font-weight:700;color:#5F7D63;margin:14px 0 0;line-height:1.5}.tk-choice .tk-badge{background:#EEF3EA;color:#5F7D63;border:0;border-radius:5px;font-size:11px;padding:3px 6px}.tk-choice__top{padding-right:20px}\n.tk-choice--trial{margin-bottom:12px;align-items:center;background:#F8F8ED}.tk-choice--trial .tk-choice__price{margin:0 40px 0 0;text-align:right}.tk-trial-kicker{font-size:12px;color:#5F7D63;font-weight:700;margin:0 0 10px}.tk-choice--33{margin-top:12px;align-items:center;background:#F8FAF5}.tk-choice--33 .tk-choice__price{margin:0 40px 0 0;text-align:right}.tk-choice--33 .tk-price-compare{margin-top:8px}.tk-price-footnote{font-size:12px;line-height:1.7;color:#64776B;margin:12px 0 0}\n.tk-experience{margin:16px 0;padding-top:14px;border-top:1px solid #DDE5D9}.tk-experience h3{font-size:17px;margin:0 0 18px}.tk-experience__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}.tk-experience__item{display:flex;gap:14px}.tk-experience__item em{color:#5F7D63;font-family:Georgia,serif}.tk-experience strong{font-size:14px}.tk-experience p{font-size:13px;line-height:1.7;color:#64776B;margin:5px 0 0}\n.tk-comparison{border:1px solid #DDE5D9;border-radius:16px;background:white;margin:20px 0}.tk-comparison>summary{cursor:pointer;padding:20px;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px}.tk-comparison>summary:after{content:'+';font-size:22px}.tk-comparison[open]>summary:after{content:'−'}.tk-comparison summary small{display:block;font-size:12px;color:#64776B;margin-top:6px;line-height:1.6}.tk-comparison__body{border-top:1px solid #DDE5D9;padding:20px}.tk-comparison__grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.tk-comparison__card{padding:18px;background:#F8FAF5;border:1px solid #E0E7DB;border-radius:14px;min-width:0}.tk-comparison__card:first-child{background:#EEF3EA;border-color:#C2D2BE}.tk-comparison__card h4{margin:0 0 6px}.tk-comparison__card dl{font-size:13px;line-height:1.7;margin:12px 0 0}.tk-comparison__card dt{font-weight:700;margin:10px 0 3px}.tk-comparison__card dd{margin:0;color:#52685A;white-space:pre-line}.tk-comparison__card p{font-size:12px;color:#64776B;margin:0}.tk-comparison a{color:#506B55;text-underline-offset:3px;overflow-wrap:anywhere}.tk-sources{font-size:12px;line-height:1.7;margin-top:12px}.tk-sources li{margin:8px 0}.tk-comparison__note{font-size:12px;color:#64776B;line-height:1.7;margin:0 0 14px}\n.tk-footer{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:12px 24px calc(12px + env(safe-area-inset-bottom));border-top:1px solid #CDD9C8;background:#FFFBF4}.tk-footer__price{font-size:24px;font-weight:800;margin:4px 0}.tk-footer small{font-size:12px;color:#64776B;line-height:1.6}.tk-footer__action{min-width:220px;max-width:50%}.tk-footer .tk-buy{white-space:normal;padding:13px 18px}.tk-footer__policy{display:block;margin-top:8px;border:0;background:none;color:#64776B;text-decoration:underline;font:inherit;font-size:12px;cursor:pointer;text-align:right;width:100%}.tk-policy{background:white;border-color:#DDE5D9;margin:18px 0 0}.tk-policy summary{cursor:pointer;font-weight:700}.tk-policy__list{margin-top:16px}.tk-used{margin-top:12px}.tk-used .tk-card__cta{display:none}.tk-single:empty{display:none}.tk-single{border:0;background:none;padding:0}.tk-admin-test{margin:18px 0}.tk-close{z-index:3}\n.tk-modal [hidden]{display:none!important}.tk-modal button:focus-visible,.tk-modal summary:focus-visible,.tk-modal a:focus-visible{outline:3px solid #5F7D63;outline-offset:3px}\n.tk-footer{box-sizing:border-box}.tk-footer>div:first-child{min-width:0;flex:1}.tk-footer__action{flex:0 1 48%;min-width:0}.tk-footer small{overflow-wrap:anywhere}.tk-footer .tk-buy{box-sizing:border-box;max-width:100%;min-width:0;overflow-wrap:anywhere}.tk-experience>summary{cursor:pointer;font-size:14px;font-weight:700;line-height:1.6}.tk-experience__grid{margin-top:12px}\n@media(max-width:680px){.tk-overlay{padding:8px}.tk-modal{max-height:96dvh;border-radius:22px}.tk-head{padding:16px 14px 10px}.tk-title{font-size:22px;padding-right:26px}.tk-sub{font-size:13px;line-height:1.8;margin-top:14px}.tk-perks{gap:6px;font-size:11px;margin-top:14px}.tk-body{padding:6px 14px 16px}.tk-grid{grid-template-columns:1fr;gap:8px}.tk-grid .tk-choice{flex-direction:row}.tk-section-heading{font-size:14px;gap:8px}.tk-section-heading small{font-size:11px;max-width:110px;text-align:right}.tk-choice{padding:12px;align-items:center;gap:10px}.tk-choice.is-selected{padding:11px}.tk-choice__top{padding-right:0}.tk-choice .tk-card__title{font-size:15px}.tk-choice .tk-card__copy{font-size:12px;line-height:1.6}.tk-choice input{top:50%;right:13px;transform:translateY(-50%)}.tk-choice.is-selected input{top:50%;right:12px}.tk-choice__price,.tk-choice--trial .tk-choice__price,.tk-choice--33 .tk-choice__price{margin:0 25px 0 0;text-align:right;flex:0 0 auto;max-width:53%}.tk-choice .tk-card__price{font-size:24px}.tk-choice .tk-price-unit{font-size:11px}.tk-choice .tk-price-compare{font-size:11px;margin-top:8px}.tk-total-label{font-size:11px}.tk-trial-kicker{font-size:11px;margin-bottom:7px}.tk-choice--33{margin-top:8px}.tk-price-footnote{font-size:11px}.tk-experience{margin-top:22px}.tk-experience__grid{grid-template-columns:1fr;gap:18px}.tk-experience h3{font-size:16px}.tk-comparison>summary,.tk-comparison__body{padding:16px}.tk-comparison__grid{grid-template-columns:1fr}.tk-footer{padding:12px 16px calc(12px + env(safe-area-inset-bottom));gap:12px}.tk-footer__action{min-width:0;width:52%;max-width:52%}.tk-footer__price{font-size:23px}.tk-footer small{font-size:11px}.tk-footer .tk-buy{font-size:12px;padding:12px 10px}.tk-footer__policy{font-size:10px}.tk-experience__item{gap:14px}.tk-close{width:36px;height:36px;top:10px;right:10px}}\n"
+    "\n.tk-eligibility{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px;font-size:12px;line-height:1.6;color:#64776B}.tk-eligibility button{font:inherit;border:1px solid #5F7D63;border-radius:8px;background:white;color:#435F4C;padding:6px 10px;cursor:pointer}\n.tk-modal{max-width:900px;background:#FFFBF4;color:#263F35;border-color:#DDE5D9;box-shadow:0 18px 48px rgba(38,63,53,.12)}\n.tk-head{padding:20px 24px 12px;text-align:left;background:none}.tk-eyebrow{color:#5F7D63}.tk-title{white-space:pre-line;font-size:24px;line-height:1.3;color:#263F35;max-width:650px}.tk-sub{margin:8px 0 0;max-width:650px;white-space:pre-line;font-weight:400;color:#64776B}.tk-perks{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:#435F4C;margin:10px 0 0;padding:0;list-style:none}.tk-perks li:before{content:'✓';display:inline-block;background:#EEF3EA;border-radius:50%;padding:2px 5px;margin-right:5px}\n.tk-body{padding:8px 24px 18px}.tk-section-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 0 12px;font-size:16px}.tk-section-heading small{font-size:12px;font-weight:400;color:#64776B}\n.tk-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.tk-grid .tk-choice{flex-direction:column}.tk-grid .tk-choice__content{flex:initial}.tk-choice{position:relative;display:flex;min-width:0;cursor:pointer;padding:14px;border:1px solid #DDE5D9;border-radius:17px;background:white;gap:12px;align-items:stretch;text-align:left;box-sizing:border-box}.tk-choice__content{min-width:0;flex:1}.tk-choice__top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.tk-choice .tk-card__title{margin:0;color:#263F35;font-size:17px}.tk-choice .tk-card__copy{text-wrap:balance;margin:5px 0 0;font-weight:400;color:#64776B}.tk-choice input{flex:0 0 auto;width:18px;height:18px;margin:0;accent-color:#5F7D63;position:absolute;right:18px;top:20px}.tk-choice:has(input:focus-visible){outline:3px solid #5F7D63;outline-offset:3px}.tk-choice.is-selected{border:2px solid #5F7D63;padding:13px;background:#F4F6E9}.tk-choice.is-selected input{right:17px;top:19px}\n.tk-choice__price{margin:14px 0 0}.tk-total-label{font-size:12px;color:#64776B;margin:0 0 5px}.tk-choice .tk-card__price{font-size:26px;color:#263F35;margin:0;line-height:1.2;white-space:nowrap}.tk-price-unit{font-size:12px;font-weight:400;color:#64776B;margin:7px 0 0;line-height:1.6}.tk-price-compare{font-size:12px;font-weight:700;color:#5F7D63;margin:14px 0 0;line-height:1.5}.tk-choice .tk-badge{background:#EEF3EA;color:#5F7D63;border:0;border-radius:5px;font-size:11px;padding:3px 6px}.tk-choice__top{padding-right:20px}\n.tk-choice--trial{margin-bottom:12px;align-items:center;background:#F8F8ED}.tk-choice--trial .tk-choice__price{margin:0 40px 0 0;text-align:right}.tk-trial-kicker{font-size:12px;color:#5F7D63;font-weight:700;margin:0 0 10px}.tk-choice--33{margin-top:12px;align-items:center;background:#F8FAF5}.tk-choice--33 .tk-choice__price{margin:0 40px 0 0;text-align:right}.tk-choice--33 .tk-price-compare{margin-top:8px}.tk-price-footnote{font-size:12px;line-height:1.7;color:#64776B;margin:12px 0 0}\n.tk-experience{margin:16px 0;padding-top:14px;border-top:1px solid #DDE5D9}.tk-experience h3{font-size:17px;margin:0 0 18px}.tk-experience__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}.tk-experience__item{display:flex;gap:14px}.tk-experience__item em{color:#5F7D63;font-family:Georgia,serif}.tk-experience strong{font-size:14px}.tk-experience p{font-size:13px;line-height:1.7;color:#64776B;margin:5px 0 0}\n.tk-footer{flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:12px 24px calc(12px + env(safe-area-inset-bottom));border-top:1px solid #CDD9C8;background:#FFFBF4}.tk-footer__price{font-size:24px;font-weight:800;margin:4px 0}.tk-footer small{font-size:12px;color:#64776B;line-height:1.6}.tk-footer__action{min-width:220px;max-width:50%}.tk-footer .tk-buy{white-space:normal;padding:13px 18px}.tk-footer__policy{display:block;margin-top:8px;border:0;background:none;color:#64776B;text-decoration:underline;font:inherit;font-size:12px;cursor:pointer;text-align:right;width:100%}.tk-policy{background:white;border-color:#DDE5D9;margin:18px 0 0}.tk-policy summary{cursor:pointer;font-weight:700}.tk-policy__list{margin-top:16px}.tk-used{margin-top:12px}.tk-used .tk-card__cta{display:none}.tk-single:empty{display:none}.tk-single{border:0;background:none;padding:0}.tk-admin-test{margin:18px 0}.tk-close{z-index:3}\n.tk-modal [hidden]{display:none!important}.tk-modal button:focus-visible,.tk-modal summary:focus-visible,.tk-modal a:focus-visible{outline:3px solid #5F7D63;outline-offset:3px}\n.tk-footer{box-sizing:border-box}.tk-footer>div:first-child{min-width:0;flex:1}.tk-footer__action{flex:0 1 48%;min-width:0}.tk-footer small{overflow-wrap:anywhere}.tk-footer .tk-buy{box-sizing:border-box;max-width:100%;min-width:0;overflow-wrap:anywhere}.tk-experience>summary{cursor:pointer;font-size:14px;font-weight:700;line-height:1.6}.tk-experience__grid{margin-top:12px}\n@media(max-width:680px){.tk-overlay{padding:8px}.tk-modal{max-height:96dvh;border-radius:22px}.tk-head{padding:16px 14px 10px}.tk-title{font-size:22px;padding-right:26px}.tk-sub{font-size:13px;line-height:1.8;margin-top:14px}.tk-perks{gap:6px;font-size:11px;margin-top:14px}.tk-body{padding:6px 14px 16px}.tk-grid{grid-template-columns:1fr;gap:8px}.tk-grid .tk-choice{flex-direction:row}.tk-section-heading{font-size:14px;gap:8px}.tk-section-heading small{font-size:11px;max-width:110px;text-align:right}.tk-choice{padding:12px;align-items:center;gap:10px}.tk-choice.is-selected{padding:11px}.tk-choice__top{padding-right:0}.tk-choice .tk-card__title{font-size:15px}.tk-choice .tk-card__copy{font-size:12px;line-height:1.6}.tk-choice input{top:50%;right:13px;transform:translateY(-50%)}.tk-choice.is-selected input{top:50%;right:12px}.tk-choice__price,.tk-choice--trial .tk-choice__price,.tk-choice--33 .tk-choice__price{margin:0 25px 0 0;text-align:right;flex:0 0 auto;max-width:53%}.tk-choice .tk-card__price{font-size:24px}.tk-choice .tk-price-unit{font-size:11px}.tk-choice .tk-price-compare{font-size:11px;margin-top:8px}.tk-total-label{font-size:11px}.tk-trial-kicker{font-size:11px;margin-bottom:7px}.tk-choice--33{margin-top:8px}.tk-price-footnote{font-size:11px}.tk-experience{margin-top:22px}.tk-experience__grid{grid-template-columns:1fr;gap:18px}.tk-experience h3{font-size:16px}.tk-footer{padding:12px 16px calc(12px + env(safe-area-inset-bottom));gap:12px}.tk-footer__action{min-width:0;width:52%;max-width:52%}.tk-footer__price{font-size:23px}.tk-footer small{font-size:11px}.tk-footer .tk-buy{font-size:12px;padding:12px 10px}.tk-footer__policy{font-size:10px}.tk-experience__item{gap:14px}.tk-close{width:36px;height:36px;top:10px;right:10px}}\n"
     ,'#pricing .ticket-price-card--trial{grid-column:1/-1}#pricing .ticket-price-card:disabled{background:#F1F2EF;border-color:#D4D7D0;color:#6B706B;cursor:not-allowed;box-shadow:none}#pricing .ticket-price-card:disabled:hover{transform:none}#pricing .ticket-landing-total{display:block;color:#263F35;font-size:1.25rem;font-weight:700;margin-top:8px}#pricing .tk-price-unit,#pricing .tk-price-compare{font-size:12px;line-height:1.6;margin:8px 0 0}#pricing .ticket-price-card:focus-visible{outline:3px solid #5F7D63;outline-offset:3px}#pricing [data-landing-trial-retry]{margin:0 0 16px;padding:8px 14px;border:1px solid #5F7D63;background:#FFFBF4;color:#435F4C;border-radius:8px;font:inherit;cursor:pointer}#pricing [hidden]{display:none!important}'
     ,'.tk-choice--disabled{background:#F1F2EF;border-color:#D4D7D0;cursor:not-allowed}.tk-choice--disabled .tk-card__title,.tk-choice--disabled .tk-card__price,.tk-choice--disabled .tk-trial-kicker{color:#6B706B}.tk-trial-unavailable{margin:8px 0 0;color:#626862;font-size:12px;line-height:1.6}'
+    ,"@media(max-width:680px){.tk-choice,.tk-grid .tk-choice{display:grid;grid-template-columns:minmax(0,1fr) 128px 18px;gap:8px}.tk-choice__content{grid-column:1;grid-row:1}.tk-choice__price,.tk-choice--trial .tk-choice__price,.tk-choice--33 .tk-choice__price{grid-column:2;grid-row:1;margin:0;max-width:none;min-width:0;text-align:right;font-variant-numeric:tabular-nums}.tk-choice input,.tk-choice.is-selected input{position:static;grid-column:3;grid-row:1;top:auto;right:auto;transform:none;width:18px;height:18px;justify-self:end}.tk-choice__content,.tk-choice__price{word-break:keep-all;overflow-wrap:normal}.tk-choice .tk-card__copy{text-wrap:wrap}.tk-choice__price .tk-price-unit,.tk-choice__price .tk-price-compare{word-break:keep-all;overflow-wrap:normal}}"
   ].join('');
 
   function priceText(n) {
@@ -269,6 +270,7 @@
   var toastTimer = null;
   var buying = false;
   var selectedPlanId = null;
+  var selectionIsExplicit = false;
   var trialState = { status: 'loading', userId: null };
   var trialReadVersion = 0;
   var trialReadPromise = null;
@@ -511,7 +513,9 @@
     });
     el.overlay.querySelector('[data-tk-selection]').textContent = pricePlanText(plan, 'title') + ' / ' + t('tickets.v2.total');
     el.overlay.querySelector('[data-tk-total]').textContent = priceText(plan.priceValue);
-    el.overlay.querySelector('[data-tk-action]').innerHTML = buyButton(plan, { cta: t('tickets.v2.continue', { price: priceText(plan.priceValue) }) });
+    el.overlay.querySelector('[data-tk-action]').innerHTML = trialState.status === 'loggedout'
+      ? '<button type="button" class="tk-buy" data-tk-guest-signin>' + t('tickets.v2.eligibility.loggedout') + '</button>'
+      : buyButton(plan, { cta: t('tickets.v2.continue', { price: priceText(plan.priceValue) }) });
   }
 
   function renderPlans() {
@@ -521,21 +525,22 @@
     var legacyConsent = el.overlay.querySelector('.tk-consent');
     if (legacyConsent) legacyConsent.style.display = adminPaymentTestVisible ? '' : 'none';
     var trialVisible = canShowTrialPurchase();
-    var showTrialCard = trialVisible || trialState.status === 'ineligible';
+    var trialSelectable = trialVisible || trialState.status === 'loggedout';
+    var showTrialCard = trialSelectable || trialState.status === 'ineligible';
     var statusNode = el.overlay.querySelector('[data-tk-eligibility]');
     var statusMarkup = trialStatusMarkup();
     statusNode.hidden = !statusMarkup;
     statusNode.innerHTML = statusMarkup;
     renderTrialSalesSurfaces();
-    if (el.banner) { el.banner.hidden = !showTrialCard; el.banner.innerHTML = showTrialCard ? planCard(findPlan('trial'), !trialVisible) : ''; }
+    if (el.banner) { el.banner.hidden = !showTrialCard; el.banner.innerHTML = showTrialCard ? planCard(findPlan('trial'), !trialSelectable) : ''; }
     if (el.grid) el.grid.innerHTML = [findPlan('single'), findPlan('pack3'), findPlan('pack11')].map(planCard).join('');
     el.overlay.querySelector('[data-tk-large]').innerHTML = planCard(findPlan('pack33'));
     if (el.single) el.single.innerHTML = adminPaymentTestVisible ? '<div class="tk-admin-test" data-tk-admin-test><span class="tk-badge">ADMIN TEST</span>' + singleRow(findPlan('admin_test_1000')) + '</div>' : '';
     if (el.used) { el.used.hidden = true; el.used.innerHTML = ''; }
-    if (!selectedPlanId || (selectedPlanId === 'trial' && !trialVisible)) selectedPlanId = trialVisible ? 'trial' : 'single';
+    if (!selectedPlanId || (selectedPlanId === 'trial' && !trialSelectable)) selectedPlanId = trialSelectable ? 'trial' : 'single';
+    if (trialState.status === 'loggedout' && !selectionIsExplicit) selectedPlanId = 'trial';
     syncSelection();
     el.overlay.querySelector('[data-tk-experience]').innerHTML = experienceMarkup();
-    el.overlay.querySelector('[data-tk-comparison-body]').innerHTML = comparisonMarkup();
     el.overlay.querySelector('[data-tk-price-footnote]').textContent = t('tickets.v2.priceNote', { single: priceText(findPlan('single').priceValue) });
   }
 
@@ -545,27 +550,6 @@
       return '<div class="tk-experience__item"><em>0' + n + '</em><div><strong>' + t('tickets.v2.experience.' + n + '.title') + '</strong><p>' + t('tickets.v2.experience.' + n + '.copy') + '</p></div></div>';
     }).join('') + '</div><p class="tk-price-footnote">' + t('tickets.v2.experience.note') + '</p>';
   }
-  var COMPARISON_SOURCES = [
-    ['Cambly — Private+', 'https://studentsupport.cambly.com/hc/ko/articles/19045434656013-나에게-맞는-플랜-선택하기'],
-    ['Cambly — weekly plans', 'https://studentsupport.cambly.com/hc/ko/articles/360000312583-플랜-작동-방식'],
-    ['Preply — subscription / trial', 'https://help.preply.com/en/articles/4966680-how-does-my-preply-subscription-work'],
-    ['Episoden — free / conditions', 'https://www.episoden.com/faq/1-2'],
-    ['Episoden — Buddy / extensions', 'https://www.episoden.com/faq/3-6'],
-    ['Episoden — 1:1 / Host Room', 'https://www.episoden.com/en/faq/1-13'],
-    ['Episoden — Host Room', 'https://www.episoden.com/faq/1-12']
-  ];
-  function comparisonMarkup() {
-    var vars = { single: priceText(findPlan('single').priceValue) };
-    return '<p class="tk-comparison__note">' + t('tickets.v2.comparison.intro') + '</p><div class="tk-comparison__grid">' +
-      ['dayo', 'cambly', 'preply', 'episoden'].map(function (service) {
-        return '<article class="tk-comparison__card"><h4>' + t('tickets.v2.comparison.' + service + '.name') + '</h4><p>' + t('tickets.v2.comparison.' + service + '.about') + '</p><dl>' +
-          ['regular', 'partner', 'conversation'].map(function (field) {
-            return '<dt>' + t('tickets.v2.comparison.' + field) + '</dt><dd>' + t('tickets.v2.comparison.' + service + '.' + field, vars) + '</dd>';
-          }).join('') + '</dl></article>';
-      }).join('') + '</div><p class="tk-price-footnote">' + t('tickets.v2.comparison.note') + '</p><details class="tk-sources"><summary>' + t('tickets.v2.comparison.sources') + '</summary><ol>' +
-      COMPARISON_SOURCES.map(function (source) { return '<li><a target="_blank" rel="noopener noreferrer" href="' + source[1] + '">' + source[0] + '</a></li>'; }).join('') + '</ol></details>';
-  }
-
   function buildMarkup() {
     return '<div class="tk-modal" role="dialog" aria-modal="true" aria-labelledby="tkTitle">' +
       '<button type="button" class="tk-close" data-tk-close>✕</button><div class="tk-head">' +
@@ -573,7 +557,7 @@
       copyNode('p', 'tickets.v2.subtitle', 'tk-sub') + '<ul class="tk-perks">' + [1, 2, 3].map(function (n) { return copyNode('li', 'tickets.v2.perk.' + n); }).join('') + '</ul></div>' +
       '<div class="tk-body"><h3 class="tk-section-heading">' + copyNode('span', 'tickets.v2.choose') + copyNode('small', 'tickets.v2.duration') + '</h3>' +
       '<div class="tk-eligibility" data-tk-eligibility role="status" aria-live="polite" hidden></div><div data-tk-banner></div><div class="tk-grid" data-tk-grid></div><div data-tk-large></div><p class="tk-price-footnote" data-tk-price-footnote></p><div class="tk-single" data-tk-single></div><div data-tk-used></div>' +
-      '<details class="tk-experience" data-tk-experience></details><details class="tk-comparison"><summary><span>' + copyNode('strong', 'tickets.v2.comparison.title') + copyNode('small', 'tickets.v2.comparison.subtitle') + '</span></summary><div class="tk-comparison__body" data-tk-comparison-body></div></details>' +
+      '<details class="tk-experience" data-tk-experience></details>' +
       '<div class="tk-consent"><label for="tkRefundAgree"><input type="checkbox" id="tkRefundAgree" name="tkRefundAgree"><span>' + copyNode('span', 'tickets.v2.consent') + ' <button type="button" data-refund-mini data-terms-check="#tkRefundAgree">' + t('tickets.v2.view') + '</button></span></label></div>' +
       '<details class="tk-policy"><summary data-tk-copy="tickets.v2.policy.title">' + t('tickets.v2.policy.title') + '</summary><ul class="tk-policy__list">' + [1, 2, 3, 4].map(function (n) { return copyNode('li', 'tickets.v2.policy.' + n); }).join('') + '</ul></details></div>' +
       '<footer class="tk-footer"><div><small data-tk-selection></small><p class="tk-footer__price" data-tk-total></p>' + copyNode('small', 'tickets.v2.noRenewal') + '</div><div class="tk-footer__action"><div data-tk-action></div><button type="button" class="tk-footer__policy" data-tk-policy-link data-tk-copy="tickets.v2.policy.title">' + t('tickets.v2.policy.title') + '</button></div></footer></div>';
@@ -869,7 +853,7 @@
     el.overlay.addEventListener('change', function (e) {
       var choice = e.target.closest('input[name="tkPlan"]');
       if (choice && choice.disabled) return;
-      if (choice) { selectedPlanId = choice.value; syncSelection(); return; }
+      if (choice) { selectionIsExplicit = true; selectedPlanId = choice.value; syncSelection(); return; }
       var box = e.target.closest('[data-tk-coupon]');
       if (!box) return;
       couponState.applyWelcome = !!box.checked;
@@ -895,6 +879,13 @@
         e.preventDefault();
         e.stopPropagation();
         if (typeof window.openRefundMiniModal === 'function') window.openRefundMiniModal('#tkRefundAgree');
+        return;
+      }
+      if (e.target.closest('[data-tk-guest-signin]')) {
+        e.preventDefault();
+        if (typeof window.openLoginModal === 'function') window.openLoginModal();
+        else if (window.DayOMode && typeof window.DayOMode.openLogin === 'function') window.DayOMode.openLogin();
+        else showToast(t('tickets.v2.eligibility.loggedout'));
         return;
       }
       var buy = e.target.closest('[data-tk-buy]');
@@ -997,7 +988,8 @@
       var trialUser = trialState.userId;
       open();
       await refreshTrialEligibility();
-      if (trialUser && trialState.userId === trialUser && canShowTrialPurchase() && el.overlay.classList.contains('is-open')) {
+      if (((trialUser && trialState.userId === trialUser && canShowTrialPurchase()) || trialState.status === 'loggedout') && el.overlay.classList.contains('is-open')) {
+        selectionIsExplicit = true;
         selectedPlanId = 'trial';
         syncSelection();
       }
@@ -1006,6 +998,7 @@
     if (['single', 'starter3', 'light11', 'full33'].indexOf(id) === -1) return;
     var plan = findPlan(id);
     if (!plan) return;
+    selectionIsExplicit = true;
     selectedPlanId = plan.id;
     syncSelection();
     open();
