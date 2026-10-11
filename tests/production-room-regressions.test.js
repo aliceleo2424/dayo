@@ -163,5 +163,8 @@ async function verifyInsufficientQuizHidesClock() {
 
 verifyBookingScopedWordHelp();
 verifyInsufficientQuizHidesClock().then(() => {
+  // Caption release gate: production finals, actual room DOM/CSS and two PeerJS browsers.
+  require('./partner-captions-fixtures.test.js');
+  require('node:child_process').execFileSync(process.execPath, [path.join(__dirname, 'partner-captions-browser.test.cjs')], { stdio: 'inherit' });
   console.log('Production room regression fixtures passed: STT lifecycle/telemetry/preflight, connection retry/audio recovery, mobile Talk Card scroll, evidence-only Word Help, booking isolation, and zero-candidate recap UX.');
 });
