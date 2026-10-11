@@ -246,6 +246,48 @@
     return access && access.bookingId ? 'dayo_stt_telemetry:' + String(access.bookingId) : '';
   }
 
+  // Local, participant-scoped counters only: never audio, utterances or raw errors.
+  function sttDiagnosticSummary(type, detail) {
+    var key = sttTelemetryKey();
+    var role = canonicalParticipantRole(window.DayORoomAccess);
+    var summary = {};
+    var counters = ['started_runs', 'audio_starts', 'speech_starts', 'received_finals',
+      'preflight_finals', 'accepted_finals', 'save_attempts', 'save_successes', 'save_failures'];
+    var stored = {};
+    if (key && role) {
+      key += ':' + role + ':summary';
+      try { stored = JSON.parse(sessionStorage.getItem(key) || '{}') || {}; } catch (e) { /* local only */ }
+    } else key = '';
+    counters.forEach(function (name) { summary[name] = Number.isSafeInteger(stored[name]) && stored[name] >= 0 ? stored[name] : 0; });
+    var count = { stt_start: 'started_runs', stt_audio_start: 'audio_starts',
+      stt_speech_start: 'speech_starts', stt_result_final: 'received_finals',
+      stt_result_accepted: 'accepted_finals', stt_save_start: 'save_attempts' }[type];
+    if (count) summary[count] += 1;
+    if (type === 'stt_result_final' && detail && detail.preflight) summary.preflight_finals += 1;
+    if (type === 'stt_save_result') summary[detail && detail.ok ? 'save_successes' : 'save_failures'] += 1;
+    var errorCodes = ['unsupported', 'no-speech', 'audio-capture', 'network', 'not-allowed',
+      'service-not-allowed', 'aborted', 'bad-grammar', 'language-not-supported',
+      'phrases-not-supported', 'start_timeout', 'start_failed', 'setup_failed',
+      'mic_track_muted', 'mic_track_ended', 'NotAllowedError', 'SecurityError'];
+    var lastError = type === 'stt_error' ? detail && detail.code : stored.last_error_code;
+    summary.last_error_code = !lastError ? null : errorCodes.indexOf(lastError) >= 0 ? lastError : 'unknown';
+    summary.api_present = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+    summary.recognition_language = 'en-US';
+    summary.capture_state = !summary.api_present ? 'unsupported' : transcriptFinalized ? 'ended' :
+      sttPermissionBlocked ? 'permission_blocked' : !sttMicAvailable ? 'microphone_unavailable' :
+      !micOn ? 'paused' : sttStarting ? 'starting' : sttOn ? 'recognition_started' : 'waiting';
+    summary.preflight_active = window.__dayoPreflightActive === true;
+    summary.visibility = document.visibilityState === 'hidden' ? 'hidden' : 'visible';
+    summary.local_fragments = sessionTranscript.length;
+    summary.pending_revision = Math.max(0, transcriptRevision - Math.max(0, transcriptSavedRevision));
+    summary.save_state = type === 'stt_save_start' ? 'pending' : type === 'stt_save_result' ?
+      (detail && detail.ok ? 'saved' : 'failed') :
+      ['pending', 'saved', 'failed'].indexOf(stored.save_state) >= 0 ? stored.save_state : 'not_attempted';
+    summary.updated_at = new Date().toISOString();
+    if (key) { try { sessionStorage.setItem(key, JSON.stringify(summary)); } catch (e) { /* quota / private mode */ } }
+    return summary;
+  }
+
   function recordSttState(type, detail) {
     var allowed = {
       stt_start: true,
@@ -254,7 +296,10 @@
       stt_result_final: true,
       stt_error: true,
       stt_end: true,
-      stt_restart: true
+      stt_restart: true,
+      stt_result_accepted: true,
+      stt_save_start: true,
+      stt_save_result: true
     };
     if (!allowed[type]) return;
     var access = window.DayORoomAccess || {};
@@ -264,10 +309,12 @@
       role: access.role === 'partner' ? 'partner' : 'learner'
     };
     var safe = detail || {};
-    if (safe.code) entry.code = String(safe.code).slice(0, 80);
     if (safe.reason) entry.reason = String(safe.reason).slice(0, 80);
     if (Number.isFinite(Number(safe.char_count))) entry.char_count = Math.max(0, Number(safe.char_count));
     if (safe.preflight === true) entry.preflight = true;
+    if (type === 'stt_save_result') entry.ok = safe.ok === true;
+    var summary = sttDiagnosticSummary(type, safe);
+    if (safe.code) entry.code = summary.last_error_code || 'unknown';
     var key = sttTelemetryKey();
     if (key) {
       try {
@@ -478,7 +525,8 @@
       pauseSpeech();
     };
     ['mute', 'unmute', 'ended'].forEach(function (type) { track.addEventListener(type, binding[type]); });
-    if (sttMicAvailable && shouldKeepSttAlive() && recognitionRun) scheduleSttRestart(180, 'mic-track-replaced');
+    if (sttMicAvailable && shouldKeepSttAlive() &&
+        (!window.__dayoPreflightActive || window.__dayoPreflightStarted)) scheduleSttRestart(180, 'mic-track-replaced');
   }
 
   function attachPreflightStream(stream) {
@@ -617,7 +665,7 @@
     sessionTranscript.push(entry);
     transcriptRevision += 1;
     window.sessionTranscript = sessionTranscript.slice();
-    console.log('🎤 [STT 인식 성공]:', cleaned);
+    recordSttState('stt_result_accepted', { char_count: cleaned.length });
     appendTranscriptRowToViewer(entry);
     backupTranscriptLocal();
     document.dispatchEvent(new CustomEvent('dayo:transcript', { detail: entry }));
@@ -677,12 +725,14 @@
     var store = window.DayOProfileStore;
     var done = function (result) {
       var payload = result || { ok: false, local: true, transcript: serialized };
+      recordSttState('stt_save_result', { ok: payload.ok === true });
       document.dispatchEvent(new CustomEvent('dayo:transcriptsaved', { detail: payload }));
       return payload;
     };
     var savingRevision = transcriptRevision;
     transcriptSavingCheckpoint = checkpoint;
     if (store && typeof store.saveSessionLog === 'function') {
+      recordSttState('stt_save_start');
       // Re-entry must never replace a longer canonical record with an empty/local subset.
       transcriptSavePromise = (async function () {
         var db = window.supabaseClient;
@@ -1614,6 +1664,7 @@
       if (micOn) resumeSpeech('manual');
     },
     getTranscript: function () { return serializeTranscript(sessionTranscript); },
+    getSttDiagnostics: function () { return sttDiagnosticSummary(); },
     getSttTelemetry: function () {
       var key = sttTelemetryKey();
       if (!key) return [];

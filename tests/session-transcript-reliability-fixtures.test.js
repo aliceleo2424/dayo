@@ -265,6 +265,8 @@ function sttBrowser(options = {}) {
         return { data:saved && clone(saved) };
       } };
     } } };
+  if (options.unsupported) delete window.SpeechRecognition;
+  if (options.prefixed) { window.webkitSpeechRecognition = Recognition; delete window.SpeechRecognition; }
   const context = vm.createContext({ window, document, navigator:{}, location:{search:''}, localStorage:local, sessionStorage:local,
     CustomEvent:function(type,init){this.type=type;this.detail=init && init.detail;}, Date:ClockDate, Math, Promise,
     setTimeout:later,clearTimeout:clear,setInterval:()=>0,clearInterval(){},console:{log(){},warn(){}} });
@@ -326,8 +328,68 @@ async function sttReliabilityChecks() {
   fresh.muted=false;fresh.emit('unmute');await tracks.advance(180);check(tracks.engines.length,2,'active unmute restarts');
   fresh.readyState='ended';fresh.emit('ended');await tracks.advance(3000);check(tracks.engines.length,2,'ended track prevents restart');
 
+  const lateMic=sttBrowser();lateMic.fire('dayo:local-stream',{stream:{getAudioTracks:()=>[]}});await lateMic.microtasks();
+  check(lateMic.engines.length,0,'initially missing microphone prevents recognition start');
+  const acquired=audioTrack();lateMic.fire('dayo:local-stream',{stream:{getAudioTracks:()=>[acquired]}});await lateMic.advance(180);
+  check(lateMic.engines.length,1,'first live microphone must start capture even without an earlier recognition run');
+  lateMic.active.emit('Captured after the microphone became available.');await lateMic.advance(15000);
+  check(lateMic.saved.transcript.length,1,'late microphone capture reaches canonical checkpoint');
+
+  const waitingPreflight=sttBrowser();waitingPreflight.fire('dayo:local-stream',{stream:{getAudioTracks:()=>[]}});await waitingPreflight.microtasks();
+  waitingPreflight.window.__dayoPreflightActive=true;waitingPreflight.window.__dayoPreflightStarted=false;
+  waitingPreflight.fire('dayo:local-stream',{stream:{getAudioTracks:()=>[audioTrack()]}});await waitingPreflight.advance(1000);
+  check(waitingPreflight.engines.length,0,'late mic cannot bypass an unstarted preflight');
+  waitingPreflight.window.__dayoPreflightStarted=true;waitingPreflight.window.DayOLive.startSpeech();
+  waitingPreflight.active.emit('Private preflight sentence.');
+  check(waitingPreflight.window.DayOLive.getSttDiagnostics().preflight_finals,1,'diagnostics distinguish preflight-discarded final');
+  check(waitingPreflight.window.DayOLive.getSttDiagnostics().accepted_finals,0,'preflight is never counted as accepted conversation');
+  waitingPreflight.window.__dayoPreflightActive=false;waitingPreflight.active.emit('Real conversation sentence.');await waitingPreflight.advance(15000);
+  check(waitingPreflight.saved.transcript.length,1,'only post-preflight speech persists');
+
+  const unsupported=sttBrowser({unsupported:true});await unsupported.microtasks();await unsupported.advance(10000);
+  check(unsupported.engines.length,0,'unsupported browser cannot start a fictitious recognizer');
+  check(unsupported.window.DayOLive.getSttDiagnostics().capture_state,'unsupported','unsupported status is explicit');
+  const unsupportedEnd=unsupported.window.DayOLive.finalizeTranscript();await unsupportedEnd;
+  check(unsupported.saved.transcript.length,0,'unsupported browser can complete an empty canonical final save');
+  const prefixed=sttBrowser({prefixed:true});await prefixed.microtasks();prefixed.active.emit('Supported prefixed API.');await prefixed.advance(15000);
+  check(prefixed.saved.transcript.length,1,'prefixed Chrome/Safari API follows the same capture/save path');
+  check(prefixed.active.lang,'en-US','recognition language remains unchanged');
+  for(const code of ['not-allowed','service-not-allowed']) {
+    const blocked=sttBrowser({prefixed:true});await blocked.microtasks();blocked.active.onerror({error:code});await blocked.advance(20000);
+    check(blocked.engines.length,1,'permission/service denial cannot auto-loop: '+code);
+    check(blocked.window.DayOLive.getSttDiagnostics().capture_state,'permission_blocked','API presence alone is not readiness: '+code);
+    check(blocked.window.DayOLive.getSttDiagnostics().last_error_code,code,'permission error remains identifiable without speech');
+    const end=blocked.window.DayOLive.finalizeTranscript();await end;
+    check(blocked.saved.transcript.length,0,'permission denial still preserves normal final save: '+code);
+  }
+  const transient=sttBrowser();await transient.microtasks();transient.active.onerror({error:'audio-capture'});await transient.advance(500);
+  check(transient.engines.length,2,'transient microphone acquisition failure can recover');
+  transient.active.emit('Recovered audio input.');await transient.advance(15000);
+  check(transient.saved.transcript.length,1,'recovered input keeps participant attribution and persistence');
+  const concurrent=sttBrowser();await concurrent.microtasks();const videoMic=audioTrack();videoMic.enabled=true;
+  concurrent.fire('dayo:local-stream',{stream:{getAudioTracks:()=>[videoMic]}});await concurrent.advance(180);
+  concurrent.active.emit('Both APIs remain independent.');await concurrent.advance(15000);
+  check(videoMic.readyState,'live','STT handoff does not stop the video microphone');
+  check(videoMic.enabled,true,'STT recovery does not disable WebRTC audio');
+  check(concurrent.engines.length,1,'live stream notification does not duplicate an active recognizer');
+  check(concurrent.saved.participant_role,'learner','video/microphone concurrency preserves learner ownership');
+  const diagnostic=sttBrowser();await diagnostic.microtasks();for(let i=0;i<90;i++) diagnostic.active.emit('Do not log this private sentence.');
+  await diagnostic.advance(15000);const summary=diagnostic.window.DayOLive.getSttDiagnostics();
+  check(summary.accepted_finals,90,'aggregate diagnostics survive the 80-event ring limit');
+  check(summary.received_finals,90,'received results remain separate from accepted results');
+  check(summary.save_successes,1,'diagnostics confirm canonical save acknowledgment');
+  check(summary.pending_revision,0,'successful checkpoint has no unsaved revision');
+  check(JSON.stringify(summary).includes('private sentence'),false,'summary contains no raw speech');
+  check(JSON.stringify(diagnostic.window.DayOLive.getSttTelemetry()).includes('private sentence'),false,'event telemetry contains no raw speech');
+  check(diagnostic.storage.get('dayo_stt_telemetry:'+bookingId+':learner:summary').includes('private sentence'),false,'stored summary contains no raw speech');
+  diagnostic.active.onerror({error:'SECRET raw provider details'});
+  check(diagnostic.window.DayOLive.getSttDiagnostics().last_error_code,'unknown','summary categorizes unexpected errors without copying details');
+  check(JSON.stringify(diagnostic.window.DayOLive.getSttTelemetry()).includes('SECRET'),false,'event ring also excludes unexpected raw error details');
+
   const retry=sttBrowser({readFailure:true});await retry.microtasks();retry.active.emit('Recorded locally.');await retry.advance(15000);
   check(retry.writes.length,0,'failed canonical read cannot overwrite');check(retry.window.DayOLive.getTranscript().length,1,'failed read retains local final');
+  check(retry.window.DayOLive.getSttDiagnostics().save_state,'failed','diagnostics identify persistence failure with accepted speech');
+  check(retry.window.DayOLive.getSttDiagnostics().accepted_finals,1,'failed persistence cannot look like no recognition');
   retry.options.readFailure=false;await retry.advance(29999);check(retry.writes.length,0,'retry backs off');await retry.advance(1);check(retry.saved.transcript.length,1,'retry restores accepted final');
   const failedWrite=sttBrowser({writeFailure:true});await failedWrite.microtasks();failedWrite.active.emit('Retain after RPC failure.');await failedWrite.advance(15000);
   failedWrite.options.writeFailure=false;await failedWrite.advance(30000);check(failedWrite.saved.transcript.length,1,'failed RPC retries without duplicate rows');
