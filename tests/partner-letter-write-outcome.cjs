@@ -14,7 +14,12 @@ function harness(response,thrown){
  assert.notEqual((await harness(null,true).save()).confirmedFailure,true);
  assert.equal(source,fs.readFileSync('supabase-client.js','utf8'));assert.equal(html,fs.readFileSync('room.html','utf8'));
  const base=f=>cp.execFileSync('git',['show','44f76c04:'+f],{cwd:process.cwd(),encoding:'utf8'}).replace(/\r\n/g,'\n'),read=f=>fs.readFileSync(f,'utf8').replace(/\r\n/g,'\n');
- for(const f of ['public/user-conversation-report.js','public/conversation-recap.js','public/session-chat.js','public/session-lifecycle.js','public/memory-game.js','public/room-live.js'])assert.equal(read(f),base(f),f+' unchanged');
+ for(const f of ['public/conversation-recap.js','public/session-chat.js','public/session-lifecycle.js','public/memory-game.js','public/room-live.js'])assert.equal(read(f),base(f),f+' unchanged');
+ // The approved private-image integration changes this file; its non-image logic is protected.
+ const slice=(source,start,end)=>source.slice(source.indexOf(start),source.indexOf(end,source.indexOf(start)));
+ const currentUI=read('public/user-conversation-report.js'),priorUI=base('public/user-conversation-report.js');
+ for(const pair of [['function corrections(','function imageURL('],['async function refreshRecapPresentation(','async function fetchLatest('],['function renderArchive(','return {']])
+  assert.equal(slice(currentUI,...pair),slice(priorUI,...pair),'non-image report/quiz/Letter logic unchanged');
  const finish=s=>s.slice(s.indexOf('    async function checkPartnerFinishAfterLetter('),s.indexOf('    window.executePartnerPayoutAndExit ='));
  assert.equal(finish(read('public/room.html')),finish(base('public/room.html')),'finish/reward calls unchanged');
  console.log('PASS write outcomes: structured ACK/rejection, known DB rollback, malformed/lost ACK unknown, payload/auth unchanged, protected Recap/chat/quiz/STT/lifecycle and mirrors unchanged.');

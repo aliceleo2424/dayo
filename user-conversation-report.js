@@ -20,6 +20,32 @@ function expressions(r){var seen={};var fixed=corrections(r).flatMap(function(x)
 function summary(r){var s=text(r.summary);return s?(s.match(/[^.!?。！？]+[.!?。！？]*(?:\s|$)/g)||[s]).slice(0,3).join('').trim():'';}
 function quiz(r){var v=r.quiz_score;return v!=null&&v!==''&&Number.isFinite(Number(v))&&Number(v)>=0&&Number(v)<=100?Number(v)+'%':'';}
 function imageURL(v){var s=text(v);if(!(/^https?:\/\//i.test(s)||/^\/(?!\/)/.test(s)))return '';var path;try{path=new URL(s,'https://www.dayotalk.com').pathname;}catch(e){return '';}return /\/images\/logo(?:[-_][^/]*)?\.(?:png|jpe?g|webp|svg)$/i.test(path)?'':s;}
+// Access URLs are presentation-only. The durable asset stays in the exact-booking ledger.
+function keepsakeURL(r){
+ var image=r&&r.__dayoKeepsakeImage;if(!image)return imageURL(r&&r.illust_url);
+ try{var url=new URL(image.url),path='/storage/v1/object/sign/dayo-keepsakes/'+image.asset.object_path;
+  if(image.booking_id===r.booking_id&&image.asset.bucket==='dayo-keepsakes'
+   &&image.asset.object_path.startsWith(r.booking_id+'/')&&/^https:$/.test(url.protocol)
+   &&/^[a-z0-9-]+\.supabase\.co$/.test(url.hostname)&&decodeURIComponent(url.pathname)===path
+   &&Date.parse(image.expires_at)>Date.now())return url.href;
+ }catch(_){}
+ return imageURL(r.illust_url);
+}
+async function refreshKeepsakeImage(db,report,fetchImpl){
+ if(!report||!report.booking_id||!db.auth||!db.auth.getSession)return report;
+ var base=Object.assign({},report);delete base.__dayoKeepsakeImage;
+ try{var auth=await db.auth.getSession(),token=auth.data&&auth.data.session&&auth.data.session.access_token;
+  if(auth.error||!token)return base;var send=fetchImpl||(typeof fetch==='function'?fetch:null);if(!send)return base;
+  var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},6500);
+  try{var response=await send('/api/conversation-recap',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+   body:JSON.stringify({action:'keepsake_image',booking_id:report.booking_id}),signal:controller.signal});
+   if(!response.ok)return base;var payload=await response.json(),image=payload&&payload.image;
+   if(!image||image.booking_id!==report.booking_id)return base;
+   var candidate=Object.assign({},base,{__dayoKeepsakeImage:image});
+   return keepsakeURL(candidate)===image.url?candidate:base;
+  }finally{clearTimeout(timer);}
+ }catch(_){return base;}
+}
 function hideIllustration(img){img.hidden=true;img.onerror=null;var block=img.closest('.ucr-block');if(block&&!block.querySelector('.ucr-theme'))block.hidden=true;}
 function heading(title,content){return content?'<div class="ucr-block"><h4>'+esc(title)+'</h4>'+content+'</div>':'';}
 function memoryData(r,locale){
@@ -31,12 +57,12 @@ if(recap&&recap.booking_id===r.booking_id&&recap.quality_version===3){
  expressions=(recap.expressions||[]).filter(e=>e.source_role==='learner'&&e.source_log_id===recap.source.learner_log_id&&e.source_version===recap.story_source_version&&(!ids.size||ids.has(e.source_utterance_id))&&usable(e.text)&&!e.greeting_fallback&&!/\b(?:song|music)\b.{0,50}\bis installed\b/i.test(e.text)).slice(0,2).map(e=>e.text);
 }
 var title=topics.length?(locale==='ko'?topics.slice(0,2).join('와 ')+' 이야기':topics.slice(0,2).join(' & ')):(locale==='ko'?nickname(r,locale)+'과 나눈 오늘의 대화':'Today’s conversation with '+nickname(r,locale));
-return {title:title,kind:'dayo_memory_card_v1',locale:locale==='ko'?'ko':'en',date:date({created_at:r.scheduled_at||r.created_at},locale),language:language(r),partner:nickname(r,locale),image:imageURL(r.illust_url),topics:topics,expressions:expressions,letter:text(r.partner_comment)};
+return {title:title,kind:'dayo_memory_card_v1',locale:locale==='ko'?'ko':'en',date:date({created_at:r.scheduled_at||r.created_at},locale),language:language(r),partner:nickname(r,locale),image:keepsakeURL(r),topics:topics,expressions:expressions,letter:text(r.partner_comment)};
 }
 function memoryAction(r,locale){var m=memoryData(r,locale);return m.letter||m.image||m.topics.length||m.expressions.length?'<div class="ucr-memory-action"><button class="ucr-primary btn-save-card" type="button"'+memoryAttribute(r,locale)+' onclick="saveInstaCard(event)">'+(locale==='ko'?'대화 카드 저장':'Save conversation card')+'</button></div>':'';}
 
 function memoryAttribute(r,locale){return ' data-memory-card="'+esc(encodeURIComponent(JSON.stringify(memoryData(r,locale))))+'"';}
-function renderLetter(r,locale){r=r||{};var name=nickname(r,locale),img=imageURL(r.illust_url),theme=conversationRecap.saved(r)?'':text(r.keyword),note=text(r.partner_comment);
+function renderLetter(r,locale){r=r||{};var name=nickname(r,locale),img=keepsakeURL(r),theme=conversationRecap.saved(r)?'':text(r.keyword),note=text(r.partner_comment);
 var human=note?'<blockquote>'+esc(note)+'</blockquote>':'<p class="ucr-letter-pending">'+(locale==='ko'?'파트너가 메시지를 준비 중이에요.':'Your partner is preparing a message.')+'</p>';
 // Canonical stories already show grounded topics. Keep legacy theme and valid image; stored Treat is untouched.
 if(theme||img)human+='<div class="ucr-block ucr-letter-theme">'+(theme?'<p class="ucr-theme">'+esc(theme)+'</p>':'')+(img?'<img class="ucr-illustration" hidden onload="this.hidden=false" src="'+esc(img)+'" alt="" referrerpolicy="no-referrer" onerror="DayOUserConversationReport.hideIllustration(this)">':'')+'</div>';
@@ -85,17 +111,19 @@ if(result.data){
  if(profile&&profile.public_name_ready===true){result.data.partner_name=profile.nickname;result.data.__dayoPublicNameVerified=true;}
  }catch(_){} // Fail closed for names; the report itself stays accessible.
 }
-return result.data?refreshRecapPresentation(db,result.data,fetchImpl):null;
+if(!result.data)return null;
+return refreshKeepsakeImage(db,await refreshRecapPresentation(db,result.data,fetchImpl),fetchImpl);
 }
 function withLatestContent(cached,latest){
 if(!cached||!latest||cached.booking_id!==latest.booking_id)throw Error('report-identity');
 var result=Object.assign({},cached);
+delete result.__dayoKeepsakeImage;if(latest.__dayoKeepsakeImage&&latest.__dayoKeepsakeImage.booking_id===latest.booking_id)result.__dayoKeepsakeImage=latest.__dayoKeepsakeImage;
 ['id','partner_comment','stamp','keyword','illust_url','summary','key_expressions','quiz_score','word_help','feedback'].forEach(function(k){if(Object.prototype.hasOwnProperty.call(latest,k))result[k]=latest[k];});
 result.partner_name=latest.__dayoPublicNameVerified===true?latest.partner_name:'DayO Partner';
 result.__dayoPublicNameVerified=latest.__dayoPublicNameVerified===true;
 return result;
 }
-function renderDetail(r,locale){r=r||{};var l=labels[locale]||labels.en,name=nickname(r,locale),t=treat(r),img=imageURL(r.illust_url),note=text(r.partner_comment);
+function renderDetail(r,locale){r=r||{};var l=labels[locale]||labels.en,name=nickname(r,locale),t=treat(r),img=keepsakeURL(r),note=text(r.partner_comment);
 var value=conversationRecap.saved(r);
 if(!value&&Array.isArray(r.__dayoLearnerTranscript)&&r.__dayoLearnerSourceLogId){
   value=conversationRecap.build({bookingId:r.booking_id,learnerId:'authenticated-learner',language:r.language,
@@ -106,5 +134,5 @@ var recap=value?conversationRecap.render(value,locale,{wordHelp:r.word_help,quiz
 
 return '<article class="ucr-detail" data-booking-id="'+esc(r.booking_id||'')+'"'+memoryAttribute(r,locale)+'><header class="ucr-header"><p class="ucr-eyebrow">DayO · '+esc(l.record)+'</p><h3>'+esc(l.with+name)+'</h3><p class="ucr-meta">'+[date(r,locale),language(r)].filter(Boolean).map(esc).join(' · ')+'</p></header>'+recap+renderLetter(r,locale)+'<footer class="ucr-actions">'+'<button type="button" onclick="closeReportDetailModal()">'+esc(l.close)+'</button></footer></article>';}
 function renderArchive(r,index,locale){r=r||{};var l=labels[locale]||labels.en,t=treat(r);return '<button class="mypage-report-item ucr-archive" type="button" onclick="openReportDetailModal(\'report-'+(index+1)+'\')"><span class="ucr-archive-content"><strong>'+esc(l.with+nickname(r,locale))+'</strong><span class="ucr-meta">'+[date(r,locale),language(r)].filter(Boolean).map(esc).join(' · ')+'</span>'+(text(r.keyword)?'<span class="ucr-archive-theme">'+esc(r.keyword)+'</span>':'')+'<span class="ucr-archive-badges">'+(conversationRecap.saved(r)&&conversationRecap.saved(r).progress.total?'<span>'+esc(conversationRecap.labels(locale).mini)+' · '+esc(conversationRecap.saved(r).progress.completed+'/'+conversationRecap.saved(r).progress.total)+'</span>':'')+'</span></span><span class="ucr-archive-open">'+esc(l.open)+' →</span></button>';}
-return {memoryData:memoryData,refreshRecapPresentation:refreshRecapPresentation,withLatestContent:withLatestContent,renderImmediate:renderImmediate,renderLetter:renderLetter,fetchLatest:fetchLatest,hideIllustration:hideIllustration,renderDetail:renderDetail,renderArchive:renderArchive,corrections:corrections,expressions:expressions,summary:summary,quiz:quiz};
+return {refreshKeepsakeImage:refreshKeepsakeImage,memoryData:memoryData,refreshRecapPresentation:refreshRecapPresentation,withLatestContent:withLatestContent,renderImmediate:renderImmediate,renderLetter:renderLetter,fetchLatest:fetchLatest,hideIllustration:hideIllustration,renderDetail:renderDetail,renderArchive:renderArchive,corrections:corrections,expressions:expressions,summary:summary,quiz:quiz};
 });

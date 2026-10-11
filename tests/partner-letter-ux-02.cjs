@@ -37,9 +37,14 @@ async function main(){
  const disabled=await manager.start({bookingId:B,actorId:P,theme:C.storyIllustrations(chat.body.topics)[0].theme,seed:1});assert.equal(disabled.failure,'generation_disabled');assert.equal(loads,0);assert.equal(events.at(-1).stage,'generation_disabled');
  // Guard unrelated functionality and the full submission/status block byte-for-byte.
  const repo=path.resolve(__dirname,'..'),base=f=>cp.execFileSync('git',['show','44f76c04:'+f],{cwd:repo,encoding:'utf8'}).replace(/\r\n/g,'\n'),read=f=>fs.readFileSync(path.join(__dirname,'..',f),'utf8').replace(/\r\n/g,'\n');
+ // The approved private-image integration changes this file; its non-image logic is protected.
+ const slice=(source,start,end)=>source.slice(source.indexOf(start),source.indexOf(end,source.indexOf(start)));
+ const currentUI=read('public/user-conversation-report.js'),priorUI=base('public/user-conversation-report.js');
+ for(const pair of [['function corrections(','function imageURL('],['async function refreshRecapPresentation(','async function fetchLatest('],['function renderArchive(','return {']])
+  assert.equal(slice(currentUI,...pair),slice(priorUI,...pair),'non-image report/quiz/Letter logic unchanged');
  const submit=s=>s.slice(s.indexOf('    function setPartnerReportSubmitStatus('),s.indexOf('    window.handleHeaderExitClick ='));
  assert.equal(require('node:crypto').createHash('sha256').update(submit(read('public/room.html'))).digest('hex'),'6d7a81beb8ef4d502b0ec3cb6a0a677312942e2105ebbb25a9243cf9c87eab0e','reviewed status block preserved');
- for(const file of ['public/session-chat.js','public/session-lifecycle.js','public/conversation-recap.js','public/memory-game.js','public/user-conversation-report.js','api/_lib/partner-letter-gemini.js'])assert.equal(read(file),base(file),file+' unchanged');
+ for(const file of ['public/session-chat.js','public/session-lifecycle.js','public/conversation-recap.js','public/memory-game.js','api/_lib/partner-letter-gemini.js'])assert.equal(read(file),base(file),file+' unchanged');
  for(const file of ['room.html','partner-report.js','partner-report-contract.js','partner-illustration.js','conversation-recap.css'])assert.equal(read('public/'+file),read(file));
  console.log('PASS Letter UX: speech/chat/mixed/insufficient evidence, exact identity/version/PII guards, 3 grounded suggestions, no starters/fallback, editable retained drafts, disabled-provider diagnosis, reviewed status integration and protected files unchanged, mirrors.');
 }

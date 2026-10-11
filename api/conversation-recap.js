@@ -1,7 +1,11 @@
 /* Read-only canonical recap for the authenticated learner's own booking.
- * Partner raw speech never leaves this server. No new env, RPC, grants or writes. */
+ * Partner raw speech never leaves this server. Private image access uses participant JWT; generation stays disabled. */
 const recap = require('../public/conversation-recap.js');
 const partnerLetter = require('./_lib/partner-letter.js');
+const illustration = require('./_lib/partner-illustration-cloudflare.js');
+const keepsake = require('./_lib/keepsake-safety.js');
+const illustrationTest = require('./_lib/keepsake-test-runtime.js');
+const cleanup = require('./_lib/keepsake-cleanup.js');
 const quizHistory = require('./_lib/quiz-history.js');
 const uuid = v => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
 function json(res, status, body) { res.statusCode = status; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', 'private, no-store'); res.end(JSON.stringify(body)); }
@@ -14,21 +18,26 @@ async function body(req) {
   if (typeof req.body === 'string') { if (req.body.length > 1024) throw Error('size'); return JSON.parse(req.body); }
   let raw = ''; for await (const chunk of req) { raw += chunk; if (raw.length > 1024) throw Error('size'); } return JSON.parse(raw || '{}');
 }
-function createHandler({ env = process.env, fetchImpl = fetch } = {}) {
+function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot = null } = {}) {
   return async function handler(req, res) {
     if (!originAllowed(req.headers && req.headers.origin, env.VERCEL_URL)) return json(res, 403, { error: 'origin_not_allowed' });
     if (req.method !== 'POST') return json(res, 405, { error: 'method_not_allowed' });
+    // Scheduler sends parsed application/json. Separate server secret; never participant JWT.
+    if (req.body && req.body.action === 'keepsake_cleanup') return cleanup.createHandler({env,fetchImpl})(req,res);
     const token = /^Bearer ([A-Za-z0-9._-]+)$/.exec(String(req.headers && req.headers.authorization || ''));
     if (!token) return json(res, 401, { error: 'auth_required' });
     let input; try { input = await body(req); } catch (_) { return json(res, 400, { error: 'invalid_request' }); }
-    if (!input || Array.isArray(input) || !uuid(input.booking_id) || Object.keys(input).some(k => !['booking_id', 'learner_version', 'action', 'topic_id', 'source_version'].includes(k))) return json(res, 400, { error: 'invalid_request' });
+    if (!input || Array.isArray(input) || !uuid(input.booking_id) || Object.keys(input).some(k => !['booking_id', 'learner_version', 'action', 'topic_id', 'source_version', 'request_id'].includes(k))) return json(res, 400, { error: 'invalid_request' });
     if (input.learner_version != null && (typeof input.learner_version !== 'string' || input.learner_version.length > 100)) return json(res, 400, { error: 'invalid_request' });
     const url = String(env.NEXT_PUBLIC_SUPABASE_URL || env.SUPABASE_URL || '').trim().replace(/\/rest\/v1\/?$/i, '').replace(/\/+$/, '');
     const anon = String(env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
     if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url) || !anon) return json(res, 503, { error: 'source_unavailable' });
-    const partnerAction = ['partner_letter_topics', 'partner_letter_blocks', 'partner_illustration_status'].includes(input.action);
-    if (input.action && !partnerAction) return json(res, 400, { error: 'invalid_request' });
-    if (!partnerAction && Object.keys(input).some(k => !['booking_id','learner_version'].includes(k))) return json(res,400,{error:'invalid_request'});
+    const partnerAction = ['partner_letter_topics', 'partner_letter_blocks', 'partner_illustration_status', 'partner_illustration_generate'].includes(input.action);
+    if (input.request_id!=null && (input.action!=='partner_illustration_generate'||!uuid(input.request_id))) return json(res,400,{error:'invalid_request'});
+    const assetAction=input.action==='keepsake_image';
+    if (assetAction && Object.keys(input).some(k=>!['booking_id','action'].includes(k))) return json(res,400,{error:'invalid_request'});
+    if (input.action && !partnerAction && !assetAction) return json(res, 400, { error: 'invalid_request' });
+    if (!partnerAction && !assetAction && Object.keys(input).some(k => !['booking_id','learner_version'].includes(k))) return json(res,400,{error:'invalid_request'});
     const controller = new AbortController(), timer = setTimeout(() => controller.abort(), partnerAction ? 45000 : 6500);
     const headers = { apikey: anon, Authorization: 'Bearer ' + token[1] };
     async function read(route, h = headers) { const result = await fetchImpl(url + route, { headers: h, signal: controller.signal }); if (!result.ok) throw Error('read'); return result.json(); }
@@ -36,8 +45,23 @@ function createHandler({ env = process.env, fetchImpl = fetch } = {}) {
       const auth = await fetchImpl(url + '/auth/v1/user', { headers, signal: controller.signal });
       if (!auth.ok) return json(res, 401, { error: 'auth_required' });
       const user = await auth.json(); if (!uuid(user.id)) return json(res, 401, { error: 'auth_required' });
+      if (assetAction) {
+        try{const db=keepsake.participantClient({env,jwt:token[1],fetchImpl,signal:controller.signal});
+          return json(res,200,{image:await keepsake.readAsset(db,input.booking_id)});
+        }catch(_){return json(res,403,{error:'image_access_unavailable'});}
+      }
       if (partnerAction) {
-        const result = await partnerLetter.handle({input, read, user, env, signal:controller.signal, fetchImpl});
+        let result;
+        if (input.action === 'partner_illustration_generate') {
+          // Canonical participant/TEST ownership precedes any service-role client.
+          const configured = illustrationPilot || illustrationTest.createPilot({env,fetchImpl});
+          if(configured){const denied=await illustrationTest.authorize({input,read,user});
+            if(denied)return json(res,denied.status,denied.body);}
+          const pilot = configured && typeof configured.contracts === 'function'
+            ? await configured.contracts({env,jwt:token[1],user,signal:controller.signal}) : null;
+          result = await illustration.handle({input,read,user,env,signal:controller.signal,fetchImpl,
+            enabled:!!pilot,testOnly:true,quota:pilot && pilot.quota,storage:pilot && pilot.storage});
+        } else result = await partnerLetter.handle({input,read,user,env,signal:controller.signal,fetchImpl});
         return json(res,result.status,result.body);
       }
       // Ownership checked with the user's JWT/RLS BEFORE any privileged read.
