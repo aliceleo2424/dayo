@@ -3,7 +3,7 @@ const recap=require('../../public/conversation-recap.js');
 const {createHash}=require('node:crypto');
 const VERSION='dayo_partner_letter_v1';
 const provider=require('./partner-letter-gemini.js');
-function compose(value,topic,model){return provider.guard(value,topic).map(b=>({...b,source_utterance_id:topic.id,generator:VERSION,model}));}
+function compose(value,topic,model){return provider.guard(value,topic).map(b=>({...b,source_utterance_id:topic.id,source_medium:topic.source_medium||'speech',generator:VERSION,model}));}
 async function handle({input,read,user,env,signal,draftGenerator,fetchImpl}){
  const allowed=['booking_id','action','topic_id','source_version'];
  if(Object.keys(input).some(k=>!allowed.includes(k))||!['partner_letter_topics','partner_letter_blocks','partner_illustration_status'].includes(input.action))return {status:400,body:{error:'invalid_request'}};
@@ -26,9 +26,16 @@ async function handle({input,read,user,env,signal,draftGenerator,fetchImpl}){
   return {status:200,body:{exists:!!report,letter_sent:!!letter,letter_digest:letter?createHash('sha256').update(letter,'utf8').digest('hex'):null}};
  }
  const logs=await read('/rest/v1/session_logs?'+new URLSearchParams({booking_id:'eq.'+b.id,participant_id:'eq.'+b.learner_id,participant_role:'eq.learner',select:'id,booking_id,participant_id,participant_role,transcript',limit:'1'}),{apikey:key,Authorization:'Bearer '+key});
- const log=Array.isArray(logs)&&logs[0],rows=recap.rows(log,b.id,b.learner_id,'learner');
- if(!rows||recap.language(b.language)!=='en')return {status:200,body:{topics:[],blocks:[],status:'no_canonical_source'}};
- const topics=recap.letterTopics(rows.slice(0,500)).filter(t=>provider.safeQuote(t.quote)&&provider.nouns(t.quote).length).map(t=>({...t,nouns:provider.nouns(t.quote),words:[...new Set(rows.filter(r=>t.source_utterance_ids.includes(r.id)).flatMap(r=>[...provider.nouns(r.text),...(/\bcrowded\b/i.test(r.text)?['crowded']:[])]))].slice(0,5)})),version=recap.sourceVersion(b.id,log.id,rows);
+ const log=Array.isArray(logs)&&logs[0],speech=recap.rows(log,b.id,b.learner_id,'learner')||[];
+ let chat=[];
+ try{
+  // Participant JWT + existing booking-scoped RLS; never a privileged chat read.
+  const messages=await read('/rest/v1/booking_chat_messages?'+new URLSearchParams({booking_id:'eq.'+b.id,sender_id:'eq.'+b.learner_id,sender_role:'eq.learner',select:'booking_id,id,sender_id,sender_role,text,created_at',order:'created_at.asc,id.asc',limit:'500'}));
+  chat=recap.chatEvidence(messages,b.id,b.learner_id,b.partner_user_id).filter(r=>r.speaker==='learner');
+ }catch(_){/* Missing optional chat never removes existing speech evidence. */}
+ const rows=[...speech.slice(0,500),...chat];
+ if(!rows.length||recap.language(b.language)!=='en')return {status:200,body:{topics:[],blocks:[],status:'no_canonical_source'}};
+ const topics=recap.letterTopics(rows).filter(t=>provider.safeQuote(t.quote)&&provider.nouns(t.quote).length).map(t=>({...t,source_medium:chat.some(r=>r.id===t.id)?'chat':'speech',nouns:provider.nouns(t.quote),words:[...new Set(rows.filter(r=>t.source_utterance_ids.includes(r.id)&&provider.safeQuote(r.text)).flatMap(r=>[...provider.nouns(r.text),...(/\bcrowded\b/i.test(r.text)?['crowded']:[])]))].slice(0,5)})),version=recap.sourceVersion(b.id,(log&&log.id)||'saved-chat',rows);
  if(input.action==='partner_letter_topics')return {status:200,body:{topics,source_version:version,status:topics.length?'available':'no_topics'}};
  if(input.source_version!==version)return {status:409,body:{error:'canonical_revision_changed'}};
  const topic=topics.find(t=>t.id===input.topic_id);if(!topic)return {status:400,body:{error:'invalid_topic'}};

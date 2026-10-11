@@ -34,7 +34,7 @@ function harness(o={}){
 async function turns(){for(let i=0;i<8;i++)await new Promise(setImmediate)}
 async function main(){
  let h=harness({note:''});await h.send();assert.equal(h.counts.save,0);assert.match(h.status(),/Write a Letter/);assert.equal(h.button().disabled,false);
- h=harness({save:()=>({ok:false})});await h.send();assert.match(h.status(),/couldn’t send/);assert.equal(h.counts.read,2);assert.equal(h.counts.finish,0);assert.equal(h.w.document.querySelector('textarea').value,NOTE);
+ h=harness({save:()=>({ok:false,confirmedFailure:true})});await h.send();assert.match(h.status(),/couldn’t send/);assert.equal(h.counts.read,2);assert.equal(h.counts.finish,0);assert.equal(h.w.document.querySelector('textarea').value,NOTE);
  h=harness({save:()=>({ok:false}),read:n=>response(n>1?NOTE:'')});await h.send();assert.equal(h.counts.save,1);assert.equal(h.counts.finish,1);assert.equal(h.status(),'Letter sent.');await h.send();assert.equal(h.counts.save,1);
  h=harness({save:()=>({ok:false}),read:n=>n===1?response(''):{ok:false}});await h.send();assert.match(h.status(),/couldn’t confirm the status/);assert.equal(h.button().textContent,'Check status');await h.send();assert.equal(h.counts.save,1);assert.equal(h.counts.finish,0);
  let fail=true;h=harness({read:()=>fail?{ok:false}:response('')});await h.send();assert.equal(h.counts.save,0);fail=false;await h.send();assert.equal(h.counts.save,0);assert.match(h.status(),/No saved Letter/);await h.send();assert.equal(h.counts.save,1);
@@ -44,7 +44,7 @@ async function main(){
   h=harness({finish});await h.send();assert.match(h.status(),/^Your Letter was sent/);assert(!/濡|한국어|세션/.test(h.status()));assert(h.button().disabled);assert.equal(h.counts.read,2);assert.deepEqual(h.order,['save','finish']);await h.send();assert.equal(h.counts.save,1);
  }
  h=harness({finish:()=>({success:false}),read:n=>n===1?response(''):{ok:false}});await h.send();assert.match(h.status(),/Your Letter was sent, but we couldn’t check/);assert(h.button().disabled);await h.send();assert.equal(h.counts.save,1);
- h=harness({finish:()=>({success:false}),read:()=>response('')});await h.send();assert.match(h.status(),/couldn’t send/);assert(!h.button().disabled);
+ h=harness({finish:()=>({success:false}),read:()=>response('')});await h.send();assert.match(h.status(),/Your Letter was sent, but we couldn’t check/);assert(h.button().disabled);await h.send();assert.equal(h.counts.save,1);
  h=harness({transcriptFail:true,imageThrow:true});await h.send();assert.equal(h.status(),'Letter sent.');assert(h.button().disabled);
  let resolveFinish;h=harness({finish:()=>new Promise(r=>resolveFinish=r)});let result=h.send();await turns();assert.match(h.status(),/^Letter sent\. Checking/);assert(h.button().disabled);await h.send();assert.equal(h.counts.save,1);resolveFinish({success:true,reward_amount:0,reward_suppressed:true});await result;assert.equal(h.status(),'Letter sent.');
  h=harness({finish:()=>new Promise(()=>{})});result=h.send();await turns();h.advance(8000);await result;assert.match(h.status(),/couldn’t confirm your earnings/);assert(h.button().disabled);
@@ -53,11 +53,20 @@ async function main(){
  h=harness({locale:'KO',note:''});await h.send();assert.match(h.status(),/Write a Letter/); // implicit default KO must not leak
  h=harness({locale:'KO',savedLocale:'KO',note:''});await h.send();assert.match(h.status(),/작성해 주세요/);h.toggle('EN');assert.match(h.status(),/Write a Letter/);
 
- for(const code of ['validation','letter_save_failed','status_check_failed','sent','finish_failed','reward_status_unavailable','sent_status_unavailable','already_sent']){h=harness();h.set(code);assert(!/[가-힣]/.test(h.status()));h.toggle('KO');assert(/[가-힣]/.test(h.status()));h.toggle('EN');assert(!/[가-힣]/.test(h.status()));}
+ for(const code of ['validation','preflight_failed','letter_save_failed','status_check_failed','sent','finish_failed','reward_status_unavailable','sent_status_unavailable','already_sent']){h=harness();h.set(code);assert(!/[가-힣]/.test(h.status()));h.toggle('KO');assert(/[가-힣]/.test(h.status()));h.toggle('EN');assert(!/[가-힣]/.test(h.status()));}
+ // Sofia-equivalent: committed save with a lost ACK, then failed confirmation.
+ h=harness({save:()=>({ok:false}),finish:()=>({success:false}),read:n=>response(n===2?NOTE:'')});await h.send();assert.match(h.status(),/^Your Letter was sent/);assert(h.button().disabled);await h.send();assert.equal(h.counts.save,1);
+ // Unknown write + empty read is not a definite rejection; retry reads only.
+ h=harness({save:()=>({ok:false}),read:n=>response(n>=3?NOTE:'')});await h.send();assert.match(h.status(),/couldn’t confirm the status/);assert.equal(h.button().textContent,'Check status');assert.equal(h.w.document.querySelector('textarea').value,NOTE);await h.send();assert.match(h.status(),/already been sent/);assert.equal(h.counts.save,1);
+ // Jen-equivalent: missing Preview configuration fails preflight before any write.
+ h=harness({read:()=>({ok:false,status:503})});await h.send();assert.match(h.status(),/Sending was not attempted/);assert.equal(h.counts.save,0);assert.equal(h.counts.finish,0);assert.equal(h.counts.transcript,0);assert.equal(h.button().textContent,'Check status');assert.equal(h.w.document.querySelector('textarea').value,NOTE);await h.send();assert.equal(h.counts.save,0);
+ // An explicit rejection still checks the server again before a second write.
+ h=harness({save:()=>({ok:false,confirmedFailure:true}),read:n=>response(n>=3?NOTE:'')});await h.send();assert.match(h.status(),/couldn’t send/);await h.send();assert.match(h.status(),/already been sent/);assert.equal(h.counts.save,1);
  const handler=require(root+'/api/_lib/partner-letter.js');let routes=[];
  const base={user:{id:P},env:{SUPABASE_SERVICE_ROLE_KEY:'fixture-only'},input:{booking_id:B,action:'partner_illustration_status'},
  read:async route=>{routes.push(route);if(route.includes('bookings?'))return [{id:B,learner_id:'user',partner_user_id:P,status:'confirmed'}];if(route.includes('profiles?'))return [{id:P,role:'partner'}];return [{booking_id:B,partner_user_id:P,partner_comment:' \r\nexisting private Letter\r\n '}] }};
- let r=await handler.handle(base);assert.deepEqual(r.body,{exists:true,letter_sent:true,letter_digest:hash('existing private Letter')});
+ let r=await handler.handle({...base,env:{}});assert.equal(r.status,503);assert.equal(r.body.error,'source_unavailable');assert(!routes.some(route=>route.includes('session_reports?')),'Jen missing-key preflight never accesses saved reports');
+ r=await handler.handle(base);assert.deepEqual(r.body,{exists:true,letter_sent:true,letter_digest:hash('existing private Letter')});
  assert(!JSON.stringify(r).includes('private Letter'));assert(routes.at(-1).includes('booking_id=eq.'+B));assert(routes.at(-1).includes('partner_user_id'));
  r=await handler.handle({...base,read:async route=>route.includes('session_reports?')?[]:base.read(route)});assert.deepEqual(r.body,{exists:false,letter_sent:false,letter_digest:null});
  r=await handler.handle({...base,user:{id:'other'}});assert.equal(r.status,403);

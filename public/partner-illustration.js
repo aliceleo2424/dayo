@@ -35,7 +35,7 @@ function create(o){
   var theme=o.contract.safeKeyword(input.theme),url=o.contract.illustrationUrl(theme,input.seed),old=jobs.get(input.bookingId);
   if(old){cancel(old);jobs.delete(input.bookingId);persist();}
   if(!theme||!url||!o.contract.illustrationKey(theme)){stage(null,'unsupported_concept');return {status:'failed',failure:'unsupported_concept',bookingId:input.bookingId};}
-  if(o.contract.illustrationAvailable===false){stage(null,'provider_request_failed');return {status:'failed',failure:'provider_request_failed',bookingId:input.bookingId};}
+  if(o.contract.illustrationAvailable===false){stage(null,'generation_disabled');return {status:'failed',failure:'generation_disabled',bookingId:input.bookingId};}
   if(!uuid(input.bookingId))return null;
   // Reserve the generation token before auth, so an immediate report save cannot
   // lose its association while getUser is in flight.

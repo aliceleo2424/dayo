@@ -730,7 +730,15 @@
         if (!insertRes || (insertRes && insertRes.error) || !resultData.success || resultData.learner_id !== learnerId) {
           console.warn('[DayO] session_reports merge failed', (insertRes && insertRes.error) || resultData.message || 'identity-mismatch');
           try { localStorage.setItem('dayo_last_approved_card', JSON.stringify(payload)); } catch (e) { /* ignore */ }
-          return { ok: false, error: (insertRes && insertRes.error) || new Error(resultData.message || 'identity-mismatch') };
+          // Only a real structured rejection or known rolled-back DB error is
+          // definite. Missing/malformed ACKs and identity mismatches stay unknown.
+          var serverPayload = insertRes && insertRes.data;
+          if (Array.isArray(serverPayload)) serverPayload = serverPayload[0];
+          var rejected = !!(insertRes && !insertRes.error && serverPayload &&
+            typeof serverPayload === 'object' && serverPayload.success === false);
+          var errorCode = insertRes && insertRes.error && insertRes.error.code;
+          var confirmedFailure = rejected || ['42501', '23505', '23514'].includes(errorCode);
+          return { ok: false, confirmedFailure: confirmedFailure, error: (insertRes && insertRes.error) || new Error(resultData.message || 'identity-mismatch') };
         }
       } catch (error) {
         return { ok: false, error: error };

@@ -7165,6 +7165,7 @@
       invalid_booking:['This booking could not be verified. Please reopen the conversation.','예약을 확인하지 못했습니다. 대화를 다시 열어 주세요.'],
       validation:['Write a Letter of 1–1,000 characters before sending.','1~1,000자 이내로 레터를 작성해 주세요.'],
       letter_save_failed:['We couldn’t send your Letter. Your draft is still here. Please try again.','레터를 보내지 못했습니다. 작성한 내용은 그대로 있어요. 다시 시도해 주세요.'],
+      preflight_failed:['We couldn’t check this session’s Letter status. Sending was not attempted. Your draft is still here. Please check status again.','이 세션의 레터 저장 상태를 확인하지 못해 전송을 시도하지 않았어요. 작성한 내용은 그대로 있어요. 상태를 다시 확인해 주세요.'],
       status_check_failed:['We couldn’t confirm the status. Your draft is still here. Check status before trying to send again.','저장 상태를 확인하지 못했습니다. 작성한 내용은 그대로 있어요. 다시 보내기 전에 상태를 확인해 주세요.'],
       not_sent:['No saved Letter was found for this session. You can try sending your draft again.','이 세션에 저장된 레터가 없습니다. 작성한 레터를 다시 보내실 수 있어요.'],
       sent_checking:['Letter sent. Checking session status…','레터를 보냈어요. 세션 상태를 확인하고 있어요…'],
@@ -7287,6 +7288,7 @@
       if (partnerLetterStatusUnknown) { await window.restorePartnerLetterState(); return; }
       if (window.isObserverRoomMode && window.isObserverRoomMode()) return;
       partnerReportSubmitPending = true; setPartnerReportSubmitBusy(true);
+      var letterPreflightComplete = false;
       try {
         stopPartnerSentencePolling();
         if (window.DayORoomAccess && window.DayORoomAccess.adminTest) {
@@ -7297,6 +7299,7 @@
         var bookingId = identity.bookingId, partnerId = identity.partnerId;
         setPartnerReportSubmitStatus('checking', true);
         var existing = await existingPartnerLetter(bookingId);
+        letterPreflightComplete = true;
         if (existing.letter_sent) { finishPartnerLetterUI('already_sent'); return; }
         var cardData = window.DayOPartnerReport ? window.DayOPartnerReport.payload() : {};
         var field = document.getElementById('popup-partner-comment');
@@ -7318,7 +7321,11 @@
         if (!reportSave || !reportSave.ok) {
           // Lost acknowledgement can follow a committed save: read back now.
           var recovered = await existingPartnerLetter(bookingId);
-          if (!recovered.letter_sent) { setPartnerReportSubmitStatus('letter_save_failed', false); return; }
+          if (!recovered.letter_sent) {
+            if (reportSave && reportSave.confirmedFailure === true) setPartnerReportSubmitStatus('letter_save_failed', false);
+            else letterStatusUnknown();
+            return;
+          }
           if (recovered.letter_digest !== expectedDigest) { finishPartnerLetterUI('different_saved'); return; }
         }
         // A server save ACK or exact content read-back is the success boundary.
@@ -7333,10 +7340,10 @@
           try {
             var confirmed = await existingPartnerLetter(bookingId);
             if (!confirmed.letter_sent) {
-              partnerReportSubmitComplete = false;
-              setPartnerReportSubmitStatus('letter_save_failed', false); return;
+              // A later empty read cannot undo a successful save ACK/read-back.
+              code = 'sent_status_unavailable';
             }
-            if (confirmed.letter_digest !== expectedDigest) code = 'different_saved';
+            else if (confirmed.letter_digest !== expectedDigest) code = 'different_saved';
             else code = finish && (finish.needs_review === true || finish.code === 'evidence_insufficient') ? 'finish_failed' : 'reward_status_unavailable';
           } catch (_) {
             // Successful save ACK remains known even if a later read fails.
@@ -7350,6 +7357,10 @@
       } catch (error) {
         if (partnerReportSubmitComplete) finishPartnerLetterUI('sent_status_unavailable');
         else if (error && error.message === 'invalid_booking') setPartnerReportSubmitStatus('invalid_booking', false);
+        else if (!letterPreflightComplete) {
+          partnerLetterStatusUnknown = true;
+          setPartnerReportSubmitStatus('preflight_failed', false);
+        }
         else letterStatusUnknown();
       } finally {
         partnerReportSubmitPending = false; setPartnerReportSubmitBusy(partnerReportSubmitComplete);
@@ -7642,7 +7653,7 @@
     <div class="pr-dialog">
       <header><h2 id="pr-title">Partner Letter</h2><p class="pr-intro">Mention one story from today, add a short reaction, and invite the next conversation.</p></header>
       <section class="pr-section"><h3>Stories & words from today</h3><div class="pr-chips" id="pr-letter-words"></div><div class="pr-chips" id="pr-letter-topics" aria-label="Choose a recorded story"></div><div class="pr-letter-tools"><button type="button" id="pr-letter-refresh">Refresh stories</button><button type="button" id="pr-letter-generate" disabled>Suggest sentences</button></div><p id="pr-letter-status" class="pr-hint" role="status"></p><div id="pr-letter-drafts" class="pr-letter-drafts"></div></section>
-      <section class="pr-section"><h3>Your message</h3><label class="pr-field">Your note<textarea id="popup-partner-comment" rows="3" maxlength="1000" placeholder="Leave a warm note. You can edit any template."></textarea></label><div id="pr-letter-selected" class="pr-letter-selected"></div><p id="pr-letter-quality" class="pr-hint" hidden></p><details class="pr-note-starters"><summary>Use a message starter (optional)</summary><p class="pr-hint">Choose a message, then make it your own.</p><div class="pr-chips" id="pr-note-templates" aria-label="Note templates"></div><label class="pr-field" id="pr-recommendation-field" hidden>Recommendation<input type="text" id="pr-recommendation" maxlength="120" placeholder="Place, food or activity"></label></details></section>
+      <section class="pr-section"><h3>Your message</h3><label class="pr-field">Your note<textarea id="popup-partner-comment" rows="3" maxlength="1000" placeholder="Write your own message, or edit a suggested sentence."></textarea></label><div id="pr-letter-selected" class="pr-letter-selected"></div></section>
       <details class="pr-section pr-optional"><summary>Add a conversation keepsake (optional)</summary><div class="pr-keyword-layout"><div><p id="pr-keyword-hint" class="pr-hint"></p><div id="pr-keyword-options" class="pr-chips" aria-label="Suggested conversation themes"></div><div id="pr-custom-keyword-field" hidden><label class="pr-field">Write a short topic or phrase<input type="text" id="pr-custom-keyword" maxlength="60" placeholder="e.g. Seoul Forest cafés"></label><button type="button" id="pr-use-keyword">Use theme</button></div><p id="pr-keyword-value" class="pr-hint" aria-live="polite"></p></div><figure class="pr-preview"><img id="pr-illustration" alt="Conversation keepsake illustration" hidden><figcaption id="pr-image-status" aria-live="polite">Choose a theme for your illustration. Image generation is optional.</figcaption><button type="button" id="pr-image-retry">Try illustration again</button></figure></div></details>
       <details class="pr-transcript"><summary>View conversation transcript — reference only</summary><div id="popup-transcript-list"></div></details>
       <footer class="pr-actions"><p id="partner-report-submit-status" role="status" aria-live="polite" hidden></p><button type="button" id="btn-final-partner-submit" onclick="executePartnerPayoutAndExit()">Send letter and finish</button></footer>

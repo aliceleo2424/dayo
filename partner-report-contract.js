@@ -1,20 +1,8 @@
 (function(root){
  'use strict';
  var treats=[['americano','Americano','Great energy'],['green_tea','Green Tea','Calm & comfortable'],['vanilla_latte','Vanilla Latte','Warm conversation'],['cookie','Cookie','Curious questions'],['croissant','Croissant','Great storyteller'],['macaron','Macaron','Lovely conversation']].map(function(x){return Object.freeze({code:x[0],label:x[1],meaning:x[2]});});
- var templates=[['a','Nice talking'],['b','Keep it going'],['c','Your stories'],['d','Great questions'],['e','Today’s topic'],['f','Recommendation'],['g','Custom message']];
- var languageLabels={en:'English',english:'English',es:'Spanish',spanish:'Spanish',fr:'French',french:'French',ko:'Korean',korean:'Korean'};
  function clean(value,max){return String(value||'').replace(/[\r\n\t]+/g,' ').trim().slice(0,max||60);}
  function safeKeyword(value){var text=clean(value,60);return text&& !/@|https?:|www\.|\d{5}|[<>\{\}]/i.test(text)?text:'';}
- function note(id,context,recommendation){
-  context=context||{};var lang=languageLabels[String(context.language||'').toLowerCase()]||'',inLanguage=lang?' in '+lang:'';
-  if(id==='a')return 'It was so nice talking with you'+inLanguage+' today.\nHave a great day!';
-  if(id==='b')return 'You did a great job keeping the conversation going'+inLanguage+' today!';
-  if(id==='c')return 'I really enjoyed hearing your stories today.\nHope we can talk again soon!';
-  if(id==='d')return 'You asked great questions today.\nKeep speaking with confidence!';
-  if(id==='e')return context.topic?'I loved talking about '+clean(context.topic,80)+' with you today!':'';
-  if(id==='f')return recommendation?'I recommend '+clean(recommendation,120)+' — I think you’d enjoy it!':'';
-  return '';
- }
  // Supported topic rules preserve known entities and combine only nearby evidence.
  // This is a conservative local heuristic, not a multilingual NLP/PII model.
  function topicText(value){return clean(value,12000).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[/|]+/g,' ');}
@@ -57,7 +45,7 @@
   return ranked.sort(function(a,b){return b.score-a.score||a.index-b.index;}).slice(0,3).map(function(item){return item.rule.label;});
  }
  var memoryThemes={cafe_coffee:'a small café memory centered on a coffee cup, with a quiet table corner',cafe_busy:'a café table corner with a gentle suggestion of a busy café using abstract chairs, no people',cafe_rabbit:'a café memory and a subtle symbolic rabbit motif on the paper margin, not a real rabbit inside a café',cafe_coffee_busy:'a café memory centered on a coffee cup, with a gentle suggestion of a busy café using abstract chairs',cafe_coffee_rabbit:'a café memory centered on a coffee cup and a subtle symbolic rabbit motif on the paper margin; the rabbit is a remembered topic, not a real rabbit in a café',cafe_busy_rabbit:'a café memory with abstract chairs suggesting a busy café and a subtle symbolic rabbit motif, not a real rabbit in a café',cafe_coffee_busy_rabbit:'a café memory centered on a coffee cup, a subtle symbolic rabbit motif on the paper margin, and a gentle suggestion of a busy café using abstract chairs; the rabbit is not a real rabbit in a café'};
- function storyIllustrations(topics){var safe=(Array.isArray(topics)?topics:[]).filter(t=>t&&typeof t.quote==='string'&&Array.isArray(t.source_utterance_ids)&&t.source_utterance_ids.includes(t.id));var cafe=safe.some(t=>t.label==='Food & cafés'&&/\bcaf[eé]s?\b/i.test(t.quote));if(!cafe)return [];var words=safe.flatMap(t=>t.words||t.nouns||[]);var coffee=words.includes('coffee'),busy=words.includes('crowded'),rabbit=safe.some(t=>t.label==='Pets'&&/\brabbits?\b/i.test(t.quote));if(!coffee&&!busy&&!rabbit)return [];var theme='cafe'+(coffee?'_coffee':'')+(busy?'_busy':'')+(rabbit?'_rabbit':'');return [{theme:theme,label:'Today’s conversation memory',concept_key:theme}];}
+ function storyIllustrations(topics){var safe=(Array.isArray(topics)?topics:[]).filter(t=>t&&typeof t.quote==='string'&&Array.isArray(t.source_utterance_ids)&&t.source_utterance_ids.includes(t.id));var cafe=safe.some(t=>t.label==='Food & cafés'&&/\bcaf[eé]s?(?=$|[^A-Za-zÀ-ž])/i.test(t.quote));if(!cafe)return [];var words=safe.flatMap(t=>t.words||t.nouns||[]);var coffee=words.includes('coffee'),busy=words.includes('crowded'),rabbit=safe.some(t=>t.label==='Pets'&&/\brabbits?\b/i.test(t.quote));if(!coffee&&!busy&&!rabbit)return [];var theme='cafe'+(coffee?'_coffee':'')+(busy?'_busy':'')+(rabbit?'_rabbit':'');return [{theme:theme,label:'Today’s conversation memory',concept_key:theme}];}
  function illustrationKey(theme){return memoryThemes[theme]?theme:null;}
  function illustrationConcept(theme){
   var safe=safeKeyword(theme);if(!safe)return '';if(memoryThemes[safe])return memoryThemes[safe];
@@ -73,6 +61,6 @@
   var prompt='Warm watercolor and colored pencil on soft paper: '+concept+'. Ivory #FFFBF4, sage #5F7D63, beige #F8F0E3, warm brown. Contemporary editorial diary/postcard mood, simple focal composition. No photorealism, stock scene, anime, chibi, mascot, 3D, neon, faces, text, letters or logos.';
   return 'https://image.pollinations.ai/prompt/'+encodeURIComponent(prompt)+'?width=400&height=400&nologo=true&seed='+encodeURIComponent(seed||1);
  }
- var api={illustrationAvailable:false,treats:Object.freeze(treats),templates:templates,note:note,suggestions:suggestions,safeKeyword:safeKeyword,illustrationConcept:illustrationConcept,illustrationUrl:illustrationUrl,storyIllustrations:storyIllustrations,illustrationKey:illustrationKey};
+ var api={illustrationAvailable:false,treats:Object.freeze(treats),suggestions:suggestions,safeKeyword:safeKeyword,illustrationConcept:illustrationConcept,illustrationUrl:illustrationUrl,storyIllustrations:storyIllustrations,illustrationKey:illustrationKey};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.DayOPartnerReportContract=api;
 })(typeof window!=='undefined'?window:this);
