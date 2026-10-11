@@ -109,34 +109,56 @@
     localizeGeneratedCopy();
   }
 
+  function bookingInstant(iso) {
+    var raw = String(iso || '').trim();
+    return /(?:Z|[+-]\d{2}:\d{2})$/i.test(raw) ? Date.parse(raw) : NaN;
+  }
+
   function formatSessionWhen(iso) {
-    if (!iso) return '';
-    var date = new Date(iso);
-    if (isNaN(date.getTime())) return '';
-    var timeLabel = String(date.getHours()).padStart(2, '0') + ':'
-      + String(date.getMinutes()).padStart(2, '0');
-    var y = date.getFullYear();
-    var m = date.getMonth() + 1;
-    var d = date.getDate();
-    var now = new Date();
-    if (now.getFullYear() === y && now.getMonth() + 1 === m && now.getDate() === d) {
+    var at = bookingInstant(iso);
+    if (!Number.isFinite(at)) return '';
+    // Booking display is always KST, independently of the browser's local zone.
+    var formatter = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Seoul',
+      year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+    function parts(date) {
+      var values = {};
+      formatter.formatToParts(date).forEach(function (part) { values[part.type] = part.value; });
+      return values;
+    }
+    var date = parts(new Date(at)), today = parts(new Date());
+    var timeLabel = date.hour + ':' + date.minute;
+    if (today.year === date.year && today.month === date.month && today.day === date.day) {
       return i18n('mypage.session.todayTime', { time: timeLabel });
     }
-    return i18n('mypage.session.mdTime', { m: m, d: d, time: timeLabel });
+    return i18n('mypage.session.mdTime', { m: Number(date.month), d: Number(date.day), time: timeLabel });
+  }
+
+  function eligibleUpcomingBookings(rows, now) {
+    return (rows || []).filter(function (row) {
+      var start = bookingInstant(row.scheduled_at);
+      return row.id && row.status === 'confirmed' && !row.ended_at && Number.isFinite(start)
+        && start + 30 * 60000 > now;
+    }).sort(function (a, b) { return bookingInstant(a.scheduled_at) - bookingInstant(b.scheduled_at); });
   }
 
   var nextConversationTiming = null;
   var nextConversationTimer = null;
+  var nextConversationLoadVersion = 0;
 
   function nextConversationState(session, now) {
-    var raw = String(session && session.scheduledAt || '').trim();
     // Same zoned booking timestamp and -5/+30 minute boundaries as room access.
-    var start = /(?:Z|[+-]\d{2}:\d{2})$/i.test(raw) ? Date.parse(raw) : NaN;
+    var start = bookingInstant(session && session.scheduledAt);
     if (!Number.isFinite(start) || !session || !session.bookingId) return { key: 'badge', allowed: false };
     if (session.internalTest) return { key: 'ready', allowed: true };
     var remaining = start - now;
-    if (remaining > 5 * 60000) return { key: 'countdown', minutes: Math.ceil(remaining / 60000), allowed: false,
-      delay: remaining - (Math.ceil(remaining / 60000) - 1) * 60000 };
+    if (remaining > 5 * 60000) {
+      var totalMinutes = Math.ceil(remaining / 60000), days = Math.floor(totalMinutes / 1440);
+      var hours = Math.floor((totalMinutes % 1440) / 60), minutes = totalMinutes % 60;
+      var key = days ? (hours ? 'countdownDaysHours' : 'countdownDays')
+        : hours ? (minutes ? 'countdownHoursMinutes' : 'countdownHours') : 'countdown';
+      return { key: key, days: days, hours: hours, minutes: minutes, allowed: false,
+        delay: remaining - (totalMinutes - 1) * 60000 };
+    }
     if (remaining > 0) return { key: 'ready', allowed: true, delay: remaining };
     if (now < start + 30 * 60000) return { key: 'live', allowed: true, delay: start + 30 * 60000 - now };
     return { key: 'expired', allowed: false };
@@ -148,8 +170,16 @@
     var state = nextConversationState(nextConversationTiming, Date.now());
     var badge = document.getElementById('urgent-session-badge');
     var button = document.querySelector('#urgent-session-banner button[onclick="enterStudio()"]');
-    if (badge) badge.textContent = i18n('mypage.urgent.' + state.key, { minutes: state.minutes });
+    if (badge) badge.textContent = i18n('mypage.urgent.' + state.key, { days: state.days, hours: state.hours, minutes: state.minutes });
     if (button) button.disabled = !state.allowed;
+    if (state.key === 'expired' && nextConversationTiming) {
+      nextConversationTiming = null;
+      syncRoomEntryLinks('');
+      var urgent = document.getElementById('urgent-session-banner');
+      if (urgent) urgent.hidden = true;
+      // One boundary refresh selects the next valid booking, not periodic DB polling.
+      loadUrgentSessionBanner();
+    }
     if (state.delay && !document.hidden) {
       nextConversationTimer = setTimeout(refreshNextConversationTiming, Math.max(1, Math.min(60000, state.delay)));
     }
@@ -259,8 +289,10 @@
   }
 
   async function loadUrgentSessionBanner() {
+    var version = ++nextConversationLoadVersion;
     var urgent = document.getElementById('urgent-session-banner');
     if (!urgent) return;
+    urgent.hidden = true;
     var titleEl = document.getElementById('urgent-session-title');
     var metaEl = document.getElementById('urgent-session-meta');
     var badgeEl = document.getElementById('urgent-session-badge');
@@ -271,7 +303,8 @@
       cancelButton.onclick = null;
     }
 
-    var session = readLocalNextSession();
+    // Only authenticated canonical bookings may populate the upcoming card.
+    var session = null;
     var futureBookings = [];
     var confirmedBookingId = '';
     syncRoomEntryLinks('');
@@ -288,21 +321,26 @@
         if (userId) {
           var q = await supabase
             .from('bookings')
-            .select('id, partner_user_id, partner_id, scheduled_at, status, language')
+            .select('id, partner_user_id, partner_id, scheduled_at, status, language, ended_at, is_test_session')
             .eq('learner_id', userId)
             .eq('status', 'confirmed')
             .gte('scheduled_at', new Date(Date.now() - 30 * 60000).toISOString())
             .order('scheduled_at', { ascending: true });
           if (q.error) throw q.error;
-          var now = Date.now();
-          var upcoming = (q.data || []).filter(function (row) {
-            if (!row.scheduled_at) return true;
-            var at = new Date(row.scheduled_at).getTime();
-            return !isNaN(at) && at + 30 * 60000 >= now;
-          })[0];
-          futureBookings = (q.data || []).filter(function (row) {
-            return row.scheduled_at && new Date(row.scheduled_at).getTime() > now;
-          });
+          var candidates = eligibleUpcomingBookings(q.data, Date.now()), verified = [];
+          for (var index = 0; index < candidates.length; index++) {
+            var candidate = candidates[index];
+            // TEST settlement can leave status=confirmed after the session has ended.
+            // Reuse Room's canonical participant-only, read-only ended-state contract.
+            var state = await supabase.rpc('get_room_session_state', { p_booking_id: candidate.id });
+            if (!state.error && state.data && state.data.success === true
+                && state.data.booking_id === candidate.id && state.data.session_ended === false) {
+              verified.push(candidate);
+            }
+          }
+          var eligible = eligibleUpcomingBookings(verified, Date.now());
+          var upcoming = eligible[0];
+          futureBookings = eligible.filter(function (row) { return bookingInstant(row.scheduled_at) > Date.now(); });
           session = null;
           if (upcoming) {
             confirmedBookingId = upcoming.id;
@@ -339,6 +377,8 @@
       }
     }
 
+    if (version !== nextConversationLoadVersion
+        || (window._dayoAuthUser && window._dayoAuthUser.id !== userId)) return;
     syncRoomEntryLinks(confirmedBookingId);
     renderAdditionalBookingList(futureBookings, confirmedBookingId, userId);
     if (session && /[@+]/.test(String(session.partnerName || ''))) session.partnerName = 'DayO Partner';

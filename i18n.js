@@ -737,6 +737,10 @@
       KO: '🚨 30분 후 시작', EN: '🚨 Starts in 30 min', ZH: '🚨 30分钟后开始', JA: '🚨 30分後に開始', FR: '🚨 Débute dans 30 min', ES: '🚨 Empieza en 30 min'
     },
     'mypage.urgent.countdown': { KO: '{minutes}분 후 시작', EN: 'Starts in {minutes} min' },
+    'mypage.urgent.countdownHours': { KO: '{hours}시간 후 시작', EN: 'Starts in {hours}h' },
+    'mypage.urgent.countdownHoursMinutes': { KO: '{hours}시간 {minutes}분 후 시작', EN: 'Starts in {hours}h {minutes}m' },
+    'mypage.urgent.countdownDays': { KO: '{days}일 후 시작', EN: 'Starts in {days}d' },
+    'mypage.urgent.countdownDaysHours': { KO: '{days}일 {hours}시간 후 시작', EN: 'Starts in {days}d {hours}h' },
     'mypage.urgent.ready': { KO: '입장 가능', EN: 'Ready to enter' },
     'mypage.urgent.live': { KO: '대화 시작 · 입장 가능', EN: 'Conversation started · You can enter' },
     'mypage.urgent.expired': { KO: '입장 시간 종료', EN: 'Entry window closed' },
