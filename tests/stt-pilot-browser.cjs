@@ -12,10 +12,15 @@ let grants=0;const used=new Set();
 const server=http.createServer((req,res)=>{
  const url=new URL(req.url,'http://localhost');
  if(url.pathname==='/api/stt-pilot-credentials'){
-  grants++;const role=(req.headers.authorization||'').includes('partner')?'partner':'learner',fixture=req.headers['x-local-fixture']||'default';
-  const max=fixture.includes('deadline')?1:fixture.includes('overlong')?601:300;
-  res.setHeader('Content-Type','application/json');return res.end(JSON.stringify({bookingId:BOOKING,role,model:'stt-rt-v5',
-   api_key:'snx_temp_'+fixture+'_'+role,expires_at:new Date(Date.now()+30000).toISOString(),maxSessionSeconds:max,captureEndsAt:Date.now()+max*1000}));
+  let raw='';req.on('data',chunk=>raw+=chunk);req.on('end',()=>{
+   const body=JSON.parse(raw),role=(req.headers.authorization||'').includes('partner')?'partner':'learner',fixture=req.headers['x-local-fixture']||'default';
+   res.setHeader('Content-Type','application/json');
+   if(body.action==='state')return res.end(JSON.stringify({role,available:!used.has('snx_temp_'+fixture+'_'+role),model:'stt-rt-v5',singleUse:true,startExpirySeconds:60,maxSessionSeconds:300}));
+   assert(!body.action||body.action==='start','Page never probes provider or auto-mints');
+   grants++;const max=fixture.includes('deadline')?1:fixture.includes('overlong')?601:300;
+   res.end(JSON.stringify({bookingId:BOOKING,role,model:'stt-rt-v5',
+    api_key:'snx_temp_'+fixture+'_'+role,expires_at:new Date(Date.now()+30000).toISOString(),maxSessionSeconds:max,captureEndsAt:Date.now()+max*1000}));
+  });return;
  }
  if(url.pathname==='/room')return res.end(room);
  const name=path.basename(url.pathname);if(!['stt-pilot.html','stt-pilot.js','stt-pilot-pcm-worklet.js'].includes(name)){res.statusCode=404;return res.end();}
@@ -44,6 +49,9 @@ const server=http.createServer((req,res)=>{
     await page.goto('http://127.0.0.1:'+server.address().port+'/stt-pilot.html?bookingId='+BOOKING);
     const f=page.frames().find(f=>f.url().includes('/room?'));await f.waitForFunction(()=>!!window.DayORoomAccess);
     await f.evaluate(r=>{window.DayORoomAccess.role=r==='partner'?'partner':'user';window.pilotUser=r;},role);
+    await page.waitForFunction(()=>!document.querySelector('#check').disabled);
+    await page.locator('#check').click();
+    await page.waitForFunction(()=>!document.querySelector('#check').disabled);
     return f;
    }
    let frame=await prepare();return{page,errors,frame,prepare};
@@ -52,6 +60,8 @@ const server=http.createServer((req,res)=>{
   for(const width of [360,390,1280]){
    const role=width===390?'partner':'learner';let c=await make(width,'main',role),before=grants;
    assert(await c.page.locator('#start').isDisabled());assert.equal(grants,before);
+   assert((await c.page.locator('#readiness').innerText()).includes('Ready · '+role));
+   assert.equal(await c.page.locator('#remaining').innerText(),'05:00');
    await c.page.locator('#consent').check();await c.page.locator('#start').click();assert.equal(grants,before,'No mic means no credential request');
    await begin(c);await c.page.waitForFunction(()=>document.querySelector('#status').textContent.includes('Streaming'));
    await c.page.waitForFunction(()=>window.transport.some(x=>typeof x==='number'));
@@ -100,9 +110,11 @@ const server=http.createServer((req,res)=>{
    assert.equal(await c.frame.evaluate(()=>window.localMediaStream.getAudioTracks()[0].readyState),'live');
    assert.equal(await c.page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
    await c.page.screenshot({path:'C:/Users/Alice/Documents/DayO/qa/soniox-pilot/bounded-'+width+'.png',fullPage:true});
-   c.frame=await c.prepare();await begin(c);
-   await c.page.waitForFunction(()=>document.querySelector('#status').textContent.includes('Provider error 401'));
-   assert(await c.page.locator('#start').isDisabled(),'Provider single-use claim survives reload');assert.deepEqual(c.errors,[]);await c.page.close();
+   const beforeReload=grants;c.frame=await c.prepare();
+   await c.page.waitForFunction(()=>document.querySelector('#readiness').textContent.includes('Allocation already consumed'));
+   await c.page.locator('#consent').check();
+   assert.equal(grants,beforeReload,'Reload state check never requests a replacement credential');
+   assert(await c.page.locator('#start').isDisabled(),'Durable exhausted state survives reload');assert.deepEqual(c.errors,[]);await c.page.close();
    for(const scenario of ['disconnect','account','mic','deadline','overlong','consent']){
     c=await make(width,scenario,role);await begin(c);
     if(scenario==='overlong'){
@@ -116,6 +128,7 @@ const server=http.createServer((req,res)=>{
      if(scenario==='consent')await c.page.locator('#consent').uncheck();
      const message={disconnect:'Disconnected',account:'Account changed',mic:'Room or microphone changed',deadline:'Capture limit reached',consent:'Consent withdrawn'}[scenario];
      await c.page.waitForFunction(m=>document.querySelector('#status').textContent.includes(m),message).catch(async e=>{throw new Error(width+' '+scenario+' status: '+await c.page.locator('#status').innerText());});
+     if(scenario==='deadline')assert.equal(await c.page.locator('#remaining').innerText(),'00:00');
      const current=grants;await c.page.waitForTimeout(150);assert.equal(grants,current,'No automatic paid retry');assert(await c.page.locator('#start').isDisabled());
     }
     assert.deepEqual(c.errors,[]);await c.page.close();

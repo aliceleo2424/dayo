@@ -6,6 +6,25 @@
   let active = false, starting = false, attempted = false, run = 0, role = '', userId = '', ws, context, node, source, track;
   let monitor, deadlineTimer, closeTimer, boundDocument, finalText = '', finalCount = 0, tokenCount = 0, began = 0, lastTokenEnd = 0;
   let browserHandler, trackEndedHandler, frameMediaHandler;
+  let ready=false,readyUser='',checking=false,countdownTimer;
+  function enableStart(){ $('start').disabled=attempted||active||starting||!ready||!$('consent').checked; }
+  function remaining(ms){ const s=Math.max(0,Math.ceil(ms/1000));$('remaining').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0'); }
+  async function checkReadiness(){
+    if(checking||active||starting)return;
+    checking=true;ready=false;readyUser='';enableStart();$('check').disabled=true;
+    $('readiness').textContent='Checking readiness without allocating a credential / 자격 확인 중, 토큰 발급 없음';
+    try{
+      const client=frame.contentWindow.supabaseClient,s=client&&await client.auth.getSession(),auth=s?.data?.session;
+      if(!auth?.access_token)throw new Error('sign_in_required');
+      const response=await fetch('/api/stt-pilot-credentials',{method:'POST',cache:'no-store',headers:{Authorization:'Bearer '+auth.access_token,'Content-Type':'application/json'},body:JSON.stringify({action:'state'}),signal:AbortSignal.timeout(10000)});
+      const state=await response.json();
+      if(!response.ok)throw new Error(state.error||'readiness_unavailable');
+      if(!['learner','partner'].includes(state.role)||state.model!=='stt-rt-v5'||state.singleUse!==true||state.startExpirySeconds!==60||state.maxSessionSeconds!==300)throw new Error('invalid_readiness');
+      ready=state.available===true&&!attempted;readyUser=auth.user.id;
+      $('readiness').textContent=ready?'Ready · '+state.role+' · 1 unused five-minute allocation / 준비 완료 · 본인 1회 테스트 가능':'Allocation already consumed — no restart / 테스트 기회 사용됨, 재시작 불가';
+    }catch(e){$('readiness').textContent='Not ready: '+(/^[a-z0-9_]+$/.test(e.message)?e.message:'readiness_unavailable')+' / 로그인 또는 준비 상태를 확인하세요';}
+    finally{checking=false;$('check').disabled=false;enableStart();}
+  }
   function status(code) { $('status').textContent = code; }
   function append(target, text) {
     const row = document.createElement('p'); row.textContent = text; target.appendChild(row);
@@ -37,7 +56,7 @@
     if (message.finished) { flushFinal(); if (active || starting) stop('Comparison finished / 비교 종료', true); else if (ws) ws.close(); }
   }
   function detachCapture() {
-    clearInterval(monitor); clearTimeout(deadlineTimer);
+    clearInterval(monitor); clearInterval(countdownTimer); clearTimeout(deadlineTimer);
     if (track && trackEndedHandler) track.removeEventListener('ended', trackEndedHandler);
     if (boundDocument && browserHandler) boundDocument.removeEventListener('dayo:transcript', browserHandler);
     if (boundDocument && frameMediaHandler) boundDocument.removeEventListener('dayo:livemedia', frameMediaHandler);
@@ -49,7 +68,7 @@
   }
   function stop(reason, immediate) {
     active = starting = false; detachCapture();
-    $('stop').disabled = true; $('start').disabled = attempted || !$('consent').checked;
+    $('stop').disabled = true; enableStart();
     status(reason);
     clearTimeout(closeTimer);
     if (ws && ws.readyState === 1 && !immediate) {
@@ -57,7 +76,7 @@
     } else { flushFinal(); if (ws) ws.close(); }
   }
   async function start() {
-    if (attempted || active || starting || !$('consent').checked || (ws && ws.readyState < 2)) return;
+    if (!ready || attempted || active || starting || !$('consent').checked || (ws && ws.readyState < 2)) return;
     const a = access(), r = roleOf(a);
     if (!a || !a.allowed || a.bookingId !== bookingId || !r) { status('Enter the authorized room first / 승인된 대화방에 먼저 입장하세요'); return; }
     const local = localTrack();
@@ -75,6 +94,7 @@
       const session = client && await client.auth.getSession();
       const auth = session && session.data && session.data.session;
       if (!auth || !auth.access_token) throw new Error('Sign in required');
+      if(auth.user.id!==readyUser){ready=false;throw new Error('account_changed_check_readiness');}
       userId = auth.user.id;
       const response = await fetch('/api/stt-pilot-credentials', { method: 'POST', cache: 'no-store',
         headers: { Authorization: 'Bearer ' + auth.access_token, 'Content-Type': 'application/json' },
@@ -112,8 +132,9 @@
           socket.send(local.enabled && !local.muted ? event.data : new ArrayBuffer(event.data.byteLength));
         };
         active = true; starting = false; status('Streaming ' + role + ' local mic · maximum 5 minutes / 본인 마이크 비교 중');
-        deadlineTimer = setTimeout(() => stop('Capture limit reached / 제한 시간 종료', false), Math.max(0,
-          Math.min(grant.captureEndsAt - Date.now(), grant.maxSessionSeconds * 1000)));
+        const stopAt=Math.min(grant.captureEndsAt,Date.now()+grant.maxSessionSeconds*1000);
+        remaining(stopAt-Date.now());countdownTimer=setInterval(()=>remaining(stopAt-Date.now()),250);
+        deadlineTimer = setTimeout(() => {remaining(0);stop('Capture limit reached / 제한 시간 종료', false);},Math.max(0,stopAt-Date.now()));
         monitor = setInterval(async () => {
           const current = access();
           if (!current || !current.allowed || current.bookingId !== bookingId || roleOf(current) !== role ||
@@ -131,26 +152,13 @@
       if (generation === run) stop('Pilot unavailable: ' + (/^[a-z_]+$/.test(error.message) ? error.message : 'mic_auth_or_connection_error') + ' / 기존 대화는 그대로 이용하세요', true);
     }
   }
-  $('consent').addEventListener('change', () => { $('start').disabled = attempted || active || starting || !$('consent').checked;
+  $('consent').addEventListener('change', () => { enableStart();
     if (!$('consent').checked && (active || starting)) { run++; stop('Consent withdrawn / 동의 철회', true); } });
-  $('check').addEventListener('click', async () => {
-    if(active||starting)return;
-    $('check').disabled=true;status('Checking real Soniox connection without audio / 음성 없이 실제 연결 확인 중');
-    try{
-      const client=frame.contentWindow.supabaseClient, s=client&&await client.auth.getSession();
-      if(!s?.data?.session?.access_token)throw new Error('sign_in_required');
-      const response=await fetch('/api/stt-pilot-credentials',{method:'POST',cache:'no-store',headers:{
-        Authorization:'Bearer '+s.data.session.access_token,'Content-Type':'application/json'},body:JSON.stringify({action:'probe'}),signal:AbortSignal.timeout(25000)});
-      const result=await response.json();
-      if(!response.ok||result.authenticated!==true||result.audioSentBytes!==0||result.allocationConsumed!==false)throw new Error(result.error||'probe_unconfirmed');
-      status('Soniox stt-rt-v5 authenticated · 0 audio bytes · capture slots untouched / 실제 연결 확인 완료, 음성 전송 없음');
-    }catch(e){status('Connection check failed: '+(/^[a-z0-9_]+$/.test(e.message)?e.message:'probe_unavailable')+' / 연결 확인 실패');}
-    // No automatic probe or retries; operator must explicitly request any check.
-    $('check').disabled=false;
-  });
+  $('check').addEventListener('click',checkReadiness);
+  window.addEventListener('storage',checkReadiness);
   $('start').addEventListener('click', start);
   $('stop').addEventListener('click', () => { if (starting) run++; stop('Stopped / 중지', false); });
-  frame.addEventListener('load', () => { if (active || starting) { run++; stop('Room reloaded / 대화방 새로고침', true); } });
+  frame.addEventListener('load', () => { if (active || starting) { run++; stop('Room reloaded / 대화방 새로고침', true); } checkReadiness(); });
   document.addEventListener('visibilitychange', () => { if (document.hidden && (active || starting)) { run++; stop('Backgrounded — paid stream stopped / 백그라운드 중지', true); } });
   window.addEventListener('pagehide', () => { run++; stop('Page closed', true); });
   if (UUID.test(bookingId || '')) frame.src = '/room?bookingId=' + encodeURIComponent(bookingId);
