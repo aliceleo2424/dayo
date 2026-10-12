@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="partner-guard-pending">
 <head>
   <link rel="icon" type="image/png" href="/images/logo-square.png">
   <link rel="apple-touch-icon" href="/images/logo-square.png">
@@ -8,6 +8,45 @@
   <meta name="description" content="DayO 대화 파트너 프로필 및 스케줄 관리 포털">
   <title data-i18n="page.title.partner">DayO Partner Lounge — 대화 파트너 라운지</title>
   <link rel="stylesheet" href="mobile-nav.css?v=20260916-gnb-minimal">
+  <style>
+    /* Prevent the footer from jumping above delayed partner auth content. */
+    #partner-guard-loading { display: none; }
+    html.partner-guard-pending #partner-guard-loading {
+      display: flex;
+      box-sizing: border-box;
+      min-height: calc(100vh - 88px);
+      align-items: flex-start;
+      justify-content: center;
+      padding: clamp(60px, 11vh, 116px) 20px 40px;
+      background: #FAF4E9;
+      color: #64758A;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.6;
+    }
+    #partner-guard-loading .partner-guard-loading-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      border: 1px solid #D9E3EC;
+      border-radius: 12px;
+      background: #F6F9FB;
+    }
+    #partner-guard-loading .partner-guard-loading-dot {
+      width: 10px;
+      height: 10px;
+      border: 2px solid #8BA9C2;
+      border-top-color: #315C7E;
+      border-radius: 50%;
+      animation: partner-guard-spin .9s linear infinite;
+    }
+    @keyframes partner-guard-spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      #partner-guard-loading .partner-guard-loading-dot { animation: none; }
+    }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-env.js"></script>
   <script src="supabase-client.js?v=20260916-auth-strict"></script>
@@ -115,6 +154,10 @@
         });
       }
 
+      function finishPartnerGuardLoading() {
+        document.documentElement.classList.remove('partner-guard-pending');
+      }
+
       function showAuthSection() {
         window.__dayoPartnerLoungeLocked = false;
         var nodes = els();
@@ -127,6 +170,7 @@
         setDisplay(nodes.recruit, false);
         var applyButton = document.getElementById('partner-auth-apply-btn');
         if (applyButton) applyButton.setAttribute('href', applyFormUrl());
+        finishPartnerGuardLoading();
       }
 
       function showPartnerLounge() {
@@ -139,6 +183,7 @@
         setDisplay(nodes.dash, true);
         setDisplay(nodes.recruit, false);
         installAuthModalKillSwitch();
+        finishPartnerGuardLoading();
       }
 
       function showPartnerRecruitView() {
@@ -163,6 +208,7 @@
         var cta = document.getElementById('partnerRecruitCta');
         if (cta) cta.setAttribute('href', applyFormUrl());
         if (window.syncPartnerRecruitCard) window.syncPartnerRecruitCard();
+        finishPartnerGuardLoading();
       }
 
       window.showPartnerLounge = showPartnerLounge;
@@ -265,9 +311,6 @@
       }
 
       async function boot() {
-        document.documentElement.classList.remove('partner-guard-pending');
-        if (document.body) document.body.classList.remove('partner-guard-pending');
-
         var client = await waitForClient(60);
         if (!client || !client.auth) {
           showAuthSection();
@@ -2155,6 +2198,9 @@
     <button type="button" onclick="handleLogout(event)" class="btn-logout" style="cursor: pointer;" data-i18n="login.logout">로그아웃</button>
   </nav>
 
+  <div id="partner-guard-loading" role="status" aria-live="polite">
+    <div class="partner-guard-loading-inner"><span class="partner-guard-loading-dot" aria-hidden="true"></span><span>Opening partner lounge…</span></div>
+  </div>
   <section id="partner-auth-section" hidden>
     <p class="partner-auth-kicker">DAYO PARTNER LOUNGE</p>
     <h2 class="partner-auth-title" data-i18n="partner.auth.title">파트너 전용 페이지입니다.</h2>
