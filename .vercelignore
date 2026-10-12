@@ -1,0 +1,4 @@
+# Soniox owner TEST branch only: fit Hobby function limit.
+.git
+.env*
+api/send-lead-email.js
