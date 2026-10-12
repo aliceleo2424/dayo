@@ -16,9 +16,10 @@
 .ud-dashboard .ud-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 22px; }
 .ud-dashboard .ud-mode { background: var(--ud-butter); color: var(--ud-text); border-radius: 999px; padding: 7px 12px; font-size: 11px; font-weight: 800; letter-spacing: .06em; }
 .ud-dashboard .role-switch-wrapper { margin: 0 0 0 auto !important; order: 1; }
-.ud-dashboard .role-segmented-control { width: 320px !important; background: var(--ud-butter-soft) !important; }
-.ud-dashboard #segmented-glider { background: var(--ud-butter) !important; box-shadow: none !important; }
-.ud-dashboard #tab-user-mode { color: var(--ud-dark) !important; }
+.ud-dashboard .role-segmented-control { width: 320px !important; background: #EEECE7 !important; border: 1px solid #E2DFD7 !important; border-radius: 12px !important; box-shadow: none !important; }
+.ud-dashboard #segmented-glider { background: #E4ECF3 !important; border-radius: 8px !important; box-shadow: none !important; }
+.ud-dashboard .role-segmented-control button { min-height: 38px; font-size: 13px !important; padding: 9px 10px !important; }
+.ud-dashboard #tab-user-mode[aria-pressed="true"] { color: #315C7E !important; }
 .ud-dashboard .mypage-greeting-line { flex-basis: 100%; order: 2; }
 .ud-dashboard #mypage-greeting { font-size: clamp(23px, 3vw, 30px) !important; color: var(--ud-text) !important; line-height: 1.35; }
 .ud-dashboard #mypage-learning-lang { order: 3; margin: 0 !important; }
