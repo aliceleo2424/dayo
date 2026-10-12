@@ -6429,8 +6429,13 @@
         }
       }
 
-      // The recap is the normal post-session screen; saving is automatic.
-      if (!window.isEarlyExit && typeof window.openQuizModalImmediately === 'function') {
+      // Optional feedback completes before Recap; repeated end events share this gate.
+      if (typeof window.openQuizModalImmediately === 'function') {
+        if (window.DayOConversationPartnerFeedback) {
+          // Do not make canonical finalization/caption teardown wait for optional input.
+          window.DayOConversationPartnerFeedback.beforeRecap(window.openQuizModalImmediately);
+          return;
+        }
         return window.openQuizModalImmediately();
       }
     }
@@ -6654,8 +6659,7 @@
         if (!report) return;
         var locale = String(window.DayOI18n && window.DayOI18n.getLang ? window.DayOI18n.getLang() : document.documentElement.lang || 'ko').toLowerCase();
         var recap = window.DayOConversationRecap.saved(Object.assign({ booking_id: window.DayORoomAccess && window.DayORoomAccess.bookingId }, report));
-                quizContainer.innerHTML = window.DayOUserConversationReport.renderImmediate(Object.assign({booking_id:window.DayORoomAccess.bookingId},report), locale, { interactive: true, hideTitle: true, hideActions: true });
-        quizContainer.innerHTML += '<button type="button" class="ucr-report-refresh" onclick="refreshCurrentRecapLetter()">' + (locale==='ko'?'파트너 메시지 새로 불러오기':'Refresh partner message') + '</button><p id="recap-letter-status" class="ucr-report-status" role="status"></p>';
+                quizContainer.innerHTML = window.DayOUserConversationReport.renderImmediate(Object.assign({booking_id:window.DayORoomAccess.bookingId},report), locale, { interactive: true, hideTitle: true, hideActions: true, hideMemoryAction: true });
         quizContainer.innerHTML += window.DayOConversationRecap.renderActions(recap, locale);
         var titleEl = document.getElementById('quizModalTitle');
         if (titleEl) titleEl.textContent = window.DayOConversationRecap.labels(locale).title;
@@ -7258,9 +7262,19 @@
       partnerLetterStatusUnknown = true;
       setPartnerReportSubmitStatus('status_check_failed', false);
     }
+    // Bound UI waits, without cancelling or duplicating an in-flight server write.
+    var partnerLetterWritePending = false;
+    async function partnerLetterWait(request, onTimeout) {
+      var timer;
+      try {
+        return await Promise.race([Promise.resolve().then(request), new Promise(function (_, reject) {
+          timer = setTimeout(function () { if (onTimeout) onTimeout(); reject(new Error('status_check_failed')); }, 10000);
+        })]);
+      } finally { clearTimeout(timer); }
+    }
     async function partnerLetterIdentity() {
       var access = window.DayORoomAccess || {};
-      var auth = window.supabaseClient && await window.supabaseClient.auth.getUser();
+      var auth = window.supabaseClient && await partnerLetterWait(function () { return window.supabaseClient.auth.getUser(); });
       var user = auth && auth.data && auth.data.user;
       if (!user || !access.allowed || access.role !== 'partner' || user.id !== access.partnerId ||
           !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(access.bookingId || '')) throw new Error('invalid_booking');
@@ -7268,12 +7282,11 @@
     }
     async function existingPartnerLetter(bookingId) {
       // Own exact Partner API; report SELECT remains denied by existing RLS.
-      var session = await window.supabaseClient.auth.getSession();
-      var token = session && session.data && session.data.session && session.data.session.access_token;
-      if (!token) throw new Error('status_check_failed');
-      var controller = new AbortController(), timeout;
-      try {
-        timeout = setTimeout(function () { controller.abort(); }, 10000);
+      var controller = new AbortController();
+      return partnerLetterWait(async function () {
+        var session = await window.supabaseClient.auth.getSession();
+        var token = session && session.data && session.data.session && session.data.session.access_token;
+        if (!token || controller.signal.aborted) throw new Error('status_check_failed');
         var response = await fetch('/api/conversation-recap', {
           method:'POST', headers:{'Content-Type':'application/json', Authorization:'Bearer ' + token},
           body:JSON.stringify({action:'partner_illustration_status', booking_id:bookingId}), signal:controller.signal
@@ -7283,7 +7296,7 @@
         if (!state || typeof state.letter_sent !== 'boolean' ||
             (state.letter_sent && !/^[a-f0-9]{64}$/.test(state.letter_digest || ''))) throw new Error('status_check_failed');
         return state;
-      } finally { clearTimeout(timeout); }
+      }, function () { controller.abort(); });
     }
     async function partnerLetterDigest(text) {
       var bytes = new TextEncoder().encode(String(text || '').replace(/\r\n?/g, '\n').trim());
@@ -7298,6 +7311,7 @@
         var identity = await partnerLetterIdentity();
         var state = await existingPartnerLetter(identity.bookingId);
         if (state.letter_sent) finishPartnerLetterUI('already_sent', false);
+        else if (partnerLetterWritePending) letterStatusUnknown();
         else { partnerLetterStatusUnknown = false; setPartnerReportSubmitStatus('not_sent', true); }
       } catch (error) {
         if (error && error.message === 'invalid_booking') setPartnerReportSubmitStatus('invalid_booking', false);
@@ -7326,11 +7340,15 @@
       } finally { clearTimeout(timeout); }
     }
     window.executePartnerPayoutAndExit = async function () {
-      if (partnerReportSubmitPending || partnerReportSubmitComplete) return;
+      if (partnerReportSubmitPending || partnerReportSubmitComplete) {
+        if (partnerLetterStatus) setPartnerReportSubmitStatus(partnerLetterStatus.code, partnerLetterStatus.success);
+        return;
+      }
       // Unknown outcome retries a READ, not a WRITE.
       if (partnerLetterStatusUnknown) { await window.restorePartnerLetterState(); return; }
-      if (window.isObserverRoomMode && window.isObserverRoomMode()) return;
+      if (window.isObserverRoomMode && window.isObserverRoomMode()) { setPartnerReportSubmitStatus('invalid_booking', false); return; }
       partnerReportSubmitPending = true; setPartnerReportSubmitBusy(true);
+      setPartnerReportSubmitStatus('checking', true);
       var letterPreflightComplete = false;
       try {
         stopPartnerSentencePolling();
@@ -7359,19 +7377,23 @@
         if (window.DayOPartnerIllustration) window.DayOPartnerIllustration.reportSubmitting(bookingId, cardData.illustrationToken);
         var transcriptPromise = Promise.resolve().then(persistTranscript).catch(function () { return {ok:false}; });
         var reportSave;
-        try { reportSave = typeof window.persistSessionReport === 'function' ? await window.persistSessionReport(cardData) : {ok:false}; }
-        catch (_) { reportSave = {ok:false}; }
-        if (!reportSave || !reportSave.ok) {
-          // Lost acknowledgement can follow a committed save: read back now.
-          var recovered = await existingPartnerLetter(bookingId);
-          if (!recovered.letter_sent) {
-            if (reportSave && reportSave.confirmedFailure === true) setPartnerReportSubmitStatus('letter_save_failed', false);
-            else letterStatusUnknown();
-            return;
-          }
-          if (recovered.letter_digest !== expectedDigest) { finishPartnerLetterUI('different_saved'); return; }
+        try {
+          reportSave = await partnerLetterWait(function () {
+            if (typeof window.persistSessionReport !== 'function') return {ok:false};
+            partnerLetterWritePending = true;
+            return Promise.resolve().then(function () { return window.persistSessionReport(cardData); })
+              .finally(function () { partnerLetterWritePending = false; });
+          });
+        } catch (_) { reportSave = {ok:false}; }
+        // Even an ACK must confirm the exact saved Letter before success/navigation.
+        var recovered = await existingPartnerLetter(bookingId);
+        if (!recovered.letter_sent) {
+          if (reportSave && reportSave.confirmedFailure === true && !partnerLetterWritePending) setPartnerReportSubmitStatus('letter_save_failed', false);
+          else letterStatusUnknown();
+          return;
         }
-        // A server save ACK or exact content read-back is the success boundary.
+        if (recovered.letter_digest !== expectedDigest) { finishPartnerLetterUI('different_saved'); return; }
+        // Exact authenticated content read-back is the success boundary.
         partnerReportSubmitComplete = true;
         setPartnerReportSubmitStatus('sent_checking', true);
         if (window.DayOPartnerIllustration) {

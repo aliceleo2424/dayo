@@ -41,14 +41,14 @@ async function main(){
  h=harness({stored:'Previously sent private message'});await h.restore();assert.match(h.status(),/already been sent/);assert(h.button().disabled);await h.send();assert.equal(h.counts.save,0);assert.equal(h.counts.finish,0);assert(h.w.document.getElementById('partner-letter-lounge-link'));
  h=harness({save:()=>({ok:false}),read:n=>response(n>1?'Existing different Letter':'')});await h.send();assert.match(h.status(),/Nothing was overwritten/);assert.equal(h.counts.finish,0);assert(h.button().disabled);
  for(const finish of [()=>({success:false,needs_review:true,message:'濡쒓렇 broken 한국어'}),()=>{throw Error('세션 보상을 확인하지 못했습니다.')}]) {
-  h=harness({finish});await h.send();assert.match(h.status(),/^Your Letter was sent/);assert(!/濡|한국어|세션/.test(h.status()));assert(h.button().disabled);assert.equal(h.counts.read,2);assert.deepEqual(h.order,['save','finish']);await h.send();assert.equal(h.counts.save,1);
+  h=harness({finish});await h.send();assert.match(h.status(),/^Your Letter was sent/);assert(!/濡|한국어|세션/.test(h.status()));assert(h.button().disabled);assert.equal(h.counts.read,3);assert.deepEqual(h.order,['save','finish']);await h.send();assert.equal(h.counts.save,1);
  }
- h=harness({finish:()=>({success:false}),read:n=>n===1?response(''):{ok:false}});await h.send();assert.match(h.status(),/Your Letter was sent, but we couldn’t check/);assert(h.button().disabled);await h.send();assert.equal(h.counts.save,1);
- h=harness({finish:()=>({success:false}),read:()=>response('')});await h.send();assert.match(h.status(),/Your Letter was sent, but we couldn’t check/);assert(h.button().disabled);await h.send();assert.equal(h.counts.save,1);
+ h=harness({finish:()=>({success:false}),read:n=>n===1?response(''):n===2?response(NOTE):{ok:false}});await h.send();assert.match(h.status(),/Your Letter was sent, but we couldn’t check/);assert(h.button().disabled);await h.send();assert.equal(h.counts.save,1);
+ h=harness({finish:()=>({success:false}),read:n=>response(n===2?NOTE:'')});await h.send();assert.match(h.status(),/Your Letter was sent, but we couldn’t check/);assert(h.button().disabled);await h.send();assert.equal(h.counts.save,1);
  h=harness({transcriptFail:true,imageThrow:true});await h.send();assert.equal(h.status(),'Letter sent.');assert(h.button().disabled);
  let resolveFinish;h=harness({finish:()=>new Promise(r=>resolveFinish=r)});let result=h.send();await turns();assert.match(h.status(),/^Letter sent\. Checking/);assert(h.button().disabled);await h.send();assert.equal(h.counts.save,1);resolveFinish({success:true,reward_amount:0,reward_suppressed:true});await result;assert.equal(h.status(),'Letter sent.');
  h=harness({finish:()=>new Promise(()=>{})});result=h.send();await turns();h.advance(8000);await result;assert.match(h.status(),/couldn’t confirm your earnings/);assert(h.button().disabled);
- let resolveSave;h=harness({save:()=>new Promise(r=>resolveSave=r)});result=h.send();await turns();await h.send();assert.equal(h.counts.save,1);resolveSave({ok:true});await result;await h.send();assert.equal(h.counts.save,1);assert.equal(h.counts.finish,1);
+ let resolveSave;h=harness({save:()=>new Promise(r=>resolveSave=r),read:n=>response(n>1?NOTE:'')});result=h.send();await turns();await h.send();assert.equal(h.counts.save,1);resolveSave({ok:true});await result;await h.send();assert.equal(h.counts.save,1);assert.equal(h.counts.finish,1);
  h=harness({access:{role:'learner'}});await h.send();assert.equal(h.counts.read,0);assert.equal(h.counts.save,0);
  h=harness({locale:'KO',note:''});await h.send();assert.match(h.status(),/Write a Letter/); // implicit default KO must not leak
  h=harness({locale:'KO',savedLocale:'KO',note:''});await h.send();assert.match(h.status(),/작성해 주세요/);h.toggle('EN');assert.match(h.status(),/Write a Letter/);
@@ -62,6 +62,15 @@ async function main(){
  h=harness({read:()=>({ok:false,status:503})});await h.send();assert.match(h.status(),/Sending was not attempted/);assert.equal(h.counts.save,0);assert.equal(h.counts.finish,0);assert.equal(h.counts.transcript,0);assert.equal(h.button().textContent,'Check status');assert.equal(h.w.document.querySelector('textarea').value,NOTE);await h.send();assert.equal(h.counts.save,0);
  // An explicit rejection still checks the server again before a second write.
  h=harness({save:()=>({ok:false,confirmedFailure:true}),read:n=>response(n>=3?NOTE:'')});await h.send();assert.match(h.status(),/couldn’t send/);await h.send();assert.match(h.status(),/already been sent/);assert.equal(h.counts.save,1);
+
+ // ACK alone is insufficient; preserve draft and require a read before retry.
+ h=harness({save:()=>({ok:true}),read:()=>response('')});await h.send();assert.match(h.status(),/couldn’t confirm/);assert.equal(h.counts.finish,0);assert.equal(h.w.document.querySelector('textarea').value,NOTE);
+ // Authentication/session lookup and writes cannot leave a disabled button forever.
+ for(const operation of ['getUser','getSession']){
+  h=harness();h.w.supabaseClient.auth[operation]=()=>new Promise(()=>{});result=h.send();await turns();assert.match(h.status(),/Checking/);h.advance(10000);await result;assert.match(h.status(),/Sending was not attempted/);assert.equal(h.button().disabled,false);assert.equal(h.counts.save,0);
+ }
+ h=harness({read:()=>new Promise(()=>{})});result=h.send();await turns();h.advance(10000);await result;assert.equal(h.button().disabled,false);assert.equal(h.counts.save,0);
+ let lateSave;h=harness({save:()=>new Promise(r=>lateSave=r)});result=h.send();await turns();h.advance(10000);await result;assert.match(h.status(),/couldn’t confirm/);assert.equal(h.button().disabled,false);await h.send();await h.send();assert.equal(h.counts.save,1,'empty reads during unsettled write never permit another write');lateSave({ok:true});await turns();
  const handler=require(root+'/api/_lib/partner-letter.js');let routes=[];
  const base={user:{id:P},env:{SUPABASE_SERVICE_ROLE_KEY:'fixture-only'},input:{booking_id:B,action:'partner_illustration_status'},
  read:async route=>{routes.push(route);if(route.includes('bookings?'))return [{id:B,learner_id:'user',partner_user_id:P,status:'confirmed'}];if(route.includes('profiles?'))return [{id:P,role:'partner'}];return [{booking_id:B,partner_user_id:P,partner_comment:' \r\nexisting private Letter\r\n '}] }};

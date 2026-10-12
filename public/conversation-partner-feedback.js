@@ -1,7 +1,7 @@
 /* Optional feedback is independent of recap rendering and settlement. */
 (function(){
  'use strict';
- var GOOD=["spoke_slowly","waited_for_me","helped_with_words","helped_with_expressions","asked_good_questions","made_me_comfortable","kept_conversation_going","shared_new_stories"],REQUESTS=["speak_more_slowly","speak_more_quickly","wait_more","correct_more","help_more_with_words","speak_more","listen_more","ask_more_questions"],dialog=null,sequence=0,offered={},partnerRun=0;
+ var GOOD=["spoke_slowly","waited_for_me","helped_with_words","helped_with_expressions","asked_good_questions","made_me_comfortable","kept_conversation_going","shared_new_stories"],REQUESTS=["speak_more_slowly","speak_more_quickly","wait_more","correct_more","help_more_with_words","speak_more","listen_more","ask_more_questions"],dialog=null,sequence=0,offered={},partnerRun=0,recapGate=null,dialogDone=null;
  // The full catalogs above remain valid for historical Partner feedback.
  var GOOD_CHOICES=['spoke_slowly','waited_for_me','asked_good_questions','made_me_comfortable','shared_new_stories'],REQUEST_CHOICES=['speak_more_slowly','speak_more_quickly','wait_more','correct_more','speak_more','ask_more_questions'];
  function text(key,partner){var i=window.DayOI18n;var lang=partner?(document.documentElement.lang==='ko'?'KO':'EN'):(i?i.getLang():'KO');return i?i.t('conversationFeedback.'+key,lang):key;}
@@ -9,8 +9,8 @@
  function button(key,handler,cls,partner){var b=node('button',text(key,partner),cls);b.type='button';b.addEventListener('click',handler);return b;}
  function access(){var a=window.DayORoomAccess;return a&&a.allowed&&!a.observer&&!a.adminTest&&a.role==='user'&&/^[0-9a-f-]{36}$/i.test(a.bookingId||'')?a:null;}
  async function rpc(name,args){var c=window.supabaseClient;if(!c)throw new Error('unavailable');var timer;try{return await Promise.race([Promise.resolve(c.rpc(name,args)).then(function(r){if(r.error)throw new Error('unavailable');return r.data;}),new Promise(function(_,reject){timer=setTimeout(function(){reject(new Error('timeout'));},8000);})]);}finally{clearTimeout(timer);}}
- function close(){sequence++;if(dialog){dialog.close();dialog.remove();dialog=null;}}
- async function open(){var a=access();if(!a||dialog)return;var id=a.bookingId,run=++sequence,legacyGood=[],legacyRequests=[];
+ function close(){sequence++;if(dialog){if(typeof dialog.close==='function')dialog.close();dialog.remove();dialog=null;}if(dialogDone){var done=dialogDone;dialogDone=null;done();}}
+ async function open(){var a=access();if(!a||dialog)return;var id=a.bookingId,run=++sequence,legacyGood=[],legacyRequests=[],loaded=false,attempted=false;
   var d=node('dialog',null,'cpf-dialog');dialog=d;d.setAttribute('aria-labelledby','cpf-title');
   var title=node('h2',text('title'));title.id='cpf-title';d.append(title,node('p',text('hint'),'cpf-hint'));
   var form=node('div',null,'cpf-form');d.append(form);
@@ -18,22 +18,31 @@
   group('good',GOOD_CHOICES);group('requests',REQUEST_CHOICES);
   var privateBox=node('details',null,'cpf-private'),summary=node('summary',text('private')),note=node('textarea');note.maxLength=1000;note.rows=3;note.setAttribute('aria-label',text('private'));privateBox.append(summary,node('p',text('privateHint')),note);form.append(privateBox);
   var status=node('p',text('loading'),'cpf-status');status.setAttribute('role','status');
-  var actions=node('div',null,'cpf-actions'),save=button('save',submit,'cpf-primary'),skip=button('skip',close,'cpf-secondary'),retry=button('retry',load,'cpf-secondary');retry.hidden=true;save.disabled=true;form.querySelectorAll('input,textarea').forEach(function(n){n.disabled=true;});
-  actions.append(save,skip);d.append(status,retry,actions);d.addEventListener('cancel',function(e){e.preventDefault();close();});document.body.append(d);d.showModal();
+  var actions=node('div',null,'cpf-actions'),save=button('save',submit,'cpf-primary'),retry=button('retry',load,'cpf-secondary');retry.hidden=true;save.disabled=true;form.querySelectorAll('input,textarea').forEach(function(n){n.disabled=true;});
+  actions.append(save);d.append(status,retry,actions);d.addEventListener('cancel',function(e){e.preventDefault();close();});document.body.append(d);d.showModal();
   function active(){return run===sequence&&dialog===d&&access()&&access().bookingId===id;}
   function enable(value){form.querySelectorAll('input,textarea').forEach(function(n){n.disabled=!value;});save.disabled=!value;}
   async function load(){retry.hidden=true;status.textContent=text('loading');enable(false);try{var row=await rpc('get_my_conversation_partner_feedback',{p_booking_id:id});if(!active())return;
     // Preserve saved legacy choices without offering them in the new form.
     legacyGood=row&&Array.isArray(row.good)?row.good.filter(function(k){return GOOD.indexOf(k)>=0&&GOOD_CHOICES.indexOf(k)<0;}):[];
     legacyRequests=row&&Array.isArray(row.requests)?row.requests.filter(function(k){return REQUESTS.indexOf(k)>=0&&REQUEST_CHOICES.indexOf(k)<0;}):[];
-    form.querySelectorAll('input').forEach(function(n){n.checked=!!(row&&Array.isArray(row[n.name])&&row[n.name].indexOf(n.value)>=0);});note.value=row&&row.private_admin_note||'';status.textContent='';enable(true);
-   }catch(_){if(active()){status.textContent=text('loadError');retry.hidden=false;}}}
-  async function submit(){if(save.disabled)return;var g=Array.from(form.querySelectorAll('input[name="good"]:checked')).map(function(n){return n.value;}).concat(legacyGood),r=Array.from(form.querySelectorAll('input[name="requests"]:checked')).map(function(n){return n.value;}).concat(legacyRequests);if(!g.length&&!r.length&&!note.value.trim()){close();return;}
-   enable(false);status.textContent=text('saving');try{await rpc('save_conversation_partner_feedback',{p_booking_id:id,p_good:g,p_requests:r,p_private_admin_note:note.value.trim()||null});if(active())close();}
-   catch(_){if(active()){status.textContent=text('saveError');enable(true);}}}
+    form.querySelectorAll('input').forEach(function(n){n.checked=!!(row&&Array.isArray(row[n.name])&&row[n.name].indexOf(n.value)>=0);});note.value=row&&row.private_admin_note||'';loaded=true;save.textContent=text('save');status.textContent='';enable(true);
+   }catch(_){if(active()){status.textContent=text('loadError');retry.hidden=false;save.disabled=false;save.textContent=text('continue');}}}
+  async function submit(){if(save.disabled)return;if(!loaded||attempted){close();return;}var g=Array.from(form.querySelectorAll('input[name="good"]:checked')).map(function(n){return n.value;}).concat(legacyGood),r=Array.from(form.querySelectorAll('input[name="requests"]:checked')).map(function(n){return n.value;}).concat(legacyRequests);if(!g.length&&!r.length&&!note.value.trim()){close();return;}
+   attempted=true;enable(false);retry.hidden=true;status.textContent=text('saving');try{await rpc('save_conversation_partner_feedback',{p_booking_id:id,p_good:g,p_requests:r,p_private_admin_note:note.value.trim()||null});if(active())close();}
+   catch(_){if(active()){status.textContent=text('saveError');save.disabled=false;save.textContent=text('continue');}}}
   load();
  }
  function mountRecap(){var box=document.getElementById('quiz-content-box');if(!box||!access()||box.querySelector('.cpf-entry'))return;box.append(button('edit',open,'cpf-entry cpf-secondary'));}
+ window.DayOConversationPartnerFeedback={beforeRecap:function(showRecap){
+  var a=access();if(!a||a.recapOnly)return showRecap();
+  if(recapGate&&recapGate.id===a.bookingId)return recapGate.promise;
+  offered[a.bookingId]=true;
+  var gate={id:a.bookingId};recapGate=gate;
+  gate.promise=new Promise(function(resolve){dialogDone=resolve;Promise.resolve(open()).catch(function(){close();});}).then(function(){
+   var current=access();if(current&&current.bookingId===gate.id)return showRecap();
+  });return gate.promise;
+ }};
  function offer(e){var a=access();if(!a||a.recapOnly||!e.detail||!e.detail.finalized||offered[a.bookingId])return;offered[a.bookingId]=true;mountRecap();open();}
  async function loadPartner(section){var run=++partnerRun,list=section.querySelector('.cpf-partner-list');list.replaceChildren(node('p',text('loading',true)));try{var rows=await rpc('list_my_partner_conversation_feedback',{});if(run!==partnerRun||!section.isConnected)return;list.replaceChildren();if(!rows||!rows.length)list.append(node('p',text('empty',true)));(rows||[]).forEach(function(row){var item=node('article',null,'cpf-partner-item');var lang=document.documentElement.lang==='ko'?'ko-KR':'en-US';var date=new Date(row.scheduled_at);item.append(node('h4',(isNaN(date)?'':date.toLocaleString(lang))+' · '+row.booking_id.slice(0,8)));['good','requests'].forEach(function(key){if(!Array.isArray(row[key])||!row[key].length)return;item.append(node('strong',text(key,true)));var ul=node('ul');row[key].forEach(function(k){if((key==='good'?GOOD:REQUESTS).indexOf(k)>=0)ul.append(node('li',text(key+'.'+k,true)));});item.append(ul);});list.append(item);});}
   catch(_){if(run===partnerRun&&section.isConnected)list.replaceChildren(node('p',text('partnerError',true)));}}

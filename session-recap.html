@@ -31,9 +31,9 @@ window.openQuizModalImmediately=function(){
   var report=window.getLearnerReviewSnapshot();
   var recap=DayOConversationRecap.saved(Object.assign({booking_id:DayORoomAccess.bookingId},report));
   var locale=String(DayOI18n.getLang()).toLowerCase();
-  document.getElementById('quiz-content-box').innerHTML=DayOUserConversationReport.renderImmediate(Object.assign({booking_id:DayORoomAccess.bookingId},report),locale,{interactive:true,hideActions:true})+'<button type="button" class="ucr-report-refresh" onclick="refreshCurrentRecapLetter()">'+(locale==='ko'?'파트너 메시지 새로 불러오기':'Refresh partner message')+'</button><p id="recap-letter-status" role="status"></p>'+DayOConversationRecap.renderActions(recap,locale);
+  document.getElementById('quiz-content-box').innerHTML=DayOUserConversationReport.renderImmediate(Object.assign({booking_id:DayORoomAccess.bookingId},report),locale,{interactive:true,hideActions:true,hideMemoryAction:true})+DayOConversationRecap.renderActions(recap,locale);
 };
-window.refreshCurrentRecapLetter=async function(){var ok=await refreshSessionPartnerLetter();openQuizModalImmediately();if(!ok)document.getElementById('recap-letter-status').textContent=String(DayOI18n.getLang()).toLowerCase()==='ko'?'메시지를 불러오지 못했어요. 다시 시도해 주세요.':'Could not load the message. Please try again.';};
+window.refreshCurrentRecapLetter=async function(){var ok=await refreshSessionPartnerLetter();openQuizModalImmediately();var status=document.getElementById('recap-letter-status');if(!ok&&status)status.textContent=String(DayOI18n.getLang()).toLowerCase()==='ko'?'메시지를 불러오지 못했어요. 다시 시도해 주세요.':'Could not load the message. Please try again.';};
 window.showToast=function(message){document.getElementById('recovery-status').textContent=message;};
 </script><script src="session-lifecycle.js"></script><script src="memory-game.js"></script>
 <script>
