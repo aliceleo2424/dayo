@@ -16,7 +16,7 @@
 .ud-dashboard .ud-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 22px; }
 .ud-dashboard .ud-mode { background: var(--ud-butter); color: var(--ud-text); border-radius: 999px; padding: 7px 12px; font-size: 11px; font-weight: 800; letter-spacing: .06em; }
 .ud-dashboard .role-switch-wrapper { flex: 0 0 100%; width: 100%; max-width: none; margin: 0 !important; order: 0; justify-content: flex-start !important; }
-.ud-dashboard .ud-mode { order: 1; }
+.ud-dashboard .ud-mode { order: 1; display: none !important; }
 .ud-dashboard .role-segmented-control { width: 306px !important; max-width: 100%; background: #EEECE7 !important; color: #363631; font-family: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif; border: 1px solid #E2DFD7 !important; border-radius: 12px !important; box-shadow: none !important; }
 .ud-dashboard #segmented-glider { background: #FFF0B8 !important; border-radius: 8px !important; box-shadow: none !important; transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
 .ud-dashboard .role-segmented-control button { min-height: 38px; font-size: 13px !important; padding: 9px 10px !important; text-align: center; transition: color 0.2s; }
