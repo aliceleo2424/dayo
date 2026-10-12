@@ -15,11 +15,12 @@
 .ud-dashboard .mypage-main-grid { display: block !important; margin: 0; }
 .ud-dashboard .ud-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 22px; }
 .ud-dashboard .ud-mode { background: var(--ud-butter); color: var(--ud-text); border-radius: 999px; padding: 7px 12px; font-size: 11px; font-weight: 800; letter-spacing: .06em; }
-.ud-dashboard .role-switch-wrapper { margin: 0 0 0 auto !important; order: 1; }
+.ud-dashboard .role-switch-wrapper { flex: 0 0 100%; width: 100%; max-width: none; margin: 0 !important; order: 0; justify-content: flex-start !important; }
+.ud-dashboard .ud-mode { order: 1; }
 .ud-dashboard .role-segmented-control { width: 306px !important; max-width: 100%; background: #EEECE7 !important; color: #363631; font-family: Pretendard, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif; border: 1px solid #E2DFD7 !important; border-radius: 12px !important; box-shadow: none !important; }
-.ud-dashboard #segmented-glider { background: #EAF0F5 !important; border-radius: 8px !important; box-shadow: none !important; transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+.ud-dashboard #segmented-glider { background: #FFF0B8 !important; border-radius: 8px !important; box-shadow: none !important; transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
 .ud-dashboard .role-segmented-control button { min-height: 38px; font-size: 13px !important; padding: 9px 10px !important; text-align: center; transition: color 0.2s; }
-.ud-dashboard #tab-user-mode[aria-pressed="true"] { color: #466A8A !important; }
+.ud-dashboard #tab-user-mode[aria-pressed="true"] { color: #805D1D !important; }
 .ud-dashboard .mypage-greeting-line { flex-basis: 100%; order: 2; }
 .ud-dashboard #mypage-greeting { font-size: clamp(23px, 3vw, 30px) !important; color: var(--ud-text) !important; line-height: 1.35; }
 .ud-dashboard #mypage-learning-lang { order: 3; margin: 0 !important; }
@@ -80,7 +81,7 @@ body[data-dayo-role="member"] .ud-dashboard .speaking-progress-metric { backgrou
 @media (max-width: 600px) {
   .ud-dashboard { padding: 22px 16px 36px !important; }
   .ud-dashboard .ud-heading { gap: 10px; margin-bottom: 18px; }
-  .ud-dashboard .role-switch-wrapper { flex-basis: 100%; order: 3; justify-content: flex-start !important; }
+  .ud-dashboard .role-switch-wrapper { flex-basis: 100%; order: 0; justify-content: flex-start !important; }
   .ud-dashboard .role-segmented-control { width: min(100%, 306px) !important; }
   .ud-dashboard #mypage-greeting { font-size: 23px !important; }
   .ud-dashboard .ud-card, .ud-dashboard #ud-archive > section { padding: 18px; border-radius: 18px; }
