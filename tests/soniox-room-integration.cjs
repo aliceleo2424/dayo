@@ -18,7 +18,7 @@ const server=http.createServer((req,res)=>{
 (async()=>{
  await new Promise(r=>server.listen(0,'127.0.0.1',r));const browser=await chromium.launch({channel:'chrome',headless:true});
  try{
-  for(const role of ['learner','partner'])for(const locale of ['ko','en'])for(const width of [360,390,430,1280]){
+  for(const role of ['learner','partner'])for(const locale of ['ko','en'])for(const width of [360,390,430,768,1280]){
    const page=await browser.newPage({viewport:{width,height:840}});let errors=[];page.on('pageerror',e=>errors.push(e.message));
    await page.goto('http://127.0.0.1:'+server.address().port+'/room?bookingId='+B+'&soniox=1');
    await page.evaluate(({B,U,P,role,locale})=>{
