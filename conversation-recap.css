@@ -32,3 +32,50 @@
 /* Results-only rows: interactive answer choices keep their existing styling. */
 #memory-game-modal #word-pool-container:has(>.recap-answer):not(:has(>button)){display:grid;gap:8px}
 #memory-game-modal #word-pool-container:has(>.recap-answer):not(:has(>button))>.recap-answer{margin:0;padding:12px 14px;border:1px solid #e8dfd1;border-radius:12px;background:#F8F0E3;color:#51433c;font-size:14px;line-height:1.6;overflow-wrap:anywhere}
+
+/* 2026-10-14 recap/quiz polish (owner request). Presentation only: ids, data-* hooks, texts and order unchanged. */
+.dayo-recap h3{font-size:20px;letter-spacing:-.01em;margin-bottom:6px}
+.dayo-recap .recap-section{border-top:0;margin-top:14px;padding:16px;background:#FFFFFF;border:1px solid #EFE6D8;border-radius:16px}
+.dayo-recap .recap-section>h4{display:flex;align-items:center;gap:8px;font-size:15px;margin-bottom:10px;color:#3e4a42}
+.dayo-recap .recap-section>h4::before{content:"";width:6px;height:6px;border-radius:50%;background:#5F7D63;flex:none}
+.dayo-recap .recap-expression{position:relative;padding:8px 12px;background:#FBF6EE;border-left:3px solid #C6D1BC;border-radius:4px 10px 10px 4px;font-size:14px}
+.dayo-recap .recap-expression+.recap-expression{margin-top:8px}
+.dayo-recap .recap-volume-change{color:#7e736b;font-size:12px}
+.dayo-recap .recap-volume .recap-spoken{background:#eef2eb}.dayo-recap .recap-volume .recap-spoken strong{font-size:22px;color:#3e4a42}
+.dayo-recap .recap-quiz>p{color:#74685f;font-size:12px}
+.dayo-recap .recap-word{background:#FBF6EE;border-color:#EFE6D8;padding:14px}
+.dayo-recap .recap-word>strong{font-size:17px;color:#3e4a42}
+.dayo-recap .recap-word .recap-word-quote{font-size:13px;color:#74685f;font-style:italic}
+.recap-actions>.recap-primary[data-recap-home]{background:transparent;color:#5F7D63}
+.recap-primary:hover{filter:brightness(.96)}
+
+/* Quiz dialog */
+#memory-game-modal .review-panel{padding:24px 20px 20px;box-shadow:0 18px 50px rgba(50,43,36,.18)}
+#memory-game-modal #memory-game-title{margin:0 0 4px;font-size:19px;color:#3e4a42}
+#memory-game-modal #game-round-badge{font-size:13px;color:#74685f}
+#memory-game-modal #review-quiz-timer:not([hidden]){display:inline-block;margin-left:6px;padding:1px 8px;border-radius:20px;background:#F8F0E3;font-size:12px;color:#7e736b}
+#memory-game-modal #game-kr-meaning{margin:14px 0 12px;font-size:17px;font-weight:600;line-height:1.5;color:#3e4a42}
+#memory-game-modal #word-pool-container{counter-reset:opt}
+.recap-quiz-progress[hidden],.recap-quiz-light[hidden]{display:none!important}.recap-quiz-progress{height:6px;margin:0 0 12px;border-radius:6px;background:#EFE6D8;overflow:hidden}.recap-quiz-progress>span{display:block;height:100%;background:#5F7D63;border-radius:6px;transition:width .3s ease}
+.recap-quiz-light{margin:0 0 10px!important;font-size:12px!important;color:#7e736b}
+#memory-game-modal .recap-option{position:relative;display:flex;align-items:center;gap:12px;margin-top:8px;padding:12px 14px;border:1.5px solid #E2D7C6;border-radius:14px;background:#FFFFFF;font-size:15px;transition:border-color .15s,background .15s}
+#memory-game-modal .recap-option::before{counter-increment:opt;content:counter(opt,upper-alpha);flex:none;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#F8F0E3;color:#7e736b;font-size:12px;font-weight:700}
+#memory-game-modal .recap-option:not(:disabled):hover{border-color:#5F7D63;background:#FBF6EE}
+#memory-game-modal .recap-option:disabled{cursor:default;opacity:1;color:#51433c}
+#memory-game-modal .recap-option.is-correct{border-color:#5F7D63;background:#eef2eb}
+#memory-game-modal .recap-option.is-correct::before{content:"✓";background:#5F7D63;color:#fff}
+#memory-game-modal .recap-option.is-wrong{border-color:#C98F84;background:#FBEFEC}
+#memory-game-modal .recap-option.is-wrong::before{content:"✕";background:#C98F84;color:#fff}
+#memory-game-modal .recap-option.is-dim{opacity:.55}
+#memory-game-modal .recap-answer{margin:12px 0 4px;padding:10px 12px;border-radius:12px;font-size:14px;font-weight:600}
+#memory-game-modal .recap-answer[data-answer-result=correct]{background:#eef2eb;color:#4a6650}
+#memory-game-modal .recap-answer[data-answer-result=correct]::before{content:"👏 "}
+#memory-game-modal .recap-answer[data-answer-result=incorrect]{background:#FBEFEC;color:#9a5a4f}
+#memory-game-modal #word-pool-container>.recap-primary{display:block;width:100%;min-height:48px;margin-top:10px;font-size:15px;font-weight:600;border-radius:14px}
+#memory-game-modal #quiz-skip-btn{display:block;width:100%;margin-top:6px;background:transparent;border-color:transparent;color:#7e736b;font-size:13px;text-decoration:underline;text-underline-offset:3px}
+.recap-result-list{display:grid;gap:8px;margin-bottom:6px}
+.recap-result-lead{margin:2px 0 4px!important;font-size:15px!important;font-weight:600;color:#3e4a42}
+.recap-result-row{margin:0!important;padding:10px 12px 10px 38px;position:relative;border-radius:12px;font-size:14px!important;line-height:1.5;background:#FBF6EE}
+.recap-result-row::before{position:absolute;left:12px;top:10px;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff}
+.recap-result-row.is-correct::before{content:"✓";background:#5F7D63}.recap-result-row.is-wrong::before{content:"✕";background:#C98F84}
+.recap-result-note{display:block;font-size:12px;color:#7e736b;margin-top:2px}

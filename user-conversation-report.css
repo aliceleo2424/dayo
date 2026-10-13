@@ -16,3 +16,13 @@
 .dayo-recap+.ucr-human{margin-top:10px}
 
 .ucr-detail > .ucr-actions{justify-content:flex-end}
+
+/* 2026-10-14 Letter/report polish (owner request). Presentation only. */
+.ucr-header{display:block}
+.ucr-human{position:relative;padding:22px 20px 20px;background:#FFFDF8;border:1px solid #EADFCC;border-top:0;border-radius:18px;box-shadow:0 8px 24px rgba(81,67,60,.06);overflow:hidden}
+.ucr-human::before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:repeating-linear-gradient(135deg,#C98F84 0 10px,#FFFDF8 10px 16px,#7F9A86 16px 26px,#FFFDF8 26px 32px)}
+.ucr-human h3{display:flex;align-items:center;gap:8px;font-size:17px;color:#3e4a42;margin:4px 0 12px}
+.ucr-human h3::before{content:"✉";font-size:16px;color:#5F7D63}
+.ucr-human blockquote,.ucr-detail .ucr-human blockquote{padding:16px 16px 18px;background:#FFFFFF;border:1px dashed #E2D7C6;border-radius:12px;font-size:16px;line-height:1.8;color:#4B4038}
+.ucr-human .ucr-illustration{width:100%;max-width:320px;max-height:none;border-radius:14px;border:6px solid #fff;box-shadow:0 4px 14px rgba(81,67,60,.12)}
+.ucr-detail .ucr-header h3{font-size:18px}

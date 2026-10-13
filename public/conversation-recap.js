@@ -216,10 +216,23 @@
   function questions(expansion) {
     // Fixed dictionary relations have unambiguous answers; no grammar judging.
     var out = [];
+    // Distractors: real words from unrelated dictionary entries (deterministic per word),
+    // so every question does not share the same two filler options.
+    var keys = Object.keys(dictionary);
+    function distractors(v) {
+      var taken = new Set([v.word].concat(v.synonyms, v.antonyms).map(quizWordKey)), picked = [], seed = 0;
+      for (var c = 0; c < v.word.length; c++) seed = (seed * 31 + v.word.charCodeAt(c)) % 9973;
+      for (var i = 0; i < keys.length && picked.length < 2; i++) {
+        var entry = dictionary[keys[(seed + i * 7) % keys.length]], candidate = entry && entry[1] && entry[1][0];
+        if (candidate && !taken.has(quizWordKey(candidate)) && !(entry[1].concat(entry[2])).some(function (w) { return taken.has(quizWordKey(w)); })) { taken.add(quizWordKey(candidate)); picked.push(candidate); }
+      }
+      return picked.length === 2 ? picked : ['slowly', 'yesterday'];
+    }
     expansion.slice(0, 3).forEach(function (v) {
       if (!v.synonyms.length || !v.antonyms.length) return;
-      if (out.length < 6) out.push({ id: v.word + ':synonym', word: v.word, type: 'synonym', options: [v.synonyms[0], v.antonyms[0], 'slowly', 'yesterday'], answer: v.synonyms[0] });
-      if (out.length < 6) out.push({ id: v.word + ':antonym', word: v.word, type: 'antonym', options: [v.antonyms[0], v.synonyms[0], 'slowly', 'yesterday'], answer: v.antonyms[0] });
+      var extra = distractors(v);
+      if (out.length < 6) out.push({ id: v.word + ':synonym', word: v.word, type: 'synonym', options: [v.synonyms[0], v.antonyms[0], extra[0], extra[1]], answer: v.synonyms[0] });
+      if (out.length < 6) out.push({ id: v.word + ':antonym', word: v.word, type: 'antonym', options: [v.antonyms[0], v.synonyms[0], extra[1], extra[0]], answer: v.antonyms[0] });
     });
     return out;
   }
@@ -360,7 +373,7 @@
       html += renderVolume(r, locale);
       var progress = r.progress || { completed: 0, total: 0 };
       if ((r.questions || []).length && progress.total) {
-        var quizCopy = progress.reason || progress.completed>=r.questions.length ? quizResult(r,locale) : r.questions.length+(ko?'문제':' questions')+(progress.completed?' · '+progress.completed+'/'+r.questions.length+' '+l.completed:'');
+        var quizCopy = progress.reason || progress.completed>=r.questions.length ? quizResult(r,locale) : r.questions.length+(ko?'문제':' questions')+(progress.completed?' · '+progress.completed+'/'+r.questions.length+' '+l.completed:(ko?' · 선택 · 점수 없이 가볍게 복습해요':' · optional · a light review, no scores'));
         var quizWords=new Set((r.questions || []).map(function(q){return quizWordKey(q.word);})),displayedWords=new Set();
         var vocabulary = (r.word_expansion || []).filter(function(v){var key=quizWordKey(v.word);if(!quizWords.has(key) || displayedWords.has(key))return false;displayedWords.add(key);return true;}).slice(0,3).map(function(v){
           // Only saved, source-linked learner evidence; no Partner transcript fetch.

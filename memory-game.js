@@ -58,6 +58,18 @@
     if (badge) badge.textContent = state.completed + '/' + questions.length + ' ' + l.completed;
     var hint = document.getElementById('game-kr-meaning'); if (hint) hint.textContent = '“' + q.word + '”' + l[q.type];
     var pool = document.getElementById('word-pool-container'); if (!pool) return; pool.innerHTML = '';
+    // Visual progress only (outside the answer pool); the saved progress model is unchanged.
+    try {
+      var parent = pool.parentNode, track = document.getElementById('recap-quiz-progress');
+      if (parent && typeof parent.insertBefore === 'function') {
+        if (!track) { track = document.createElement('div'); track.id = 'recap-quiz-progress'; track.className = 'recap-quiz-progress'; track.setAttribute('aria-hidden', 'true'); track.appendChild(document.createElement('span')); parent.insertBefore(track, pool); }
+        track.hidden = false; if (track.firstChild && track.firstChild.style) track.firstChild.style.width = Math.round(state.currentIndex / Math.max(1, questions.length) * 100) + '%';
+        var light = document.getElementById('recap-quiz-light');
+        if (!light) { light = document.createElement('p'); light.id = 'recap-quiz-light'; light.className = 'recap-quiz-light'; parent.insertBefore(light, track); }
+        light.textContent = locale() === 'ko' ? '점수 없이 가볍게 풀어보세요 · 리포트에서 언제든 다시 풀 수 있어요' : 'No scores — just a light review. You can retry anytime from your report.';
+        light.hidden = state.currentIndex !== 0;
+      }
+    } catch (_) { /* decoration only */ }
     // Stable rotation keeps recovery deterministic without the answer always first.
     var answered=false, offset = (state.currentIndex + 1) % q.options.length;
     q.options.slice(offset).concat(q.options.slice(0, offset)).forEach(function (option) {
@@ -67,6 +79,7 @@
         answered=true;
         Array.from(pool.querySelectorAll('button')).forEach(function (node) { node.disabled = true; });
         b.setAttribute('aria-pressed', 'true');
+        Array.from(pool.querySelectorAll('.recap-option')).forEach(function (node) { node.classList.add(node.textContent === q.answer ? 'is-correct' : node === b ? 'is-wrong' : 'is-dim'); });
         state.answers=state.answers||[];state.answers.push({question_id:q.id,selected:option});
         state.completed = Math.max(state.completed, state.currentIndex + 1); state.correct=progress().correct; sync();
         save().then(function (saved) { if (!saved) showSaveFailure(); });
@@ -94,6 +107,16 @@
     stopTimer();var badge=document.getElementById('game-round-badge'),hint=document.getElementById('game-kr-meaning'),pool=document.getElementById('word-pool-container');
     if(badge)badge.textContent=window.DayOConversationRecap.quizResult(recap,locale());
     if(hint)hint.textContent='';if(!pool)return;pool.innerHTML='';
+    ['recap-quiz-progress','recap-quiz-light'].forEach(function(id){var n=document.getElementById(id);if(n)n.hidden=true;});
+    // Review summary, not a grade: what each word was and the right answer.
+    var p=window.DayOConversationRecap.quizProgress(recap),ko=locale()==='ko',l=labels(),list=document.createElement('div');list.className='recap-result-list';
+    var lead=document.createElement('p');lead.className='recap-result-lead';
+    lead.textContent=p.correct===null?(ko?'오늘 대화의 단어를 복습했어요.':'You reviewed words from today’s conversation.'):p.correct===p.total?(ko?'모두 맞혔어요! 오늘 쓴 단어를 잘 기억하고 있어요.':'All correct! You remember today’s words well.'):(ko?(p.total-p.correct)+'개 단어를 한 번 더 살펴보면 좋아요.':'Take another look at '+(p.total-p.correct)+(p.total-p.correct===1?' word.':' words.'));
+    list.appendChild(lead);
+    (recap.questions||[]).forEach(function(q){var a=(p.answers||[]).find(function(x){return x.question_id===q.id;});if(!a)return;var ok=a.selected===q.answer,row=document.createElement('p');row.className='recap-result-row '+(ok?'is-correct':'is-wrong');
+      row.textContent=q.word+' · '+(q.type==='synonym'?l.synonyms:l.antonyms)+': '+q.answer+(ok?'':(ko?' (내 답: ':' (your answer: ')+a.selected+')');list.appendChild(row);});
+    var note=document.createElement('small');note.className='recap-result-note';note.textContent=ko?'점수가 아닌 복습 기록이에요 · 리포트에서 언제든 다시 풀 수 있어요':'This is a review, not a score · Retry anytime from your report';list.appendChild(note);
+    pool.appendChild(list);
     pool.appendChild(button(locale()==='ko'?'리캡으로 돌아가기':'Return to recap',function(){practicing=false;reviewing=false;modal(false);if(typeof originalOpen==='function')originalOpen();}));
     var skip=document.getElementById('quiz-skip-btn');if(skip){skip.hidden=true;skip.style.display='none';}modal(true);
   }
