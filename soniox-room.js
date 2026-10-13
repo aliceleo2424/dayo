@@ -11,6 +11,7 @@
   var role = '', identity = '', scheduled = 0, maxSeconds = 0, run = 0, sequence = 0, pending = '';
   var ws, context, source, node, track, grantTimer, captureTimer, watchTimer, closeTimer, audioPreparation;
   var flushPromise, flushResolve, statusNode;
+  var previewSequence=0, diagnostics={audioFrames:0,audioBytes:0,messages:0,finalTokens:0,interimTokens:0,finals:0,previews:0,lastMessageAt:0};
   function en() { return window.DayOI18n && String(window.DayOI18n.getLang()).toUpperCase() === 'EN'; }
   function message(english,korean) { return en() ? english : korean; }
   function status(english,korean) {
@@ -36,15 +37,23 @@
   function publishFinal() {
     if(!pending.trim())return;
     var text=pending.trim();pending='';
-    if(active && window.DayOLive)window.DayOLive.acceptSonioxFinal(text,++sequence);
+    if(active && window.DayOLive){var accepted=window.DayOLive.acceptSonioxFinal(text,++sequence);if(accepted)diagnostics.finals++;}
   }
   function receive(data) {
     if(data.error_code){stop('Provider rejected capture / 제공자 연결 오류',true);return;}
+    diagnostics.messages++;diagnostics.lastMessageAt=Date.now();var interim='';
     for(var token of Array.isArray(data.tokens)?data.tokens:[]){
-      if(!token||token.is_final!==true||token.translation_status==='translation')continue;
-      if(token.text==='<end>'||token.text==='<fin>'){publishFinal();continue;}
+      if(!token||token.translation_status==='translation'||typeof token.text!=='string')continue;
+      if(token.is_final!==true){if(!/^<.*>$/.test(token.text)){interim+=token.text;diagnostics.interimTokens++;}continue;}
+      diagnostics.finalTokens++;
+      if(token.text==='<end>'||token.text==='<fin>'){publishFinal();interim='';continue;}
       if(typeof token.text!=='string'||/^<.*>$/.test(token.text))continue;
       pending+=token.text;if(pending.length>4000)publishFinal();
+    }
+    var preview=(pending+interim).trim();
+    if(active && !closing && preview && role==='partner'){
+      diagnostics.previews++;
+      document.dispatchEvent(new CustomEvent('dayo:caption-preview',{detail:{speaker:'partner',id:'soniox-preview-'+run+'-'+(++previewSequence),text:preview.slice(-400),timestamp:new Date()}}));
     }
     if(data.finished){publishFinal();finish();}
   }
@@ -87,7 +96,7 @@
         socket.send(JSON.stringify({model:'stt-rt-v5',audio_format:'pcm_s16le',sample_rate:16000,num_channels:1,language_hints:['en','ko','es'],enable_language_identification:true,enable_endpoint_detection:true}));
         active=true;starting=false;window.DayOLive.setSonioxSource(true);
         source=context.createMediaStreamSource(new MediaStream([local]));node=new AudioWorkletNode(context,'dayo-pilot-pcm');source.connect(node);node.connect(context.destination);
-        node.port.onmessage=function(event){if(!active||closing||socket.readyState!==1)return;if(socket.bufferedAmount>64000){stop('Network backpressure — no retry / 네트워크 지연',true);return;}socket.send(local.enabled&&!local.muted?event.data:new ArrayBuffer(event.data.byteLength));};
+        node.port.onmessage=function(event){if(!active||closing||socket.readyState!==1)return;if(socket.bufferedAmount>64000){stop('Network backpressure — no retry / 네트워크 지연',true);return;}socket.send(local.enabled&&!local.muted?event.data:new ArrayBuffer(event.data.byteLength));diagnostics.audioFrames++;diagnostics.audioBytes+=event.data.byteLength;};
         clearTimeout(grantTimer);var stopAt=Math.min(grant.captureEndsAt,Date.now()+grant.maxSessionSeconds*1000);
         captureTimer=setTimeout(function(){stop('Soniox capture limit reached / Soniox 제한 시간 종료',false);},Math.max(0,stopAt-Date.now()));
         watchTimer=setInterval(async function(){
@@ -104,7 +113,7 @@
       grantTimer=setTimeout(function(){if(starting)stop('Soniox connection timeout / Soniox 연결 시간 초과',true);},10000);
     }catch(error){starting=false;detach();if(window.DayOLive)window.DayOLive.setSonioxSource(false);status('Soniox unavailable: '+(/^[a-z0-9_]+$/.test(error.message)?error.message:'capture_error')+' — Browser STT retained','Soniox를 사용할 수 없어 기존 브라우저 음성 인식을 유지합니다.');}
   }
-  window.DayOSonioxRoom={isActive:function(){return active;},isAuthorized:function(){return authorized&&access().allowed&&access().bookingId===booking&&ownRole()===role;},flush:function(){return stop('Session finishing / 세션 마무리',false);}};
+  window.DayOSonioxRoom={isActive:function(){return active;},snapshot:function(){return {socketState:ws?ws.readyState:null,active:active,closing:closing,audioFramesSent:diagnostics.audioFrames,audioBytesSent:diagnostics.audioBytes,messages:diagnostics.messages,finalTokens:diagnostics.finalTokens,interimTokens:diagnostics.interimTokens,acceptedFinals:diagnostics.finals,captionPreviews:diagnostics.previews,pendingFinalChars:pending.length,lastMessageAgeMs:diagnostics.lastMessageAt?Date.now()-diagnostics.lastMessageAt:null};},isAuthorized:function(){return authorized&&access().allowed&&access().bookingId===booking&&ownRole()===role;},flush:function(){return stop('Session finishing / 세션 마무리',false);}};
   window.DayORoomAccessReady.then(async function(a){
     if(!a.allowed||a.bookingId!==booking||a.adminTest||a.observer)return;
     role=ownRole();statusNode=document.getElementById('devicePreflightStt');

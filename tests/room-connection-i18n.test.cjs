@@ -25,8 +25,8 @@ var remoteConnectionState = document.getElementById('remoteConnectionState');
 var remoteConnectionDetail = document.getElementById('remoteConnectionDetail');
 var remoteReconnectButton = document.getElementById('remoteReconnectButton');
 var currentRole = 'learner', isObserver = false, remotePendingSince = 0;
-var remoteConnectionDelayTimer = 0, remoteRetryActionTimer = 0, remoteHealthTimer = 0;
-var activeCall = null, partnerCaptions = null, hostCallConnecting = false, hostCallConnected = false;
+var remoteConnectionDelayTimer = 0, remoteRetryActionTimer = 0, remoteHealthTimer = 0, remoteConnectTimer = 0;
+var activeCall = null, partnerCaptions = null, audioDiagnostics = null, hostCallConnecting = false, hostCallConnected = false;
 var destroyed = false, peer = null, currentRemoteStream = null, remoteVideo = null;
 var scheduled = [], peersCreated = 0;
 function scheduleHostCall(delay) { scheduled.push(delay); }
@@ -45,7 +45,7 @@ async function main() {
     const dom = new JSDOM(fixtureHTML, {url:'https://www.dayotalk.com/room?bookingId=fixture',runScripts:'outside-only'});
     const w = dom.window;
     w.eval(i18n); w.document.dispatchEvent(new w.Event('DOMContentLoaded')); w.DayOI18n.setLang(lang, false);
-    const timers = new Map(); let serial=0;
+    const timers = new Map(); let serial=0;const fixtureNow=Date.now();w.Date.now=()=>fixtureNow;
     w.setTimeout = (fn, delay) => { timers.set(++serial,{fn,delay});return serial; };
     w.clearTimeout = id => timers.delete(id);
     w.eval(harness); w.currentRole=role;

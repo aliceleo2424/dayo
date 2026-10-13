@@ -43,22 +43,29 @@ const server=http.createServer((req,res)=>{
    await page.evaluate(()=>window.makeMic());await page.waitForTimeout(550);assert.equal(mints,before,'Microphone readiness alone does not allocate');
    await page.locator('#devicePreflightContinue').click();
    await page.waitForFunction(()=>window.DayOSonioxRoom.isActive());
-   await page.waitForFunction(()=>window.sentAudio>0);assert.equal(mints,before+1);
+   await page.waitForFunction(()=>window.sentAudio>0);assert.equal(mints,before+1);assert(await page.evaluate(()=>DayOSonioxRoom.snapshot().audioFramesSent>0));
    assert.equal(await page.evaluate(()=>window.providerConfig.model),'stt-rt-v5');assert.deepEqual(await page.evaluate(()=>window.providerConfig.language_hints),['en','ko','es']);
+   const previewBefore=await page.evaluate(()=>window.DayOLive.getTranscript().length);
+   await page.evaluate(()=>fixtureSocket.onmessage({data:JSON.stringify({tokens:[{text:'오늘은 ',is_final:true},{text:'날씨가 좋아요. I want to go outside.',is_final:false}]})}));
+   assert.equal(await page.evaluate(()=>DayOLive.getTranscript().length),previewBefore,'No interim canonical writes');
+   assert.equal(await page.evaluate(()=>DayOSonioxRoom.snapshot().pendingFinalChars),4);
+   assert.equal(await page.evaluate(()=>DayOSonioxRoom.snapshot().captionPreviews),role==='partner'?1:0);
+   await page.evaluate(()=>fixtureSocket.onmessage({data:JSON.stringify({tokens:[{text:'날씨가 좋아요. I want to go outside.',is_final:true},{text:'<end>',is_final:true}]})}));
+   assert.equal(await page.evaluate(()=>DayOLive.getTranscript().at(-1).text),'오늘은 날씨가 좋아요. I want to go outside.');
    const texts=['The crowded restaurant had delicious food.','We enjoyed a quiet café after our trip.','오늘은 날씨가 좋아요. I want to go outside.','I like coffee.','I like coffee.'];
    await page.evaluate(texts=>{for(const text of texts)window.fixtureSocket.onmessage({data:JSON.stringify({tokens:[{text:'WRONG INTERIM',is_final:false},{text,is_final:true},{text:'<end>',is_final:true}]})});},texts);
-   const rows=await page.evaluate(()=>window.DayOLive.getTranscript());assert.deepEqual(rows.map(r=>r.text),texts);assert(rows.every(r=>r.speaker===role));
-   await page.evaluate(()=>window.DayOLive.acceptSonioxFinal('DUPLICATE CALLBACK',5));assert.equal((await page.evaluate(()=>window.DayOLive.getTranscript())).length,5);
-   assert.equal(await page.evaluate(()=>window.transcriptEvents.length),5,'Actual canonical event emitted for existing caption path');
-   const saved=await page.evaluate(()=>window.DayOLive.saveTranscript(true));assert.equal(saved.ok,true);const payload=await page.evaluate(()=>window.savedPayloads[0]);assert.equal(payload.extra.bookingId,B);assert.deepEqual(payload.transcript.map(r=>r.text),texts);assert(payload.transcript.every(r=>r.speaker===role));
+   const rows=await page.evaluate(()=>window.DayOLive.getTranscript());assert.deepEqual(rows.map(r=>r.text),['오늘은 날씨가 좋아요. I want to go outside.',...texts]);assert(rows.every(r=>r.speaker===role));
+   await page.evaluate(()=>window.DayOLive.acceptSonioxFinal('DUPLICATE CALLBACK',6));assert.equal((await page.evaluate(()=>window.DayOLive.getTranscript())).length,6);
+   assert.equal(await page.evaluate(()=>window.transcriptEvents.length),6,'Actual canonical event emitted for existing caption path');
+   const saved=await page.evaluate(()=>window.DayOLive.saveTranscript(true));assert.equal(saved.ok,true);const payload=await page.evaluate(()=>window.savedPayloads[0]);assert.equal(payload.extra.bookingId,B);assert.deepEqual(payload.transcript.map(r=>r.text),['오늘은 날씨가 좋아요. I want to go outside.',...texts]);assert(payload.transcript.every(r=>r.speaker===role));
    // Actual saved-input Recap builder uses those accepted rows, never provider interims.
    const recap=require(path.join(root,'public/conversation-recap.js')).build({bookingId:B,learnerId:U,partnerId:P,language:'en',learnerLog:{id:'fixture-learner-log',booking_id:B,participant_id:U,participant_role:'learner',transcript:role==='learner'?payload.transcript:[]},partnerLog:{id:'fixture-partner-log',booking_id:B,participant_id:P,participant_role:'partner',transcript:role==='partner'?payload.transcript:[]}});
-   assert.equal(recap.metrics.user_utterance_count,role==='learner'?5:0,'No Partner speech in Learner spoken metrics');
+   assert.equal(recap.metrics.user_utterance_count,role==='learner'?6:0,'No Partner speech in Learner spoken metrics');
    assert.equal(recap.questions.length,role==='learner'?6:0,'Actual learner finals supply three grounded words / six questions; no Partner-only quiz');
    if(width===360&&locale==='ko'){
     const originalMints=mints;await page.evaluate(()=>window.fixtureSocket.onmessage({data:JSON.stringify({error_code:429})}));await page.waitForFunction(()=>!window.DayOSonioxRoom.isActive());
     await page.waitForTimeout(600);assert.equal(mints,originalMints,'No automatic paid retry after provider failure');assert.equal(await page.evaluate(()=>window.localMediaStream.getAudioTracks()[0].readyState),'live');
-    await page.evaluate(()=>window.DayOLive.flushTranscript());assert.equal((await page.evaluate(()=>window.DayOLive.saveTranscript())).ok,true);assert.deepEqual((await page.evaluate(()=>window.DayOLive.getTranscript())).map(r=>r.text),texts);assert.deepEqual(errors,[]);await page.close();continue;
+    await page.evaluate(()=>window.DayOLive.flushTranscript());assert.equal((await page.evaluate(()=>window.DayOLive.saveTranscript())).ok,true);assert.deepEqual((await page.evaluate(()=>window.DayOLive.getTranscript())).map(r=>r.text),['오늘은 날씨가 좋아요. I want to go outside.',...texts]);assert.deepEqual(errors,[]);await page.close();continue;
    }
    await page.evaluate(()=>{window.dayoSessionEnded=true;window.fixtureSocket.onmessage({data:JSON.stringify({tokens:[{text:'A final sentence.',is_final:true}]})});});
    const ended=await page.evaluate(async()=>{await window.DayOLive.flushTranscript();return window.DayOLive.saveTranscript();});assert.equal(ended.ok,true);

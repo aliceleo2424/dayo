@@ -81,6 +81,12 @@ async function run() {
     const [partner, user] = pages;
     await user.waitForFunction(() => window.fixtureCaptionConnection && window.fixtureCaptionConnection.open, { timeout: 20000 });
     await partner.waitForFunction(() => window.fixtureCaptionConnection && window.fixtureCaptionConnection.open, { timeout: 20000 });
+    for(const text of ['오늘은 날씨가 좋아요.','I am going to 강남역 tomorrow.','Hablo español y 한국어.']){
+      const prior=await partner.evaluate(()=>window.sessionTranscript.length);
+      await partner.evaluate(text=>document.dispatchEvent(new CustomEvent('dayo:caption-preview',{detail:{id:'preview-'+Date.now(),speaker:'partner',text,timestamp:new Date()}})),text);
+      await user.waitForFunction(text=>document.getElementById('partnerCaptionText').textContent===text,text);
+      assert.equal(await partner.evaluate(()=>window.sessionTranscript.length),prior,'Preview never adds canonical transcript');
+    }
     for (const locale of ['ko', 'en']) {
       await user.evaluate(locale => { document.documentElement.lang = locale; }, locale);
       for (const width of [360, 390, 1280]) {

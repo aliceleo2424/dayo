@@ -95,7 +95,7 @@
           text: entry.text.replace(/\s+/g, ' ').trim().slice(0, 400), sent_at: stamp });
       } catch (_) { closeConnection(); }
     }
-    if (sender && doc) doc.addEventListener('dayo:transcript', publish);
+    if (sender && doc){doc.addEventListener('dayo:transcript',publish);doc.addEventListener('dayo:caption-preview',publish);}
     return {
       bindPeer: function (instance) {
         if (!valid || stopped || peer === instance) return;
@@ -123,7 +123,7 @@
       destroy: function () {
         stopped = true; cancel(retry); retry = 0; closeConnection();
         available = false; clearCaption();
-        if (sender && doc) doc.removeEventListener('dayo:transcript', publish);
+        if (sender && doc){doc.removeEventListener('dayo:transcript',publish);doc.removeEventListener('dayo:caption-preview',publish);}
       }
     };
   }

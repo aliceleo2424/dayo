@@ -4125,6 +4125,7 @@
       let remoteRetryActionTimer = 0;
       let remotePendingSince = 0;
       let remoteHealthTimer = 0;
+      let remoteConnectTimer = 0;
       let remoteUnlockBound = false;
       let currentRemoteStream = null;
       const boundRemoteTracks = typeof WeakSet === 'function' ? new WeakSet() : null;
@@ -4275,6 +4276,7 @@
 
       function endParticipantCall(call, delay) {
         if (!call || activeCall !== call) return;
+        clearTimeout(remoteConnectTimer);remoteConnectTimer=0;
         if (audioDiagnostics) audioDiagnostics.detach('closed');
         activeCall = null;
         if (partnerCaptions) partnerCaptions.setRemotePeer('');
@@ -4325,9 +4327,9 @@
       }
 
       function bindParticipantCallHealth(call, stream) {
-        if (!call || !stream) return;
+        if (!call) return;
         bindCallIceTelemetry(call);
-        Array.prototype.forEach.call(stream.getTracks(), function (track) {
+        Array.prototype.forEach.call(stream ? stream.getTracks() : [], function (track) {
           if (boundRemoteTracks && boundRemoteTracks.has(track)) return;
           if (boundRemoteTracks) boundRemoteTracks.add(track);
           track.addEventListener('mute', function () {
@@ -4420,6 +4422,8 @@
       function attachRemoteStream(stream, call) {
         if (!remoteVideo || !stream) return;
         setupVideoElement(remoteVideo, false);
+        clearTimeout(remoteConnectTimer);remoteConnectTimer=0;
+        if(call)call.__dayoRemoteStreamSeen=true;
         currentRemoteStream = stream;
         if (remoteVideo.srcObject !== stream) remoteVideo.srcObject = stream;
         if (typeof window.logParticipantMediaConnected === 'function') {
@@ -4473,6 +4477,16 @@
         }
       }
 
+      function watchParticipantConnect(call) {
+        clearTimeout(remoteConnectTimer);
+        bindParticipantCallHealth(call, null);
+        remoteConnectTimer=setTimeout(function(){
+          remoteConnectTimer=0;
+          if(destroyed || activeCall!==call || call.__dayoRemoteStreamSeen)return;
+          if(audioDiagnostics)audioDiagnostics.event('recovery','initial-stream-timeout');
+          endParticipantCall(call,800);
+        },12000);
+      }
       function callHostPeer(hostPeerId) {
         if (destroyed || !peer || !localStream || currentRole === 'partner' || isObserver) return;
         if (hostCallConnecting || hostCallConnected || activeCall) return;
@@ -4495,6 +4509,8 @@
           return;
         }
         activeCall = call;
+        if(partnerCaptions)partnerCaptions.setRemotePeer(hostPeerId);
+        watchParticipantConnect(call);
         bindCallIceTelemetry(call);
         var receivedStream = false;
         call.on('stream', function (incomingStream) {
@@ -4803,6 +4819,8 @@
           if (previousCall && previousCall !== call) {
             try { previousCall.close(); } catch (e) { /* ignore */ }
           }
+          if(partnerCaptions)partnerCaptions.setRemotePeer(call.peer);
+          watchParticipantConnect(call);
           call.answer(localStream);
           call.on('stream', function (incomingStream) {
             if (activeCall !== call) return;
@@ -4821,9 +4839,10 @@
             schedulePartnerPeerRetry(instance);
             return;
           }
-          if (type === 'peer-unavailable' && currentRole !== 'partner') {
+          if (type === 'peer-unavailable' && currentRole !== 'partner' && !hostCallConnected) {
             showRemotePending('room.connection.waitingOther');
-            scheduleHostCall();
+            if(activeCall && !hostCallConnected)endParticipantCall(activeCall,1000);
+            else scheduleHostCall();
           }
           if (type === 'disconnected' && typeof instance.reconnect === 'function') {
             instance.reconnect();
@@ -4863,8 +4882,9 @@
             text.textContent = state.text;
             text.hidden = !state.text;
             button.setAttribute('aria-pressed', state.enabled ? 'true' : 'false');
-            button.setAttribute('aria-label', state.enabled ? 'Partner 영어 원문 자막 끄기' : 'Partner 영어 원문 자막 켜기');
-            button.textContent = state.enabled ? 'CC · 영어 자막 켜짐' : 'CC · 영어 자막 꺼짐';
+            var captionEn=window.DayOI18n && String(window.DayOI18n.getLang()).toUpperCase()==='EN';
+            button.setAttribute('aria-label',captionEn?(state.enabled?'Turn off Partner captions':'Turn on Partner captions'):(state.enabled?'파트너 원문 자막 끄기':'파트너 원문 자막 켜기'));
+            button.textContent=captionEn?(state.enabled?'CC · On':'CC · Off'):(state.enabled?'CC · 자막 켜짐':'CC · 자막 꺼짐');
           }});
           var captionToggle = document.getElementById('partnerCaptionToggle');
           if (captionToggle) captionToggle.addEventListener('click', function (event) {
@@ -4914,6 +4934,7 @@
         clearTimeout(remoteConnectionDelayTimer);
         clearTimeout(remoteRetryActionTimer);
         clearTimeout(remoteHealthTimer);
+        clearTimeout(remoteConnectTimer);
         clearInterval(observerProbeTimer);
         try { if (activeCall) activeCall.close(); } catch (e) { /* ignore */ }
         try { if (observerHostCall) observerHostCall.close(); } catch (e) { /* ignore */ }
