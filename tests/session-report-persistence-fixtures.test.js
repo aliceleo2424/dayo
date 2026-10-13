@@ -107,7 +107,7 @@ function createSubmitContext(options = {}) {
   };
   const context = {
     window, console: quiet, localStorage: storage,
-    document: { getElementById() { return { value: 'Great conversation' }; }, querySelector() { return options.messageOnly?null:{ value: 'cookie' }; } },
+    document: { addEventListener() {}, getElementById() { return { value: 'Great conversation' }; }, querySelector() { return options.messageOnly?null:{ value: 'cookie' }; } },
     stopPartnerSentencePolling() {},
     setPartnerReportSubmitBusy(value) { busy = value; },
     setPartnerReportSubmitStatus(value) { statuses.push(value); },
