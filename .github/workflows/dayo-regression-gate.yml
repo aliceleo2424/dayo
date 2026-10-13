@@ -32,14 +32,18 @@ jobs:
   core:
     name: Product invariants & core regressions
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
       - run: npm ci
+      - name: Install isolated pinned DB and DOM fixture tools
+        run: npm install --no-save --package-lock=false --ignore-scripts @electric-sql/pglite@0.3.15 jsdom@26.1.0
       - name: Standing product invariants and source mirrors
         run: node tests/ci-product-invariants.cjs
       - name: Run release-critical no-browser fixtures
