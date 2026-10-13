@@ -19,9 +19,9 @@
       const response=await fetch('/api/stt-pilot-credentials',{method:'POST',cache:'no-store',headers:{Authorization:'Bearer '+auth.access_token,'Content-Type':'application/json'},body:JSON.stringify({action:'state',bookingId}),signal:AbortSignal.timeout(10000)});
       const state=await response.json();
       if(!response.ok)throw new Error(state.error||'readiness_unavailable');
-      if(!['learner','partner'].includes(state.role)||state.model!=='stt-rt-v5'||state.singleUse!==true||state.startExpirySeconds!==60||state.maxSessionSeconds!==300)throw new Error('invalid_readiness');
+      if(!['learner','partner'].includes(state.role)||state.model!=='stt-rt-v5'||state.singleUse!==true||state.startExpirySeconds!==60||state.maxSessionSeconds!==1500)throw new Error('invalid_readiness');
       ready=state.available===true&&!attempted;readyUser=auth.user.id;
-      $('readiness').textContent=ready?'Ready · '+state.role+' · 1 unused five-minute allocation / 준비 완료 · 본인 1회 테스트 가능':'Allocation already consumed — no restart / 테스트 기회 사용됨, 재시작 불가';
+      $('readiness').textContent=ready?'Ready · '+state.role+' · 1 unused 25-minute allocation / 준비 완료 · 본인 1회 테스트 가능':'Allocation already consumed — no restart / 테스트 기회 사용됨, 재시작 불가';
     }catch(e){$('readiness').textContent='Not ready: '+(/^[a-z0-9_]+$/.test(e.message)?e.message:'readiness_unavailable')+' / 로그인 또는 준비 상태를 확인하세요';}
     finally{checking=false;$('check').disabled=false;enableStart();}
   }
@@ -103,7 +103,7 @@
       if (generation !== run || !starting) return;
       if (!response.ok) { if (grant.allocationConsumed === true || grant.allocationConsumed === null) attempted = true; throw new Error(String(grant.error || 'Pilot unavailable')); }
       if (grant.bookingId !== bookingId || grant.role !== role || grant.model !== 'stt-rt-v5' ||
-          Date.now() >= Date.parse(grant.expires_at) || (!Number.isFinite(grant.maxSessionSeconds) || grant.maxSessionSeconds <= 0 || grant.maxSessionSeconds > 300) ||
+          Date.now() >= Date.parse(grant.expires_at) || (!Number.isFinite(grant.maxSessionSeconds) || grant.maxSessionSeconds <= 0 || grant.maxSessionSeconds > 1500) ||
           !Number.isFinite(grant.captureEndsAt) || grant.captureEndsAt <= Date.now()) throw new Error('Invalid authorization');
       track = local; began = performance.now(); finalText = ''; finalCount = tokenCount = lastTokenEnd = 0;
       $('paid-output').textContent = ''; $('browser-output').textContent = '';
@@ -131,7 +131,7 @@
           if (socket.bufferedAmount > 64000) { stop('Network backpressure — pilot stopped / 네트워크 지연', true); return; }
           socket.send(local.enabled && !local.muted ? event.data : new ArrayBuffer(event.data.byteLength));
         };
-        active = true; starting = false; status('Streaming ' + role + ' local mic · maximum 5 minutes / 본인 마이크 비교 중');
+        active = true; starting = false; status('Streaming ' + role + ' local mic · maximum 25 minutes / 본인 마이크 비교 중');
         const stopAt=Math.min(grant.captureEndsAt,Date.now()+grant.maxSessionSeconds*1000);
         remaining(stopAt-Date.now());countdownTimer=setInterval(()=>remaining(stopAt-Date.now()),250);
         deadlineTimer = setTimeout(() => {remaining(0);stop('Capture limit reached / 제한 시간 종료', false);},Math.max(0,stopAt-Date.now()));

@@ -2,7 +2,7 @@
 // Server-only just-in-time mint. Caller must FIRST commit the atomic reservation.
 const crypto = require('node:crypto');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
-const MAX_SECONDS = 300, START_TTL_SECONDS = 60;
+const MAX_SECONDS = 1500, START_TTL_SECONDS = 60;
 const BRANCH = 'codex/soniox-owner-pilot';
 const PILOT_BOOKING = 'cfb91da5-991b-48d9-b86f-a7e912cb8ed4';
 const OWNERS = Object.freeze({

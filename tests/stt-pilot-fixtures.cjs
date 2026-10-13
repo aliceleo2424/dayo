@@ -40,7 +40,7 @@ async function harness(options={}){
 }
 async function main(){
  let h=await harness();try{
-  for(const actor of [U,P]){const r=await h.invoke(actor,{action:'state',bookingId:B});assert.equal(r.status,200);assert.equal(r.body.available,true);assert.equal(r.body.singleUse,true);assert.equal(r.body.startExpirySeconds,60);assert.equal(r.body.maxSessionSeconds,300);}
+  for(const actor of [U,P]){const r=await h.invoke(actor,{action:'state',bookingId:B});assert.equal(r.status,200);assert.equal(r.body.available,true);assert.equal(r.body.singleUse,true);assert.equal(r.body.startExpirySeconds,60);assert.equal(r.body.maxSessionSeconds,1500);}
   const probe=await h.invoke(U,{action:'probe',bookingId:B});assert.equal(probe.status,200);assert.equal(probe.body.audioSentBytes,0);assert.equal(probe.body.allocationConsumed,false);assert.equal(h.probes(),1);assert.equal((await h.actor(U)).available,true);
   assert.equal((await h.invoke(X,{action:'probe',bookingId:B})).status,403);assert.equal(h.probes(),1,'outsider cannot probe');
   assert.equal((await h.invoke(U,{action:'start',consent:true})).status,403,'every call requires the exact authorized booking');
@@ -48,8 +48,8 @@ async function main(){
   // Fresh handlers model independent workers; each uses the same actual local DB.
   const results=await Promise.all(Array.from({length:60},(_,i)=>h.invoke(i%2?U:P)));
   const granted=results.filter(r=>r.status===200);assert.equal(granted.length,2);assert.equal(h.mints(),2);assert.deepEqual(granted.map(r=>r.body.role).sort(),['learner','partner']);
-  for(const r of granted){assert.equal(r.headers['Cache-Control'],'private, no-store');assert.equal(r.body.maxSessionSeconds,300);assert.equal(r.body.startExpirySeconds,60);assert(!JSON.stringify(r).includes('synthetic-master'));}
-  assert(h.mintBodies.every(b=>b.expires_in_seconds===60&&b.single_use===true&&b.usage_type==='transcribe_websocket'&&b.max_session_duration_seconds===300));
+  for(const r of granted){assert.equal(r.headers['Cache-Control'],'private, no-store');assert.equal(r.body.maxSessionSeconds,1500);assert.equal(r.body.startExpirySeconds,60);assert(!JSON.stringify(r).includes('synthetic-master'));}
+  assert(h.mintBodies.every(b=>b.expires_in_seconds===60&&b.single_use===true&&b.usage_type==='transcribe_websocket'&&b.max_session_duration_seconds===1500));
   assert(h.mintBodies.every(b=>!JSON.stringify(b).includes(U)&&!JSON.stringify(b).includes(P)));
   for(const actor of [U,P]){assert.equal((await h.invoke(actor)).status,409);assert.equal((await h.invoke(actor,{action:'state',bookingId:B})).body.available,false);}
   assert.equal(h.mints(),2,'reloads/cold handlers do not mint replacement credentials');
@@ -80,6 +80,6 @@ async function main(){
  for(const opt of [{user:X},{anonymous:true},{concurrency:10},{future:true},{past:true},{ended:true}]){
   h=await harness(opt);try{const r=await h.invoke(U,opt.future||opt.past||opt.ended?{action:'start',consent:true,bookingId:B}:undefined);assert.notEqual(r.status,200);assert.equal(h.mints(),0);assert.equal((await h.actor(U)).available,true);}finally{await h.db.close();}
  }
- console.log('PASS JIT API: 60 fresh-worker dispatches / actual local DB -> exactly two provider attempts; 60s single-use / 300s capture; owner/consent/origin/exact Preview gates; no token persistence; failures and lost ACK consume slots; no replacement/retry. Provider fully mocked; no audio or real credentials.');
+ console.log('PASS JIT API: 60 fresh-worker dispatches / actual local DB -> exactly two provider attempts; 60s single-use / 1500s capture; owner/consent/origin/exact Preview gates; no token persistence; failures and lost ACK consume slots; no replacement/retry. Provider fully mocked; no audio or real credentials.');
 }
 main().catch(e=>{console.error(e);process.exitCode=1;});

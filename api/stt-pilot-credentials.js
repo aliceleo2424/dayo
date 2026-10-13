@@ -13,12 +13,12 @@ function config(env) {
   const auth=suppliedUrl&&env.NEXT_PUBLIC_SUPABASE_ANON_KEY?{url:suppliedUrl,anon:env.NEXT_PUBLIC_SUPABASE_ANON_KEY}:publicAuthConfig();
   return {
   enabled:env.DAYO_SONIOX_TEST_ENABLED==='1',preview:env.VERCEL_ENV==='preview'&&env.VERCEL_GIT_COMMIT_REF===BRANCH,
-  host:env.VERCEL_URL,key:env.SONIOX_API_KEY,booking:env.DAYO_SONIOX_TEST_BOOKING,
+  host:env.VERCEL_URL,branchHost:env.VERCEL_BRANCH_URL,key:env.SONIOX_API_KEY,booking:env.DAYO_SONIOX_TEST_BOOKING,
   url:String(auth.url).replace(/\/rest\/v1\/?$/i,'').replace(/\/+$/,''),
   anon:auth.anon,budget:Number(env.DAYO_SONIOX_PROJECT_BUDGET_USD),
   verifiedAt:Date.parse(env.DAYO_SONIOX_LIMITS_VERIFIED_AT)
 };}
-function safeOrigin(req,c) {try {const u=new URL(req.headers.origin);return u.protocol==='https:'&&u.host===c.host&&/\.vercel\.app$/.test(u.hostname)&&u.hostname!=='dayo-black.vercel.app';}catch(_){return false;}}
+function safeOrigin(req,c) {try {const u=new URL(req.headers.origin);return u.protocol==='https:'&&(u.host===c.host||(c.branchHost==='dayo-git-codex-soniox-owner-pilot-aliceleo2424s-projects.vercel.app'&&u.host===c.branchHost))&&/\.vercel\.app$/.test(u.hostname)&&u.hostname!=='dayo-black.vercel.app';}catch(_){return false;}}
 function captureWindow(booking,now) {const start=Date.parse(booking&&booking.scheduled_at),end=start+25*60000;return Number.isFinite(start)&&now>=start&&now<end-70000?{end,duration:Math.min(MAX_SECONDS,Math.floor((end-now-70000)/1000))}:null;}
 async function request(fetchImpl,url,options) {
   const r=await fetchImpl(url,{...options,signal:AbortSignal.timeout(7000)});
@@ -51,7 +51,7 @@ function createHandler({env=process.env,fetchImpl=fetch,clock=Date.now,probeImpl
     headers={apikey:c.anon,Authorization:authorization};
     const user=await request(fetchImpl,c.url+'/auth/v1/user',{headers}),role=user&&OWNERS[user.id];
     if(!user||user.is_anonymous===true||!role)return reply(res,403,{error:'pilot_owner_required'});
-    let captureEndsAt=clock()+MAX_SECONDS*1000;
+    let captureEndsAt=clock()+MAX_SECONDS*1000,scheduledAt;
     // One explicitly authorized sibling booking only; its normal booking flag is unchanged.
     if(body.bookingId){
       const q=new URLSearchParams({id:'eq.'+body.bookingId,select:'id,learner_id,partner_user_id,status,scheduled_at,is_test_session',limit:'1'});
@@ -59,6 +59,7 @@ function createHandler({env=process.env,fetchImpl=fetch,clock=Date.now,probeImpl
       const b=Array.isArray(rows)&&rows.find(x=>x.id===body.bookingId),window=captureWindow(b,clock());
       if(!b||b[role==='partner'?'partner_user_id':'learner_id']!==user.id||b.learner_id!==Object.keys(OWNERS)[0]||b.partner_user_id!==Object.keys(OWNERS)[1]||b.status!=='confirmed'||(action==='start'&&!window))
         return reply(res,409,{error:'outside_authorized_test_window'});
+      scheduledAt=b.scheduled_at;
       if(action==='start'){
       const state=await request(fetchImpl,c.url+'/rest/v1/rpc/get_room_session_state',{
         method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({p_booking_id:body.bookingId})
@@ -68,14 +69,14 @@ function createHandler({env=process.env,fetchImpl=fetch,clock=Date.now,probeImpl
       captureEndsAt=window.end;
       }
     }
-    if(action==='state'){
-      const state=await rpc({p_action:'state'});
-      if(!state||state.role!==role||typeof state.available!=='boolean')throw new Error('invalid_state');
-      return reply(res,200,{...state,model:'stt-rt-v5',singleUse:true,startExpirySeconds:START_TTL_SECONDS,maxSessionSeconds:MAX_SECONDS,bookingId:PILOT_BOOKING});
-    }
     // Verify existing provider concurrency guard before consuming a slot.
     const limits=await request(fetchImpl,'https://api.soniox.com/v1/concurrency-limits',{headers:{Authorization:'Bearer '+c.key}});
     if(limits?.project?.limits?.transcribe_concurrent!==2)return reply(res,503,{error:'provider_concurrency_guard_unverified'});
+    if(action==='state'){
+      const state=await rpc({p_action:'state'});
+      if(!state||state.role!==role||typeof state.available!=='boolean')throw new Error('invalid_state');
+      return reply(res,200,{...state,model:'stt-rt-v5',singleUse:true,startExpirySeconds:START_TTL_SECONDS,maxSessionSeconds:MAX_SECONDS,bookingId:PILOT_BOOKING,scheduledAt,canonicalPilot:true,providerAuthenticationVerified:true});
+    }
     if(action==='probe'){
       // Verify caller's durable owner binding; never reserve or mint.
       const state=await rpc({p_action:'state'});

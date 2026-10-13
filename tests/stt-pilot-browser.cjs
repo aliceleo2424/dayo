@@ -15,9 +15,9 @@ const server=http.createServer((req,res)=>{
   let raw='';req.on('data',chunk=>raw+=chunk);req.on('end',()=>{
    const body=JSON.parse(raw),role=(req.headers.authorization||'').includes('partner')?'partner':'learner',fixture=req.headers['x-local-fixture']||'default';
    res.setHeader('Content-Type','application/json');
-   if(body.action==='state')return res.end(JSON.stringify({role,available:!used.has('snx_temp_'+fixture+'_'+role),model:'stt-rt-v5',singleUse:true,startExpirySeconds:60,maxSessionSeconds:300}));
+   if(body.action==='state')return res.end(JSON.stringify({role,available:!used.has('snx_temp_'+fixture+'_'+role),model:'stt-rt-v5',singleUse:true,startExpirySeconds:60,maxSessionSeconds:1500}));
    assert(!body.action||body.action==='start','Page never probes provider or auto-mints');
-   grants++;const max=fixture.includes('deadline')?1:fixture.includes('overlong')?601:300;
+   grants++;const max=fixture.includes('deadline')?1:fixture.includes('overlong')?1501:1500;
    res.end(JSON.stringify({bookingId:BOOKING,role,model:'stt-rt-v5',
     api_key:'snx_temp_'+fixture+'_'+role,expires_at:new Date(Date.now()+30000).toISOString(),maxSessionSeconds:max,captureEndsAt:Date.now()+max*1000}));
   });return;
@@ -61,7 +61,7 @@ const server=http.createServer((req,res)=>{
    const role=width===390?'partner':'learner';let c=await make(width,'main',role),before=grants;
    assert(await c.page.locator('#start').isDisabled());assert.equal(grants,before);
    assert((await c.page.locator('#readiness').innerText()).includes('Ready · '+role));
-   assert.equal(await c.page.locator('#remaining').innerText(),'05:00');
+   assert.equal(await c.page.locator('#remaining').innerText(),'25:00');
    await c.page.locator('#consent').check();await c.page.locator('#start').click();assert.equal(grants,before,'No mic means no credential request');
    await begin(c);await c.page.waitForFunction(()=>document.querySelector('#status').textContent.includes('Streaming'));
    await c.page.waitForFunction(()=>window.transport.some(x=>typeof x==='number'));
