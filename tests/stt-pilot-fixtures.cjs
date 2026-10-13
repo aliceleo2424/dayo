@@ -3,7 +3,7 @@ const assert=require('node:assert/strict'),path=require('node:path');
 const root=process.env.DAYO_PILOT_ROOT||path.resolve(__dirname,'..');
 const {createHandler}=require(path.join(root,'api/stt-pilot-credentials.js'));
 const {fixture,U,P,X}=require('./soniox-pilot-allocation-sql.cjs');
-const B='cfb91da5-991b-48d9-b86f-a7e912cb8ed4';
+const B='cfb91da5-991b-48d9-b86f-a7e912cb8ed4', EVENING='de9cf057-af5e-4e5c-9d17-9ad099e070e0';
 function config(){return {VERCEL_ENV:'preview',VERCEL_GIT_COMMIT_REF:'codex/soniox-owner-pilot',VERCEL_URL:'dayo-owner.vercel.app',
  DAYO_SONIOX_TEST_BOOKING:B,DAYO_SONIOX_TEST_ENABLED:'1',SONIOX_API_KEY:'synthetic-master',NEXT_PUBLIC_SUPABASE_URL:'https://fixture.invalid/rest/v1/',NEXT_PUBLIC_SUPABASE_ANON_KEY:'synthetic-public',
  DAYO_SONIOX_PROJECT_BUDGET_USD:'2',DAYO_SONIOX_LIMITS_VERIFIED_AT:new Date().toISOString()};}
@@ -27,12 +27,12 @@ async function harness(options={}){
    return {ok:true,json:async()=>({api_key:options.invalidGrant?'synthetic-master':'snx_temp_fixture-'+mints,
     expires_at:new Date(Date.now()+(options.expiry??60000)).toISOString()})};
   }
-  if(url.includes('/rest/v1/bookings?'))return {ok:true,json:async()=>[{id:B,learner_id:U,partner_user_id:P,is_test_session:false,status:'confirmed',scheduled_at:new Date(Date.now()+(options.future?600000:options.past?-1800000:0)).toISOString()}]};
-  if(url.endsWith('/rpc/get_room_session_state'))return {ok:true,json:async()=>({success:true,booking_id:B,participant_id:actor,role:actor===P?'partner':'learner',session_ended:!!options.ended})};
+  if(url.includes('/rest/v1/bookings?'))return {ok:true,json:async()=>[{id:options.booking||B,learner_id:U,partner_user_id:P,is_test_session:false,status:'confirmed',scheduled_at:new Date(Date.now()+(options.future?600000:options.past?-1800000:0)).toISOString()}]};
+  if(url.endsWith('/rpc/get_room_session_state'))return {ok:true,json:async()=>({success:true,booking_id:options.booking||B,participant_id:actor,role:actor===P?'partner':'learner',session_ended:!!options.ended})};
   throw Error('Unexpected URL '+url);
  }
- function worker(change={}){return createHandler({env:{...config(),...options.env,...change},fetchImpl,probeImpl:async()=>{probes++;return {authenticated:true,model:'stt-rt-v5',audioSentBytes:0,audioProcessedMs:0};}});}
- async function invoke(actor=U,body={action:'start',consent:true,bookingId:B},change={},reqChange={}){
+ function worker(change={}){return createHandler({env:{...config(),...options.env,...(options.booking?{DAYO_SONIOX_TEST_BOOKING:options.booking}:{}),...change},fetchImpl,probeImpl:async()=>{probes++;return {authenticated:true,model:'stt-rt-v5',audioSentBytes:0,audioProcessedMs:0};}});}
+ async function invoke(actor=U,body={action:'start',consent:true,bookingId:options.booking||B},change={},reqChange={}){
   let output;const headers={};await worker(change)({method:'POST',headers:{origin:'https://dayo-owner.vercel.app',authorization:'Bearer fixture:'+actor},body,...reqChange},
    {setHeader(k,v){headers[k]=v;},end(v){output={status:this.statusCode,body:JSON.parse(v),headers};}});return output;
  }
@@ -80,6 +80,17 @@ async function main(){
  for(const opt of [{user:X},{anonymous:true},{concurrency:10},{future:true},{past:true},{ended:true}]){
   h=await harness(opt);try{const r=await h.invoke(U,opt.future||opt.past||opt.ended?{action:'start',consent:true,bookingId:B}:undefined);assert.notEqual(r.status,200);assert.equal(h.mints(),0);assert.equal((await h.actor(U)).available,true);}finally{await h.db.close();}
  }
+ // The same protected Preview can authorize a NEW exact booking without code rewrites.
+ // The server still rejects the previously authorized booking, wrong actors and invalid time.
+ h=await harness({booking:EVENING});try{
+  const current=await h.invoke(U,{action:'state',bookingId:EVENING});
+  assert.equal(current.status,200);assert.equal(current.body.bookingId,EVENING);
+  assert.equal((await h.invoke(U,{action:'state',bookingId:B})).status,403);
+  assert.equal((await h.invoke(X,{action:'state',bookingId:EVENING})).status,403);
+  assert.equal(h.mints(),0,'New booking readiness must not spend one-use slots');
+  assert.equal((await h.invoke(U,{action:'start',consent:true,bookingId:EVENING})).status,200);
+  assert.equal(h.mints(),1);
+ }finally{await h.db.close();}
  console.log('PASS JIT API: 60 fresh-worker dispatches / actual local DB -> exactly two provider attempts; 60s single-use / 1500s capture; owner/consent/origin/exact Preview gates; no token persistence; failures and lost ACK consume slots; no replacement/retry. Provider fully mocked; no audio or real credentials.');
 }
 main().catch(e=>{console.error(e);process.exitCode=1;});
