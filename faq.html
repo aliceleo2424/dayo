@@ -11,6 +11,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="legal-pages.css">
+<link rel="stylesheet" href="/mobile-nav.css">
+<script src="/scroll-lock.js"></script>
   <style>
     .faq-header { gap: 1rem; font-family: 'Gowun Dodum', 'Quicksand', -apple-system, sans-serif; }
     .faq-nav { display: flex; align-items: center; gap: 1rem; margin-left: auto; }
@@ -44,20 +46,27 @@
   </style>
   <link rel="stylesheet" href="/english-typography.css?v=20261005-en">
   <link rel="stylesheet" href="/brand-surfaces.css?v=20261005-logo-palette">
+<link rel="stylesheet" href="/customer-navigation.css?v=20261013-views">
 </head>
-<body class="legal-page">
+<body data-customer-page="faq" class="legal-page">
   <header class="legal-header faq-header">
     <a class="legal-brand" href="/" aria-label="DayO 홈으로" data-i18n="faq.homeAria" data-i18n-attr="aria-label">
       <img src="/images/logo_header.png" alt="DayO" class="legal-logo">
     </a>
-    <nav class="faq-nav" aria-label="주요 메뉴" data-i18n="nav.mainMenuAria" data-i18n-attr="aria-label">
-      <a href="/#how" data-i18n="landing.nav.how">이용 방법</a>
-      <a href="/#pricing" data-i18n="landing.nav.pricing">티켓</a>
-      <a href="/faq.html" aria-current="page" data-i18n="landing.nav.faq">FAQ</a>
-    </nav>
+    <nav class="nav-desktop customer-desktop-nav" aria-label="주요 메뉴">
+  <a href="/#about" data-customer-route="about" data-i18n="customer.nav.about">DayO 소개</a>
+  <a href="/#how" data-customer-route="how" data-i18n="landing.nav.how">이용 방법</a>
+  <a href="/#pricing" data-customer-route="pricing" data-i18n="landing.nav.pricing">티켓</a>
+  <a href="/mypage.html#talkArchiveTitle" data-customer-route="letters" data-i18n="customer.nav.letters">편지함</a>
+  <a href="/mypage.html" data-customer-route="mypage" data-i18n="nav.mypage">마이페이지</a>
+</nav>
     <div class="faq-language" data-i18n-lang="icon" data-i18n-languages="KO,EN"></div>
-    <a class="legal-home-btn" href="/" data-i18n="faq.home">메인으로 돌아가기</a>
+    <div class="header-actions"><a class="header-cta customer-cta" href="/index.html?booking=open" data-i18n="customer.nav.start">대화 시작하기</a><button class="menu-toggle" id="menuToggle" type="button" aria-label="메뉴 열기" aria-expanded="false" aria-controls="mobileNav">☰</button></div>
   </header>
+<div class="nav-drawer-backdrop" id="mobileNavBackdrop"></div><nav class="nav-drawer" id="mobileNav" aria-label="모바일 메뉴"><div class="nav-drawer__head">DayO 메뉴</div><a href="/#about" data-customer-route="about" data-i18n="customer.nav.about">DayO 소개</a>
+  <a href="/#how" data-customer-route="how" data-i18n="landing.nav.how">이용 방법</a>
+  <a href="/faq.html" data-customer-route="faq">FAQ</a>
+  <a href="https://pf.kakao.com/_hpxkJX/chat" target="_blank" rel="noopener noreferrer" data-i18n="customer.nav.support">고객센터</a><div data-i18n-lang="drawer" data-i18n-languages="KO,EN"></div></nav>
 
   <main class="faq-main">
     <p class="faq-kicker">FAQ</p>
@@ -87,5 +96,7 @@
   <div id="dayo-legal-footer-root"></div>
   <script src="i18n.js?v=20261001-nav-tickets"></script>
   <script src="legal-footer.js"></script>
+<script src="/mobile-nav.js"></script>
+<script src="/customer-navigation.js?v=20261013-views"></script>
 </body>
 </html>

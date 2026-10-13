@@ -12,7 +12,7 @@
   var loadedAt = 0;
   var preparation = null;
   var copy = {
-    first: ['첫 대화 시작하기', 'Start your first conversation'],
+    first: ['대화 시작하기', 'Start conversation'],
     next: ['다음 대화 예약하기', 'Book your next conversation'],
     start: ['대화 시작하기', 'Start conversation'],
     preparation: ['예약된 대화 준비', 'Prepare for your conversation'],
@@ -53,7 +53,7 @@
         button.removeAttribute('data-i18n');
         button.textContent = label(rows ? state.key : 'next');
       } else {
-        button.setAttribute('data-i18n', 'landing.nav.start');
+        button.setAttribute('data-i18n', 'customer.nav.start');
         button.textContent = label('first');
       }
       if (authenticated && state.booking) button.removeAttribute('data-booking-open');

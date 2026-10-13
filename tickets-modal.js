@@ -257,8 +257,11 @@
     var exactUnit = amount / count;
     var copy = t(exactUnit === Math.round(exactUnit) ? 'tickets.price.unit' : 'tickets.price.unitApprox', { price: priceText(Math.round(exactUnit)) });
     var single = findPlan('single'), saving = single ? Number(single.priceValue) * count - amount : 0;
-    return '<p class="tk-price-unit">' + (count > 1 ? t('tickets.v2.totalCount', { count: count }) + ' · ' : '') + copy + '</p>' +
-      (saving > 0 ? '<p class="tk-price-compare">' + t(savingKey || 'tickets.v2.saving', { count: count, saving: priceText(saving) }) + '</p>' : '');
+    var customer = document.body.hasAttribute('data-customer-page');
+    var discount = customer && saving > 0 ? Math.round(saving / (Number(single.priceValue) * count) * 100) : 0;
+    return (discount ? '<p class="tk-discount"><strong>' + discount + '%</strong><span>' + (window.DayOI18n && window.DayOI18n.getLang() === 'EN' ? ' off single-ticket prices' : ' 할인 · 1회권 기준') + '</span></p>' : '') + '<p class="tk-price-unit">' + (count > 1 ? t('tickets.v2.totalCount', { count: count }) + ' · ' : '') + copy + '</p>' +
+      (saving > 0 ? '<p class="tk-price-compare">' + t(savingKey || 'tickets.v2.saving', { count: count, saving: priceText(saving) }) + '</p>' : '') +
+      (customer && (plan.id === 'pack11' || plan.id === 'pack33') ? '<p class="tk-price-bonus">' + t('tickets.price.' + plan.id + '.meta') + '</p>' : '');
   }
   function pricePlanText(plan, field) {
     if (plan.id === 'admin_test_1000') return plan[field] || '';
