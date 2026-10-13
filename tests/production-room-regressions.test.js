@@ -164,6 +164,7 @@ async function verifyInsufficientQuizHidesClock() {
 verifyBookingScopedWordHelp();
 verifyInsufficientQuizHidesClock().then(() => {
   // Caption release gate: production finals, actual room DOM/CSS and two PeerJS browsers.
+  require('./soniox-pcm-fixtures.cjs');
   require('./room-reconnect-p0.cjs');
   require('./partner-captions-fixtures.test.js');
   require('node:child_process').execFileSync(process.execPath, [path.join(__dirname, 'partner-captions-browser.test.cjs')], { stdio: 'inherit' });

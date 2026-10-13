@@ -30,7 +30,7 @@ const server=http.createServer((req,res)=>{
     window.supabaseClient={auth:{getSession:async()=>({data:{session:{access_token:'fixture-'+role,user:{id:role==='partner'?P:U}}}})},from:()=>{const chain={select:()=>chain,eq:()=>chain,maybeSingle:async()=>({data:null,error:null})};return chain;}};
     window.DayOProfileStore={saveSessionLog:async(transcript,extra)=>{window.savedPayloads.push({transcript,extra});return {ok:true};}};
     window.SpeechRecognition=class {constructor(){window.speechRuns.push(this);}start(){if(this.onstart)this.onstart();}stop(){if(this.onend)this.onend();}abort(){if(this.onend)this.onend();}};
-    window.WebSocket=class {constructor(){this.readyState=0;this.bufferedAmount=0;window.fixtureSocket=this;setTimeout(()=>{this.readyState=1;this.onopen();},20);}send(data){if(typeof data==='string'&&data==='')setTimeout(()=>this.onmessage({data:JSON.stringify({finished:true})}),15);else if(typeof data==='string')window.providerConfig=JSON.parse(data);else window.sentAudio=(window.sentAudio||0)+data.byteLength;}close(){this.readyState=3;if(this.onclose)this.onclose();}};
+    window.WebSocket=class {constructor(){this.readyState=0;this.bufferedAmount=0;window.fixtureSocket=this;setTimeout(()=>{this.readyState=1;this.onopen();},20);}send(data){if(typeof data==='string'&&data==='')setTimeout(()=>this.onmessage({data:JSON.stringify({finished:true})}),15);else if(typeof data==='string'){const msg=JSON.parse(data);if(msg.type){(window.controlFrames||=[]).push(msg.type);}else window.providerConfig=msg;}else window.sentAudio=(window.sentAudio||0)+data.byteLength;}close(){this.readyState=3;if(this.onclose)this.onclose();}};
     document.addEventListener('dayo:transcript',event=>window.transcriptEvents.push(event.detail));
     window.makeMic=async()=>{const c=new AudioContext(),osc=c.createOscillator(),dest=c.createMediaStreamDestination();osc.connect(dest);osc.start();window.localMediaStream=dest.stream;window.fixtureAudio=c;};
    },{B,U,P,role,locale});
@@ -45,10 +45,19 @@ const server=http.createServer((req,res)=>{
    await page.waitForFunction(()=>window.DayOSonioxRoom.isActive());
    await page.waitForFunction(()=>window.sentAudio>0);assert.equal(mints,before+1);assert(await page.evaluate(()=>DayOSonioxRoom.snapshot().audioFramesSent>0));
    assert.equal(await page.evaluate(()=>window.providerConfig.model),'stt-rt-v5');assert.deepEqual(await page.evaluate(()=>window.providerConfig.language_hints),['en','ko','es']);
+   assert.equal(await page.evaluate(()=>providerConfig.max_endpoint_delay_ms),1000);
+   const allocationCount=mints;
+   await page.evaluate(()=>{window.fixtureHidden=true;Object.defineProperty(document,'hidden',{configurable:true,get:()=>fixtureHidden});document.dispatchEvent(new Event('visibilitychange'));});
+   const framesBefore=await page.evaluate(()=>DayOSonioxRoom.snapshot().audioFramesSent);await page.waitForTimeout(250);
+   assert.equal(await page.evaluate(()=>DayOSonioxRoom.isActive()),true,'same socket survives background');
+   assert.equal(await page.evaluate(()=>DayOSonioxRoom.snapshot().audioFramesSent),framesBefore,'no background audio');
+   assert((await page.evaluate(()=>controlFrames)).includes('keepalive'));
+   await page.evaluate(()=>{fixtureHidden=false;document.dispatchEvent(new Event('visibilitychange'));});await page.waitForFunction(n=>DayOSonioxRoom.snapshot().audioFramesSent>n,framesBefore);assert.equal(mints,allocationCount,'no fresh credential/retry on foreground');
+   await page.evaluate(()=>window.makeMic());await page.waitForFunction(()=>DayOSonioxRoom.snapshot().microphoneRebindings===1);assert.equal(await page.evaluate(()=>DayOSonioxRoom.isActive()),true);assert.equal(mints,allocationCount,'local microphone replacement reuses socket');
    const previewBefore=await page.evaluate(()=>window.DayOLive.getTranscript().length);
-   await page.evaluate(()=>fixtureSocket.onmessage({data:JSON.stringify({tokens:[{text:'오늘은 ',is_final:true},{text:'날씨가 좋아요. I want to go outside.',is_final:false}]})}));
+   await page.evaluate(()=>fixtureSocket.onmessage({data:JSON.stringify({tokens:[{text:'오늘은 ',is_final:true,language:'ko'},{text:'날씨가 좋아요. I want to go outside.',is_final:false,language:'ko'}]})}));
    assert.equal(await page.evaluate(()=>DayOLive.getTranscript().length),previewBefore,'No interim canonical writes');
-   assert.equal(await page.evaluate(()=>DayOSonioxRoom.snapshot().pendingFinalChars),4);
+   assert.equal(await page.evaluate(()=>DayOSonioxRoom.snapshot().pendingFinalChars),4);assert.equal(await page.evaluate(()=>DayOSonioxRoom.snapshot().koreanTokens),2);assert.equal(await page.evaluate(()=>DayOSonioxRoom.snapshot().tokenLanguages.ko),2);
    assert.equal(await page.evaluate(()=>DayOSonioxRoom.snapshot().captionPreviews),role==='partner'?1:0);
    await page.evaluate(()=>fixtureSocket.onmessage({data:JSON.stringify({tokens:[{text:'날씨가 좋아요. I want to go outside.',is_final:true},{text:'<end>',is_final:true}]})}));
    assert.equal(await page.evaluate(()=>DayOLive.getTranscript().at(-1).text),'오늘은 날씨가 좋아요. I want to go outside.');
@@ -62,6 +71,10 @@ const server=http.createServer((req,res)=>{
    const recap=require(path.join(root,'public/conversation-recap.js')).build({bookingId:B,learnerId:U,partnerId:P,language:'en',learnerLog:{id:'fixture-learner-log',booking_id:B,participant_id:U,participant_role:'learner',transcript:role==='learner'?payload.transcript:[]},partnerLog:{id:'fixture-partner-log',booking_id:B,participant_id:P,participant_role:'partner',transcript:role==='partner'?payload.transcript:[]}});
    assert.equal(recap.metrics.user_utterance_count,role==='learner'?6:0,'No Partner speech in Learner spoken metrics');
    assert.equal(recap.questions.length,role==='learner'?6:0,'Actual learner finals supply three grounded words / six questions; no Partner-only quiz');
+   if(width===430&&locale==='ko'){
+     await page.evaluate(()=>{fixtureHidden=true;document.dispatchEvent(new Event('visibilitychange'));const realNow=Date.now;Date.now=()=>realNow()+1600000;});
+     await page.waitForFunction(()=>!DayOSonioxRoom.isActive());assert.equal(mints,allocationCount);assert((await page.evaluate(()=>DayOSonioxRoom.snapshot().stopCode)).includes('capture_limit'));assert.equal(await page.evaluate(()=>localMediaStream.getAudioTracks()[0].readyState),'live');assert.deepEqual(errors,[]);await page.close();continue;
+   }
    if(width===360&&locale==='ko'){
     const originalMints=mints;await page.evaluate(()=>window.fixtureSocket.onmessage({data:JSON.stringify({error_code:429})}));await page.waitForFunction(()=>!window.DayOSonioxRoom.isActive());
     await page.waitForTimeout(600);assert.equal(mints,originalMints,'No automatic paid retry after provider failure');assert.equal(await page.evaluate(()=>window.localMediaStream.getAudioTracks()[0].readyState),'live');

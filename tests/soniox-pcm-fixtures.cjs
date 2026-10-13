@@ -1,0 +1,9 @@
+// Actual PCM processor. Synthetic in-memory signal only; no recording/provider calls.
+const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict');const code=fs.readFileSync('public/soniox-pcm-worklet.js','utf8');
+for(const rate of [8000,16000,32000,44100,48000,96000])for(const kind of ['mono','right-only','silence']){
+ let Processor;const frames=[];vm.runInNewContext(code,{sampleRate:rate,AudioWorkletProcessor:class{constructor(){this.port={postMessage:b=>frames.push(b)}}},registerProcessor:(n,c)=>Processor=c,Int16Array,ArrayBuffer,DataView,Math});const p=new Processor();
+ for(let i=0;i<rate;i+=128){const n=Math.min(128,rate-i),signal=Float32Array.from({length:n},(_,j)=>kind==='silence'?0:.4*Math.sin(2*Math.PI*1000*(i+j)/rate));const input=kind==='right-only'?[new Float32Array(n),signal]:[signal];const out=new Float32Array(n).fill(1);assert(p.process([input],[[out]]));assert(out.every(v=>v===0),'no audio playback loop');}
+ assert.equal(frames.length,50,'20ms chunks');assert(frames.every(b=>b.byteLength===640));const values=frames.flatMap(b=>{const d=new DataView(b);return Array.from({length:b.byteLength/2},(_,i)=>d.getInt16(i*2,true));});assert.equal(values.length,16000,'16kHz mono signed16LE');
+ if(kind==='silence')assert(values.every(v=>v===0));else{assert(Math.max(...values)>1000);let crossings=0;for(let i=1;i<values.length;i++)if(values[i-1]<0&&values[i]>=0)crossings++;assert(Math.abs(crossings-1000)<=2,'frequency preserved rather than double speed');}
+}
+assert.equal(fs.readFileSync('soniox-pcm-worklet.js','utf8'),code);console.log('PASS 18 actual PCM processor fixtures: 8/16/32/44.1/48/96kHz, mono/right-channel-only/silence,16k output,640-byte20ms LE frames, frequency/clipping/playback/mirror. Synthetic signals do not prove recognition quality.');
