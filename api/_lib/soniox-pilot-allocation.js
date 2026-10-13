@@ -4,7 +4,6 @@ const crypto = require('node:crypto');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const MAX_SECONDS = 1500, START_TTL_SECONDS = 60;
 const BRANCH = 'codex/soniox-owner-pilot';
-const PILOT_BOOKING = 'cfb91da5-991b-48d9-b86f-a7e912cb8ed4';
 const OWNERS = Object.freeze({
   'c4552202-cafd-4ab5-bbf9-5a23719edf44':'learner',
   '1bc0eab5-9399-4da8-a90c-145ab0c4409d':'partner'
@@ -65,4 +64,4 @@ function probeConnection({masterKey,Socket=WebSocket,timeoutMs=9000}) {
   socket.onerror=()=>finish('probe_connection_failed');socket.onclose=()=>{if(!done)finish('probe_closed_unconfirmed');};
  });
 }
-module.exports={MAX_SECONDS,START_TTL_SECONDS,BRANCH,OWNERS,PILOT_BOOKING,UUID,mintCredential,publicAuthConfig,probeConnection};
+module.exports={MAX_SECONDS,START_TTL_SECONDS,BRANCH,OWNERS,UUID,mintCredential,publicAuthConfig,probeConnection};
