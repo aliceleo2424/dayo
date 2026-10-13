@@ -45,15 +45,21 @@ jobs:
       - name: Run release-critical no-browser fixtures
         shell: bash
         run: |
-          set -euo pipefail
-          node tests/room-wrap-up-fixtures.test.js
-          node tests/partner-captions-fixtures.test.js
-          node tests/partner-report-finalize-fixtures.test.js
-          node tests/mobile-assist-layout-fixtures.test.js
-          node tests/conversation-recap-fixtures.test.js
-          node tests/session-report-persistence-fixtures.test.js
-          node tests/session-transcript-reliability-fixtures.test.js
-          node tests/partner-letter-write-outcome.cjs
+          failed=0
+          for suite in \
+            tests/room-wrap-up-fixtures.test.js \
+            tests/partner-captions-fixtures.test.js \
+            tests/partner-report-finalize-fixtures.test.js \
+            tests/mobile-assist-layout-fixtures.test.js \
+            tests/conversation-recap-fixtures.test.js \
+            tests/session-report-persistence-fixtures.test.js \
+            tests/session-transcript-reliability-fixtures.test.js \
+            tests/partner-letter-write-outcome.cjs; do
+            echo "::group::$suite"
+            node "$suite" || failed=1
+            echo "::endgroup::"
+          done
+          exit "$failed"
 
   browser:
     name: Real DOM / room / captions / letter
@@ -74,12 +80,19 @@ jobs:
         run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1 jsdom@26.1.0
       - name: Install Chrome and Linux browser dependencies
         run: npx playwright install --with-deps chrome
-      - name: Partner and Learner mobile viewport / panel interactions
-        run: node tests/mobile-room-ux-browser.cjs
-      - name: Partner Letter and Customer Feedback-to-Recap real DOM interactions
-        run: node tests/letter-post-session-browser.cjs
-      - name: Existing Production room / caption regression entry point
-        run: node tests/production-room-regressions.test.js
+      - name: Run all actual browser suites and preserve each failure
+        shell: bash
+        run: |
+          failed=0
+          for suite in \
+            tests/mobile-room-ux-browser.cjs \
+            tests/letter-post-session-browser.cjs \
+            tests/production-room-regressions.test.js; do
+            echo "::group::$suite"
+            node "$suite" || failed=1
+            echo "::endgroup::"
+          done
+          exit "$failed"
       - name: Upload synthetic UI screenshots on failure
         if: failure()
         uses: actions/upload-artifact@v4
