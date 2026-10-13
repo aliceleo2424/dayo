@@ -1,0 +1,25 @@
+name: Quiz History Recovery Regression
+
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  quiz-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Install isolated DB fixture only (no app dependencies changed)
+        run: npm install --no-save --package-lock=false --ignore-scripts @electric-sql/pglite@0.3.15
+      - name: Verify JWT history, verified owner fallback, stale history denial and grounded questions
+        run: node tests/quiz-novelty-fixtures.cjs
+      - name: Canonical learner Recap fixtures
+        run: node tests/conversation-recap-fixtures.test.js
+# Uses mocked Supabase REST and saved synthetic learner evidence; no live DB writes.
