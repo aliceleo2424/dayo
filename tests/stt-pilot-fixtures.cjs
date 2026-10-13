@@ -4,6 +4,8 @@ const root=process.env.DAYO_PILOT_ROOT||path.resolve(__dirname,'..');
 const {createHandler}=require(path.join(root,'api/stt-pilot-credentials.js'));
 const {fixture,U,P,X}=require('./soniox-pilot-allocation-sql.cjs');
 const B='cfb91da5-991b-48d9-b86f-a7e912cb8ed4';
+// Synthetic future booking: no real customer or Production write.
+const FUTURE_B='a4c0e872-2d9b-487b-8b3b-404659581edb';
 function config(){return {VERCEL_ENV:'preview',VERCEL_GIT_COMMIT_REF:'codex/soniox-owner-pilot',VERCEL_URL:'dayo-owner.vercel.app',
  DAYO_SONIOX_TEST_BOOKING:B,DAYO_SONIOX_TEST_ENABLED:'1',SONIOX_API_KEY:'synthetic-master',NEXT_PUBLIC_SUPABASE_URL:'https://fixture.invalid/rest/v1/',NEXT_PUBLIC_SUPABASE_ANON_KEY:'synthetic-public',
  DAYO_SONIOX_PROJECT_BUDGET_USD:'2',DAYO_SONIOX_LIMITS_VERIFIED_AT:new Date().toISOString()};}
@@ -27,8 +29,8 @@ async function harness(options={}){
    return {ok:true,json:async()=>({api_key:options.invalidGrant?'synthetic-master':'snx_temp_fixture-'+mints,
     expires_at:new Date(Date.now()+(options.expiry??60000)).toISOString()})};
   }
-  if(url.includes('/rest/v1/bookings?'))return {ok:true,json:async()=>[{id:B,learner_id:U,partner_user_id:P,is_test_session:false,status:'confirmed',scheduled_at:new Date(Date.now()+(options.future?600000:options.past?-1800000:0)).toISOString()}]};
-  if(url.endsWith('/rpc/get_room_session_state'))return {ok:true,json:async()=>({success:true,booking_id:B,participant_id:actor,role:actor===P?'partner':'learner',session_ended:!!options.ended})};
+  if(url.includes('/rest/v1/bookings?'))return {ok:true,json:async()=>[{id:options.booking||B,learner_id:U,partner_user_id:P,is_test_session:false,status:'confirmed',scheduled_at:new Date(Date.now()+(options.future?600000:options.past?-1800000:0)).toISOString()}]};
+  if(url.endsWith('/rpc/get_room_session_state'))return {ok:true,json:async()=>({success:true,booking_id:options.booking||B,participant_id:actor,role:actor===P?'partner':'learner',session_ended:!!options.ended})};
   throw Error('Unexpected URL '+url);
  }
  function worker(change={}){return createHandler({env:{...config(),...options.env,...change},fetchImpl,probeImpl:async()=>{probes++;return {authenticated:true,model:'stt-rt-v5',audioSentBytes:0,audioProcessedMs:0};}});}
@@ -39,7 +41,22 @@ async function harness(options={}){
  return {...f,invoke,calls,mintBodies,mints:()=>mints,probes:()=>probes};
 }
 async function main(){
- let h=await harness();try{
+ // A future booking is legal only when explicitly configured on the Preview
+ // and the same two authenticated participants are bound to it.
+ let h=await harness({booking:FUTURE_B,env:{DAYO_SONIOX_TEST_BOOKING:FUTURE_B}});try{
+  const ready=await h.invoke(U,{action:'state',bookingId:FUTURE_B});
+  assert.equal(ready.status,200);
+  assert.equal(ready.body.bookingId,FUTURE_B);
+  assert.equal((await h.invoke(U,{action:'state',bookingId:B})).status,403);
+  assert.equal((await h.invoke(X,{action:'state',bookingId:FUTURE_B})).status,403);
+  assert.equal(h.mints(),0,'readiness and unauthorized booking cannot consume one-use slots');
+  const trial=await h.invoke(U,{action:'start',consent:true,bookingId:FUTURE_B});
+  assert.equal(trial.status,200);
+  assert.equal(trial.body.bookingId,FUTURE_B);
+  assert.equal(h.mints(),1,'only one synthetic grant for the approved future booking');
+  assert.equal((await h.invoke(U,{action:'start',consent:true,bookingId:FUTURE_B})).status,409,'no second mint');
+ }finally{await h.db.close();}
+ h=await harness();try{
   for(const actor of [U,P]){const r=await h.invoke(actor,{action:'state',bookingId:B});assert.equal(r.status,200);assert.equal(r.body.available,true);assert.equal(r.body.singleUse,true);assert.equal(r.body.startExpirySeconds,60);assert.equal(r.body.maxSessionSeconds,1500);}
   const probe=await h.invoke(U,{action:'probe',bookingId:B});assert.equal(probe.status,200);assert.equal(probe.body.audioSentBytes,0);assert.equal(probe.body.allocationConsumed,false);assert.equal(h.probes(),1);assert.equal((await h.actor(U)).available,true);
   assert.equal((await h.invoke(X,{action:'probe',bookingId:B})).status,403);assert.equal(h.probes(),1,'outsider cannot probe');

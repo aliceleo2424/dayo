@@ -1,0 +1,35 @@
+name: Soniox Future Booking Safety (branch only)
+
+on:
+  push:
+    branches:
+      - codex/soniox-future-booking-20261013
+
+permissions:
+  contents: read
+
+jobs:
+  backend-and-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Install test-only dependencies (do not update lockfile)
+        run: npm install --no-save --package-lock=false --ignore-scripts @electric-sql/pglite@0.3.15 playwright@1.56.1 jsdom@26.1.0
+      - name: Existing durable slot and exact-booking JIT regression
+        run: |
+          node tests/soniox-pilot-allocation-sql.cjs
+          node tests/stt-pilot-fixtures.cjs
+          node tests/soniox-sibling-binding.cjs
+      - name: Install Chrome for real DOM synthetic tests
+        run: npx playwright install --with-deps chrome
+      - name: Soniox Korean-English final, caption bridge and quiz pipeline
+        run: node tests/soniox-room-integration.cjs
+
+# Synthetic mocks/local DB only. NEVER use a real Soniox key, audio, booking
+# data, live provider or Production connection in this branch test.
