@@ -13,7 +13,7 @@
   var preparation = null;
   var copy = {
     first: ['대화 시작하기', 'Start conversation'],
-    next: ['다음 대화 예약하기', 'Book your next conversation'],
+    next: ['대화 시작하기', 'Start conversation'],
     start: ['대화 시작하기', 'Start conversation'],
     preparation: ['예약된 대화 준비', 'Prepare for your conversation'],
     wait: ['대화 시작 5분 전부터 입장할 수 있어요.', 'You can enter 5 minutes before the conversation starts.'],
