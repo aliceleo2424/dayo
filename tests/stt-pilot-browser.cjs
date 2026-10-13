@@ -2,7 +2,7 @@
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),http=require('node:http');
 const {chromium}=require('playwright');
 const root=process.env.DAYO_PILOT_ROOT||path.resolve(__dirname,'..');
-const BOOKING='11111111-1111-4111-8111-111111111111';
+const BOOKING='cfb91da5-991b-48d9-b86f-a7e912cb8ed4';
 const room=`<!doctype html><html><body>Existing room fixture<script>
 window.DayORoomAccess={allowed:true,role:'user',bookingId:'${BOOKING}'};
 window.pilotUser='learner';window.supabaseClient={auth:{getSession:async()=>({data:{session:{access_token:'synthetic-'+window.pilotUser,user:{id:window.pilotUser}}}})}};

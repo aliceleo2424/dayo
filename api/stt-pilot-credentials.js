@@ -1,7 +1,7 @@
 'use strict';
 // Existing protected pilot route; no service-role key or canonical writes.
 const crypto=require('node:crypto');
-const {MAX_SECONDS,START_TTL_SECONDS,BRANCH,OWNERS,UUID,mintCredential,publicAuthConfig,probeConnection}=require('./_lib/soniox-pilot-allocation.js');
+const {MAX_SECONDS,START_TTL_SECONDS,BRANCH,OWNERS,PILOT_BOOKING,UUID,mintCredential,publicAuthConfig,probeConnection}=require('./_lib/soniox-pilot-allocation.js');
 function reply(res,status,body) {
   res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');
   res.setHeader('Cache-Control','private, no-store');res.setHeader('Pragma','no-cache');
@@ -29,7 +29,7 @@ function createHandler({env=process.env,fetchImpl=fetch,clock=Date.now,probeImpl
   if(req.method!=='POST')return reply(res,405,{error:'post_required'});
   // Hard target/branch gate, independent of feature flags. Production never mints.
   if(!c.preview)return reply(res,403,{error:'exact_protected_preview_required'});
-  if(!c.enabled||!c.key||!c.url||!c.anon||!c.host)return reply(res,503,{error:'pilot_not_configured'});
+  if(!c.enabled||!c.key||!c.url||!c.anon||!c.host||c.booking!==PILOT_BOOKING)return reply(res,503,{error:'pilot_not_configured'});
   if(!safeOrigin(req,c))return reply(res,403,{error:'protected_test_origin_required'});
   if(!Number.isFinite(c.budget)||c.budget<=0||c.budget>2||!Number.isFinite(c.verifiedAt)||c.verifiedAt>now||now-c.verifiedAt>12*3600000)
     return reply(res,503,{error:'project_budget_unverified'});
@@ -42,7 +42,7 @@ function createHandler({env=process.env,fetchImpl=fetch,clock=Date.now,probeImpl
   const action=body.action||'start';
   if(!['state','start','probe'].includes(action)||action==='start'&&body.consent!==true)return reply(res,403,{error:'explicit_start_and_consent_required'});
   if(body.bookingId!==undefined&&!UUID.test(body.bookingId||''))return reply(res,400,{error:'invalid_request'});
-  if(action==='start'&&c.booking&&body.bookingId!==c.booking)return reply(res,403,{error:'allowlisted_test_booking_required'});
+  if(body.bookingId!==PILOT_BOOKING)return reply(res,403,{error:'allowlisted_test_booking_required'});
   let reservation,headers,reserveAttempted=false;
   const rpc=async args=>request(fetchImpl,c.url+'/rest/v1/rpc/dayo_soniox_pilot_allocation',{
     method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify(args)
@@ -52,25 +52,26 @@ function createHandler({env=process.env,fetchImpl=fetch,clock=Date.now,probeImpl
     const user=await request(fetchImpl,c.url+'/auth/v1/user',{headers}),role=user&&OWNERS[user.id];
     if(!user||user.is_anonymous===true||!role)return reply(res,403,{error:'pilot_owner_required'});
     let captureEndsAt=clock()+MAX_SECONDS*1000;
-    // Preserve prior booking authorization if a legacy room comparison supplies one.
-    // Owner-only standalone comparison does not need another booking.
+    // One explicitly authorized sibling booking only; its normal booking flag is unchanged.
     if(body.bookingId){
       const q=new URLSearchParams({id:'eq.'+body.bookingId,select:'id,learner_id,partner_user_id,status,scheduled_at,is_test_session',limit:'1'});
       const rows=await request(fetchImpl,c.url+'/rest/v1/bookings?'+q,{headers});
       const b=Array.isArray(rows)&&rows.find(x=>x.id===body.bookingId),window=captureWindow(b,clock());
-      if(!b||b[role==='partner'?'partner_user_id':'learner_id']!==user.id||b.is_test_session!==true||b.status!=='confirmed'||!window)
+      if(!b||b[role==='partner'?'partner_user_id':'learner_id']!==user.id||b.learner_id!==Object.keys(OWNERS)[0]||b.partner_user_id!==Object.keys(OWNERS)[1]||b.status!=='confirmed'||(action==='start'&&!window))
         return reply(res,409,{error:'outside_authorized_test_window'});
+      if(action==='start'){
       const state=await request(fetchImpl,c.url+'/rest/v1/rpc/get_room_session_state',{
         method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({p_booking_id:body.bookingId})
       });
       if(!state||state.success!==true||state.booking_id!==body.bookingId||state.participant_id!==user.id||state.role!==role||state.session_ended!==false)
         return reply(res,409,{error:'session_not_active'});
       captureEndsAt=window.end;
+      }
     }
     if(action==='state'){
       const state=await rpc({p_action:'state'});
       if(!state||state.role!==role||typeof state.available!=='boolean')throw new Error('invalid_state');
-      return reply(res,200,{...state,model:'stt-rt-v5',singleUse:true,startExpirySeconds:START_TTL_SECONDS,maxSessionSeconds:MAX_SECONDS});
+      return reply(res,200,{...state,model:'stt-rt-v5',singleUse:true,startExpirySeconds:START_TTL_SECONDS,maxSessionSeconds:MAX_SECONDS,bookingId:PILOT_BOOKING});
     }
     // Verify existing provider concurrency guard before consuming a slot.
     const limits=await request(fetchImpl,'https://api.soniox.com/v1/concurrency-limits',{headers:{Authorization:'Bearer '+c.key}});

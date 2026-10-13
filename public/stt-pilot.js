@@ -16,7 +16,7 @@
     try{
       const client=frame.contentWindow.supabaseClient,s=client&&await client.auth.getSession(),auth=s?.data?.session;
       if(!auth?.access_token)throw new Error('sign_in_required');
-      const response=await fetch('/api/stt-pilot-credentials',{method:'POST',cache:'no-store',headers:{Authorization:'Bearer '+auth.access_token,'Content-Type':'application/json'},body:JSON.stringify({action:'state'}),signal:AbortSignal.timeout(10000)});
+      const response=await fetch('/api/stt-pilot-credentials',{method:'POST',cache:'no-store',headers:{Authorization:'Bearer '+auth.access_token,'Content-Type':'application/json'},body:JSON.stringify({action:'state',bookingId}),signal:AbortSignal.timeout(10000)});
       const state=await response.json();
       if(!response.ok)throw new Error(state.error||'readiness_unavailable');
       if(!['learner','partner'].includes(state.role)||state.model!=='stt-rt-v5'||state.singleUse!==true||state.startExpirySeconds!==60||state.maxSessionSeconds!==300)throw new Error('invalid_readiness');
