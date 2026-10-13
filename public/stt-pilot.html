@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DayO · Owner STT comparison</title>
+<style>
+*{box-sizing:border-box}body{margin:0;color:#254237;background:#f7f6ee;font:16px/1.45 system-ui,sans-serif}
+main{max-width:1280px;margin:auto;padding:12px}h1{font-size:20px}button,input{font:inherit}button{padding:10px 16px;min-height:44px;border:1px solid #668772;border-radius:8px;background:white;color:inherit}button:disabled{opacity:.5}section{border:1px solid #d2dccf;padding:12px;border-radius:10px;margin-bottom:12px}label{display:block;margin:10px 0}iframe{width:100%;height:70dvh;min-height:380px;border:1px solid #d2dccf;border-radius:10px;background:white}.results{display:grid;grid-template-columns:1fr 1fr;gap:12px}.output{max-height:200px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}.output p{margin:8px 0}#status{overflow-wrap:anywhere}details{margin:12px 0}@media(max-width:600px){.results{grid-template-columns:1fr}main{padding:8px}iframe{height:65dvh}}
+</style></head><body><main>
+<h1>DayO · Owner STT comparison / 음성 인식 비교</h1>
+<section><p>This TEST view streams only your local microphone to Soniox (US processing). The existing room and browser STT remain unchanged. Paid results are not saved to DayO reports. No audio recording, transcript logs or training use. Wear headphones to avoid remote-speaker bleed.</p>
+<p>이 TEST 화면은 본인 마이크만 Soniox(미국 처리)로 전송합니다. 기존 대화방과 브라우저 STT는 그대로 유지합니다. 유료 STT 결과는 리포트에 저장하지 않습니다. 오디오 녹음·발화 로그·학습 이용은 하지 않습니다. 상대방 소리가 마이크에 섞이지 않도록 이어폰을 사용하세요.</p>
+<label><input type="checkbox" id="consent"> I consent to stream my voice to Soniox for this comparison. / 이번 비교를 위한 음성 전송에 동의합니다.</label>
+<button id="check">Check readiness (no allocation) / 준비 상태 확인</button>
+<button id="start" disabled>Start comparison / 비교 시작</button> <button id="stop" disabled>Stop / 중지</button>
+<p><a href="/mypage" target="_blank" rel="noopener">Judy: sign in / 로그인</a> · <a href="/partner" target="_blank" rel="noopener">Jen: sign in / 로그인</a></p>
+<p id="readiness" role="status">Checking sign-in / 로그인 확인 중</p>
+<p>Remaining test time / 남은 테스트 시간: <strong id="remaining">25:00</strong></p>
+<p id="status" role="status">Open this page with the authorized bookingId, then sign in through the existing DayO flow.</p>
+<details><summary>Short test script / 짧은 테스트 문장</summary><ol>
+<li>I went to a café yesterday. The coffee was delicious.</li>
+<li>I visited 경복궁 and then walked around 홍대.</li>
+<li>오늘은 날씨가 좋아요. 저는 부산에 가고 싶어요.</li>
+<li>Me gusta conversar. Mañana voy a visitar una cafetería.</li>
+<li>I like coffee. I like coffee. (Repeat both sentences.)</li>
+<li>Stay silent for ten seconds. Note any unexpected text.</li>
+<li>Mute/unmute the existing room mic. On disconnect, the pilot stops; no automatic paid reconnect.</li>
+</ol><p>Compare omissions, wrong words, unexpected text, final fragment length and displayed latency. ASR output is not proof of what was actually spoken.</p></details>
+</section>
+<div class="results"><section><h2>Browser STT · local participant</h2><div id="browser-output" class="output"></div></section>
+<section><h2>Soniox · local participant</h2><div id="paid-output" class="output"></div><p id="metrics"></p></section></div>
+<iframe id="room" title="Existing DayO room" allow="camera; microphone; autoplay; fullscreen"></iframe>
+</main><script src="stt-pilot.js"></script></body></html>

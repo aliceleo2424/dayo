@@ -20,6 +20,8 @@
   var demoMode = true;
   var geminiOk = false;
   var sttOn = false;
+  var sonioxSourceActive = false;
+  var sonioxFinalSequence = 0;
 
   var callFrame = null;
   var localStream = null;
@@ -238,7 +240,7 @@
   }
 
   function shouldKeepSttAlive() {
-    return wantListen && micOn && sttMicAvailable && !hungUp && !window.dayoSessionEnded;
+    return !sonioxSourceActive && wantListen && micOn && sttMicAvailable && !hungUp && !window.dayoSessionEnded;
   }
 
   function sttTelemetryKey() {
@@ -1387,6 +1389,7 @@
           if (finalText) {
             var isPreflight = window.__dayoPreflightActive === true;
             recordSttState('stt_result_final', { char_count: finalText.length, preflight: isPreflight });
+            if (window.DayOSonioxRoom && window.DayOSonioxRoom.isActive()) continue;
             if (!isPreflight) {
               pushTranscript(finalText, localTranscriptSpeaker());
               scheduleCopilot(finalText);
@@ -1454,6 +1457,11 @@
         retireRecognitionRun(recognitionRun);
         recordSttState('stt_end', { reason: reason });
         resolve();
+      }
+      if (sonioxSourceActive && window.DayOSonioxRoom && window.DayOSonioxRoom.isActive()) {
+        timer = setTimeout(function () { finish('review-flush-timeout'); }, 2500);
+        window.DayOSonioxRoom.flush().then(function () { finish('soniox-session-stop'); }, function () { finish('soniox-flush-error'); });
+        return;
       }
       var run = recognitionRun;
       if (!run || run.closed) { finish('session-stop'); return; }
@@ -1651,6 +1659,25 @@
   }
 
   window.DayOLive = {
+    setSonioxSource: function (enabled) {
+      var pilot = window.DayOSonioxRoom;
+      if (!pilot || (enabled ? (!pilot.isAuthorized() || !pilot.isActive()) : pilot.isActive())) return false;
+      sonioxSourceActive = enabled === true;
+      if (sonioxSourceActive) { retireRecognitionRun(recognitionRun); sttOn = false; sttStarting = false; clearTimeout(sttRestartTimer); }
+      else if (shouldKeepSttAlive()) scheduleSttRestart(180, 'soniox-ended');
+      return true;
+    },
+    acceptSonioxFinal: function (text, sequence) {
+      var pilot = window.DayOSonioxRoom;
+      if (!sonioxSourceActive || !pilot || !pilot.isActive() || !pilot.isAuthorized() || transcriptFinalized || window.__dayoPreflightActive || !Number.isSafeInteger(sequence) || sequence <= sonioxFinalSequence) return null;
+      var cleaned = typeof text === 'string' ? text.trim() : '';
+      if (!cleaned || cleaned.length > 8000) return null;
+      sonioxFinalSequence = sequence;
+      recordSttState('stt_result_final', { char_count: cleaned.length, preflight: false });
+      var entry = pushTranscript(cleaned, localTranscriptSpeaker());
+      scheduleCopilot(cleaned);
+      return entry;
+    },
     isMicOn: function () { return micOn; },
     isCamOn: function () { return camOn; },
     isDemo: function () { return demoMode; },
