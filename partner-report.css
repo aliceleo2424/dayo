@@ -17,5 +17,15 @@
 .pr-letter-drafts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}.pr-letter-draft{min-width:0;padding:12px;border:1px solid #ded1c1;border-radius:12px;background:#F8F0E3}.pr-letter-draft p{line-height:1.5;overflow-wrap:anywhere;font-size:.9rem}.pr-letter-draft strong{font-size:.8rem;color:#466A8A}.pr-letter-tools,.pr-letter-block-actions{display:flex;gap:8px;flex-wrap:wrap}.pr-letter-selected>div{padding:8px 0;border-bottom:1px solid #ded1c1;overflow-wrap:anywhere}.pr-letter-selected button{margin-right:6px;min-height:44px}.pr-letter-tools button,.pr-letter-block-actions button{min-height:44px}.pr-preview:not(:has(img:not([hidden]))){display:block}.pr-preview:not(:has(img:not([hidden]))) button{width:auto}.pr-chips span{font-size:.84rem;padding:6px 10px;border-radius:20px;background:#F8F0E3}
 @media(max-width:700px){.pr-letter-drafts{grid-template-columns:minmax(0,1fr)}}
 
+/* Personalized Partner Letter: keep the editor first, source assistance optional. */
+#partner-report-popup .pr-letter-compose{margin-top:8px;padding-top:12px}
+#partner-report-popup .pr-letter-steps{font-size:.94rem;line-height:1.65;margin:8px 0;color:#3e5748}
+#partner-report-popup .pr-letter-warning{font-size:.83rem;line-height:1.6;color:#875353;background:#fff0ed;border:1px solid #efd8d2;border-radius:10px;padding:10px 12px;margin:10px 0 14px}
+#partner-report-popup .pr-letter-compose textarea{min-height:160px;font-size:16px;line-height:1.65;background:#fff}
+#partner-report-popup .pr-letter-assist summary{cursor:pointer;color:#476d54;font-size:.92rem;font-weight:700;padding:12px;background:#edf3eb;border-radius:10px;list-style:revert}
+#partner-report-popup .pr-letter-assist[open] summary{margin-bottom:10px}
+#partner-report-popup .pr-letter-assist:not([open]) .pr-letter-tools,#partner-report-popup .pr-letter-assist:not([open]) .pr-letter-drafts{display:none}
+@media(max-width:560px){#partner-report-popup .pr-letter-compose textarea{min-height:170px}#partner-report-popup .pr-letter-steps{font-size:.88rem}#partner-report-popup .pr-letter-warning{font-size:.79rem}}
+
 /* Exact-image Partner decisions only; Letter actions remain independent. */
 .pr-keepsake-review .pr-preview{display:block}.pr-keepsake-review .pr-preview img{width:100%;max-width:420px;margin:auto}.pr-keepsake-review .pr-letter-tools{margin-top:10px}.pr-keepsake-review .pr-letter-tools button{flex:1 1 130px;min-width:0;min-height:44px;white-space:normal;overflow-wrap:break-word}
