@@ -1,9 +1,12 @@
 /* Protected, exact-booking pilot. No master keys, audio recording or automatic paid retries. */
 (function () {
   'use strict';
-  var booking = 'cfb91da5-991b-48d9-b86f-a7e912cb8ed4';
   var query = new URLSearchParams(location.search);
-  if (query.get('bookingId') !== booking || !/\.vercel\.app$/.test(location.hostname)) return;
+  var booking = query.get('bookingId');
+  var bookingUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  // A URL parameter is NOT authorization: the protected server still requires
+  // the EXACT Vercel Preview env allowlist, booking-time window and both role identities.
+  if (!bookingUuid.test(booking || '') || !/\.vercel\.app$/.test(location.hostname)) return;
   var active = false, closing = false, attempted = false, starting = false, authorized = false, consent = false;
   var role = '', identity = '', scheduled = 0, maxSeconds = 0, run = 0, sequence = 0, pending = '';
   var ws, context, source, node, track, grantTimer, captureTimer, watchTimer, closeTimer, audioPreparation;
