@@ -21,30 +21,27 @@ function summary(r){var s=text(r.summary);return s?(s.match(/[^.!?。！？]+[.!
 function quiz(r){var v=r.quiz_score;return v!=null&&v!==''&&Number.isFinite(Number(v))&&Number(v)>=0&&Number(v)<=100?Number(v)+'%':'';}
 function imageURL(v){var s=text(v);if(!(/^https?:\/\//i.test(s)||/^\/(?!\/)/.test(s)))return '';var path;try{path=new URL(s,'https://www.dayotalk.com').pathname;}catch(e){return '';}return /\/images\/logo(?:[-_][^/]*)?\.(?:png|jpe?g|webp|svg)$/i.test(path)?'':s;}
 // Access URLs are presentation-only. The durable asset stays in the exact-booking ledger.
+// Approved images are authenticated, ephemeral reads; never persist image bytes/URLs in reports.
 function keepsakeURL(r){
- var image=r&&r.__dayoKeepsakeImage;if(!image)return imageURL(r&&r.illust_url);
- try{var url=new URL(image.url),path='/storage/v1/object/sign/dayo-keepsakes/'+image.asset.object_path;
-  if(image.booking_id===r.booking_id&&image.asset.bucket==='dayo-keepsakes'
-   &&image.asset.object_path.startsWith(r.booking_id+'/')&&/^https:$/.test(url.protocol)
-   &&/^[a-z0-9-]+\.supabase\.co$/.test(url.hostname)&&decodeURIComponent(url.pathname)===path
-   &&Date.parse(image.expires_at)>Date.now())return url.href;
- }catch(_){}
- return imageURL(r.illust_url);
+ var image=r&&r.__dayoKeepsakeImage;
+ if(image&&image.approved===true&&image.booking_id===r.booking_id&&/^blob:/.test(image.url)&&image.asset&&image.asset.bucket==='dayo-keepsakes'&&image.asset.object_path.startsWith(r.booking_id+'/'))return image.url;
+ if(r&&r.__dayoKeepsakeManaged)return '';
+ var legacy=imageURL(r&&r.illust_url);return /dayo-keepsakes/.test(legacy)?'':legacy;
 }
 async function refreshKeepsakeImage(db,report,fetchImpl){
  if(!report||!report.booking_id||!db.auth||!db.auth.getSession)return report;
- var base=Object.assign({},report);delete base.__dayoKeepsakeImage;
- try{var auth=await db.auth.getSession(),token=auth.data&&auth.data.session&&auth.data.session.access_token;
-  if(auth.error||!token)return base;var send=fetchImpl||(typeof fetch==='function'?fetch:null);if(!send)return base;
-  var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},6500);
-  try{var response=await send('/api/conversation-recap',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
-   body:JSON.stringify({action:'keepsake_image',booking_id:report.booking_id}),signal:controller.signal});
-   if(!response.ok)return base;var payload=await response.json(),image=payload&&payload.image;
-   if(!image||image.booking_id!==report.booking_id)return base;
-   var candidate=Object.assign({},base,{__dayoKeepsakeImage:image});
-   return keepsakeURL(candidate)===image.url?candidate:base;
-  }finally{clearTimeout(timer);}
- }catch(_){return base;}
+ var base=Object.assign({},report),old=base.__dayoKeepsakeImage;
+ if(old&&/^blob:/.test(old.url)&&typeof URL.revokeObjectURL==='function')URL.revokeObjectURL(old.url);
+ delete base.__dayoKeepsakeImage;
+ try{var auth=await db.auth.getSession(),token=auth.data&&auth.data.session&&auth.data.session.access_token;if(auth.error||!token)return base;
+ var send=fetchImpl||(typeof fetch==='function'?fetch:null);if(!send)return base;
+ var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},10000);
+ try{var response=await send('/api/conversation-recap',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({action:'keepsake_review',review:{action:'read',booking_id:report.booking_id}}),signal:controller.signal});
+ if(!response.ok)return base;var payload=await response.json(),image=payload&&payload.image;base.__dayoKeepsakeManaged=payload.managed===true;
+ if(!image||image.approved!==true||image.booking_id!==report.booking_id||image.content_type!=='image/png'||typeof image.data!=='string'||image.data.length>4194304||!image.asset||image.asset.bucket!=='dayo-keepsakes'||!image.asset.object_path.startsWith(report.booking_id+'/')||typeof URL.createObjectURL!=='function')return base;
+ var decoded=atob(image.data),bytes=new Uint8Array(decoded.length);for(var i=0;i<decoded.length;i++)bytes[i]=decoded.charCodeAt(i);
+ base.__dayoKeepsakeImage={approved:true,booking_id:image.booking_id,asset:image.asset,url:URL.createObjectURL(new Blob([bytes],{type:'image/png'}))};return base;
+ }finally{clearTimeout(timer);}}catch(_){return base;}
 }
 function hideIllustration(img){img.hidden=true;img.onerror=null;var block=img.closest('.ucr-block');if(block&&!block.querySelector('.ucr-theme'))block.hidden=true;}
 function heading(title,content){return content?'<div class="ucr-block"><h4>'+esc(title)+'</h4>'+content+'</div>':'';}
@@ -62,7 +59,12 @@ return {title:title,kind:'dayo_memory_card_v1',locale:locale==='ko'?'ko':'en',da
 function memoryAction(r,locale){var m=memoryData(r,locale);return m.letter||m.image||m.topics.length||m.expressions.length?'<div class="ucr-memory-action"><button class="ucr-primary btn-save-card" type="button"'+memoryAttribute(r,locale)+' onclick="saveInstaCard(event)">'+(locale==='ko'?'대화 카드 저장':'Save conversation card')+'</button></div>':'';}
 
 function memoryAttribute(r,locale){return ' data-memory-card="'+esc(encodeURIComponent(JSON.stringify(memoryData(r,locale))))+'"';}
-function renderLetter(r,locale){r=r||{};if(!text(r.partner_comment))return '';var name=nickname(r,locale),img=keepsakeURL(r),theme=conversationRecap.saved(r)?'':text(r.keyword),note=text(r.partner_comment);
+function renderLetter(r,locale){r=r||{};var img=keepsakeURL(r);
+if(!text(r.partner_comment)){
+ if(!img||!r.__dayoKeepsakeImage||r.__dayoKeepsakeImage.approved!==true)return '';
+ return '<section class="ucr-section ucr-human ucr-approved-keepsake"'+memoryAttribute(r,locale)+'><img class="ucr-illustration" hidden onload="this.hidden=false" src="'+esc(img)+'" alt="Conversation keepsake illustration" referrerpolicy="no-referrer" onerror="DayOUserConversationReport.hideIllustration(this)"></section>';
+}
+var name=nickname(r,locale),theme=conversationRecap.saved(r)?'':text(r.keyword),note=text(r.partner_comment);
 var human=note?'<blockquote>'+esc(note)+'</blockquote>':'<p class="ucr-letter-pending">'+(locale==='ko'?'파트너가 메시지를 준비 중이에요.':'Your partner is preparing a message.')+'</p>';
 // Canonical stories already show grounded topics. Keep legacy theme and valid image; stored Treat is untouched.
 if(theme||img)human+='<div class="ucr-block ucr-letter-theme">'+(theme?'<p class="ucr-theme">'+esc(theme)+'</p>':'')+(img?'<img class="ucr-illustration" hidden onload="this.hidden=false" src="'+esc(img)+'" alt="" referrerpolicy="no-referrer" onerror="DayOUserConversationReport.hideIllustration(this)">':'')+'</div>';

@@ -97,7 +97,8 @@
   }
   var ko=window.partnerLetterLocale ? window.partnerLetterLocale()==='KO' : !!(window.DayOI18n&&window.DayOI18n.getLang&&String(window.DayOI18n.getLang()).toLowerCase()==='ko'&&localStorage.getItem('dayo_lang')==='KO');
   el('pr-title').textContent=ko?'파트너 레터':'Partner Letter';
-  root.querySelector('.pr-intro').textContent=ko?'오늘의 대화를 떠올리며 짧은 메시지를 남겨 주세요.':'Leave a short, warm message about today’s conversation.';
+  if(window.DayOKeepsakePartnerReview)window.DayOKeepsakePartnerReview.open(context.bookingId,root,ko?'ko':'en');
+  root.querySelector('.pr-intro').textContent=ko?'오늘 이 고객과 실제로 나눈 이야기만 담아 주세요. 누구에게나 보낼 수 있는 인사말은 피해주세요.':'Write a personal note about something this learner really shared with you. Only you could write it.';
   if(!el('btn-final-partner-submit').disabled)el('btn-final-partner-submit').textContent=ko?'메시지 보내고 마치기':'Send letter and finish';
  }
  document.addEventListener('dayo:langchange',function(){if(initialized&&root&&root.style.display!=='none')open(context);});

@@ -1,0 +1,36 @@
+name: DayO Integrated Evening Smoke
+
+on:
+  pull_request:
+    branches: [codex/soniox-owner-pilot]
+
+permissions:
+  contents: read
+
+jobs:
+  integrated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Install isolated test-only browser / database fixtures
+        run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1 jsdom@26.1.0 @electric-sql/pglite@0.3.15
+      - run: npx playwright install --with-deps chrome
+      - name: Mixed Korean-English finals into real room DOM and recap on tablet
+        run: node tests/soniox-room-integration.cjs
+      - name: Actual Partner Letter and Customer Feedback-Recap browser interactions
+        run: node tests/letter-post-session-browser.cjs
+      - name: Private Keepsake Partner preview/send browser interactions
+        run: node tests/keepsake-partner-review-browser.cjs
+      - name: Learner quiz cooldown and repeat-safe history recovery
+        run: node tests/quiz-novelty-fixtures.cjs
+      - name: Existing STT/captions and PeerJS browser regression
+        run: node tests/production-room-regressions.test.js
+
+# Synthetic audio/transports and mock DB. Real device/paid provider auth,
+# recording, and production rollout are separate explicit acceptance gates.
