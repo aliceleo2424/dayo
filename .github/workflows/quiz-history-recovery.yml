@@ -16,6 +16,8 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
+      - name: Install isolated DB fixture only (no app dependencies changed)
+        run: npm install --no-save --package-lock=false --ignore-scripts @electric-sql/pglite@0.3.15
       - name: Verify JWT history, verified owner fallback, stale history denial and grounded questions
         run: node tests/quiz-novelty-fixtures.cjs
       - name: Canonical learner Recap fixtures
