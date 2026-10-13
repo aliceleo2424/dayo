@@ -31,13 +31,24 @@ async function main(){
  const stored={...build(),progress:{completed:4,total:6,reason:'skip'}};const frozen=JSON.stringify(stored);
  async function api(o={}){const calls=[];const fetchImpl=async(url,args)=>{calls.push({url,args});const query=new URL(url).searchParams;let data;
   if(url.includes('/auth/v1/user'))data={id:o.outsider?X:U};
-  else if(url.includes('/bookings?'))data=query.has('order')?(query.get('limit')==='3'?bs:[]):(o.outsider?[]:[current]);
+  else if(url.includes('/bookings?')){
+   if((o.failHistoryJWT&&query.get('limit')==='3'&&args.headers.Authorization==='Bearer own.token')||
+      (o.failAllHistory&&query.get('limit')==='3'))return {ok:false,json:async()=>({})};
+   data=query.has('order')?(query.get('limit')==='3'?bs:[]):(o.outsider?[]:[current]);
+  }
   else if(url.includes('/session_logs?'))data=query.get('participant_role')==='eq.partner'?[]:[log];
   else if(url.includes('/session_reports?')){if(o.fail)throw Error('history offline');data=query.get('booking_id')==='eq.'+B?(o.saved?[{booking_id:B,learner_id:U,feedback:[stored]}]:[]):reports;}
   else throw Error('unexpected route');return {ok:true,json:async()=>data};};
-  const handler=createHandler({env:{NEXT_PUBLIC_SUPABASE_URL:'https://fixture.supabase.co',NEXT_PUBLIC_SUPABASE_ANON_KEY:'synthetic'},fetchImpl});const res={setHeader(){},end(s){this.body=JSON.parse(s);}};
+  const handler=createHandler({env:{NEXT_PUBLIC_SUPABASE_URL:'https://fixture.supabase.co',NEXT_PUBLIC_SUPABASE_ANON_KEY:'synthetic',...(o.failHistoryJWT||o.failAllHistory?{SUPABASE_SERVICE_ROLE_KEY:'fixture-service'}:{})},fetchImpl});const res={setHeader(){},end(s){this.body=JSON.parse(s);}};
   await handler({method:'POST',headers:{authorization:'Bearer own.token'},body:{booking_id:B}},res);return {...res,calls};}
  let fresh=await api();eq(fresh.statusCode,200);eq(fresh.body.recap.word_expansion.map(w=>w.word),['expensive']);eq(fresh.body.recap.questions.length,2);
+ let recovered=await api({failHistoryJWT:true});
+ eq(recovered.statusCode,200,'JWT history failure is recoverable for verified learner');
+ eq(recovered.body.recap.quiz_history_status,'available','service fallback recovers prior target history');
+ eq(recovered.body.recap.word_expansion.map(w=>w.word),['expensive'],'previous quiz words still excluded, never guessed');
+ eq(recovered.body.recap.questions.length,2,'recovered cooldown allows sourced quiz');
+ eq(recovered.calls.some(x=>x.url.includes('/bookings?')&&new URL(x.url).searchParams.get('limit')==='3'&&x.args.headers.Authorization==='Bearer fixture-service'),true,'history-only credential fallback');
+ let stillDenied=await api({failAllHistory:true});eq(stillDenied.body.recap.questions.length,0,'both history queries failing remain fail-closed');
  let reload=await api({saved:true});eq(reload.body.recap.questions,stored.questions,'saved quiz after reload unchanged');eq(reload.body.recap.progress,stored.progress);eq(JSON.stringify(stored),frozen,'historical marker never mutated');eq(reload.calls.filter(c=>new URL(c.url).searchParams.get('limit')==='3').length,0,'saved quiz does not query new history');
  const generation=build({quizHistoryStatus:'available',quizExcludedWords:['crowded','quiet','delicious']});const retryable=build({quizHistoryStatus:'unavailable'});eq(retryable.quiz_history_status,'unavailable');eq(generation.questions.length,2);eq(M.quizDuration(2),30);eq(M.quizDuration(4),60);eq(M.quizDuration(6),90);
  eq((await api({fail:true})).body.recap.questions.length,0);eq((await api({outsider:true})).statusCode,403);
