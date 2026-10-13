@@ -44,9 +44,11 @@ function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot
     const partnerAction = ['partner_letter_topics', 'partner_letter_blocks', 'partner_illustration_status', 'partner_illustration_generate', 'partner_illustration_choices'].includes(input.action);
     if (input.request_id!=null && (input.action!=='partner_illustration_generate'||!uuid(input.request_id))) return json(res,400,{error:'invalid_request'});
     const assetAction=input.action==='keepsake_image';
+    const transcriptAction=input.action==='conversation_transcript';
+    if (transcriptAction && Object.keys(input).some(k=>!['booking_id','action'].includes(k))) return json(res,400,{error:'invalid_request'});
     if (assetAction && Object.keys(input).some(k=>!['booking_id','action'].includes(k))) return json(res,400,{error:'invalid_request'});
-    if (input.action && !partnerAction && !assetAction) return json(res, 400, { error: 'invalid_request' });
-    if (!partnerAction && !assetAction && Object.keys(input).some(k => !['booking_id','learner_version'].includes(k))) return json(res,400,{error:'invalid_request'});
+    if (input.action && !partnerAction && !assetAction && !transcriptAction) return json(res, 400, { error: 'invalid_request' });
+    if (!partnerAction && !assetAction && !transcriptAction && Object.keys(input).some(k => !['booking_id','learner_version'].includes(k))) return json(res,400,{error:'invalid_request'});
     const controller = new AbortController(), timer = setTimeout(() => controller.abort(), partnerAction ? 45000 : 6500);
     const headers = { apikey: anon, Authorization: 'Bearer ' + token[1] };
     async function read(route, h = headers) { const result = await fetchImpl(url + route, { headers: h, signal: controller.signal }); if (!result.ok) throw Error('read'); return result.json(); }
@@ -54,6 +56,24 @@ function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot
       const auth = await fetchImpl(url + '/auth/v1/user', { headers, signal: controller.signal });
       if (!auth.ok) return json(res, 401, { error: 'auth_required' });
       const user = await auth.json(); if (!uuid(user.id)) return json(res, 401, { error: 'auth_required' });
+      // Owner decision 2026-10-14: both booking participants can read the saved speech of BOTH
+      // participants as a chat-style record. Ownership via the user's JWT/RLS before the service read.
+      if (transcriptAction) {
+        const rows = await read('/rest/v1/bookings?' + new URLSearchParams({ id: 'eq.' + input.booking_id, or: '(learner_id.eq.' + user.id + ',partner_user_id.eq.' + user.id + ')', select: 'id,learner_id,partner_user_id,status', limit: '1' }));
+        const b = Array.isArray(rows) && rows[0];
+        if (!b || b.id !== input.booking_id || ![b.learner_id, b.partner_user_id].includes(user.id) || !['confirmed', 'completed'].includes(b.status)) return json(res, 403, { error: 'not_booking_participant' });
+        const key = String(env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+        if (!key) return json(res, 503, { error: 'source_unavailable' });
+        const logs = await read('/rest/v1/session_logs?' + new URLSearchParams({ booking_id: 'eq.' + b.id, select: 'id,booking_id,participant_id,participant_role,transcript', limit: '4' }), { apikey: key, Authorization: 'Bearer ' + key });
+        const lines = [];
+        for (const log of Array.isArray(logs) ? logs : []) {
+          const role = log && log.participant_role, id = role === 'learner' ? b.learner_id : role === 'partner' ? b.partner_user_id : null;
+          if (!id) continue;
+          for (const r of recap.rows(log, b.id, id, role) || []) lines.push({ speaker: role, text: String(r.text || '').slice(0, 2000), timestamp: r.timestamp });
+        }
+        lines.sort((a, z) => Date.parse(a.timestamp) - Date.parse(z.timestamp));
+        return json(res, 200, { booking_id: b.id, viewer: user.id === b.learner_id ? 'learner' : 'partner', lines: lines.slice(0, 1200) });
+      }
       if (assetAction) {
         try{const db=keepsake.participantClient({env,jwt:token[1],fetchImpl,signal:controller.signal});
           return json(res,200,{image:await keepsake.readAsset(db,input.booking_id)});

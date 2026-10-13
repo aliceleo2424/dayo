@@ -26,3 +26,17 @@
 .ucr-human blockquote,.ucr-detail .ucr-human blockquote{padding:16px 16px 18px;background:#FFFFFF;border:1px dashed #E2D7C6;border-radius:12px;font-size:16px;line-height:1.8;color:#4B4038}
 .ucr-human .ucr-illustration{width:100%;max-width:320px;max-height:none;border-radius:14px;border:6px solid #fff;box-shadow:0 4px 14px rgba(81,67,60,.12)}
 .ucr-detail .ucr-header h3{font-size:18px}
+
+/* Chat-style conversation record (both participants' saved speech). */
+.ucr-transcript details>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-size:15px;font-weight:600;color:#3e4a42;list-style:none}
+.ucr-transcript details>summary::-webkit-details-marker{display:none}
+.ucr-transcript details>summary::after{content:"▾";margin-left:auto;color:#7e736b;transition:transform .2s}.ucr-transcript details[open]>summary::after{transform:rotate(180deg)}
+.ucr-chat{display:flex;flex-direction:column;gap:10px;margin-top:10px;max-height:60vh;overflow-y:auto;overscroll-behavior:contain;padding:4px 2px}
+.ucr-chat-line{display:flex;flex-direction:column;max-width:82%}
+.ucr-chat-line.is-me{align-self:flex-start;align-items:flex-start}
+.ucr-chat-line.is-them{align-self:flex-end;align-items:flex-end}
+.ucr-chat-who{font-size:11px;color:#7e736b;margin:0 6px 3px}
+.ucr-chat .ucr-chat-bubble{margin:0;padding:9px 13px;font-size:14px;line-height:1.55;border-radius:16px;white-space:pre-wrap}
+.ucr-chat-line.is-me .ucr-chat-bubble{background:#F3ECE0;border-top-left-radius:4px}
+.ucr-chat-line.is-them .ucr-chat-bubble{background:#E4ECE2;border-top-right-radius:4px}
+.ucr-chat-status{font-size:13px!important;color:#7e736b}
