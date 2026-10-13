@@ -1,0 +1,36 @@
+name: Soniox Evening Booking Regression
+
+on:
+  pull_request:
+    branches:
+      - codex/soniox-owner-pilot
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  evening-pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install existing app dependencies
+        run: npm ci
+      - name: Install isolated test-only dependencies
+        run: npm install --no-save --package-lock=false --ignore-scripts @electric-sql/pglite@0.3.15 playwright@1.56.1 jsdom@26.1.0
+      - name: Install headless Chrome
+        run: npx playwright install --with-deps chrome
+      - name: Verify no-audio Soniox auth and booking boundary (mock provider)
+        run: node tests/stt-pilot-fixtures.cjs
+      - name: Verify Korean-English finals, tablet/mobile UI, learner/partner roles and canonical Recap (synthetic PCM)
+        run: node tests/soniox-room-integration.cjs
+      - name: Verify existing caption and room behavior
+        run: node tests/production-room-regressions.test.js
+
+# No Soniox API credentials or actual audio are supplied by this workflow.
+# A green run is not real Soniox audio, actual device or Production acceptance.
