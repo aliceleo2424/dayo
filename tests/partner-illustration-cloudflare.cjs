@@ -1,3 +1,4 @@
+const crypto=require('node:crypto');
 const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),sharp=require('sharp');
 const I=require('../api/_lib/partner-illustration-cloudflare.js'),L=require('../api/_lib/partner-letter.js');
 const B='ea5289f9-41fe-4b94-9677-bd3b038c87eb',U='11111111-1111-4111-8111-111111111111',P='22222222-2222-4222-8222-222222222222';
@@ -9,11 +10,12 @@ function fixture(mode='mixed',values=texts){return {user:{id:P},env:{SUPABASE_SE
  if(route.includes('booking_chat_messages?'))return mode==='speech'?[]:values.map((text,i)=>({id:'m'+i,booking_id:B,sender_id:U,sender_role:'learner',text,created_at:'2026-10-10T09:46:00Z'}));
  throw Error('unexpected read');}};}
 (async()=>{
- const png=await sharp({create:{width:1024,height:1024,channels:3,background:'#fffbf4'}}).png().toBuffer();let calls=0,puts=0;
- const fetchImpl=async(url,opts)=>{calls++;assert.equal(url,'https://api.cloudflare.com/client/v4/accounts/'+ 'a'.repeat(32)+'/ai/run/'+I.MODEL);assert.equal(opts.headers.Authorization,'Bearer mock-token');const prompt=opts.body.get('prompt');assert(!prompt.includes(B)&&!prompt.includes(U)&&!prompt.includes(P)&&!prompt.includes(texts[0]));assert(!/Judy|Jen|Letter/.test(prompt));assert.equal(opts.body.get('width'),'1024');assert.equal(opts.body.get('height'),'1024');const reference=opts.body.get('input_image_0');const m=await sharp(Buffer.from(await reference.arrayBuffer())).metadata();assert(m.width<512&&m.height<512);return {ok:true,json:async()=>({success:true,result:{image:png.toString('base64')}})};};
+ const png=await sharp({create:{width:1024,height:1024,channels:3,background:'#fffbf4'}}).png().toBuffer();let calls=0,puts=0,motifPrompt='';
+ const fetchImpl=async(url,opts)=>{calls++;assert.equal(url,'https://api.cloudflare.com/client/v4/accounts/'+ 'a'.repeat(32)+'/ai/run/'+I.MODEL);assert.equal(opts.headers.Authorization,'Bearer mock-token');const prompt=opts.body.get('prompt');motifPrompt=prompt;assert(!prompt.includes(B)&&!prompt.includes(U)&&!prompt.includes(P)&&!prompt.includes(texts[0]));assert(!/Judy|Jen|Letter/.test(prompt));assert.equal(opts.body.get('width'),'1024');assert.equal(opts.body.get('height'),'1024');const reference=opts.body.get('input_image_0');const m=await sharp(Buffer.from(await reference.arrayBuffer())).metadata();assert(m.width<512&&m.height<512);return {ok:true,json:async()=>({success:true,result:{image:png.toString('base64')}})};};
  const storage={put:async data=>{puts++;assert.equal(data.bookingId,B);assert.equal(data.actorId,P);assert.equal(data.contentType,'image/png');assert(!('partner_comment' in data));return {url:'https://storage.fixture.invalid/approved/image.png',durable:true,firstParty:true};}};
  const quota={reserve:async data=>{assert.equal(data.freeOnly,true);assert.equal(data.maxAttempts,2);return {plan:'workers_free',allowed:true,attempt:1,token:'reservation'};}};
- async function setup(mode,values){const f=fixture(mode,values),source=await L.handle({...f,input:{action:'partner_letter_topics',booking_id:B}});return {...f,input:{action:'partner_illustration_generate',booking_id:B,source_version:source.body.source_version},enabled:true,quota,storage,fetchImpl};}
+ const qualityCheck=async({bytes})=>({reviewed:true,imageHash:crypto.createHash('sha256').update(bytes).digest('hex'),visibleText:'',logoDetected:false,watermarkDetected:false});
+ async function setup(mode,values){const f=fixture(mode,values),source=await L.handle({...f,input:{action:'partner_letter_topics',booking_id:B}});return {...f,input:{action:'partner_illustration_generate',booking_id:B,source_version:source.body.source_version},enabled:true,quota,storage,fetchImpl,qualityCheck};}
  for(const mode of ['speech','chat','mixed']){const o=await setup(mode);const r=await I.handle(o);assert.equal(r.status,200);assert.equal(r.body.status,'ready');}
  const o=await setup('mixed'),before=calls;
  assert.equal((await I.handle({...o,enabled:false})).body.error,'generation_disabled');
@@ -52,7 +54,7 @@ function fixture(mode='mixed',values=texts){return {user:{id:P},env:{SUPABASE_SE
  const count=calls;const concurrent=await Promise.all([I.handle({...o,quota:atomic}),I.handle({...o,quota:atomic})]);assert.equal(concurrent.filter(r=>r.status===200).length,1);assert.equal(calls-count,1,'mock atomic reservation prevents duplicate generation');
  const duplicateCount=calls;
  const reused=await I.handle({...o,quota:{reserve:async()=>({reused:true,state:'ready',token:'stored'})},storage:{...storage,read:async()=>({url:'https://fixture.supabase.co/storage/v1/object/sign/dayo-keepsakes/saved',asset:{bucket:'dayo-keepsakes',object_path:'saved'},expires_at:'fixture'})}});
- assert.equal(reused.status,200);assert.equal(calls,duplicateCount,'saved image never generates twice');
+ assert.equal(reused.status,409);assert.equal(reused.body.error,'saved_image_quality_unverified');assert.equal(calls,duplicateCount,'saved image never generates twice');
  for(const state of ['reserved','cleanup','failed']){
   const result=await I.handle({...o,quota:{reserve:async()=>({reused:true,state})}});
   assert.equal(result.body.error,state==='reserved'?'generation_pending':'attempt_already_used');
@@ -60,6 +62,26 @@ function fixture(mode='mixed',values=texts){return {user:{id:P},env:{SUPABASE_SE
  let failures=0;
  await I.handle({...o,quota:{...quota,fail:async data=>{failures++;assert.equal(data.code,'provider_http_error');}},fetchImpl:async()=>({ok:false,status:500})});
  assert.equal(failures,1,'provider failures recorded without retry or budget refund');
+ const preQualityCalls=calls,preQualityPuts=puts;
+ const missing=await I.handle({...o,qualityCheck:null});assert.equal(missing.body.error,'quality_check_unavailable');assert.equal(calls,preQualityCalls);assert.equal(puts,preQualityPuts);
+ for(const assessment of [{visibleText:'BIRTH'},{visibleText:'2026'},{visibleText:'축하'},{logoDetected:true},{watermarkDetected:true}]){
+  let failed=0;
+  const result=await I.handle({...o,qualityCheck:async image=>({...await qualityCheck(image),...assessment}),quota:{...quota,fail:async data=>{failed++;assert.equal(data.code,'invalid_image');}}});
+  assert.equal(result.body.error,'quality_rejected');assert.equal(failed,1);assert.equal(puts,preQualityPuts,'rejected image never enters storage/attachment');
+ }
+ for(const inspection of [async()=>({}),async image=>({...await qualityCheck(image),imageHash:'different-image'}),async()=>{throw Error('private scanner detail');}]){
+  const result=await I.handle({...o,qualityCheck:inspection});assert.equal(result.body.error,'quality_check_unavailable');assert.equal(puts,preQualityPuts);
+ }
+ let inspected=0;
+ const timeout=await I.handle({...o,qualityCheck:async({signal})=>{inspected++;return new Promise(resolve=>signal.addEventListener('abort',()=>resolve({}),{once:true}));}});
+ assert.equal(timeout.body.error,'quality_check_unavailable');assert.equal(inspected,1);assert.equal(puts,preQualityPuts);
+ assert(motifPrompt.includes('No greeting cards')&&motifPrompt.includes('numbers')&&motifPrompt.includes('book covers'));
+ const party=await setup('chat',['I went to a birthday party.','We talked about wine.','I like a quiet café.']);
+ const actualParty=await I.handle(party);assert.equal(actualParty.status,200);assert(motifPrompt.includes('celebratory'));
+ assert(!motifPrompt.includes('I went to a birthday party.')&&!motifPrompt.includes('We talked about wine.'));
+ const clean=await setup('chat',[]),baseRead=clean.read;
+ const contaminated={...clean,read:async route=>route.includes('booking_chat_messages?')?[{id:'unrelated',booking_id:'33333333-3333-4333-8333-333333333333',sender_id:U,sender_role:'learner',text:'I went to a birthday party and talked about wine.',created_at:'2026-10-10T09:46:00Z'}]:baseRead(route)};
+ assert.equal((await I.handle(contaminated)).body.status,'insufficient_evidence','other booking cannot supply motifs');
  const retry=await I.handle({...o,quota:{reserve:async()=>({plan:'workers_free',allowed:true,attempt:2,token:'second'})}});assert.equal(retry.status,200);
  assert.equal((await I.handle({...o,quota:{reserve:async()=>{throw Error('budget unknown');}}})).body.error,'quota_unavailable');
  const route=require('../api/conversation-recap.js').createHandler({env:{SUPABASE_URL:'https://fixture.supabase.co',NEXT_PUBLIC_SUPABASE_ANON_KEY:'fixture'},fetchImpl:async url=>{assert(url.endsWith('/auth/v1/user'));return {ok:true,json:async()=>({id:P})};}});
@@ -88,7 +110,7 @@ function fixture(mode='mixed',values=texts){return {user:{id:P},env:{SUPABASE_SE
    chatReads++;assert.equal(headers.get('authorization'),'Bearer fixture');
    assert.equal(url.searchParams.get('booking_id'),'eq.'+B);
    data=syntheticChat.filter(m=>url.searchParams.get('sender_id')==='eq.'+m.sender_id);
-  }else if(url.pathname==='/rest/v1/rpc/dayo_keepsake_reserve'){
+  }else if(url.pathname==='/rest/v1/rpc/dayo_keepsake_reserve_review'){
    reservations++;assert.equal(headers.get('authorization'),'Bearer fixture-only');
    const args=JSON.parse(options.body);assert.equal(args.p_booking_id,B);assert.equal(args.p_actor_id,P);
    data={allowed:false,error:'daily_budget_exhausted'}; // Stop before any provider/storage writes.
@@ -103,8 +125,8 @@ function fixture(mode='mixed',values=texts){return {user:{id:P},env:{SUPABASE_SE
  assert.equal(sourceResponse.statusCode,200);assert(sourceResponse.body.source_version);
  assert(sourceResponse.body.topics.length>0,'chat-only preflight has verified synthetic motifs');
  const generateResponse=response();await sourceHandler({method:'POST',headers:{authorization:'Bearer fixture'},
-  body:{booking_id:B,action:'partner_illustration_generate',source_version:sourceResponse.body.source_version}},generateResponse);
- assert.equal(generateResponse.statusCode,409,'chat-only path reaches existing quota, not source_unavailable');
+  body:{booking_id:B,action:'partner_illustration_generate',topic_id:require('../public/partner-report-contract.js').storyIllustrations(sourceResponse.body.topics)[0].theme,source_version:sourceResponse.body.source_version}},generateResponse);
+ assert.equal(generateResponse.statusCode,409,'chat-only source and inspector wiring preserve the exhausted quota gate');
  assert.equal(generateResponse.body.error,'daily_budget_exhausted');assert.equal(reservations,1);
  assert.equal(providerRequests,0);assert.equal(chatReads,2);assert.equal(speechReads,2);
  const assetResponse=response();await sourceHandler({method:'POST',headers:{authorization:'Bearer fixture'},

@@ -32,7 +32,7 @@ async function readAsset(participantDb,bookingId,clock=()=>Date.now()){
    ||decodeURIComponent(access.pathname)!=='/storage/v1/object/sign/'+BUCKET+'/'+asset.object_path)throw fail('image_access_unavailable');
  return {booking_id:bookingId,asset,url:r.data.signedUrl,expires_at:new Date(clock()+TTL*1000).toISOString(),durable:true,firstParty:true};
 }
-function createContracts({db,participantDb,accountId,verifyFreePlan,clock=()=>Date.now()}){
+function createContracts({db,participantDb,accountId,verifyFreePlan,clock=()=>Date.now(),manualReview=false}){
  const accountKey=crypto.createHash('sha256').update(String(accountId)).digest('hex');
  const quota={reserve:async data=>{
   if(!/^[a-f0-9]{32}$/.test(String(accountId))||data.model!==MODEL||data.freeOnly!==true
@@ -46,7 +46,7 @@ function createContracts({db,participantDb,accountId,verifyFreePlan,clock=()=>Da
     &&proof.source==='workers_dashboard'&&proof.enforcedFreeLimit===true
     &&Number.isFinite(Date.parse(proof.verifiedAt))&&Date.parse(proof.verifiedAt)<=clock()
     &&clock()-Date.parse(proof.verifiedAt)<=12*60*60*1000;
-  return rpc(db,'dayo_keepsake_reserve',{p_booking_id:data.bookingId,p_actor_id:data.actorId,
+  return rpc(db,manualReview?'dayo_keepsake_reserve_review':'dayo_keepsake_reserve',{p_booking_id:data.bookingId,p_actor_id:data.actorId,
    p_request_id:id,p_source_version:data.sourceVersion,p_account_key:accountKey,
    p_plan:fresh?'workers_free':null,p_verified_at:fresh?proof.verifiedAt:null,
    p_proof_day:fresh?new Date(clock()).toISOString().slice(0,10):null,p_remaining_neurons:null});
@@ -63,6 +63,18 @@ function createContracts({db,participantDb,accountId,verifyFreePlan,clock=()=>Da
   await rpc(db,'dayo_keepsake_finish',{p_token:a.id,p_actor_id:data.actorId,p_failure_code:null});
   return readAsset(participantDb,data.bookingId,clock);
  }};
+ if(manualReview)storage.reviewStatus=async({bookingId,actorId,token})=>{
+  const r=await db.from('keepsake_illustration_attempts').select('id,booking_id,actor_id,state,review_state').eq('id',token).single(),a=r.data;
+  if(r.error||!a||a.booking_id!==bookingId||a.actor_id!==actorId)throw fail('image_access_unavailable');
+  return {booking_id:bookingId,attempt_id:a.id,status:a.review_state==='pending'&&a.state==='ready'?'pending_review':a.review_state==='approved'&&a.state==='ready'?'approved':a.review_state==='rejected'?'rejected':a.review_state==='revoked'?'revoked':a.state==='reserved'?'generation_pending':'failed',url:null};
+ };
+ if(manualReview)storage.putPending=async data=>{
+  const r=await db.from('keepsake_illustration_attempts').select('id,booking_id,actor_id,state,object_path').eq('id',data.reservationToken).single(),a=r.data;
+  if(r.error||!a||a.state!=='reserved'||a.booking_id!==data.bookingId||a.actor_id!==data.actorId||!objectPath(a.object_path)||!a.object_path.startsWith(data.bookingId+'/')||data.contentType!=='image/png'||!Buffer.isBuffer(data.bytes)||!data.bytes.length||data.bytes.length>3145728)throw fail('save_failed');
+  const uploaded=await db.storage.from(BUCKET).upload(a.object_path,data.bytes,{contentType:'image/png',upsert:false,cacheControl:'0'});
+  if(uploaded.error)throw fail('save_failed');
+  return rpc(db,'dayo_keepsake_stage',{p_token:a.id,p_actor_id:data.actorId,p_sha256:crypto.createHash('sha256').update(data.bytes).digest('hex')});
+ };
  return {quota,storage};
 }
 // Bounded batches; caller schedules this server-side after rollout approval. Removal

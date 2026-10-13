@@ -194,7 +194,7 @@ const B='ea5289f9-41fe-4b94-9677-bd3b038c87eb',A='a'.repeat(32),K=crypto.createH
  const pilotQuota={reserve:async()=>ready?{reused:true,state:'ready'}:{allowed:true,plan:'workers_free',attempt:1,token:two.token},fail:C.quota.fail};
  const topics=['I went to a crowded café and had coffee.','I love coffee at a quiet café.','I have a rabbit and I love my rabbit.'];
  const api=handler({env:{SUPABASE_URL:'https://fixture.supabase.co',NEXT_PUBLIC_SUPABASE_ANON_KEY:'mock-anon',SUPABASE_SERVICE_ROLE_KEY:'mock-service',CLOUDFLARE_ACCOUNT_ID:A,CLOUDFLARE_API_TOKEN:'mock-token'},
-  illustrationPilot:{contracts:async()=>({quota:pilotQuota,storage:{...C.storage,put:async data=>{const image=await C.storage.put(data);ready=true;return image;}}})},
+  illustrationPilot:{contracts:async()=>({quota:pilotQuota,qualityCheck:async({bytes})=>({reviewed:true,imageHash:require("node:crypto").createHash("sha256").update(bytes).digest("hex"),visibleText:"",logoDetected:false,watermarkDetected:false}),storage:{...C.storage,put:async data=>{const image=await C.storage.put(data);ready=true;return image;}}})},
   fetchImpl:async(url,opts)=>{
    if(url.includes('/ai/run/')){providerCalls++;const prompt=opts.body.get('prompt');assert(!prompt.includes(B)&&!prompt.includes(P)&&!prompt.includes('Existing test Letter'));return {ok:true,json:async()=>({success:true,result:{image:png.toString('base64')}})};}
    let data;if(url.endsWith('/auth/v1/user'))data={id:P};
@@ -211,7 +211,7 @@ const B='ea5289f9-41fe-4b94-9677-bd3b038c87eb',A='a'.repeat(32),K=crypto.createH
  }})).body.source_version};
  const submit=async()=>{const response={setHeader(){},end(v){this.body=JSON.parse(v);}};await api({method:'POST',headers:{authorization:'Bearer fixture'},body:input},response);return response;};
  let full=await submit();assert.equal(full.statusCode,200);assert.equal(full.body.booking_id,B);assert.equal(providerCalls,1);
- const repeat=await submit();assert.equal(repeat.statusCode,200);assert.equal(providerCalls,1,'re-read of ready reservation never calls provider');
+ const repeat=await submit();assert.equal(repeat.statusCode,409);assert.equal(repeat.body.error,"saved_image_quality_unverified");assert.equal(providerCalls,1,'re-read of ready reservation never calls provider');
  testBooking=false;assert.equal((await submit()).statusCode,403);assert.equal(providerCalls,1,'isolated pilot rejects normal bookings');
  const report={booking_id:B,partner_name:'Jen',__dayoPublicNameVerified:true,partner_comment:'Existing test Letter',quiz_score:100,feedback:[{kind:'existing-fixture'}],stamp:'cookie'};
  const Module=require('node:module'),cp=require('node:child_process');
@@ -224,16 +224,17 @@ const B='ea5289f9-41fe-4b94-9677-bd3b038c87eb',A='a'.repeat(32),K=crypto.createH
   assert.equal(UI.renderDetail(legacy,locale),baseline.exports.renderDetail(legacy,locale),'existing Recap/quiz rendering unchanged');
  }
  const original=JSON.stringify(report),db={auth:{getSession:async()=>({data:{session:{access_token:'mock'}}})}};
- const attach=async image=>UI.refreshKeepsakeImage(db,report,async(_,opts)=>{assert.equal(JSON.parse(opts.body).booking_id,B);assert.equal(JSON.parse(opts.body).action,'keepsake_image');return {ok:true,json:async()=>({image})};});
- const displayed=await attach(full.body);assert.equal(UI.memoryData(displayed,'ko').image,full.body.url);assert.equal(JSON.stringify(report),original);
+ const approved={booking_id:B,approved:true,content_type:'image/png',data:png.toString('base64'),asset:{bucket:S.BUCKET,object_path:artifact,image_sha256:crypto.createHash('sha256').update(png).digest('hex'),storage_version:'fixture-v1'}};
+ const attach=async image=>UI.refreshKeepsakeImage(db,report,async(route,opts)=>{assert.equal(route,'/api/conversation-recap');assert.equal(JSON.parse(opts.body).review.booking_id,B);assert.equal(JSON.parse(opts.body).action,'keepsake_review');assert.equal(JSON.parse(opts.body).review.action,'read');return {ok:true,json:async()=>({managed:true,image})};});
+ const displayed=await attach(approved);assert(UI.memoryData(displayed,'ko').image.startsWith('blob:'));assert.equal(JSON.stringify(report),original);
  assert.equal(displayed.partner_comment,report.partner_comment);assert.equal(displayed.quiz_score,100);assert.deepEqual(displayed.feedback,report.feedback);
  assert(UI.renderLetter(displayed,'ko').includes('ucr-illustration'));assert(!UI.memoryData(displayed,'ko').stamp);
- for(const wrong of [{...full.body,booking_id:X},{...full.body,expires_at:'2000-01-01'},{...full.body,url:'https://elsewhere.invalid/image.png'},{...full.body,asset:{bucket:S.BUCKET,object_path:X+'/'+two.token+'.png'}}])assert.equal(UI.memoryData(await attach(wrong),'en').image,'');
+ for(const wrong of [null,full.body,{...approved,booking_id:X},{...approved,approved:false},{...approved,content_type:'image/jpeg'},{...approved,asset:{bucket:S.BUCKET,object_path:X+'/'+two.token+'.png'}}])assert.equal(UI.memoryData(await attach(wrong),'en').image,'');
  const failed=await UI.refreshKeepsakeImage(db,report,async()=>({ok:false}));assert.equal(UI.memoryData(failed,'en').image,'');assert.equal(failed.partner_comment,report.partner_comment);
  const {chromium}=require('playwright');const browser=await chromium.launch({channel:'chrome',headless:true});
  try{const page=await browser.newPage();await page.route('https://fixture.supabase.co/**',r=>r.fulfill({status:200,contentType:'image/png',body:png,headers:{'access-control-allow-origin':'*'}}));
   await page.setContent('<html><body></body></html>');await page.addScriptTag({content:fs.readFileSync(path.join(__dirname,'../public/memory-card.js'),'utf8')});
-  for(const locale of ['ko','en']){const model=UI.memoryData(displayed,locale);await page.evaluate(async model=>{document.body.replaceChildren(await DayOMemoryCard.render(model));},model);
+  for(const locale of ['ko','en']){const model=UI.memoryData(displayed,locale);await page.evaluate(async ({model,png})=>{const raw=atob(png),bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));model.image=URL.createObjectURL(new Blob([bytes],{type:'image/png'}));document.body.replaceChildren(await DayOMemoryCard.render(model));URL.revokeObjectURL(model.image);},{model,png:png.toString('base64')});
    assert.deepEqual(await page.locator('canvas').evaluate(c=>[c.width,c.height,c.dataset.memoryImage]),[1080,1350,'shown']);
   }
   await page.evaluate(async model=>{document.body.replaceChildren(await DayOMemoryCard.render(model));},UI.memoryData(failed,'ko'));

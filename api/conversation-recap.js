@@ -27,12 +27,16 @@ function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot
     const token = /^Bearer ([A-Za-z0-9._-]+)$/.exec(String(req.headers && req.headers.authorization || ''));
     if (!token) return json(res, 401, { error: 'auth_required' });
     let input; try { input = await body(req); } catch (_) { return json(res, 400, { error: 'invalid_request' }); }
+    if(input&&input.action==='keepsake_review'){
+      if(Object.keys(input).some(k=>!['action','review'].includes(k)))return json(res,400,{error:'invalid_request'});
+      return require('./_lib/keepsake-review-handler.js').createHandler({env,fetchImpl})({method:req.method,headers:req.headers,body:input.review},res);
+    }
     if (!input || Array.isArray(input) || !uuid(input.booking_id) || Object.keys(input).some(k => !['booking_id', 'learner_version', 'action', 'topic_id', 'source_version', 'request_id'].includes(k))) return json(res, 400, { error: 'invalid_request' });
     if (input.learner_version != null && (typeof input.learner_version !== 'string' || input.learner_version.length > 100)) return json(res, 400, { error: 'invalid_request' });
     const url = String(env.NEXT_PUBLIC_SUPABASE_URL || env.SUPABASE_URL || '').trim().replace(/\/rest\/v1\/?$/i, '').replace(/\/+$/, '');
     const anon = String(env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
     if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url) || !anon) return json(res, 503, { error: 'source_unavailable' });
-    const partnerAction = ['partner_letter_topics', 'partner_letter_blocks', 'partner_illustration_status', 'partner_illustration_generate'].includes(input.action);
+    const partnerAction = ['partner_letter_topics', 'partner_letter_blocks', 'partner_illustration_status', 'partner_illustration_generate', 'partner_illustration_choices'].includes(input.action);
     if (input.request_id!=null && (input.action!=='partner_illustration_generate'||!uuid(input.request_id))) return json(res,400,{error:'invalid_request'});
     const assetAction=input.action==='keepsake_image';
     if (assetAction && Object.keys(input).some(k=>!['booking_id','action'].includes(k))) return json(res,400,{error:'invalid_request'});
@@ -52,15 +56,16 @@ function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot
       }
       if (partnerAction) {
         let result;
-        if (input.action === 'partner_illustration_generate') {
+        if(input.action==='partner_illustration_choices'){result=await illustration.choices({input,read,user,env,signal:controller.signal});}
+        else if (input.action === 'partner_illustration_generate') {
           // Canonical participant/TEST ownership precedes any service-role client.
           const configured = illustrationPilot || illustrationTest.createPilot({env,fetchImpl});
-          if(configured){const denied=await illustrationTest.authorize({input,read,user});
+          if(configured){const denied=await illustrationTest.authorize({input,read,user,allowBeta:configured.manualReview===true});
             if(denied)return json(res,denied.status,denied.body);}
           const pilot = configured && typeof configured.contracts === 'function'
             ? await configured.contracts({env,jwt:token[1],user,signal:controller.signal}) : null;
           result = await illustration.handle({input,read,user,env,signal:controller.signal,fetchImpl,
-            enabled:!!pilot,testOnly:true,quota:pilot && pilot.quota,storage:pilot && pilot.storage});
+            enabled:!!pilot,testOnly:configured?.manualReview!==true,manualReview:configured?.manualReview===true,quota:pilot && pilot.quota,storage:pilot && pilot.storage,qualityCheck:pilot && pilot.qualityCheck});
         } else result = await partnerLetter.handle({input,read,user,env,signal:controller.signal,fetchImpl});
         return json(res,result.status,result.body);
       }
