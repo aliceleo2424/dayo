@@ -1,5 +1,5 @@
 'use strict';
-const assert=require('node:assert/strict');const {createHandler}=require('../api/soniox-credentials.js');const {BOOKING,FAMILY}=require('../api/_lib/soniox-family-session.js');
+const assert=require('node:assert/strict');const {createHandler}=require('../api/conversation-recap.js');const {BOOKING,FAMILY}=require('../api/_lib/soniox-family-session.js');
 const now=Date.parse('2026-10-13T12:01:00Z');let checks=0;
 const check=(a,b)=>{assert.deepEqual(a,b);checks++;};
 async function run(options={}){
@@ -18,7 +18,7 @@ async function run(options={}){
  };
  const env={SONIOX_ENABLED:'1',SONIOX_API_KEY:'provider-fixture',SUPABASE_SERVICE_ROLE_KEY:'server-fixture',NEXT_PUBLIC_SUPABASE_ANON_KEY:'public-fixture',NEXT_PUBLIC_SUPABASE_URL:'https://fixture.supabase.co/rest/v1/',SONIOX_PROJECT_BUDGET_USD:'2',...options.env};
  const res={setHeader(){},end(raw){this.body=JSON.parse(raw);}};
- await createHandler({env,fetchImpl,clock:()=>options.now||now})({method:'POST',headers:{origin:options.origin||'https://www.dayotalk.com',authorization:options.noAuth?'':'Bearer user.fixture'},body:{action:options.action||'state',bookingId:options.wrongBooking?'55555555-5555-4555-8555-555555555555':BOOKING}},res);
+ await createHandler({env,fetchImpl,clock:()=>options.now||now})({method:'POST',headers:{origin:options.origin||'https://www.dayotalk.com',authorization:options.noAuth?'':'Bearer user.fixture'},body:{action:'soniox_'+(options.action||'state'),booking_id:options.wrongBooking?'55555555-5555-4555-8555-555555555555':BOOKING}},res);
  return {...res,calls};
 }
 (async()=>{

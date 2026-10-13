@@ -1,7 +1,7 @@
 'use strict';
 // Family's prior consent is owner-confirmed for one booking. No general rollout.
 const crypto=require('node:crypto');
-const {BOOKING,FAMILY,MAX_SECONDS,START_TTL_SECONDS,UUID,mint}=require('./_lib/soniox-family-session.js');
+const {BOOKING,FAMILY,MAX_SECONDS,START_TTL_SECONDS,UUID,mint}=require('./soniox-family-session.js');
 function createHandler({env=process.env,fetchImpl=fetch,clock=Date.now}={}){return async(req,res)=>{
  const send=(status,data)=>{res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');res.setHeader('Cache-Control','private, no-store');res.setHeader('Vary','Origin, Authorization');res.end(JSON.stringify(data));};
  if(req.method!=='POST')return send(405,{error:'post_required'});

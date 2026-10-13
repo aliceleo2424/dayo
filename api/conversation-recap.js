@@ -18,7 +18,7 @@ async function body(req) {
   if (typeof req.body === 'string') { if (req.body.length > 1024) throw Error('size'); return JSON.parse(req.body); }
   let raw = ''; for await (const chunk of req) { raw += chunk; if (raw.length > 1024) throw Error('size'); } return JSON.parse(raw || '{}');
 }
-function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot = null } = {}) {
+function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot = null, clock = Date.now } = {}) {
   return async function handler(req, res) {
     if (!originAllowed(req.headers && req.headers.origin, env.VERCEL_URL)) return json(res, 403, { error: 'origin_not_allowed' });
     if (req.method !== 'POST') return json(res, 405, { error: 'method_not_allowed' });
@@ -27,6 +27,11 @@ function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot
     const token = /^Bearer ([A-Za-z0-9._-]+)$/.exec(String(req.headers && req.headers.authorization || ''));
     if (!token) return json(res, 401, { error: 'auth_required' });
     let input; try { input = await body(req); } catch (_) { return json(res, 400, { error: 'invalid_request' }); }
+    if(input && ['soniox_state','soniox_start'].includes(input.action)) {
+      const requestBody={...input,action:input.action.slice(7),bookingId:input.booking_id};
+      delete requestBody.booking_id;
+      return require('./_lib/soniox-family-credentials.js').createHandler({env,fetchImpl,clock})({method:req.method,headers:req.headers,body:requestBody},res);
+    }
     if(input&&input.action==='keepsake_review'){
       if(Object.keys(input).some(k=>!['action','review'].includes(k)))return json(res,400,{error:'invalid_request'});
       return require('./_lib/keepsake-review-handler.js').createHandler({env,fetchImpl})({method:req.method,headers:req.headers,body:input.review},res);

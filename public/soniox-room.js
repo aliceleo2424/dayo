@@ -22,7 +22,7 @@
   function ownRole() { return access().role==='partner'?'partner':['user','learner'].includes(access().role)?'learner':''; }
   async function session() { var result=await window.supabaseClient.auth.getSession();return result && result.data && result.data.session; }
   async function request(action,auth) {
-    var response=await fetch('/api/soniox-credentials',{method:'POST',cache:'no-store',headers:{Authorization:'Bearer '+auth.access_token,'Content-Type':'application/json'},body:JSON.stringify({action:action,bookingId:booking}),signal:AbortSignal.timeout(10000)});
+    var response=await fetch('/api/conversation-recap',{method:'POST',cache:'no-store',headers:{Authorization:'Bearer '+auth.access_token,'Content-Type':'application/json'},body:JSON.stringify({action:'soniox_'+action,booking_id:booking}),signal:AbortSignal.timeout(10000)});
     var body=await response.json();if(!response.ok){var error=new Error(body.error||'unavailable');error.consumed=body.allocationConsumed;throw error;}return body;
   }
   function prepareAudio() {

@@ -7,10 +7,10 @@ const actualHtml=fs.readFileSync(path.join(root,'public/room.html'),'utf8').repl
 let mints=0;
 const server=http.createServer((req,res)=>{
  const url=new URL(req.url,'http://localhost');
- if(url.pathname==='/api/soniox-credentials'){let raw='';req.on('data',v=>raw+=v);req.on('end',()=>{const body=JSON.parse(raw),role=req.headers.authorization==='Bearer fixture-partner'?'partner':'learner';assert.equal(body.bookingId,B);res.setHeader('Content-Type','application/json');
+ if(url.pathname==='/api/conversation-recap'){let raw='';req.on('data',v=>raw+=v);req.on('end',()=>{const body=JSON.parse(raw),role=req.headers.authorization==='Bearer fixture-partner'?'partner':'learner';assert.equal(body.booking_id,B);res.setHeader('Content-Type','application/json');
   const common={role,bookingId:B,model:'stt-rt-v5',singleUse:true,startExpirySeconds:60,maxSessionSeconds:1500,scheduledAt:new Date(Date.now()-1000).toISOString(),canonical:true};
-  if(body.action==='state')return res.end(JSON.stringify({...common,available:true}));
-  assert.equal(body.action,'start');assert.deepEqual(Object.keys(body).sort(),['action','bookingId']);mints++;res.end(JSON.stringify({...common,api_key:'snx_temp_fixture',expires_at:new Date(Date.now()+60000).toISOString(),captureEndsAt:Date.now()+1500000}));});return;
+  if(body.action==='soniox_state')return res.end(JSON.stringify({...common,available:true}));
+  assert.equal(body.action,'soniox_start');assert.deepEqual(Object.keys(body).sort(),['action','booking_id']);mints++;res.end(JSON.stringify({...common,api_key:'snx_temp_fixture',expires_at:new Date(Date.now()+60000).toISOString(),captureEndsAt:Date.now()+1500000}));});return;
  }
  if(url.pathname==='/room')return res.end(actualHtml);
  const file=path.join(root,'public',url.pathname.slice(1));if(fs.existsSync(file)){res.setHeader('Content-Type',file.endsWith('.js')?'application/javascript':'text/plain');res.end(fs.readFileSync(file));}else{res.statusCode=404;res.end();}
