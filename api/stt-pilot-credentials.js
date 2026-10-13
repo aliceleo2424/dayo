@@ -1,7 +1,7 @@
 'use strict';
 // Existing protected pilot route; no service-role key or canonical writes.
 const crypto=require('node:crypto');
-const {MAX_SECONDS,START_TTL_SECONDS,BRANCH,OWNERS,PILOT_BOOKING,UUID,mintCredential,publicAuthConfig,probeConnection}=require('./_lib/soniox-pilot-allocation.js');
+const {MAX_SECONDS,START_TTL_SECONDS,BRANCH,OWNERS,UUID,mintCredential,publicAuthConfig,probeConnection}=require('./_lib/soniox-pilot-allocation.js');
 function reply(res,status,body) {
   res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');
   res.setHeader('Cache-Control','private, no-store');res.setHeader('Pragma','no-cache');
@@ -29,7 +29,7 @@ function createHandler({env=process.env,fetchImpl=fetch,clock=Date.now,probeImpl
   if(req.method!=='POST')return reply(res,405,{error:'post_required'});
   // Hard target/branch gate, independent of feature flags. Production never mints.
   if(!c.preview)return reply(res,403,{error:'exact_protected_preview_required'});
-  if(!c.enabled||!c.key||!c.url||!c.anon||!c.host||c.booking!==PILOT_BOOKING)return reply(res,503,{error:'pilot_not_configured'});
+  if(!c.enabled||!c.key||!c.url||!c.anon||!c.host||!UUID.test(c.booking||''))return reply(res,503,{error:'pilot_not_configured'});
   if(!safeOrigin(req,c))return reply(res,403,{error:'protected_test_origin_required'});
   if(!Number.isFinite(c.budget)||c.budget<=0||c.budget>2||!Number.isFinite(c.verifiedAt)||c.verifiedAt>now||now-c.verifiedAt>12*3600000)
     return reply(res,503,{error:'project_budget_unverified'});
@@ -42,7 +42,7 @@ function createHandler({env=process.env,fetchImpl=fetch,clock=Date.now,probeImpl
   const action=body.action||'start';
   if(!['state','start','probe'].includes(action)||action==='start'&&body.consent!==true)return reply(res,403,{error:'explicit_start_and_consent_required'});
   if(body.bookingId!==undefined&&!UUID.test(body.bookingId||''))return reply(res,400,{error:'invalid_request'});
-  if(body.bookingId!==PILOT_BOOKING)return reply(res,403,{error:'allowlisted_test_booking_required'});
+  if(body.bookingId!==c.booking)return reply(res,403,{error:'allowlisted_test_booking_required'});
   let reservation,headers,reserveAttempted=false;
   const rpc=async args=>request(fetchImpl,c.url+'/rest/v1/rpc/dayo_soniox_pilot_allocation',{
     method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify(args)
@@ -75,7 +75,7 @@ function createHandler({env=process.env,fetchImpl=fetch,clock=Date.now,probeImpl
     if(action==='state'){
       const state=await rpc({p_action:'state'});
       if(!state||state.role!==role||typeof state.available!=='boolean')throw new Error('invalid_state');
-      return reply(res,200,{...state,model:'stt-rt-v5',singleUse:true,startExpirySeconds:START_TTL_SECONDS,maxSessionSeconds:MAX_SECONDS,bookingId:PILOT_BOOKING,scheduledAt,canonicalPilot:true,providerAuthenticationVerified:true});
+      return reply(res,200,{...state,model:'stt-rt-v5',singleUse:true,startExpirySeconds:START_TTL_SECONDS,maxSessionSeconds:MAX_SECONDS,bookingId:c.booking,scheduledAt,canonicalPilot:true,providerAuthenticationVerified:true});
     }
     if(action==='probe'){
       // Verify caller's durable owner binding; never reserve or mint.
