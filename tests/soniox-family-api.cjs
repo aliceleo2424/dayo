@@ -1,0 +1,37 @@
+'use strict';
+const assert=require('node:assert/strict');const {createHandler}=require('../api/soniox-credentials.js');const {BOOKING,FAMILY}=require('../api/_lib/soniox-family-session.js');
+const now=Date.parse('2026-10-13T12:01:00Z');let checks=0;
+const check=(a,b)=>{assert.deepEqual(a,b);checks++;};
+async function run(options={}){
+ const role=options.role||'learner',user={id:options.outsider?'33333333-3333-4333-8333-333333333333':FAMILY[role]},calls=[];
+ const fetchImpl=async(url,args={})=>{calls.push({url,args});const response=data=>({ok:true,json:async()=>data});
+ if(url.endsWith('/auth/v1/user'))return options.authFail?{ok:false,status:401}:response(user);
+ if(url.includes('/bookings?'))return response([{id:BOOKING,learner_id:options.changedParty?'44444444-4444-4444-8444-444444444444':FAMILY.learner,partner_user_id:FAMILY.partner,status:options.status||'confirmed',scheduled_at:options.changedTime?'2026-10-14T12:00:00Z':'2026-10-13T12:00:00Z'}]);
+ if(url.includes('/rpc/get_room_session_state')){assert.equal(args.headers.Authorization,'Bearer user.fixture');return response({success:true,booking_id:BOOKING,participant_id:user.id,role,session_ended:options.ended===true});}
+ if(url.endsWith('/concurrency-limits')){assert.equal(args.headers.Authorization,'Bearer provider-fixture');return options.providerAuthFail?{ok:false,status:401}:response({project:{limits:{transcribe_concurrent:options.capacity||2}}});}
+ if(url.includes('/rpc/dayo_soniox_session_allocation')){assert.equal(args.headers.Authorization,'Bearer server-fixture');const body=JSON.parse(args.body);assert.equal(body.p_booking_id,BOOKING);assert.equal(body.p_actor_id,user.id);assert.equal(body.p_budget_usd,2);
+ if(body.p_action==='state')return response({role,state:'available',available:true});
+ if(body.p_action==='reserve')return response(options.used?{reserved:false,error:'session_allocation_used'}:options.budgetUsed?{reserved:false,error:'project_budget_exhausted'}:{reserved:true,reservation_id:body.p_request_id,role,max_seconds:1440});
+ if(body.p_action==='finish')return response({updated:!options.lostAck});throw Error('Unexpected RPC');}
+ if(url.endsWith('/auth/temporary-api-key')){const body=JSON.parse(args.body);assert.equal(body.single_use,true);assert.equal(body.usage_type,'transcribe_websocket');assert.equal(body.expires_in_seconds,60);assert.equal(body.max_session_duration_seconds,1440);assert(!args.body.includes(BOOKING)&&!args.body.includes(FAMILY.learner)&&!args.body.includes(FAMILY.partner));return options.mintFail?{ok:false,status:503}:response({api_key:'snx_temp_fixture_only',expires_at:new Date((options.now||now)+60000).toISOString()});}
+ throw Error('Unexpected request: '+url);
+ };
+ const env={SONIOX_ENABLED:'1',SONIOX_API_KEY:'provider-fixture',SUPABASE_SERVICE_ROLE_KEY:'server-fixture',NEXT_PUBLIC_SUPABASE_ANON_KEY:'public-fixture',NEXT_PUBLIC_SUPABASE_URL:'https://fixture.supabase.co/rest/v1/',SONIOX_PROJECT_BUDGET_USD:'2',...options.env};
+ const res={setHeader(){},end(raw){this.body=JSON.parse(raw);}};
+ await createHandler({env,fetchImpl,clock:()=>options.now||now})({method:'POST',headers:{origin:options.origin||'https://www.dayotalk.com',authorization:options.noAuth?'':'Bearer user.fixture'},body:{action:options.action||'state',bookingId:options.wrongBooking?'55555555-5555-4555-8555-555555555555':BOOKING}},res);
+ return {...res,calls};
+}
+(async()=>{
+ for(const role of ['learner','partner']){const ready=await run({role});check(ready.statusCode,200);check(ready.body.role,role);check(ready.body.available,true);check(ready.body.providerAuthenticationVerified,true);check(ready.calls.some(c=>c.url.includes('temporary-api-key')),false);check(ready.calls.filter(c=>c.url.includes('dayo_soniox_session_allocation')).map(c=>JSON.parse(c.args.body).p_action),['state']);
+ const grant=await run({role,action:'start'});check(grant.statusCode,200);check(grant.body.role,role);check(grant.body.maxSessionSeconds,1440);check(grant.calls.filter(c=>c.url.includes('temporary-api-key')).length,1);}
+ for(const options of [{wrongBooking:true},{outsider:true},{changedParty:true},{origin:'https://unrelated.invalid'}]){const r=await run(options);check(r.statusCode,403);check(r.calls.some(c=>c.url.includes('dayo_soniox_session_allocation')||c.url.includes('soniox.com')),false);}
+ const anonymous=await run({noAuth:true});check(anonymous.statusCode,401);check(anonymous.calls.length,0);
+ for(const options of [{status:'cancelled'},{ended:true},{changedTime:true},{now:Date.parse('2026-10-13T12:25:00Z')}]){const r=await run(options);check(r.statusCode,409);check(r.calls.some(c=>c.url.includes('soniox.com')),false);}
+ const early=await run({action:'start',now:Date.parse('2026-10-13T11:55:00Z')});check(early.statusCode,409);check(early.calls.some(c=>c.url.includes('dayo_soniox_session_allocation')),false);
+ for(const options of [{used:true},{budgetUsed:true}]){const r=await run({...options,action:'start'});check(r.statusCode,409);check(r.calls.some(c=>c.url.includes('temporary-api-key')),false);}
+ for(const options of [{providerAuthFail:true},{capacity:3}]){const r=await run({...options,action:'start'});check(r.statusCode,503);check(r.calls.some(c=>c.url.includes('dayo_soniox_session_allocation')),false);}
+ const failed=await run({action:'start',mintFail:true});check(failed.statusCode,502);check(failed.body.allocationConsumed,true);check(failed.calls.filter(c=>c.url.includes('temporary-api-key')).length,1);check(failed.calls.filter(c=>c.url.includes('dayo_soniox_session_allocation')).at(-1).args.body.includes('failed'),true);
+ const lost=await run({action:'start',lostAck:true});check(lost.statusCode,503);check('api_key' in lost.body,false);check(lost.body.allocationConsumed,true);
+ const unavailable=await run({env:{SONIOX_API_KEY:''}});check(unavailable.statusCode,503);check(unavailable.calls.length,0);
+ console.log('PASS '+checks+' new family-only API checks: exact consent scope, both authenticated roles, session/time guards before privileged operations, non-consuming readiness, single-use/60s/capped duration, budget/concurrency guards, failures and lost acknowledgment. All external requests mocked; no real credentials/audio.');
+})().catch(error=>{console.error(error);process.exitCode=1;});
