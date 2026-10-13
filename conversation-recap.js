@@ -392,7 +392,9 @@
             (quote?'<small>'+(ko?'오늘 대화에서 · 나':'From today’s conversation · You')+'</small><p class="recap-word-quote">“'+esc(quote.text)+'”</p>':'')+'</div>';
         }).join('');
         var quizAction=o.quizHref ? '<a class="recap-primary recap-quiz-entry" href="'+esc(o.quizHref)+'">'+esc(quizActionLabel(r,locale))+'</a>' : o.interactive && !o.hideQuizAction && !progress.reason ? '<button class="recap-primary recap-quiz-entry" type="button" data-recap-start>'+esc(quizActionLabel(r,locale))+'</button>' : '';
-        html += '<section class="recap-section recap-quiz"><h4>'+esc(l.mini)+'</h4><p>'+esc(quizCopy)+'</p>'+vocabulary+quizAction+'</section>';
+        // Collapsible word list; the entry action stays visible. A caller may place it last via quizSink.
+        var quizHtml = '<section class="recap-section recap-quiz"><details class="recap-fold"><summary><h4>'+esc(l.mini)+'</h4><p>'+esc(quizCopy)+'</p></summary>'+vocabulary+'</details>'+quizAction+'</section>';
+        if (o.quizSink && typeof o.quizSink === 'object') o.quizSink.html = quizHtml; else html += quizHtml;
       }
     } else html += '<p>' + esc(l.unsupported) + '</p>';
     if(r.chat&&r.chat.version===1&&r.chat.messages&&r.chat.messages.length){
