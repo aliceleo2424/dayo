@@ -1,6 +1,6 @@
 (function(){
  'use strict';
- var contract=window.DayOPartnerReportContract,root,context={},selectedKeyword='',imageUrl=null,request=0,timer=null,initialized=false,letterRun=0,letterTopics=[],letterTopic='',letterVersion='',letterBooking='';
+ var contract=window.DayOPartnerReportContract,root,context={},selectedKeyword='',imageUrl=null,request=0,timer=null,initialized=false,letterRun=0,letterTopics=[],letterTopic='',letterVersion='',letterBooking='',imageChoices=[],imageVersion='',imageChoiceRun=0,imageBusy=false;
  function el(id){return document.getElementById(id);}
  function selectButtons(container,value){container.querySelectorAll('button').forEach(function(button){button.setAttribute('aria-pressed',String(button.dataset.value===value));});}
  function setImageStatus(text){el('pr-image-status').textContent=text;}
@@ -11,27 +11,37 @@
   var messages={generation_disabled:'Illustration generation is currently unavailable. Your letter can still be sent.',unsupported_concept:'Illustration is unavailable for this topic. Your letter can still be sent.',provider_http_error:'The image provider could not create an illustration. Your letter can still be sent.',provider_request_failed:'The image provider is unavailable. Your letter can still be sent.',timeout:'The illustration is taking longer. You can send your letter; it can finish later.',image_load_failed:'The illustration could not be opened. Your letter can still be sent.',save_failed:'Your illustration is ready but could not be saved. Try again.',authorization_failure:'This session could not be verified for image generation.'};
   setImageStatus(state.failure?messages[state.failure]||'Illustration unavailable.':state.status==='saved'?'Illustration saved.':state.status==='ready'?'Illustration ready.':'Creating your illustration… You can send your letter now.');
  }
- function requestIllustration(){
-  if(contract.illustrationAvailable===false)return;
-  var manager=window.DayOPartnerIllustration,keyword=contract.safeKeyword(selectedKeyword);if(!keyword||!manager)return;
-  var current=manager.state(context.bookingId);if(current&&current.failure==='save_failed'&&current.theme===keyword){manager.retrySave(context.bookingId);return;}
-  var run=++request;imageUrl=null;el('pr-illustration').hidden=true;setImageStatus('Creating your illustration… You can send your letter now.');
-  manager.start({bookingId:context.bookingId,actorId:(window.DayORoomAccess||{}).partnerId,theme:keyword,seed:Math.floor(Math.random()*1000000)+1,current:function(){return run===request;}}).then(function(state){if(run===request)imageState(state);}).catch(function(){imageState({bookingId:context.bookingId,failure:'provider_request_failed'});});
+ function imageKo(){return window.partnerLetterLocale?window.partnerLetterLocale()==='KO':!!(window.DayOI18n&&String(window.DayOI18n.getLang()).toLowerCase()==='ko');}
+ function imageCopy(en,ko){return imageKo()?ko:en;}
+ async function requestIllustration(retry){
+  if(contract.illustrationAvailable===false||imageBusy||!context.bookingId||!imageVersion||!imageChoices.some(function(c){return c.id===selectedKeyword;}))return;
+  var booking=context.bookingId,theme=selectedKeyword,version=imageVersion,run=++request,id,key='dayo_keepsake_request:'+booking;
+  try{var saved=JSON.parse(sessionStorage.getItem(key)||'null');if(retry!==true&&saved&&saved.theme===theme&&saved.version===version)id=saved.id;}catch(_){}
+  id=id||crypto.randomUUID();try{sessionStorage.setItem(key,JSON.stringify({id:id,theme:theme,version:version}));}catch(_){}
+  imageBusy=true;imageUrl=null;el('pr-illustration').hidden=true;el('pr-image-retry').disabled=true;
+  setImageStatus(imageCopy('Creating your illustration… Your Letter can still be sent.','그림을 만들고 있어요. 레터는 그대로 보낼 수 있어요.'));
+  try{var data=await letterRequest('partner_illustration_generate',{booking_id:booking,topic_id:theme,source_version:version,request_id:id});if(run!==request||booking!==context.bookingId)return;
+   setImageStatus(data.status==='pending_review'?imageCopy('Image ready. Preview it below before sending.','그림이 준비됐어요. 아래에서 확인한 뒤 보내 주세요.'):data.status==='approved'?imageCopy('Image approved.','승인된 그림이에요.'):imageCopy('No usable image is available. Your Letter can still be sent.','사용 가능한 그림이 없어요. 레터는 그대로 보낼 수 있어요.'));
+  }catch(_){if(run===request)setImageStatus(imageCopy('Image could not be confirmed. Check the preview below before retrying. Your Letter can still be sent.','그림 상태를 확인하지 못했어요. 다시 시도하기 전에 아래 미리보기를 확인해 주세요. 레터는 그대로 보낼 수 있어요.'));}
+  finally{imageBusy=false;el('pr-image-retry').disabled=false;if(run===request&&booking===context.bookingId&&window.DayOKeepsakePartnerReview)await window.DayOKeepsakePartnerReview.open(booking,root,imageKo()?'ko':'en');}
  }
  function chooseKeyword(value,source){
   var keyword=contract.safeKeyword(value);if(!keyword){setImageStatus('Choose a short topic, without contact details or links.');return;}
   selectedKeyword=keyword;
-  el('pr-keyword-value').textContent='Today’s theme: '+keyword;
+  el('pr-keyword-value').textContent=imageCopy('Today’s theme: ','오늘의 소재: ')+(imageChoices.find(function(c){return c.id===keyword;})||{}).label;
   selectButtons(el('pr-keyword-options'),source==='suggested'?keyword:'custom');
   requestIllustration();
  }
- function paintSuggestions(){
-  var list=el('pr-keyword-options');list.replaceChildren();
-  var section=list.closest('.pr-optional');if(section)section.hidden=contract.illustrationAvailable===false;
-  if(contract.illustrationAvailable===false)return;
-  var candidates=contract.storyIllustrations(letterTopics);
-  el('pr-keyword-hint').textContent=candidates.length?'Create a small memory from today’s recorded stories.':'There is not enough recorded story detail for an illustration. Your letter and card work without one.';
-  candidates.forEach(function(item){var button=document.createElement('button');button.type='button';button.textContent=item.label;button.dataset.value=item.theme;button.setAttribute('aria-pressed',String(item.theme===selectedKeyword));button.onclick=function(){chooseKeyword(item.theme,'suggested');};list.append(button);});
+ async function paintSuggestions(){
+  var list=el('pr-keyword-options'),section=list.closest('.pr-optional'),run=++imageChoiceRun,booking=context.bookingId;list.replaceChildren();imageChoices=[];imageVersion='';
+  if(section)section.hidden=contract.illustrationAvailable===false;if(contract.illustrationAvailable===false||!booking)return;
+  el('pr-custom-keyword-field').hidden=true;el('pr-image-retry').textContent=imageCopy('Try illustration again','그림 다시 만들기');
+  el('pr-keyword-hint').textContent=imageCopy('Checking this conversation’s verified themes…','이 대화에서 확인된 소재를 확인하고 있어요…');
+  try{var data=await letterRequest('partner_illustration_choices',{booking_id:booking});if(run!==imageChoiceRun||booking!==context.bookingId)return;
+   imageChoices=Array.isArray(data.choices)?data.choices.filter(function(c){return c&&typeof c.id==='string'&&typeof c.label==='string';}).slice(0,3):[];imageVersion=data.source_version||'';
+   el('pr-keyword-hint').textContent=imageChoices.length?imageCopy('Choose a recorded theme to create an optional keepsake.','실제 대화 소재를 선택해 기념 그림을 만들 수 있어요.'):imageCopy('Not enough verified detail for an image. Your Letter works without one.','확인된 대화 소재가 부족해요. 그림 없이 레터를 보낼 수 있어요.');
+   imageChoices.forEach(function(item){var button=document.createElement('button');button.type='button';button.textContent=item.label;button.dataset.value=item.id;button.setAttribute('aria-pressed',String(item.id===selectedKeyword));button.onclick=function(){chooseKeyword(item.id,'suggested');};list.append(button);});
+  }catch(_){if(run===imageChoiceRun)el('pr-keyword-hint').textContent=imageCopy('Image themes are unavailable. Your Letter can still be sent.','그림 소재를 불러오지 못했어요. 레터는 그대로 보낼 수 있어요.');}
  }
  function letterStatus(text){if(el('pr-letter-status'))el('pr-letter-status').textContent=text;}
  async function letterRequest(action,extra){
@@ -86,7 +96,7 @@
   if(el('pr-letter-generate'))el('pr-letter-generate').addEventListener('click',suggestLetters);
   el('pr-use-keyword').addEventListener('click',function(){chooseKeyword(el('pr-custom-keyword').value,'custom');});
   el('pr-custom-keyword').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();chooseKeyword(e.target.value,'custom');}});
-  el('pr-image-retry').addEventListener('click',requestIllustration);initialized=true;
+  el('pr-image-retry').addEventListener('click',function(){void requestIllustration(true);});initialized=true;
  }
  function open(data){
   mount();if(!initialized)return;context=data||{};

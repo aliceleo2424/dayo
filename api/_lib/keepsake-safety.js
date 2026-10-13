@@ -32,7 +32,7 @@ async function readAsset(participantDb,bookingId,clock=()=>Date.now()){
    ||decodeURIComponent(access.pathname)!=='/storage/v1/object/sign/'+BUCKET+'/'+asset.object_path)throw fail('image_access_unavailable');
  return {booking_id:bookingId,asset,url:r.data.signedUrl,expires_at:new Date(clock()+TTL*1000).toISOString(),durable:true,firstParty:true};
 }
-function createContracts({db,participantDb,accountId,verifyFreePlan,clock=()=>Date.now(),manualReview=false}){
+function createContracts({db,participantDb,accountId,verifyFreePlan,clock=()=>Date.now(),manualReview=false,normalBookings=false}){
  const accountKey=crypto.createHash('sha256').update(String(accountId)).digest('hex');
  const quota={reserve:async data=>{
   if(!/^[a-f0-9]{32}$/.test(String(accountId))||data.model!==MODEL||data.freeOnly!==true
@@ -48,7 +48,7 @@ function createContracts({db,participantDb,accountId,verifyFreePlan,clock=()=>Da
     &&clock()-Date.parse(proof.verifiedAt)<=12*60*60*1000;
   return rpc(db,manualReview?'dayo_keepsake_reserve_review':'dayo_keepsake_reserve',{p_booking_id:data.bookingId,p_actor_id:data.actorId,
    p_request_id:id,p_source_version:data.sourceVersion,p_account_key:accountKey,
-   p_plan:fresh?'workers_free':null,p_verified_at:fresh?proof.verifiedAt:null,
+   p_plan:normalBookings||fresh?'workers_free':null,p_verified_at:fresh?proof.verifiedAt:null,
    p_proof_day:fresh?new Date(clock()).toISOString().slice(0,10):null,p_remaining_neurons:null});
  },fail:async({token,actorId,code})=>rpc(db,'dayo_keepsake_finish',{
   p_token:token,p_actor_id:actorId,p_failure_code:code})};

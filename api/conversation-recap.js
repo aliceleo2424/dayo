@@ -63,7 +63,7 @@ function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot
         let result;
         if(input.action==='partner_illustration_choices'){result=await illustration.choices({input,read,user,env,signal:controller.signal});}
         else if (input.action === 'partner_illustration_generate') {
-          // Canonical participant/TEST ownership precedes any service-role client.
+          // Canonical booking Partner ownership precedes any service-role client.
           const configured = illustrationPilot || illustrationTest.createPilot({env,fetchImpl});
           if(configured){const denied=await illustrationTest.authorize({input,read,user,allowBeta:configured.manualReview===true});
             if(denied)return json(res,denied.status,denied.body);}

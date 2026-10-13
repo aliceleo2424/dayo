@@ -61,6 +61,6 @@
   var prompt='Warm watercolor and colored pencil on soft paper: '+concept+'. Ivory #FFFBF4, sage #5F7D63, beige #F8F0E3, warm brown. Contemporary editorial diary/postcard mood, simple focal composition. No photorealism, stock scene, anime, chibi, mascot, 3D, neon, faces, text, letters or logos.';
   return 'https://image.pollinations.ai/prompt/'+encodeURIComponent(prompt)+'?width=400&height=400&nologo=true&seed='+encodeURIComponent(seed||1);
  }
- var api={illustrationAvailable:false,treats:Object.freeze(treats),suggestions:suggestions,safeKeyword:safeKeyword,illustrationConcept:illustrationConcept,illustrationUrl:illustrationUrl,storyIllustrations:storyIllustrations,illustrationKey:illustrationKey};
+ var api={illustrationAvailable:true,illustrationProvider:'cloudflare',treats:Object.freeze(treats),suggestions:suggestions,safeKeyword:safeKeyword,illustrationConcept:illustrationConcept,illustrationUrl:illustrationUrl,storyIllustrations:storyIllustrations,illustrationKey:illustrationKey};
  if(typeof module!=='undefined'&&module.exports)module.exports=api;else root.DayOPartnerReportContract=api;
 })(typeof window!=='undefined'?window:this);

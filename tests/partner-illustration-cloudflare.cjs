@@ -27,13 +27,12 @@ function fixture(mode='mixed',values=texts){return {user:{id:P},env:{SUPABASE_SE
  for(const claim of [{plan:'paid',allowed:true,attempt:1,token:'x'},{plan:'workers_free',allowed:true,attempt:3,token:'x'},null])assert.equal((await I.handle({...o,quota:{reserve:async()=>claim}})).body.error,'generation_not_reserved');
  const runtime=require('../api/_lib/keepsake-test-runtime.js');
  let unexpectedRead=0;
- const other=await I.handle({...o,input:{...o.input,booking_id:'33333333-3333-4333-8333-333333333333'},read:async()=>{unexpectedRead++;throw Error('must not read');}});
- assert.equal(other.body.error,'test_booking_not_allowlisted');assert.equal(unexpectedRead,0);
- const configuredEnv={...o.env,CLOUDFLARE_ACCOUNT_ID:runtime.ACCOUNT,
+ const other=await I.handle({...o,input:{...o.input,booking_id:'33333333-3333-4333-8333-333333333333'},read:async()=>{unexpectedRead++;return [];}});
+ assert.equal(other.body.error,'not_booking_partner');assert.equal(unexpectedRead,1);
+ const configuredEnv={...o.env,CLOUDFLARE_ACCOUNT_ID:'a'.repeat(32),
   DAYO_KEEPSAKE_TEST_BOOKING:B,DAYO_CLOUDFLARE_FREE_VERIFIED_AT:new Date().toISOString()};
  assert(runtime.createPilot({env:configuredEnv}));
- for(const patch of [{DAYO_KEEPSAKE_TEST_BOOKING:'all'},{CLOUDFLARE_ACCOUNT_ID:'a'.repeat(32)},
-  {DAYO_CLOUDFLARE_FREE_VERIFIED_AT:'2000-01-01'},{SUPABASE_SERVICE_ROLE_KEY:''}])
+ for(const patch of [{CLOUDFLARE_ACCOUNT_ID:'invalid'},{CLOUDFLARE_API_TOKEN:''},{SUPABASE_SERVICE_ROLE_KEY:''}])
   assert.equal(runtime.createPilot({env:{...configuredEnv,...patch}}),null);
  let privileged=0;
  const guarded=require('../api/conversation-recap.js').createHandler({env:{SUPABASE_URL:'https://fixture.supabase.co',NEXT_PUBLIC_SUPABASE_ANON_KEY:'fixture'},
@@ -103,7 +102,7 @@ function fixture(mode='mixed',values=texts){return {user:{id:P},env:{SUPABASE_SE
   assert(!url.pathname.includes('/rest/v1/rest/v1'),'REST suffix must not duplicate');
   let data;
   if(url.pathname==='/auth/v1/user')data={id:P};
-  else if(url.pathname==='/rest/v1/bookings')data=[{id:B,learner_id:U,partner_user_id:P,status:'completed',language:'en',is_test_session:true}];
+  else if(url.pathname==='/rest/v1/bookings')data=[{id:B,learner_id:U,partner_user_id:P,status:'completed',language:'en',is_test_session:false}];
   else if(url.pathname==='/rest/v1/profiles')data=[{id:P,role:'partner'}];
   else if(url.pathname==='/rest/v1/session_logs'){speechReads++;data=[];}
   else if(url.pathname==='/rest/v1/booking_chat_messages'){
@@ -139,7 +138,7 @@ function fixture(mode='mixed',values=texts){return {user:{id:P},env:{SUPABASE_SE
  }
  for(const value of ['http://fixture.supabase.co','https://untrusted.invalid/rest/v1/',
   'https://fixture.supabase.co/other',''])assert.throws(()=>S.serviceClient({env:{...endpointEnv,NEXT_PUBLIC_SUPABASE_URL:value},fetchImpl:mockSourceFetch}));
- const C=require('../public/partner-report-contract.js');assert.equal(C.illustrationAvailable,false);
+ const C=require('../public/partner-report-contract.js');assert.equal(C.illustrationAvailable,true);assert.equal(C.illustrationProvider,'cloudflare');
  const api=fs.readFileSync(path.join(__dirname,'../api/conversation-recap.js'),'utf8');assert(api.includes('partner_illustration_generate'));assert(!api.includes('enabled:true'));
- console.log('PASS: speech/chat/mixed motifs; privacy/minimal provider payload; 511x285 reference; disabled default; ownership/revision; quota/attempt/atomic mock gates; 429/500/network/abort; format/dimensions; storage failure; no auto retries or report writes.');
+ console.log('PASS: speech/chat/mixed motifs; privacy/minimal provider payload; 511x285 reference; unconfigured-server fallback, normal-booking routing; ownership/revision; quota/attempt/atomic mock gates; 429/500/network/abort; format/dimensions; storage failure; no auto retries or report writes.');
 })().catch(e=>{console.error(e);process.exitCode=1;});
