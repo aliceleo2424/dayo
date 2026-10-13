@@ -1,9 +1,5 @@
 'use strict';
-// Owner's explicit existing consent applies ONLY to these two family participants
-// on this confirmed reservation. It is NOT consent for other users/bookings.
 const crypto=require('node:crypto');
-const BOOKING='2191fadf-ac84-4d9e-8102-d52ae0095683';
-const FAMILY=Object.freeze({learner:'c4552202-cafd-4ab5-bbf9-5a23719edf44',partner:'1bc0eab5-9399-4da8-a90c-145ab0c4409d'});
 const MAX_SECONDS=1500,START_TTL_SECONDS=60,UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i;
 function fail(code){const e=Error(code);e.code=code;return e;}
 async function mint({reservation,key,fetchImpl=fetch,clock=Date.now}){
@@ -14,4 +10,4 @@ async function mint({reservation,key,fetchImpl=fetch,clock=Date.now}){
  const expires=Date.parse(grant?.expires_at);if(typeof grant?.api_key!=='string'||!grant.api_key.startsWith('snx_temp_')||grant.api_key.length>4096||!Number.isFinite(expires)||expires<=clock()||expires>clock()+65000)throw fail('invalid_grant');
  return {api_key:grant.api_key,expires_at:grant.expires_at};
 }
-module.exports={BOOKING,FAMILY,MAX_SECONDS,START_TTL_SECONDS,UUID,mint};
+module.exports={MAX_SECONDS,START_TTL_SECONDS,UUID,mint};

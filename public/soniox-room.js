@@ -1,12 +1,12 @@
-/* Owner-consented family booking only. No master keys, audio recording or automatic paid retries. */
+/* Authenticated booking participants only. No master keys, audio recording or automatic paid retries. */
 (function () {
   'use strict';
   var query = new URLSearchParams(location.search);
   var booking = query.get('bookingId') || '';
   var UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-  // Browser booking is merely a request. The Preview server enforces an exact env allowlist,
-  // both participant identities, active session time and one bounded allocation.
-  if (!UUID.test(booking) || booking !== '2191fadf-ac84-4d9e-8102-d52ae0095683') return;
+  // Browser booking is merely a request. The server verifies actual booking participants,
+  // active session time and the existing bounded allocation.
+  if (!UUID.test(booking)) return;
   var active = false, closing = false, attempted = false, starting = false, authorized = false, entered = false;
   var role = '', identity = '', scheduled = 0, maxSeconds = 0, run = 0, sequence = 0, pending = '';
   var ws, context, source, node, track, grantTimer, captureTimer, watchTimer, closeTimer, audioPreparation;

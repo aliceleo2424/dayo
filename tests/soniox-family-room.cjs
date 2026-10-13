@@ -2,7 +2,7 @@
 const fs=require('node:fs'),path=require('node:path'),http=require('node:http'),assert=require('node:assert/strict');
 const {chromium}=require('playwright');
 const root=process.env.DAYO_PILOT_ROOT||path.resolve(__dirname,'..');
-const B='2191fadf-ac84-4d9e-8102-d52ae0095683',U='c4552202-cafd-4ab5-bbf9-5a23719edf44',P='1bc0eab5-9399-4da8-a90c-145ab0c4409d';
+const B='66666666-6666-4666-8666-666666666666',U='77777777-7777-4777-8777-777777777777',P='88888888-8888-4888-8888-888888888888';
 const actualHtml=fs.readFileSync(path.join(root,'public/room.html'),'utf8').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'');
 let mints=0;
 const server=http.createServer((req,res)=>{
@@ -38,7 +38,7 @@ const server=http.createServer((req,res)=>{
    let paid=fs.readFileSync(path.join(root,'public/soniox-room.js'),'utf8');
    await page.addScriptTag({content:paid});
    await page.waitForFunction(()=>!!window.DayOLive && /Soniox (ready|준비 완료)/.test(document.querySelector('#devicePreflightStt')?.textContent));
-   assert.equal(await page.locator('#sonioxRoomConsent').count(),0,'No duplicate consent UI for the previously consented family booking');
+   assert.equal(await page.locator('#sonioxRoomConsent').count(),0,'No duplicate consent UI for authenticated booking participants');
    const before=mints;await page.waitForTimeout(550);assert.equal(mints,before,'No allocation on page load or readiness');
    await page.evaluate(()=>window.makeMic());await page.waitForTimeout(550);assert.equal(mints,before,'Microphone readiness alone does not allocate');
    await page.locator('#devicePreflightContinue').click();
@@ -68,6 +68,6 @@ const server=http.createServer((req,res)=>{
    assert.deepEqual(errors,[]);
    await page.close();
   }
-  console.log('PASS full room DOM + synthetic PCM: both roles, KO/EN 360/390/430/1280; existing family consent, no duplicate UI, normal-entry auto-start; one allocation; exact mixed-language finals -> actual canonical transcript event and save payload -> existing Recap metrics; repeats retained, interims/duplicate/late finals excluded; 2.5s bounded final flush; WebRTC track retained. Provider/auth/database transport mocked; real speech accuracy not claimed.');
+  console.log('PASS full room DOM + synthetic PCM: both roles, KO/EN 360/390/430/1280; dynamic booking/participant IDs, no duplicate UI, normal-entry auto-start; one allocation; exact mixed-language finals -> actual canonical transcript event and save payload -> existing Recap metrics; repeats retained, interims/duplicate/late finals excluded; 2.5s bounded final flush; WebRTC track retained. Provider/auth/database transport mocked; real speech accuracy not claimed.');
  }finally{await browser.close();await new Promise(r=>server.close(r));}
 })().catch(e=>{console.error(e);process.exitCode=1;server.close();});
