@@ -124,7 +124,18 @@ function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot
         const current = reports.find(r=>r.booking_id===booking.id && r.learner_id===user.id);
         storedQuiz = recap.saved(current);
         if (storedQuiz && storedQuiz.quiz_history_status === 'unavailable' && !storedQuiz.questions.length) storedQuiz = null;
-        if (!storedQuiz) quizState = await quizHistory.load(read,booking,user.id);
+        if (!storedQuiz) {
+          quizState = await quizHistory.load(read, booking, user.id);
+          // A learner-scoped JWT read may fail even when current booking ownership
+          // and current report read were verified. Retry only the same bounded
+          // cooldown data under existing server credentials; never invent history.
+          if (quizState.status === 'unavailable' && key) {
+            quizState = await quizHistory.load(
+              route => read(route, {apikey:key, Authorization:'Bearer '+key}),
+              booking, user.id
+            );
+          }
+        }
       } catch (_) { /* Unknown history never authorizes repeated quiz targets. */ }
       const value = recap.build({ chatMessages, chatStatus, bookingId: booking.id, learnerId: user.id, partnerId: booking.partner_user_id, language: booking.language, learnerLog, partnerLog, history, historyStatus, previousVolume, scheduledAt: booking.scheduled_at, isTestSession: booking.is_test_session === true, quizExcludedWords: quizState.words, quizHistoryStatus: quizState.status });
       if (storedQuiz) {
