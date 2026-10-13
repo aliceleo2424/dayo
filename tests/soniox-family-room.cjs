@@ -31,7 +31,7 @@ const server=http.createServer((req,res)=>{
     window.supabaseClient={auth:{getSession:async()=>({data:{session:{access_token:'fixture-'+role,user:{id:role==='partner'?P:U}}}})},from:()=>{const chain={select:()=>chain,eq:()=>chain,maybeSingle:async()=>({data:null,error:null})};return chain;}};
     window.DayOProfileStore={saveSessionLog:async(transcript,extra)=>{window.savedPayloads.push({transcript,extra});return {ok:true};}};
     window.SpeechRecognition=class {constructor(){window.speechRuns.push(this);}start(){if(this.onstart)this.onstart();}stop(){if(this.onend)this.onend();}abort(){if(this.onend)this.onend();}};
-    window.WebSocket=class {constructor(){this.readyState=0;this.bufferedAmount=0;window.fixtureSocket=this;setTimeout(()=>{this.readyState=1;this.onopen();},20);}send(data){if(typeof data==='string'&&data==='')setTimeout(()=>this.onmessage({data:JSON.stringify({finished:true})}),15);else if(typeof data==='string'){const msg=JSON.parse(data);if(msg.type){(window.controlFrames||=[]).push(msg.type);}else window.providerConfig=msg;}else window.sentAudio=(window.sentAudio||0)+data.byteLength;}close(){this.readyState=3;if(this.onclose)this.onclose();}};
+    window.WebSocket=class {constructor(){this.readyState=0;this.bufferedAmount=0;window.fixtureSocket=this;setTimeout(()=>{this.readyState=1;this.onopen();},20);}send(data){if(typeof data==='string'&&data==='')setTimeout(()=>this.onmessage({data:JSON.stringify({finished:true})}),15);else if(typeof data==='string'){const msg=JSON.parse(data);if(msg.type){(window.controlFrames||=[]).push(msg.type);}else window.providerConfig=msg;}else window.sentAudio=(window.sentAudio||0)+(data.byteLength||data.size||0);}close(){this.readyState=3;if(this.onclose)this.onclose();}};
     document.addEventListener('dayo:transcript',event=>window.transcriptEvents.push(event.detail));
     window.makeMic=async()=>{const c=new AudioContext(),osc=c.createOscillator(),dest=c.createMediaStreamDestination();osc.connect(dest);osc.start();window.localMediaStream=dest.stream;window.fixtureAudio=c;};
    },{B,U,P,role,locale});
@@ -47,14 +47,19 @@ const server=http.createServer((req,res)=>{
    await page.waitForFunction(()=>window.sentAudio>0);assert.equal(mints,before+1);assert(await page.evaluate(()=>DayOSonioxRoom.snapshot().audioFramesSent>0));
    assert.equal(await page.evaluate(()=>window.providerConfig.model),'stt-rt-v5');assert.deepEqual(await page.evaluate(()=>window.providerConfig.language_hints),['en','ko','es']);
    assert.equal(await page.evaluate(()=>providerConfig.max_endpoint_delay_ms),1000);
-   const allocationCount=mints;
+   // Same capture as Soniox's official web SDK: MediaRecorder chunks + audio_format auto.
+   assert.equal(await page.evaluate(()=>DayOSonioxRoom.snapshot().captureMode),'recorder');assert.equal(await page.evaluate(()=>providerConfig.audio_format),'auto');
+   assert.equal(await page.evaluate(()=>typeof providerConfig.sample_rate),'undefined');
+   let allocationCount=mints;
    await page.evaluate(()=>{window.fixtureHidden=true;Object.defineProperty(document,'hidden',{configurable:true,get:()=>fixtureHidden});document.dispatchEvent(new Event('visibilitychange'));});
    const framesBefore=await page.evaluate(()=>DayOSonioxRoom.snapshot().audioFramesSent);await page.waitForTimeout(250);
    assert.equal(await page.evaluate(()=>DayOSonioxRoom.isActive()),true,'same socket survives background');
    assert.equal(await page.evaluate(()=>DayOSonioxRoom.snapshot().audioFramesSent),framesBefore,'no background audio');
    assert((await page.evaluate(()=>controlFrames)).includes('keepalive'));
    await page.evaluate(()=>{fixtureHidden=false;document.dispatchEvent(new Event('visibilitychange'));});await page.waitForFunction(n=>DayOSonioxRoom.snapshot().audioFramesSent>n,framesBefore);assert.equal(mints,allocationCount,'no fresh credential/retry on foreground');
-   await page.evaluate(()=>window.makeMic());await page.waitForFunction(()=>DayOSonioxRoom.snapshot().microphoneRebindings===1);assert.equal(await page.evaluate(()=>DayOSonioxRoom.isActive()),true);assert.equal(mints,allocationCount,'local microphone replacement reuses socket');
+   // Recorder streams are bound to one track: a replaced microphone reconnects with a new bounded credential.
+   await page.evaluate(()=>window.makeMic());await page.waitForFunction(n=>DayOSonioxRoom.isActive()&&DayOSonioxRoom.snapshot().starts===2,null,{timeout:6000});assert.equal(mints,allocationCount+1,'microphone replacement reconnects once');allocationCount=mints;
+   assert(reports.some(r=>r.stopCode==='microphone_changed'&&r.captureMode==='recorder'),'microphone change reported');
    const previewBefore=await page.evaluate(()=>window.DayOLive.getTranscript().length);
    await page.evaluate(()=>fixtureSocket.onmessage({data:JSON.stringify({tokens:[{text:'오늘은 ',is_final:true,language:'ko'},{text:'날씨가 좋아요. I want to go outside.',is_final:false,language:'ko'}]})}));
    assert.equal(await page.evaluate(()=>DayOLive.getTranscript().length),previewBefore,'No interim canonical writes');
@@ -79,11 +84,10 @@ const server=http.createServer((req,res)=>{
    if(width===360&&locale==='ko'){
     const originalMints=mints;await page.evaluate(()=>window.fixtureSocket.onmessage({data:JSON.stringify({error_code:429})}));await page.waitForFunction(()=>!window.DayOSonioxRoom.isActive());
     // Owner-approved reconnection: a dropped capture gets a new bounded credential, max 3 per participant.
-    await page.waitForFunction(()=>window.DayOSonioxRoom.isActive(),null,{timeout:5000});assert.equal(mints,originalMints+1,'one reconnect credential');
+    await page.waitForFunction(()=>window.DayOSonioxRoom.isActive()&&DayOSonioxRoom.snapshot().starts===3,null,{timeout:5000});assert.equal(mints,originalMints+1,'one reconnect credential');
     assert(reports.some(r=>r.stopCode==='provider_rejected_capture'&&r.reservationId&&Number.isInteger(r.audioFrames)&&!('text' in r)),'content-free stop report');
-    await page.evaluate(()=>window.fixtureSocket.onmessage({data:JSON.stringify({error_code:503})}));await page.waitForFunction(n=>window.DayOSonioxRoom.isActive()&&window.DayOSonioxRoom.snapshot().starts===3,null,{timeout:5000});
     await page.evaluate(()=>window.fixtureSocket.onmessage({data:JSON.stringify({error_code:503})}));await page.waitForFunction(()=>!window.DayOSonioxRoom.isActive());
-    await page.waitForTimeout(2500);assert.equal(mints,originalMints+2,'never more than 3 credentials');assert.equal(await page.evaluate(()=>DayOSonioxRoom.isActive()),false);
+    await page.waitForTimeout(2500);assert.equal(mints,originalMints+1,'never more than 3 credentials');assert.equal(await page.evaluate(()=>DayOSonioxRoom.isActive()),false);
     assert.equal(await page.evaluate(()=>window.speechRuns.at(-1).lang),role==='learner'?'ko-KR':'en-US','browser fallback language by role');assert.equal(await page.evaluate(()=>window.localMediaStream.getAudioTracks()[0].readyState),'live');
     await page.evaluate(()=>window.DayOLive.flushTranscript());assert.equal((await page.evaluate(()=>window.DayOLive.saveTranscript())).ok,true);assert.deepEqual((await page.evaluate(()=>window.DayOLive.getTranscript())).map(r=>r.text),['오늘은 날씨가 좋아요. I want to go outside.',...texts]);assert.deepEqual(errors,[]);await page.close();continue;
    }

@@ -27,16 +27,69 @@ async function chatTheme({input,read,user}) {
  if(wine)return birthday?'chat_birthday_wine':'chat_wine';
  return rows.some(r=>/\bcaf[eé]s?(?=$|[^A-Za-zÀ-ž])/i.test(r.text))?'chat_cafe':null;
 }
+// Owner decision 2026-10-14: a keepsake must be possible for ordinary conversations, not only café talk.
+// Only these fixed, allowlisted concepts reach the provider; transcript text never does.
+// A theme is chosen only when the exact booking's saved speech/chat mentions it (Korean or English).
+const SUBJECT_THEMES = Object.freeze([
+ ['travel',/\b(?:travel(?:l?ing)?|trips?|vacation|holiday|airport|flight)\b|여행|휴가|공항|비행기/i,'Travel','a small suitcase and a softly folded map as a symbolic travel motif'],
+ ['beach',/\b(?:beach|ocean|sea|surf(?:ing)?)\b|바다|해변|해수욕/i,'The sea','a quiet shoreline with gentle waves and an empty beach'],
+ ['mountain',/\b(?:hik(?:e|ing)|mountains?|trekking)\b|등산|산책로|한라산|북한산/i,'Mountains','a mountain trail winding through soft hills'],
+ ['coffee',/\b(?:coffee|latte|americano|espresso|caf[eé]s?)\b|커피|카페|라떼|아메리카노/i,'Coffee & cafés','a single cup of coffee on a quiet café table corner'],
+ ['tea',/\b(?:tea|matcha)\b|녹차|말차|차 한잔/i,'Tea','a simple teapot and a cup of tea'],
+ ['korean_food',/\b(?:kimchi|bibimbap|bulgogi|tteokbokki|ramyeon|ramen|korean\s+(?:food|bbq|barbecue)|samgyeopsal)\b|김치|비빔밥|불고기|떡볶이|라면|삼겹살|한식/i,'Korean food','a few small bowls of Korean side dishes on a wooden table'],
+ ['cooking',/\b(?:cook(?:ing|ed)?|recipes?|baking|bake[ds]?|kitchen|pasta)\b|요리|레시피|베이킹|빵|파스타/i,'Cooking','a tidy kitchen counter with simple cooking utensils and fresh vegetables'],
+ ['food',/\b(?:food|restaurants?|dinner|lunch|breakfast|delicious|eat(?:ing)?)\b|음식|맛집|식당|저녁|점심|아침밥|맛있/i,'Food','a simple shared plate on a table, symbolic of a favorite meal'],
+ ['music',/\b(?:music|songs?|singing|singer|concerts?|k-?pop|guitar|piano|band)\b|음악|노래|콘서트|케이팝|기타|피아노|밴드/i,'Music','musical instruments resting together, a quiet symbolic music motif'],
+ ['movies',/\b(?:movies?|films?|cinema|netflix|dramas?|series|tv\s+shows?)\b|영화|드라마|넷플릭스|시리즈/i,'Movies & dramas','a cozy sofa facing a blank screen with a bowl of popcorn'],
+ ['books',/\b(?:books?|novels?|reading|library)\b|책|소설|독서|도서관/i,'Books','a small stack of blank-covered books beside a reading lamp'],
+ ['sports',/\b(?:soccer|football|baseball|basketball|tennis|golf|gym|workout|exercise|running|jogging|swimming|yoga|sports?)\b|축구|야구|농구|테니스|골프|헬스|운동|달리기|수영|요가/i,'Sports & exercise','a pair of running shoes and a water bottle'],
+ ['dog',/\b(?:dogs?|puppy|puppies)\b|강아지|반려견/i,'Dogs','a sleepy dog curled up on a soft rug'],
+ ['cat',/\b(?:cats?|kitten)\b|고양이|반려묘/i,'Cats','a cat resting by a sunny window'],
+ ['pets',/\b(?:pets?|rabbits?|hamsters?|birds?)\b|반려동물|토끼|햄스터|앵무새/i,'Pets','a small pet bed with a soft blanket'],
+ ['rain',/\b(?:rain(?:y|ing)?|umbrella|monsoon)\b|비가|비 오|장마|우산/i,'Rainy days','an umbrella and soft rain on a window'],
+ ['weather',/\b(?:weather|sunny|snow(?:y|ing)?|cold|hot|autumn|fall\s+leaves|spring|summer|winter)\b|날씨|맑|눈이|추워|더워|가을|봄|여름|겨울|단풍/i,'Seasons & weather','a single tree with soft seasonal leaves'],
+ ['flowers',/\b(?:flowers?|garden(?:ing)?|plants?|cherry\s+blossoms?)\b|꽃|정원|식물|벚꽃/i,'Flowers & plants','a small vase of flowers and potted plants'],
+ ['art',/\b(?:art|paint(?:ing)?|drawing|museum|gallery|photograph(?:y)?|camera)\b|그림|미술|전시|박물관|사진|카메라/i,'Art & photos','an easel with a blank canvas and a few brushes'],
+ ['games',/\b(?:games?|gaming|board\s+games?)\b|게임|보드게임/i,'Games','a scattered set of board game pieces and dice'],
+ ['shopping',/\b(?:shopping|clothes|fashion)\b|쇼핑|옷|패션/i,'Shopping & fashion','a neatly folded sweater and a paper shopping bag with no print'],
+ ['work',/\b(?:work(?:ing)?|office|job|company|meeting)\b|회사|직장|사무실|회의|출근/i,'Work life','a tidy desk with a notebook and a warm mug'],
+ ['study',/\b(?:study(?:ing)?|school|university|class(?:es)?|exam|homework|learn(?:ing)?)\b|공부|학교|대학|수업|시험|숙제/i,'Study','an open notebook and pencils on a study desk'],
+ ['family',/\b(?:family|parents|brother|sister|kids?|children)\b|가족|부모님|형제|자매|동생|아이들/i,'Family','a cozy living room with a warm lamp and cushions'],
+ ['city',/\b(?:seoul|busan|jeju|city|subway|street)\b|서울|부산|제주|도시|지하철|거리/i,'City life','a quiet city street corner with soft evening light']
+]);
+const CONVERSATION_MEMORY = 'two warm cups of tea on a small table by a window, a symbolic memory of a friendly conversation';
+function subjectConcept(theme){if(theme==='conversation_memory')return CONVERSATION_MEMORY;const hit=SUBJECT_THEMES.find(t=>'subject_'+t[0]===theme);return hit?hit[3]:'';}
+function subjectLabel(theme){if(theme==='conversation_memory')return 'Conversation memory';const hit=SUBJECT_THEMES.find(t=>'subject_'+t[0]===theme);return hit?hit[2]:'';}
+// Exact-booking saved speech of BOTH participants plus booking chat (service read after Partner ownership check).
+async function bookingTexts({input,read,user,env}){
+ const b=(await read('/rest/v1/bookings?'+new URLSearchParams({id:'eq.'+input.booking_id,partner_user_id:'eq.'+user.id,select:'id,learner_id,partner_user_id',limit:'1'}))||[]).find(x=>x.id===input.booking_id&&x.partner_user_id===user.id);
+ if(!b)return [];
+ const key=String(env.SUPABASE_SERVICE_ROLE_KEY||'').trim();const texts=[];
+ if(key){const logs=await read('/rest/v1/session_logs?'+new URLSearchParams({booking_id:'eq.'+b.id,select:'id,booking_id,participant_id,participant_role,transcript',limit:'4'}),{apikey:key,Authorization:'Bearer '+key});
+  for(const log of Array.isArray(logs)?logs:[]){const id=log.participant_role==='learner'?b.learner_id:log.participant_role==='partner'?b.partner_user_id:null;if(!id)continue;for(const r of (recap.rows(log,b.id,id,log.participant_role)||[]))texts.push(String(r.text||''));}}
+ try{const messages=await read('/rest/v1/booking_chat_messages?'+new URLSearchParams({booking_id:'eq.'+b.id,select:'booking_id,id,sender_id,sender_role,text,created_at',order:'created_at.asc,id.asc',limit:'500'}));for(const r of recap.chatEvidence(messages,b.id,b.learner_id,b.partner_user_id))texts.push(String(r.text||''));}catch(_){}
+ return texts;
+}
+async function verifiedTheme({input,read,user,env,source}){
+ let theme=contract.storyIllustrations(source.body.topics)[0]?.theme;if(theme)return theme;
+ try{theme=await chatTheme({input,read,user});}catch(_){}if(theme)return theme;
+ const texts=(Array.isArray(source.body.topics)?source.body.topics:[]).map(t=>String(t.quote||''));
+ try{texts.push(...await bookingTexts({input,read,user,env}));}catch(_){}
+ let best=null,score=0;
+ for(const [id,re] of SUBJECT_THEMES){const n=texts.filter(t=>re.test(t)).length;if(n>score){best=id;score=n;}}
+ if(best)return 'subject_'+best;
+ return texts.some(t=>t.trim().length>=2)?'conversation_memory':null;
+}
 const MODEL = '@cf/black-forest-labs/flux-2-klein-4b';
 const REFERENCE = path.join(__dirname, '../_assets/dayo-watercolor-reference-511.png');
 const STYLE = 'Use image 0 only for watercolor and colored-pencil technique, textured ivory paper, muted sage, beige and warm brown. Simple adult editorial vignette, softly fading edges and generous ivory space. Do not copy reference subjects or composition. No people, human faces, text, letters, numbers, glyphs, logos, signatures or visible watermarks. No words or writing. No greeting cards, invitations, signs, posters, menus, labels, packaging, book covers or screens. All surfaces must be blank and unmarked. No photorealism, cartoon mascot, 3D or neon. Subjects from separate topics are symbolic motifs, not events or objects physically together. ';
 function failure(code) { const e = Error(code); e.code = code; return e; }
 async function generate({theme, env, fetchImpl=fetch, signal}) {
- if (!contract.illustrationKey(theme)&&!Object.hasOwn(CHAT_THEMES,theme)) throw failure('unsupported_concept');
+ if (!contract.illustrationKey(theme)&&!Object.hasOwn(CHAT_THEMES,theme)&&!subjectConcept(theme)) throw failure('unsupported_concept');
  const account=String(env.CLOUDFLARE_ACCOUNT_ID||'').trim(), token=String(env.CLOUDFLARE_API_TOKEN||'').trim();
  if(!/^[a-f0-9]{32}$/.test(account)||!token)throw failure('provider_unavailable');
  const reference=await fs.readFile(REFERENCE), form=new FormData();
- form.append('prompt',STYLE+(CHAT_THEMES[theme]||contract.illustrationConcept(theme)));
+ form.append('prompt',STYLE+(CHAT_THEMES[theme]||subjectConcept(theme)||contract.illustrationConcept(theme)));
  form.append('width','1024');form.append('height','1024');
  form.append('input_image_0',new Blob([reference],{type:'image/png'}),'style-reference.png');
  const timeout=AbortSignal.timeout(30000);
@@ -89,9 +142,7 @@ async function handle({input,read,user,env,signal,fetchImpl, enabled=false, test
  }
  if(input.source_version!==source.body.source_version)return {status:409,body:{error:'canonical_revision_changed'}};
  // All motifs come from server-verified exact-booking evidence, never client prompt/theme.
- const themes=contract.storyIllustrations(source.body.topics);
- let theme=themes[0]?.theme;
- if(!theme){try{theme=await chatTheme({input,read,user});}catch(_){/* Optional chat failure keeps the quality gate closed. */}}
+ const theme=await verifiedTheme({input,read,user,env,source});
  if(manualReview&&input.topic_id!==theme)return {status:400,body:{error:'invalid_verified_topic'}};
  if(!theme)return {status:200,body:{status:'insufficient_evidence',url:null}};
  if(typeof qualityCheck!=='function')return {status:503,body:{error:'quality_check_unavailable'}};
@@ -131,8 +182,7 @@ async function handle({input,read,user,env,signal,fetchImpl, enabled=false, test
 async function choices({input,read,user,env,signal}){
  const denied=await testRuntime.authorize({input,read,user,allowBeta:true});if(denied)return denied;
  const source=await letter.handle({input:{action:'partner_letter_topics',booking_id:input.booking_id},read,user,env,signal});if(source.status!==200)return source;
- let theme=contract.storyIllustrations(source.body.topics)[0]?.theme;
- if(!theme){try{theme=await chatTheme({input,read,user});}catch(_){}}
- return {status:200,body:{source_version:source.body.source_version,choices:theme?[{id:theme,label:theme==='chat_birthday_wine'?'Wine and celebration':theme==='chat_wine'?'Wine':theme==='chat_cafe'?'Café':'Conversation memory'}]:[]}};
+ const theme=await verifiedTheme({input,read,user,env,source});
+ return {status:200,body:{source_version:source.body.source_version,choices:theme?[{id:theme,label:theme==='chat_birthday_wine'?'Wine and celebration':theme==='chat_wine'?'Wine':theme==='chat_cafe'?'Café':subjectLabel(theme)||'Conversation memory'}]:[]}};
 }
-module.exports={handle,choices,MODEL,REFERENCE};
+module.exports={handle,choices,MODEL,REFERENCE,verifiedTheme,subjectConcept};

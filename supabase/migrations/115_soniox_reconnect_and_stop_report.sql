@@ -33,6 +33,8 @@ alter table public.soniox_session_allocations
  add column client_audio_frames integer check(client_audio_frames>=0),
  add column client_nonsilent_frames integer check(client_nonsilent_frames>=0),
  add column client_finals integer check(client_finals>=0),
+ add column client_messages integer check(client_messages>=0),
+ add column client_capture_mode text check(client_capture_mode in ('recorder','worklet')),
  add column client_reported_at timestamptz;
 
 create or replace function public.dayo_soniox_session_allocation(
@@ -50,7 +52,7 @@ begin
  else raise exception 'not_booking_participant' using errcode='42501';end if;
  if not exists(select 1 from public.profiles where id=p_actor_id) then
   raise exception 'not_booking_participant' using errcode='42501';end if;
- -- Content-free stop report: allowed after the session window so the final stop is kept.
+ -- Content-free status report (latest wins): allowed after the session window so the final stop is kept.
  if p_action='report' then
   if p_request_id is null or p_expires_at is not null or p_failure_code is null or
      p_failure_code !~ '^[a-z0-9_]{1,80}$' or p_outcome is null or length(p_outcome)>200 then
@@ -60,8 +62,10 @@ begin
    client_audio_frames=greatest(0,least(2000000000,coalesce((rep->>'audioFrames')::bigint,0)))::integer,
    client_nonsilent_frames=greatest(0,least(2000000000,coalesce((rep->>'nonSilentFrames')::bigint,0)))::integer,
    client_finals=greatest(0,least(2000000000,coalesce((rep->>'finals')::bigint,0)))::integer,
+   client_messages=greatest(0,least(2000000000,coalesce((rep->>'messages')::bigint,0)))::integer,
+   client_capture_mode=case when rep->>'mode' in ('recorder','worklet') then rep->>'mode' else null end,
    client_reported_at=t
-   where id=p_request_id and booking_id=p_booking_id and actor_id=p_actor_id and state='issued' and client_reported_at is null;
+   where id=p_request_id and booking_id=p_booking_id and actor_id=p_actor_id and state='issued';
   return jsonb_build_object('updated',found);
  end if;
  if b.status<>'confirmed' or b.scheduled_at is null or t>=b.scheduled_at+interval '25 minutes' then

@@ -32,12 +32,12 @@ assert.equal((await rpc('reserve',B2,L,crypto.randomUUID())).error,'allocation_i
 const r=await rpc('reserve',B2,P,crypto.randomUUID(),null,null,null,0.5);assert.equal(r.error,'project_budget_exhausted');
 // Report: stores codes/counters only, once, issued rows only; works after session window.
 assert.equal((await rpc('report',B,L,second.id,'{"audioFrames":12,"nonSilentFrames":5,"finals":2}',null,'socket_closed_1006')).updated,true);
-assert.equal((await rpc('report',B,L,second.id,'{"audioFrames":1}',null,'x')).updated,false);
+assert.equal((await rpc("report",B,L,second.id,"{\"mode\":\"recorder\",\"audioFrames\":12,\"messages\":3,\"finals\":2}",null,"stopped")).updated,true);
 await assert.rejects(rpc('report',B,L,second.id,'{}',null,'Bad Code!'),/invalid_request/);
 await pg.query("update bookings set scheduled_at=clock_timestamp()-interval '2 hours' where id=$1",[B]);
 const row=(await pg.query('select client_stop_code,client_audio_frames,client_finals from soniox_session_allocations where id=$1',[second.id])).rows[0];
-assert.deepEqual(row,{client_stop_code:'socket_closed_1006',client_audio_frames:12,client_finals:2});
+assert.deepEqual(row,{client_stop_code:'stopped',client_audio_frames:12,client_finals:2});
 await assert.rejects(rpc('state'),/session_not_active/);
 const priv=(await pg.query("select has_function_privilege('authenticated','dayo_soniox_session_allocation(text,uuid,uuid,uuid,text,timestamptz,text,numeric)','EXECUTE') ok")).rows[0].ok;assert.equal(priv,false);
-console.log('PASS 115: max 3 per participant, concurrency, partner independent, in-progress guard, $ cap, report once/validated, no replay, service-only.');
+console.log('PASS 115: max 3 per participant, concurrency, partner independent, in-progress guard, $ cap, report latest-wins/validated, no replay, service-only.');
 })().catch(e=>{console.error(e);process.exit(1);});

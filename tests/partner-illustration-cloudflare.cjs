@@ -42,7 +42,9 @@ function fixture(mode='mixed',values=texts){return {user:{id:P},env:{SUPABASE_SE
  await guarded({method:'POST',headers:{authorization:'Bearer fixture'},body:{action:'partner_illustration_generate',booking_id:B}},deniedResponse);
  assert.equal(deniedResponse.statusCode,403);assert.equal(privileged,0,'User/outsider denial precedes privileged contracts');
  assert.equal(calls,before,'all safety gates prevent provider calls');
- for(const values of [[],['coffee rabbit','song Soo is installed','My name is Alice and I love coffee.']])assert.equal((await I.handle(await setup('chat',values))).body.status,'insufficient_evidence');
+ assert.equal((await I.handle(await setup('chat',[]))).body.status,'insufficient_evidence','no saved conversation at all -> no image');
+ // Owner decision 2026-10-14: real recorded subjects (here: coffee) produce a keepsake from a fixed allowlisted concept.
+ assert.equal((await I.handle(await setup('chat',['coffee rabbit','song Soo is installed','My name is Alice and I love coffee.']))).body.status,'ready');
  for(const [status,code] of [[429,'quota_unavailable'],[500,'provider_http_error']]){let n=0;assert.equal((await I.handle({...o,fetchImpl:async()=>{n++;return {ok:false,status};}})).body.error,code);assert.equal(n,1,'no automatic retry');}
  assert.equal((await I.handle({...o,fetchImpl:async()=>{throw Error('network secret');}})).body.error,'provider_request_failed');
  const aborted=new AbortController();aborted.abort();assert.equal((await I.handle({...o,signal:aborted.signal,fetchImpl:async()=>{throw Error('abort');}})).body.error,'timeout');
