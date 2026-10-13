@@ -353,7 +353,8 @@ async function sttReliabilityChecks() {
   check(unsupported.saved.transcript.length,0,'unsupported browser can complete an empty canonical final save');
   const prefixed=sttBrowser({prefixed:true});await prefixed.microtasks();prefixed.active.emit('Supported prefixed API.');await prefixed.advance(15000);
   check(prefixed.saved.transcript.length,1,'prefixed Chrome/Safari API follows the same capture/save path');
-  check(prefixed.active.lang,'en-US','recognition language remains unchanged');
+  check(prefixed.active.lang,'ko-KR','learner browser fallback listens in Korean (owner decision 2026-10-13)');
+  const partnerBrowser=sttBrowser({prefixed:true,role:'partner'});await partnerBrowser.microtasks();check(partnerBrowser.active.lang,'en-US','partner browser fallback listens in English');
   for(const code of ['not-allowed','service-not-allowed']) {
     const blocked=sttBrowser({prefixed:true});await blocked.microtasks();blocked.active.onerror({error:code});await blocked.advance(20000);
     check(blocked.engines.length,1,'permission/service denial cannot auto-loop: '+code);

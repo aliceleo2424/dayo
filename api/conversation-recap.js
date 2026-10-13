@@ -27,7 +27,7 @@ function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot
     const token = /^Bearer ([A-Za-z0-9._-]+)$/.exec(String(req.headers && req.headers.authorization || ''));
     if (!token) return json(res, 401, { error: 'auth_required' });
     let input; try { input = await body(req); } catch (_) { return json(res, 400, { error: 'invalid_request' }); }
-    if(input && ['soniox_state','soniox_start'].includes(input.action)) {
+    if(input && ['soniox_state','soniox_start','soniox_report'].includes(input.action)) {
       const requestBody={...input,action:input.action.slice(7),bookingId:input.booking_id};
       delete requestBody.booking_id;
       return require('./_lib/soniox-family-credentials.js').createHandler({env,fetchImpl,clock})({method:req.method,headers:req.headers,body:requestBody},res);

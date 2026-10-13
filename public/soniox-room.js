@@ -1,4 +1,5 @@
-/* Authenticated booking participants only. No master keys, audio recording or automatic paid retries. */
+/* Authenticated booking participants only. No master keys or audio recording.
+   Owner-approved reconnection: at most 3 credentials per participant per booking (server-enforced). */
 (function () {
   'use strict';
   var query = new URLSearchParams(location.search);
@@ -12,6 +13,7 @@
   var ws, context, source, node, track, grantTimer, captureTimer, watchTimer, closeTimer, audioPreparation;
   var flushPromise, flushResolve, statusNode;
   var paused=false,keepaliveTimer,stopAt=0;
+  var MAX_STARTS=3,starts=0,retryAt=0,exhausted=false,noRetry=false,reservationId='',lastToken='',reported=true;
   var previewSequence=0, diagnostics={audioFrames:0,audioBytes:0,silentFrames:0,nonSilentFrames:0,lastAudioAt:0,messages:0,finalTokens:0,interimTokens:0,finals:0,previews:0,lastMessageAt:0,koreanTokens:0,koreanFinalTokens:0,languages:{en:0,ko:0,es:0},stopCode:null,micRebindings:0};
   function en() { return window.DayOI18n && String(window.DayOI18n.getLang()).toUpperCase() === 'EN'; }
   function message(english,korean) { return en() ? english : korean; }
@@ -26,6 +28,11 @@
   async function request(action,auth) {
     var response=await fetch('/api/conversation-recap',{method:'POST',cache:'no-store',headers:{Authorization:'Bearer '+auth.access_token,'Content-Type':'application/json'},body:JSON.stringify({action:'soniox_'+action,booking_id:booking}),signal:AbortSignal.timeout(10000)});
     var body=await response.json();if(!response.ok){var error=new Error(body.error||'unavailable');error.consumed=body.allocationConsumed;throw error;}return body;
+  }
+  // Content-free stop report (stop code + counters only) so a failed session can be diagnosed afterwards.
+  function sendReport() {
+    if(reported||!reservationId||!lastToken)return;reported=true;
+    try{fetch('/api/conversation-recap',{method:'POST',keepalive:true,cache:'no-store',headers:{Authorization:'Bearer '+lastToken,'Content-Type':'application/json'},body:JSON.stringify({action:'soniox_report',booking_id:booking,reservationId:reservationId,stopCode:/^[a-z0-9_]{1,80}$/.test(diagnostics.stopCode||'')?diagnostics.stopCode:'unknown',audioFrames:diagnostics.audioFrames,nonSilentFrames:diagnostics.nonSilentFrames,finals:diagnostics.finals})}).catch(function(){});}catch(_){}
   }
   function prepareAudio() {
     if(audioPreparation)return audioPreparation;
@@ -63,19 +70,25 @@
   function detach() {
     clearTimeout(grantTimer);clearTimeout(captureTimer);clearInterval(watchTimer);clearInterval(keepaliveTimer);
     if(node){node.port.onmessage=null;node.disconnect();}if(source)source.disconnect();
-    if(context)context.close().catch(function(){});context=source=node=null;audioPreparation=null;
+    // Keep the gesture-unlocked AudioContext for a reconnect; mobile browsers block a new one without a tap.
+    if(context&&(noRetry||window.dayoSessionEnded||exhausted)){context.close().catch(function(){});context=null;audioPreparation=null;}
+    source=node=null;
     // Never stop, clone, disable or replace the original WebRTC microphone track.
   }
   function finish() {
     clearTimeout(closeTimer);publishFinal();active=false;closing=false;starting=false;detach();
     if(ws)ws.close();
     if(window.DayOLive)window.DayOLive.setSonioxSource(false);
+    sendReport();
+    // Unexpected drop (network, provider, mic swap, backgrounding): reconnect with a new bounded credential.
+    if(!noRetry&&!window.dayoSessionEnded&&starts<MAX_STARTS)retryAt=Date.now()+1500;
     if(flushResolve){var resolve=flushResolve;flushResolve=null;resolve();}
   }
   function stop(reason,immediate) {
     if(closing)return flushPromise||Promise.resolve();
     if(!active&&!starting){detach();return Promise.resolve();}
-    diagnostics.stopCode=String(reason||'session_stop').split(' / ')[0].toLowerCase().replace(/[^a-z0-9]+/g,'_').slice(0,80);
+    diagnostics.stopCode=String(reason||'session_stop').split(' / ')[0].toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'').slice(0,80);
+    noRetry=/^(session_finishing|page_closed|account_changed|soniox_capture_limit_reached)$/.test(diagnostics.stopCode);
     closing=true;starting=false;paused=false;detach();
     status(reason,'Soniox 종료 — 기존 브라우저 음성 인식으로 돌아갑니다.');
     flushPromise=new Promise(function(resolve){flushResolve=resolve;});
@@ -83,24 +96,25 @@
     return flushPromise;
   }
   async function start() {
-    if(attempted||starting||active||!authorized||!entered||document.hidden||window.__dayoPreflightActive||window.dayoSessionEnded||Date.now()<scheduled)return;
+    if(exhausted||starts>=MAX_STARTS||starting||active||closing||!authorized||!entered||document.hidden||window.__dayoPreflightActive||window.dayoSessionEnded||Date.now()<scheduled||Date.now()<retryAt)return;
+    var a=access();if(!a.allowed||a.bookingId!==booking||ownRole()!==role)return;
     var local=localTrack();if(!local||!local.enabled||local.muted||!window.DayOLive)return;
-    starting=true;attempted=true;var current=++run;
+    starting=true;attempted=true;noRetry=false;var current=++run;
     try{
-      await prepareAudio();if(context.state && context.state!=='running')throw new Error('audio_processing_unavailable');var auth=await session();
+      await prepareAudio();if(context.state && context.state!=='running')await context.resume().catch(function(){});if(context.state && context.state!=='running')throw new Error('audio_processing_unavailable');var auth=await session();
       if(!entered||!starting||current!==run||document.hidden||!auth||auth.user.id!==identity)throw new Error('entry_or_account_changed');
       var grant;
-      attempted=true;grant=await request('start',auth);
-      attempted=true;
+      starts++;grant=await request('start',auth);
+      reservationId=typeof grant.reservationId==='string'?grant.reservationId:'';lastToken=auth.access_token;reported=false;
       if(!starting||!entered||document.hidden||current!==run)throw new Error('capture_cancelled');
       if(grant.role!==role||grant.bookingId!==booking||grant.model!=='stt-rt-v5'||grant.singleUse!==true||!Number.isInteger(grant.maxSessionSeconds)||grant.maxSessionSeconds<1||grant.maxSessionSeconds>1500||Date.parse(grant.expires_at)<=Date.now()||grant.captureEndsAt<=Date.now())throw new Error('invalid_grant');
       track=local;ws=new WebSocket('wss://stt-rt.soniox.com/transcribe-websocket',['soniox-api-key',grant.api_key]);grant.api_key='';var socket=ws;
       socket.onopen=function(){
         if(current!==run||!starting||!entered||document.hidden||localTrack()!==local||!context){finish();return;}
         socket.send(JSON.stringify({model:'stt-rt-v5',audio_format:'pcm_s16le',sample_rate:16000,num_channels:1,language_hints:['en','ko','es'],enable_language_identification:true,enable_endpoint_detection:true,max_endpoint_delay_ms:1000}));
-        active=true;starting=false;window.DayOLive.setSonioxSource(true);
+        active=true;starting=false;diagnostics.stopCode=null;window.DayOLive.setSonioxSource(true);
         source=context.createMediaStreamSource(new MediaStream([local]));node=new AudioWorkletNode(context,'dayo-pilot-pcm');source.connect(node);node.connect(context.destination);
-        node.port.onmessage=function(event){if(!active||closing||paused||document.hidden||socket.readyState!==1)return;if(socket.bufferedAmount>64000){stop('Network backpressure — no retry / 네트워크 지연',true);return;}var chunk=local.enabled&&!local.muted?event.data:new ArrayBuffer(event.data.byteLength);var samples=new Int16Array(chunk),energy=0;for(var i=0;i<samples.length;i++)energy+=samples[i]*samples[i];if(samples.length&&Math.sqrt(energy/samples.length)>64)diagnostics.nonSilentFrames++;else diagnostics.silentFrames++;socket.send(chunk);diagnostics.lastAudioAt=Date.now();diagnostics.audioFrames++;diagnostics.audioBytes+=chunk.byteLength;};
+        node.port.onmessage=function(event){if(!active||closing||paused||document.hidden||socket.readyState!==1)return;if(socket.bufferedAmount>64000){stop('Network backpressure / 네트워크 지연',true);return;}var chunk=local.enabled&&!local.muted?event.data:new ArrayBuffer(event.data.byteLength);var samples=new Int16Array(chunk),energy=0;for(var i=0;i<samples.length;i++)energy+=samples[i]*samples[i];if(samples.length&&Math.sqrt(energy/samples.length)>64)diagnostics.nonSilentFrames++;else diagnostics.silentFrames++;socket.send(chunk);diagnostics.lastAudioAt=Date.now();diagnostics.audioFrames++;diagnostics.audioBytes+=chunk.byteLength;};
         clearTimeout(grantTimer);stopAt=Math.min(grant.captureEndsAt,Date.now()+grant.maxSessionSeconds*1000);
         captureTimer=setTimeout(function(){stop('Soniox capture limit reached / Soniox 제한 시간 종료',false);},Math.max(0,stopAt-Date.now()));
         watchTimer=setInterval(async function(){
@@ -118,18 +132,19 @@
       };
       socket.onmessage=function(event){if(current!==run||(!active&&!closing))return;try{var data=JSON.parse(event.data);if(!data.error_code&&(Array.isArray(data.tokens)||Number(data.total_audio_proc_ms)>0))status('Soniox active — captions and conversation record','Soniox 사용 중 — 자막과 대화 기록에 반영');receive(data);}catch(_){stop('Invalid provider response / 제공자 응답 오류',true);}};
       socket.onerror=function(){if(current===run)stop('Soniox connection failed — browser fallback / Soniox 연결 실패',true);};
-      socket.onclose=function(event){diagnostics.stopCode=diagnostics.stopCode||'socket_closed_'+(event&&event.code||0);if(current===run&&(active||starting||closing)){status('Soniox disconnected — no paid retry','Soniox 연결 종료 — 자동 유료 재시도 없이 브라우저 사용');finish();}};
+      socket.onclose=function(event){diagnostics.stopCode=diagnostics.stopCode||'socket_closed_'+(event&&event.code||0);if(current===run&&(active||starting||closing)){status('Soniox disconnected — reconnecting if available','Soniox 연결 끊김 — 가능하면 자동 재연결합니다');finish();}};
       grantTimer=setTimeout(function(){if(starting)stop('Soniox connection timeout / Soniox 연결 시간 초과',true);},10000);
-    }catch(error){starting=false;detach();if(window.DayOLive)window.DayOLive.setSonioxSource(false);status('Soniox unavailable: '+(/^[a-z0-9_]+$/.test(error.message)?error.message:'capture_error')+' — Browser STT retained','Soniox를 사용할 수 없어 기존 브라우저 음성 인식을 유지합니다.');}
+    }catch(error){starting=false;detach();if(error.consumed===false)starts=Math.max(0,starts-1);if(/^(session_allocation_used|project_budget_exhausted|session_not_active|not_booking_participant)$/.test(error.message))exhausted=true;retryAt=Date.now()+5000;if(window.DayOLive)window.DayOLive.setSonioxSource(false);status('Soniox unavailable: '+(/^[a-z0-9_]+$/.test(error.message)?error.message:'capture_error')+' — Browser STT retained','Soniox를 사용할 수 없어 기존 브라우저 음성 인식을 유지합니다.');}
   }
   function recoverAudio(){
+    if(!active&&!closing&&!document.hidden&&context&&context.state!=='running'){context.resume().catch(function(){});return;}
     if(!active||closing||document.hidden||!context)return;
     if(Date.now()>=stopAt){stop('Soniox capture limit reached / Soniox 제한 시간 종료',false);return;}
     var current=context;
     if(current.state==='running'){paused=false;return;}
     current.resume().then(function(){if(context===current&&active&&!closing&&!document.hidden)paused=current.state!=='running';}).catch(function(){status('Soniox audio suspended — microphone processing unavailable','Soniox 오디오 중단 — 마이크 처리를 확인해 주세요.');});
   }
-  window.DayOSonioxRoom={isActive:function(){return active;},snapshot:function(){return {socketState:ws?ws.readyState:null,active:active,closing:closing,paused:paused,audioContextState:context?context.state:null,inputSampleRate:context?context.sampleRate:null,outputSampleRate:16000,numChannels:1,audioFormat:'pcm_s16le',koreanTokens:diagnostics.koreanTokens,koreanFinalTokens:diagnostics.koreanFinalTokens,tokenLanguages:Object.assign({},diagnostics.languages),stopCode:diagnostics.stopCode,microphoneRebindings:diagnostics.micRebindings,audioFramesSent:diagnostics.audioFrames,audioBytesSent:diagnostics.audioBytes,silentFramesSent:diagnostics.silentFrames,nonSilentFramesSent:diagnostics.nonSilentFrames,lastAudioAgeMs:diagnostics.lastAudioAt?Date.now()-diagnostics.lastAudioAt:null,messages:diagnostics.messages,finalTokens:diagnostics.finalTokens,interimTokens:diagnostics.interimTokens,acceptedFinals:diagnostics.finals,captionPreviews:diagnostics.previews,pendingFinalChars:pending.length,lastMessageAgeMs:diagnostics.lastMessageAt?Date.now()-diagnostics.lastMessageAt:null};},isAuthorized:function(){return authorized&&access().allowed&&access().bookingId===booking&&ownRole()===role;},flush:function(){return stop('Session finishing / 세션 마무리',false);}};
+  window.DayOSonioxRoom={isActive:function(){return active;},snapshot:function(){return {socketState:ws?ws.readyState:null,active:active,closing:closing,paused:paused,audioContextState:context?context.state:null,inputSampleRate:context?context.sampleRate:null,outputSampleRate:16000,numChannels:1,audioFormat:'pcm_s16le',koreanTokens:diagnostics.koreanTokens,koreanFinalTokens:diagnostics.koreanFinalTokens,tokenLanguages:Object.assign({},diagnostics.languages),stopCode:diagnostics.stopCode,starts:starts,maxStarts:MAX_STARTS,exhausted:exhausted,microphoneRebindings:diagnostics.micRebindings,audioFramesSent:diagnostics.audioFrames,audioBytesSent:diagnostics.audioBytes,silentFramesSent:diagnostics.silentFrames,nonSilentFramesSent:diagnostics.nonSilentFrames,lastAudioAgeMs:diagnostics.lastAudioAt?Date.now()-diagnostics.lastAudioAt:null,messages:diagnostics.messages,finalTokens:diagnostics.finalTokens,interimTokens:diagnostics.interimTokens,acceptedFinals:diagnostics.finals,captionPreviews:diagnostics.previews,pendingFinalChars:pending.length,lastMessageAgeMs:diagnostics.lastMessageAt?Date.now()-diagnostics.lastMessageAt:null};},isAuthorized:function(){return authorized&&access().allowed&&access().bookingId===booking&&ownRole()===role;},flush:function(){return stop('Session finishing / 세션 마무리',false);}};
   window.DayORoomAccessReady.then(async function(a){
     if(!a.allowed||a.bookingId!==booking||a.adminTest||a.observer)return;
     role=ownRole();statusNode=document.getElementById('devicePreflightStt');
@@ -141,7 +156,7 @@
       status(authorized?'Soniox ready':'Soniox session unavailable; Browser STT retained',authorized?'Soniox 준비 완료':'Soniox 세션을 확인할 수 없어 브라우저 음성 인식을 유지합니다.');
     }catch(_){status('Paid recognition unavailable — existing conversation remains available','유료 음성 인식을 확인할 수 없어 기존 대화 기능을 유지합니다.');}
     window.supabaseClient.auth.onAuthStateChange && window.supabaseClient.auth.onAuthStateChange(function(event,s){if(identity&&(!s||s.user.id!==identity)){authorized=false;entered=false;run++;stop('Account changed / 계정 변경',true);}});
-    var beginTimer=setInterval(function(){if(attempted||window.dayoSessionEnded){clearInterval(beginTimer);return;}start();},500);
+    var beginTimer=setInterval(function(){if(exhausted||window.dayoSessionEnded){clearInterval(beginTimer);return;}start();},500);
     document.addEventListener('visibilitychange',function(){
       if(document.hidden){
         if(active&&!closing){paused=true;if(ws&&ws.readyState===1){ws.send(JSON.stringify({type:'finalize'}));ws.send(JSON.stringify({type:'keepalive'}));}if(context&&context.state==='running')context.suspend().catch(function(){});}

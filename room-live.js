@@ -239,6 +239,10 @@
     }
   }
 
+  function fallbackRecognitionLang() {
+    return canonicalParticipantRole(window.DayORoomAccess) === 'learner' ? 'ko-KR' : 'en-US';
+  }
+
   function shouldKeepSttAlive() {
     return !sonioxSourceActive && wantListen && micOn && sttMicAvailable && !hungUp && !window.dayoSessionEnded;
   }
@@ -274,7 +278,7 @@
     var lastError = type === 'stt_error' ? detail && detail.code : stored.last_error_code;
     summary.last_error_code = !lastError ? null : errorCodes.indexOf(lastError) >= 0 ? lastError : 'unknown';
     summary.api_present = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
-    summary.recognition_language = 'en-US';
+    summary.recognition_language = fallbackRecognitionLang();
     summary.capture_state = !summary.api_present ? 'unsupported' : transcriptFinalized ? 'ended' :
       sttPermissionBlocked ? 'permission_blocked' : !sttMicAvailable ? 'microphone_unavailable' :
       !micOn ? 'paused' : sttStarting ? 'starting' : sttOn ? 'recognition_started' : 'waiting';
@@ -1355,7 +1359,8 @@
       window.dayoSTT = recognition;
       recognition.continuous = true;
       recognition.interimResults = false;
-      recognition.lang = 'en-US';
+      // Owner decision 2026-10-13: browser fallback hears the learner in Korean, the partner in English.
+      recognition.lang = fallbackRecognitionLang();
       recognition.maxAlternatives = 1;
 
       recognition.onstart = function () {

@@ -4,13 +4,14 @@ const {chromium}=require('playwright');
 const root=process.env.DAYO_PILOT_ROOT||path.resolve(__dirname,'..');
 const B='66666666-6666-4666-8666-666666666666',U='77777777-7777-4777-8777-777777777777',P='88888888-8888-4888-8888-888888888888';
 const actualHtml=fs.readFileSync(path.join(root,'public/room.html'),'utf8').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'');
-let mints=0;
+let mints=0;const reports=[];
 const server=http.createServer((req,res)=>{
  const url=new URL(req.url,'http://localhost');
  if(url.pathname==='/api/conversation-recap'){let raw='';req.on('data',v=>raw+=v);req.on('end',()=>{const body=JSON.parse(raw),role=req.headers.authorization==='Bearer fixture-partner'?'partner':'learner';assert.equal(body.booking_id,B);res.setHeader('Content-Type','application/json');
   const common={role,bookingId:B,model:'stt-rt-v5',singleUse:true,startExpirySeconds:60,maxSessionSeconds:1500,scheduledAt:new Date(Date.now()-1000).toISOString(),canonical:true};
   if(body.action==='soniox_state')return res.end(JSON.stringify({...common,available:true}));
-  assert.equal(body.action,'soniox_start');assert.deepEqual(Object.keys(body).sort(),['action','booking_id']);mints++;res.end(JSON.stringify({...common,api_key:'snx_temp_fixture',expires_at:new Date(Date.now()+60000).toISOString(),captureEndsAt:Date.now()+1500000}));});return;
+  if(body.action==='soniox_report'){reports.push(body);return res.end(JSON.stringify({updated:true}));}
+  assert.equal(body.action,'soniox_start');assert.deepEqual(Object.keys(body).sort(),['action','booking_id']);mints++;res.end(JSON.stringify({...common,reservationId:'99999999-9999-4999-8999-'+String(mints).padStart(12,'0'),api_key:'snx_temp_fixture',expires_at:new Date(Date.now()+60000).toISOString(),captureEndsAt:Date.now()+1500000}));});return;
  }
  if(url.pathname==='/room')return res.end(actualHtml);
  const file=path.join(root,'public',url.pathname.slice(1));if(fs.existsSync(file)){res.setHeader('Content-Type',file.endsWith('.js')?'application/javascript':'text/plain');res.end(fs.readFileSync(file));}else{res.statusCode=404;res.end();}
@@ -77,7 +78,13 @@ const server=http.createServer((req,res)=>{
    }
    if(width===360&&locale==='ko'){
     const originalMints=mints;await page.evaluate(()=>window.fixtureSocket.onmessage({data:JSON.stringify({error_code:429})}));await page.waitForFunction(()=>!window.DayOSonioxRoom.isActive());
-    await page.waitForTimeout(600);assert.equal(mints,originalMints,'No automatic paid retry after provider failure');assert.equal(await page.evaluate(()=>window.localMediaStream.getAudioTracks()[0].readyState),'live');
+    // Owner-approved reconnection: a dropped capture gets a new bounded credential, max 3 per participant.
+    await page.waitForFunction(()=>window.DayOSonioxRoom.isActive(),null,{timeout:5000});assert.equal(mints,originalMints+1,'one reconnect credential');
+    assert(reports.some(r=>r.stopCode==='provider_rejected_capture'&&r.reservationId&&Number.isInteger(r.audioFrames)&&!('text' in r)),'content-free stop report');
+    await page.evaluate(()=>window.fixtureSocket.onmessage({data:JSON.stringify({error_code:503})}));await page.waitForFunction(n=>window.DayOSonioxRoom.isActive()&&window.DayOSonioxRoom.snapshot().starts===3,null,{timeout:5000});
+    await page.evaluate(()=>window.fixtureSocket.onmessage({data:JSON.stringify({error_code:503})}));await page.waitForFunction(()=>!window.DayOSonioxRoom.isActive());
+    await page.waitForTimeout(2500);assert.equal(mints,originalMints+2,'never more than 3 credentials');assert.equal(await page.evaluate(()=>DayOSonioxRoom.isActive()),false);
+    assert.equal(await page.evaluate(()=>window.speechRuns.at(-1).lang),role==='learner'?'ko-KR':'en-US','browser fallback language by role');assert.equal(await page.evaluate(()=>window.localMediaStream.getAudioTracks()[0].readyState),'live');
     await page.evaluate(()=>window.DayOLive.flushTranscript());assert.equal((await page.evaluate(()=>window.DayOLive.saveTranscript())).ok,true);assert.deepEqual((await page.evaluate(()=>window.DayOLive.getTranscript())).map(r=>r.text),['오늘은 날씨가 좋아요. I want to go outside.',...texts]);assert.deepEqual(errors,[]);await page.close();continue;
    }
    await page.evaluate(()=>{window.dayoSessionEnded=true;window.fixtureSocket.onmessage({data:JSON.stringify({tokens:[{text:'A final sentence.',is_final:true}]})});});

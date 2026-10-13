@@ -34,7 +34,8 @@ assert.match(room, /function retryParticipantConnection\(\)[\s\S]*endParticipant
 assert.match(room, /showRemoteAudioUnlock\(\)[\s\S]*room\.connection\.enableAudio/);
 assert.match(room, /function resumeRemotePlayback\(\)[\s\S]*attempt\.then\(hideRemotePending\)\.catch\(function/);
 
-assert.match(roomLive, /recognition\.lang = 'en-US'/);
+assert.match(roomLive, /recognition\.lang = fallbackRecognitionLang\(\)/);
+assert.match(roomLive, /=== 'learner' \? 'ko-KR' : 'en-US'/);
 assert.match(roomLive, /recognition\.continuous = true/);
 assert.match(roomLive, /recognition\.interimResults = false/);
 ['onstart', 'onaudiostart', 'onspeechstart', 'onresult', 'onerror', 'onend'].forEach((handler) => {
