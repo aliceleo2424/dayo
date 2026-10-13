@@ -1083,7 +1083,7 @@
           (expressions ? '<div class="report-meta-row"><strong>핵심 표현</strong><div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:7px;">' + expressions + '</div></div>' : '') +
           (wordHelp ? '<div class="report-meta-row">💡 단어 도움: ' + esc(wordHelp) + '</div>' : '') +
           (feedback ? '<div class="report-meta-row">📝 문장 피드백:<br>' + feedback + '</div>' : '') +
-          (r.quiz_score != null ? '<div class="report-meta-row">🎯 5분 복습 퀴즈: ' + esc(r.quiz_score) + '점</div>' : '') +
+          (window.DayOConversationRecap && window.DayOConversationRecap.saved(r) && window.DayOConversationRecap.saved(r).questions.length ? '<div class="report-meta-row">' + esc(window.DayOConversationRecap.quizResult(window.DayOConversationRecap.saved(r), (window.DayOI18n && window.DayOI18n.getLang ? window.DayOI18n.getLang() : 'ko').toLowerCase())) + '</div>' : '') +
           reportTreatHtml(r) +
         '</div>' +
         '<div class="insta-card-export-wrap" style="display:flex; flex-direction:column; align-items:center;">' +

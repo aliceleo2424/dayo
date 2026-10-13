@@ -157,7 +157,7 @@ async function lifecycleChecks() {
     b.nodes['word-pool-container'].children[0].handlers.click();
     b.nodes['word-pool-container'].children.at(-1).handlers.click();
     stored = JSON.parse(b.store.getItem('dayo_recap_state:' + B)); assert.equal(stored.completed, 1);
-    await b.window.skipToRecordCard(); assert.equal(b.window.savedPayload.quiz_score, 17, 'legacy value is completion only');
+    await b.window.skipToRecordCard(); assert.equal(b.window.savedPayload.quiz_score, null, 'new quiz results never calculate a percentage');assert.equal(model.saved({...b.window.savedPayload,booking_id:B}).progress.answers.length,1);
     assert.equal(model.saved({ ...b.window.savedPayload, booking_id: B }).progress.completed, 1);
     b.window.DayORoomAccess.bookingId = OTHER; assert.equal(b.window.getLearnerReviewSnapshot().key_expressions.length, 0, 'cached report cannot cross bookings');
   } finally { b.stop(); }

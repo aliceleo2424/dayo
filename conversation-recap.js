@@ -172,12 +172,28 @@
     if(content.length<3) speech.forEach(function(r){if(content.length<3 && r.id && greeting(r.text) && !content.some(function(e){return normalizeSpeech(e.text)===normalizeSpeech(r.text);})) content.push({text:r.text,source_utterance_id:r.id,source_timestamp:r.timestamp,greeting_fallback:true});});
     return content.slice(0,3).map(function(e){return Object.assign({},e,{source_log_id:logId,source_role:'learner',source_version:version,topic_keys:topics.filter(function(t){return t.source_utterance_ids.includes(e.source_utterance_id);}).map(function(t){return t.key;})});});
   }
+  // Saved answer identities, never the legacy completion percentage, establish correctness.
+  function quizProgress(recap) {
+    var qs=recap && recap.questions || [], p=recap && recap.progress || {}, total=qs.length;
+    var completed=Math.min(total,Math.max(0,Math.floor(Number(p.completed)||0))), seen=new Set();
+    var answers=(Array.isArray(p.answers)?p.answers:[]).filter(function(a){
+      var index=qs.findIndex(function(q){return a && q.id===a.question_id;});
+      if(index<0 || index>=completed || seen.has(a.question_id) || typeof a.selected!=='string' || !qs[index].options.includes(a.selected))return false;
+      seen.add(a.question_id);return true;
+    }).map(function(a){return {question_id:a.question_id,selected:a.selected};});
+    var correct=answers.length===completed ? answers.filter(function(a){return qs.find(function(q){return q.id===a.question_id;}).answer===a.selected;}).length : null;
+    return {completed:completed,total:total,reason:p.reason||null,correct:correct,answers:answers};
+  }
+  function quizResult(recap,locale) {
+    var p=quizProgress(recap),ko=String(locale).toLowerCase()==='ko';
+    return p.correct===null ? (ko?'정답 기록 없음':'Correct answers not recorded') : p.correct+'/'+p.total+(ko?' 정답':' correct');
+  }
   function quizActionLabel(recap, locale) {
     var l=labels(locale),p=recap && recap.progress || {};
     return p.reason==='completed' || (p.total>0 && p.completed>=p.total) ? l.retry : p.reason ? l.review : p.completed>0 ? l.resume : l.open;
   }
   function renderActions(recap, locale) {
-    var l=labels(locale),done=recap && recap.progress && recap.progress.reason;
+    var l=labels(locale),done=recap && recap.progress && (recap.progress.reason || recap.questions.length>0 && recap.progress.completed>=recap.questions.length);
     return '<div class="recap-actions">'+(recap && recap.questions && recap.questions.length ? '<button type="button" class="recap-primary" '+(done?(recap.progress.reason==='completed' || recap.progress.completed>=recap.progress.total?'data-recap-replay':'data-recap-review'):'data-recap-start')+'>'+esc(quizActionLabel(recap,locale))+'</button>':'')+'<button type="button" class="recap-primary" data-recap-home>'+esc(l.home)+'</button></div>';
   }
   function quizWordKey(value) {
@@ -288,7 +304,7 @@
       chat: {version:1,status:o.chatStatus||'unavailable',metrics:typedMetrics(chat),messages:chat},
       topics: displayed, expressions: ex, word_expansion: expansion,
       ...(o.quizHistoryStatus ? { quiz_history_status: o.quizHistoryStatus } : {}),
-      questions: questions(expansion), progress: { completed: 0, total: questions(expansion).length, reason: null }, ai: { status: 'not_required' } };
+      questions: questions(expansion), progress: { completed: 0, total: questions(expansion).length, reason: null, correct: 0, answers: [] }, ai: { status: 'not_required' } };
   }
   function saved(report) {
     var markers = (report && Array.isArray(report.feedback) ? report.feedback : []).filter(function (v) {
@@ -344,7 +360,7 @@
       html += renderVolume(r, locale);
       var progress = r.progress || { completed: 0, total: 0 };
       if ((r.questions || []).length && progress.total) {
-        var quizCopy = progress.reason==='completed' && progress.completed===progress.total ? (ko?'단어 퀴즈 완료':'Word quiz completed')+' · '+progress.completed+'/'+progress.total : progress.total+(ko?'문제':' questions')+(progress.completed?' · '+progress.completed+'/'+progress.total+' '+l.completed:'');
+        var quizCopy = progress.reason || progress.completed>=r.questions.length ? quizResult(r,locale) : r.questions.length+(ko?'문제':' questions')+(progress.completed?' · '+progress.completed+'/'+r.questions.length+' '+l.completed:'');
         var quizWords=new Set((r.questions || []).map(function(q){return quizWordKey(q.word);})),displayedWords=new Set();
         var vocabulary = (r.word_expansion || []).filter(function(v){var key=quizWordKey(v.word);if(!quizWords.has(key) || displayedWords.has(key))return false;displayedWords.add(key);return true;}).slice(0,3).map(function(v){
           // Only saved, source-linked learner evidence; no Partner transcript fetch.
@@ -379,5 +395,5 @@
     if (help.length) html += '<details class="recap-help"><summary>' + esc(l.help) + '</summary><p>' + help.map(function (x) { return esc(x.text); }).join(' · ') + '</p><small>' + esc(l.helpNote) + '</small></details>';
     return html + '</section>';
   }
-  return { VERSION: VERSION, chatEvidence: chatEvidence, typedMetrics: typedMetrics, quizWordKey: quizWordKey, language: language, words: words, rows: rows, sourceVersion: sourceVersion, build: build, letterTopics: letterTopics, saved: saved, mergeFeedback: mergeFeedback, render: render, renderActions: renderActions, quizActionLabel: quizActionLabel, renderRatio: renderRatio, labels: labels, questions: questions, quizDuration: quizDuration, volumeHistory: volumeHistory };
+  return { VERSION: VERSION, chatEvidence: chatEvidence, typedMetrics: typedMetrics, quizWordKey: quizWordKey, language: language, words: words, rows: rows, sourceVersion: sourceVersion, build: build, letterTopics: letterTopics, saved: saved, mergeFeedback: mergeFeedback, render: render, renderActions: renderActions, quizProgress: quizProgress, quizResult: quizResult, quizActionLabel: quizActionLabel, renderRatio: renderRatio, labels: labels, questions: questions, quizDuration: quizDuration, volumeHistory: volumeHistory };
 });

@@ -23,19 +23,24 @@
       result.completed = saved.completed; result.currentIndex = Math.max(result.currentIndex, saved.completed);
       if (saved.reason) { result.ended = true; result.endReason = saved.reason; }
     }
+    var validRecovered=recovered && recovered.fingerprint===fingerprint && recovered.total===questions.length ? recovered : null;
+    var evidence=saved.completed>=result.completed && (!validRecovered || (saved.answers||[]).length>=(validRecovered.answers||[]).length) ? saved : validRecovered || {};
+    var p=window.DayOConversationRecap.quizProgress({questions:questions,progress:Object.assign({},evidence,{completed:result.completed})});
+    result.answers=p.answers;result.correct=p.correct;
+    result.currentIndex=Math.max(result.currentIndex,result.completed);
     return result;
   }
   function progress() {
-    return { completed: state ? state.completed : 0, total: questions.length, reason: state && state.endReason || null };
+    return window.DayOConversationRecap.quizProgress({questions:questions,progress:{completed:state?state.completed:0,reason:state&&state.endReason||null,answers:state&&state.answers||[]}});
   }
   function sync() {
     if (practicing) return;
     var next = progress(), source = window.getCanonicalReviewSource && window.getCanonicalReviewSource();
     var prior = window.__dayoQuizProgress || source && source.recap && source.recap.progress;
-    var unchanged = prior && JSON.stringify(prior) === JSON.stringify(next);
+    var unchanged = prior && JSON.stringify(window.DayOConversationRecap.quizProgress({questions:questions,progress:prior})) === JSON.stringify(next);
     window.__dayoQuizProgress = next;
     if (unchanged && window.__dayoReviewReportSaved) { write(); return; }
-    window.__dayoQuizScore = questions.length ? Math.round(window.__dayoQuizProgress.completed / questions.length * 100) : null;
+    // Leave the historical quiz_score field intact; new results live in recap.progress.
     window.__dayoReviewReportSaved = false;
     window.__dayoReviewRevision = (window.__dayoReviewRevision || 0) + 1;
     write();
@@ -54,17 +59,20 @@
     var hint = document.getElementById('game-kr-meaning'); if (hint) hint.textContent = '“' + q.word + '”' + l[q.type];
     var pool = document.getElementById('word-pool-container'); if (!pool) return; pool.innerHTML = '';
     // Stable rotation keeps recovery deterministic without the answer always first.
-    var offset = (state.currentIndex + 1) % q.options.length;
+    var answered=false, offset = (state.currentIndex + 1) % q.options.length;
     q.options.slice(offset).concat(q.options.slice(0, offset)).forEach(function (option) {
       var b = document.createElement('button'); b.type = 'button'; b.className = 'recap-option'; b.textContent = option;
       b.addEventListener('click', function () {
-        if (state.currentIndex >= questions.length || state.ended) return;
+        if (answered || state.currentIndex >= questions.length || state.ended) return;
+        answered=true;
         Array.from(pool.querySelectorAll('button')).forEach(function (node) { node.disabled = true; });
         b.setAttribute('aria-pressed', 'true');
-        state.completed = Math.max(state.completed, state.currentIndex + 1); sync();
+        state.answers=state.answers||[];state.answers.push({question_id:q.id,selected:option});
+        state.completed = Math.max(state.completed, state.currentIndex + 1); state.correct=progress().correct; sync();
         save().then(function (saved) { if (!saved) showSaveFailure(); });
         var note = document.createElement('p'); note.className = 'recap-answer'; note.setAttribute('role', 'status');
-        note.textContent = q.word + ' · ' + q.answer; pool.appendChild(note);
+        var correct=option===q.answer;note.setAttribute('data-answer-result',correct?'correct':'incorrect');
+        note.textContent = correct ? (locale()==='ko'?'정답':'Correct') : (locale()==='ko'?'오답 · 올바른 답: ':'Incorrect · Correct answer: ')+q.answer; pool.appendChild(note);
         pool.appendChild(button(locale() === 'ko' ? '계속 보기' : 'Continue', function () { state.currentIndex += 1; write(); renderQuestion(); }));
       }); pool.appendChild(b);
     });
@@ -82,16 +90,25 @@
     box.appendChild(notice);
     box.appendChild(button(locale() === 'ko' ? '기록 다시 저장하기' : 'Retry saving', async function () { if (await save()) originalOpen(); }));
   }
+  function renderResults(recap) {
+    stopTimer();var badge=document.getElementById('game-round-badge'),hint=document.getElementById('game-kr-meaning'),pool=document.getElementById('word-pool-container');
+    if(badge)badge.textContent=window.DayOConversationRecap.quizResult(recap,locale());
+    if(hint)hint.textContent='';if(!pool)return;pool.innerHTML='';
+    pool.appendChild(button(locale()==='ko'?'리캡으로 돌아가기':'Return to recap',function(){practicing=false;reviewing=false;modal(false);if(typeof originalOpen==='function')originalOpen();}));
+    var skip=document.getElementById('quiz-skip-btn');if(skip){skip.hidden=true;skip.style.display='none';}modal(true);
+  }
   async function finish(reason) {
-    if (!state || finalizing) return;
+    if (!state || finalizing || state.ended) return;
     if (practicing) {
-      stopTimer(); state.ended=true; state.endReason=reason; practicing=false; modal(false);
-      if (typeof originalOpen==='function') originalOpen();
+      stopTimer(); state.ended=true; state.endReason=reason;
+      if(reason==='completed'){renderResults({questions:questions,progress:progress()});return;}
+      practicing=false;modal(false);if(typeof originalOpen==='function')originalOpen();
       return;
     }
     finalizing = true; stopTimer(); state.ended = true; state.endReason = reason; sync();
-    await save(); finalizing = false; modal(false);
-    if (typeof originalOpen === 'function') originalOpen();
+    var saved=await save(); finalizing = false;
+    if(reason==='completed' && saved){renderResults({questions:questions,progress:progress()});return;}
+    modal(false);if (typeof originalOpen === 'function') originalOpen();
     // A failed save is retryable from the recap itself; never hides the base recap.
     showSaveFailure();
   }
@@ -105,13 +122,13 @@
     practicing=replay;
     reviewing = false; questions = recap.questions;
     var fingerprint = window.DayOLearnerExpressions.contentFingerprint(bookingId(), recap.source.learner_version || recap.source.fingerprint, questions);
-    state = replay ? {completed:0,currentIndex:0,startedAt:Date.now(),ended:false,endReason:null} : recoverState(recap, fingerprint);
+    state = replay ? {completed:0,correct:0,answers:[],currentIndex:0,startedAt:Date.now(),ended:false,endReason:null} : recoverState(recap, fingerprint);
     if (state.ended || state.currentIndex >= questions.length) { if (typeof originalOpen === 'function') originalOpen(); return; }
     state.startedAt = state.startedAt || Date.now(); write(); sync();
     var record = document.getElementById('quiz-modal');
     if (record) { record.hidden = true; record.classList.remove('is-open'); record.style.removeProperty('display'); if (window.DayOScrollLock) window.DayOScrollLock.unlock(); }
     modal(true); renderQuestion();
-    var skip = document.getElementById('quiz-skip-btn'); if (skip) skip.hidden = false;
+    var skip = document.getElementById('quiz-skip-btn'); if (skip){skip.hidden=false;skip.style.removeProperty('display');}
     function clock() {
       var remaining = window.DayOLearnerExpressions.quizRemainingSeconds(state.startedAt, Date.now(), window.DayOConversationRecap.quizDuration(questions.length));
       var node = document.getElementById('review-quiz-timer');
@@ -128,10 +145,11 @@
     practicing=false;reviewing=true;stopTimer();
     var record=document.getElementById('quiz-modal');if(record){record.hidden=true;record.classList.remove('is-open');record.style.removeProperty('display');if(window.DayOScrollLock)window.DayOScrollLock.unlock();}
     var title=document.getElementById('memory-game-title');if(title)title.textContent=labels().mini;
-    var badge=document.getElementById('game-round-badge');if(badge)badge.textContent=(recap.progress.completed||0)+'/'+recap.questions.length+' '+labels().completed;
+    var badge=document.getElementById('game-round-badge');if(badge)badge.textContent=window.DayOConversationRecap.quizResult(recap,locale());
     var hint=document.getElementById('game-kr-meaning');if(hint)hint.textContent='';
     var pool=document.getElementById('word-pool-container');if(!pool)return;pool.innerHTML='';
     recap.questions.forEach(function(q){var p=document.createElement('p');p.className='recap-answer';p.textContent=q.word+' · '+(q.type==='synonym'?(locale()==='ko'?'유사어':'Synonym'):(locale()==='ko'?'반의어':'Antonym'))+' · '+q.answer;pool.appendChild(p);});
+    var skip=document.getElementById('quiz-skip-btn');if(skip){skip.hidden=false;skip.style.removeProperty('display');}
     modal(true);
   };
   async function openRecap() {

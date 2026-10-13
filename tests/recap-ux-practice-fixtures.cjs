@@ -21,7 +21,7 @@ return {w,report,r,dom,get writes(){return writes;},tick(){now+=100000;if(clock)
 (async()=>{for(const lang of ['ko','en']){
 let p=page(lang);p.w.document.querySelector('[data-recap-replay]').click();assert(p.w.document.querySelector('#game-round-badge').textContent.startsWith('0/6'));
 for(let i=0;i<6;i++){const buttons=Array.from(p.w.document.querySelectorAll('#word-pool-container button'));buttons.find(b=>b.textContent===p.r.questions[i].answer).click();await Promise.resolve();p.w.document.querySelector('#word-pool-container button.recap-primary').click();}
-p.unchanged();assert(p.w.document.querySelector('#memory-game-modal').hidden);assert(!p.w.document.querySelector('#quiz-modal').hidden);p.dom.window.close();
+p.unchanged();assert.equal(p.w.document.querySelector('#game-round-badge').textContent,lang==='ko'?'6/6 정답':'6/6 correct');p.w.document.querySelector('#word-pool-container button').click();assert(p.w.document.querySelector('#memory-game-modal').hidden);assert(!p.w.document.querySelector('#quiz-modal').hidden);p.dom.window.close();
 for(const end of ['skip','timeout','recap']){p=page(lang);p.w.startRecapQuestions({practice:true});if(end==='skip')p.w.skipToRecordCard();else if(end==='timeout')p.tick();else await p.w.openQuizModalImmediately();p.unchanged();assert(p.w.document.querySelector('#memory-game-modal').hidden);p.dom.window.close();}
 p=page(lang);assert(p.w.document.querySelector('[data-recap-replay]'));assert.equal(p.report.quiz_score,67);assert.equal(p.r.progress.completed,6);p.dom.window.close();
 p=page(lang,false);p.w.startRecapQuestions();assert(p.w.document.querySelector('#game-round-badge').textContent.startsWith('2/6'));p.w.document.querySelector('#word-pool-container button').click();await Promise.resolve();assert(p.writes>0);assert.equal(p.w.__dayoQuizProgress.completed,3);await p.w.skipToRecordCard();p.dom.window.close();
@@ -30,7 +30,7 @@ for(const lang of ['ko','en']){
 let p=page(lang,true,captured);assert.equal(p.r.questions.length,2);assert.equal(p.r.progress.completed,2);
 p.w.document.querySelector('[data-recap-replay]').click();assert(p.w.document.querySelector('#game-round-badge').textContent.startsWith('0/2'));
 for(let i=0;i<2;i++){const buttons=Array.from(p.w.document.querySelectorAll('#word-pool-container button'));buttons.find(b=>b.textContent===p.r.questions[i].answer).click();await Promise.resolve();p.w.document.querySelector('#word-pool-container button.recap-primary').click();}
-p.unchanged();assert(p.w.document.querySelector('#memory-game-modal').hidden);assert.equal(p.r.progress.completed,2);assert.equal(p.report.quiz_score,67);p.dom.window.close();
+p.unchanged();assert.equal(p.w.document.querySelector('#game-round-badge').textContent,lang==='ko'?'2/2 정답':'2/2 correct');p.w.document.querySelector('#word-pool-container button').click();assert(p.w.document.querySelector('#memory-game-modal').hidden);assert.equal(p.r.progress.completed,2);assert.equal(p.report.quiz_score,67);p.dom.window.close();
 p=page(lang,true,captured);assert.equal(p.r.progress.completed,2);assert.equal(p.report.quiz_score,67);assert(model.render(p.r,lang).includes('114'));assert(model.renderRatio(p.r,lang).includes('63%'));p.unchanged();p.dom.window.close();
 }
 for(const file of ['conversation-recap.js','conversation-recap.css','user-conversation-report.js','memory-game.js'])assert.equal(fs.readFileSync('public/'+file,'utf8'),fs.readFileSync(file,'utf8'));
