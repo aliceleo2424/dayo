@@ -1,3 +1,73 @@
+# DayO — Non-Negotiable Coding Agent Rules
+
+These instructions govern **every task in this repository**, whether requested in Korean or English. The owner is a product founder, not an engineer: understand ordinary-language requests without requiring a developer-formatted prompt. **Do not transfer the burden of technical planning or routine QA to the owner.**
+
+## 1. Strict task isolation — the highest-priority operating rule
+
+- Implement **only** the behavior explicitly requested in the current task. A report, an idea, or an earlier discussion is not permission to modify other features.
+- First identify the smallest impacted files, observable success criteria, and protected neighboring functionality. Give a brief scope statement only when helpful; do not demand an elaborate prompt.
+- Read only relevant files and relevant sections of project guidance. **No repository-wide re-audits, summaries, mass searches, or unrelated dirty-file analysis** on each task. Continue from existing Work/Codex state and use current repository evidence as needed.
+- **Never** refactor, rename, delete, optimize, reformat, redesign, update dependencies, or “clean up” unrelated code opportunistically, including while fixing a bug.
+- If a change outside scope is genuinely necessary, **stop and request a narrow, explicit scope expansion**; do not silently include it. A test for the requested feature and an exact root/public mirror are allowed as scoped support files, and must be reported.
+- Handle separate issues in **separate changes, commits, and releases**. Do not bundle illustration, paid STT, bookings, quizzes, or UI changes merely because they were discussed in the same conversation.
+- If a test reveals an unrelated pre-existing failure, compare against the untouched base, record it, and leave unrelated code unchanged. Never “fix the fixtures” to make a failing feature appear to pass.
+
+## 2. Preserve the working tree and source layout
+
+- Inspect `git status --short`, active branch, and base commit before editing. Existing uncommitted changes in any worktree belong to the owner and **must remain untouched**.
+- Never use `git reset --hard`, broad `git checkout/restore`, `git clean`, force-push, blanket staging (`git add .` / `git add -A`), or automatic conflict resolution that discards changes.
+- Stage **exact approved files or hunks** only; confirm the staged diff matches the task. Do not commit or deploy pre-existing dirty changes.
+- Canonical customer static source is `public/`; synchronize matching root static files when the existing deployment structure requires it. Do **not** collapse or remove these mirrors. Do **not** mirror `vercel.json`. Preserve unrelated changes in `public/partner.html`.
+- Server endpoints live in root `api/`; Admin app in `admin/`. Do not edit either without direct task relevance.
+- Never delete an apparently unused feature without checking imports, DOM IDs, global JS entry points, dynamic calls, RPCs, Admin users and future-use status. Webinar and dormant functionality are **preserved**, not assumed obsolete.
+
+## 3. Protected systems — explicit approval required
+
+Treat the following as read-only unless the owner specifically authorizes that exact change: Supabase Auth/login/OAuth, identities/profiles, RLS and grants, DB schema/migrations, bookings and cancellation, ticket lots/allocations/ledgers, checkout/PortOne/payments, rewards/payouts, safety/refunds, Admin privileges, environment secrets, Vercel configuration, and Production feature flags.
+
+- Read-only diagnosis is not authorization to write. **Never apply migrations, manipulate Production records, issue real payouts, spend paid API credits, mint billable credentials, or activate customer features without scope-specific permission.**
+- A migration approved and applied once must **never** be reapplied. Do not bypass ownership checks, time windows, RLS, allocation limits, or rate limits just to pass a test.
+- Do not expose `.env*`, JWTs, service-role keys, restricted API keys, audio/transcript contents, participant personal data, or secret values in code, logs, tickets or reports.
+- Always distinguish **local fix**, **mock test**, **real Preview**, **real authenticated E2E**, and **Production Ready**. Never present one as another.
+
+## 4. Preserve the product contract and existing UX
+
+`docs/DAYO_PRODUCT_CONTRACT.md` contains the owner's signed-off functional behavior. Consult **only relevant sections** for the requested task. Never reinterpret the product to make engineering easier.
+
+Critical examples: preserve partner→learner live CC captions, 25-minute conversation plus 5-minute follow-up, mobile Talk Cards, independent participant STT, Letter submission, grounded learner quiz, customer feedback-before-Recap, and **Partner-owned illustration selection/preview/send decision**. No mandatory Admin review. Optional private Partner→Operations note is **not** a refund/safety report.
+
+Do not change hero copy, booking purchase flow, pricing, language availability, STT provider, image provider, or Recap design during an unrelated fix. If an existing feature is disabled, preserve its disabled state unless specifically authorized to enable it.
+
+## 5. Tests are a release gate, not a decorative report
+
+Follow `docs/DAYO_RELEASE_GATES.md`. First establish relevant **untouched-base** test behavior. Then test the requested positive path, failure path, double-tap/reload, both roles where relevant, and contractually protected neighboring paths.
+
+- Tests must exercise **real DOM interactions and the actual data/event route** where possible, not just the presence of functions, string matching or mocked success responses.
+- Mobile UI changes require screenshots and tap/scroll/keyboard checks at **360, 390, 430 px and desktop**, in **KO/EN**, using both roles as applicable. No clipped buttons, invisible submit controls, horizontal overflow, stuck overlays, or unexpected browser zoom.
+- Always run the existing normal room regression runner when the room or its dependencies change: `node tests/production-room-regressions.test.js`. Use additional task-relevant suites, not every unrelated test by default.
+- For server/storage/permissions, test participant allow/deny and a real authenticated read/write only when authorized. Synthetic tests do **not** establish live security, speech accuracy, or device success.
+- No deletion or disabling of existing features to pass an unrelated test. Missing valid quiz evidence must be explained honestly; never invent the learner's speech.
+- If a required suite fails on the changed branch but passes on untouched base, **stop release**. If it fails in both, document and escalate only if it blocks this scope.
+- `AGENTS.md` alone **cannot enforce CI**. Ensure the release workflow and required branch checks described in `docs/DAYO_RELEASE_GATES.md` are actually installed and passing before claiming an automated gate exists.
+
+## 6. Scope/approval/deployment discipline
+
+- For each task, privately establish `IN SCOPE`, `OUT OF SCOPE`, `ACCEPTANCE`, `REGRESSION CHECKS`, and `APPROVAL REQUIRED`. Report only meaningful blockers; minimize status overhead.
+- No automatic push, Production deploy, migration, or external data write from a vague “check/fix” request. If the owner explicitly authorizes a scoped release, proceed only after its real gates pass.
+- Use a task branch or isolated worktree as appropriate, with scoped staging and one narrow commit. Validate `HEAD`, branch, test run, deployed revision and Production domain only if a deployment actually occurred.
+- Do not consume one-time trial slots, image attempts, or paid-provider tokens for a test that could be performed read-only or with a local fixture.
+- If blocked, state the **single exact remaining blocker**, preserve progress, and do not start tangential audits or infrastructure projects.
+
+## 7. Required final report — short, in English
+
+Report: **Outcome** (DONE / PARTIAL / BLOCKED); **exact files changed**; **what behavior was proven**; **regressions passed/failed** (distinguish baseline failures); **real device / authenticated / Production verification status**; **commit SHA + deployment URL/status only if verified**; and **one owner action only if unavoidable**.
+
+Never say “fixed,” “saved,” “deployed,” “secure,” or “Production Ready” without matching evidence. Do not misrepresent old test sessions as new results. Do not ask the owner to run commands that you can safely execute yourself.
+
+---
+
+# Pre-existing DayO rules — retained without modification
+
 # DayO 개발 기본 원칙
 
 ## 1. 작업 범위 제한
@@ -126,3 +196,4 @@ DayO는 영어 수업이나 화상영어 서비스가 아니다. 한국에 사�
 
 - 무엇을 변경해야 할지 확실하지 않을 때는 추측해서 범위를 넓히지 않는다.
 - 기존 동작과 데이터를 보존하는 쪽을 선택하고, 확인이 필요한 사항으로 보고한다.
+
