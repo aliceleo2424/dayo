@@ -59,6 +59,7 @@ return {title:title,kind:'dayo_memory_card_v1',locale:locale==='ko'?'ko':'en',da
 function memoryAction(r,locale){var m=memoryData(r,locale);return m.letter||m.image||m.topics.length||m.expressions.length?'<div class="ucr-memory-action"><button class="ucr-primary btn-save-card" type="button"'+memoryAttribute(r,locale)+' onclick="saveInstaCard(event)">'+(locale==='ko'?'대화 카드 저장':'Save conversation card')+'</button></div>':'';}
 
 function memoryAttribute(r,locale){return ' data-memory-card="'+esc(encodeURIComponent(JSON.stringify(memoryData(r,locale))))+'"';}
+var DEFAULT_KEEPSAKE='images/keepsake-default.webp';
 function renderLetter(r,locale){r=r||{};var img=keepsakeURL(r);
 if(!text(r.partner_comment)){
  if(!img||!r.__dayoKeepsakeImage||r.__dayoKeepsakeImage.approved!==true)return '';
@@ -67,7 +68,9 @@ if(!text(r.partner_comment)){
 var name=nickname(r,locale),theme=conversationRecap.saved(r)?'':text(r.keyword),note=text(r.partner_comment);
 var human=note?'<blockquote>'+esc(note)+'</blockquote>':'<p class="ucr-letter-pending">'+(locale==='ko'?'파트너가 메시지를 준비 중이에요.':'Your partner is preparing a message.')+'</p>';
 // Canonical stories already show grounded topics. Keep legacy theme and valid image; stored Treat is untouched.
-if(theme||img)human+='<div class="ucr-block ucr-letter-theme">'+(theme?'<p class="ucr-theme">'+esc(theme)+'</p>':'')+(img?'<img class="ucr-illustration" hidden onload="this.hidden=false" src="'+esc(img)+'" alt="" referrerpolicy="no-referrer" onerror="DayOUserConversationReport.hideIllustration(this)">':'')+'</div>';
+// Owner decision 2026-10-14: a sent Letter without an approved keepsake shows the DayO default illustration.
+var shown=img||(note?DEFAULT_KEEPSAKE:'');
+if(theme||shown)human+='<div class="ucr-block ucr-letter-theme">'+(theme?'<p class="ucr-theme">'+esc(theme)+'</p>':'')+(shown?'<img class="ucr-illustration'+(img?'':' ucr-default-keepsake')+'" hidden onload="this.hidden=false" src="'+esc(shown)+'" alt="" referrerpolicy="no-referrer" onerror="DayOUserConversationReport.hideIllustration(this)">':'')+'</div>';
 return '<section id="insta-card-capture" class="ucr-section ucr-human"'+memoryAttribute(r,locale)+'><h3>Letter from '+esc(name)+'</h3>'+human+'</section>';}
 function renderLegacy(r,locale){
 var l=labels[locale]||labels.en, parts=heading(l.summary,summary(r)?'<p>'+esc(summary(r))+'</p>':'');

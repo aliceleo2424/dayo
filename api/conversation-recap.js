@@ -81,7 +81,7 @@ function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot
       }
       if (partnerAction) {
         let result;
-        if(input.action==='partner_illustration_choices'){result=await illustration.choices({input,read,user,env,signal:controller.signal});}
+        if(input.action==='partner_illustration_choices'){result=await illustration.choices({input,read,user,env,signal:controller.signal,fetchImpl});}
         else if (input.action === 'partner_illustration_generate') {
           // Canonical booking Partner ownership precedes any service-role client.
           const configured = illustrationPilot || illustrationTest.createPilot({env,fetchImpl});

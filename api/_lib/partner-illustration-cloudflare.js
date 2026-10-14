@@ -1,4 +1,5 @@
-/* Disabled server-only adapter. No transcript/Letter content reaches the provider.
+/* Server-only adapter. Image prompts use either learner keywords signed by keepsake-keywords.js
+ * (owner decision 2026-10-14) or the fixed fallback motifs below; raw Letter text never does.
  * Activation requires approved durable quota reservation and image storage.
  * Neither is replaced by browser/session memory or temporary/data URLs. */
 const fs = require('node:fs/promises');
@@ -9,6 +10,7 @@ const contract = require('../../public/partner-report-contract.js');
 const testRuntime = require('./keepsake-test-runtime.js');
 const recap = require('../../public/conversation-recap.js');
 const {safeQuote} = require('./partner-letter-gemini.js');
+const keywords = require('./keepsake-keywords.js');
 // Image-only motifs: Letter drafting nouns/categories are not image eligibility.
 const CHAT_THEMES = Object.freeze({
  chat_wine:'a single glass of wine as a symbolic topic vignette, not a claim that anybody drank it',
@@ -84,12 +86,12 @@ const MODEL = '@cf/black-forest-labs/flux-2-klein-4b';
 const REFERENCE = path.join(__dirname, '../_assets/dayo-watercolor-reference-511.png');
 const STYLE = 'Use image 0 only for watercolor and colored-pencil technique, textured ivory paper, muted sage, beige and warm brown. Simple adult editorial vignette, softly fading edges and generous ivory space. Do not copy reference subjects or composition. No people, human faces, text, letters, numbers, glyphs, logos, signatures or visible watermarks. No words or writing. No greeting cards, invitations, signs, posters, menus, labels, packaging, book covers or screens. All surfaces must be blank and unmarked. No photorealism, cartoon mascot, 3D or neon. Subjects from separate topics are symbolic motifs, not events or objects physically together. ';
 function failure(code) { const e = Error(code); e.code = code; return e; }
-async function generate({theme, env, fetchImpl=fetch, signal}) {
- if (!contract.illustrationKey(theme)&&!Object.hasOwn(CHAT_THEMES,theme)&&!subjectConcept(theme)) throw failure('unsupported_concept');
+async function generate({theme, concept, env, fetchImpl=fetch, signal}) {
+ if (!concept&&!contract.illustrationKey(theme)&&!Object.hasOwn(CHAT_THEMES,theme)&&!subjectConcept(theme)) throw failure('unsupported_concept');
  const account=String(env.CLOUDFLARE_ACCOUNT_ID||'').trim(), token=String(env.CLOUDFLARE_API_TOKEN||'').trim();
  if(!/^[a-f0-9]{32}$/.test(account)||!token)throw failure('provider_unavailable');
  const reference=await fs.readFile(REFERENCE), form=new FormData();
- form.append('prompt',STYLE+(CHAT_THEMES[theme]||subjectConcept(theme)||contract.illustrationConcept(theme)));
+ form.append('prompt',STYLE+(concept||CHAT_THEMES[theme]||subjectConcept(theme)||contract.illustrationConcept(theme)));
  form.append('width','1024');form.append('height','1024');
  form.append('input_image_0',new Blob([reference],{type:'image/png'}),'style-reference.png');
  const timeout=AbortSignal.timeout(30000);
@@ -130,26 +132,36 @@ async function handle({input,read,user,env,signal,fetchImpl, enabled=false, test
  // Only the allowlisted server TEST runtime may enable generation. UI remains disabled.
  if(!enabled)return {status:503,body:{error:'generation_disabled'}};
  if(input.request_id!=null&&!/^[a-f0-9]{8}-[a-f0-9]{4}-[1-5][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(input.request_id))return {status:400,body:{error:'invalid_request'}};
- if(input.action!=='partner_illustration_generate'||Object.keys(input).some(k=>!['action','booking_id','topic_id','source_version','request_id'].includes(k)))return {status:400,body:{error:'invalid_request'}};
+ if(input.action!=='partner_illustration_generate'||Object.keys(input).some(k=>!['action','booking_id','topic_id','source_version','request_id','keywords'].includes(k)))return {status:400,body:{error:'invalid_request'}};
  const denied=await testRuntime.authorize({input,read,user,allowBeta:manualReview});if(denied)return denied;
- const source=await letter.handle({input:{action:'partner_letter_topics',booking_id:input.booking_id},read,user,env,signal});
- if(source.status!==200)return source;
+ const keywordPick=input.keywords!=null;
+ const source=keywordPick?null:await letter.handle({input:{action:'partner_letter_topics',booking_id:input.booking_id},read,user,env,signal});
+ if(source&&source.status!==200)return source;
  if(testOnly){
   const rows=await read('/rest/v1/bookings?'+new URLSearchParams({id:'eq.'+input.booking_id,
     partner_user_id:'eq.'+user.id,select:'id,partner_user_id,is_test_session',limit:'1'}));
   if(!Array.isArray(rows)||!rows.some(b=>b.id===input.booking_id&&b.partner_user_id===user.id&&b.is_test_session===true))
     return {status:403,body:{error:'test_booking_required'}};
  }
- if(input.source_version!==source.body.source_version)return {status:409,body:{error:'canonical_revision_changed'}};
- // All motifs come from server-verified exact-booking evidence, never client prompt/theme.
- const theme=await verifiedTheme({input,read,user,env,source});
- if(manualReview&&input.topic_id!==theme)return {status:400,body:{error:'invalid_verified_topic'}};
- if(!theme)return {status:200,body:{status:'insufficient_evidence',url:null}};
+ let theme=null,concept=null,sourceVersion;
+ if(keywordPick){
+  // Only keywords this server signed from the same booking's saved learner speech/chat.
+  let picked;try{picked=await keywords.pick({input,read,user,env});}catch(_){return {status:503,body:{error:'source_unavailable'}};}
+  if(picked.status!==200)return {status:picked.status,body:{error:picked.error}};
+  concept=picked.concept;sourceVersion=picked.version;
+ }else{
+  if(input.source_version!==source.body.source_version)return {status:409,body:{error:'canonical_revision_changed'}};
+  // All motifs come from server-verified exact-booking evidence, never client prompt/theme.
+  theme=await verifiedTheme({input,read,user,env,source});
+  if(manualReview&&input.topic_id!==theme)return {status:400,body:{error:'invalid_verified_topic'}};
+  if(!theme)return {status:200,body:{status:'insufficient_evidence',url:null}};
+  sourceVersion=source.body.source_version;
+ }
  if(typeof qualityCheck!=='function')return {status:503,body:{error:'quality_check_unavailable'}};
  if(!quota||typeof quota.reserve!=='function'||!storage||typeof storage.put!=='function')return {status:503,body:{error:'durable_storage_and_quota_required'}};
  // Required future contract: atomic, persistent per-booking idempotency + at most two
  // attempts, and account-wide free-only budget. A rejected/uncertain claim never calls AI.
- let claim;try {claim=await quota.reserve({bookingId:input.booking_id,actorId:user.id,sourceVersion:source.body.source_version,model:MODEL,requestId:input.request_id,maxAttempts:2,estimatedNeurons:110,freeOnly:true});}catch(_){return {status:503,body:{error:'quota_unavailable'}};}
+ let claim;try {claim=await quota.reserve({bookingId:input.booking_id,actorId:user.id,sourceVersion,model:MODEL,requestId:input.request_id,maxAttempts:2,estimatedNeurons:110,freeOnly:true});}catch(_){return {status:503,body:{error:'quota_unavailable'}};}
  if(claim?.reused===true){
   if(manualReview&&typeof storage.reviewStatus==='function'){try{return {status:200,body:await storage.reviewStatus({bookingId:input.booking_id,actorId:user.id,token:claim.token})};}catch(_){return {status:503,body:{error:'image_access_unavailable'}};}}
   if(claim.state==='ready'&&typeof storage.read==='function'){
@@ -161,7 +173,7 @@ async function handle({input,read,user,env,signal,fetchImpl, enabled=false, test
  if(claim?.allowed===false&&claim.error)return {status:409,body:{error:['attempt_limit','generation_pending','free_allowance_unverified','daily_budget_exhausted'].includes(claim.error)?claim.error:'generation_not_reserved'}};
  if(!claim||claim.plan!=='workers_free'||claim.allowed!==true||!Number.isInteger(claim.attempt)||claim.attempt<1||claim.attempt>2||typeof claim.token!=='string'||!claim.token)return {status:409,body:{error:'generation_not_reserved'}};
  try {
-  const image=await generate({theme,env,signal,fetchImpl});
+  const image=await generate({theme,concept,env,signal,fetchImpl});
   const inspected=await checkQuality(image,qualityCheck,signal);
   if(manualReview){
    if(inspected.manualPending!==true||typeof storage.putPending!=='function')throw failure('quality_check_unavailable');
@@ -179,8 +191,11 @@ async function handle({input,read,user,env,signal,fetchImpl, enabled=false, test
   return {status:502,body:{error:code}};
  }
 }
-async function choices({input,read,user,env,signal}){
+async function choices({input,read,user,env,signal,fetchImpl}){
  const denied=await testRuntime.authorize({input,read,user,allowBeta:true});if(denied)return denied;
+ // Primary: concrete things the learner said. Fixed motifs remain the fallback if the text model fails.
+ try{const found=await keywords.choices({input,read,user,env,signal,fetchImpl});
+  if(found.choices.length)return {status:200,body:{mode:'keywords',max_pick:keywords.MAX_PICK,source_version:found.version,choices:found.choices}};}catch(_){}
  const source=await letter.handle({input:{action:'partner_letter_topics',booking_id:input.booking_id},read,user,env,signal});if(source.status!==200)return source;
  const theme=await verifiedTheme({input,read,user,env,source});
  return {status:200,body:{source_version:source.body.source_version,choices:theme?[{id:theme,label:theme==='chat_birthday_wine'?'Wine and celebration':theme==='chat_wine'?'Wine':theme==='chat_cafe'?'Café':subjectLabel(theme)||'Conversation memory'}]:[]}};
