@@ -1,0 +1,35 @@
+/* Landing color palette only: sage green + butter yellow on warm cream.
+   No layout, spacing, copy, image or behavior changes. Loaded after landing-views.css. */
+body[data-customer-page="landing"] { background: #fbf7ea !important; }
+
+/* Hero: butter fade over the existing watercolor image */
+body[data-customer-page="landing"] .hero-media::after { background: linear-gradient(90deg,rgba(255,242,198,.97) 0%,rgba(255,242,198,.88) 34%,rgba(255,242,198,.1) 60%,transparent 72%); }
+
+/* Talk card section: sage band, butter card */
+body[data-customer-page="landing"] .lv-story { background: #e8f1e4; }
+body[data-customer-page="landing"] .lv-question .lv-question-type { color: #5b6a3c; }
+body[data-customer-page="landing"] .lv-question .lv-question-en,
+body[data-customer-page="landing"] .lv-question .lv-question-hint { color: #6b5d3f; }
+body[data-customer-page="landing"] .lv-story-controls [data-story-next] { background: #fffae6; color: #3f5a45; border: 2.5px solid #5f7d63; }
+body[data-customer-page="landing"] .lv-story-controls [data-story-prev],
+body[data-customer-page="landing"] .lv-story-controls [data-story-pause] { background: #ffffffa6; color: #506b55; }
+body[data-customer-page="landing"] .lv-question { box-shadow: 0 26px 44px -26px #7a580080; }
+body[data-customer-page="landing"] .lv-question .lv-question-en { color: #506b55; }
+body[data-customer-page="landing"] .lv-close .lv-price { color: #4c6d51; }
+body[data-customer-page="landing"] .lv-close .lv-offer-copy,
+body[data-customer-page="landing"] .lv-close .lv-offer-note { color: #6b5a52; }
+body[data-customer-page="landing"] .lv-story-dots button::before { background: #8a7a3f4d; }
+body[data-customer-page="landing"] .lv-story-dots button[aria-pressed="true"]::before { background: #5f7d63; }
+
+/* Closing section: butter cream */
+body[data-customer-page="landing"] .lv-close { background: #fff4cc; border-top-color: #f1e3a6; }
+
+/* Menu detail views keep the same page color */
+body[data-customer-page="landing"] #about,
+body[data-customer-page="landing"] #how,
+body[data-customer-page="landing"] #pricing { background: #fbf7ea; }
+
+@media (max-width: 767px) {
+  body[data-customer-page="landing"] .hero-grid { background: #fff1c4; }
+  body[data-customer-page="landing"] .hero-media::after { background: linear-gradient(0deg,#fff1c4,transparent 30%); }
+}

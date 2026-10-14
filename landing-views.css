@@ -112,3 +112,49 @@ body[data-customer-page="landing"] .lv-comparison article:last-child { backgroun
   body[data-customer-page="landing"] #pricing .tk-discount strong { font-size: 34px; }
   body[data-customer-page="landing"] .lv-comparison { grid-template-columns: 1fr; }
 }
+
+/* ---- Talk card (tilted card) and closing offer: layout and type ---- */
+body[data-customer-page="landing"] .lv-story { overflow-x: clip; }
+body[data-customer-page="landing"] .lv-story-grid { gap: clamp(36px, 6vw, 88px); }
+body[data-customer-page="landing"] .lv-story h2 { font-size: clamp(28px, 3.1vw, 40px); text-wrap: balance; }
+body[data-customer-page="landing"] .lv-question { display: flex; flex-direction: column; justify-content: space-between; gap: 18px; border-radius: 32px; padding: clamp(26px, 3.4vw, 42px); min-height: 330px; transform: rotate(-1.2deg); }
+body[data-customer-page="landing"] .lv-question .lv-question-type { font-size: 13px; font-weight: 500; margin: 0 0 18px; }
+body[data-customer-page="landing"] .lv-question h3 { font-family: 'Gowun Dodum','Quicksand',sans-serif; font-weight: 400; font-size: clamp(25px, 2.7vw, 34px); line-height: 1.4; letter-spacing: -.02em; margin: 0 0 12px; text-wrap: balance; }
+body[data-customer-page="landing"] .lv-question .lv-question-en { font-family: 'Quicksand','Gowun Dodum',sans-serif; font-weight: 600; font-size: clamp(16px, 1.5vw, 19px); line-height: 1.5; margin: 0 0 10px; }
+body[data-customer-page="landing"] .lv-question .lv-question-hint { font-size: 13px; margin: 0; }
+body[data-customer-page="landing"] .lv-story-controls { flex-wrap: wrap; justify-content: flex-start; gap: 10px; margin-top: 8px; }
+body[data-customer-page="landing"] .lv-story-controls [data-story-next] { order: 1; min-height: 46px; padding: 0 24px; border-radius: 999px; font-family: 'Gowun Dodum','Quicksand',sans-serif; font-size: 16px; font-weight: 600; white-space: nowrap; }
+body[data-customer-page="landing"] .lv-story-controls [data-story-prev] { order: 2; }
+body[data-customer-page="landing"] .lv-story-controls [data-story-pause] { order: 3; }
+body[data-customer-page="landing"] .lv-story-controls [data-story-prev],
+body[data-customer-page="landing"] .lv-story-controls [data-story-pause] { min-width: 44px; min-height: 44px; border-radius: 50%; font-size: 16px; }
+body[data-customer-page="landing"] .lv-story-dots { order: 4; margin-left: auto; }
+body[data-customer-page="landing"] .lv-story-dots button { min-height: 40px; }
+
+body[data-customer-page="landing"] .lv-close { padding: clamp(52px, 8vw, 92px) 0; text-align: left; }
+body[data-customer-page="landing"] .lv-close-grid { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 28px 56px; }
+body[data-customer-page="landing"] .lv-close-copy { flex: 1 1 320px; min-width: 0; }
+body[data-customer-page="landing"] .lv-close-action { flex: 0 1 340px; display: grid; gap: 12px; justify-items: center; min-width: 0; }
+body[data-customer-page="landing"] .lv-close h2 { margin: 10px 0 8px; text-wrap: balance; }
+body[data-customer-page="landing"] .lv-close .lv-offer-only { display: none; }
+body[data-customer-page="landing"] .lv-close[data-trial-offer-state="offer"] .lv-offer-only { display: block; }
+body[data-customer-page="landing"] .lv-close[data-trial-offer-state="offer"] .lv-plain-only { display: none; }
+body[data-customer-page="landing"] .lv-close .lv-offer-lead,
+body[data-customer-page="landing"] .lv-close .lv-price { display: block; }
+body[data-customer-page="landing"] .lv-close .lv-offer-lead { font-size: clamp(28px, 3.4vw, 42px); font-weight: 700; line-height: 1.3; }
+body[data-customer-page="landing"] .lv-close .lv-price { font-family: 'Quicksand','Gowun Dodum',sans-serif; font-size: clamp(52px, 8vw, 88px); font-weight: 700; line-height: 1.05; letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+body[data-customer-page="landing"] .lv-close .lv-price::after { content: '.'; }
+body[data-customer-page="landing"] .lv-close .lv-offer-copy { font-size: 16px; line-height: 1.6; margin: 14px 0 0; }
+body[data-customer-page="landing"] .lv-close .home-cta-btn { display: inline-flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 58px; margin: 0; }
+body[data-customer-page="landing"] .lv-close .home-cta-btn::after { content: '\2197'; font-size: 1.1em; }
+body[data-customer-page="landing"] .lv-close .lv-offer-note { font-size: 13px; margin: 0; }
+body[data-customer-page="landing"] .lv-close a { margin-top: 2px; }
+@media (max-width: 767px) {
+  body[data-customer-page="landing"] .lv-question { min-height: 300px; border-radius: 28px; padding: 24px; transform: rotate(-.8deg); }
+  body[data-customer-page="landing"] .lv-question h3 { font-size: 25px; }
+  body[data-customer-page="landing"] .lv-story-dots { flex: 1 1 100%; margin-left: 0; justify-content: center; }
+  body[data-customer-page="landing"] .lv-story h2 { font-size: 27px; }
+  body[data-customer-page="landing"] .lv-close-action { flex: 1 1 100%; }
+  body[data-customer-page="landing"] .lv-close .lv-price { font-size: clamp(52px, 17vw, 72px); }
+}
+@media (prefers-reduced-motion: reduce) { body[data-customer-page="landing"] .lv-question { transform: none; } }

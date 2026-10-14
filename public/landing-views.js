@@ -32,11 +32,11 @@
 
     // Marketing examples only: no fake Partners, slots, or changes to live Talk Cards.
     var cards = [
-      ['나라와 문화','Countries & cultures','프랑스 하면 생각나는 것은?','What comes to mind when you think of France?','빵, 에펠탑… 단어 하나로 시작해요.','Bread, the Eiffel Tower… one word is enough.','#e7edde'],
-      ['나라와 문화','Countries & cultures','한국 음식 중 무엇을 좋아해요?','Which Korean food do you like?','김밥? 떡볶이? 좋아하는 음식 하나를 골라요.','Gimbap? Tteokbokki? Choose one you like.','#f4e8d2'],
-      ['밸런스 게임','This or that','바다 여행 vs 도시 여행?','Beach trip or city trip?','하나만 골라요. 이유는 짧게 말해도 돼요.','Pick one. A short reason is enough.','#e5e9ec'],
-      ['나라와 문화','Countries & cultures','내 나라에서 추천하고 싶은 음식은?','What food would you recommend from your country?','음식 이름부터 말해봐요.','Start with the name of a food.','#efdfd6'],
-      ['밸런스 게임','This or that','아침 커피 vs 저녁 차?','Morning coffee or evening tea?','둘 중 내 취향은?','Which one feels more like you?','#ece8d1']
+      ['나라와 문화','Countries & cultures','프랑스 하면 생각나는 것은?','What comes to mind when you think of France?','빵, 에펠탑… 단어 하나로 시작해요.','Bread, the Eiffel Tower… one word is enough.','#ffeeb4'],
+      ['나라와 문화','Countries & cultures','한국 음식 중 무엇을 좋아해요?','Which Korean food do you like?','김밥? 떡볶이? 좋아하는 음식 하나를 골라요.','Gimbap? Tteokbokki? Choose one you like.','#fff3c4'],
+      ['밸런스 게임','This or that','바다 여행 vs 도시 여행?','Beach trip or city trip?','하나만 골라요. 이유는 짧게 말해도 돼요.','Pick one. A short reason is enough.','#ffe8a3'],
+      ['나라와 문화','Countries & cultures','내 나라에서 추천하고 싶은 음식은?','What food would you recommend from your country?','음식 이름부터 말해봐요.','Start with the name of a food.','#fff6d6'],
+      ['밸런스 게임','This or that','아침 커피 vs 저녁 차?','Morning coffee or evening tea?','둘 중 내 취향은?','Which one feels more like you?','#ffebb0']
     ];
     var card = document.querySelector('[data-story-card]');
     var dots = card.querySelector('.lv-story-dots');
@@ -47,7 +47,8 @@
       var en = window.DayOI18n && window.DayOI18n.getLang() === 'EN';
       var value = cards[index];
       card.style.backgroundColor = value[6];
-      card.querySelector('[data-story-type]').textContent = value[en ? 1 : 0];
+      card.querySelector('[data-story-type]').textContent = (en ? 'Talk card · ' : '이야기 카드 · ') + value[en ? 1 : 0] + (en ? ' (example)' : ' (질문 예시)');
+      card.querySelector('[data-story-next]').textContent = en ? 'Next card' : '다음 카드';
       card.querySelector('[data-story-ko]').textContent = value[en ? 3 : 2];
       card.querySelector('[data-story-en]').textContent = en ? value[2] : value[3];
       card.querySelector('[data-story-hint]').textContent = value[en ? 5 : 4];

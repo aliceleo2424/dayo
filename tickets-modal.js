@@ -401,6 +401,14 @@
     var visible = canShowTrialPurchase();
     var trial = findPlan('trial');
     renderLandingTicketCards();
+    // Landing closing section: show the first-trial price only to people who can buy it (signed out or eligible).
+    var offerVisible = !!trial && (visible || trialState.status === 'loggedout');
+    document.querySelectorAll('[data-trial-offer]').forEach(function (node) {
+      var next = offerVisible ? 'offer' : 'plain';
+      if (node.getAttribute('data-trial-offer-state') !== next) node.setAttribute('data-trial-offer-state', next);
+      var price = node.querySelector('[data-trial-price]');
+      if (price && trial) { var label = priceText(trial.priceValue); if (price.textContent !== label) price.textContent = label; }
+    });
     document.querySelectorAll('[data-coupon-wallet]').forEach(function (wallet) {
       var eligibility = visible ? 'true' : 'false';
       if (wallet.getAttribute('data-trial-eligible') !== eligibility) wallet.setAttribute('data-trial-eligible', eligibility);
