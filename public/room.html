@@ -1790,6 +1790,11 @@
       color: #9A8580;
       box-shadow: none;
     }
+    /* 2026-10-14: make mic/camera OFF obvious (red tint + red X badge). */
+    #micBtn.off, #camBtn.off { background: #FDECEA; border-color: #F3B4AA; color: #B4483A; opacity: 1; }
+    #micBtn.off .ctrl-btn__icon, #camBtn.off .ctrl-btn__icon { position: relative; filter: grayscale(1); opacity: .55; }
+    #micBtn.off::after, #camBtn.off::after { content: '✕'; position: absolute; top: 4px; right: 4px; width: 18px; height: 18px; border-radius: 50%; background: #E5484D; color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+    #micBtn, #camBtn { position: relative; }
     .ctrl-btn.is-active {
       background: var(--room-sage-soft);
       border-color: var(--room-sage-hover);

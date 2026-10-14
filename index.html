@@ -1651,6 +1651,9 @@
     .ds-pip img{width:100%;height:100%;object-fit:cover;object-position:50% 25%}.ds-pip span{position:absolute;top:3px;left:3px;padding:0 5px;border-radius:6px;background:rgba(0,0,0,.45);color:#fff;font-size:8.5px}
     .ds-bar{display:flex;gap:5px;padding:2px 9px 14px}.ds-bar span{flex:1 1 0;min-width:0;height:40px;border-radius:12px;background:#fff;border:1px solid #EFE6D8;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;gap:1px}
     .ds-bar span:nth-child(-n+2){flex:0 0 38px}.ds-bar em{font-style:normal;font-size:8.5px;white-space:nowrap}.ds-bar .ds-ai{flex:1.35 1 0;background:#5F7D63;border-color:#5F7D63;color:#fff}
+    .ds-dev{cursor:pointer;position:relative;transition:background .15s}.ds-dev.is-off{background:#FDECEA!important;border-color:#F3B4AA!important;filter:none}.ds-dev.is-off::before{content:"";position:absolute;inset:0;margin:auto;width:2px;height:60%;background:#E5484D;transform:rotate(-45deg);border-radius:2px}
+    .ds-dev.is-off::after{content:"✕";position:absolute;top:-5px;right:-5px;width:15px;height:15px;border-radius:50%;background:#E5484D;color:#fff;font-size:9px;font-weight:700;line-height:15px;text-align:center}
+    .ds-stage.cam-off .ds-partner-img{opacity:1}.ds-pip.cam-off img{display:none}.ds-pip.cam-off{background:#3a332e}.ds-pip.cam-off::after{content:"📹✕";position:absolute;inset:0;display:grid;place-items:center;font-size:12px;color:#fff;opacity:.8}
     .ds-phone-wrap{position:relative;display:grid;justify-items:center;gap:12px}.ds-hint{margin:0;font-size:13px;color:#7e736b;text-align:center}
     .ds-tip-area{position:absolute;left:0;right:0;top:40px;height:150px}
     .ds-phone [data-ds-tip]{cursor:pointer}.ds-phone [data-ds-tip].is-on{outline:2.5px solid #F2B84B;outline-offset:2px;border-radius:10px}
@@ -3205,7 +3208,7 @@
         <div class="ds-cc" data-ds-tip="2"><span class="ds-cc-tag" data-i18n="customer.showcase.mCc">CC · 영어 자막</span><p>Hi! So nice to meet you. How's your day going?</p></div>
         <div class="ds-pip" data-ds-tip="3"><img src="/images/about-call-learner.webp" alt="" width="320" height="320" loading="lazy"><span data-i18n="customer.showcase.mMe">나</span></div>
       </div>
-      <div class="ds-bar"><span>🎤</span><span>📹</span><span class="ds-ai" data-ds-tip="4">💡<em data-i18n="customer.showcase.mHelp">말하기 도움</em></span><span class="ds-ai" data-ds-tip="5">🌐<em data-i18n="customer.showcase.mCards">대화카드</em></span><span class="ds-chat" data-ds-tip="6">💬<em data-i18n="customer.showcase.mChat">채팅</em></span></div>
+      <div class="ds-bar"><span class="ds-dev" data-ds-dev="mic">🎤</span><span class="ds-dev" data-ds-dev="cam">📹</span><span class="ds-ai" data-ds-tip="4">💡<em data-i18n="customer.showcase.mHelp">말하기 도움</em></span><span class="ds-ai" data-ds-tip="5">🌐<em data-i18n="customer.showcase.mCards">대화카드</em></span><span class="ds-chat" data-ds-tip="6">💬<em data-i18n="customer.showcase.mChat">채팅</em></span></div>
     </div>
   </div>
   <p class="ds-hint" data-i18n="customer.showcase.hint">👆 화면 속 버튼을 눌러 기능을 확인해 보세요</p></div>
@@ -4764,7 +4767,13 @@
     var left=Math.min(Math.max(4,cx-bw/2),w.width-bw-4),top=r.bottom-w.top+10,below=true;
     if(r.bottom+bh+16>window.innerHeight&&r.top-bh-16>0){top=r.top-w.top-bh-10;below=false;}
     box.classList.add(below?'is-below':'is-above');box.style.left=left+'px';box.style.top=top+'px';box.style.setProperty('--ax',Math.min(Math.max(14,cx-left),bw-14)+'px');}
-  document.addEventListener('click',function(e){var t=e.target.closest('.ds-phone [data-ds-tip]');if(t){show(t);return;}if(!e.target.closest('.ds-tipbox'))hide();});
+  var D={ko:{mic:['🎤 마이크 꺼짐','내 목소리가 상대에게 들리지 않아요. 다시 누르면 켜져요.'],cam:['📹 카메라 꺼짐','내 영상이 상대에게 보이지 않아요. 다시 누르면 켜져요.'],micOn:['🎤 마이크 켜짐','다시 내 목소리가 들려요.'],camOn:['📹 카메라 켜짐','다시 내 모습이 보여요.']},
+    en:{mic:['🎤 Mic off','Your partner can’t hear you. Tap again to turn it back on.'],cam:['📹 Camera off','Your partner can’t see you. Tap again to turn it back on.'],micOn:['🎤 Mic on','Your partner can hear you again.'],camOn:['📹 Camera on','Your partner can see you again.']}};
+  function devTip(el){var wrap=el.closest('.ds-phone-wrap');var off=el.classList.toggle('is-off'),kind=el.getAttribute('data-ds-dev');if(kind==='cam'){var pip=wrap.querySelector('.ds-pip');if(pip)pip.classList.toggle('cam-off',off);}
+    var d=D[lang()][off?kind:kind+'On'];hide();cur=el;box=document.createElement('div');box.className='ds-tipbox';box.setAttribute('role','status');var b=document.createElement('b');b.textContent=d[0];box.appendChild(b);box.appendChild(document.createTextNode(d[1]));wrap.appendChild(box);
+    var w=wrap.getBoundingClientRect(),r=el.getBoundingClientRect(),bw=box.offsetWidth,bh=box.offsetHeight,cx=r.left+r.width/2-w.left,left=Math.min(Math.max(4,cx-bw/2),w.width-bw-4);
+    box.classList.add('is-above');box.style.left=left+'px';box.style.top=(r.top-w.top-bh-10)+'px';box.style.setProperty('--ax',Math.min(Math.max(14,cx-left),bw-14)+'px');}
+  document.addEventListener('click',function(e){var dv=e.target.closest('.ds-phone [data-ds-dev]');if(dv){devTip(dv);return;}var t=e.target.closest('.ds-phone [data-ds-tip]');if(t){show(t);return;}if(!e.target.closest('.ds-tipbox'))hide();});
   document.addEventListener('keydown',function(e){if(e.key==='Escape')hide();});
   document.addEventListener('dayo:langchange',hide);var rw=window.innerWidth;window.addEventListener('resize',function(){if(window.innerWidth!==rw){rw=window.innerWidth;hide();}});
 })();
