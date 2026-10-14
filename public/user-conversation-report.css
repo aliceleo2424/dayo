@@ -40,3 +40,7 @@
 .ucr-chat-line.is-me .ucr-chat-bubble{background:#F3ECE0;border-top-left-radius:4px}
 .ucr-chat-line.is-them .ucr-chat-bubble{background:#E4ECE2;border-top-right-radius:4px}
 .ucr-chat-status{font-size:13px!important;color:#7e736b}
+.ucr-chat-hint{margin:0 0 4px!important;font-size:12px!important;color:#7e736b;text-align:center}
+.ucr-chat .ucr-chat-bubble{cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:transform .15s}
+.ucr-chat-line.is-picked .ucr-chat-bubble{transform:scale(.97)}
+.ucr-chat-save[hidden]{display:none!important}

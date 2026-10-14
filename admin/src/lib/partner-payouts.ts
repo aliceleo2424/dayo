@@ -72,3 +72,12 @@ export async function recordPartnerPayout(input: RecordPayoutInput): Promise<Rec
     throw new Error("지급 기록 저장 결과를 확인하지 못했습니다. 새로고침 후 이력을 확인해 주세요.");
   return result;
 }
+
+// Partner-registered payout account (migration 118). Admin read via RLS; null when not registered.
+export type PayoutAccount = { bank_name: string; account_holder: string; account_number: string; updated_at: string };
+export async function fetchPartnerPayoutAccount(partnerId: string): Promise<PayoutAccount | null> {
+  const { data, error } = await supabase.from("partner_payout_accounts")
+    .select("bank_name,account_holder,account_number,updated_at").eq("partner_id", partnerId).maybeSingle();
+  if (error) return null;
+  return (data as PayoutAccount | null) ?? null;
+}

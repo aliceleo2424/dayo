@@ -139,6 +139,13 @@ return '<article class="ucr-detail" data-booking-id="'+esc(r.booking_id||'')+'"'
 // Chat-style record of BOTH participants' saved speech (owner decision 2026-10-14). Loaded on open.
 function renderTranscript(r,locale){if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(r.booking_id||''))return '';var ko=locale==='ko';
 return '<section class="ucr-section ucr-transcript"><details data-transcript-booking="'+esc(r.booking_id)+'" data-partner-name="'+esc(nickname(r,locale))+'" data-locale="'+(ko?'ko':'en')+'" ontoggle="DayOUserConversationReport.loadTranscript(this)"><summary>'+(ko?'💬 대화 내용 보기':'💬 View the conversation')+'</summary><div class="ucr-chat" data-transcript-body><p class="ucr-chat-status">'+(ko?'불러오는 중…':'Loading…')+'</p></div></details></section>';}
+// Long-press (or click) a bubble to reveal its save button; keeps the record compact.
+function bindHold(body){if(!body||body.__dayoHold)return;body.__dayoHold=true;var timer=0,held=null;
+ function reveal(line){if(!line)return;var b=line.querySelector('.ucr-chat-save');if(!b)return;body.querySelectorAll('.ucr-chat-save').forEach(function(x){if(x!==b&&!x.classList.contains('is-saved'))x.hidden=true;});b.hidden=false;line.classList.add('is-picked');setTimeout(function(){line.classList.remove('is-picked');},300);}
+ body.addEventListener('pointerdown',function(e){var line=e.target.closest('.ucr-chat-bubble')&&e.target.closest('.ucr-chat-line');if(!line)return;clearTimeout(timer);held=null;timer=setTimeout(function(){held=line;reveal(line);},450);});
+ ['pointerup','pointerleave','pointercancel'].forEach(function(t){body.addEventListener(t,function(){clearTimeout(timer);});});
+ body.addEventListener('click',function(e){var line=e.target.closest('.ucr-chat-bubble')&&e.target.closest('.ucr-chat-line');if(!line)return;if(held===line){held=null;return;}reveal(line);});
+ body.addEventListener('contextmenu',function(e){if(e.target.closest('.ucr-chat-bubble'))e.preventDefault();});}
 async function loadTranscript(details){
  if(!details||!details.open||details.getAttribute('data-loaded')==='1')return;
  var body=details.querySelector('[data-transcript-body]'),ko=details.getAttribute('data-locale')==='ko',name=details.getAttribute('data-partner-name')||'Partner',booking=details.getAttribute('data-transcript-booking');
@@ -146,11 +153,11 @@ async function loadTranscript(details){
  try{var db=typeof window!=='undefined'&&window.supabaseClient,auth=db&&await db.auth.getSession(),token=auth&&auth.data&&auth.data.session&&auth.data.session.access_token;if(!token)throw Error('auth');
   var response=await fetch('/api/conversation-recap',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({action:'conversation_transcript',booking_id:booking})});
   if(!response.ok)throw Error('load');var data=await response.json(),lines=Array.isArray(data.lines)?data.lines:[];
-  details.setAttribute('data-loaded','1');
+  details.setAttribute('data-loaded','1');bindHold(body);
   if(!lines.length){status(ko?'저장된 음성 기록이 없어요.':'No saved speech for this conversation.');return;}
-  var mine=data.viewer==='partner'?'partner':'learner';
-  body.innerHTML=lines.map(function(l){var me=l.speaker===mine,who=me?(ko?'나':'Me'):(l.speaker==='partner'?name:(ko?'학습자':'Learner'));
-   var saveBtn=typeof window!=='undefined'&&window.DayOSavedSentences?'<button type="button" class="ucr-chat-save" onclick="DayOSavedSentences.onSaveClick(this)">'+(ko?'☆ 문장 저장':'☆ Save')+'</button>':'';
+  var mine=data.viewer==='partner'?'partner':'learner',saving=typeof window!=='undefined'&&window.DayOSavedSentences;
+  body.innerHTML=(saving?'<p class="ucr-chat-hint">'+(ko?'💡 저장하고 싶은 문장을 꾹 눌러 보세요!':'💡 Press and hold a sentence to save it!')+'</p>':'')+lines.map(function(l){var me=l.speaker===mine,who=me?(ko?'나':'Me'):(l.speaker==='partner'?name:(ko?'학습자':'Learner'));
+   var saveBtn=saving?'<button type="button" class="ucr-chat-save" hidden onclick="DayOSavedSentences.onSaveClick(this)">'+(ko?'☆ 문장 저장':'☆ Save')+'</button>':'';
    return '<div class="ucr-chat-line '+(me?'is-me':'is-them')+'" data-ts="'+esc(l.timestamp||'')+'"><span class="ucr-chat-who">'+esc(who)+'</span><p class="ucr-chat-bubble">'+esc(l.text)+'</p>'+saveBtn+'</div>';}).join('');
  }catch(_){status(ko?'대화 내용을 불러오지 못했어요. 다시 열어 주세요.':'Could not load the conversation. Please reopen.');details.removeAttribute('data-loaded');}
 }

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
-import { fetchPartnerPayoutAudit, recordPartnerPayout, PAYOUT_METHODS, payoutPaidAtIso,
+import { fetchPartnerPayoutAudit, fetchPartnerPayoutAccount, recordPartnerPayout, type PayoutAccount, PAYOUT_METHODS, payoutPaidAtIso,
   payoutSourceLabel, payoutStatusLabel, type PayoutAudit, type PayoutMethod,
   type RecordPayoutInput, type RecordPayoutResult } from "@/lib/partner-payouts";
 
@@ -12,6 +12,7 @@ export function PartnerPayoutDialog({ partnerId, onClose, onRecorded }: {
   onRecorded: (result: RecordPayoutResult) => void;
 }) {
   const [audit, setAudit] = useState<PayoutAudit | null>(null);
+  const [account, setAccount] = useState<PayoutAccount | null>(null);
   const [loading, setLoading] = useState(false), [busy, setBusy] = useState(false);
   const [error, setError] = useState(""), [notice, setNotice] = useState("");
   const [amount, setAmount] = useState(""), [method, setMethod] = useState<PayoutMethod>("bank_transfer");
@@ -26,8 +27,13 @@ export function PartnerPayoutDialog({ partnerId, onClose, onRecorded }: {
     setAudit(null); setError(""); setNotice(""); setSaved(false); setLocked(false);
     setAmount(""); setMethod("bank_transfer"); setDestination(""); setPaidAt(""); setReference(""); setNote("");
     payload.current = null; requestId.current = crypto.randomUUID();
+    setAccount(null);
     if (!partnerId) return;
     setLoading(true);
+    void fetchPartnerPayoutAccount(partnerId).then(value => {
+      if (epoch.current !== generation || !value) return;
+      setAccount(value); setDestination(prev => prev || `${value.bank_name} ${value.account_number} (${value.account_holder})`);
+    });
     void fetchPartnerPayoutAudit(partnerId).then(value => {
       if (epoch.current !== generation) return;
       setAudit(value); setAmount(String(value.summary.amount));
@@ -93,6 +99,7 @@ export function PartnerPayoutDialog({ partnerId, onClose, onRecorded }: {
             }} className="rounded-md border p-2">{PAYOUT_METHODS.map(item => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
             <label className="grid gap-1 text-sm">실제 지급 일시 (KST)<input required type="datetime-local" value={paidAt} onChange={e => setPaidAt(e.target.value)} disabled={fieldsDisabled} className="min-w-0 rounded-md border p-2"/></label>
           </div>
+          <p className="rounded-md border px-3 py-2 text-sm">{account ? `등록 계좌: ${account.bank_name} ${account.account_number} · 예금주 ${account.account_holder}` : "파트너가 등록한 정산 계좌가 없어요."}</p>
           <label className="grid gap-1 text-sm">지급 대상 표시<input required maxLength={160} value={destination} onChange={e => setDestination(e.target.value)} disabled={fieldsDisabled} placeholder="국민은행 ****1234 / PayPal c***@gmail.com / 현금 지급" className="min-w-0 rounded-md border p-2"/></label>
           <p className="text-xs text-muted-foreground">마스킹한 표시만 입력해 주세요. 전체 계좌번호나 이메일을 입력하지 마세요.</p>
           <label className="grid gap-1 text-sm">송금 참조 (선택)<input maxLength={200} value={reference} onChange={e => setReference(e.target.value)} disabled={fieldsDisabled} className="min-w-0 rounded-md border p-2"/></label>
