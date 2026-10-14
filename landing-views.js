@@ -36,7 +36,7 @@
       ['나라와 문화','Countries & cultures','한국 음식 중 무엇을 좋아해요?','Which Korean food do you like?','답변 예시 · 김밥을 좋아해요. / I like gimbap.','Example answer · I like gimbap. / 김밥을 좋아해요.','#fff3c4'],
       ['밸런스 게임','This or that','바다 여행 vs 도시 여행?','Beach trip or city trip?','답변 예시 · 바다요, 쉬고 싶어서요. / Beach, to relax.','Example answer · Beach, to relax. / 바다요, 쉬고 싶어서요.','#ffe8a3'],
       ['나라와 문화','Countries & cultures','내 나라에서 추천하고 싶은 음식은?','What food would you recommend from your country?','답변 예시 · 김치찌개요, 따뜻해서요. / Kimchi stew — it’s warming.','Example answer · Kimchi stew — it’s warming. / 김치찌개요, 따뜻해서요.','#fff6d6'],
-      ['밸런스 게임','This or that','아침 커피 vs 저녁 차?','Morning coffee or evening tea?','답변 예시 · 아침엔 커피요. / Coffee in the morning.','Example answer · Coffee in the morning. / 아침엔 커피요.','#ffebb0']
+      ['밸런스 게임','This or that','아침형 vs 저녁형?','Morning person or night owl?','답변 예시 · 저는 저녁형이에요. / I’m a night owl.','Example answer · I’m a night owl. / 저는 저녁형이에요.','#ffebb0']
     ];
     var card = document.querySelector('[data-story-card]');
     var dots = card.querySelector('.lv-story-dots');
