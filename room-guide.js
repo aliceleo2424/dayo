@@ -18,7 +18,7 @@
       ['#btn-talk-cards', k ? '🌐 대화카드' : '🌐 Talk cards', p ? (k ? '대화 주제 카드를 골라 상대방과 함께 이야기를 시작할 수 있어요.' : 'Pick a topic card to start a conversation together.') : (k ? '이야깃거리가 필요할 때 대화 주제 카드를 볼 수 있어요.' : 'Browse topic cards when you need something to talk about.')],
       ['#chatToggle', k ? '💬 채팅' : '💬 Chat', k ? '말로 하기 어려운 단어나 링크를 글로 주고받을 수 있어요.' : 'Send words or links in text when it is easier than saying them.'],
       ['#safetyReportBtn', k ? '▲ 비매너 신고' : '▲ Report', k ? '불편하거나 부적절한 행동이 있으면 눌러 주세요. DayO가 확인해요.' : 'Press this if something feels inappropriate. DayO will review it.'],
-      ['#endBtn', k ? '🚪 세션 종료' : '🚪 End session', k ? '대화를 마칠 때 눌러요. 끝나면 오늘의 대화 기록을 볼 수 있어요.' : 'Press when you are done. You will then see your conversation recap.']
+      ['#endBtn', k ? '🚪 세션 종료' : '🚪 End session', k ? '대화는 정해진 시간에 자동으로 시작되고 끝나요. 급한 일이 있을 때만 눌러 주세요. 중간에 종료하면 대화 리포트가 제대로 저장되지 않을 수 있어요.' : 'Your conversation starts and ends automatically. Only press this if something urgent comes up — ending early may stop your report from being saved properly.']
     ].map(function (s) { return { sel: s[0], title: s[1], body: s[2] }; }).filter(function (s) {
       var el = document.querySelector(s.sel); if (!el) return false; var r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0;
     });
