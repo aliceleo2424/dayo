@@ -1639,7 +1639,7 @@
     .ds-timer{padding:4px 9px;border-radius:20px;background:#eef2eb;color:#4a6650;font-weight:700;font-size:11px}
     .ds-roombtns{display:flex;gap:4px}.ds-report,.ds-end{padding:4px 7px;border-radius:9px;font-size:9.5px;white-space:nowrap}.ds-report{background:#FFF1F2;color:#BE123C;border:1px solid #FECDD3}.ds-end{border:1px solid #5F7D63;color:#3e4a42;background:#fff}
     .ds-stage{position:relative;margin:9px;height:330px;border-radius:22px;overflow:hidden;background:#fdfdfd}
-    .ds-partner-img{position:absolute;left:50%;bottom:-6px;width:112%;height:auto;transform:translateX(-50%)}
+    .ds-partner-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 35%}
     .ds-wave{position:absolute;top:120px;right:22px;font-size:30px;transform-origin:70% 80%;animation:dsWave 2.6s ease-in-out infinite}
     @keyframes dsWave{0%,60%,100%{transform:rotate(0)}10%,30%{transform:rotate(16deg)}20%,40%{transform:rotate(-8deg)}}
     @media (prefers-reduced-motion:reduce){.ds-wave{animation:none}}
@@ -3202,8 +3202,8 @@
       <div class="ds-status"><b>9:41</b><span class="ds-status-icons"><i class="ds-sig"></i><i class="ds-wifi"></i><i class="ds-batt"></i></span></div>
       <div class="ds-roombar"><span class="ds-timer" data-ds-tip="0">⏱️ 18:42</span><span class="ds-roombtns"><span class="ds-report" data-ds-tip="7">▲ <b data-i18n="customer.showcase.mReport">비매너 신고</b></span><span class="ds-end" data-ds-tip="8">🚪 <b data-i18n="customer.showcase.mEnd">세션 종료</b></span></span></div>
       <div class="ds-stage">
-        <span class="ds-tip-area" data-ds-tip="1"></span><img class="ds-partner-img" src="/images/about-call-partner.webp" alt="" width="640" height="640" loading="lazy">
-        <span class="ds-wave">👋</span>
+        <span class="ds-tip-area" data-ds-tip="1"></span><img class="ds-partner-img" src="/images/about-call-partner.webp" alt="" width="544" height="640" loading="lazy">
+        
         <span class="ds-name">Emma</span>
         <div class="ds-cc" data-ds-tip="2"><span class="ds-cc-tag" data-i18n="customer.showcase.mCc">CC · 영어 자막</span><p>Hi! So nice to meet you. How's your day going?</p></div>
         <div class="ds-pip" data-ds-tip="3"><img src="/images/about-call-learner.webp" alt="" width="320" height="320" loading="lazy"><span data-i18n="customer.showcase.mMe">나</span></div>
