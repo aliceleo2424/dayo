@@ -73,6 +73,7 @@
     "customer.close.offerNote": {"KO": "1회 체험 · 정기결제 없음", "EN": "One session · no subscription"},
     "customer.close.tickets": {"KO": "티켓 알아보기 →", "EN": "Explore tickets →"},
     "customer.showcase.aria": {"KO": "DayO 대화 화면 예시", "EN": "Example DayO conversation screen"},
+    "customer.showcase.tour": {"KO": "👆 화면 기능 설명 보기", "EN": "👆 See what each button does"},
     "customer.showcase.sample": {"KO": "예시 화면", "EN": "Example screen"},
     "customer.showcase.p1t": {"KO": "1:1 화상 대화 25분", "EN": "25-minute 1:1 video chat"},
     "customer.showcase.p1": {"KO": "한국에서 생활하는 외국인 파트너와 얼굴을 보며 편하게 이야기해요.", "EN": "Talk face to face with an international partner living in Korea."},

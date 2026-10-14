@@ -1651,6 +1651,12 @@
     .ds-pip img{width:100%;height:100%;object-fit:cover;object-position:50% 25%}.ds-pip span{position:absolute;top:3px;left:3px;padding:0 5px;border-radius:6px;background:rgba(0,0,0,.45);color:#fff;font-size:8.5px}
     .ds-bar{display:flex;gap:5px;padding:2px 9px 14px}.ds-bar span{flex:1 1 0;min-width:0;height:40px;border-radius:12px;background:#fff;border:1px solid #EFE6D8;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;gap:1px}
     .ds-bar span:nth-child(-n+2){flex:0 0 38px}.ds-bar em{font-style:normal;font-size:8.5px;white-space:nowrap}.ds-bar .ds-ai{flex:1.35 1 0;background:#5F7D63;border-color:#5F7D63;color:#fff}
+    .ds-phone-wrap{display:grid;justify-items:center;gap:14px}.ds-tour-btn{font:inherit;font-size:14px;font-weight:600;min-height:44px;padding:0 18px;border-radius:22px;border:1px solid #C6D1BC;background:#fff;color:#4a6650;cursor:pointer;box-shadow:0 2px 8px rgba(60,45,35,.06)}
+    .ds-tip-area{position:absolute;left:0;right:0;top:40px;height:150px}
+    .ds-gt{position:fixed;inset:0;z-index:2147483000}.ds-gt-spot{position:fixed;border-radius:12px;box-shadow:0 0 0 9999px rgba(38,32,27,.7);outline:3px solid #FFFBF4;outline-offset:2px;transition:all .25s ease;pointer-events:none}
+    .ds-gt-card{position:fixed;width:min(320px,calc(100vw - 32px));background:#FFFBF4;color:#4B4038;border-radius:18px;padding:16px 16px 12px;box-shadow:0 18px 40px rgba(0,0,0,.28);transition:top .25s ease,left .25s ease}.ds-gt-card h4{margin:0 0 6px;font-size:16px;color:#3e4a42}.ds-gt-card p{margin:0;font-size:14px;line-height:1.6}
+    .ds-gt-foot{display:flex;align-items:center;gap:8px;margin-top:12px}.ds-gt-dots{display:flex;gap:4px;flex:1}.ds-gt-dots i{width:6px;height:6px;border-radius:50%;background:#E2D7C6}.ds-gt-dots i.on{width:16px;border-radius:6px;background:#5F7D63}
+    .ds-gt-skip{background:none;border:0;font:inherit;font-size:13px;color:#7e736b;min-height:40px;text-decoration:underline;cursor:pointer}.ds-gt-next{font:inherit;font-size:14px;font-weight:600;min-height:42px;padding:0 18px;border:0;border-radius:12px;background:#5F7D63;color:#fff;cursor:pointer}
     .dayo-showcase{margin-bottom:2rem}.ds-screen{grid-template-columns:minmax(0,1fr);min-width:0}.ds-screen>*{min-width:0}.ds-bar .ds-ai{min-width:0;overflow:hidden;text-overflow:ellipsis}
     @media (max-width:767px){.dayo-showcase{grid-template-columns:minmax(0,1fr);gap:28px;margin-top:1.5rem}.ds-phone{max-width:290px;box-sizing:border-box}.ds-bar span{min-width:28px;padding:0 4px}.ds-bar .ds-ai{font-size:9px}}
     .dayo-video-wrapper {
@@ -3186,20 +3192,21 @@
       <div class="lv-close-action"><button type="button" class="home-cta-btn" data-booking-open data-i18n="customer.hero.book">첫 대화 예약하기</button><p class="lv-offer-only lv-offer-note" data-i18n="customer.close.offerNote">1회 체험 · 정기결제 없음</p><a href="/#pricing" data-customer-route="pricing" data-i18n="customer.close.tickets">티켓 알아보기 →</a></div>
     </div></section>
 <section class="journey lv-intro" id="about" data-detail-view="about"><div class="section-inner"><p class="lv-eyebrow">ABOUT DAYO</p><h1 data-i18n="customer.about.title">영어 실력보다,<br>나누고 싶은 이야기.</h1><p class="landing-lead" data-i18n="customer.about.copy">외국인 파트너와 일상과 취향을 나누는 1:1 글로벌 대화 서비스예요. 이야기 카드와 필요한 순간의 AI 도움으로 대화를 이어가요.</p>        <div class="dayo-showcase" aria-label="DayO 대화 화면 예시" data-i18n="customer.showcase.aria" data-i18n-attr="aria-label">
-  <div class="ds-phone" aria-hidden="true">
+  <div class="ds-phone-wrap"><div class="ds-phone" aria-hidden="true">
     <div class="ds-screen">
       <div class="ds-status"><b>9:41</b><span class="ds-status-icons"><i class="ds-sig"></i><i class="ds-wifi"></i><i class="ds-batt"></i></span></div>
-      <div class="ds-roombar"><span class="ds-timer">⏱️ 18:42</span><span class="ds-roombtns"><span class="ds-report">▲ 비매너 신고</span><span class="ds-end">🚪 세션 종료</span></span></div>
+      <div class="ds-roombar"><span class="ds-timer" data-ds-tip="0">⏱️ 18:42</span><span class="ds-roombtns"><span class="ds-report" data-ds-tip="7">▲ 비매너 신고</span><span class="ds-end" data-ds-tip="8">🚪 세션 종료</span></span></div>
       <div class="ds-stage">
-        <img class="ds-partner-img" src="/images/about-call-partner.webp" alt="" width="640" height="640" loading="lazy">
+        <span class="ds-tip-area" data-ds-tip="1"></span><img class="ds-partner-img" src="/images/about-call-partner.webp" alt="" width="640" height="640" loading="lazy">
         <span class="ds-wave">👋</span>
         <span class="ds-name">Emma</span>
-        <div class="ds-cc"><span class="ds-cc-tag">CC · 영어 자막</span><p>Hi! So nice to meet you. How's your day going?</p></div>
-        <div class="ds-pip"><img src="/images/about-call-learner.webp" alt="" width="320" height="320" loading="lazy"><span>나</span></div>
+        <div class="ds-cc" data-ds-tip="2"><span class="ds-cc-tag">CC · 영어 자막</span><p>Hi! So nice to meet you. How's your day going?</p></div>
+        <div class="ds-pip" data-ds-tip="3"><img src="/images/about-call-learner.webp" alt="" width="320" height="320" loading="lazy"><span>나</span></div>
       </div>
-      <div class="ds-bar"><span>🎤</span><span>📹</span><span class="ds-ai">💡<em>말하기 도움</em></span><span class="ds-ai">🌐<em>대화카드</em></span><span class="ds-chat">💬<em>채팅</em></span></div>
+      <div class="ds-bar"><span>🎤</span><span>📹</span><span class="ds-ai" data-ds-tip="4">💡<em>말하기 도움</em></span><span class="ds-ai" data-ds-tip="5">🌐<em>대화카드</em></span><span class="ds-chat" data-ds-tip="6">💬<em>채팅</em></span></div>
     </div>
   </div>
+  <button type="button" class="ds-tour-btn" data-ds-tour data-i18n="customer.showcase.tour">👆 화면 기능 설명 보기</button></div>
   <div class="ds-points">
     <p class="ds-sample" data-i18n="customer.showcase.sample">예시 화면</p>
     <div class="ds-point"><span>🎥</span><div><h3 data-i18n="customer.showcase.p1t">1:1 화상 대화 25분</h3><p data-i18n="customer.showcase.p1">한국에서 생활하는 외국인 파트너와 얼굴을 보며 편하게 이야기해요.</p></div></div>
@@ -4740,5 +4747,30 @@
 <script src="/customer-navigation.js?v=20261013-views"></script>
 <script src="/landing-views.js?v=20261014-palette"></script>
 <script src="/how-it-works.js?v=20261013"></script>
+<script>
+(function(){
+  // Opaque spotlight guide over the ABOUT example phone (owner request 2026-10-14).
+  var T={ko:[['⏳ 남은 대화 시간','대화는 25분이에요. 정해진 시간에 자동으로 시작하고 끝나요.'],['🧑 파트너 화면','한국에서 생활하는 외국인 파트너와 얼굴을 보며 대화해요.'],['💬 실시간 자막','파트너가 하는 말이 영어 자막으로 바로 보여요. 놓친 말도 다시 확인할 수 있어요.'],['🙂 내 화면','내 모습이에요. 누르면 파트너 화면과 크기를 바꿀 수 있어요.'],['💡 말하기 도움','말이 막히면 눌러 보세요. 쓸 만한 단어를 추천하고, 한국어로 적으면 영어 표현을 찾아줘요.'],['🌐 대화카드','여행, 음식, 문화 같은 주제 카드로 대화를 쉽게 시작해요.'],['💬 채팅','말로 하기 어려운 단어나 링크를 글로 주고받아요.'],['▲ 비매너 신고','불편한 일이 생기면 바로 알려 주세요. DayO가 확인해요.'],['🚪 세션 종료','급한 일이 있을 때만 눌러 주세요. 대화가 끝나면 기록과 퀴즈, 파트너의 편지를 받아요.']],
+    en:[['⏳ Time left','Each chat is 25 minutes and starts and ends automatically.'],['🧑 Your partner','Talk face to face with an international partner living in Korea.'],['💬 Live captions','Your partner’s words appear as English captions in real time.'],['🙂 You','This is you. Tap to swap with your partner’s view.'],['💡 Speaking help','Stuck? Get suggested words, or type in Korean to find the English expression.'],['🌐 Talk cards','Start easily with topic cards on travel, food and culture.'],['💬 Chat','Send words or links in text when that is easier.'],['▲ Report','Tell us right away if something feels wrong. DayO will review it.'],['🚪 End session','Only for emergencies. After the chat you get your recap, quiz and your partner’s letter.']]};
+  function ko(){var l=window.DayOI18n&&DayOI18n.getLang?String(DayOI18n.getLang()):(document.documentElement.lang||'ko');return l.toLowerCase()!=='en';}
+  var root,spot,card,i=0,list=[];
+  function place(){var el=list[i];if(!el||!root)return;var r=el.getBoundingClientRect(),vw=innerWidth,vh=innerHeight,p=5;
+    spot.style.cssText='top:'+(r.top-p)+'px;left:'+(r.left-p)+'px;width:'+(r.width+p*2)+'px;height:'+(r.height+p*2)+'px';
+    var cw=card.offsetWidth,ch=card.offsetHeight,t=r.bottom+14;if(t+ch>vh-12)t=r.top-ch-14;if(t<12)t=Math.max(12,(vh-ch)/2);
+    card.style.top=t+'px';card.style.left=Math.min(Math.max(16,r.left+r.width/2-cw/2),vw-cw-16)+'px';}
+  function render(){var k=ko(),d=T[k?'ko':'en'][+list[i].getAttribute('data-ds-tip')],last=i===list.length-1;
+    card.innerHTML='<h4></h4><p></p><div class="ds-gt-foot"><div class="ds-gt-dots">'+list.map(function(_,j){return '<i class="'+(j===i?'on':'')+'"></i>';}).join('')+'</div><button type="button" class="ds-gt-skip"></button><button type="button" class="ds-gt-next"></button></div>';
+    card.querySelector('h4').textContent=d[0];card.querySelector('p').textContent=d[1];card.querySelector('.ds-gt-skip').textContent=k?'닫기':'Close';card.querySelector('.ds-gt-next').textContent=last?(k?'완료':'Done'):(k?'다음':'Next');
+    card.querySelector('.ds-gt-skip').onclick=close;card.querySelector('.ds-gt-next').onclick=function(){i++;if(i>=list.length)close();else render();};place();}
+  function close(){if(root)root.remove();root=null;removeEventListener('resize',place);removeEventListener('scroll',place,true);}
+  function open(start){var phone=document.querySelector('.ds-phone');if(!phone)return;phone.scrollIntoView({block:'center',behavior:'smooth'});
+    list=Array.prototype.slice.call(phone.querySelectorAll('[data-ds-tip]')).sort(function(a,b){return a.getAttribute('data-ds-tip')-b.getAttribute('data-ds-tip');});
+    i=Math.max(0,list.indexOf(start));close();root=document.createElement('div');root.className='ds-gt';root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');
+    spot=document.createElement('div');spot.className='ds-gt-spot';card=document.createElement('div');card.className='ds-gt-card';root.appendChild(spot);root.appendChild(card);document.body.appendChild(root);
+    addEventListener('resize',place);addEventListener('scroll',place,true);setTimeout(render,350);}
+  document.addEventListener('click',function(e){var b=e.target.closest('[data-ds-tour]');if(b){open();return;}var t=e.target.closest('.ds-phone [data-ds-tip]');if(t&&!root)open(t);});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape')close();});
+})();
+</script>
 </body>
 </html>
