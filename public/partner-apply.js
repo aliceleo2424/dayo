@@ -88,7 +88,7 @@
   form.addEventListener('submit', async function (event) {
     event.preventDefault(); if (busy || !form.reportValidity()) return; status.textContent = '';
     var fields = new FormData(form), payload = {};
-    ['full_name','email','contact_method','nationality','current_country','current_city','university','visa_type','korean_level','stranger_conversation_comfort','weekly_session_capacity','device','video_environment','scenario_answer','intro_video_language','acquisition_source','acquisition_source_other','referral_code'].forEach(function (key) { payload[key] = String(fields.get(key) || '').trim(); });
+    ['full_name','email','contact_method','nationality','current_country','current_city','university','visa_type','korean_level','weekly_session_capacity','device','video_environment','scenario_answer','intro_video_language','acquisition_source','acquisition_source_other','referral_code'].forEach(function (key) { payload[key] = String(fields.get(key) || '').trim(); });
     var location = locationFields.read(); payload.location_status = location.location_status; payload.current_country = location.country; payload.current_city = location.city; payload.korea_city_other = location.korea_city_other; payload.visa_type = location.visa_type;
     payload.email = payload.email.toLowerCase(); payload.native_languages = selectedLanguages('native'); payload.other_language_proficiencies = proficiencyMapping();
     payload.partner_languages = fields.getAll('partner_languages'); payload.strongest_language = payload.native_languages[0];
