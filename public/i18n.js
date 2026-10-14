@@ -73,7 +73,14 @@
     "customer.close.offerNote": {"KO": "1회 체험 · 정기결제 없음", "EN": "One session · no subscription"},
     "customer.close.tickets": {"KO": "티켓 알아보기 →", "EN": "Explore tickets →"},
     "customer.showcase.aria": {"KO": "DayO 대화 화면 예시", "EN": "Example DayO conversation screen"},
-    "customer.showcase.tour": {"KO": "👆 화면 기능 설명 보기", "EN": "👆 See what each button does"},
+    "customer.showcase.hint": {"KO": "👆 화면 속 버튼을 눌러 기능을 확인해 보세요", "EN": "👆 Tap any button on the screen to see what it does"},
+    "customer.showcase.mReport": {"KO": "비매너 신고", "EN": "Report"},
+    "customer.showcase.mEnd": {"KO": "세션 종료", "EN": "End"},
+    "customer.showcase.mCc": {"KO": "CC · 영어 자막", "EN": "CC · English captions"},
+    "customer.showcase.mMe": {"KO": "나", "EN": "Me"},
+    "customer.showcase.mHelp": {"KO": "말하기 도움", "EN": "Speaking help"},
+    "customer.showcase.mCards": {"KO": "대화카드", "EN": "Talk cards"},
+    "customer.showcase.mChat": {"KO": "채팅", "EN": "Chat"},
     "customer.showcase.sample": {"KO": "예시 화면", "EN": "Example screen"},
     "customer.showcase.p1t": {"KO": "1:1 화상 대화 25분", "EN": "25-minute 1:1 video chat"},
     "customer.showcase.p1": {"KO": "한국에서 생활하는 외국인 파트너와 얼굴을 보며 편하게 이야기해요.", "EN": "Talk face to face with an international partner living in Korea."},
@@ -3338,12 +3345,19 @@
     });
   }
 
+  function browserDefault() {
+    var raw = String((typeof navigator !== 'undefined' && (navigator.language || navigator.userLanguage)) || 'ko').toLowerCase();
+    return /^ko/.test(raw) ? 'KO' : 'EN';
+  }
+
   function init() {
     try {
       var saved = localStorage.getItem(STORAGE_KEY);
-      currentLang = saved ? normalizeLang(saved) : 'KO';
+      // Owner decision 2026-10-14: with no saved choice, visitors whose browser is not
+      // Korean see English; Korean browsers keep Korean. A saved choice always wins.
+      currentLang = saved ? normalizeLang(saved) : browserDefault();
     } catch (e) {
-      currentLang = 'KO';
+      currentLang = browserDefault();
     }
 
     var style = document.createElement('style');
