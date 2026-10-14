@@ -46,7 +46,7 @@ const server=http.createServer((req,res)=>{
    await page.waitForFunction(()=>window.DayOSonioxRoom.isActive());
    await page.waitForFunction(()=>window.sentAudio>0);assert.equal(mints,before+1);assert(await page.evaluate(()=>DayOSonioxRoom.snapshot().audioFramesSent>0));
    assert.equal(await page.evaluate(()=>window.providerConfig.model),'stt-rt-v5');assert.deepEqual(await page.evaluate(()=>window.providerConfig.language_hints),['en','ko','es']);
-   assert.equal(await page.evaluate(()=>providerConfig.max_endpoint_delay_ms),1000);
+   assert.equal(await page.evaluate(()=>providerConfig.max_endpoint_delay_ms),2000);
    // Same capture as Soniox's official web SDK: MediaRecorder chunks + audio_format auto.
    assert.equal(await page.evaluate(()=>DayOSonioxRoom.snapshot().captureMode),'recorder');assert.equal(await page.evaluate(()=>providerConfig.audio_format),'auto');
    assert.equal(await page.evaluate(()=>typeof providerConfig.sample_rate),'undefined');

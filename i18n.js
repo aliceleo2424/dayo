@@ -78,6 +78,7 @@
     "customer.showcase.mEnd": {"KO": "세션 종료", "EN": "End"},
     "customer.showcase.mCc": {"KO": "CC · 영어 자막", "EN": "CC · English captions"},
     "customer.showcase.mMe": {"KO": "나", "EN": "Me"},
+    "customer.showcase.mPartner": {"KO": "DayO 파트너", "EN": "DayO Partner"},
     "customer.showcase.mHelp": {"KO": "말하기 도움", "EN": "Speaking help"},
     "customer.showcase.mCards": {"KO": "대화카드", "EN": "Talk cards"},
     "customer.showcase.mChat": {"KO": "채팅", "EN": "Chat"},

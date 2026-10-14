@@ -149,6 +149,10 @@ function bindHold(body){if(!body||body.__dayoHold)return;body.__dayoHold=true;va
  ['pointerup','pointerleave','pointercancel'].forEach(function(t){body.addEventListener(t,function(){clearTimeout(timer);});});
  body.addEventListener('click',function(e){var line=e.target.closest('.ucr-chat-bubble')&&e.target.closest('.ucr-chat-line');if(!line)return;if(held===line){held=null;return;}reveal(line);});
  body.addEventListener('contextmenu',function(e){if(e.target.closest('.ucr-chat-bubble'))e.preventDefault();});}
+// Speech recognition stores one row per pause; join a speaker's consecutive fragments (<=4s apart) into one bubble.
+function mergeLines(lines){var out=[];lines.forEach(function(l){var text=String(l&&l.text||'').trim();if(!text)return;var t=Date.parse(l.timestamp||''),prev=out[out.length-1];
+ if(prev&&prev.speaker===l.speaker&&Number.isFinite(t)&&Number.isFinite(prev._t)&&t-prev._t>=0&&t-prev._t<=4000&&prev.text.length+text.length<=400){prev.text+=' '+text;prev._t=t;return;}
+ out.push({speaker:l.speaker,text:text,timestamp:l.timestamp,_t:t});});return out;}
 async function loadTranscript(details){
  if(!details||!details.open||details.getAttribute('data-loaded')==='1')return;
  var body=details.querySelector('[data-transcript-body]'),ko=details.getAttribute('data-locale')==='ko',name=details.getAttribute('data-partner-name')||'Partner',booking=details.getAttribute('data-transcript-booking');
@@ -156,7 +160,7 @@ async function loadTranscript(details){
  try{var db=typeof window!=='undefined'&&window.supabaseClient,auth=db&&await db.auth.getSession(),token=auth&&auth.data&&auth.data.session&&auth.data.session.access_token;if(!token)throw Error('auth');
   var response=await fetch('/api/conversation-recap',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({action:'conversation_transcript',booking_id:booking})});
   if(!response.ok)throw Error('load');var data=await response.json(),lines=Array.isArray(data.lines)?data.lines:[];
-  details.setAttribute('data-loaded','1');bindHold(body);
+  lines=mergeLines(lines);details.setAttribute('data-loaded','1');bindHold(body);
   if(!lines.length){status(ko?'저장된 음성 기록이 없어요.':'No saved speech for this conversation.');return;}
   var mine=data.viewer==='partner'?'partner':'learner',saving=typeof window!=='undefined'&&window.DayOSavedSentences;
   body.innerHTML=(saving?'<p class="ucr-chat-hint">'+(ko?'💡 저장하고 싶은 문장을 꾹 눌러 보세요!':'💡 Press and hold a sentence to save it!')+'</p>':'')+lines.map(function(l){var me=l.speaker===mine,who=me?(ko?'나':'Me'):(l.speaker==='partner'?name:(ko?'학습자':'Learner'));
@@ -165,5 +169,5 @@ async function loadTranscript(details){
  }catch(_){status(ko?'대화 내용을 불러오지 못했어요. 다시 열어 주세요.':'Could not load the conversation. Please reopen.');details.removeAttribute('data-loaded');}
 }
 function renderArchive(r,index,locale){r=r||{};var l=labels[locale]||labels.en,t=treat(r);return '<button class="mypage-report-item ucr-archive" type="button" onclick="openReportDetailModal(\'report-'+(index+1)+'\')"><span class="ucr-archive-content"><strong>'+esc(l.with+nickname(r,locale))+'</strong><span class="ucr-meta">'+[date(r,locale),language(r)].filter(Boolean).map(esc).join(' · ')+'</span>'+(text(r.keyword)?'<span class="ucr-archive-theme">'+esc(r.keyword)+'</span>':'')+'<span class="ucr-archive-badges">'+(conversationRecap.saved(r)&&conversationRecap.saved(r).progress.total?'<span>'+esc(conversationRecap.labels(locale).mini)+' · '+esc(conversationRecap.saved(r).progress.reason || conversationRecap.saved(r).progress.completed>=conversationRecap.saved(r).questions.length ? conversationRecap.quizResult(conversationRecap.saved(r),locale) : conversationRecap.saved(r).progress.completed+'/'+conversationRecap.saved(r).questions.length+' '+conversationRecap.labels(locale).completed)+'</span>':'')+'</span></span><span class="ucr-archive-open">'+esc(l.open)+' →</span></button>';}
-return {loadTranscript:loadTranscript,renderTranscript:renderTranscript,refreshKeepsakeImage:refreshKeepsakeImage,memoryData:memoryData,refreshRecapPresentation:refreshRecapPresentation,withLatestContent:withLatestContent,renderImmediate:renderImmediate,renderLetter:renderLetter,fetchLatest:fetchLatest,hideIllustration:hideIllustration,renderDetail:renderDetail,renderArchive:renderArchive,corrections:corrections,expressions:expressions,summary:summary,quiz:quiz};
+return {mergeLines:mergeLines,loadTranscript:loadTranscript,renderTranscript:renderTranscript,refreshKeepsakeImage:refreshKeepsakeImage,memoryData:memoryData,refreshRecapPresentation:refreshRecapPresentation,withLatestContent:withLatestContent,renderImmediate:renderImmediate,renderLetter:renderLetter,fetchLatest:fetchLatest,hideIllustration:hideIllustration,renderDetail:renderDetail,renderArchive:renderArchive,corrections:corrections,expressions:expressions,summary:summary,quiz:quiz};
 });

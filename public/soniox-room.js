@@ -119,7 +119,7 @@
       socket.onopen=function(){
         if(current!==run||!starting||!entered||document.hidden||localTrack()!==local||(captureMode==='worklet'&&!context)){finish();return;}
         var recording=captureMode==='recorder';
-        socket.send(JSON.stringify(Object.assign({model:'stt-rt-v5',language_hints:['en','ko','es'],enable_language_identification:true,enable_endpoint_detection:true,max_endpoint_delay_ms:1000},recording?{audio_format:'auto'}:{audio_format:'pcm_s16le',sample_rate:16000,num_channels:1})));
+        socket.send(JSON.stringify(Object.assign({model:'stt-rt-v5',language_hints:['en','ko','es'],enable_language_identification:true,enable_endpoint_detection:true,max_endpoint_delay_ms:2000},recording?{audio_format:'auto'}:{audio_format:'pcm_s16le',sample_rate:16000,num_channels:1})));
         active=true;starting=false;diagnostics.stopCode=null;runActiveAt=Date.now();runFramesAtOpen=diagnostics.audioFrames;runVoiceAtOpen=diagnostics.nonSilentFrames;window.DayOLive.setSonioxSource(true);
         reportTimer=setTimeout(function(){if(active&&!closing)sendReport('running');},20000);
         if(recording){
