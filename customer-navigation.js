@@ -20,13 +20,17 @@
     body.appendChild(bottom);
     var drawer = document.getElementById('mobileNav');
     var toggle = document.getElementById('menuToggle');
-    // Keep the existing account/logout/mode control accessible on desktop My Page.
+    // Keep My Page's account/logout control reachable: the drawer on phones; on desktop the Account
+    // tab, or the header actions in the letters view (which hides the Account tab).
     var accountControl = drawer && drawer.querySelector('[data-mode-switch]');
     var accountPanel = page === 'mypage' && document.getElementById('ud-account');
+    var headerActions = page === 'mypage' && document.querySelector('body > header .topbar-right');
     function accountPlacement() {
       if (!accountControl || !accountPanel) return;
-      if (innerWidth >= 768) accountPanel.appendChild(accountControl);
-      else drawer.insertBefore(accountControl, drawer.firstChild);
+      var letters = page === 'mypage' && (location.hash === '#talkArchiveTitle' || location.hash === '#letters');
+      if (innerWidth < 768) { if (accountControl.parentNode !== drawer) drawer.insertBefore(accountControl, drawer.firstChild); return; }
+      if (accountPanel && !letters) { if (accountControl.parentNode !== accountPanel) accountPanel.appendChild(accountControl); return; }
+      if (headerActions && accountControl.parentNode !== headerActions) headerActions.insertBefore(accountControl, headerActions.querySelector('.header-cta') || headerActions.firstChild);
     }
     accountPlacement();
     if (drawer && toggle) {
@@ -47,28 +51,29 @@
       });
     }
     function active() {
-      var view = page === 'landing' ? body.getAttribute('data-customer-view') || 'home' : page === 'mypage' && location.hash === '#talkArchiveTitle' ? 'letters' : page;
+      var view = page === 'landing' ? body.getAttribute('data-customer-view') || 'home' : page === 'mypage' && (location.hash === '#talkArchiveTitle' || location.hash === '#letters') ? 'letters' : page;
       document.querySelectorAll('[data-customer-route]').forEach(function (a) {
         var selected = a.getAttribute('data-customer-route') === view;
         a.classList.toggle('is-current', selected);
         if (selected) a.setAttribute('aria-current', 'page');
         else a.removeAttribute('aria-current');
       });
-      if (page === 'mypage' && view === 'letters') {
-        var archive = document.getElementById('talkArchiveTitle');
-        if (archive) requestAnimationFrame(function () { archive.scrollIntoView({ block: 'start' }); });
-      }
+      // The letters view (letterbox.js) replaces My Page content; no archive scroll.
     }
     // Delegate view routing before the old hash-scroll handler. Existing drawer API owns locking.
     document.addEventListener('click', function (event) {
       var a = event.target.closest('a[data-customer-route]');
       if (!a || event.button || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       var url = new URL(a.href, location.href);
-      if ((a.dataset.customerRoute === 'mypage' || a.dataset.customerRoute === 'letters') && typeof window.checkUserLoggedIn === 'function' && !window.checkUserLoggedIn() && typeof window.openLoginModal === 'function') {
+      // Logged-out 편지함/마이페이지 opens the login modal on every customer page (home has no role-switch.js),
+      // then continues to the chosen page after login via DayOMode's pending link.
+      var openLogin = window.DayOMode && typeof window.DayOMode.openLogin === 'function' ? function () { window.DayOMode.openLogin(a.getAttribute('href')); }
+        : typeof window.openLoginModal === 'function' ? window.openLoginModal : null;
+      if ((a.dataset.customerRoute === 'mypage' || a.dataset.customerRoute === 'letters') && typeof window.checkUserLoggedIn === 'function' && !window.checkUserLoggedIn() && openLogin) {
         event.preventDefault();
         event.stopImmediatePropagation();
         if (window.DayOMobileNav) window.DayOMobileNav.close();
-        window.openLoginModal();
+        openLogin();
         return;
       }
       if (page === 'landing' && url.origin === location.origin && ['/', '/index.html', '/index'].indexOf(url.pathname) !== -1 && !url.search && window.DayOLandingViews) {
@@ -79,6 +84,7 @@
       } else if (window.DayOMobileNav) window.DayOMobileNav.close();
     }, true);
     window.addEventListener('hashchange', active);
+    window.addEventListener('hashchange', accountPlacement);
     document.addEventListener('dayo:customer-view', active);
     function labelNavigation() {
       bottom.setAttribute('aria-label', window.DayOI18n && window.DayOI18n.getLang() === 'EN' ? 'Mobile navigation' : '모바일 주요 메뉴');

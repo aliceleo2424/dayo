@@ -12,6 +12,10 @@
   <link rel="stylesheet" href="conversation-recap.css?v=20261007-hotfix">
   <script src="user-conversation-report.js?v=20261007-hotfix"></script>
   <link rel="stylesheet" href="user-conversation-report.css?v=20261007-hotfix">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="letterbox.css?v=20261014">
   <script src="supabase-client.js?v=20261005-user-report"></script>
   <script src="password-account.js?v=20260930-password-recovery"></script>
   <link rel="stylesheet" href="conversation-insights.css?v=20260928-conversation-story">
@@ -1638,7 +1642,7 @@
   <style>/* PRICE-02: unconfirmed trial sales only; other coupons remain visible. */
     [data-coupon-wallet]:not([data-trial-eligible="true"]) [data-coupon-code="WELCOME_9900"], [data-coupon-wallet]:not([data-trial-eligible="true"]) [data-coupon-code="WELCOME9900"] { display: none !important; }
   </style>
-<link rel="stylesheet" href="/customer-navigation.css?v=20261013-views">
+<link rel="stylesheet" href="/customer-navigation.css?v=20261014-letterbox">
 </head>
 <body data-customer-page="mypage" data-dayo-role="member">
   <script>
@@ -1727,6 +1731,7 @@
   </nav>
 
   <main class="page mypage-container" style="max-width: 1140px; margin: 0 auto; padding: 32px 20px; box-sizing: border-box;">
+    <section id="dayo-letterbox" aria-live="polite"></section>
 
     <div id="user-dashboard-layout" hidden>
       <div class="ud-heading"></div>
@@ -1956,7 +1961,8 @@
   <script>
     if (typeof window.loadUserReports === 'function') window.loadUserReports();
   </script>
-<script src="/customer-navigation.js?v=20261013-views"></script>
+<script src="/customer-navigation.js?v=20261014-letterbox"></script>
 <script src="saved-sentences.js?v=20261014"></script>
+<script src="letterbox.js?v=20261014"></script>
 </body>
 </html>
