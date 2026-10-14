@@ -4,14 +4,13 @@
   <link rel="apple-touch-icon" href="/images/logo-square.png"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Join DayO as a Conversation Partner</title><meta name="description" content="Get paid for short, structured 1:1 video conversations on DayO."><link rel="canonical" href="https://www.dayotalk.com/partner-apply"><meta property="og:url" content="https://www.dayotalk.com/partner-apply"><link rel="stylesheet" href="partner-apply.css">  <link rel="stylesheet" href="/english-typography.css?v=20261005-en">
   <link rel="stylesheet" href="/brand-surfaces.css?v=20261005-logo-palette">
 </head>
-<body><main><a class="brand" href="/">DayO</a><header><h1>Join DayO as a Conversation Partner</h1><p>Get paid for short, structured 1:1 video conversations.</p><p class="rate">₩6,000+ / completed 30-min session</p><p>Remote · Flexible schedule · No teaching required</p><p class="eyebrow">All conversations take place on the DayO platform.</p><a class="apply-cta" href="#application-form">Apply now</a></header><nav class="entry-links" aria-label="DayO partner links"><a href="/">Explore DayO</a><span>Already a DayO partner? <a href="/partner">Go to Partner Lounge</a></span></nav>
+<body><main><a class="brand" href="/" aria-label="DayO"><img class="brand-logo" src="/images/logo_header.png" alt="DayO" width="1072" height="599"></a><header><h1>Join DayO as a Conversation Partner</h1><p>Get paid for short, structured 1:1 video conversations.</p><p class="rate">₩6,000+ / completed 30-min session</p><p class="hint rate-note">Earn more with reliable attendance (no no-shows), referral bonuses and special events.</p><p>Remote · Flexible schedule · No teaching required</p><p class="eyebrow">All conversations take place on the DayO platform.</p><p class="hint apply-note">The application includes a short introduction video (30–60 sec).</p><a class="apply-cta" href="#application-form">Apply now</a></header><nav class="entry-links" aria-label="DayO partner links"><a href="/">Explore DayO</a><span>Already a DayO partner? <a href="/partner">Go to Partner Lounge</a></span></nav>
 <form id="application-form">
 <fieldset><legend>1. Basic profile</legend><div class="grid">
 <label>Full name<input name="full_name" autocomplete="name" maxlength="120" required></label>
 <label>Email<input name="email" type="email" autocomplete="email" maxlength="254" required></label>
-<label>Preferred contact method and contact details<input name="contact_method" placeholder="Email, Kakao ID or phone number" maxlength="300" required></label>
+<label>Preferred contact method and contact details<input name="contact_method" placeholder="Kakao ID or phone number" maxlength="300" required></label>
 <label>Nationality<input name="nationality" maxlength="100" required></label>
-<label>University (optional)<input name="university" maxlength="200"></label>
 </div></fieldset>
 <fieldset><legend>2. Location & visa</legend><div class="grid" id="partner-location-fields"></div></fieldset>
 <fieldset><legend>3. Languages</legend>
@@ -51,14 +50,15 @@
 <label>Video language<select name="intro_video_language" required><option value="">Select a DayO session language above</option></select></label>
 <label>Short introduction video (required)<input name="intro_video" type="file" accept="video/mp4,video/webm,video/quicktime" required></label>
 <p class="hint">MP4, WebM or MOV · up to 50 MB. Your video is private and visible only to DayO administrators.</p>
+<p class="hint">Tip: if your file is over 50 MB, re-record or export it at 720p. Holding your phone sideways also helps.</p>
 </fieldset>
 <fieldset><legend>7. Referral</legend>
 <div class="grid"><label>How did you hear about DayO? (optional)<select name="acquisition_source"><option value="">Select (optional)</option>
 <option value="friend_referral">Friend / referral</option><option value="instagram">Instagram</option><option value="facebook_group">Facebook group</option><option value="university_community">University community</option><option value="international_student_community">International student community</option><option value="job_board">Job board</option><option value="reddit_discord">Reddit / Discord</option><option value="google_search">Google search</option><option value="flyer_qr">Flyer / QR poster</option><option value="other">Other</option>
-</select></label><label id="source-other-field" hidden>Other source<input name="acquisition_source_other" maxlength="200" disabled></label><label>Referral (optional)<input name="referral_code" maxlength="11" pattern="DY-[A-HJ-NP-Z2-9]{8}" aria-describedby="referral-hint" autocapitalize="characters"><p class="hint" id="referral-hint">Enter your referrer’s DY- code. Please do not enter a name.</p></label></div>
+</select></label><label id="source-other-field" hidden>Other source<input name="acquisition_source_other" maxlength="200" disabled></label><label>Referral code (optional)<input name="referral_code" maxlength="11" pattern="DY-[A-HJ-NP-Z2-9]{8}" aria-describedby="referral-hint" autocapitalize="characters"><p class="hint" id="referral-hint">Enter your referrer’s DY- code. Please do not enter a name.</p></label></div>
 </fieldset>
-<p>Your answers, contact details, introduction video will be used to review your application and contact you about becoming a partner. Read our <a href="/privacy?lang=en" target="_blank" rel="noopener">Privacy Policy</a>.</p>
+<p>Your answers, contact details, and introduction video will be used to review your application and contact you about becoming a partner. Read our <a href="/privacy?lang=en" target="_blank" rel="noopener">Privacy Policy</a>.</p>
 <label class="consent"><input name="privacy_consent" type="checkbox" required>I consent to DayO collecting and using these details and files for partner recruitment.</label>
 <p id="form-status" role="status" aria-live="polite"></p><button id="submit-button" type="submit">Submit application</button>
-</form><section id="success" hidden tabindex="-1"><h2>Thank you for applying!</h2><p>Your application has been received. The DayO team will review it and contact you about the next step.</p><a href="/">Back to DayO</a></section><noscript>Please enable JavaScript to submit your application.</noscript></main>
+</form><section id="success" hidden tabindex="-1"><h2>Thank you for applying!</h2><p>Your application has been received. The DayO team will review it and contact you about the next step.</p><a href="/">Back to DayO</a></section><p class="contact-note">Questions? Email us at <a href="mailto:hello@dayotalk.com">hello@dayotalk.com</a>.</p><noscript>Please enable JavaScript to submit your application.</noscript></main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script><script src="supabase-client.js"></script><script src="partner-profile-fields.js"></script><script src="partner-privacy.js"></script><script src="partner-apply.js"></script></body></html>
