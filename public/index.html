@@ -1629,6 +1629,28 @@
     .ds-points{display:grid;gap:18px}.ds-sample{margin:0;font-size:12px;color:#9a8e83;letter-spacing:.04em}
     .ds-point{display:flex;gap:14px;align-items:flex-start}.ds-point>span{flex:none;width:42px;height:42px;border-radius:14px;background:#F8F0E3;display:grid;place-items:center;font-size:20px}
     .ds-point h3{margin:0 0 4px;font-size:17px;color:#3e4a42}.ds-point p{margin:0;font-size:14.5px;line-height:1.65;color:#6b5f56}
+    /* ABOUT showcase phone v2: live room screen (2026-10-14) */
+    .ds-phone{max-width:300px;padding:9px;border-radius:44px;background:#1f1b18}
+    .ds-screen{padding:0;gap:0;border-radius:36px;background:#FFFBF4;font-size:11px}
+    .ds-status{display:flex;justify-content:space-between;align-items:center;padding:10px 22px 4px;font-size:12px;color:#2f2924}
+    .ds-status-icons{display:flex;gap:5px;align-items:center}.ds-sig{width:16px;height:9px;background:linear-gradient(90deg,#2f2924 0 3px,transparent 3px 4px,#2f2924 4px 7px,transparent 7px 8px,#2f2924 8px 11px,transparent 11px 12px,#2f2924 12px 16px);clip-path:polygon(0 100%,100% 0,100% 100%)}
+    .ds-wifi{width:13px;height:9px;border-radius:13px 13px 0 0;background:#2f2924;clip-path:polygon(50% 100%,0 15%,100% 15%)}.ds-batt{width:22px;height:10px;border:1.5px solid #2f2924;border-radius:3px;position:relative;box-sizing:border-box}.ds-batt::after{content:"";position:absolute;inset:1.5px 5px 1.5px 1.5px;background:#2f2924;border-radius:1px}
+    .ds-roombar{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:8px 10px 9px;border-bottom:1px solid #EFE6D8}
+    .ds-timer{padding:4px 9px;border-radius:20px;background:#eef2eb;color:#4a6650;font-weight:700;font-size:11px}
+    .ds-roombtns{display:flex;gap:4px}.ds-report,.ds-end{padding:4px 7px;border-radius:9px;font-size:9.5px;white-space:nowrap}.ds-report{background:#FFF1F2;color:#BE123C;border:1px solid #FECDD3}.ds-end{border:1px solid #5F7D63;color:#3e4a42;background:#fff}
+    .ds-stage{position:relative;margin:9px;height:330px;border-radius:22px;overflow:hidden;background:#fdfdfd}
+    .ds-partner-img{position:absolute;left:50%;bottom:-6px;width:112%;height:auto;transform:translateX(-50%)}
+    .ds-wave{position:absolute;top:120px;right:22px;font-size:30px;transform-origin:70% 80%;animation:dsWave 2.6s ease-in-out infinite}
+    @keyframes dsWave{0%,60%,100%{transform:rotate(0)}10%,30%{transform:rotate(16deg)}20%,40%{transform:rotate(-8deg)}}
+    @media (prefers-reduced-motion:reduce){.ds-wave{animation:none}}
+    .ds-name{position:absolute;top:10px;left:10px;padding:3px 9px;border-radius:20px;background:rgba(255,255,255,.88);font-weight:700;font-size:11px;color:#3e4a42}
+    .ds-cc{position:absolute;left:8px;right:84px;bottom:12px;padding:7px 10px 8px;border-radius:12px;background:rgba(31,27,24,.78);color:#fff}
+    .ds-cc-tag{display:inline-block;margin-bottom:3px;padding:1px 6px;border-radius:5px;background:rgba(255,255,255,.18);font-size:8.5px;letter-spacing:.02em}
+    .ds-cc p{margin:0;font-size:12px;line-height:1.45;font-weight:600}
+    .ds-pip{position:absolute;right:9px;bottom:9px;width:66px;height:72px;border-radius:12px;overflow:hidden;border:2px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.15);background:#fff}
+    .ds-pip img{width:100%;height:100%;object-fit:cover;object-position:50% 25%}.ds-pip span{position:absolute;top:3px;left:3px;padding:0 5px;border-radius:6px;background:rgba(0,0,0,.45);color:#fff;font-size:8.5px}
+    .ds-bar{display:flex;gap:5px;padding:2px 9px 14px}.ds-bar span{flex:1 1 0;min-width:0;height:40px;border-radius:12px;background:#fff;border:1px solid #EFE6D8;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;gap:1px}
+    .ds-bar span:nth-child(-n+2){flex:0 0 38px}.ds-bar em{font-style:normal;font-size:8.5px;white-space:nowrap}.ds-bar .ds-ai{flex:1.35 1 0;background:#5F7D63;border-color:#5F7D63;color:#fff}
     .dayo-showcase{margin-bottom:2rem}.ds-screen{grid-template-columns:minmax(0,1fr);min-width:0}.ds-screen>*{min-width:0}.ds-bar .ds-ai{min-width:0;overflow:hidden;text-overflow:ellipsis}
     @media (max-width:767px){.dayo-showcase{grid-template-columns:minmax(0,1fr);gap:28px;margin-top:1.5rem}.ds-phone{max-width:290px;box-sizing:border-box}.ds-bar span{min-width:28px;padding:0 4px}.ds-bar .ds-ai{font-size:9px}}
     .dayo-video-wrapper {
@@ -3162,16 +3184,16 @@
 <section class="journey lv-intro" id="about" data-detail-view="about"><div class="section-inner"><p class="lv-eyebrow">ABOUT DAYO</p><h1 data-i18n="customer.about.title">영어 실력보다,<br>나누고 싶은 이야기.</h1><p class="landing-lead" data-i18n="customer.about.copy">외국인 파트너와 일상과 취향을 나누는 1:1 글로벌 대화 서비스예요. 이야기 카드와 필요한 순간의 AI 도움으로 대화를 이어가요.</p>        <div class="dayo-showcase" aria-label="DayO 대화 화면 예시" data-i18n="customer.showcase.aria" data-i18n-attr="aria-label">
   <div class="ds-phone" aria-hidden="true">
     <div class="ds-screen">
-      <div class="ds-top"><span class="ds-timer">⏱️ 18:42</span><span class="ds-live">● DayO LIVE</span></div>
-      <div class="ds-video">
-        <div class="ds-partner"><span class="ds-avatar">🙂</span><span class="ds-name">Emma</span><span class="ds-flag">🇺🇸 Seoul</span></div>
-        <div class="ds-cap ds-cap--them"><b>CC</b> What did you do last weekend?</div>
-        <div class="ds-cap ds-cap--me">주말에 부산 갔어요! I ate fresh seafood 🦐</div>
-        <div class="ds-pip">나</div>
+      <div class="ds-status"><b>9:41</b><span class="ds-status-icons"><i class="ds-sig"></i><i class="ds-wifi"></i><i class="ds-batt"></i></span></div>
+      <div class="ds-roombar"><span class="ds-timer">⏱️ 18:42</span><span class="ds-roombtns"><span class="ds-report">▲ 비매너 신고</span><span class="ds-end">🚪 세션 종료</span></span></div>
+      <div class="ds-stage">
+        <img class="ds-partner-img" src="/images/about-call-partner.webp" alt="" width="640" height="640" loading="lazy">
+        <span class="ds-wave">👋</span>
+        <span class="ds-name">Emma</span>
+        <div class="ds-cc"><span class="ds-cc-tag">CC · 영어 자막</span><p>Hi! So nice to meet you. How's your day going?</p></div>
+        <div class="ds-pip"><img src="/images/about-call-learner.webp" alt="" width="320" height="320" loading="lazy"><span>나</span></div>
       </div>
-      <div class="ds-help"><span>💡</span><div><b>seafood market</b><small>수산시장 · “We went to a seafood market.”</small></div></div>
-      <div class="ds-card"><small>🌐 대화카드 · 여행</small><b>가장 기억에 남는 여행지는?</b><i>What’s your most memorable trip?</i></div>
-      <div class="ds-bar"><span>🎤</span><span>📹</span><span class="ds-ai">💡 말하기 도움</span><span class="ds-ai">🌐 대화카드</span><span>💬</span></div>
+      <div class="ds-bar"><span>🎤</span><span>📹</span><span class="ds-ai">💡<em>말하기 도움</em></span><span class="ds-ai">🌐<em>대화카드</em></span><span class="ds-chat">💬<em>채팅</em></span></div>
     </div>
   </div>
   <div class="ds-points">
