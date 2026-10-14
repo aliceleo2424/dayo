@@ -1,0 +1,21 @@
+/* Korean glyphs only: NanumSquareRound (OFL-1.1), self-hosted.
+   Latin letters, digits and the rounded English type (Quicksand) are not touched:
+   each face below is limited to Hangul code points.
+   The Korean fallback names already used in the site's font stacks are mapped to it,
+   so no per-page font-family has to change. Remove this file's @import in
+   english-typography.css to restore the previous Korean fonts. */
+@font-face { font-family: "Gowun Dodum"; font-weight: 400; font-display: swap; unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7A3; src: url("/fonts/NanumSquareRoundR.woff2") format("woff2"); }
+@font-face { font-family: "Gowun Dodum"; font-weight: 700; font-display: swap; unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7A3; src: url("/fonts/NanumSquareRoundB.woff2") format("woff2"); }
+@font-face { font-family: "Gowun Dodum"; font-weight: 800; font-display: swap; unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7A3; src: url("/fonts/NanumSquareRoundEB.woff2") format("woff2"); }
+@font-face { font-family: "Pretendard"; font-weight: 400; font-display: swap; unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7A3; src: url("/fonts/NanumSquareRoundR.woff2") format("woff2"); }
+@font-face { font-family: "Pretendard"; font-weight: 700; font-display: swap; unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7A3; src: url("/fonts/NanumSquareRoundB.woff2") format("woff2"); }
+@font-face { font-family: "Pretendard"; font-weight: 800; font-display: swap; unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7A3; src: url("/fonts/NanumSquareRoundEB.woff2") format("woff2"); }
+@font-face { font-family: "Noto Sans KR"; font-weight: 400; font-display: swap; unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7A3; src: url("/fonts/NanumSquareRoundR.woff2") format("woff2"); }
+@font-face { font-family: "Noto Sans KR"; font-weight: 700; font-display: swap; unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7A3; src: url("/fonts/NanumSquareRoundB.woff2") format("woff2"); }
+@font-face { font-family: "Noto Sans KR"; font-weight: 800; font-display: swap; unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7A3; src: url("/fonts/NanumSquareRoundEB.woff2") format("woff2"); }
+@font-face { font-family: "Apple SD Gothic Neo"; font-weight: 400; font-display: swap; unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7A3; src: url("/fonts/NanumSquareRoundR.woff2") format("woff2"); }
+@font-face { font-family: "Apple SD Gothic Neo"; font-weight: 700; font-display: swap; unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7A3; src: url("/fonts/NanumSquareRoundB.woff2") format("woff2"); }
+@font-face { font-family: "Apple SD Gothic Neo"; font-weight: 800; font-display: swap; unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7A3; src: url("/fonts/NanumSquareRoundEB.woff2") format("woff2"); }
+@font-face { font-family: "Malgun Gothic"; font-weight: 400; font-display: swap; unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7A3; src: url("/fonts/NanumSquareRoundR.woff2") format("woff2"); }
+@font-face { font-family: "Malgun Gothic"; font-weight: 700; font-display: swap; unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7A3; src: url("/fonts/NanumSquareRoundB.woff2") format("woff2"); }
+@font-face { font-family: "Malgun Gothic"; font-weight: 800; font-display: swap; unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7A3; src: url("/fonts/NanumSquareRoundEB.woff2") format("woff2"); }

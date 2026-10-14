@@ -1,5 +1,6 @@
 /* Reuse Partner Guide's existing Quicksand source and weights. */
 @import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap");
+@import url("/korean-font.css?v=20261014");
 
 :root {
   --font-dayo-ko-fallback: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic";
