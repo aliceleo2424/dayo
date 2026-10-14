@@ -158,3 +158,6 @@ body[data-customer-page="landing"] .lv-close a { margin-top: 2px; }
   body[data-customer-page="landing"] .lv-close .lv-price { font-size: clamp(52px, 17vw, 72px); }
 }
 @media (prefers-reduced-motion: reduce) { body[data-customer-page="landing"] .lv-question { transform: none; } }
+/* Korean text wraps between words, never inside a word. */
+body[data-customer-page="landing"] .lv-story, body[data-customer-page="landing"] .lv-close, body[data-customer-page="landing"] .lv-question { word-break: keep-all; overflow-wrap: break-word; }
+body[data-customer-page="landing"] .lv-question .lv-question-hint { font-size: 14px; line-height: 1.55; }

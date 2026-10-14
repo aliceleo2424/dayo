@@ -32,16 +32,15 @@
 
     // Marketing examples only: no fake Partners, slots, or changes to live Talk Cards.
     var cards = [
-      ['나라와 문화','Countries & cultures','프랑스 하면 생각나는 것은?','What comes to mind when you think of France?','빵, 에펠탑… 단어 하나로 시작해요.','Bread, the Eiffel Tower… one word is enough.','#ffeeb4'],
-      ['나라와 문화','Countries & cultures','한국 음식 중 무엇을 좋아해요?','Which Korean food do you like?','김밥? 떡볶이? 좋아하는 음식 하나를 골라요.','Gimbap? Tteokbokki? Choose one you like.','#fff3c4'],
-      ['밸런스 게임','This or that','바다 여행 vs 도시 여행?','Beach trip or city trip?','하나만 골라요. 이유는 짧게 말해도 돼요.','Pick one. A short reason is enough.','#ffe8a3'],
-      ['나라와 문화','Countries & cultures','내 나라에서 추천하고 싶은 음식은?','What food would you recommend from your country?','음식 이름부터 말해봐요.','Start with the name of a food.','#fff6d6'],
-      ['밸런스 게임','This or that','아침 커피 vs 저녁 차?','Morning coffee or evening tea?','둘 중 내 취향은?','Which one feels more like you?','#ffebb0']
+      ['나라와 문화','Countries & cultures','프랑스 하면 생각나는 것은?','What comes to mind when you think of France?','답변 예시 · 에펠탑이 떠올라요. / The Eiffel Tower.','Example answer · The Eiffel Tower. / 에펠탑이 떠올라요.','#ffeeb4'],
+      ['나라와 문화','Countries & cultures','한국 음식 중 무엇을 좋아해요?','Which Korean food do you like?','답변 예시 · 김밥을 좋아해요. / I like gimbap.','Example answer · I like gimbap. / 김밥을 좋아해요.','#fff3c4'],
+      ['밸런스 게임','This or that','바다 여행 vs 도시 여행?','Beach trip or city trip?','답변 예시 · 바다요, 쉬고 싶어서요. / Beach, to relax.','Example answer · Beach, to relax. / 바다요, 쉬고 싶어서요.','#ffe8a3'],
+      ['나라와 문화','Countries & cultures','내 나라에서 추천하고 싶은 음식은?','What food would you recommend from your country?','답변 예시 · 김치찌개요, 따뜻해서요. / Kimchi stew — it’s warming.','Example answer · Kimchi stew — it’s warming. / 김치찌개요, 따뜻해서요.','#fff6d6'],
+      ['밸런스 게임','This or that','아침 커피 vs 저녁 차?','Morning coffee or evening tea?','답변 예시 · 아침엔 커피요. / Coffee in the morning.','Example answer · Coffee in the morning. / 아침엔 커피요.','#ffebb0']
     ];
     var card = document.querySelector('[data-story-card]');
     var dots = card.querySelector('.lv-story-dots');
-    var index = 0, paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var timer;
+    var index = 0;
     dots.innerHTML = cards.map(function (_, n) { return '<button type="button" data-story-index="' + n + '" aria-label="질문 ' + (n + 1) + '" aria-pressed="false"></button>'; }).join('');
     function paint() {
       var en = window.DayOI18n && window.DayOI18n.getLang() === 'EN';
@@ -52,29 +51,19 @@
       card.querySelector('[data-story-ko]').textContent = value[en ? 3 : 2];
       card.querySelector('[data-story-en]').textContent = en ? value[2] : value[3];
       card.querySelector('[data-story-hint]').textContent = value[en ? 5 : 4];
-      card.querySelector('[data-story-pause]').textContent = paused ? '▶' : 'Ⅱ';
-      card.querySelector('[data-story-pause]').setAttribute('aria-label', en ? paused ? 'Resume automatic questions' : 'Pause automatic questions' : paused ? '질문 자동 넘김 시작' : '질문 자동 넘김 멈추기');
-      card.querySelector('[data-story-prev]').setAttribute('aria-label', en ? 'Previous question' : '이전 질문');
       card.querySelector('[data-story-next]').setAttribute('aria-label', en ? 'Next question' : '다음 질문');
       dots.querySelectorAll('button').forEach(function (b, n) { b.setAttribute('aria-pressed', String(n === index)); b.setAttribute('aria-label', (en ? 'Question ' : '질문 ') + (n + 1)); });
-    }
-    function restart() {
-      clearInterval(timer);
-      if (!paused) timer = setInterval(function () {
-        if (document.hidden || document.body.getAttribute('data-customer-view') !== 'home' || card.matches(':hover') || card.contains(document.activeElement)) return;
-        index = (index + 1) % cards.length; paint();
-      }, 7000);
     }
     card.addEventListener('click', function (event) {
       var button = event.target.closest('button');
       if (!button) return;
-      if (button.hasAttribute('data-story-pause')) paused = !paused;
-      else if (button.hasAttribute('data-story-index')) index = Number(button.getAttribute('data-story-index'));
-      else index = (index + (button.hasAttribute('data-story-prev') ? cards.length - 1 : 1)) % cards.length;
-      paint(); restart();
+      if (button.hasAttribute('data-story-index')) index = Number(button.getAttribute('data-story-index'));
+      else if (button.hasAttribute('data-story-next')) index = (index + 1) % cards.length;
+      else return;
+      paint();
     });
     document.addEventListener('dayo:langchange', function () { render(); paint(); });
-    paint(); restart();
+    paint();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
