@@ -173,13 +173,13 @@ export default function PartnerApplicationsPage() {
             <td className="p-2">{star(row)}</td>
             <td className="p-3"><button className="break-words text-left underline" onClick={() => void open(row)}>{row.full_name}</button><div className="mt-1 flex gap-2">{indicators(row)}</div></td>
             <td className="p-3">{row.nationality}</td><td className="p-3">{row.partner_languages.join(', ')}</td><td className="p-3">{visaLabel(row)}<div className="text-xs text-muted-foreground">{applicationResidence(row) === 'korea' ? 'Korea' : row.current_country || '—'}</div></td><td className="p-3">{row.weekly_session_capacity}</td>
-            <td className="p-3">{row.review_score}/7 · {row.review_status}</td><td className="p-3">{row.test_status} / {row.final_status}</td><td className="whitespace-nowrap p-3">{submitted(row)}</td>
+            <td className="p-3">{row.review_score}/5 · {row.review_status}</td><td className="p-3">{row.test_status} / {row.final_status}</td><td className="whitespace-nowrap p-3">{submitted(row)}</td>
           </tr>)}</tbody></table>
       </div>
       <div className="space-y-3 md:hidden">{visible.map(row => <article key={row.id} className="space-y-2 rounded border p-3 text-sm">
         <div className="flex items-start gap-2">{star(row)}<div className="min-w-0 flex-1"><button className="break-words text-left font-semibold underline" onClick={() => void open(row)}>{row.full_name}</button><div className="mt-1 flex gap-2">{indicators(row)}</div></div></div>
         <p className="break-words">{row.nationality} · {row.partner_languages.join(', ')}</p><p>{visaLabel(row)} · {row.current_country || 'Location not collected'} · {row.weekly_session_capacity}/week</p>
-        <p>{row.review_score}/7 · {row.review_status} · {row.final_status}</p><p className="text-xs text-muted-foreground">{submitted(row)}</p>
+        <p>{row.review_score}/5 · {row.review_status} · {row.final_status}</p><p className="text-xs text-muted-foreground">{submitted(row)}</p>
       </article>)}</div>
       <Dialog open={!!selected} onOpenChange={value => { if (!value && !busy) setSelected(null); }}>
         <DialogContent aria-describedby="application-review-description" className="max-h-[90vh] max-w-3xl overflow-y-auto">
