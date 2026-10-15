@@ -14,6 +14,10 @@
  function imageKo(){return window.partnerLetterLocale?window.partnerLetterLocale()==='KO':!!(window.DayOI18n&&String(window.DayOI18n.getLang()).toLowerCase()==='ko');}
  function imageCopy(en,ko){return imageKo()?ko:en;}
  // Owner decision 2026-10-14: show a few concrete words the learner said; the Partner picks 1-2 for one illustration.
+ // Owner decision 2026-10-15: a Letter needs at least 400 characters (spaces and punctuation included).
+ var LETTER_MIN=400,letterKo=false;
+ function letterLength(){var area=el('popup-partner-comment');return area?Array.from(area.value.trim()).length:0;}
+ function paintLetterCount(){var n=el('pr-letter-count');if(!n)return;var len=letterLength(),ok=len>=LETTER_MIN;n.textContent=ok?(letterKo?len+'자 · 보낼 수 있어요':len+' characters · ready to send'):(letterKo?len+' / '+LETTER_MIN+'자 (최소 '+LETTER_MIN+'자)':len+' / '+LETTER_MIN+' characters minimum');n.classList.toggle('is-ready',ok);}
  var IMAGE_DISPLAY=4,imageOffset=0,imagePicked=[],imageMaxPick=1,imageChoicesBooking='';
  function choiceLabel(c){return imageKo()?c.label:(c.label_en||c.label);}
  function pickedChoices(){return imagePicked.map(function(id){return imageChoices.find(function(c){return c.id===id;});}).filter(Boolean);}
@@ -95,6 +99,7 @@
  }
  function sentenceParts(){return el('popup-partner-comment').value.split(/\n+/).map(function(s){return s.trim();}).filter(Boolean);}
  function showSelected(){
+  paintLetterCount();
   var host=el('pr-letter-selected');if(!host)return;host.replaceChildren();
   var parts=sentenceParts();if(parts.length<2)return;
   parts.forEach(function(sentence,i){var row=document.createElement('div'),text=document.createElement('p');text.textContent=sentence;row.append(text);
@@ -134,7 +139,7 @@
   var ko=window.partnerLetterLocale ? window.partnerLetterLocale()==='KO' : !!(window.DayOI18n&&window.DayOI18n.getLang&&String(window.DayOI18n.getLang()).toLowerCase()==='ko'&&localStorage.getItem('dayo_lang')==='KO');
   el('pr-title').textContent=ko?'파트너 레터':'Partner Letter';
   if(window.DayOKeepsakePartnerReview)window.DayOKeepsakePartnerReview.open(context.bookingId,root,ko?'ko':'en',{autoPreview:true});
-  localizeStatic(ko);
+  localizeStatic(ko);letterKo=ko;paintLetterCount();
   root.querySelector('.pr-intro').textContent=ko?'오늘 이 고객과 실제로 나눈 이야기만 담아 주세요. 누구에게나 보낼 수 있는 인사말은 피해주세요.':'Write a personal note about something this learner really shared with you. Only you could write it.';
   if(!el('btn-final-partner-submit').disabled)el('btn-final-partner-submit').textContent=ko?'메시지 보내고 마치기':'Send letter and finish';
  }
@@ -152,5 +157,5 @@
   t('.pr-transcript summary','View conversation transcript — reference only','대화 기록 보기 — 참고용');
  }
  document.addEventListener('dayo:langchange',function(){if(initialized&&root&&root.style.display!=='none')open(context);});
- window.DayOPartnerReport={open:open,refresh:function(data){context=data||context;if(initialized&&!selectedKeyword)paintSuggestions();},payload:function(){return {stamp:null,partnerComment:el('popup-partner-comment').value,keyword:selectedKeyword||null,illustUrl:imageUrl,illustrationToken:window.DayOPartnerIllustration&&(window.DayOPartnerIllustration.state(context.bookingId)||{}).token};}};
+ window.DayOPartnerReport={letterMin:LETTER_MIN,letterLength:letterLength,open:open,refresh:function(data){context=data||context;if(initialized&&!selectedKeyword)paintSuggestions();},payload:function(){return {stamp:null,partnerComment:el('popup-partner-comment').value,keyword:selectedKeyword||null,illustUrl:imageUrl,illustrationToken:window.DayOPartnerIllustration&&(window.DayOPartnerIllustration.state(context.bookingId)||{}).token};}};
 })();

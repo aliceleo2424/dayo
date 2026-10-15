@@ -3584,7 +3584,7 @@
       box-sizing: border-box !important;
     }
   </style>
-  <link rel="stylesheet" href="partner-report.css?v=20261005-recap-integration">
+  <link rel="stylesheet" href="partner-report.css?v=20261015-letter-min">
   <link rel="stylesheet" href="/brand-surfaces.css?v=20261005-logo-palette">
 <link rel="stylesheet" href="conversation-partner-feedback.css?v=20261008">
 <script src="conversation-partner-feedback.js?v=20261008" defer></script>
@@ -7238,6 +7238,7 @@
       preview:['This is a preview. No Letter was sent.','미리보기입니다. 레터를 보내지 않았어요.'],
       invalid_booking:['This booking could not be verified. Please reopen the conversation.','예약을 확인하지 못했습니다. 대화를 다시 열어 주세요.'],
       validation:['Write a Letter of 1–1,000 characters before sending.','1~1,000자 이내로 레터를 작성해 주세요.'],
+      too_short:['Please write at least 400 characters (spaces included) before sending.','공백 포함 400자 이상 작성해야 보낼 수 있어요.'],
       letter_save_failed:['We couldn’t send your Letter. Your draft is still here. Please try again.','레터를 보내지 못했습니다. 작성한 내용은 그대로 있어요. 다시 시도해 주세요.'],
       preflight_failed:['We couldn’t check this session’s Letter status. Sending was not attempted. Your draft is still here. Please check status again.','이 세션의 레터 저장 상태를 확인하지 못해 전송을 시도하지 않았어요. 작성한 내용은 그대로 있어요. 상태를 다시 확인해 주세요.'],
       status_check_failed:['We couldn’t confirm the status. Your draft is still here. Check status before trying to send again.','저장 상태를 확인하지 못했습니다. 작성한 내용은 그대로 있어요. 다시 보내기 전에 상태를 확인해 주세요.'],
@@ -7395,6 +7396,10 @@
         cardData.partnerComment = String(field ? field.value : cardData.partnerComment || '').trim();
         if (!cardData.partnerComment || cardData.partnerComment.length > 1000) {
           setPartnerReportSubmitStatus('validation', false); return;
+        }
+        // Owner decision 2026-10-15: minimum 400 characters, spaces and punctuation included.
+        if (Array.from(cardData.partnerComment).length < 400) {
+          setPartnerReportSubmitStatus('too_short', false); return;
         }
         // Owner decision 2026-10-15: the image shown in the Letter popup goes with the Letter unless "Don't use"
         // was chosen. Bounded so an image problem never blocks or delays the Letter beyond a few seconds.
@@ -7750,7 +7755,7 @@
   <div id="partner-report-popup" style="display:none;position:fixed;inset:0;z-index:99999999;justify-content:center;align-items:center" role="dialog" aria-modal="true" aria-labelledby="pr-title">
     <div class="pr-dialog">
       <header><h2 id="pr-title">Partner Letter</h2><p class="pr-intro">Write a personal note about something this learner really shared with you. Only you could write it.</p></header>
-      <section class="pr-section pr-letter-compose"><h3>A note only this learner could receive</h3><p class="pr-letter-steps">Recall <strong>one real detail</strong> they shared. Add <strong>your genuine response</strong>. End with <strong>something specific</strong> you'd love to hear next time.</p><p class="pr-letter-warning">Please avoid generic lines like “I enjoyed talking to you today.” Never invent a story or pretend the learner said something you did not hear.</p><label class="pr-field" for="popup-partner-comment">Your personal message<textarea id="popup-partner-comment" rows="6" maxlength="1000" placeholder="What did they tell you today? What genuinely interested you? What would you ask them next time?"></textarea></label><div id="pr-letter-selected" class="pr-letter-selected"></div></section>
+      <section class="pr-section pr-letter-compose"><h3>A note only this learner could receive</h3><p class="pr-letter-steps">Recall <strong>one real detail</strong> they shared. Add <strong>your genuine response</strong>. End with <strong>something specific</strong> you'd love to hear next time.</p><p class="pr-letter-warning">Please avoid generic lines like “I enjoyed talking to you today.” Never invent a story or pretend the learner said something you did not hear.</p><label class="pr-field" for="popup-partner-comment">Your personal message<textarea id="popup-partner-comment" rows="6" maxlength="1000" placeholder="What did they tell you today? What genuinely interested you? What would you ask them next time?"></textarea></label><div id="pr-letter-count" class="pr-letter-count" aria-live="polite"></div><div id="pr-letter-selected" class="pr-letter-selected"></div></section>
       <details class="pr-section pr-letter-assist" open><summary>Optional: find details in the saved conversation</summary><p class="pr-hint">Only real, verified learner speech or chat can generate sentence ideas. If no reliable text was recorded, write from what you actually remember—never guess.</p><div class="pr-chips" id="pr-letter-words"></div><div class="pr-chips" id="pr-letter-topics" aria-label="Choose a recorded story"></div><div class="pr-letter-tools"><button type="button" id="pr-letter-refresh">Check saved conversation</button><button type="button" id="pr-letter-generate" disabled>Help phrase this memory</button></div><p id="pr-letter-status" class="pr-hint" role="status"></p><div id="pr-letter-drafts" class="pr-letter-drafts"></div></details>
       <details class="pr-section pr-optional" open><summary>Add a conversation keepsake (optional)</summary><div class="pr-keyword-layout"><div><p id="pr-keyword-hint" class="pr-hint"></p><div id="pr-keyword-options" class="pr-chips" aria-label="Suggested conversation themes"></div><div class="pr-letter-tools"><button type="button" id="pr-image-make" disabled>Create illustration</button><button type="button" id="pr-keyword-more" hidden>Show other words</button></div><div id="pr-custom-keyword-field" hidden><label class="pr-field">Write a short topic or phrase<input type="text" id="pr-custom-keyword" maxlength="60" placeholder="e.g. Seoul Forest cafés"></label><button type="button" id="pr-use-keyword">Use theme</button></div><p id="pr-keyword-value" class="pr-hint" aria-live="polite"></p></div><figure class="pr-preview"><img id="pr-illustration" alt="Conversation keepsake illustration" hidden><figcaption id="pr-image-status" aria-live="polite">Choose a theme for your illustration. Image generation is optional.</figcaption><button type="button" id="pr-image-retry">Try illustration again</button></figure></div></details>
       <details class="pr-transcript"><summary>View conversation transcript — reference only</summary><div id="popup-transcript-list"></div></details>
@@ -7831,6 +7836,6 @@
   <script src="partner-report-contract.js"></script>
   <script src="partner-illustration.js"></script>
   <script src="keepsake-partner-review.js"></script>
-  <script src="partner-report.js?v=20261008-memory"></script>
+  <script src="partner-report.js?v=20261015-letter-min"></script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 const fs=require('fs'),path=require('path'),assert=require('assert/strict'),vm=require('vm'),{JSDOM}=require('jsdom'),{webcrypto,createHash}=require('node:crypto');
 const root=path.resolve(__dirname,'..'),B='44444444-4444-4444-8444-444444444444',P='22222222-2222-4222-8222-222222222222';
-const NOTE='I enjoyed our conversation about your favourite café.';
+const NOTE='I enjoyed our conversation about your favourite café. '.repeat(8).trim(); // Letters need at least 400 characters (owner decision 2026-10-15).
 const hash=s=>createHash('sha256').update(String(s).replace(/\r\n?/g,'\n').trim(),'utf8').digest('hex');
 const state=(s)=>({exists:!!s,letter_sent:!!s,letter_digest:s?hash(s):null});
 const response=s=>({ok:true,json:async()=>state(s)});
@@ -34,6 +34,7 @@ function harness(o={}){
 async function turns(){for(let i=0;i<8;i++)await new Promise(setImmediate)}
 async function main(){
  let h=harness({note:''});await h.send();assert.equal(h.counts.save,0);assert.match(h.status(),/Write a Letter/);assert.equal(h.button().disabled,false);
+ h=harness({note:'Too short to send.'});await h.send();assert.equal(h.counts.save,0);assert.match(h.status(),/at least 400 characters/);assert.equal(h.button().disabled,false);
  h=harness({save:()=>({ok:false,confirmedFailure:true})});await h.send();assert.match(h.status(),/couldn’t send/);assert.equal(h.counts.read,2);assert.equal(h.counts.finish,0);assert.equal(h.w.document.querySelector('textarea').value,NOTE);
  h=harness({save:()=>({ok:false}),read:n=>response(n>1?NOTE:'')});await h.send();assert.equal(h.counts.save,1);assert.equal(h.counts.finish,1);assert.equal(h.status(),'Letter sent.');await h.send();assert.equal(h.counts.save,1);
  h=harness({save:()=>({ok:false}),read:n=>n===1?response(''):{ok:false}});await h.send();assert.match(h.status(),/couldn’t confirm the status/);assert.equal(h.button().textContent,'Check status');await h.send();assert.equal(h.counts.save,1);assert.equal(h.counts.finish,0);
