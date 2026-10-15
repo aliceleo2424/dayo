@@ -1,6 +1,27 @@
 <!DOCTYPE html>
 <html lang="ko" class="dayo-auth-pending">
 <head>
+  <script>
+    /* Partner Lounge first without showing My Page (owner request 2026-10-16). Runs before anything renders.
+       Only when this browser's signed-in user was already confirmed as an approved partner; a hash view,
+       choosing user mode in this tab, or a redirect in the last 15 seconds (loop guard) keeps My Page. */
+    (function () {
+      try {
+        if (location.hash || sessionStorage.getItem('dayo_partner_user_view') === '1') return;
+        var flag = localStorage.getItem('dayo_partner_lounge_uid'); if (!flag) return;
+        var uid = '', keys = Object.keys(localStorage);
+        for (var i = 0; i < keys.length && !uid; i++) {
+          if (keys[i].indexOf('sb-') !== 0 || keys[i].indexOf('-auth-token') < 0) continue;
+          var p = JSON.parse(localStorage.getItem(keys[i]) || 'null'), u = p && (p.user || (p.currentSession && p.currentSession.user));
+          if (u && u.id) uid = u.id;
+        }
+        if (!uid || uid !== flag) return;
+        if (Date.now() - Number(sessionStorage.getItem('dayo_lounge_auto') || 0) < 15000) return;
+        sessionStorage.setItem('dayo_lounge_auto', String(Date.now()));
+        location.replace('partner.html');
+      } catch (e) { /* stay on My Page */ }
+    })();
+  </script>
   <link rel="icon" type="image/png" href="/images/logo-square.png">
   <link rel="apple-touch-icon" href="/images/logo-square.png">
   <meta charset="UTF-8">
@@ -1950,7 +1971,7 @@
   <script src="memory-card.js"></script>
   <script src="insta-card-export.js"></script>
   <script src="tea-table.js"></script>
-  <script src="role-switch.js?v=20261016-lounge-first"></script>
+  <script src="role-switch.js?v=20261016-lounge-direct"></script>
   <script src="greeting-banner.js"></script>
   <script src="mypage-dashboard.js"></script>
 <link rel="stylesheet" href="conversation-posts.css">

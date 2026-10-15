@@ -479,6 +479,13 @@
     if (typeof window.fetchAuthProfile === 'function') {
       try { await window.fetchAuthProfile(); } catch (e) { /* ignore */ }
     }
+    // Approved partners go straight to Partner Lounge (owner request 2026-10-16); everyone else to My Page.
+    var signedInRole = String(window._dayoAuthProfile && window._dayoAuthProfile.role || '').trim().toLowerCase();
+    if (signedInRole === 'partner' && data.user && data.user.id) {
+      try { localStorage.setItem('dayo_partner_lounge_uid', data.user.id); sessionStorage.removeItem('dayo_partner_user_view'); } catch (e) { /* ignore */ }
+      window.location.href = '/partner.html';
+      return;
+    }
     window.location.href = '/mypage.html';
   };
 

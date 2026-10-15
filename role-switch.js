@@ -82,6 +82,8 @@
         if (myRun !== accessRunId) return;
         var profile = result.error ? null : result.data;
         var role = String(profile && profile.role || '').trim().toLowerCase().replace(/[\s-]+/g, '_');
+        // Remember (per user) that this browser may open Partner Lounge directly next time; cleared otherwise.
+        try { if (role === 'partner') localStorage.setItem('dayo_partner_lounge_uid', user.id); else localStorage.removeItem('dayo_partner_lounge_uid'); } catch (e) { /* ignore */ }
         setPartnerAccess(role === 'partner');
       } catch (err) {
         if (myRun === accessRunId) setPartnerAccess(false);
