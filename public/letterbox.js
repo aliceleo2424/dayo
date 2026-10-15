@@ -6,7 +6,11 @@
   'use strict';
   var DEFAULT_IMAGE = 'images/keepsake-default.webp';
   var LETTER_HASHES = ['#letters', '#talkArchiveTitle'];
-  var PAPERS = ['#f3e3c3', '#e6eddc', '#f4ddd0', '#dde6ee', '#f6ecd4', '#ebe0ea', '#e3ead9'];
+  // Soft envelope tints: [front, flap/back, fold line]. Rotates so neighbours differ without standing out.
+  var TINTS = [['#fbf3d7', '#f2e5c3', '#e2cf9f'], ['#f7e8e2', '#efd8cf', '#ddbfb3'], ['#ebf0e3', '#dce6d2', '#c3d1b6'], ['#e9eef1', '#d9e3e9', '#bfcdd6']];
+  var FLAP_SEALED = 'M0 64 L85 100 L170 64 L170 30 L0 30 Z', FLAP_OPEN = 'M0 64 L85 4 L170 64 Z';
+  var FRONT_OPEN = 'M0 64 L0 164 L170 164 L170 64 L85 112 Z', FRONT_SEALED = 'M0 64 L0 164 L170 164 L170 64 L85 100 Z', BACK = 'M0 64 L170 64 L170 164 L0 164 Z';
+  var EMPTY_TIP = ['대화를 마치면, 우리가 나눈 이야기 속 한 장면이 그림이 되어 편지로 와요!', 'After each conversation, a scene from the story you shared becomes a picture and arrives as a letter!'];
   var UNREAD_DAYS = 14;
   var letters = [], images = {}, lastFocus = null, renderRun = 0, loaded = false;
 
@@ -43,18 +47,30 @@
         (unread ? ' · ' + t('아직 열지 않은 편지 <strong class="lb-unread-count">' + unread + '통</strong>', '<strong class="lb-unread-count">' + unread + '</strong> unopened') : '')
         : t('대화를 마치면 파트너의 편지가 이곳에 도착해요.', 'Letters from your partners arrive here after each conversation.')) + '</p></div>';
     if (!letters.length) {
-      host.innerHTML = '<div class="lb">' + head + '<div class="lb-empty">' + t('아직 받은 편지가 없어요.<br>첫 대화를 마치면 파트너가 오늘 이야기를 담아 편지를 보내요.', 'No letters yet.<br>After your first conversation, your partner writes you a letter about it.') +
+      // Empty state: faint dashed envelopes that hint at what will arrive.
+      host.innerHTML = '<div class="lb">' + head + '<ul class="lb-grid lb-grid--ghost">' + [0, 1, 2, 3].map(function (i) {
+        return '<li><button type="button" class="lb-ghost" data-ghost="' + i + '" aria-pressed="false" aria-controls="lb-ghost-tip" aria-label="' + esc(t('아직 비어 있는 편지 자리', 'An empty letter spot')) + '">' +
+          '<svg viewBox="0 0 170 120" preserveAspectRatio="none" aria-hidden="true"><path d="M1 1 L169 1 L169 119 L1 119 Z" class="lb-ghost-body"></path><path d="M1 1 L85 62 L169 1"></path></svg></button></li>';
+      }).join('') + '</ul><p class="lb-ghost-tip" id="lb-ghost-tip" role="status" hidden>' + esc(t(EMPTY_TIP[0], EMPTY_TIP[1])) + '</p>' +
+        '<div class="lb-empty">' + t('첫 대화가 끝나면,<br>파트너의 편지가 이곳에 도착해요.', 'After your first conversation,<br>your partner’s letter arrives here.') +
         '<br><a href="/">' + t('대화 예약하러 가기', 'Book a conversation') + '</a></div></div>';
       return;
     }
     host.innerHTML = '<div class="lb">' + head + '<ul class="lb-grid">' + letters.map(function (l, i) {
-      return '<li><button type="button" class="lb-env' + (l.unread ? ' is-unread' : '') + '" data-letter="' + i + '" style="--lb-paper:' + PAPERS[i % PAPERS.length] + '" aria-label="' +
-        esc(t(l.name + '의 편지, ' + longDate(l.date) + (l.unread ? ', 읽지 않음' : ''), 'Letter from ' + l.name + ', ' + longDate(l.date) + (l.unread ? ', unopened' : ''))) + '">' +
-        '<span class="lb-fold lb-fold--left"></span><span class="lb-fold lb-fold--right"></span><span class="lb-fold lb-fold--bottom"></span><span class="lb-fold lb-fold--flap"></span>' +
-        (l.unread ? '<span class="lb-seal" aria-hidden="true">D</span>' : '') +
-        '<img class="lb-stamp" alt="" src="' + esc(images[l.id] || DEFAULT_IMAGE) + '" data-stamp="' + esc(l.id) + '">' +
-        '<span class="lb-env-meta"><span class="lb-from">From ' + esc(l.name) + '</span><span class="lb-date">' + shortDate(l.date) + '</span></span></button></li>';
+      var tint = TINTS[i % TINTS.length], sealed = l.unread;
+      return '<li><button type="button" class="lb-env' + (sealed ? ' is-unread' : ' is-open') + '" data-letter="' + i + '" style="--lb-front:' + tint[0] + ';--lb-flap:' + tint[1] + ';--lb-fold:' + tint[2] + '" aria-label="' +
+        esc(t(l.name + '의 편지, ' + longDate(l.date) + (sealed ? ', 읽지 않음' : ''), 'Letter from ' + l.name + ', ' + longDate(l.date) + (sealed ? ', unopened' : ''))) + '">' +
+        '<svg class="lb-env-back" viewBox="0 0 170 164" preserveAspectRatio="none" aria-hidden="true">' + (sealed ? '' : '<path d="' + BACK + '"></path>') + '<path d="' + (sealed ? FLAP_SEALED : FLAP_OPEN) + '"></path></svg>' +
+        (sealed ? '' : '<span class="lb-peek" aria-hidden="true"><span class="lb-peek-text">' + esc(l.body.slice(0, 120)) + '</span></span>') +
+        '<svg class="lb-env-front" viewBox="0 0 170 164" preserveAspectRatio="none" aria-hidden="true"><path d="' + (sealed ? FRONT_SEALED : FRONT_OPEN) + '"></path></svg>' +
+        (sealed ? '<span class="lb-seal" aria-hidden="true">D</span>' : '') +
+        (sealed ? '<span class="lb-new">' + t('새 편지', 'New') + '</span>' : '') + '<span class="lb-env-meta"><span class="lb-from">From ' + esc(l.name) + '</span><span class="lb-date">' + shortDate(l.date) + '</span></span></button></li>';
     }).join('') + '</ul><p class="lb-hint">' + t('봉투를 누르면 편지가 열려요', 'Tap an envelope to open the letter') + '</p></div>';
+  }
+  function showGhostTip(button) {
+    var host = root(); if (!host) return;
+    host.querySelectorAll('[data-ghost]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === button)); });
+    var tip = host.querySelector('.lb-ghost-tip'); if (tip) tip.hidden = false;
   }
 
   // Approved keepsakes only; everything else keeps the DayO default illustration.
@@ -69,7 +85,6 @@
         var img = r && r.__dayoKeepsakeImage;
         if (img && img.approved === true && img.booking_id === l.report.booking_id && /^blob:/.test(img.url)) {
           images[l.id] = img.url;
-          var stamp = document.querySelector('[data-stamp="' + CSS.escape(l.id) + '"]'); if (stamp) stamp.src = img.url;
         }
       } catch (_) { /* default illustration stays */ }
     }
@@ -120,7 +135,10 @@
 
   function init() {
     if (document.body.getAttribute('data-customer-page') !== 'mypage' || !root()) return;
-    root().addEventListener('click', function (e) { var b = e.target.closest('[data-letter]'); if (b) openLetter(Number(b.getAttribute('data-letter'))); });
+    root().addEventListener('click', function (e) {
+      var b = e.target.closest('[data-letter]'); if (b) { openLetter(Number(b.getAttribute('data-letter'))); return; }
+      var g = e.target.closest('[data-ghost]'); if (g) showGhostTip(g);
+    });
     document.addEventListener('dayo:reportsloaded', function (e) { load(e.detail && e.detail.reports); });
     document.addEventListener('dayo:langchange', render);
     window.addEventListener('hashchange', syncView);

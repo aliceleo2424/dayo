@@ -13,21 +13,32 @@ body[data-mypage-view="letters"] .mypage-container > :not(#dayo-letterbox) { dis
 .lb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: 18px 16px; margin: 0; padding: 0; list-style: none; }
 @media (max-width: 480px) { .lb-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; } }
 
-.lb-env { position: relative; display: block; width: 100%; aspect-ratio: 1.42 / 1; padding: 0; border: none; border-radius: 6px; overflow: hidden; cursor: pointer; font-family: inherit; background: var(--lb-paper, #f3e3c3); box-shadow: 0 6px 14px rgba(63, 54, 39, .14); transition: transform .18s ease, box-shadow .18s ease; }
-.lb-env:hover { transform: translateY(-3px) rotate(-.6deg); box-shadow: 0 10px 20px rgba(63, 54, 39, .18); }
-.lb-env:focus-visible { outline: 3px solid var(--lb-sage); outline-offset: 4px; }
-.lb-env.is-unread { box-shadow: 0 6px 14px rgba(63, 54, 39, .14), 0 0 0 2px var(--lb-sage); }
-.lb-fold { position: absolute; inset: 0; pointer-events: none; }
-.lb-fold--left { background: rgba(90, 68, 40, .07); clip-path: polygon(0 0, 52% 56%, 0 100%); }
-.lb-fold--right { background: rgba(90, 68, 40, .07); clip-path: polygon(100% 0, 48% 56%, 100% 100%); }
-.lb-fold--bottom { background: rgba(255, 255, 255, .28); clip-path: polygon(0 100%, 50% 50%, 100% 100%); }
-.lb-fold--flap { background: rgba(90, 68, 40, .08); clip-path: polygon(0 0, 100% 0, 50% 40%); }
-.lb-env.is-unread .lb-fold--flap { background: rgba(90, 68, 40, .16); clip-path: polygon(0 0, 100% 0, 50% 58%); }
-.lb-seal { position: absolute; left: 50%; top: 50%; width: 30px; height: 30px; margin: -21px 0 0 -15px; border-radius: 50%; background: var(--lb-sage); color: #fffcf6; font: 700 13px/30px 'Gowun Batang', serif; text-align: center; box-shadow: 0 0 0 3px rgba(95, 125, 99, .35), 0 2px 4px rgba(0, 0, 0, .2); }
-.lb-stamp { position: absolute; top: 8px; right: 8px; width: 30px; height: 36px; object-fit: cover; padding: 2px; background: #fff; outline: 1.5px dashed #fff; outline-offset: 1px; box-shadow: 0 1px 3px rgba(0, 0, 0, .18); }
-.lb-env-meta { position: absolute; left: 10px; right: 10px; bottom: 8px; display: flex; justify-content: space-between; align-items: baseline; gap: 6px; text-align: left; }
+/* Envelope: sealed (unread) shows a closed flap and wax seal; opened shows the flap up and the letter peeking out. */
+.lb-env { position: relative; display: block; width: 100%; aspect-ratio: 170 / 164; padding: 0; border: none; background: transparent; cursor: pointer; font-family: inherit; color: var(--lb-ink); filter: drop-shadow(0 5px 9px rgba(84, 70, 48, .12)); transition: transform .18s ease; }
+.lb-env:hover { transform: translateY(-3px); }
+.lb-env:focus-visible { outline: 3px solid var(--lb-sage); outline-offset: 4px; border-radius: 6px; }
+.lb-env svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.lb-env-back path { fill: var(--lb-flap, #f2e5c3); stroke: var(--lb-fold, #e2cf9f); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.lb-env-front path { fill: var(--lb-front, #fbf3d7); stroke: var(--lb-fold, #e2cf9f); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.lb-peek { position: absolute; left: 8%; right: 8%; top: 12%; height: 58%; box-sizing: border-box; padding: 9px 10px; background: #fffefb; border-radius: 4px; box-shadow: 0 2px 8px rgba(84, 70, 48, .14); font-family: 'Gowun Batang', serif; font-size: 11.5px; line-height: 1.6; color: #4a4033; text-align: left; overflow: hidden; transition: transform .2s ease; }
+.lb-peek-text { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; max-height: 4.8em; overflow: hidden; white-space: normal; overflow-wrap: anywhere; }
+.lb-env:hover .lb-peek { transform: translateY(-4px); }
+.lb-seal { position: absolute; left: 50%; top: 61%; width: 32px; height: 32px; margin: -16px 0 0 -16px; border-radius: 50%; background: var(--lb-sage); color: #fffcf6; font: 700 13px/32px 'Gowun Batang', serif; text-align: center; box-shadow: inset 0 0 0 4px #7a9580, 0 2px 4px rgba(47, 74, 51, .25); }
+.lb-env-meta { position: absolute; left: 10px; right: 10px; bottom: 8px; display: flex; flex-direction: column; gap: 1px; text-align: left; }
+.lb-new { position: absolute; top: 22%; right: 10px; padding: 2px 8px; border-radius: 999px; background: #fffcf6; font-size: 11px; font-weight: 800; color: var(--lb-sage-dark); box-shadow: 0 1px 3px rgba(84, 70, 48, .12); }
 .lb-from { font-family: 'Gowun Batang', serif; font-size: 15px; font-weight: 700; color: var(--lb-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lb-date { flex: 0 0 auto; font-size: 11px; font-weight: 700; color: #6b5a42; }
+.lb-date { font-size: 11px; font-weight: 700; color: #6b5a42; }
+
+/* Empty letterbox: faint dashed envelopes; tapping one reveals what will arrive. */
+.lb-ghost { position: relative; display: block; width: 100%; aspect-ratio: 170 / 120; padding: 0; border: none; background: transparent; cursor: pointer; opacity: .7; transition: transform .2s ease, opacity .2s ease; }
+.lb-ghost:hover, .lb-ghost[aria-pressed="true"] { opacity: 1; transform: translateY(-3px); }
+.lb-ghost:focus-visible { outline: 3px solid var(--lb-sage); outline-offset: 4px; border-radius: 6px; }
+.lb-ghost svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.lb-ghost path { fill: none; stroke: #cdbb97; stroke-width: 1.2; stroke-dasharray: 5 4; vector-effect: non-scaling-stroke; }
+.lb-ghost path.lb-ghost-body { fill: rgba(251, 243, 215, .55); }
+.lb-ghost-tip { margin: 16px 0 0; padding: 14px 16px; border-radius: 16px; background: #fbf3d7; font-family: 'Gowun Batang', serif; font-size: 16px; line-height: 1.7; color: var(--lb-ink); }
+.lb-ghost-tip[hidden] { display: none; }
+.lb-grid--ghost + .lb-ghost-tip + .lb-empty, .lb-grid--ghost + .lb-ghost-tip[hidden] + .lb-empty { margin-top: 16px; }
 .lb-hint { margin: 16px 0 0; text-align: center; font-size: 12px; color: #8b7d70; }
 
 .lb-empty { padding: 36px 20px; text-align: center; background: #fffcf6; border: 1px dashed #d8cbb2; border-radius: 16px; color: var(--lb-soft); font-size: 14px; line-height: 1.7; }
