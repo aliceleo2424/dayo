@@ -118,7 +118,7 @@
     "tickets.v2.trial.appliedNotice": { KO: "첫 체험 혜택을 성공적으로 받으셨어요.", EN: "You’ve successfully received your first-trial benefit." },
     "tickets.v2.landingSaving": { KO: "1회권 기준 {saving} 절약", EN: "Save {saving} vs. single tickets" },
     "tickets.v2.saving": { KO: "1회권 {count}번보다 {saving} 절약", EN: "Save {saving} vs. {count} single tickets" },
-    "tickets.v2.priceNote": {"KO":"회당 금액은 총액을 횟수로 나눈 값이며, 절약액은 1회권 {single}을 같은 횟수만큼 구매할 때와 비교했어요. 10+1 혜택은 총 11회에 이미 포함돼요.","EN":"Per-session prices divide the total by the session count. Savings compare the same number of {single} single tickets. The 10+1 benefit is already included in the 11 sessions."},
+    "tickets.v2.priceNote": {"KO":"할인율은 1회권({single})을 같은 횟수만큼 살 때와 비교했어요. 10+1, 30+3 혜택은 횟수에 포함돼 있어요.","EN":"Discounts compare buying the same number of single tickets ({single}). 10+1 and 30+3 bonuses are included in the session count."},
     "tickets.v2.continue": { KO: "{price} 이용권 확인 →", EN: "Review tickets · {price} →" },
     "tickets.v2.noRenewal": { KO: "자동결제 없이, 선택한 이용권만 결제해요.", EN: "Pay only for the tickets you choose. No auto-renewal." },
     "tickets.v2.eligibility.loading": {"KO":"체험 구매 자격을 확인하고 있어요.","EN":"Checking trial eligibility…"},

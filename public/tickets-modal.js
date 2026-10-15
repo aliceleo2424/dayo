@@ -244,6 +244,8 @@
     ,'#pricing .ticket-price-card--trial{grid-column:1/-1}#pricing .ticket-price-card:disabled{background:#F1F2EF;border-color:#D4D7D0;color:#6B706B;cursor:not-allowed;box-shadow:none}#pricing .ticket-price-card:disabled:hover{transform:none}#pricing .ticket-landing-total{display:block;color:#263F35;font-size:1.25rem;font-weight:700;margin-top:8px}#pricing .tk-price-unit,#pricing .tk-price-compare{font-size:12px;line-height:1.6;margin:8px 0 0}#pricing .ticket-price-card:focus-visible{outline:3px solid #5F7D63;outline-offset:3px}#pricing [data-landing-trial-retry]{margin:0 0 16px;padding:8px 14px;border:1px solid #5F7D63;background:#FFFBF4;color:#435F4C;border-radius:8px;font:inherit;cursor:pointer}#pricing [hidden]{display:none!important}'
     ,'.tk-choice--disabled{background:#F1F2EF;border-color:#D4D7D0;cursor:not-allowed}.tk-choice--disabled .tk-card__title,.tk-choice--disabled .tk-card__price,.tk-choice--disabled .tk-trial-kicker{color:#6B706B}.tk-trial-unavailable{margin:8px 0 0;color:#626862;font-size:12px;line-height:1.6}'
     ,"@media(max-width:680px){.tk-choice,.tk-grid .tk-choice{display:grid;grid-template-columns:minmax(0,1fr) 128px 18px;gap:8px}.tk-choice__content{grid-column:1;grid-row:1}.tk-choice__price,.tk-choice--trial .tk-choice__price,.tk-choice--33 .tk-choice__price{grid-column:2;grid-row:1;margin:0;max-width:none;min-width:0;text-align:right;font-variant-numeric:tabular-nums}.tk-choice input,.tk-choice.is-selected input{position:static;grid-column:3;grid-row:1;top:auto;right:auto;transform:none;width:18px;height:18px;justify-self:end}.tk-choice__content,.tk-choice__price{word-break:keep-all;overflow-wrap:normal}.tk-choice .tk-card__copy{text-wrap:wrap}.tk-choice__price .tk-price-unit,.tk-choice__price .tk-price-compare{word-break:keep-all;overflow-wrap:normal}}"
+    // Owner request 2026-10-16: four plans side by side, same-size footer button for every plan.
+    ,"@media(min-width:681px){.tk-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.tk-grid .tk-card__copy{min-height:3.2em}.tk-grid .tk-choice__price{margin-top:10px}body[data-customer-page] .tk-modal .tk-grid .tk-discount{justify-content:flex-start}}.tk-footer .tk-buy,.tk-footer .tk-buy--slim{width:100%;min-width:0}.tk-modal .tk-discount{margin:10px 0 2px}.tk-modal .tk-discount strong{font-size:26px}.tk-modal .tk-choice .tk-price-unit{margin-top:2px}"
   ].join('');
 
   function priceText(n) {
@@ -259,6 +261,11 @@
     var single = findPlan('single'), saving = single ? Number(single.priceValue) * count - amount : 0;
     var customer = document.body.hasAttribute('data-customer-page');
     var discount = customer && saving > 0 ? Math.round(saving / (Number(single.priceValue) * count) * 100) : 0;
+    if (customer) {
+      // Customer pages: one discount figure + per-session price. Count/saving/bonus are already in the title or badge.
+      return (discount ? '<p class="tk-discount"><strong>' + discount + '%</strong><span>' + (window.DayOI18n && window.DayOI18n.getLang() === 'EN' ? ' off single-ticket prices' : ' 할인') + '</span></p>' : '') + '<p class="tk-price-unit">' + copy + '</p>' +
+        (savingKey && (plan.id === 'pack11' || plan.id === 'pack33') ? '<p class="tk-price-bonus">' + t('tickets.price.' + plan.id + '.meta') + '</p>' : '');
+    }
     return (discount ? '<p class="tk-discount"><strong>' + discount + '%</strong><span>' + (window.DayOI18n && window.DayOI18n.getLang() === 'EN' ? ' off single-ticket prices' : ' 할인 · 1회권 기준') + '</span></p>' : '') + '<p class="tk-price-unit">' + (count > 1 ? t('tickets.v2.totalCount', { count: count }) + ' · ' : '') + copy + '</p>' +
       (saving > 0 ? '<p class="tk-price-compare">' + t(savingKey || 'tickets.v2.saving', { count: count, saving: priceText(saving) }) + '</p>' : '') +
       (customer && (plan.id === 'pack11' || plan.id === 'pack33') ? '<p class="tk-price-bonus">' + t('tickets.price.' + plan.id + '.meta') + '</p>' : '');
@@ -337,15 +344,15 @@
   function planCard(plan, disabled) {
     if (!plan) return '';
     disabled = disabled === true;
-    var badge = plan.id === 'pack11' ? '<span class="tk-badge">10+1</span>' : plan.id === 'trial' && disabled && trialCompletionBadge() ? '<span class="tk-badge">' + trialCompletionBadge() + '</span>' : '';
-    var cls = 'tk-choice' + (plan.id === 'trial' ? ' tk-choice--trial' : plan.id === 'pack33' ? ' tk-choice--33' : '');
+    var badge = plan.id === 'pack11' ? '<span class="tk-badge">10+1</span>' : plan.id === 'pack33' ? '<span class="tk-badge">30+3</span>' : plan.id === 'trial' && disabled && trialCompletionBadge() ? '<span class="tk-badge">' + trialCompletionBadge() + '</span>' : '';
+    var cls = 'tk-choice' + (plan.id === 'trial' ? ' tk-choice--trial' : '');
     if (disabled) cls += ' tk-choice--disabled';
     return '<label class="' + cls + '" data-plan="' + plan.id + '"' + (disabled ? ' aria-disabled="true"' : '') + '>' +
       '<input type="radio" name="tkPlan" value="' + plan.id + '"' + (disabled ? ' disabled aria-disabled="true" aria-describedby="tkTrialUnavailable"' : '') + ' aria-label="' + pricePlanText(plan, 'title') + ', ' + priceText(plan.priceValue) + '">' +
       '<div class="tk-choice__content">' + (plan.id === 'trial' ? '<p class="tk-trial-kicker">' + t('tickets.v2.trial.badge') + '</p>' : '') +
       '<div class="tk-choice__top"><h3 class="tk-card__title">' + pricePlanText(plan, 'title') + '</h3>' + badge + '</div>' +
       '<p class="tk-card__copy">' + pricePlanText(plan, 'copy') + '</p>' + (disabled ? '<p class="tk-trial-unavailable" id="tkTrialUnavailable">' + trialUnavailableCopy() + '</p>' : '') + '</div>' +
-      '<div class="tk-choice__price"><p class="tk-total-label">' + t('tickets.v2.total') + '</p><p class="tk-card__price">' + priceText(plan.priceValue) + '</p>' + priceDetails(plan) + '</div></label>';
+      '<div class="tk-choice__price"><p class="tk-card__price">' + priceText(plan.priceValue) + '</p>' + priceDetails(plan) + '</div></label>';
   }
 
   function singleRow(plan) {
@@ -544,14 +551,12 @@
     statusNode.innerHTML = statusMarkup;
     renderTrialSalesSurfaces();
     if (el.banner) { el.banner.hidden = !showTrialCard; el.banner.innerHTML = showTrialCard ? planCard(findPlan('trial'), !trialSelectable) : ''; }
-    if (el.grid) el.grid.innerHTML = [findPlan('single'), findPlan('pack3'), findPlan('pack11')].map(planCard).join('');
-    el.overlay.querySelector('[data-tk-large]').innerHTML = planCard(findPlan('pack33'));
+    if (el.grid) el.grid.innerHTML = [findPlan('single'), findPlan('pack3'), findPlan('pack11'), findPlan('pack33')].map(planCard).join('');
     if (el.single) el.single.innerHTML = adminPaymentTestVisible ? '<div class="tk-admin-test" data-tk-admin-test><span class="tk-badge">ADMIN TEST</span>' + singleRow(findPlan('admin_test_1000')) + '</div>' : '';
     if (el.used) { el.used.hidden = true; el.used.innerHTML = ''; }
     if (!selectedPlanId || (selectedPlanId === 'trial' && !trialSelectable)) selectedPlanId = trialSelectable ? 'trial' : 'single';
     if (trialState.status === 'loggedout' && !selectionIsExplicit) selectedPlanId = 'trial';
     syncSelection();
-    el.overlay.querySelector('[data-tk-experience]').innerHTML = experienceMarkup();
     el.overlay.querySelector('[data-tk-price-footnote]').textContent = t('tickets.v2.priceNote', { single: priceText(findPlan('single').priceValue) });
   }
 
@@ -565,10 +570,9 @@
     return '<div class="tk-modal" role="dialog" aria-modal="true" aria-labelledby="tkTitle">' +
       '<button type="button" class="tk-close" data-tk-close>✕</button><div class="tk-head">' +
       copyNode('p', 'tickets.v2.eyebrow', 'tk-eyebrow') + '<h2 class="tk-title" id="tkTitle" data-tk-copy="tickets.v2.title">' + t('tickets.v2.title') + '</h2>' +
-      copyNode('p', 'tickets.v2.subtitle', 'tk-sub') + '<ul class="tk-perks">' + [1, 2, 3].map(function (n) { return copyNode('li', 'tickets.v2.perk.' + n); }).join('') + '</ul></div>' +
-      '<div class="tk-body"><h3 class="tk-section-heading">' + copyNode('span', 'tickets.v2.choose') + copyNode('small', 'tickets.v2.duration') + '</h3>' +
-      '<div class="tk-eligibility" data-tk-eligibility role="status" aria-live="polite" hidden></div><div data-tk-banner></div><div class="tk-grid" data-tk-grid></div><div data-tk-large></div><p class="tk-price-footnote" data-tk-price-footnote></p><div class="tk-single" data-tk-single></div><div data-tk-used></div>' +
-      '<details class="tk-experience" data-tk-experience></details>' +
+      '<ul class="tk-perks">' + [1, 2, 3].map(function (n) { return copyNode('li', 'tickets.v2.perk.' + n); }).join('') + '</ul></div>' +
+      '<div class="tk-body"><h3 class="tk-section-heading">' + copyNode('span', 'tickets.v2.choose') + '</h3>' +
+      '<div class="tk-eligibility" data-tk-eligibility role="status" aria-live="polite" hidden></div><div data-tk-banner></div><div class="tk-grid" data-tk-grid></div><p class="tk-price-footnote" data-tk-price-footnote></p><div class="tk-single" data-tk-single></div><div data-tk-used></div>' +
       '<div class="tk-consent"><label for="tkRefundAgree"><input type="checkbox" id="tkRefundAgree" name="tkRefundAgree"><span>' + copyNode('span', 'tickets.v2.consent') + ' <button type="button" data-refund-mini data-terms-check="#tkRefundAgree">' + t('tickets.v2.view') + '</button></span></label></div>' +
       '<details class="tk-policy"><summary data-tk-copy="tickets.v2.policy.title">' + t('tickets.v2.policy.title') + '</summary><ul class="tk-policy__list">' + [1, 2, 3, 4].map(function (n) { return copyNode('li', 'tickets.v2.policy.' + n); }).join('') + '</ul></details></div>' +
       '<footer class="tk-footer"><div><small data-tk-selection></small><p class="tk-footer__price" data-tk-total></p>' + copyNode('small', 'tickets.v2.noRenewal') + '</div><div class="tk-footer__action"><div data-tk-action></div><button type="button" class="tk-footer__policy" data-tk-policy-link data-tk-copy="tickets.v2.policy.title">' + t('tickets.v2.policy.title') + '</button></div></footer></div>';
