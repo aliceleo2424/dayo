@@ -9,7 +9,7 @@ for (const file of ['index.html', 'tickets-modal.js']) {
   assert.equal(fs.readFileSync(path.join(root, file), 'utf8'), fs.readFileSync(path.join(root, 'public', file), 'utf8'));
 }
 const plans = vm.runInNewContext(modal.slice(modal.indexOf('var PLANS = ['), modal.indexOf('  var CSS =')) + '\nPLANS');
-const expected = [['single', 19900], ['starter3', 54900], ['light11', 179000], ['full33', 499000]];
+const expected = [['starter3', 54900], ['light11', 179000], ['full33', 499000], ['single', 19900]];
 const cards = [...html.matchAll(/<button type="button" class="ticket-price-card[^\"]*" data-landing-ticket="([^\"]+)"(?: disabled)?>([\s\S]*?)<\/button>/g)];
 assert.deepEqual(cards.filter(card=>card[1]!=='trial').map(card => card[1]), expected.map(row => row[0]));
 for (const [id, price] of expected) {
@@ -37,7 +37,7 @@ const code = modal.slice(modal.indexOf('  async function selectLandingPlan'), mo
     completePurchase: () => { throw Error('Opening a landing card must not start checkout'); } };
   vm.createContext(ctx); vm.runInContext(code, ctx);
   for (const [id] of expected) ctx.selectLandingPlan(id);
-  assert.deepEqual(selections, ['single','pack3','pack11','pack33']);
+  assert.deepEqual(selections, ['pack3','pack11','pack33','single']);
   assert.equal(opens, 4);
   for (const id of ['trial','admin_test_1000','unknown']) ctx.selectLandingPlan(id);
   assert.equal(opens, 4);
