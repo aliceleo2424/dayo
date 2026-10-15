@@ -1,12 +1,14 @@
-/* Private image review is independent of Letter drafts, submission and rewards. */
+/* Private image review is independent of Letter drafts, submission and rewards.
+ * Owner decision 2026-10-15: a shown image is sent with the Letter unless the Partner chooses "Don't use". */
 (function(w){'use strict';
  var panels=new WeakMap(),UUID=/^[a-f0-9-]{36}$/i;
- var copy={en:{title:'Review and send the image',preview:'Preview image',send:'Send this image',reject:"Don't use",checking:'Checking image status…',pending:'Review the exact image for any text, numbers, logos or watermarks before sending.',approved:'Image approved. The customer can see it.',unused:'Image not used. Your Letter can still be sent.',unknown:'Image status could not be confirmed. Check status before trying again.',unavailable:'No reviewable image is available. Your Letter can still be sent.',alt:'Private conversation keepsake for Partner review'},ko:{title:'그림 확인 후 보내기',preview:'그림 확인',send:'이 그림 보내기',reject:'사용하지 않기',checking:'그림 상태를 확인하고 있어요…',pending:'글자·숫자·로고·워터마크가 없는지 실제 그림을 확인한 뒤 보내 주세요.',approved:'그림을 승인했어요. 고객이 확인할 수 있어요.',unused:'그림을 사용하지 않아요. 레터는 그대로 보낼 수 있어요.',unknown:'그림 상태를 확인하지 못했어요. 다시 시도하기 전에 상태를 확인해 주세요.',unavailable:'확인할 수 있는 그림이 없어요. 레터는 그대로 보낼 수 있어요.',alt:'파트너 검토용 비공개 대화 그림'}};
+ var copy={en:{title:'Review and send the image',preview:'Preview image',send:'Send this image',reject:"Don't use",checking:'Checking image status…',pending:'This image will be sent with your Letter. If you don’t want it, choose “Don’t use”.',approved:'Image approved. The customer can see it.',unused:'Image not used. The customer will see the DayO illustration with your Letter.',unknown:'Image status could not be confirmed. Check status before trying again.',unavailable:'No reviewable image is available. Your Letter can still be sent.',alt:'Private conversation keepsake for Partner review'},ko:{title:'그림 확인 후 보내기',preview:'그림 확인',send:'이 그림 보내기',reject:'사용하지 않기',checking:'그림 상태를 확인하고 있어요…',pending:'이 그림은 레터와 함께 보내져요. 원하지 않으면 “사용하지 않기”를 눌러 주세요.',approved:'그림을 승인했어요. 고객이 확인할 수 있어요.',unused:'그림을 사용하지 않아요. 고객에게는 DayO 기본 그림과 함께 레터가 전달돼요.',unknown:'그림 상태를 확인하지 못했어요. 다시 시도하기 전에 상태를 확인해 주세요.',unavailable:'확인할 수 있는 그림이 없어요. 레터는 그대로 보낼 수 있어요.',alt:'파트너 검토용 비공개 대화 그림'}};
  function create(host){
   var section=w.document.createElement('section');section.className='pr-section pr-keepsake-review';section.hidden=true;
   var title=w.document.createElement('h3'),status=w.document.createElement('p'),figure=w.document.createElement('figure'),image=w.document.createElement('img'),tools=w.document.createElement('div');
   status.className='pr-hint';status.setAttribute('role','status');status.setAttribute('aria-live','polite');figure.className='pr-preview';image.hidden=true;tools.className='pr-letter-tools';
   var buttons={};['preview','send','reject'].forEach(function(key){var b=w.document.createElement('button');b.type='button';b.dataset.keepsakeAction=key;buttons[key]=b;tools.append(b);});
+  buttons.send.hidden=true; // Sending happens with the Letter (sendShown); kept in the DOM for compatibility.
   figure.append(image);section.append(title,status,figure,tools);var keepsake=host.querySelector('.pr-optional'),footer=host.querySelector('.pr-actions');if(keepsake)keepsake.after(section);else if(footer)footer.before(section);else host.append(section);
   var p={host:host,section:section,title:title,status:status,image:image,buttons:buttons,booking:'',locale:'en',row:null,binding:null,seen:false,busy:false,epoch:0};
   buttons.preview.onclick=function(){void operate(p,'preview');};buttons.send.onclick=function(){void operate(p,'approve');};buttons.reject.onclick=function(){void operate(p,p.row&&p.row.review_state==='approved'?'revoke':'reject');};panels.set(host,p);return p;
@@ -42,5 +44,9 @@
   // Show the exact private image right away; sending it still needs the Partner's explicit click.
   if(options&&options.autoPreview===true&&shown&&run===p.epoch&&p.row&&p.row.state==='ready'&&['pending','approved'].includes(p.row.review_state))await operate(p,'preview');
  }
- w.DayOKeepsakePartnerReview={open:open};
+ // Called by "Send letter and finish": approve only the exact image the Partner was shown (pending, previewed).
+ async function sendShown(booking,host){var p=host&&panels.get(host);
+  if(!p||p.booking!==booking||!p.row||p.row.review_state!=='pending'||!p.seen||!p.binding||p.busy)return 'skipped';
+  await operate(p,'approve');return p.row&&p.row.review_state==='approved'?'approved':'unknown';}
+ w.DayOKeepsakePartnerReview={open:open,sendShown:sendShown};
 })(window);

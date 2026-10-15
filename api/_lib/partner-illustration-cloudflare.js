@@ -194,10 +194,15 @@ async function handle({input,read,user,env,signal,fetchImpl, enabled=false, test
 async function choices({input,read,user,env,signal,fetchImpl}){
  const denied=await testRuntime.authorize({input,read,user,allowBeta:true});if(denied)return denied;
  // Primary: concrete things the learner said. Fixed motifs remain the fallback if the text model fails.
+ // keyword_status is a content-free cause code (also logged) so a fallback can be diagnosed.
+ let keywordStatus='no_valid_keywords';
  try{const found=await keywords.choices({input,read,user,env,signal,fetchImpl});
-  if(found.choices.length)return {status:200,body:{mode:'keywords',max_pick:keywords.MAX_PICK,source_version:found.version,choices:found.choices}};}catch(_){}
+  keywordStatus='no_valid_keywords:learner_rows_'+found.learnerRows+':partner_rows_'+found.partnerRows;
+  if(found.choices.length)return {status:200,body:{mode:'keywords',keyword_source:found.from,max_pick:keywords.MAX_PICK,source_version:found.version,choices:found.choices}};}
+ catch(e){keywordStatus=String(e&&e.code||'keyword_error').replace(/[^a-z0-9_:]/gi,'').slice(0,80);}
+ console.warn('[keepsake-keywords] fallback',keywordStatus);
  const source=await letter.handle({input:{action:'partner_letter_topics',booking_id:input.booking_id},read,user,env,signal});if(source.status!==200)return source;
  const theme=await verifiedTheme({input,read,user,env,source});
- return {status:200,body:{source_version:source.body.source_version,choices:theme?[{id:theme,label:theme==='chat_birthday_wine'?'Wine and celebration':theme==='chat_wine'?'Wine':theme==='chat_cafe'?'Café':subjectLabel(theme)||'Conversation memory'}]:[]}};
+ return {status:200,body:{keyword_status:keywordStatus,source_version:source.body.source_version,choices:theme?[{id:theme,label:theme==='chat_birthday_wine'?'Wine and celebration':theme==='chat_wine'?'Wine':theme==='chat_cafe'?'Café':subjectLabel(theme)||'Conversation memory'}]:[]}};
 }
 module.exports={handle,choices,MODEL,REFERENCE,verifiedTheme,subjectConcept};

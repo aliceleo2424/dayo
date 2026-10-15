@@ -71,6 +71,12 @@ function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot
           if (!id) continue;
           for (const r of recap.rows(log, b.id, id, role) || []) lines.push({ speaker: role, text: String(r.text || '').slice(0, 2000), timestamp: r.timestamp });
         }
+        // Owner decision 2026-10-14: typed chat (often a correction) appears in the same record, marked as chat.
+        // Participant JWT + existing booking-scoped RLS read; chat failure never hides saved speech.
+        try {
+          const messages = await read('/rest/v1/booking_chat_messages?' + new URLSearchParams({ booking_id: 'eq.' + b.id, select: 'booking_id,id,sender_id,sender_role,text,created_at', order: 'created_at.asc,id.asc', limit: '500' }));
+          for (const m of recap.chatEvidence(messages, b.id, b.learner_id, b.partner_user_id)) lines.push({ speaker: m.speaker, text: String(m.text || '').slice(0, 1000), timestamp: m.timestamp, medium: 'chat' });
+        } catch (_) { /* speech record stays available */ }
         lines.sort((a, z) => Date.parse(a.timestamp) - Date.parse(z.timestamp));
         return json(res, 200, { booking_id: b.id, viewer: user.id === b.learner_id ? 'learner' : 'partner', lines: lines.slice(0, 1200) });
       }

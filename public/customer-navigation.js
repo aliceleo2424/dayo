@@ -94,6 +94,18 @@
       if (innerWidth >= 768 && window.DayOMobileNav && body.classList.contains('nav-drawer-open')) window.DayOMobileNav.close();
       accountPlacement();
     });
+    // Desktop logout outside My Page (owner request 2026-10-15): reuses auth.js handleLogout; phones keep the drawer button.
+    var logoutHost = page !== 'mypage' && document.querySelector('body > header .header-actions, body > header .topbar-right');
+    if (logoutHost && typeof window.handleLogout === 'function') {
+      var logoutButton = document.createElement('button');
+      logoutButton.type = 'button'; logoutButton.className = 'customer-logout'; logoutButton.hidden = true;
+      logoutButton.setAttribute('data-i18n', 'landing.nav.logout'); logoutButton.textContent = '로그아웃';
+      logoutButton.addEventListener('click', function (event) { window.handleLogout(event); });
+      logoutHost.insertBefore(logoutButton, logoutHost.querySelector('.header-cta') || null);
+      var syncLogout = function () { logoutButton.hidden = !(typeof window.checkUserLoggedIn === 'function' && window.checkUserLoggedIn()); };
+      syncLogout(); setTimeout(syncLogout, 1500);
+      try { window.supabaseClient && window.supabaseClient.auth.onAuthStateChange(function () { setTimeout(syncLogout, 0); }); } catch (_) {}
+    }
     if (window.DayOI18n) window.DayOI18n.apply();
     labelNavigation();
     active();

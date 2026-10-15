@@ -44,3 +44,6 @@
 .ucr-chat .ucr-chat-bubble{cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:transform .15s}
 .ucr-chat-line.is-picked .ucr-chat-bubble{transform:scale(.97)}
 .ucr-chat-save[hidden]{display:none!important}
+/* Typed chat inside the conversation record (owner decision 2026-10-14). */
+.ucr-chat-typed{font-size:11px;font-weight:700;color:#5f7d63;margin-left:4px}
+.ucr-chat-line.is-chat .ucr-chat-bubble{border:1.5px dashed #b9c9b6}

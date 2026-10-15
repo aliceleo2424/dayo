@@ -7339,7 +7339,8 @@
         var state = await existingPartnerLetter(identity.bookingId);
         if (state.letter_sent) finishPartnerLetterUI('already_sent', false);
         else if (partnerLetterWritePending) letterStatusUnknown();
-        else { partnerLetterStatusUnknown = false; setPartnerReportSubmitStatus('not_sent', true); }
+        // No saved Letter yet is the normal pre-send state: show nothing (owner request 2026-10-14).
+        else { partnerLetterStatusUnknown = false; setPartnerReportSubmitStatus('', true); }
       } catch (error) {
         if (error && error.message === 'invalid_booking') setPartnerReportSubmitStatus('invalid_booking', false);
         else letterStatusUnknown();
@@ -7394,6 +7395,11 @@
         cardData.partnerComment = String(field ? field.value : cardData.partnerComment || '').trim();
         if (!cardData.partnerComment || cardData.partnerComment.length > 1000) {
           setPartnerReportSubmitStatus('validation', false); return;
+        }
+        // Owner decision 2026-10-15: the image shown in the Letter popup goes with the Letter unless "Don't use"
+        // was chosen. Bounded so an image problem never blocks or delays the Letter beyond a few seconds.
+        if (window.DayOKeepsakePartnerReview && typeof window.DayOKeepsakePartnerReview.sendShown === 'function') {
+          try { await Promise.race([window.DayOKeepsakePartnerReview.sendShown(bookingId, document.getElementById('partner-report-popup')), new Promise(function (r) { setTimeout(r, 8000); })]); } catch (_) { /* Letter continues */ }
         }
         var expectedDigest = await partnerLetterDigest(cardData.partnerComment);
         var selectedTreat = document.querySelector('input[name="popup_stamp"]:checked');

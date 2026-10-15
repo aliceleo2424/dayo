@@ -16,6 +16,7 @@
   var MAX_STARTS=3,starts=0,retryAt=0,exhausted=false,noRetry=false,reservationId='',lastToken='',reportTimer;
   // Capture like Soniox's official web SDK: MediaRecorder chunks (120 ms) with audio_format 'auto'.
   // The PCM AudioWorklet path is kept only as a fallback (no MediaRecorder, or recorder delivered no audio).
+  var levelSource=null,levelMeter=null,levelBuffer=null;
   var recorder,recorderMime=(function(){try{if(!window.MediaRecorder||typeof MediaRecorder.isTypeSupported!=='function')return '';return ['audio/webm;codecs=opus','audio/ogg;codecs=opus','audio/webm'].find(function(t){return MediaRecorder.isTypeSupported(t);})||'';}catch(_){return '';}})();
   var captureMode=recorderMime?'recorder':'worklet',runActiveAt=0,runFramesAtOpen=0,runVoiceAtOpen=0;
   var previewSequence=0, diagnostics={audioFrames:0,audioBytes:0,silentFrames:0,nonSilentFrames:0,lastAudioAt:0,messages:0,finalTokens:0,interimTokens:0,finals:0,previews:0,lastMessageAt:0,koreanTokens:0,koreanFinalTokens:0,languages:{en:0,ko:0,es:0},stopCode:null,micRebindings:0};
@@ -75,6 +76,7 @@
   function detach() {
     clearTimeout(grantTimer);clearTimeout(captureTimer);clearInterval(watchTimer);clearInterval(keepaliveTimer);clearTimeout(reportTimer);
     if(recorder){recorder.ondataavailable=null;recorder.onerror=null;try{if(recorder.state!=='inactive')recorder.stop();}catch(_){}recorder=null;}
+    if(levelSource){try{levelSource.disconnect();}catch(_){}levelSource=null;levelMeter=null;levelBuffer=null;}
     if(node){node.port.onmessage=null;node.disconnect();}if(source)source.disconnect();
     // Keep the gesture-unlocked AudioContext for a reconnect; mobile browsers block a new one without a tap.
     if(context&&(noRetry||window.dayoSessionEnded||exhausted)){context.close().catch(function(){});context=null;audioPreparation=null;}
@@ -125,7 +127,12 @@
         if(recording){
           try{
             recorder=new MediaRecorder(new MediaStream([local]),{mimeType:recorderMime});
-            recorder.ondataavailable=function(event){if(!active||closing||socket.readyState!==1||!event.data||!event.data.size)return;if(socket.bufferedAmount>256000){stop('Network backpressure / 네트워크 지연',true);return;}socket.send(event.data);diagnostics.lastAudioAt=Date.now();diagnostics.audioFrames++;diagnostics.audioBytes+=event.data.size;};
+            // Encoded chunks carry no samples: meter the same mic on the existing context so voiced/silent
+            // diagnostics are real in recorder mode too (counters only, never audio content).
+            try{if(context&&!levelMeter){levelSource=context.createMediaStreamSource(new MediaStream([local]));levelMeter=context.createAnalyser();levelMeter.fftSize=1024;levelSource.connect(levelMeter);levelBuffer=new Float32Array(levelMeter.fftSize);}}catch(_){levelMeter=null;levelSource=null;}
+            recorder.ondataavailable=function(event){if(!active||closing||socket.readyState!==1||!event.data||!event.data.size)return;if(socket.bufferedAmount>256000){stop('Network backpressure / 네트워크 지연',true);return;}
+              if(levelMeter){levelMeter.getFloatTimeDomainData(levelBuffer);var level=0;for(var k=0;k<levelBuffer.length;k++)level+=levelBuffer[k]*levelBuffer[k];if(local.enabled&&!local.muted&&Math.sqrt(level/levelBuffer.length)>0.002)diagnostics.nonSilentFrames++;else diagnostics.silentFrames++;}
+              socket.send(event.data);diagnostics.lastAudioAt=Date.now();diagnostics.audioFrames++;diagnostics.audioBytes+=event.data.size;};
             recorder.onerror=function(){if(current===run)stop('Recorder failed / 녹음 장치 오류',true);};
             recorder.start(120);
           }catch(_){captureMode='worklet';stop('Recorder unavailable / 녹음 장치 오류',true);return;}

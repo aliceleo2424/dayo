@@ -19,6 +19,9 @@ body[data-customer-page] .header-actions,
 body[data-customer-page] .topbar-right { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
 body[data-customer-page] .header-cta { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 12px 20px; border: none; border-radius: 13px; background: #5f7d63; color: #fff; font: 700 15px/1.3 -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; text-decoration: none; cursor: pointer; white-space: nowrap; box-sizing: border-box; }
 body[data-customer-page] .topbar-extras { display: none; }
+body[data-customer-page] .customer-logout { min-height: 40px; padding: 0 12px; border: 1px solid #e3ddcf; border-radius: 11px; background: transparent; color: #6b6052; font: 600 13px/1.3 -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif; cursor: pointer; }
+body[data-customer-page] .customer-logout:hover { background: #fbf3d7; }
+body[data-customer-page] .customer-logout[hidden] { display: none; }
 body[data-customer-page] .nav-drawer { background: #fffcf6; padding-bottom: max(24px, env(safe-area-inset-bottom)); }
 body[data-customer-page] .nav-drawer .is-current { background: #f7e3a3; color: #3f3627; font-weight: 800; }
 body[data-customer-page] .header-mode { margin: 0; }
@@ -41,7 +44,7 @@ body[data-customer-page] .tk-price-bonus { font-size: 11px; line-height: 1.5; co
 @media (max-width: 767px) {
   body[data-customer-page] { padding-top: calc(64px + env(safe-area-inset-top)); padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
   body[data-customer-page] .header-inner, body[data-customer-page] .topbar-inner, body[data-customer-page] .faq-header { min-height: 64px; padding: calc(10px + env(safe-area-inset-top)) 16px 10px; gap: 12px; flex-wrap: nowrap; }
-  body[data-customer-page] .customer-desktop-nav { display: none; }
+  body[data-customer-page] .customer-desktop-nav, body[data-customer-page] .customer-logout { display: none !important; }
   body[data-customer-page] .logo-img, body[data-customer-page] .legal-logo { height: 31px; max-width: 92px; }
   body[data-customer-page] .header-actions, body[data-customer-page] .topbar-right { margin-left: auto; gap: 8px; }
   body[data-customer-page] .header-actions > [data-i18n-lang], body[data-customer-page] .topbar-right > [data-i18n-lang], body[data-customer-page] .faq-language, body[data-customer-page] .admin-dash-link { display: none; }
