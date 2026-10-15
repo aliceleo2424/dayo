@@ -44,6 +44,15 @@
   }
 
 
+  // Owner request 2026-10-16: approved partners land on Partner Lounge first. Only plain My Page visits
+  // redirect; a hash view (#letters, #ud-…) or choosing user mode in this tab keeps the user page.
+  var USER_VIEW_KEY = 'dayo_partner_user_view';
+  function openLoungeFirst() {
+    if (isPartnerPage() || document.body.getAttribute('data-customer-page') !== 'mypage' || window.location.hash) return;
+    try { if (sessionStorage.getItem(USER_VIEW_KEY) === '1') return; } catch (e) { return; }
+    window.location.replace('partner.html');
+  }
+
   function bindPartnerToggleVisibility() {
     var control = document.querySelector('.role-segmented-control[data-partner-access]');
     if (!control || isPartnerPage()) return;
@@ -56,6 +65,7 @@
         entry.hidden = !allowed;
       });
       if (!allowed) setUserModeUi();
+      else openLoungeFirst();
     }
 
     async function refreshPartnerAccess() {
@@ -131,6 +141,7 @@
     var goingPartner = targetRole === 'partner';
     if (goingPartner === isPartnerPage()) return;
 
+    try { if (goingPartner) sessionStorage.removeItem(USER_VIEW_KEY); else sessionStorage.setItem(USER_VIEW_KEY, '1'); } catch (e) { /* ignore */ }
     if (goingPartner) {
       setPartnerModeUi();
       window.location.href = 'partner.html';
