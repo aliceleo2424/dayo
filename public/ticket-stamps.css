@@ -5,9 +5,24 @@
 .ud-stamp-card .ts-count { font-size: 13px; color: #7A7066; }
 .ud-stamp-card .ts-count strong { font-size: 18px; color: var(--ud-text, #40362F); }
 .ud-stamp-card .ts-stamps { grid-area: stamps; display: flex; flex-wrap: wrap; gap: 8px; }
-.ud-stamp-card .ts-stamp { width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--ud-primary, #5F7D63); color: #FFFCF6; box-shadow: inset 0 0 0 3px rgba(255, 255, 255, .18); }
-.ud-stamp-card .ts-stamp svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.ud-stamp-card .ts-stamp--empty { background: var(--ud-butter-soft, #FFF6D3); border: 1.5px dashed #C9B28D; box-shadow: none; }
+.ud-stamp-card .ts-stamp { position: relative; width: 34px; height: 34px; padding: 0; border: 0; border-radius: 50%; display: grid; place-items: center; background: var(--ud-primary, #5F7D63); color: #FFFCF6; box-shadow: inset 0 0 0 3px rgba(255, 255, 255, .18); font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background-color .25s ease; }
+.ud-stamp-card .ts-stamp svg { grid-area: 1 / 1; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.ud-stamp-card .ts-stamp .ts-heart { opacity: 0; transform: scale(.4); fill: #FFFFFF; stroke: #FFFFFF; transition: opacity .2s ease, transform .2s ease; }
+.ud-stamp-card .ts-stamp .ts-cup { transition: opacity .2s ease, transform .2s ease; }
+.ud-stamp-card .ts-stamp:focus-visible { outline: 3px solid var(--ud-primary, #5F7D63); outline-offset: 2px; }
+.ud-stamp-card .ts-stamp--empty { background: rgba(255, 246, 211, .55); border: 1.5px dashed #D9C7A3; box-shadow: none; cursor: default; opacity: .75; }
+
+/* Tap a stamp: it turns into a pastel heart for a moment, with a soft sparkle. Decoration only. */
+.ud-stamp-card .ts-stamp.is-heart { background: var(--ts-heart, #F7B9C4); animation: ts-pop .45s ease; }
+.ud-stamp-card .ts-stamp.is-heart .ts-cup { opacity: 0; transform: scale(.4); }
+.ud-stamp-card .ts-stamp.is-heart .ts-heart { opacity: 1; transform: scale(1); }
+.ud-stamp-card .ts-stamp.is-heart::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid var(--ts-heart, #F7B9C4); opacity: 0; animation: ts-glow .7s ease-out; pointer-events: none; }
+@keyframes ts-pop { 0% { transform: scale(1); } 45% { transform: scale(1.22); } 100% { transform: scale(1); } }
+@keyframes ts-glow { 0% { opacity: .9; transform: scale(.8); } 100% { opacity: 0; transform: scale(1.35); } }
+@media (prefers-reduced-motion: reduce) {
+  .ud-stamp-card .ts-stamp.is-heart, .ud-stamp-card .ts-stamp.is-heart::after { animation: none; }
+}
+
 .ud-stamp-card .ts-more { min-width: 34px; height: 34px; padding: 0 8px; box-sizing: border-box; border-radius: 17px; display: grid; place-items: center; background: var(--ud-soft, #EAF4E8); color: var(--ud-dark, #4F7C59); font-size: 13px; font-weight: 800; }
 .ud-stamp-card .ts-empty { grid-area: empty; margin: 0 !important; }
 .ud-stamp-card .ts-buy { grid-area: buy; min-height: 44px; padding: 0 16px; border-radius: 12px; border: 1.5px solid var(--ud-primary, #5F7D63); background: #fff; color: var(--ud-dark, #4F7C59); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; white-space: nowrap; }
@@ -15,5 +30,6 @@
 .ud-stamp-card .ts-buy:focus-visible { outline: 3px solid var(--ud-primary, #5F7D63); outline-offset: 2px; }
 @media (max-width: 560px) {
   .ud-dashboard .ud-stamp-card { grid-template-columns: minmax(0, 1fr); grid-template-areas: "head" "stamps" "empty" "buy"; }
+  .ud-stamp-card .ts-stamps { display: grid; grid-template-columns: repeat(5, 34px); justify-content: start; gap: 10px 12px; }
   .ud-stamp-card .ts-buy { width: 100%; }
 }
