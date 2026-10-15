@@ -139,6 +139,7 @@
     "tickets.v2.trial.copy": { KO: "나와 맞는 대화인지, 한 번 만나봐요.", EN: "Meet once and see if it feels right for you." },
     "tickets.v2.single.title": { KO: "1회권", EN: "1 session" },
     "tickets.v2.single.copy": { KO: "필요한 날 딱 한 번", EN: "One more, whenever you need it" },
+    "tickets.v2.recommended": { KO: "★ 추천", EN: "★ Recommended" },
     "tickets.v2.pack3.title": { KO: "3회권", EN: "3 sessions" },
     "tickets.v2.pack3.copy": { KO: "가볍게 이어가기", EN: "Keep the conversation going" },
     "tickets.v2.pack11.title": { KO: "11회권", EN: "11 sessions" },

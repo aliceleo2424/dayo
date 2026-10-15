@@ -52,9 +52,13 @@ body[data-customer-page="landing"] #about .landing-lead { max-width: 690px; text
 body[data-customer-page="landing"] .lv-intro .dayo-video-wrapper { max-width: 690px; margin: 32px 0; }
 body[data-customer-page="landing"] .lv-detail-actions { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
 body[data-customer-page="landing"] .lv-detail-actions a { color: #4c6850; }
-body[data-customer-page="landing"] #pricing .ticket-price-row { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 12px; margin: 24px 0; }
+body[data-customer-page="landing"] #pricing .ticket-price-row { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; margin: 24px 0; }
 body[data-customer-page="landing"] #pricing .ticket-price-card { grid-column: auto; width: auto; max-width: none; min-width: 0; border-radius: 18px; padding: 22px 15px; text-align: left; background: #fffdfa; color: #40362f; display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-start; }
-body[data-customer-page="landing"] #pricing .ticket-price-card--trial { grid-column: auto; background: #e6eddd; border-color: #d4deca; }
+body[data-customer-page="landing"] #pricing .ticket-price-card--trial { grid-column: 1/-1; background: #e6eddd; border-color: #d4deca; }
+/* First trial: one full-width row on top, price on the right (owner request 2026-10-16). */
+body[data-customer-page="landing"] #pricing .ticket-price-card--trial { display: grid; grid-template-columns: minmax(0,1fr) auto; column-gap: 16px; align-items: center; }
+body[data-customer-page="landing"] #pricing .ticket-price-card--trial > * { grid-column: 1; }
+body[data-customer-page="landing"] #pricing .ticket-price-card--trial .ticket-landing-total { grid-column: 2; grid-row: 1 / span 4; margin: 0; }
 body[data-customer-page="landing"] #pricing .ticket-price-card strong { font-size: 15px; }
 body[data-customer-page="landing"] #pricing .ticket-landing-total { font-size: clamp(21px,2.15vw,28px); margin: 12px 0 8px; }
 body[data-customer-page="landing"] #pricing .tk-discount { display: block; margin: 18px 0 10px; }

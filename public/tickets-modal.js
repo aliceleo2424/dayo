@@ -245,7 +245,7 @@
     ,'.tk-choice--disabled{background:#F1F2EF;border-color:#D4D7D0;cursor:not-allowed}.tk-choice--disabled .tk-card__title,.tk-choice--disabled .tk-card__price,.tk-choice--disabled .tk-trial-kicker{color:#6B706B}.tk-trial-unavailable{margin:8px 0 0;color:#626862;font-size:12px;line-height:1.6}'
     ,"@media(max-width:680px){.tk-choice,.tk-grid .tk-choice{display:grid;grid-template-columns:minmax(0,1fr) 128px 18px;gap:8px}.tk-choice__content{grid-column:1;grid-row:1}.tk-choice__price,.tk-choice--trial .tk-choice__price,.tk-choice--33 .tk-choice__price{grid-column:2;grid-row:1;margin:0;max-width:none;min-width:0;text-align:right;font-variant-numeric:tabular-nums}.tk-choice input,.tk-choice.is-selected input{position:static;grid-column:3;grid-row:1;top:auto;right:auto;transform:none;width:18px;height:18px;justify-self:end}.tk-choice__content,.tk-choice__price{word-break:keep-all;overflow-wrap:normal}.tk-choice .tk-card__copy{text-wrap:wrap}.tk-choice__price .tk-price-unit,.tk-choice__price .tk-price-compare{word-break:keep-all;overflow-wrap:normal}}"
     // Owner request 2026-10-16: four plans side by side, same-size footer button for every plan.
-    ,"@media(min-width:681px){.tk-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.tk-grid .tk-card__copy{min-height:3.2em}.tk-grid .tk-choice__price{margin-top:10px}body[data-customer-page] .tk-modal .tk-grid .tk-discount{justify-content:flex-start}}.tk-footer .tk-buy,.tk-footer .tk-buy--slim{width:100%;min-width:0}.tk-modal .tk-discount{margin:10px 0 2px}.tk-modal .tk-discount strong{font-size:26px}.tk-modal .tk-choice .tk-price-unit{margin-top:2px}"
+    ,"@media(min-width:681px){.tk-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.tk-grid .tk-card__copy{min-height:3.2em}.tk-grid .tk-choice__price{margin-top:10px}body[data-customer-page] .tk-modal .tk-grid .tk-discount{justify-content:flex-start}}.tk-footer .tk-buy,.tk-footer .tk-buy--slim{width:100%;min-width:0}.tk-modal .tk-discount{margin:10px 0 2px}.tk-modal .tk-discount strong{font-size:26px}.tk-modal .tk-choice .tk-price-unit{margin-top:2px}.tk-reco{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:20px;background:#F2B84B;color:#3B2A06;font-size:11.5px;font-weight:800;letter-spacing:.01em;white-space:nowrap}.tk-choice--reco{border-color:#E3B45A;box-shadow:0 0 0 1px #E3B45A inset}.tk-choice--reco{overflow:visible}.tk-choice--reco .tk-reco{position:absolute;top:-11px;left:12px;z-index:1}#pricing .ticket-price-card{position:relative}#pricing .ticket-price-card .tk-reco{position:absolute;top:-11px;left:14px;margin:0;color:#3B2A06!important;opacity:1;font-size:11.5px;font-weight:800}.tk-choice--reco.is-selected{border-color:#5F7D63;box-shadow:none}#pricing .ticket-price-card.is-recommended{border:2px solid #E3B45A}"
   ].join('');
 
   function priceText(n) {
@@ -344,8 +344,8 @@
   function planCard(plan, disabled) {
     if (!plan) return '';
     disabled = disabled === true;
-    var badge = plan.id === 'pack11' ? '<span class="tk-badge">10+1</span>' : plan.id === 'pack33' ? '<span class="tk-badge">30+3</span>' : plan.id === 'trial' && disabled && trialCompletionBadge() ? '<span class="tk-badge">' + trialCompletionBadge() + '</span>' : '';
-    var cls = 'tk-choice' + (plan.id === 'trial' ? ' tk-choice--trial' : '');
+    var badge = plan.id === 'pack11' ? '<span class="tk-reco">' + t('tickets.v2.recommended') + '</span><span class="tk-badge">10+1</span>' : plan.id === 'pack33' ? '<span class="tk-badge">30+3</span>' : plan.id === 'trial' && disabled && trialCompletionBadge() ? '<span class="tk-badge">' + trialCompletionBadge() + '</span>' : '';
+    var cls = 'tk-choice' + (plan.id === 'trial' ? ' tk-choice--trial' : plan.id === 'pack11' ? ' tk-choice--reco' : '');
     if (disabled) cls += ' tk-choice--disabled';
     return '<label class="' + cls + '" data-plan="' + plan.id + '"' + (disabled ? ' aria-disabled="true"' : '') + '>' +
       '<input type="radio" name="tkPlan" value="' + plan.id + '"' + (disabled ? ' disabled aria-disabled="true" aria-describedby="tkTrialUnavailable"' : '') + ' aria-label="' + pricePlanText(plan, 'title') + ', ' + priceText(plan.priceValue) + '">' +
@@ -398,7 +398,9 @@
       if (node.disabled !== disabled) node.disabled = disabled;
       if (node.getAttribute('aria-disabled') !== String(disabled)) node.setAttribute('aria-disabled', String(disabled));
       var note = !isTrial ? pricePlanText(plan, 'copy') : trialState.status === 'ineligible' ? trialUnavailableCopy() : trialState.status === 'eligible' ? t('landing.pricing.trialBenefit') : trialState.status === 'loggedout' ? t('landing.pricing.trialSignup') : trialState.status === 'error' ? t('tickets.v2.eligibility.error') : t('tickets.v2.eligibility.loading');
-      setTrialMarkupIfChanged(node, '<strong>' + pricePlanText(plan, 'title') + '</strong>' + (isTrial && trialCompletionBadge() ? '<small>' + trialCompletionBadge() + '</small>' : '') + '<span class="ticket-landing-total">' + priceText(plan.priceValue) + '</span><small>' + note + '</small>' + priceDetails(plan, 'tickets.v2.landingSaving'));
+      var reco = plan.id === 'pack11';
+      node.classList.toggle('is-recommended', reco);
+      setTrialMarkupIfChanged(node, (reco ? '<span class="tk-reco">' + t('tickets.v2.recommended') + '</span>' : '') + '<strong>' + pricePlanText(plan, 'title') + '</strong>' + (isTrial && trialCompletionBadge() ? '<small>' + trialCompletionBadge() + '</small>' : '') + '<span class="ticket-landing-total">' + priceText(plan.priceValue) + '</span><small>' + note + '</small>' + priceDetails(plan, 'tickets.v2.landingSaving'));
     });
     var retry = document.querySelector('#pricing [data-landing-trial-retry]');
     if (retry && retry.hidden !== (trialState.status !== 'error')) retry.hidden = trialState.status !== 'error';
@@ -551,7 +553,7 @@
     statusNode.innerHTML = statusMarkup;
     renderTrialSalesSurfaces();
     if (el.banner) { el.banner.hidden = !showTrialCard; el.banner.innerHTML = showTrialCard ? planCard(findPlan('trial'), !trialSelectable) : ''; }
-    if (el.grid) el.grid.innerHTML = [findPlan('single'), findPlan('pack3'), findPlan('pack11'), findPlan('pack33')].map(planCard).join('');
+    if (el.grid) el.grid.innerHTML = [findPlan('pack3'), findPlan('pack11'), findPlan('pack33'), findPlan('single')].map(planCard).join('');
     if (el.single) el.single.innerHTML = adminPaymentTestVisible ? '<div class="tk-admin-test" data-tk-admin-test><span class="tk-badge">ADMIN TEST</span>' + singleRow(findPlan('admin_test_1000')) + '</div>' : '';
     if (el.used) { el.used.hidden = true; el.used.innerHTML = ''; }
     if (!selectedPlanId || (selectedPlanId === 'trial' && !trialSelectable)) selectedPlanId = trialSelectable ? 'trial' : 'single';
