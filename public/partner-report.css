@@ -18,6 +18,11 @@
 @media(max-width:700px){.pr-letter-drafts{grid-template-columns:minmax(0,1fr)}}
 
 /* Personalized Partner Letter: keep the editor first, source assistance optional. */
+.pr-image-skip[aria-pressed="true"]{background:#e8eee1;border-color:#5f7d63;color:#2f4a33;font-weight:700}
+.pr-thanks{position:fixed;inset:0;z-index:2147483000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(255,252,246,.96);text-align:center;animation:pr-thanks-in .25s ease}
+.pr-thanks-check{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:#5f7d63;color:#fff;font-size:28px;font-weight:800}
+.pr-thanks strong{font-size:1.5rem;color:#3f3627}.pr-thanks span:last-child{color:#6b6052}
+@keyframes pr-thanks-in{from{opacity:0}to{opacity:1}}@media (prefers-reduced-motion:reduce){.pr-thanks{animation:none}}
 .pr-letter-count{margin:-4px 2px 6px;text-align:right;font-size:.8rem;color:#8a6d3b}.pr-letter-count.is-ready{color:#166534;font-weight:700}
 #partner-report-popup .pr-letter-compose{margin-top:8px;padding-top:12px}
 #partner-report-popup .pr-letter-steps{font-size:.94rem;line-height:1.65;margin:8px 0;color:#3e5748}

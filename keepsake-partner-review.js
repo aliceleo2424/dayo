@@ -48,5 +48,8 @@
  async function sendShown(booking,host){var p=host&&panels.get(host);
   if(!p||p.booking!==booking||!p.row||p.row.review_state!=='pending'||!p.seen||!p.binding||p.busy)return 'skipped';
   await operate(p,'approve');return p.row&&p.row.review_state==='approved'?'approved':'unknown';}
- w.DayOKeepsakePartnerReview={open:open,sendShown:sendShown};
+ // What the Partner decided about the image for this booking (read-only).
+ function decision(booking,host){var p=host&&panels.get(host);if(!p||p.booking!==booking)return 'none';if(p.busy)return 'busy';if(!p.row)return 'none';
+  if(p.row.review_state==='approved')return 'approved';if(['rejected','revoked'].includes(p.row.review_state))return 'unused';return p.seen&&p.binding?'shown':'none';}
+ w.DayOKeepsakePartnerReview={open:open,sendShown:sendShown,decision:decision};
 })(window);

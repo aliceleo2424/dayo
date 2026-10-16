@@ -1,6 +1,6 @@
 (function(){
  'use strict';
- var contract=window.DayOPartnerReportContract,root,context={},selectedKeyword='',imageUrl=null,request=0,timer=null,initialized=false,letterRun=0,letterTopics=[],letterTopic='',letterVersion='',letterBooking='',imageChoices=[],imageVersion='',imageChoiceRun=0,imageBusy=false;
+ var contract=window.DayOPartnerReportContract,root,context={},selectedKeyword='',imageUrl=null,request=0,timer=null,initialized=false,letterRun=0,letterTopics=[],letterTopic='',letterVersion='',letterBooking='',imageChoices=[],imageVersion='',imageChoiceRun=0,imageBusy=false,imageSkipped=false;
  function el(id){return document.getElementById(id);}
  function selectButtons(container,value){container.querySelectorAll('button').forEach(function(button){button.setAttribute('aria-pressed',String(button.dataset.value===value));});}
  function setImageStatus(text){el('pr-image-status').textContent=text;}
@@ -25,6 +25,10 @@
   var m={attempt_limit:['You have used both drawings for this session. Send the image below or choose “Don’t use”.','이 대화의 그림은 두 번까지 그릴 수 있어요. 아래 그림을 보내거나 “사용하지 않기”를 선택해 주세요.'],generation_pending:['The illustration is still being drawn. Please wait a moment.','그림을 아직 그리고 있어요. 잠시만 기다려 주세요.'],quality_rejected:['That drawing had visible text or marks, so it can’t be used. Try drawing again.','그림에 글자나 표시가 보여서 사용할 수 없어요. 다시 그리기를 눌러 주세요.'],daily_budget_exhausted:['Today’s illustration limit has been reached. Your Letter can still be sent.','오늘 그릴 수 있는 그림 수를 다 썼어요. 레터는 그대로 보낼 수 있어요.'],canonical_revision_changed:['The saved conversation changed. Choose the words again.','저장된 대화가 바뀌었어요. 단어를 다시 골라 주세요.']}[code];
   return m?m[imageKo()?1:0]:imageCopy('Image could not be confirmed. Check the preview below before retrying. Your Letter can still be sent.','그림 상태를 확인하지 못했어요. 다시 시도하기 전에 아래 미리보기를 확인해 주세요. 레터는 그대로 보낼 수 있어요.');
  }
+ // Owner decision 2026-10-17: the Partner must create an image or explicitly choose to send without one.
+ function paintSkip(){var b=el('pr-image-skip');if(!b)return;b.textContent=imageCopy('Send without a picture','그림 없이 보내기');b.setAttribute('aria-pressed',String(imageSkipped));}
+ function toggleSkip(){imageSkipped=!imageSkipped;paintSkip();setImageStatus(imageSkipped?imageCopy('This Letter will go without a new picture. The learner will see the DayO illustration.','이번 레터는 그림 없이 보내요. 고객에게는 DayO 기본 그림이 함께 보여요.'):'');}
+ function imageDecision(){if(contract.illustrationAvailable===false||!el('pr-image-make'))return 'unavailable';if(imageBusy)return 'busy';return imageSkipped?'skip':'none';}
  function imageControls(){var picked=pickedChoices().length;el('pr-image-make').disabled=imageBusy||!picked;el('pr-image-retry').disabled=imageBusy||!picked;el('pr-keyword-more').hidden=imageChoices.length<=IMAGE_DISPLAY;}
  async function requestIllustration(retry){
   var chosen=pickedChoices();
@@ -32,7 +36,7 @@
   var booking=context.bookingId,theme=chosen.map(function(c){return c.id;}).join('+'),version=imageVersion,run=++request,id,key='dayo_keepsake_request:'+booking;
   try{var saved=JSON.parse(sessionStorage.getItem(key)||'null');if(retry!==true&&saved&&saved.theme===theme&&saved.version===version)id=saved.id;}catch(_){}
   id=id||crypto.randomUUID();try{sessionStorage.setItem(key,JSON.stringify({id:id,theme:theme,version:version}));}catch(_){}
-  imageBusy=true;imageUrl=null;el('pr-illustration').hidden=true;imageControls();
+  imageBusy=true;imageSkipped=false;paintSkip();imageUrl=null;el('pr-illustration').hidden=true;imageControls();
   setImageStatus(imageCopy('Drawing your illustration… Your Letter can still be sent.','그림을 그리고 있어요. 레터는 그대로 보낼 수 있어요.'));
   var body=chosen[0].token?{keywords:chosen.map(function(c){return c.token;})}:{topic_id:chosen[0].id};
   try{var data=await letterRequest('partner_illustration_generate',Object.assign({booking_id:booking,source_version:version,request_id:id},body));if(run!==request||booking!==context.bookingId)return;
@@ -58,8 +62,8 @@
  async function paintSuggestions(force){
   var list=el('pr-keyword-options'),section=list.closest('.pr-optional'),booking=context.bookingId;
   if(section)section.hidden=contract.illustrationAvailable===false;if(contract.illustrationAvailable===false||!booking)return;
-  el('pr-custom-keyword-field').hidden=true;el('pr-image-make').textContent=imageCopy('Create illustration','그림 만들기');el('pr-image-retry').textContent=imageCopy('Draw again (once)','다시 그리기 (1번 가능)');el('pr-keyword-more').textContent=imageCopy('Show other words','다른 단어 보기');
-  if(section&&section.querySelector('summary'))section.querySelector('summary').textContent=imageCopy('Conversation keepsake illustration (optional)','대화 기념 그림 (선택)');
+  el('pr-custom-keyword-field').hidden=true;el('pr-image-make').textContent=imageCopy('Create illustration','그림 만들기');el('pr-image-retry').textContent=imageCopy('Draw again (once)','다시 그리기 (1번 가능)');el('pr-keyword-more').textContent=imageCopy('Show other words','다른 단어 보기');paintSkip();
+  if(section&&section.querySelector('summary'))section.querySelector('summary').textContent=imageCopy('Conversation keepsake illustration · make one or choose “Send without a picture”','대화 기념 그림 · 그림을 만들거나 “그림 없이 보내기”를 골라 주세요');
   // One text-model call per booking; re-opening the popup reuses the same words.
   if(force!==true&&imageChoicesBooking===booking){paintChoiceButtons();return;}
   var run=++imageChoiceRun;list.replaceChildren();imageChoices=[];imageVersion='';imagePicked=[];imageOffset=0;imageChoicesBooking=booking;imageControls();
@@ -126,6 +130,7 @@
   if(el('pr-letter-refresh'))el('pr-letter-refresh').addEventListener('click',loadLetterTopics);
   if(el('pr-letter-generate'))el('pr-letter-generate').addEventListener('click',suggestLetters);
   el('pr-image-make').addEventListener('click',function(){void requestIllustration();});
+  if(el('pr-image-skip'))el('pr-image-skip').addEventListener('click',toggleSkip);
   el('pr-keyword-more').addEventListener('click',function(){imageOffset=imageOffset+IMAGE_DISPLAY>=imageChoices.length?0:imageOffset+IMAGE_DISPLAY;paintChoiceButtons();});
   el('pr-image-retry').addEventListener('click',function(){void requestIllustration(true);});initialized=true;
  }
@@ -133,7 +138,7 @@
   mount();if(!initialized)return;context=data||{};
   paintSuggestions();showSelected();
   if(context.bookingId&&letterBooking!==context.bookingId){
-    if(letterBooking){el('popup-partner-comment').value='';selectedKeyword='';imagePicked=[];imageUrl=null;request++;clearTimeout(timer);el('pr-illustration').hidden=true;el('pr-illustration').removeAttribute('src');el('pr-keyword-value').textContent='';paintSuggestions();}
+    if(letterBooking){el('popup-partner-comment').value='';selectedKeyword='';imagePicked=[];imageSkipped=false;imageUrl=null;request++;clearTimeout(timer);el('pr-illustration').hidden=true;el('pr-illustration').removeAttribute('src');el('pr-keyword-value').textContent='';paintSuggestions();}
     letterBooking=context.bookingId;loadLetterTopics();
   }
   var ko=window.partnerLetterLocale ? window.partnerLetterLocale()==='KO' : !!(window.DayOI18n&&window.DayOI18n.getLang&&String(window.DayOI18n.getLang()).toLowerCase()==='ko'&&localStorage.getItem('dayo_lang')==='KO');
@@ -157,5 +162,5 @@
   t('.pr-transcript summary','View conversation transcript — reference only','대화 기록 보기 — 참고용');
  }
  document.addEventListener('dayo:langchange',function(){if(initialized&&root&&root.style.display!=='none')open(context);});
- window.DayOPartnerReport={letterMin:LETTER_MIN,letterLength:letterLength,open:open,refresh:function(data){context=data||context;if(initialized&&!selectedKeyword)paintSuggestions();},payload:function(){return {stamp:null,partnerComment:el('popup-partner-comment').value,keyword:selectedKeyword||null,illustUrl:imageUrl,illustrationToken:window.DayOPartnerIllustration&&(window.DayOPartnerIllustration.state(context.bookingId)||{}).token};}};
+ window.DayOPartnerReport={letterMin:LETTER_MIN,letterLength:letterLength,imageDecision:imageDecision,open:open,refresh:function(data){context=data||context;if(initialized&&!selectedKeyword)paintSuggestions();},payload:function(){return {stamp:null,partnerComment:el('popup-partner-comment').value,keyword:selectedKeyword||null,illustUrl:imageUrl,illustrationToken:window.DayOPartnerIllustration&&(window.DayOPartnerIllustration.state(context.bookingId)||{}).token};}};
 })();
