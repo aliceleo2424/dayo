@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { AdminHeader } from '@/components/admin/header';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { actionChanges, applicationMedia, applicationMessage, applicationResidence, emptyFilters, listApplications, markApplicationViewed, profileSummary, selectApplications, shortlistApplication, sourceLabels, updateApplication, type Application, type ApplicationFilters, type ApplicationSort, type ReviewAction } from '@/lib/partner-applications';
+import { actionChanges, applicationAccount, applicationMedia, applicationMessage, applicationResidence, emptyFilters, listApplications, markApplicationViewed, profileSummary, selectApplications, shortlistApplication, sourceLabels, updateApplication, type Application, type ApplicationFilters, type ApplicationSort, type ReviewAction } from '@/lib/partner-applications';
 
 const inputClass = 'w-full rounded border p-2 text-sm bg-background';
 const actionLabels: Record<ReviewAction, string> = { invite: 'Invite to Test', hold: 'Hold', reject: 'Reject', approve: 'Approve' };
@@ -53,6 +53,7 @@ export default function PartnerApplicationsPage() {
   const [onboardingLink, setOnboardingLink] = useState('');
   const [message, setMessage] = useState('');
   const [detailStatus, setDetailStatus] = useState('');
+  const [account, setAccount] = useState('');
   const load = useCallback(async () => {
     setLoading(true); setStatus('');
     try { setRows(await listApplications()); }
@@ -62,6 +63,8 @@ export default function PartnerApplicationsPage() {
   useEffect(() => { void load(); }, [load]);
   const open = useCallback(async (row: Application) => {
     setSelected(row); setNote(row.review_note); setTestStatus(row.test_status); setMessage(''); setDetailStatus('');
+    setAccount('');
+    applicationAccount(row.id).then(info => setAccount(!info.hasAccount ? '아직 가입 안 함 (신청 이메일 기준)' : info.role === 'partner' ? '가입 완료 · 파트너 권한 적용됨' : '가입 완료 · 아직 파트너 권한 없음 (' + (info.role || 'user') + ')'), () => setAccount('가입 여부를 확인하지 못했습니다'));
     if (!row.first_viewed_at) {
       try {
         const viewed = await markApplicationViewed(row.id);
@@ -186,7 +189,7 @@ export default function PartnerApplicationsPage() {
           <DialogHeader><DialogTitle>{selected?.full_name}</DialogTitle><p id="application-review-description" className="text-sm text-muted-foreground">전체 답변 검토 및 상태 관리. 메시지는 직접 복사해 전달하세요.</p></DialogHeader>
           {selected && <>
             <section aria-label="Review tools" className="space-y-3 rounded border p-3">
-              <div className="flex flex-wrap items-center gap-2">{star(selected)}<span className="text-sm">Shortlist</span><span className="text-xs text-muted-foreground">{selected.first_viewed_at ? 'Viewed' : 'New'}</span></div>
+              <div className="flex flex-wrap items-center gap-2">{star(selected)}<span className="text-sm">Shortlist</span><span className="text-xs text-muted-foreground">{selected.first_viewed_at ? 'Viewed' : 'New'}</span><span className="text-xs text-muted-foreground">{selected.first_viewed_at ? 'Viewed' : 'New'}</span>{account && <span className="rounded bg-muted px-2 py-0.5 text-xs">DayO 계정: {account}</span>}</div>
               <label className="text-sm">Review note<textarea aria-label="Review note" className={inputClass} value={note} maxLength={5000} rows={3} onChange={event => setNote(event.target.value)} disabled={busy} /></label>
               <Button variant="outline" disabled={busy || !!starBusy} onClick={() => void save(undefined, true)}>Save note</Button>
               {detailStatus && <p className="text-sm">{detailStatus}</p>}
