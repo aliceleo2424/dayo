@@ -26,9 +26,9 @@ assert.ok(rule.length>200&&rule.includes("image_required"),'send rule found in r
    for(const f of ['partner-report-contract.js','partner-illustration.js','keepsake-partner-review.js','partner-report.js'])await page.addScriptTag({url:base+'/'+f});await page.evaluate(B=>DayOPartnerReport.open({bookingId:B}),B);await page.locator('#pr-keyword-options button').first().waitFor({state:'attached'});}
   const decide=()=>page.evaluate(B=>sendRule(B),B);
   for(const locale of ['ko','en']){state=null;fail=false;await prepare(locale);
-   const skip=page.locator('#pr-image-skip');assert.equal(await skip.textContent(),locale==='ko'?'그림 없이 보내기':'Send without a picture');
+   const skip=page.locator('#pr-image-skip');assert.equal(await skip.textContent(),locale==='ko'?'기본 그림으로 보내기':'Send with the DayO picture');
    assert.equal(await decide(),'image_required','no decision blocks the Letter');
-   await skip.click();assert.equal(await skip.getAttribute('aria-pressed'),'true');assert.equal(await decide(),'ok','"Send without a picture" allows sending');
+   await skip.click();assert.equal(await skip.getAttribute('aria-pressed'),'true');assert.match(await page.locator('#pr-illustration').getAttribute('src'),/keepsake-default\.webp$/,'default picture shown');assert.equal(await page.locator('#pr-illustration').isVisible(),true);assert.equal(await decide(),'ok','"Send without a picture" allows sending');
    await skip.click();assert.equal(await decide(),'image_required','un-skipping blocks again');
    // Provider failure: still never stuck, "Send without a picture" works.
    fail=true;await page.getByRole('button',{name:'Wine',exact:true}).click();await page.locator('#pr-image-make').click();

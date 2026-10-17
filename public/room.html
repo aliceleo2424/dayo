@@ -7239,7 +7239,7 @@
       invalid_booking:['This booking could not be verified. Please reopen the conversation.','예약을 확인하지 못했습니다. 대화를 다시 열어 주세요.'],
       validation:['Write a Letter of 1–1,000 characters before sending.','1~1,000자 이내로 레터를 작성해 주세요.'],
       too_short:['Please write at least 400 characters (spaces included) before sending.','공백 포함 400자 이상 작성해야 보낼 수 있어요.'],
-      image_required:['Please choose words and press “Create illustration”, or choose “Send without a picture”.','단어를 골라 “그림 만들기”를 누르거나, “그림 없이 보내기”를 선택해 주세요.'],
+      image_required:['Please choose words and press “Create illustration”, or choose “Send with the DayO picture”.','단어를 골라 “그림 만들기”를 누르거나, “기본 그림으로 보내기”를 선택해 주세요.'],
       image_busy:['The illustration is still being drawn. Please wait a moment, then send.','그림을 그리고 있어요. 잠시 후 보내 주세요.'],
       thanks:['Thank you!','고마워요!'],
       thanks_sub:['Your letter is on its way.','편지가 전달됐어요.'],
@@ -7417,7 +7417,7 @@
           setPartnerReportSubmitStatus('too_short', false); return;
         }
         // Owner decision 2026-10-17: the Partner must decide about the image (create one, "Don't use", or
-        // "Send without a picture"). An image failure never blocks: "Send without a picture" is always available.
+        // "Send with the DayO picture"). An image failure never blocks: that choice is always available.
         var letterPopup = document.getElementById('partner-report-popup');
         var reportImage = window.DayOPartnerReport && typeof window.DayOPartnerReport.imageDecision === 'function' ? window.DayOPartnerReport.imageDecision() : 'unavailable';
         var reviewImage = window.DayOKeepsakePartnerReview && typeof window.DayOKeepsakePartnerReview.decision === 'function' ? window.DayOKeepsakePartnerReview.decision(bookingId, letterPopup) : 'none';
@@ -7781,7 +7781,7 @@
       <header><h2 id="pr-title">Partner Letter</h2><p class="pr-intro">Write a personal note about something this learner really shared with you. Only you could write it.</p></header>
       <section class="pr-section pr-letter-compose"><h3>A note only this learner could receive</h3><p class="pr-letter-steps">Recall <strong>one real detail</strong> they shared. Add <strong>your genuine response</strong>. End with <strong>something specific</strong> you'd love to hear next time.</p><p class="pr-letter-warning">Please avoid generic lines like “I enjoyed talking to you today.” Never invent a story or pretend the learner said something you did not hear.</p><label class="pr-field" for="popup-partner-comment">Your personal message<textarea id="popup-partner-comment" rows="6" maxlength="1000" placeholder="What did they tell you today? What genuinely interested you? What would you ask them next time?"></textarea></label><div id="pr-letter-count" class="pr-letter-count" aria-live="polite"></div><div id="pr-letter-selected" class="pr-letter-selected"></div></section>
       <details class="pr-section pr-letter-assist" open><summary>Optional: find details in the saved conversation</summary><p class="pr-hint">Only real, verified learner speech or chat can generate sentence ideas. If no reliable text was recorded, write from what you actually remember—never guess.</p><div class="pr-chips" id="pr-letter-words"></div><div class="pr-chips" id="pr-letter-topics" aria-label="Choose a recorded story"></div><div class="pr-letter-tools"><button type="button" id="pr-letter-refresh">Check saved conversation</button><button type="button" id="pr-letter-generate" disabled>Help phrase this memory</button></div><p id="pr-letter-status" class="pr-hint" role="status"></p><div id="pr-letter-drafts" class="pr-letter-drafts"></div></details>
-      <details class="pr-section pr-optional" open><summary>Add a conversation keepsake (optional)</summary><div class="pr-keyword-layout"><div><p id="pr-keyword-hint" class="pr-hint"></p><div id="pr-keyword-options" class="pr-chips" aria-label="Suggested conversation themes"></div><div class="pr-letter-tools"><button type="button" id="pr-image-make" disabled>Create illustration</button><button type="button" id="pr-keyword-more" hidden>Show other words</button><button type="button" id="pr-image-skip" class="pr-image-skip" aria-pressed="false">Send without a picture</button></div><div id="pr-custom-keyword-field" hidden><label class="pr-field">Write a short topic or phrase<input type="text" id="pr-custom-keyword" maxlength="60" placeholder="e.g. Seoul Forest cafés"></label><button type="button" id="pr-use-keyword">Use theme</button></div><p id="pr-keyword-value" class="pr-hint" aria-live="polite"></p></div><figure class="pr-preview"><img id="pr-illustration" alt="Conversation keepsake illustration" hidden><figcaption id="pr-image-status" aria-live="polite">Choose a theme for your illustration. Image generation is optional.</figcaption><button type="button" id="pr-image-retry">Try illustration again</button></figure></div></details>
+      <details class="pr-section pr-optional" open><summary>Add a conversation keepsake (optional)</summary><div class="pr-keyword-layout"><div><p id="pr-keyword-hint" class="pr-hint"></p><div id="pr-keyword-options" class="pr-chips" aria-label="Suggested conversation themes"></div><div class="pr-letter-tools"><button type="button" id="pr-image-make" disabled>Create illustration</button><button type="button" id="pr-keyword-more" hidden>Show other words</button><button type="button" id="pr-image-skip" class="pr-image-skip" aria-pressed="false">Send with the DayO picture</button></div><div id="pr-custom-keyword-field" hidden><label class="pr-field">Write a short topic or phrase<input type="text" id="pr-custom-keyword" maxlength="60" placeholder="e.g. Seoul Forest cafés"></label><button type="button" id="pr-use-keyword">Use theme</button></div><p id="pr-keyword-value" class="pr-hint" aria-live="polite"></p></div><figure class="pr-preview"><img id="pr-illustration" alt="Conversation keepsake illustration" hidden><figcaption id="pr-image-status" aria-live="polite">Choose a theme for your illustration. Image generation is optional.</figcaption><button type="button" id="pr-image-retry">Try illustration again</button></figure></div></details>
       <details class="pr-transcript"><summary>View conversation transcript — reference only</summary><div id="popup-transcript-list"></div></details>
       <footer class="pr-actions"><p id="partner-report-submit-status" role="status" aria-live="polite" hidden></p><button type="button" id="btn-final-partner-submit" onclick="executePartnerPayoutAndExit()">Send letter and finish</button></footer>
     </div>
@@ -7860,6 +7860,6 @@
   <script src="partner-report-contract.js"></script>
   <script src="partner-illustration.js"></script>
   <script src="keepsake-partner-review.js"></script>
-  <script src="partner-report.js?v=20261017-image-decision"></script>
+  <script src="partner-report.js?v=20261017-default-picture"></script>
 </body>
 </html>

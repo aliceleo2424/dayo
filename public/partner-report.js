@@ -26,8 +26,10 @@
   return m?m[imageKo()?1:0]:imageCopy('Image could not be confirmed. Check the preview below before retrying. Your Letter can still be sent.','그림 상태를 확인하지 못했어요. 다시 시도하기 전에 아래 미리보기를 확인해 주세요. 레터는 그대로 보낼 수 있어요.');
  }
  // Owner decision 2026-10-17: the Partner must create an image or explicitly choose to send without one.
- function paintSkip(){var b=el('pr-image-skip');if(!b)return;b.textContent=imageCopy('Send without a picture','그림 없이 보내기');b.setAttribute('aria-pressed',String(imageSkipped));}
- function toggleSkip(){imageSkipped=!imageSkipped;paintSkip();setImageStatus(imageSkipped?imageCopy('This Letter will go without a new picture. The learner will see the DayO illustration.','이번 레터는 그림 없이 보내요. 고객에게는 DayO 기본 그림이 함께 보여요.'):'');}
+ var DEFAULT_PICTURE='images/keepsake-default.webp';
+ function paintSkip(){var b=el('pr-image-skip');if(!b)return;b.textContent=imageCopy('Send with the DayO picture','기본 그림으로 보내기');b.setAttribute('aria-pressed',String(imageSkipped));
+  var img=el('pr-illustration');if(!img||imageUrl)return;if(imageSkipped){img.src=DEFAULT_PICTURE;img.alt=imageCopy('DayO picture sent with your Letter','레터와 함께 가는 DayO 기본 그림');img.hidden=false;}else if(img.getAttribute('src')===DEFAULT_PICTURE){img.hidden=true;img.removeAttribute('src');}}
+ function toggleSkip(){imageSkipped=!imageSkipped;paintSkip();setImageStatus(imageSkipped?imageCopy('Your Letter will go with this DayO picture.','레터와 함께 이 DayO 기본 그림이 전달돼요.'):'');}
  function imageDecision(){if(contract.illustrationAvailable===false||!el('pr-image-make'))return 'unavailable';if(imageBusy)return 'busy';return imageSkipped?'skip':'none';}
  function imageControls(){var picked=pickedChoices().length;el('pr-image-make').disabled=imageBusy||!picked;el('pr-image-retry').disabled=imageBusy||!picked;el('pr-keyword-more').hidden=imageChoices.length<=IMAGE_DISPLAY;}
  async function requestIllustration(retry){
@@ -63,7 +65,7 @@
   var list=el('pr-keyword-options'),section=list.closest('.pr-optional'),booking=context.bookingId;
   if(section)section.hidden=contract.illustrationAvailable===false;if(contract.illustrationAvailable===false||!booking)return;
   el('pr-custom-keyword-field').hidden=true;el('pr-image-make').textContent=imageCopy('Create illustration','그림 만들기');el('pr-image-retry').textContent=imageCopy('Draw again (once)','다시 그리기 (1번 가능)');el('pr-keyword-more').textContent=imageCopy('Show other words','다른 단어 보기');paintSkip();
-  if(section&&section.querySelector('summary'))section.querySelector('summary').textContent=imageCopy('Conversation keepsake illustration · make one or choose “Send without a picture”','대화 기념 그림 · 그림을 만들거나 “그림 없이 보내기”를 골라 주세요');
+  if(section&&section.querySelector('summary'))section.querySelector('summary').textContent=imageCopy('Conversation keepsake illustration · make one or choose “Send with the DayO picture”','대화 기념 그림 · 그림을 만들거나 “기본 그림으로 보내기”를 골라 주세요');
   // One text-model call per booking; re-opening the popup reuses the same words.
   if(force!==true&&imageChoicesBooking===booking){paintChoiceButtons();return;}
   var run=++imageChoiceRun;list.replaceChildren();imageChoices=[];imageVersion='';imagePicked=[];imageOffset=0;imageChoicesBooking=booking;imageControls();
