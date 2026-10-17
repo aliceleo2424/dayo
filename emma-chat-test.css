@@ -1,0 +1,55 @@
+/* Emma chat speaking-sense test (inside #quizModal). Sage green + butter yellow on cream. */
+#quizModal .quiz-lang-tabs[hidden] { display: none; }
+#quizModal .emma-intro { display: flex; flex-direction: column; align-items: center; gap: 0.7rem; text-align: center; }
+#quizModal .emma-intro-ava,
+#quizModal .emma-ava { display: grid; place-items: center; border-radius: 50%; background: #5F7D63; color: #fff; font-weight: 800; }
+#quizModal .emma-intro-ava { width: 58px; height: 58px; font-size: 1.6rem; box-shadow: 0 0 0 6px #FFEAA7; }
+#quizModal .emma-intro-lead { margin: 0.3rem 0 0; font-size: 1.02rem; font-weight: 700; line-height: 1.5; color: #40362F; word-break: keep-all; }
+#quizModal .emma-intro-body { margin: 0; font-size: 0.9rem; line-height: 1.6; color: #5F574F; word-break: keep-all; }
+#quizModal .emma-intro .quiz-next-btn { width: 100%; }
+
+#quizModal .emma-chat { display: flex; flex-direction: column; border: 1px solid #E7DDD0; border-radius: 18px; overflow: hidden; background: #FFFBF4; }
+#quizModal .emma-bar { display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 0.85rem; border-bottom: 1px solid #E7DDD0; background: #FFF4CC; text-align: left; }
+#quizModal .emma-ava { width: 34px; height: 34px; flex: none; font-size: 1rem; }
+#quizModal .emma-bar b { display: block; font-size: 0.95rem; color: #40362F; }
+#quizModal .emma-bar small { display: block; font-size: 0.74rem; color: #6B5D3F; }
+#quizModal .emma-log { display: flex; flex-direction: column; gap: 0.5rem; padding: 0.85rem 0.75rem; background: #E8F1E4; min-height: 220px; max-height: min(46vh, 360px); overflow-y: auto; overscroll-behavior: contain; }
+#quizModal .emma-msg { max-width: 82%; padding: 0.5rem 0.75rem; border-radius: 16px; font-size: 0.92rem; line-height: 1.45; text-align: left; word-break: keep-all; overflow-wrap: anywhere; color: #40362F; }
+#quizModal .emma-her { align-self: flex-start; background: #fff; border-top-left-radius: 5px; box-shadow: 0 1px 2px rgba(64,54,47,.08); }
+#quizModal .emma-me { align-self: flex-end; background: #FFEAA7; border-top-right-radius: 5px; }
+#quizModal .emma-help { border: 1.5px dashed #5F7D63; }
+#quizModal .emma-sys { align-self: center; padding: 0.2rem 0.7rem; border-radius: 999px; background: rgba(255,251,244,.85); color: #506B55; font-size: 0.74rem; text-align: center; }
+#quizModal .emma-typing { display: inline-flex; gap: 4px; padding: 2px 0; }
+#quizModal .emma-typing i { width: 6px; height: 6px; border-radius: 50%; background: #A9B8A6; animation: emmaDot 1s infinite; }
+#quizModal .emma-typing i:nth-child(2) { animation-delay: .15s; }
+#quizModal .emma-typing i:nth-child(3) { animation-delay: .3s; }
+@keyframes emmaDot { 50% { opacity: .25; } }
+@media (prefers-reduced-motion: reduce) { #quizModal .emma-typing i { animation: none; } }
+
+#quizModal .emma-dock { display: flex; flex-direction: column; gap: 0.45rem; padding: 0.75rem; border-top: 1px solid #E7DDD0; background: #FFFBF4; }
+#quizModal .emma-dock:empty { display: none; }
+#quizModal .emma-choice { min-height: 44px; padding: 0.6rem 0.8rem; border: 1px solid #E7DDD0; border-radius: 14px; background: #fff; color: #40362F; font: inherit; font-size: 0.9rem; line-height: 1.4; text-align: left; cursor: pointer; }
+#quizModal .emma-choice:hover,
+#quizModal .emma-choice:focus-visible { border-color: #5F7D63; background: #F1F5EE; outline: none; }
+#quizModal .emma-ko { align-self: flex-start; max-width: 100%; min-height: 34px; padding: 0.3rem 0.8rem; border: 1.5px dashed #5F7D63; border-radius: 999px; background: #FFF4CC; color: #3F5A45; font: inherit; font-size: 0.8rem; font-weight: 700; text-align: left; cursor: pointer; }
+#quizModal .emma-ko:disabled { opacity: .5; cursor: default; }
+#quizModal .emma-mic { display: flex; flex-direction: column; align-items: center; gap: 0.45rem; text-align: center; }
+#quizModal .emma-mic-lead { margin: 0; font-size: 0.86rem; line-height: 1.5; color: #5F574F; word-break: keep-all; }
+#quizModal .emma-mic .speaking-status { margin: 0; }
+#quizModal .emma-mic .speaking-transcript { width: 100%; }
+#quizModal .emma-skip { width: 100%; }
+#quizModal .emma-dock > .quiz-next-btn { width: 100%; margin-top: 0; }
+
+#quizModal .emma-result { display: flex; flex-direction: column; gap: 0.85rem; text-align: left; margin-bottom: 1rem; }
+#quizModal .emma-type-card { display: flex; align-items: center; gap: 0.9rem; padding: 1rem; border-radius: 18px; background: #FFF4CC; border: 1px solid #F1E3A6; }
+#quizModal .emma-type-card svg { width: 84px; height: 84px; flex: none; }
+#quizModal .emma-eyebrow { margin: 0 0 0.2rem; font-size: 0.74rem; font-weight: 800; letter-spacing: .04em; color: #5F7D63; }
+#quizModal .emma-type-name { margin: 0; font-size: 1.22rem; line-height: 1.35; color: #40362F; word-break: keep-all; }
+#quizModal .emma-type-line { margin: 0; font-size: 0.92rem; line-height: 1.6; color: #40362F; word-break: keep-all; }
+#quizModal .emma-stats { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+#quizModal .emma-stats span { padding: 0.25rem 0.7rem; border-radius: 999px; background: #E8F1E4; color: #3F5A45; font-size: 0.78rem; font-weight: 700; }
+#quizModal .emma-block p { margin: 0; font-size: 0.9rem; line-height: 1.55; color: #40362F; word-break: keep-all; }
+#quizModal .emma-block .quiz-result-label { margin-bottom: 0.35rem; }
+#quizModal .emma-phrases { display: flex; flex-direction: column; gap: 0.35rem; margin: 0; padding: 0; list-style: none; }
+#quizModal .emma-phrases li { padding: 0.5rem 0.75rem; border-radius: 12px; background: #FFFBF4; border: 1px solid #E7DDD0; font-size: 0.9rem; font-weight: 700; color: #40362F; }
+#quizModal .emma-phrases em { display: block; font-style: normal; font-weight: 400; font-size: 0.78rem; color: #6B5D3F; }
