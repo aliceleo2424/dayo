@@ -32,8 +32,19 @@ function buildWelcomeMessage(nickname, role, language, from) {
   const intro = en ? 'Hello, ' + name + '!' : '안녕하세요, ' + name + '님!';
   const lines = partner ? (en ? [
     'Share interests and everyday stories through relaxed 1:1 global conversations.',
-    'Check your profile, schedule and Partner Guide in Partner Lounge.'
-  ] : ['취향과 일상을 나누는 편안한 1:1 글로벌 대화에 함께해 주세요.', 'Partner Lounge에서 프로필, 일정과 Partner Guide를 확인해 주세요.']) : (en ? [
+    'Your first step: open your available times. Learners can only book the times you open.',
+    'Set times that repeat every week: Partner Lounge → Sessions → Availability → "Weekly Template". Pick a day, tap the times you can talk, then press "Save weekly availability". These times repeat every week.',
+    'Need a change on one specific day? Use "Monthly Calendar" to close that date or set custom times. Your weekly times stay as they are.',
+    'Times are in Korea time (KST), in 30-minute slots.',
+    'Check your profile and Partner Guide in Partner Lounge.'
+  ] : [
+    '취향과 일상을 나누는 편안한 1:1 글로벌 대화에 함께해 주세요.',
+    '첫 단계는 대화 가능 시간 열기예요. 고객은 파트너가 열어 둔 시간에만 예약할 수 있어요.',
+    '매주 반복되는 시간 설정: Partner Lounge → 세션 → Availability → "Weekly Template"에서 요일을 고르고 가능한 시간을 누른 뒤 "반복 가능시간 저장"을 눌러 주세요. 저장한 시간은 매주 반복돼요.',
+    '특정 날짜만 바꾸고 싶다면 "Monthly Calendar"에서 그날을 닫거나 시간을 따로 정할 수 있어요. 매주 반복 시간은 그대로 유지돼요.',
+    '시간은 한국 시간(KST) 기준이며 30분 단위로 열려요.',
+    'Partner Lounge에서 프로필과 Partner Guide도 확인해 주세요.'
+  ]) : (en ? [
     'When you want to use another language with a real person, try a relaxed 1:1 video conversation with a DayO conversation partner.',
     'Choose a conversation partner. If you would like Korean help, you can choose a partner who speaks Korean.',
     'Start with Talk Cards and open AI word help whenever you need an expression.',
@@ -48,8 +59,8 @@ function buildWelcomeMessage(nickname, role, language, from) {
     '첫 이용 9,900원 할인 혜택이 준비돼 있어요. 이용권은 결제 후 지급돼요.',
     '먼저 DayO에서 대화 방식을 살펴보세요.'
   ]);
-  const link = partner ? 'https://www.dayotalk.com/partner' : 'https://www.dayotalk.com/#how';
-  const cta = partner ? (en ? 'View Partner Lounge' : 'Partner Lounge 확인') : (en ? 'Explore DayO' : 'DayO 둘러보기');
+  const link = partner ? 'https://www.dayotalk.com/partner#pd-sessions' : 'https://www.dayotalk.com/#how';
+  const cta = partner ? (en ? 'Open your first times' : '첫 대화 시간 열기') : (en ? 'Explore DayO' : 'DayO 둘러보기');
   return {from: sender(from), reply_to: REPLY_TO, subject: '[DayO] ' + title,
     html: renderEmail({language, title, intro, lines, link, cta}),
     text: [intro, '', ...lines, '', cta + ': ' + link, '', (en ? 'Contact: ' : '문의: ') + REPLY_TO, 'DayO'].join('\n')};
