@@ -1,0 +1,113 @@
+name: DayO Regression Gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dayo-regression-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  scope:
+    name: Scope & protected changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate exact PR allowlist and owner-approval label
+        run: node tests/ci-scope-check.cjs
+
+  core:
+    name: Product invariants & core regressions
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Install isolated pinned DB and DOM fixture tools
+        run: npm install --no-save --package-lock=false --ignore-scripts @electric-sql/pglite@0.3.15 jsdom@26.1.0
+      - name: Standing product invariants and source mirrors
+        run: node tests/ci-product-invariants.cjs
+      - name: Run release-critical no-browser fixtures
+        shell: bash
+        run: |
+          failed=0
+          for suite in \
+            tests/room-wrap-up-fixtures.test.js \
+            tests/partner-captions-fixtures.test.js \
+            tests/partner-report-finalize-fixtures.test.js \
+            tests/mobile-assist-layout-fixtures.test.js \
+            tests/conversation-recap-fixtures.test.js \
+            tests/session-report-persistence-fixtures.test.js \
+            tests/session-transcript-reliability-fixtures.test.js \
+            tests/partner-letter-write-outcome.cjs; do
+            echo "::group::$suite"
+            node "$suite" || failed=1
+            echo "::endgroup::"
+          done
+          exit "$failed"
+
+  browser:
+    name: Real DOM / room / captions / letter
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      DAYO_MOBILE_SCREENSHOTS: dayo-ci-artifacts/mobile
+      DAYO_LETTER_SCREENSHOTS: dayo-ci-artifacts/letter
+      DAYO_CAPTION_SCREENSHOTS: dayo-ci-artifacts/captions
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Install isolated, version-pinned browser QA tools
+        run: npm install --no-save --package-lock=false --ignore-scripts playwright@1.56.1 jsdom@26.1.0
+      - name: Install Chrome and Linux browser dependencies
+        run: npx playwright install --with-deps chrome
+      - name: Run all actual browser suites and preserve each failure
+        shell: bash
+        run: |
+          failed=0
+          for suite in \
+            tests/mobile-room-ux-browser.cjs \
+            tests/letter-post-session-browser.cjs \
+            tests/production-room-regressions.test.js; do
+            echo "::group::$suite"
+            node "$suite" || failed=1
+            echo "::endgroup::"
+          done
+          exit "$failed"
+      - name: Upload synthetic UI screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dayo-regression-screenshots
+          path: dayo-ci-artifacts/
+          if-no-files-found: ignore
+          retention-days: 7
+
+# This workflow executes on PRs and main pushes; by itself it DOES NOT
+# stop direct main pushes, guarantee Vercel deployment gating or prove
+# physical-device / authenticated live Production acceptance.
+# Enable required status checks and protected-main rules separately.
