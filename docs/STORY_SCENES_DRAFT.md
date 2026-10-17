@@ -19,7 +19,7 @@
   - 인물 이름은 번역에서도 영어 그대로 씁니다(예: Ethan).
   - 서술은 해요체를 쓰고, 학습자는 "당신"이라고 부릅니다.
   - 친구의 대사는 친구끼리 하는 말이라 반말로 옮겼습니다.
-- 이미지 파일: `public/images/stories/{장면 ID}.webp` (예: `drama-01.webp`)
+- 이미지 파일: `public/images/stories/{장면 ID}.webp` (예: `drama-01.webp`, `food-cafe-01.webp`). 장면 ID에는 영문 소문자·숫자·하이픈만 씁니다(밑줄 불가, DB 규칙).
 
 ---
 
@@ -235,7 +235,7 @@ Mia의 플레이리스트는 재즈에서 헤비메탈, 그리고 상어가족 �
 
 ## 6. 음식·카페 `food_cafe`
 
-### food_cafe-01 · 카페 주문
+### food-cafe-01 · 카페 주문
 **장면**: You and your friend Olivia walk into a cozy café in Seongsu.
 당신과 Olivia가 성수동의 아늑한 카페에 들어가요.
 
@@ -254,7 +254,7 @@ Mia의 플레이리스트는 재즈에서 헤비메탈, 그리고 상어가족 �
 
 **내 한 줄**: Describe your perfect café in one sentence. / 나만의 완벽한 카페를 한 문장으로 표현하면?
 
-### food_cafe-02 · 처음 먹는 한식
+### food-cafe-02 · 처음 먹는 한식
 **장면**: Your friend Ethan is trying Korean food for the first time at a small restaurant.
 Ethan이 작은 식당에서 처음으로 한식을 먹어 봐요.
 
@@ -361,7 +361,7 @@ Nina가 "한 판만 더"를 일곱 번 외쳐요.
 
 ## 9. 패션·뷰티 `fashion_beauty`
 
-### fashion_beauty-01 · 쇼핑 고민
+### fashion-beauty-01 · 쇼핑 고민
 **장면**: You and your friend Chloe are shopping for clothes in Myeongdong.
 당신과 Chloe가 명동에서 옷 쇼핑을 하고 있어요.
 
@@ -380,7 +380,7 @@ Nina가 "한 판만 더"를 일곱 번 외쳐요.
 
 **내 한 줄**: What item do you wear the most? / 가장 자주 입는 아이템은?
 
-### fashion_beauty-02 · 화장품 매장
+### fashion-beauty-02 · 화장품 매장
 **장면**: Your friend Isabel needs help choosing skincare at a beauty store.
 Isabel이 뷰티 매장에서 스킨케어 고르는 걸 도와달래요.
 
@@ -445,7 +445,7 @@ Bori는 신나서 돌아오고, 당신은 신발에 진흙을 묻히고 돌아�
 
 ## 11. 책·웹툰 `books_webtoon`
 
-### books_webtoon-01 · 웹툰 추천
+### books-webtoon-01 · 웹툰 추천
 **장면**: On the subway, your friend Max is reading a webtoon and laughing out loud.
 지하철에서 Max가 웹툰을 보며 소리 내어 웃고 있어요.
 
@@ -464,7 +464,7 @@ Bori는 신나서 돌아오고, 당신은 신발에 진흙을 묻히고 돌아�
 
 **내 한 줄**: What story would you recommend to everyone? / 모두에게 추천하고 싶은 이야기는?
 
-### books_webtoon-02 · 북카페
+### books-webtoon-02 · 북카페
 **장면**: You and your friend Zoe spend a quiet afternoon at a book café.
 당신과 Zoe가 북카페에서 조용한 오후를 보내요.
 
@@ -487,7 +487,7 @@ Bori는 신나서 돌아오고, 당신은 신발에 진흙을 묻히고 돌아�
 
 ## 12. 일·학교 `work_school`
 
-### work_school-01 · 점심 메뉴
+### work-school-01 · 점심 메뉴
 **장면**: It's lunchtime, and your coworker Ben asks you to eat together.
 점심시간, 동료 Ben이 같이 밥 먹자고 해요.
 
@@ -506,7 +506,7 @@ Bori는 신나서 돌아오고, 당신은 신발에 진흙을 묻히고 돌아�
 
 **내 한 줄**: What makes a good day at work or school? / 일이나 학교에서 좋은 하루란?
 
-### work_school-02 · 시험 끝
+### work-school-02 · 시험 끝
 **장면**: You and your classmate Julia just finished a big exam.
 당신과 반 친구 Julia가 큰 시험을 막 끝냈어요.
 

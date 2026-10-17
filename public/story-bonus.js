@@ -10,6 +10,7 @@
   'use strict';
 
   var MY_LINE_MAX = 200;
+  var SCENE_ID = /^[a-z0-9][a-z0-9-]{0,63}$/;
   var origOpenRecap = window.openQuizModalImmediately;
   var contexts = {};
   var renderToken = 0;
@@ -33,7 +34,10 @@
     (doneIds || []).forEach(function (id) { done[String(id)] = true; });
     var wanted = {};
     (interests || []).forEach(function (id) { wanted[String(id)] = true; });
-    var fresh = (scenes || []).filter(function (scene) { return scene && !done[scene.id]; });
+    // Only IDs the save RPC accepts (lowercase, digits, hyphens) are offered.
+    var fresh = (scenes || []).filter(function (scene) {
+      return scene && SCENE_ID.test(String(scene.id)) && !done[scene.id];
+    });
     var preferred = fresh.filter(function (scene) { return wanted[scene.interest]; });
     var pool = preferred.length ? preferred : fresh;
     if (!pool.length) return null;
@@ -88,9 +92,13 @@
       '.dsb-card-entry h4{margin:0 0 4px;font-size:15px;font-weight:800;color:#222;}',
       '.dsb-card-entry p{margin:0 0 12px;font-size:12.5px;color:#78716C;line-height:1.55;}',
       '.dsb-card-entry .dsb-entry-done{margin:0;font-size:13px;font-weight:700;color:#57534E;}',
-      '.dsb-overlay{position:fixed;inset:0;z-index:500001;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);overflow-y:auto;}',
-      '.dsb-card{width:100%;max-width:440px;background:#fff;border-radius:22px;padding:24px 20px 20px;box-shadow:0 20px 50px rgba(0,0,0,.25);font-family:inherit;color:#222;}',
-      '.dsb-badge{display:inline-block;margin:0 0 10px;padding:4px 10px;border-radius:999px;background:#FFF1EC;color:#E85B48;font-size:12px;font-weight:800;}',
+      // The card never outgrows the visible viewport: its header (close) and
+      // the sticky action row stay on screen while only the body scrolls.
+      '.dsb-overlay{position:fixed;top:0;left:0;right:0;height:100%;z-index:500001;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:12px;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);}',
+      '.dsb-shell{position:relative;display:flex;flex-direction:column;width:100%;max-width:440px;max-height:100%;background:#fff;border-radius:22px;box-shadow:0 20px 50px rgba(0,0,0,.25);overflow:hidden;}',
+      '.dsb-close{position:absolute;top:10px;right:10px;z-index:2;width:36px;height:36px;border:none;border-radius:50%;background:#F5F5F4;color:#57534E;font-size:18px;line-height:36px;cursor:pointer;font-family:inherit;}',
+      '.dsb-card{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:22px 18px 0;font-family:inherit;color:#222;}',
+      '.dsb-badge{display:inline-block;margin:0 44px 10px 0;padding:4px 10px;border-radius:999px;background:#FFF1EC;color:#E85B48;font-size:12px;font-weight:800;}',
       '.dsb-title{margin:0 0 6px;font-size:19px;font-weight:800;line-height:1.35;}',
       '.dsb-sub{margin:0 0 16px;font-size:13px;color:#78716C;line-height:1.6;white-space:pre-line;}',
       '.dsb-img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:14px;margin:0 0 14px;background:#FAF8F5;}',
@@ -101,9 +109,9 @@
       '.dsb-options{display:grid;gap:8px;margin:0 0 6px;}',
       '.dsb-option{width:100%;text-align:left;padding:12px 14px;border:1.5px solid #EDE4D5;border-radius:14px;background:#fff;cursor:pointer;font-family:inherit;}',
       '.dsb-option:hover,.dsb-option:focus-visible{border-color:#FF6B57;outline:none;}',
-      '.dsb-textarea{width:100%;box-sizing:border-box;min-height:84px;padding:12px 14px;border:1.5px solid #EDE4D5;border-radius:14px;font:inherit;font-size:14px;resize:vertical;}',
+      '.dsb-textarea{width:100%;box-sizing:border-box;min-height:84px;padding:12px 14px;border:1.5px solid #EDE4D5;border-radius:14px;font:inherit;font-size:16px;resize:vertical;}',
       '.dsb-count{margin:4px 0 0;text-align:right;font-size:11px;color:#A8A29E;}',
-      '.dsb-actions{display:flex;gap:8px;margin-top:16px;}',
+      '.dsb-actions{position:sticky;bottom:0;display:flex;gap:8px;margin:16px -18px 0;padding:12px 18px calc(14px + env(safe-area-inset-bottom));background:#fff;border-top:1px solid #F5F0EA;}',
       '.dsb-btn{flex:1;padding:13px 14px;border:none;border-radius:14px;font:inherit;font-size:14px;font-weight:800;cursor:pointer;}',
       '.dsb-btn--primary{background:#FF6B57;color:#fff;}',
       '.dsb-btn--ghost{background:#F5F5F4;color:#57534E;}',
@@ -132,12 +140,33 @@
     el.setAttribute('role', 'dialog');
     el.setAttribute('aria-modal', 'true');
     el.setAttribute('aria-labelledby', 'dsb-title');
-    el.innerHTML = '<div class="dsb-card" id="dsb-card"></div>';
+    el.innerHTML = '<div class="dsb-shell">' +
+      '<button type="button" class="dsb-close" aria-label="닫기" data-dsb-x>✕</button>' +
+      '<div class="dsb-card" id="dsb-card"></div>' +
+      '</div>';
     document.body.appendChild(el);
+    el.querySelector('[data-dsb-x]').addEventListener('click', closeOverlay);
+    fitViewport();
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', fitViewport);
+      window.visualViewport.addEventListener('scroll', fitViewport);
+    }
+  }
+
+  // Follow the visible area so the on-screen keyboard never hides the card.
+  function fitViewport() {
+    var vv = window.visualViewport;
+    if (!el || !vv) return;
+    el.style.height = vv.height + 'px';
+    el.style.top = vv.offsetTop + 'px';
   }
 
   function closeOverlay() {
     if (!el) return;
+    if (window.visualViewport) {
+      window.visualViewport.removeEventListener('resize', fitViewport);
+      window.visualViewport.removeEventListener('scroll', fitViewport);
+    }
     el.remove();
     el = null;
   }
@@ -191,7 +220,7 @@
         lineHtml(scene.ending) +
         '<p class="dsb-en" lang="en" style="margin-top:4px;">' + escapeHtml(scene.myLinePrompt.en) + '</p>' +
         '<p class="dsb-ko" style="margin-bottom:8px;">' + escapeHtml(scene.myLinePrompt.ko) + ' (선택)</p>' +
-        '<textarea class="dsb-textarea" maxlength="' + MY_LINE_MAX + '" placeholder="내 한 줄을 남겨 보세요. 비워 둬도 괜찮아요." data-dsb-line data-dsb-focus></textarea>' +
+        '<textarea class="dsb-textarea" maxlength="' + MY_LINE_MAX + '" placeholder="내 한 줄을 남겨 보세요. 비워 둬도 괜찮아요." data-dsb-line></textarea>' +
         '<p class="dsb-count" data-dsb-count>0 / ' + MY_LINE_MAX + '</p>' +
         (errorText ? '<p class="dsb-error" role="alert">' + escapeHtml(errorText) + '</p>' : '') +
         '<div class="dsb-actions">' +

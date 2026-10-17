@@ -683,7 +683,7 @@
       }
     },
     {
-      "id": "food_cafe-01",
+      "id": "food-cafe-01",
       "interest": "food_cafe",
       "version": 1,
       "title": "카페 주문",
@@ -751,7 +751,7 @@
       }
     },
     {
-      "id": "food_cafe-02",
+      "id": "food-cafe-02",
       "interest": "food_cafe",
       "version": 1,
       "title": "처음 먹는 한식",
@@ -1091,7 +1091,7 @@
       }
     },
     {
-      "id": "fashion_beauty-01",
+      "id": "fashion-beauty-01",
       "interest": "fashion_beauty",
       "version": 1,
       "title": "쇼핑 고민",
@@ -1159,7 +1159,7 @@
       }
     },
     {
-      "id": "fashion_beauty-02",
+      "id": "fashion-beauty-02",
       "interest": "fashion_beauty",
       "version": 1,
       "title": "화장품 매장",
@@ -1363,7 +1363,7 @@
       }
     },
     {
-      "id": "books_webtoon-01",
+      "id": "books-webtoon-01",
       "interest": "books_webtoon",
       "version": 1,
       "title": "웹툰 추천",
@@ -1431,7 +1431,7 @@
       }
     },
     {
-      "id": "books_webtoon-02",
+      "id": "books-webtoon-02",
       "interest": "books_webtoon",
       "version": 1,
       "title": "북카페",
@@ -1499,7 +1499,7 @@
       }
     },
     {
-      "id": "work_school-01",
+      "id": "work-school-01",
       "interest": "work_school",
       "version": 1,
       "title": "점심 메뉴",
@@ -1567,7 +1567,7 @@
       }
     },
     {
-      "id": "work_school-02",
+      "id": "work-school-02",
       "interest": "work_school",
       "version": 1,
       "title": "시험 끝",
