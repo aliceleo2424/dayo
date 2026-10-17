@@ -32,7 +32,7 @@ function buildWelcomeMessage(nickname, role, language, from) {
   const intro = en ? 'Hello, ' + name + '!' : '안녕하세요, ' + name + '님!';
   const lines = partner ? (en ? [
     'Share interests and everyday stories through relaxed 1:1 global conversations.',
-    'Your first step: open your available times. Learners can only book the times you open.',
+    'Your first step: open your available times. Users can only book the times you open.',
     'Set times that repeat every week: Partner Lounge → Sessions → Availability → "Weekly Template". Pick a day, tap the times you can talk, then press "Save weekly availability". These times repeat every week.',
     'Need a change on one specific day? Use "Monthly Calendar" to close that date or set custom times. Your weekly times stay as they are.',
     'Times are in Korea time (KST), in 30-minute slots.',

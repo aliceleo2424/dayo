@@ -65,15 +65,15 @@
   var list=el('pr-keyword-options'),section=list.closest('.pr-optional'),booking=context.bookingId;
   if(section)section.hidden=contract.illustrationAvailable===false;if(contract.illustrationAvailable===false||!booking)return;
   el('pr-custom-keyword-field').hidden=true;el('pr-image-make').textContent=imageCopy('Create illustration','그림 만들기');el('pr-image-retry').textContent=imageCopy('Draw again (once)','다시 그리기 (1번 가능)');el('pr-keyword-more').textContent=imageCopy('Show other words','다른 단어 보기');paintSkip();
-  if(section&&section.querySelector('summary'))section.querySelector('summary').textContent=imageCopy('Conversation keepsake illustration · make one or choose “Send with the DayO picture”','대화 기념 그림 · 그림을 만들거나 “기본 그림으로 보내기”를 골라 주세요');
+  if(section&&section.querySelector('summary'))section.querySelector('summary').textContent=imageCopy('Illustration · make one or send with the DayO picture','그림 · 만들거나 기본 그림으로 보내기');
   // One text-model call per booking; re-opening the popup reuses the same words.
   if(force!==true&&imageChoicesBooking===booking){paintChoiceButtons();return;}
   var run=++imageChoiceRun;list.replaceChildren();imageChoices=[];imageVersion='';imagePicked=[];imageOffset=0;imageChoicesBooking=booking;imageControls();
-  el('pr-keyword-hint').textContent=imageCopy('Finding things the learner talked about…','학습자가 이야기한 단어를 찾고 있어요…');
+  el('pr-keyword-hint').textContent=imageCopy('Finding things the user talked about…','고객이 이야기한 단어를 찾고 있어요…');
   try{var data=await letterRequest('partner_illustration_choices',{booking_id:booking});if(run!==imageChoiceRun||booking!==context.bookingId)return;
    imageChoices=Array.isArray(data.choices)?data.choices.filter(function(c){return c&&typeof c.id==='string'&&typeof c.label==='string'&&(c.label_en==null||typeof c.label_en==='string');}).slice(0,8):[];imageVersion=data.source_version||'';
    imageMaxPick=data.mode==='keywords'&&data.max_pick===2?2:1;
-   el('pr-keyword-hint').textContent=!imageChoices.length?imageCopy('Not enough saved detail for an image. Your Letter works without one.','저장된 대화에서 그릴 만한 단어를 찾지 못했어요. 그림 없이 레터를 보낼 수 있어요.'):imageMaxPick===2?imageCopy('Pick 1–2 words the learner said. They become one watercolor illustration with no text.','학습자가 말한 단어를 1~2개 고르면 글자 없는 수채화 그림 한 장으로 그려요.'):imageCopy('Pick a theme from this conversation to create an optional keepsake.','대화 소재를 골라 기념 그림을 만들 수 있어요.');
+   el('pr-keyword-hint').textContent=!imageChoices.length?imageCopy('Not enough saved detail for an image. Your Letter works without one.','저장된 대화에서 그릴 만한 단어를 찾지 못했어요. 그림 없이 레터를 보낼 수 있어요.'):imageMaxPick===2?imageCopy('Pick 1–2 words the user said. They become one watercolor illustration with no text.','고객이 말한 단어를 1~2개 고르면 글자 없는 수채화 그림 한 장으로 그려요.'):imageCopy('Pick a theme from this conversation to create an optional keepsake.','대화 소재를 골라 기념 그림을 만들 수 있어요.');
    paintChoiceButtons();
   }catch(_){if(run===imageChoiceRun){imageChoicesBooking='';el('pr-keyword-hint').textContent=imageCopy('Image words are unavailable. Your Letter can still be sent.','그림 단어를 불러오지 못했어요. 레터는 그대로 보낼 수 있어요.');}}
  }
@@ -147,18 +147,18 @@
   el('pr-title').textContent=ko?'파트너 레터':'Partner Letter';
   if(window.DayOKeepsakePartnerReview)window.DayOKeepsakePartnerReview.open(context.bookingId,root,ko?'ko':'en',{autoPreview:true});
   localizeStatic(ko);letterKo=ko;paintLetterCount();
-  root.querySelector('.pr-intro').textContent=ko?'오늘 이 고객과 실제로 나눈 이야기만 담아 주세요. 누구에게나 보낼 수 있는 인사말은 피해주세요.':'Write a personal note about something this learner really shared with you. Only you could write it.';
+  root.querySelector('.pr-intro').textContent=ko?'오늘 이 고객이 실제로 들려준 이야기 하나와, 다음에 더 듣고 싶은 이야기를 적어 주세요. 지어내지는 말아 주세요.':'Write about one real thing this user shared and what you would like to hear next time. Please don’t invent anything.';
   if(!el('btn-final-partner-submit').disabled)el('btn-final-partner-submit').textContent=ko?'메시지 보내고 마치기':'Send letter and finish';
  }
  // Static Letter copy (KO/EN). Image-section copy is set by paintSuggestions.
  function localizeStatic(ko){
   var q=function(s){return root.querySelector(s);},t=function(s,en,kr){var n=q(s);if(n)n.textContent=ko?kr:en;};
-  t('.pr-letter-compose h3','A note only this learner could receive','이 고객만 받을 수 있는 메시지');
+  t('.pr-letter-compose h3','A note only this user could receive','이 고객만 받을 수 있는 메시지');
   var steps=q('.pr-letter-steps');if(steps)steps.innerHTML=ko?'고객이 들려준 <strong>실제 이야기 하나</strong>를 떠올리고, <strong>내 진심 어린 반응</strong>을 더한 뒤, 다음에 <strong>더 듣고 싶은 이야기</strong>로 마무리해 주세요.':'Recall <strong>one real detail</strong> they shared. Add <strong>your genuine response</strong>. End with <strong>something specific</strong> you\'d love to hear next time.';
-  t('.pr-letter-warning','Please avoid generic lines like “I enjoyed talking to you today.” Never invent a story or pretend the learner said something you did not hear.','“오늘 즐거웠어요” 같은 누구에게나 쓸 수 있는 문장은 피해 주세요. 고객이 하지 않은 이야기를 지어내지 마세요.');
+  t('.pr-letter-warning','Please avoid generic lines like “I enjoyed talking to you today.” Never invent a story or pretend the user said something you did not hear.','“오늘 즐거웠어요” 같은 누구에게나 쓸 수 있는 문장은 피해 주세요. 고객이 하지 않은 이야기를 지어내지 마세요.');
   var label=q('label[for="popup-partner-comment"]');if(label&&label.firstChild&&label.firstChild.nodeType===3)label.firstChild.nodeValue=ko?'나의 메시지':'Your personal message';
   t('.pr-letter-assist summary','Optional: find details in the saved conversation','선택: 저장된 대화에서 이야기 찾기');
-  t('.pr-letter-assist .pr-hint','Only real, verified learner speech or chat can generate sentence ideas. If no reliable text was recorded, write from what you actually remember—never guess.','실제로 기록된 고객의 말이나 채팅만으로 문장 아이디어를 만들어요. 기록이 부족하면 기억나는 내용으로 직접 써 주세요. 추측해서 쓰지 마세요.');
+  t('.pr-letter-assist .pr-hint','Only real, verified user speech or chat can generate sentence ideas. If no reliable text was recorded, write from what you actually remember—never guess.','실제로 기록된 고객의 말이나 채팅만으로 문장 아이디어를 만들어요. 기록이 부족하면 기억나는 내용으로 직접 써 주세요. 추측해서 쓰지 마세요.');
   t('#pr-letter-refresh','Check saved conversation','저장된 대화 확인');
   t('#pr-letter-generate','Help phrase this memory','이 이야기로 문장 제안받기');
   t('.pr-transcript summary','View conversation transcript — reference only','대화 기록 보기 — 참고용');

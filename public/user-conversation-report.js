@@ -164,7 +164,7 @@ async function loadTranscript(details){
   lines=mergeLines(lines);details.setAttribute('data-loaded','1');bindHold(body);
   if(!lines.length){status(ko?'저장된 음성 기록이 없어요.':'No saved speech for this conversation.');return;}
   var mine=data.viewer==='partner'?'partner':'learner',saving=typeof window!=='undefined'&&window.DayOSavedSentences;
-  body.innerHTML=(saving?'<p class="ucr-chat-hint">'+(ko?'💡 저장하고 싶은 문장을 꾹 눌러 보세요!':'💡 Press and hold a sentence to save it!')+'</p>':'')+lines.map(function(l){var me=l.speaker===mine,who=me?(ko?'나':'Me'):(l.speaker==='partner'?name:(ko?'학습자':'Learner'));
+  body.innerHTML=(saving?'<p class="ucr-chat-hint">'+(ko?'💡 저장하고 싶은 문장을 꾹 눌러 보세요!':'💡 Press and hold a sentence to save it!')+'</p>':'')+lines.map(function(l){var me=l.speaker===mine,who=me?(ko?'나':'Me'):(l.speaker==='partner'?name:(ko?'고객':'User'));
    var saveBtn=saving?'<button type="button" class="ucr-chat-save" hidden onclick="DayOSavedSentences.onSaveClick(this)">'+(ko?'☆ 문장 저장':'☆ Save')+'</button>':'';
    var typed=l.medium==='chat'?' <span class="ucr-chat-typed">'+(ko?'💬 채팅':'💬 Chat')+'</span>':'';
    return '<div class="ucr-chat-line '+(me?'is-me':'is-them')+(l.medium==='chat'?' is-chat':'')+'" data-ts="'+esc(l.timestamp||'')+'"><span class="ucr-chat-who">'+esc(who)+typed+'</span><p class="ucr-chat-bubble">'+esc(l.text)+'</p>'+saveBtn+'</div>';}).join('');

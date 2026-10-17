@@ -56,7 +56,7 @@
     var otherLabel=element('label',copy('관리자에게 전달할 상세 사유 (최대 300자)','Details for the admin (max 300 characters)'));otherLabel.htmlFor='pc-other';
     var other=element('textarea');other.id='pc-other';other.maxLength=300;
     otherWrap.append(otherLabel,other); form.append(label,select,otherWrap);
-    var confirmation=element('p',copy('정말 이 예약을 취소할까요? 사용한 원래 티켓 1장이 상대방에게 반환됩니다.','Cancel this booking? The learner’s original ticket will be returned.'));
+    var confirmation=element('p',copy('정말 이 예약을 취소할까요? 사용한 원래 티켓 1장이 상대방에게 반환됩니다.','Cancel this booking? The user’s original ticket will be returned.'));
     confirmation.hidden=true;
     var error=element('p',null,'pc-error');error.setAttribute('role','alert');
     var actions=element('div',null,'pc-actions');
@@ -95,7 +95,7 @@
       select.options[0].textContent=copy('사유를 선택해 주세요','Select a reason');
       reasons.forEach(function(r,index){select.options[index+1].textContent=r[ko()?1:2];});
       otherLabel.textContent=copy('관리자에게 전달할 상세 사유 (최대 300자)','Details for the admin (max 300 characters)');
-      confirmation.textContent=copy('정말 이 예약을 취소할까요? 사용한 원래 티켓 1장이 상대방에게 반환됩니다.','Cancel this booking? The learner’s original ticket will be returned.');
+      confirmation.textContent=copy('정말 이 예약을 취소할까요? 사용한 원래 티켓 1장이 상대방에게 반환됩니다.','Cancel this booking? The user’s original ticket will be returned.');
       back.textContent=copy('돌아가기','Go back');
       submit.textContent=state.stage ? copy('확인하고 취소하기','Confirm cancellation') : copy('예약 취소하기','Cancel booking');
       error.textContent=message(state.errorKey);
@@ -143,7 +143,7 @@
           state.busy=false;state.close();
           if(typeof window.loadPartnerBookings==='function')Promise.resolve(window.loadPartnerBookings()).catch(function(){});
           if(typeof window.loadPartnerSchedule==='function')Promise.resolve(window.loadPartnerSchedule()).catch(function(){});
-          if(typeof window.showToast==='function')window.showToast(copy('예약이 취소되었습니다. 상대방의 원래 티켓이 반환되었습니다.','Booking cancelled. The learner’s original ticket was returned.'));
+          if(typeof window.showToast==='function')window.showToast(copy('예약이 취소되었습니다. 상대방의 원래 티켓이 반환되었습니다.','Booking cancelled. The user’s original ticket was returned.'));
           return;
         }
       }catch(failure){state.errorKey=failure.message==='missing_created_at'?'missing_created_at':'request';if(state.errorKey==='missing_created_at')state.data=null;localize();}
