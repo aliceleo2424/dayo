@@ -13,6 +13,11 @@
   var ws, context, source, node, track, grantTimer, captureTimer, watchTimer, closeTimer, audioPreparation;
   var flushPromise, flushResolve, statusNode;
   var paused=false,keepaliveTimer,stopAt=0;
+  // Owner approval 2026-10-17: help Soniox keep short Korean words inside English speech (e.g. 전어, not "journal").
+  // Spelling hints only; nothing is added to transcripts. If Soniox ever rejects the context, later runs omit it.
+  var CONTEXT={general:[{key:'domain',value:'Casual one-to-one video conversation between a Korean learner and a foreign partner living in Korea'},{key:'languages',value:'Mostly English with Korean words for food, places and culture; sometimes Spanish'}],
+    terms:['전어','떡볶이','삼겹살','치맥','김치찌개','된장찌개','비빔밥','막걸리','소주','붕어빵','호떡','순대','냉면','짜장면','김밥','라면','찜질방','노래방','편의점','맛집','한강','남산','홍대','강남','성수','이태원','경복궁','제주도','부산','추석','설날','수능','회식','야근','김장','웹툰','동호회','탁구']};
+  var contextRejected=false,contextSent=false;
   var MAX_STARTS=3,starts=0,retryAt=0,exhausted=false,noRetry=false,reservationId='',lastToken='',reportTimer;
   // Capture like Soniox's official web SDK: MediaRecorder chunks (120 ms) with audio_format 'auto'.
   // The PCM AudioWorklet path is kept only as a fallback (no MediaRecorder, or recorder delivered no audio).
@@ -54,7 +59,7 @@
     if(active && window.DayOLive){var accepted=window.DayOLive.acceptSonioxFinal(text,++sequence);if(accepted)diagnostics.finals++;}
   }
   function receive(data) {
-    if(data.error_code){stop('Provider rejected capture / 제공자 연결 오류',true);return;}
+    if(data.error_code){if(contextSent&&Number(data.error_code)===400)contextRejected=true;stop('Provider rejected capture / 제공자 연결 오류',true);return;}
     diagnostics.messages++;diagnostics.lastMessageAt=Date.now();var interim='';
     for(var token of Array.isArray(data.tokens)?data.tokens:[]){
       if(!token||token.translation_status==='translation'||typeof token.text!=='string')continue;
@@ -121,7 +126,8 @@
       socket.onopen=function(){
         if(current!==run||!starting||!entered||document.hidden||localTrack()!==local||(captureMode==='worklet'&&!context)){finish();return;}
         var recording=captureMode==='recorder';
-        socket.send(JSON.stringify(Object.assign({model:'stt-rt-v5',language_hints:['en','ko','es'],enable_language_identification:true,enable_endpoint_detection:true,max_endpoint_delay_ms:2000},recording?{audio_format:'auto'}:{audio_format:'pcm_s16le',sample_rate:16000,num_channels:1})));
+        contextSent=!contextRejected;
+        socket.send(JSON.stringify(Object.assign({model:'stt-rt-v5',language_hints:['en','ko','es'],enable_language_identification:true,enable_endpoint_detection:true,max_endpoint_delay_ms:2000},contextSent?{context:CONTEXT}:{},recording?{audio_format:'auto'}:{audio_format:'pcm_s16le',sample_rate:16000,num_channels:1})));
         active=true;starting=false;diagnostics.stopCode=null;runActiveAt=Date.now();runFramesAtOpen=diagnostics.audioFrames;runVoiceAtOpen=diagnostics.nonSilentFrames;window.DayOLive.setSonioxSource(true);
         reportTimer=setTimeout(function(){if(active&&!closing)sendReport('running');},20000);
         if(recording){
