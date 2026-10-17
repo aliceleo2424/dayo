@@ -39,8 +39,9 @@
   finally{if(run===p.epoch){p.busy=false;controls(p);}}
  }
  async function open(booking,host,locale,options){if(!host||!UUID.test(booking||''))return;var p=panels.get(host)||create(host);if(p.busy&&p.booking===booking)return;
-  p.booking=booking;p.locale=locale==='ko'?'ko':'en';labels(p);var run=++p.epoch,shown=false;p.busy=true;clear(p);controls(p);
-  try{shown=await list(p,run);}catch(_){if(run===p.epoch){p.section.hidden=true;clear(p);}}finally{if(run===p.epoch){p.busy=false;controls(p);}}
+  p.booking=booking;p.locale=locale==='ko'?'ko':'en';labels(p);var run=++p.epoch,shown=false;p.busy=true;p.listOk=false;clear(p);controls(p);
+  p.listing=(async function(){try{shown=await list(p,run);if(run===p.epoch)p.listOk=true;}catch(_){if(run===p.epoch){p.section.hidden=true;clear(p);}}finally{if(run===p.epoch){p.busy=false;controls(p);}}})();
+  await p.listing;
   // Show the exact private image right away; sending it still needs the Partner's explicit click.
   if(options&&options.autoPreview===true&&shown&&run===p.epoch&&p.row&&p.row.state==='ready'&&['pending','approved'].includes(p.row.review_state))await operate(p,'preview');
  }
@@ -51,5 +52,8 @@
  // What the Partner decided about the image for this booking (read-only).
  function decision(booking,host){var p=host&&panels.get(host);if(!p||p.booking!==booking)return 'none';if(p.busy)return 'busy';if(!p.row)return 'none';
   if(p.row.review_state==='approved')return 'approved';if(['rejected','revoked'].includes(p.row.review_state))return 'unused';return p.seen&&p.binding?'shown':'none';}
- w.DayOKeepsakePartnerReview={open:open,sendShown:sendShown,decision:decision};
+ // Read-only: true/false once the image list for this booking has loaded; null when unknown.
+ function hasImage(booking,host){var p=host&&panels.get(host);if(!p||p.booking!==booking)return Promise.resolve(null);
+  return Promise.resolve(p.listing).then(function(){return p.booking===booking&&p.listOk?!!p.row:null;});}
+ w.DayOKeepsakePartnerReview={open:open,sendShown:sendShown,decision:decision,hasImage:hasImage};
 })(window);

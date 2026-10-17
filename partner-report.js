@@ -26,6 +26,8 @@
   return m?m[imageKo()?1:0]:imageCopy('Image could not be confirmed. Check the preview below before retrying. Your Letter can still be sent.','그림 상태를 확인하지 못했어요. 다시 시도하기 전에 아래 미리보기를 확인해 주세요. 레터는 그대로 보낼 수 있어요.');
  }
  // Owner decision 2026-10-17: the Partner must create an image or explicitly choose to send without one.
+ // Owner decision 2026-10-17 (later): opening the Letter draws one picture from the user's words automatically;
+ // the Partner can draw again or switch to the DayO picture. Never auto-draws over an existing image, and only once per booking on this device.
  var DEFAULT_PICTURE='images/keepsake-default.webp';
  function paintSkip(){var b=el('pr-image-skip');if(!b)return;b.textContent=imageCopy('Send with the DayO picture','기본 그림으로 보내기');b.setAttribute('aria-pressed',String(imageSkipped));
   var img=el('pr-illustration');if(!img||imageUrl)return;if(imageSkipped){img.src=DEFAULT_PICTURE;img.alt=imageCopy('DayO picture sent with your Letter','레터와 함께 가는 DayO 기본 그림');img.hidden=false;}else if(img.getAttribute('src')===DEFAULT_PICTURE){img.hidden=true;img.removeAttribute('src');}}
@@ -45,6 +47,19 @@
    setImageStatus(data.status==='pending_review'?imageCopy('Image ready. Check it below, then send it or choose “Don’t use”.','그림이 준비됐어요. 아래에서 확인하고 보내거나 “사용하지 않기”를 골라 주세요.'):data.status==='approved'?imageCopy('Image approved.','승인된 그림이에요.'):imageCopy('No usable image is available. Your Letter can still be sent.','사용 가능한 그림이 없어요. 레터는 그대로 보낼 수 있어요.'));
   }catch(e){if(run===request)setImageStatus(imageError(e&&e.message));}
   finally{imageBusy=false;imageControls();if(run===request&&booking===context.bookingId&&window.DayOKeepsakePartnerReview)await window.DayOKeepsakePartnerReview.open(booking,root,imageKo()?'ko':'en',{autoPreview:true});}
+ }
+ var autoTried={};
+ async function autoIllustrate(booking){
+  if(autoTried[booking]||booking!==context.bookingId||contract.illustrationAvailable===false)return;
+  if(imageSkipped||imageBusy||imageUrl||imagePicked.length||!imageChoices.length||!imageVersion)return;
+  var key='dayo_keepsake_auto:'+booking;try{if(localStorage.getItem(key))return;}catch(_){}
+  autoTried[booking]=true;
+  var review=window.DayOKeepsakePartnerReview,has=review&&review.hasImage?await review.hasImage(booking,root):null;
+  // Only draw when it is confirmed that no image exists yet for this booking.
+  if(has!==false||booking!==context.bookingId||imageSkipped||imageBusy||imageUrl||imagePicked.length)return;
+  imagePicked=imageChoices.slice(0,imageMaxPick).map(function(c){return c.id;});paintChoiceButtons();
+  try{localStorage.setItem(key,String(Date.now()));}catch(_){}
+  await requestIllustration();
  }
  function toggleKeyword(id){
   var at=imagePicked.indexOf(id);
@@ -75,6 +90,7 @@
    imageMaxPick=data.mode==='keywords'&&data.max_pick===2?2:1;
    el('pr-keyword-hint').textContent=!imageChoices.length?imageCopy('Not enough saved detail for an image. Your Letter works without one.','저장된 대화에서 그릴 만한 단어를 찾지 못했어요. 그림 없이 레터를 보낼 수 있어요.'):imageMaxPick===2?imageCopy('Pick 1–2 words the user said. They become one watercolor illustration with no text.','고객이 말한 단어를 1~2개 고르면 글자 없는 수채화 그림 한 장으로 그려요.'):imageCopy('Pick a theme from this conversation to create an optional keepsake.','대화 소재를 골라 기념 그림을 만들 수 있어요.');
    paintChoiceButtons();
+   void autoIllustrate(booking);
   }catch(_){if(run===imageChoiceRun){imageChoicesBooking='';el('pr-keyword-hint').textContent=imageCopy('Image words are unavailable. Your Letter can still be sent.','그림 단어를 불러오지 못했어요. 레터는 그대로 보낼 수 있어요.');}}
  }
  // Letter-help status copy follows the popup locale (KO/EN).
