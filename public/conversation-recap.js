@@ -84,8 +84,30 @@
         source_utterance_ids:matches.filter(function (r) { return r.speaker === 'learner'; }).map(function (r) { return r.id; })};
     }).filter(function (t) { return t.count; }).sort(function (a,b) { return b.count-a.count; }).slice(0,3);
   }
+  // Owner request 2026-10-17: learners pause mid-sentence to think, and fast speech can put several sentences in
+  // one STT row. For "Expressions I actually used" only, join a speaker's pause fragments that end on a dangling
+  // word (e.g. "I went to the." + "River with my friends.") and split multi-sentence rows into single sentences.
+  // Words are never changed; metrics, topics and stored transcripts still use the original rows.
+  var DANGLING = /\b(?:a|an|the|to|of|in|on|at|for|from|with|about|and|or|but|so|because|if|my|your|our|their|his|her|i|we|you|they|he|she|it|is|are|was|were|am|be|have|has|had|will|would|can|could|should|really|very|some|this|that|went|go|want|wanted|like|think|was)$/i;
+  var CONTINUE = /^(?:With|And|Or|But|So|Because|To|At|In|On|For|From|About|Really|Very|Some|The|A|An|Is|Are|Was|Were|Have|Has|Had)\b/;
+  function sentenceUnits(speech) {
+    var joined = [];
+    speech.forEach(function (r) {
+      var prev = joined[joined.length - 1], t = Date.parse(r.timestamp);
+      var stem = prev ? prev.text.replace(/[.!?]+$/, '') : '';
+      if (prev && prev.speaker === r.speaker && Number.isFinite(t) && t - prev._t >= 0 && t - prev._t <= 8000 && DANGLING.test(stem) && (stem + ' ' + r.text).length <= 240) {
+        prev.text = stem + ' ' + (CONTINUE.test(r.text) ? r.text.charAt(0).toLowerCase() + r.text.slice(1) : r.text); prev._t = t; return;
+      }
+      joined.push({ id: r.id, speaker: r.speaker, text: r.text, timestamp: r.timestamp, _t: t });
+    });
+    var out = [];
+    joined.forEach(function (r) {
+      r.text.split(/(?<=[.!?])\s+(?=\S)/).forEach(function (s) { s = s.trim(); if (s) out.push({ id: r.id, speaker: r.speaker, text: s, timestamp: r.timestamp }); });
+    });
+    return out;
+  }
   function expressions(speech, options) {
-    var safe = speech.filter(meaningful), seen = new Set();
+    var safe = sentenceUnits(speech).filter(meaningful), seen = new Set();
     // Prefer story-bearing speech over greetings/fragments; never edit the text.
     var ranked = safe.map(function (r,i) { return {r:r,i:i,score:(options && options.linkedIds && options.linkedIds.has(r.id) ? 100 : 0)+anchors.filter(function (a) { return a[3].test(r.text); }).length*10 + Math.min(words(r.text).length,12)}; })
       .sort(function (a,b) { return b.score-a.score || a.i-b.i; });
