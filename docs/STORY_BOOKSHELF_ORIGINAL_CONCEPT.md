@@ -55,10 +55,10 @@
 - **그림은 Owner가 직접 만든다**(수채화 감성). Claude는 장면 구성 스케치(콘티)와 그림 요청 문구를 준비한다.
 - 위치: `public/images/stories/<에피소드-아이디>/scene-1` ~ `scene-4` (책 표지가 필요하면 같은 폴더의 `cover`). 루트 미러 `images/stories/...`도 함께 둔다.
   - 예: `belgium-waffle/scene-1` ~ `scene-4`, `mexico-one-more-plate/scene-1` ~ `scene-4`
-- 비율은 **가로 4:3**(예: 1200×900). png나 jpg로 받아 웹용 webp로 바꿔 넣는다.
+- 비율은 **정사각형**(Owner 결정 2026-10-18, 예: 1254×1254). png나 jpg로 받아 웹용 webp(1000×1000)로 바꿔 넣는다. 원본 png는 저장소에 올리지 않는다.
 - 한 에피소드는 **같은 주인공**으로 그린다. 무서운 장면은 위트로 바꾼다.
 - 그림 속 글자는 괜찮다(Owner가 만든 그림이라 자동 글자 검사 대상이 아니다).
-- 2026-10-18 현재 Owner가 「와플 대작전」 4장을 준비했다. `belgium-waffle/` 폴더에 있는 `scene-*.png`/`.svg`는 Claude가 코드로 그린 **임시 콘티**라서 Owner 그림으로 교체한다(커밋 안 됨).
+- 2026-10-18: Owner가 그린 「와플 대작전」 4장이 `belgium-waffle/scene-1~4.webp`로 들어갔다(정사각형). Claude의 임시 콘티는 교체했다.
 
 ## 6. 책장 (마이페이지)
 
@@ -114,7 +114,21 @@
 | 고르는 기준 | 그날 파트너의 나라 우선 | 고정 | 예약 관심사 무작위 |
 | 쌓이는 곳 | 책장의 나라 책에 1장 | 데모 책장(저장 안 함) | `learner_story_scenes`, 마이페이지 책장(현재 화면에 안 보임) |
 
-## 9. 다음 작업 (Owner 확인 후)
+## 9. 원안 데모 (2026-10-18)
+
+- `/storybook-demo` (`public/storybook-demo.html`): 메뉴에 연결하지 않은 숨은 페이지이며 아무것도 저장하지 않는다. 테스트는 `tests/storybook-demo-browser.cjs`.
+- 개정 대본(아래 표)과 Owner 그림 4장으로 원안 흐름 전체를 해 볼 수 있다: 표지 → 4장면 조각 맞추기(틀리면 다시, 두 번 틀리면 정답 보기) → 한국어 뜻 · 펀치라인 · 오늘의 표현 → "다음 대화에서 물어보기" → 책장에 1장.
+
+| # | 문장 (조각) | 오늘의 표현 | 맞힌 뒤 한 줄 |
+| --- | --- | --- | --- |
+| 1 | I couldn’t wait / to try / the waffle / I had been dreaming of / for months. | couldn’t wait to ~ | 도착 10분 만에, 관광은 뒷전이 됐다. |
+| 2 | “Take my word for it,” / he said, / “a real Belgian waffle / doesn’t need / any help.” | Take my word for it. | 그 순간 날개 달린 와플들이 고개를 끄덕인 것 같았다. 기분 탓이겠지. |
+| 3 | I couldn’t help it, / so I ordered / strawberries, cream, chocolate, / and everything else / they had. | I couldn’t help it. | 아저씨 이마에 땀 한 방울. 와플은 토핑에 묻혀 보이지도 않았다. |
+| 4 | He slid me / a plain one / on the side, / and it turned out / to be / the best bite of my trip. | turn out to be ~ | 토핑 탑은 사진용, 진짜 와플은 마음에. 아저씨는 아무 말 없이 웃었다. |
+
+- 다음 대화에서 물어보기: *"Have you ever been told you were eating something "the wrong way"?"*
+
+## 10. 다음 작업 (Owner 확인 후)
 
 1. 「와플 대작전」 개정 대본(4장 기준) → Owner 검토.
 2. Owner 그림 4장을 `belgium-waffle/scene-1~4`로 넣기.
