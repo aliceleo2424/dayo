@@ -76,7 +76,7 @@ function build({ type, ad, unsubscribe }) {
     : `요청하신 PDF 가이드북 전달용 메일입니다. 마케팅 수신 동의로 사용하지 않습니다.<br>수신 동의 철회·이메일 정보 삭제 요청: <a href="mailto:hello@dayotalk.com" style="color:#4F7C59">hello@dayotalk.com</a> · <a href="${unsubscribe}" style="color:#4F7C59">수신 거부</a>`;
   const html = `<div style="background:#F6EFE3;padding:24px 12px;${FONT};color:#40362F">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;background:#FFFBF4;border-radius:20px;overflow:hidden">
-<tr><td style="background:#FFF4CC;padding:18px 24px;border-bottom:1px solid #F1E3A6"><b style="font-size:20px;color:#3F5A45">DayO 돼요</b></td></tr>
+<tr><td style="background:#FFF4CC;padding:14px 24px;border-bottom:1px solid #F1E3A6"><img src="https://www.dayotalk.com/images/logo_header.png" width="86" height="48" alt="DayO 돼요" style="display:block;border:0;height:48px;width:auto"></td></tr>
 <tr><td style="padding:24px">
 ${ad ? introHtml() : ''}${typeHtml(type)}${previewHtml()}
 <p style="text-align:center;margin:22px 0 8px"><a href="${GUIDE}" style="display:inline-block;background:#5F7D63;color:#ffffff;text-decoration:none;font-weight:700;font-size:16px;padding:14px 30px;border-radius:14px">가이드북 열기 (PDF 21쪽)</a></p>
