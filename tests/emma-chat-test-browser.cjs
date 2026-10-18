@@ -89,6 +89,9 @@ async function run() {
       assert.ok(resText.includes(width === 360 ? (locale === 'KO' ? '한국어 찬스 1번' : 'Asked in Korean 1×') : (locale === 'KO' ? '한국어 찬스 2번' : 'Asked in Korean 2×')), 'korean help counted');
       const order = await page.evaluate(() => { const q = (s) => document.querySelector('#quizModal ' + s); const pos = (a, b) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING); return pos(q('.emma-result-head'), q('#quizLeadCard')) && pos(q('#quizLeadCard'), q('.emma-result-details')) && pos(q('.emma-result-details'), q('.quiz-topic-grid')); });
       assert.ok(order, 'order: type head → guidebook → details → topics');
+      assert.equal(await modal.locator('#consentReqDetail').isVisible(), false, 'consent details folded');
+      await modal.locator('[aria-controls="consentReqDetail"]').click(); assert.ok(await modal.locator('#consentReqDetail').isVisible(), 'details open');
+      await modal.locator('[aria-controls="consentReqDetail"]').click(); assert.equal(await modal.locator('#consentReqDetail').isVisible(), false);
       const all = modal.locator('#guidebook-all'), req = modal.locator('#guidebook-consent'), mkt = modal.locator('#guidebook-marketing');
       assert.equal(await all.isChecked(), false); assert.equal(await mkt.isChecked(), false, 'marketing never pre-checked');
       await all.check(); assert.ok(await req.isChecked() && await mkt.isChecked(), 'agree-all checks both');

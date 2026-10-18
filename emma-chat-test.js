@@ -44,7 +44,9 @@
     micKoQ: { KO: "'좋아하는 디저트는 ○○야'는 영어로 어떻게 말해요?", EN: "How do I say my favorite dessert?" },
     micKoA: { KO: "'My favorite dessert is ___.' 또는 'I love ___!' 하고 디저트 이름을 넣으면 돼요 🍰", EN: "Say 'My favorite dessert is ___.' 🍰" },
     micAgain: { KO: '한 번 더 말해 볼까요? 디저트 이름까지 넣어서요.', EN: 'Try once more, with the dessert name.' },
-    consentAll: { KO: '모두 동의하기 (필수·선택 포함)', EN: 'Agree to all (required and optional)' }
+    consentAll: { KO: '아래 내용에 모두 동의합니다', EN: 'I agree to all of the below' },
+    consentAllSub: { KO: '(필수·선택 포함)', EN: '(required and optional)' },
+    consentMore: { KO: '자세히 보기', EN: 'Show details' }
   };
   function u(key, vars) {
     var v = (UI[key] && UI[key][lang()]) || key;

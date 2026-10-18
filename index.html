@@ -4126,11 +4126,15 @@
               </select>
               <input class="email-domain-custom" id="lead-email-domain-custom" type="text" maxlength="253" hidden placeholder="${escapeHtml(t('quiz.emailDomainCustomPlaceholder'))}" aria-label="${escapeHtml(t('quiz.emailDomainCustomPlaceholder'))}">
             </div>
-            ${window.DayOEmmaChat ? `<label class="guidebook-consent guidebook-all"><input id="guidebook-all" type="checkbox"><span>${escapeHtml(window.DayOEmmaChat.label('consentAll'))}</span></label>` : ''}
-            <label class="guidebook-consent"><input id="guidebook-consent" type="checkbox" required><span>${escapeHtml(t('quiz.guidebook.consent'))} <a href="/privacy" target="_blank" rel="noopener">${escapeHtml(t('quiz.guidebook.privacy'))}</a></span></label>
-            <p class="guidebook-privacy-note">${escapeHtml(t('quiz.guidebook.retention'))}</p>
-            <label class="guidebook-consent guidebook-marketing"><input id="guidebook-marketing" type="checkbox"><span>${escapeHtml(t('quiz.guidebook.marketing'))}</span></label>
-            <p class="guidebook-helper">${escapeHtml(t('quiz.guidebook.marketingDetails'))}</p>
+            <div class="consent-box">
+            ${window.DayOEmmaChat ? `<label class="guidebook-consent guidebook-all"><input id="guidebook-all" type="checkbox"><span>${escapeHtml(window.DayOEmmaChat.label('consentAll'))} <small>${escapeHtml(window.DayOEmmaChat.label('consentAllSub'))}</small></span></label>` : ''}
+            <div class="consent-list">
+              <div class="consent-row"><label class="guidebook-consent"><input id="guidebook-consent" type="checkbox" required><span>${escapeHtml(t('quiz.guidebook.consent'))} <a href="/privacy" target="_blank" rel="noopener">${escapeHtml(t('quiz.guidebook.privacy'))}</a></span></label><button type="button" class="consent-more" aria-expanded="false" aria-controls="consentReqDetail" aria-label="${escapeHtml(window.DayOEmmaChat ? window.DayOEmmaChat.label('consentMore') : '')}"></button></div>
+              <p class="guidebook-privacy-note" id="consentReqDetail" hidden>${escapeHtml(t('quiz.guidebook.retention'))}</p>
+              <div class="consent-row"><label class="guidebook-consent guidebook-marketing"><input id="guidebook-marketing" type="checkbox"><span>${escapeHtml(t('quiz.guidebook.marketing'))}</span></label><button type="button" class="consent-more" aria-expanded="false" aria-controls="consentMktDetail" aria-label="${escapeHtml(window.DayOEmmaChat ? window.DayOEmmaChat.label('consentMore') : '')}"></button></div>
+              <p class="guidebook-helper" id="consentMktDetail" hidden>${escapeHtml(t('quiz.guidebook.marketingDetails'))}</p>
+            </div>
+            </div>
             <p class="quiz-lead-error" id="quizLeadError" role="alert"></p>
             <button class="email-submit" type="submit">${escapeHtml(t('quiz.guidebook.submit'))}</button>
             <p class="guidebook-helper">${escapeHtml(t('quiz.guidebook.helper'))}</p>
@@ -4211,6 +4215,15 @@
       const errorEl = slide.querySelector('#quizLeadError');
       if (!form || !card) return;
 
+      slide.querySelectorAll('.consent-more').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const panel = slide.querySelector('#' + btn.getAttribute('aria-controls'));
+          if (!panel) return;
+          const open = btn.getAttribute('aria-expanded') !== 'true';
+          btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          panel.hidden = !open;
+        });
+      });
       const allBox = slide.querySelector('#guidebook-all');
       const reqBox = slide.querySelector('#guidebook-consent');
       const mktBox = slide.querySelector('#guidebook-marketing');
