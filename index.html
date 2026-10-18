@@ -3080,6 +3080,7 @@
   <link rel="stylesheet" href="/english-typography.css?v=20261005-en">
   <link rel="stylesheet" href="/brand-surfaces.css?v=20261005-logo-palette">
   <link rel="stylesheet" href="/speaking-guidebook.css?v=20261006-guidebook">
+  <link rel="stylesheet" href="/emma-chat-test.css?v=20261017-emma">
 <link rel="stylesheet" href="/customer-navigation.css?v=20261014-letterbox">
 <link rel="stylesheet" href="/landing-views.css?v=20261013-views">
 <link rel="stylesheet" href="/how-it-works.css?v=20261013">
@@ -3409,6 +3410,7 @@
     <div>© 2026 DayO. All rights reserved.</div>
   </footer>
   <script src="legal-footer.js"></script>
+  <script src="/emma-chat-test.js?v=20261017-emma"></script>
 
   <!-- Quiz Modal -->
   <div class="modal-overlay" id="quizModal">
@@ -3416,7 +3418,7 @@
       <button class="modal-close" id="modalClose" data-i18n="quiz.closeAria" data-i18n-attr="aria-label" aria-label="닫기">✕</button>
       <div class="quiz-header">
         <div class="quiz-badge" data-i18n="quiz.badge">무료 스피킹 감각 테스트</div>
-        <div class="quiz-lang-tabs" role="tablist" aria-label="대화 언어 선택" id="quizLangTabs">
+        <div class="quiz-lang-tabs" role="tablist" aria-label="대화 언어 선택" id="quizLangTabs" hidden>
           <button type="button" class="quiz-lang-tab is-on" role="tab" aria-selected="true" data-quiz-lang="en"><span class="quiz-lang-flag" aria-hidden="true">🇺🇸</span><span data-i18n="quiz.lang.en">영어</span></button>
           <button type="button" class="quiz-lang-tab" role="tab" aria-selected="false" data-quiz-lang="fr"><span class="quiz-lang-flag" aria-hidden="true">🇫🇷</span><span data-i18n="quiz.lang.fr">프랑스어</span></button>
           <button type="button" class="quiz-lang-tab" role="tab" aria-selected="false" data-quiz-lang="ja"><span class="quiz-lang-flag" aria-hidden="true">🇯🇵</span><span data-i18n="quiz.lang.ja">일본어</span></button>
@@ -3778,7 +3780,7 @@
     }
 
     function applyQuizHeadline() {
-      quizTitle.textContent = t('quiz.speaking.title');
+      quizTitle.textContent = window.DayOEmmaChat ? window.DayOEmmaChat.title() : t('quiz.speaking.title');
     }
 
     function syncQuizLangTabs() {
@@ -3790,6 +3792,7 @@
     }
 
     function stopSpeakingRecognition() {
+      if (window.DayOEmmaChat) window.DayOEmmaChat.stop();
       clearTimeout(speechStopTimer);
       speechStopTimer = null;
       if (!speechRecognition) return;
@@ -3834,23 +3837,54 @@
       setQuizProgressVisible(false);
       const slide = document.createElement('div');
       slide.className = 'quiz-slide active';
-      slide.innerHTML = `<div class="quiz-start">
+      if (!window.DayOEmmaChat) {
+        slide.innerHTML = `<div class="quiz-start">
         <div class="speaking-intro-icon" aria-hidden="true">🎙️</div>
         <p class="quiz-start-desc">${escapeHtml(t('quiz.speaking.intro'))}</p>
         <p class="speaking-intro-note">${escapeHtml(t('quiz.speaking.privacy'))}</p>
         <button class="quiz-next-btn" type="button">${escapeHtml(t('quiz.speaking.start'))}</button>
       </div>`;
-      slide.querySelector('.quiz-next-btn').addEventListener('click', () => {
+        slide.querySelector('.quiz-next-btn').addEventListener('click', () => {
+          if (isTransitioning) return;
+          isTransitioning = true;
+          slide.classList.add('exit-left');
+          setTimeout(() => { slide.remove(); startSpeakingTest(); isTransitioning = false; }, 350);
+        });
+        return slide;
+      }
+      slide.innerHTML = `<div class="quiz-start">${window.DayOEmmaChat.introHtml()}</div>`;
+      slide.querySelector('[data-emma-start]').addEventListener('click', () => {
         if (isTransitioning) return;
         isTransitioning = true;
         slide.classList.add('exit-left');
         setTimeout(() => {
           slide.remove();
-          startSpeakingTest();
+          startEmmaChat();
           isTransitioning = false;
         }, 350);
       });
       return slide;
+    }
+
+    let emmaResult = null;
+    function startEmmaChat() {
+      emmaResult = null;
+      speechResultSaved = false;
+      quizPhase = 'chat';
+      setQuizProgressVisible(false);
+      quizSlides.innerHTML = '';
+      const slide = document.createElement('div');
+      slide.className = 'quiz-slide active';
+      quizSlides.appendChild(slide);
+      window.DayOEmmaChat.mount(slide, {
+        onFinish(result) {
+          if (quizPhase !== 'chat') return;
+          emmaResult = result;
+          quizPhase = 'result';
+          quizSlides.innerHTML = '';
+          quizSlides.appendChild(renderResultStep());
+        }
+      });
     }
 
     function bindQuizIllustration(slide, q, nextQ) {
@@ -4044,9 +4078,11 @@
       speechResultSaved = true;
       const payload = {
         type: 'speaking-sense',
-        language: quizLang,
-        completed_steps: speechAnswers.filter(Boolean).length,
-        utterance_units: speechAnswers.map((answer) => answer ? answer.units : 0),
+        format: 'emma-chat',
+        language: 'en',
+        dessert_type: emmaResult ? emmaResult.type : null,
+        korean_help_used: emmaResult ? emmaResult.koUsed : 0,
+        mic_checked: !!(emmaResult && emmaResult.micOk),
         completed_at: new Date().toISOString()
       };
       try {
@@ -4060,16 +4096,7 @@
 
     function renderResultStep() {
       persistSpeakingTestResult();
-      setQuizProgressVisible(true);
-      setQuizProgress(3, 3);
-      const completed = speechAnswers.filter(Boolean).length;
-      const secondUnits = speechAnswers[1] ? speechAnswers[1].units : 0;
-      const thirdUnits = speechAnswers[2] ? speechAnswers[2].units : 0;
-      const secondReady = secondUnits >= (quizLang === 'ja' || quizLang === 'zh' ? 6 : 4);
-      const thirdReady = !!speechAnswers[2] && (thirdUnits >= (quizLang === 'ja' || quizLang === 'zh' ? 10 : 7) || speechAnswers[2].durationMs >= 8000);
-      const feedbackKey = thirdReady
-        ? 'quiz.speaking.feedback.flow'
-        : (completed >= 2 ? 'quiz.speaking.feedback.pause' : 'quiz.speaking.feedback.open');
+      setQuizProgressVisible(false);
       const leadTitle = t('quiz.guidebook.title');
       const topicCards = quizTopicCardsForLang(quizLang).map((title, idx) => (
         '<button type="button" class="quiz-topic-card" data-quiz-topic-choice="' + idx + '" aria-pressed="' + (idx === 0 ? 'true' : 'false') + '">' +
@@ -4079,23 +4106,7 @@
       const slide = document.createElement('div');
       slide.className = 'quiz-slide active';
       slide.innerHTML = `<div class="quiz-result">
-        <p class="quiz-result-score">${escapeHtml(t('quiz.speaking.completed', { completed: String(completed), total: '3' }))}</p>
-        <h3 class="quiz-result-lead">${escapeHtml(t('quiz.speaking.resultTitle'))}</h3>
-        <div class="quiz-result-block">
-          <p class="quiz-result-label">${escapeHtml(t('quiz.speaking.senseLabel'))}</p>
-          <div class="speaking-result-grid">
-            <div class="speaking-result-item"><strong>${escapeHtml(t('quiz.speaking.metric.open'))}</strong><span>${escapeHtml(t(speechAnswers[0] ? 'quiz.speaking.metric.done' : 'quiz.speaking.metric.try'))}</span></div>
-            <div class="speaking-result-item"><strong>${escapeHtml(t('quiz.speaking.metric.sentence'))}</strong><span>${escapeHtml(t(secondReady ? 'quiz.speaking.metric.done' : 'quiz.speaking.metric.practice'))}</span></div>
-            <div class="speaking-result-item"><strong>${escapeHtml(t('quiz.speaking.metric.continue'))}</strong><span>${escapeHtml(t(thirdReady ? 'quiz.speaking.metric.done' : 'quiz.speaking.metric.practice'))}</span></div>
-          </div>
-          <p class="quiz-result-course-desc">${escapeHtml(t(feedbackKey))}</p>
-        </div>
-        <div class="quiz-result-block">
-          <p class="quiz-result-label">${escapeHtml(t('quiz.resultTopicsTitle'))}</p>
-          <p class="quiz-result-topics-sub">${escapeHtml(t('quiz.resultTopicsSub'))}</p>
-          <div class="quiz-topic-grid" role="group" aria-label="${escapeHtml(t('quiz.resultTopicsTitle'))}">${topicCards}</div>
-          <a class="quiz-topic-cta" href="#" data-quiz-preopen-cta data-quiz-topic="0">${escapeHtml(t('quiz.resultTopicCta'))}</a>
-        </div>
+        ${window.DayOEmmaChat ? window.DayOEmmaChat.resultHeadHtml(emmaResult || { type: 'pud', picks: [], koUsed: 0, micOk: false }) : ''}
         <div class="quiz-lead-card" id="quizLeadCard">
           <p class="quiz-lead-title">${escapeHtml(leadTitle)}</p>
           <p class="quiz-lead-desc">${escapeHtml(t('quiz.guidebook.description'))}</p>
@@ -4115,6 +4126,7 @@
               </select>
               <input class="email-domain-custom" id="lead-email-domain-custom" type="text" maxlength="253" hidden placeholder="${escapeHtml(t('quiz.emailDomainCustomPlaceholder'))}" aria-label="${escapeHtml(t('quiz.emailDomainCustomPlaceholder'))}">
             </div>
+            ${window.DayOEmmaChat ? `<label class="guidebook-consent guidebook-all"><input id="guidebook-all" type="checkbox"><span>${escapeHtml(window.DayOEmmaChat.label('consentAll'))}</span></label>` : ''}
             <label class="guidebook-consent"><input id="guidebook-consent" type="checkbox" required><span>${escapeHtml(t('quiz.guidebook.consent'))} <a href="/privacy" target="_blank" rel="noopener">${escapeHtml(t('quiz.guidebook.privacy'))}</a></span></label>
             <p class="guidebook-privacy-note">${escapeHtml(t('quiz.guidebook.retention'))}</p>
             <label class="guidebook-consent guidebook-marketing"><input id="guidebook-marketing" type="checkbox"><span>${escapeHtml(t('quiz.guidebook.marketing'))}</span></label>
@@ -4127,6 +4139,13 @@
             <p class="quiz-lead-success" id="quizLeadSuccess"></p>
             <a class="quiz-lead-cta" href="/guidebook/level-1" target="_blank" rel="noopener">${escapeHtml(t('quiz.guidebook.open'))}</a>
           </div>
+        </div>
+        ${window.DayOEmmaChat ? window.DayOEmmaChat.resultDetailsHtml(emmaResult || { type: 'pud', picks: [], koUsed: 0, micOk: false }) : ''}
+        <div class="quiz-result-block">
+          <p class="quiz-result-label">${escapeHtml(t('quiz.resultTopicsTitle'))}</p>
+          <p class="quiz-result-topics-sub">${escapeHtml(t('quiz.resultTopicsSub'))}</p>
+          <div class="quiz-topic-grid" role="group" aria-label="${escapeHtml(t('quiz.resultTopicsTitle'))}">${topicCards}</div>
+          <a class="quiz-topic-cta" href="#" data-quiz-preopen-cta data-quiz-topic="0">${escapeHtml(t('quiz.resultTopicCta'))}</a>
         </div>
         <button class="quiz-result-retry" type="button">${escapeHtml(t('quiz.speaking.retryAll'))}</button>
       </div>`;
@@ -4191,6 +4210,16 @@
       const custom = slide.querySelector('#lead-email-domain-custom');
       const errorEl = slide.querySelector('#quizLeadError');
       if (!form || !card) return;
+
+      const allBox = slide.querySelector('#guidebook-all');
+      const reqBox = slide.querySelector('#guidebook-consent');
+      const mktBox = slide.querySelector('#guidebook-marketing');
+      if (allBox && reqBox && mktBox) {
+        allBox.addEventListener('change', () => { reqBox.checked = allBox.checked; mktBox.checked = allBox.checked; });
+        const syncAll = () => { allBox.checked = reqBox.checked && mktBox.checked; };
+        reqBox.addEventListener('change', syncAll);
+        mktBox.addEventListener('change', syncAll);
+      }
 
       if (domainSel && custom) {
         domainSel.addEventListener('change', () => {
@@ -4273,6 +4302,7 @@
       syncQuizLangTabs();
       quizSlides.innerHTML = '';
       if (quizPhase === 'start') quizSlides.appendChild(renderLevelStep());
+      else if (quizPhase === 'chat') startEmmaChat();
       else if (quizPhase === 'result') quizSlides.appendChild(renderResultStep());
       else quizSlides.appendChild(renderQuestion(currentStep));
     }
