@@ -8,11 +8,13 @@
 <link rel="icon" type="image/png" href="/images/logo-square.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap">
 <style>
-/* Owner-preferred original concept (docs/STORY_BOOKSHELF_ORIGINAL_CONCEPT.md). Demo only: not linked, nothing saved. */
+/* Owner-preferred original concept (docs/STORY_BOOKSHELF_ORIGINAL_CONCEPT.md), merged with the owner's
+   "DayO Story Play" prototype (blur-to-reveal art, Korean toggle, check button, wrong-piece marks, coming episodes).
+   Demo only: not linked from menus, nothing is saved. */
 @font-face{font-family:'NanumSquareRound';src:url('/fonts/NanumSquareRoundR.woff2') format('woff2');font-weight:400}
 @font-face{font-family:'NanumSquareRound';src:url('/fonts/NanumSquareRoundB.woff2') format('woff2');font-weight:700}
 @font-face{font-family:'NanumSquareRound';src:url('/fonts/NanumSquareRoundEB.woff2') format('woff2');font-weight:800}
-:root{--ink:#3F3627;--soft:#6B6052;--muted:#8A7C69;--cream:#F8F3E8;--card:#FFFDF8;--line:#EDE3D1;--sage:#5F7D63;--sage-dark:#2F4A33;--sage-soft:#E8EEE1;--butter:#F7E3A3;--butter-soft:#FBF3D7;--wrong:#B4584A}
+:root{--ink:#3F3627;--soft:#6B6052;--muted:#8A7C69;--cream:#F8F3E8;--card:#FFFDF8;--line:#EDE3D1;--sage:#5F7D63;--sage-dark:#2F4A33;--sage-soft:#E8EEE1;--butter:#F7E3A3;--butter-soft:#FBF3D7;--pink:#FFE8EB;--pink-line:#F1A6B2;--pink-ink:#9B4556}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--cream);color:var(--ink);font-family:'NanumSquareRound','Apple SD Gothic Neo','Malgun Gothic',sans-serif;-webkit-text-size-adjust:100%}
 .serif{font-family:'Gowun Batang',serif}
@@ -23,32 +25,50 @@ button{font:inherit;color:inherit}
 .badge{margin-left:auto;font-size:11.5px;font-weight:700;color:#8A5A2B;background:var(--butter-soft);border-radius:999px;padding:5px 10px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px}
 .btn{min-height:50px;border:0;border-radius:14px;background:var(--sage);color:#fff;font-weight:800;font-size:15px;cursor:pointer;padding:0 18px;width:100%}
-.btn:focus-visible,.chip:focus-visible,.ghost:focus-visible{outline:3px solid var(--sage);outline-offset:2px}
-.btn[disabled]{opacity:.45;cursor:default}
+.btn[disabled]{opacity:.4;cursor:default}
+.btn:focus-visible,.chip:focus-visible,.ghost:focus-visible,.pill:focus-visible{outline:3px solid var(--sage);outline-offset:2px}
 .ghost{min-height:44px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--soft);font-weight:700;font-size:13.5px;cursor:pointer;padding:0 14px}
+.pill{min-height:36px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--soft);font-size:12.5px;font-weight:700;padding:0 12px;cursor:pointer}
 .stack{display:flex;flex-direction:column;gap:14px}
-.art{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:16px;border:6px solid #fff;box-shadow:0 8px 22px rgba(84,70,48,.12);display:block;background:#efe8da}
+.eyebrow{font-size:12px;font-weight:800;color:#8A5A2B}
+.small{margin:0;font-size:12.5px;color:var(--muted);line-height:1.6}
+.lead{margin:0;font-size:14.5px;line-height:1.75;color:var(--soft)}
+/* Art: blurred until the sentence is complete (from the prototype). */
+.art-wrap{position:relative;border-radius:16px;overflow:hidden;border:6px solid #fff;box-shadow:0 8px 22px rgba(84,70,48,.12);background:#efe8da;aspect-ratio:1/1}
+.art{width:100%;height:100%;object-fit:cover;display:block}
+.art.blur{filter:blur(10px) saturate(.6);transform:scale(1.06);transition:filter .7s ease,transform .7s ease}
+.art.clear{filter:none;transform:none;transition:filter .7s ease,transform .7s ease}
+.art-caption{position:absolute;left:12px;bottom:12px;max-width:calc(100% - 24px);border-radius:999px;padding:7px 12px;background:rgba(255,253,248,.92);font-size:12px;font-weight:800;color:var(--sage-dark)}
+.tag{position:absolute;left:12px;top:12px;background:rgba(255,253,248,.92);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;color:#8A5A2B}
 .progress{display:flex;gap:6px}
 .progress span{flex:1;height:6px;border-radius:3px;background:var(--line)}
 .progress span.on{background:var(--sage)}
-.lead{margin:0;font-size:14px;line-height:1.7;color:var(--soft)}
-.answer{min-height:64px;border:1.5px dashed #D9C7A3;border-radius:14px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;background:#FFFEFB;transition:border-color .2s,background .2s}
+.scene-head{display:flex;flex-direction:column;gap:8px}
+.scene-head h2{margin:2px 0 0;font-size:21px;line-height:1.4}
+.help{display:flex;gap:6px;flex-wrap:wrap}
+.ko-box{margin:0;padding:10px 12px;border-radius:12px;background:var(--sage-soft);font-size:14px;line-height:1.65}
+.hint{margin:0;padding:10px 12px;border-radius:12px;background:var(--butter-soft);font-size:13.5px;line-height:1.6}
+.answer{min-height:64px;border:1.5px dashed #D9C7A3;border-radius:14px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;background:#FFFEFB}
 .answer.empty::before{content:attr(data-empty);color:var(--muted);font-size:13px;padding:8px 4px}
 .answer.ok{border-style:solid;border-color:var(--sage);background:var(--sage-soft)}
-.answer.no{animation:shake .35s ease;border-color:var(--wrong)}
-@keyframes shake{25%{transform:translateX(-5px)}50%{transform:translateX(5px)}75%{transform:translateX(-3px)}}
 .pool{display:flex;flex-wrap:wrap;gap:8px;min-height:44px}
 .chip{min-height:44px;padding:8px 13px;border-radius:12px;border:1px solid #DDD3C1;background:#fff;font-size:15px;font-weight:700;line-height:1.35;cursor:pointer;box-shadow:0 2px 0 #E6DCC8;text-align:left}
-.answer .chip{background:var(--butter-soft);border-color:#E8D7A6}
+.answer .chip{background:var(--butter-soft);border-color:#E8D7A6;box-shadow:none}
 .answer.ok .chip{background:#fff;border-color:#C9D6C3;cursor:default}
-.tools{display:flex;gap:8px;flex-wrap:wrap}
-.hint{margin:0;padding:10px 12px;border-radius:12px;background:var(--butter-soft);font-size:13.5px;line-height:1.6}
+.answer .chip.wrong{background:var(--pink);border-color:var(--pink-line);color:var(--pink-ink);animation:wrongPulse .48s ease-in-out 0s 3}
+@keyframes wrongPulse{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}55%{transform:translateX(3px)}}
+.feedback{margin:0;min-height:1.3em;font-size:13.5px;font-weight:700;color:#B16D50}
+.actions{display:flex;gap:8px;align-items:center}
+.actions .btn{flex:1}
 .reveal{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:16px;background:#fff;border:1px solid var(--line)}
-.reveal .ko{margin:0;font-size:15px;line-height:1.7}
 .punch{margin:0;font-family:'Gowun Batang',serif;font-size:17px;line-height:1.7;color:var(--sage-dark)}
-.idiom{display:flex;gap:10px;align-items:baseline;padding:10px 12px;border-radius:12px;background:var(--sage-soft);font-size:13.5px;line-height:1.55}
-.idiom b{white-space:nowrap;color:var(--sage-dark)}
-.status{margin:0;font-size:13.5px;color:var(--wrong);min-height:1.2em}
+.idiom{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;padding:10px 12px;border-radius:12px;background:var(--sage-soft);font-size:13.5px;line-height:1.55}
+.idiom b{color:var(--sage-dark)}
+.coming{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.coming article{border:1px dashed #D9CBB0;border-radius:16px;padding:14px;background:rgba(255,253,248,.55);min-height:104px;display:flex;flex-direction:column;gap:4px}
+.coming .country{font-size:11px;font-weight:800;color:var(--muted)}
+.coming h3{margin:2px 0 0;font-family:'Gowun Batang',serif;font-size:16px;color:var(--soft)}
+.coming p{margin:0;font-size:12px;color:var(--muted);line-height:1.5}
 .shelf{background:#EAD9BD;border-radius:16px;padding:10px 10px 0;box-shadow:inset 0 0 0 6px #D9C19C}
 .shelf-row{height:170px;display:flex;align-items:flex-end;gap:6px;padding:0 12px;border-bottom:12px solid #B8915F;background:#E3CFAE}
 .spine{border-radius:4px 4px 2px 2px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:10px 0 8px;color:#FFFCF6;box-shadow:inset 3px 0 rgba(255,255,255,.18),inset -3px 0 rgba(0,0,0,.10)}
@@ -57,111 +77,117 @@ button{font:inherit;color:inherit}
 .spine.new{animation:slide .7s cubic-bezier(.2,.8,.2,1)}
 @keyframes slide{from{transform:translateY(-60px);opacity:0}to{transform:none;opacity:1}}
 .q{margin:0;font-size:17px;font-weight:800;line-height:1.5}
-.small{margin:0;font-size:12.5px;color:var(--muted);line-height:1.6}
-.cover{position:relative}
-.cover .tag{position:absolute;left:14px;top:14px;background:rgba(255,253,248,.92);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:800;color:#8A5A2B}
 [hidden]{display:none!important}
-@media (prefers-reduced-motion:reduce){.answer.no,.spine.new{animation:none}}
+@media (prefers-reduced-motion:reduce){.answer .chip.wrong,.spine.new{animation:none}.art.blur,.art.clear{transition:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top"><img src="/images/logo_header.png" alt="DayO"><span class="badge">원안 데모 · 저장 안 됨</span></header>
 
-  <!-- 1. 시작 -->
+  <!-- 1. 표지 -->
   <section id="intro" class="stack" aria-labelledby="intro-title">
-    <div class="cover"><img class="art" src="/images/stories/belgium-waffle/scene-1.webp" alt="브뤼셀 광장에서 와플을 떠올리며 들뜬 여행자"><span class="tag">오늘의 이야기</span></div>
+    <div class="art-wrap"><img class="art" src="/images/stories/belgium-waffle/scene-1.webp" alt="브뤼셀 광장에서 와플을 떠올리며 들뜬 여행자"><span class="tag">오늘의 이야기</span></div>
     <div class="card stack">
-      <span class="small">즐거운 벨기에 여행 · 1장</span>
+      <span class="eyebrow">즐거운 벨기에 여행 · 1장</span>
       <h1 id="intro-title" class="serif" style="margin:0;font-size:26px">와플 대작전</h1>
-      <p class="lead">오늘 대화를 마친 당신에게, 벨기에에서 온 짧은 이야기 한 편. 장면마다 섞인 영어 조각을 순서대로 맞춰 문장을 완성해 보세요. 점수는 없어요.</p>
+      <p class="lead">완벽한 와플 하나를 먹으러 브뤼셀까지 온 나. 그런데 와플 가게 아저씨에게는 아주 진지한 규칙이 있는데…</p>
+      <p class="small">영어 조각을 순서대로 놓으면 흐릿했던 장면이 선명해지고, 이야기가 한 문장씩 이어져요. 점수는 없어요.</p>
       <button class="btn" type="button" id="start">이야기 펼치기</button>
+    </div>
+    <div class="stack" style="gap:10px">
+      <span class="eyebrow">다음 이야기도 준비 중이에요</span>
+      <div class="coming">
+        <article><span class="country">멕시코</span><h3>하나 더 놓인 접시</h3><p>저녁 식탁에 놓인 빈 접시 하나의 비밀</p></article>
+        <article><span class="country">올라 스페인</span><h3>시에스타 대소동</h3><p>오후 두 시, 온 동네가 문을 닫았다</p></article>
+        <article><span class="country">몽 쁘띠 프랑스</span><h3>바게트 한 줄</h3><p>빵 한 줄 사러 갔다가 생긴 일</p></article>
+        <article><span class="country">헬로 USA</span><h3>팁은 얼마나?</h3><p>계산서 앞에서 멈춘 계산기</p></article>
+      </div>
+      <p class="small">그날 대화한 파트너의 나라 이야기가 먼저 펼쳐져요.</p>
     </div>
   </section>
 
   <!-- 2. 장면 -->
-  <section id="scene" class="stack" hidden aria-live="polite">
+  <section id="scene" class="stack" hidden>
+    <div class="actions" style="justify-content:space-between"><button class="pill" type="button" id="to-intro">← 이야기 표지</button><span class="small" id="scene-step"></span></div>
     <div class="progress" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-    <p class="small" id="scene-step"></p>
-    <img class="art" id="scene-art" src="" alt="">
-    <p class="lead serif" id="scene-lead"></p>
-    <div class="answer empty" id="answer" data-empty="조각을 눌러 여기에 문장을 만들어요" aria-label="내가 만든 문장"></div>
-    <p class="status" id="status" role="status"></p>
-    <div class="pool" id="pool" aria-label="섞인 조각"></div>
-    <div class="tools" id="tools">
-      <button class="ghost" type="button" id="hint-btn">힌트 보기</button>
-      <button class="ghost" type="button" id="reset-btn">다시 섞기</button>
-      <button class="ghost" type="button" id="show-btn" hidden>정답 보기</button>
+    <div class="scene-head">
+      <div><span class="eyebrow" id="scene-kicker"></span><h2 class="serif" id="scene-title"></h2></div>
+      <div class="help"><button class="pill" type="button" id="ko-btn" aria-pressed="false">한국어 보기</button><button class="pill" type="button" id="hint-btn" aria-pressed="false">힌트</button></div>
     </div>
+    <div class="art-wrap"><img class="art blur" id="scene-art" src="" alt=""><span class="art-caption" id="art-caption">문장을 완성하면 장면이 보여요</span></div>
+    <p class="lead serif" id="scene-lead"></p>
+    <p class="ko-box" id="ko-box" hidden></p>
     <p class="hint" id="hint" hidden></p>
+    <div class="answer empty" id="answer" data-empty="조각을 눌러 여기에 순서대로 놓아 주세요" aria-label="내가 만든 문장"></div>
+    <div class="pool" id="pool" aria-label="섞인 조각"></div>
+    <p class="feedback" id="feedback" role="status" aria-live="polite"></p>
+    <div class="actions" id="check-row"><button class="ghost" type="button" id="reset-btn">처음부터</button><button class="ghost" type="button" id="show-btn" hidden>정답 보기</button><button class="btn" type="button" id="check" disabled>문장 확인</button></div>
     <div class="reveal" id="reveal" hidden>
-      <p class="ko" id="ko"></p>
       <p class="punch" id="punch"></p>
-      <div class="idiom"><b id="idiom-en"></b><span id="idiom-ko"></span></div>
+      <div class="idiom"><span class="small" style="font-weight:800;color:#8A5A2B">오늘의 표현</span><b id="idiom-en"></b><span id="idiom-ko"></span></div>
       <button class="btn" type="button" id="next">다음 장면</button>
     </div>
   </section>
 
   <!-- 3. 마무리 -->
   <section id="done" class="stack" hidden aria-labelledby="done-title">
+    <div class="art-wrap"><img class="art" src="/images/stories/belgium-waffle/scene-4.webp" alt="플레인 와플을 먹고 감동한 여행자와 웃는 아저씨"><span class="tag">이야기 완성</span></div>
     <div class="card stack">
-      <span class="small">와플 대작전 · 완성</span>
-      <h2 id="done-title" class="serif" style="margin:0;font-size:22px">벨기에 책에 1장이 꽂혔어요</h2>
+      <h2 id="done-title" class="serif" style="margin:0;font-size:23px;line-height:1.45">토핑은 졌지만,<br>여행은 이겼어요.</h2>
+      <p class="lead">벨기에 책에 1장이 꽂혔어요. 오늘 만든 문장으로 다음 파트너와 이야기를 이어가 볼까요?</p>
       <div class="shelf" aria-label="나의 책장"><div class="shelf-row" id="shelf"></div></div>
     </div>
     <div class="card stack">
-      <span class="small" style="font-weight:800;color:#8A5A2B">다음 대화에서 물어보기</span>
+      <span class="eyebrow">다음 대화에서 물어보기</span>
       <p class="q" id="next-q"></p>
       <p class="small" id="next-q-ko"></p>
       <button class="ghost" type="button" id="copy-q">질문 복사하기</button>
       <p class="small" id="copy-status" role="status"></p>
     </div>
-    <button class="btn" type="button" id="again">처음부터 다시 보기</button>
+    <div class="actions"><button class="ghost" type="button" id="again" style="flex:1">다시 해 보기</button><button class="btn" type="button" id="to-cover" style="flex:1">다른 이야기 보기</button></div>
   </section>
 </div>
 
 <script>
 (function () {
   'use strict';
-  // Revised script (2026-10-18): bigger twist, 5–6 pieces, one idiom per scene. Pictures by the owner (square).
+  // Revised script (2026-10-18): bigger twist, 5–6 pieces, one idiom per scene. Owner's square pictures.
   var STORY = {
     question: 'Have you ever been told you were eating something "the wrong way"?',
     questionKo: '음식을 "잘못된 방법"으로 먹는다는 말을 들어 본 적 있어요?',
     scenes: [
-      { img: 'scene-1', alt: '브뤼셀 광장에서 와플을 떠올리며 들뜬 여행자',
-        lead: '브뤼셀 그랑플라스. 당신의 여행 일정표에는 딱 한 줄이 적혀 있어요.',
+      { img: 'scene-1', kicker: '도착', title: '브뤼셀에 온 단 하나의 이유', alt: '브뤼셀 광장에서 와플을 떠올리며 들뜬 여행자',
+        lead: '브뤼셀 그랑플라스. 당신의 여행 일정표에는 딱 한 줄이 적혀 있어요.', caption: '여행 일정표: 와플. 끝.',
         pieces: ['I couldn’t wait', 'to try', 'the waffle', 'I had been dreaming of', 'for months.'],
         ko: '몇 달 동안 꿈꿔 온 그 와플을 빨리 먹어 보고 싶어서 견딜 수가 없었다.',
         hint: 'couldn’t wait to + 동사 = ~하고 싶어 못 견디다 · had been dreaming of = 계속 꿈꿔 왔던',
-        punch: '도착 10분 만에, 관광은 뒷전이 됐다.',
-        idiom: ['couldn’t wait to ~', '~하고 싶어 못 견디다'] },
-      { img: 'scene-2', alt: '날개 달린 와플들이 떠다니고, 콧수염 아저씨가 토핑 금지 손짓을 하는 장면',
-        lead: '주문하려는 순간, 가게 주인 아저씨가 손가락을 들었어요.',
+        punch: '도착 10분 만에, 관광은 뒷전이 됐다.', idiom: ['couldn’t wait to ~', '~하고 싶어 못 견디다'] },
+      { img: 'scene-2', kicker: '경고', title: '와플 가게의 진지한 규칙', alt: '날개 달린 와플들이 떠다니고, 콧수염 아저씨가 토핑 금지 손짓을 하는 장면',
+        lead: '주문하려는 순간, 가게 주인 아저씨가 손가락을 들었어요.', caption: '와플 천사들도 고개를 끄덕여요',
         pieces: ['“Take my word for it,”', 'he said,', '“a real Belgian waffle', 'doesn’t need', 'any help.”'],
         ko: '"내 말 믿어요." 아저씨가 말했다. "진짜 벨기에 와플은 아무 도움도 필요 없어요."',
         hint: 'Take my word for it = 내 말 믿어 봐 · doesn’t need any ~ = ~가 하나도 필요 없다',
-        punch: '그 순간 날개 달린 와플들이 고개를 끄덕인 것 같았다. 기분 탓이겠지.',
-        idiom: ['Take my word for it.', '내 말 믿어 봐.'] },
-      { img: 'scene-3', alt: '딸기와 생크림이 산처럼 쌓인 와플 앞에서 신난 여행자와 땀 흘리는 아저씨',
-        lead: '하지만 메뉴판의 토핑 사진이 너무 반짝였어요.',
+        punch: '그 순간 날개 달린 와플들이 고개를 끄덕인 것 같았다. 기분 탓이겠지.', idiom: ['Take my word for it.', '내 말 믿어 봐.'] },
+      { img: 'scene-3', kicker: '유혹', title: '참을 수 없는 토핑 산', alt: '딸기와 생크림이 산처럼 쌓인 와플 앞에서 신난 여행자와 땀 흘리는 아저씨',
+        lead: '하지만 메뉴판의 토핑 사진이 너무 반짝였어요.', caption: '아저씨 이마에 땀 한 방울…',
         pieces: ['I couldn’t help it,', 'so I ordered', 'strawberries, cream, chocolate,', 'and everything else', 'they had.'],
         ko: '참을 수가 없었다. 그래서 딸기, 생크림, 초콜릿, 그리고 가게에 있는 건 전부 주문했다.',
         hint: 'couldn’t help it = 어쩔 수 없었다(참을 수 없었다) · 여러 개를 말할 땐 A, B, and C',
-        punch: '아저씨 이마에 땀 한 방울. 와플은 토핑에 묻혀 보이지도 않았다.',
-        idiom: ['I couldn’t help it.', '참을 수가 없었어요.'] },
-      { img: 'scene-4', alt: '플레인 와플을 한입 먹고 감동한 여행자와 흐뭇하게 웃는 아저씨',
-        lead: '토핑 산을 반쯤 무너뜨렸을 때, 아저씨가 조용히 접시 하나를 밀어 줬어요.',
+        punch: '아저씨 이마에 땀 한 방울. 와플은 토핑에 묻혀 보이지도 않았다.', idiom: ['I couldn’t help it.', '참을 수가 없었어요.'] },
+      { img: 'scene-4', kicker: '반전', title: '옆으로 밀어 준 접시 하나', alt: '플레인 와플을 한입 먹고 감동한 여행자와 흐뭇하게 웃는 아저씨',
+        lead: '토핑 산을 반쯤 무너뜨렸을 때, 아저씨가 조용히 접시 하나를 밀어 줬어요.', caption: '여행 최고의 한 입',
         pieces: ['He slid me', 'a plain one', 'on the side,', 'and it turned out', 'to be', 'the best bite of my trip.'],
         ko: '아저씨가 옆으로 플레인 와플 하나를 슬쩍 건넸는데, 알고 보니 그게 여행 최고의 한 입이었다.',
         hint: 'turn out to be = 알고 보니 ~였다 · on the side = 곁들여서',
-        punch: '토핑 탑은 사진용, 진짜 와플은 마음에. 아저씨는 아무 말 없이 웃었다.',
-        idiom: ['turn out to be ~', '알고 보니 ~였다'] }
+        punch: '토핑 탑은 사진용, 진짜 와플은 마음에. 아저씨는 아무 말 없이 웃었다.', idiom: ['turn out to be ~', '알고 보니 ~였다'] }
     ]
   };
   var BOOKS = [ { t: '즐거운 벨기에 여행', c: '#5F7D63', w: 46, on: true }, { t: '올라 스페인', c: '#E9C96B', w: 42 }, { t: '몽 쁘띠 프랑스', c: '#7D98AD', w: 44 }, { t: '헬로 USA', c: '#C98B6B', w: 40 } ];
   var $ = function (id) { return document.getElementById(id); };
   var index = 0, placed = [], pool = [], misses = 0, solved = false;
 
+  function view(name) { ['intro', 'scene', 'done'].forEach(function (v) { $(v).hidden = v !== name; }); window.scrollTo(0, 0); }
   function shuffle(list) {
     var a = list.map(function (text, i) { return { text: text, i: i }; });
     do { for (var k = a.length - 1; k > 0; k--) { var j = Math.floor(Math.random() * (k + 1)); var t = a[k]; a[k] = a[j]; a[j] = t; } }
@@ -170,68 +196,77 @@ button{font:inherit;color:inherit}
   }
   function chip(piece, where) {
     var b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = piece.text;
-    b.setAttribute('aria-label', (where === 'pool' ? '추가: ' : '빼기: ') + piece.text);
-    b.onclick = function () { if (solved) return; move(piece, where); };
+    b.setAttribute('aria-label', (where === 'pool' ? '놓기: ' : '빼기: ') + piece.text);
+    b.onclick = function () { if (!solved) move(piece, where); };
     return b;
   }
   function move(piece, from) {
     if (from === 'pool') { pool.splice(pool.indexOf(piece), 1); placed.push(piece); }
     else { placed.splice(placed.indexOf(piece), 1); pool.push(piece); }
-    $('status').textContent = ''; $('answer').classList.remove('no');
-    paint();
-    if (!pool.length) check();
+    $('feedback').textContent = ''; paint();
   }
   function paint() {
     var answer = $('answer'), box = $('pool'); answer.replaceChildren(); box.replaceChildren();
     placed.forEach(function (p) { answer.appendChild(chip(p, 'answer')); });
     pool.forEach(function (p) { box.appendChild(chip(p, 'pool')); });
     answer.classList.toggle('empty', !placed.length);
+    $('check').disabled = solved || pool.length > 0;
   }
   function check() {
-    var ok = placed.every(function (p, n) { return p.i === n; });
-    if (ok) return win();
+    if (placed.every(function (p, n) { return p.i === n; })) return win();
     misses++;
-    var a = $('answer'); a.classList.remove('no'); void a.offsetWidth; a.classList.add('no');
-    $('status').textContent = misses >= 2 ? '거의 다 왔어요. 힌트나 정답 보기를 써도 괜찮아요.' : '순서를 한 번만 더 볼까요? 조각을 눌러 빼고 다시 놓을 수 있어요.';
+    var nodes = $('answer').querySelectorAll('.chip');
+    nodes.forEach(function (el, n) { el.classList.remove('wrong'); if (placed[n].i !== n) { void el.offsetWidth; el.classList.add('wrong'); } });
+    $('feedback').textContent = misses >= 2 ? '분홍색 조각만 다시 놓아 보세요. 정답 보기를 써도 괜찮아요.' : '분홍색으로 깜빡이는 조각을 확인해 보세요.';
     $('show-btn').hidden = misses < 2;
   }
+  function setKo(on) { $('ko-box').hidden = !on; $('ko-btn').setAttribute('aria-pressed', String(on)); $('ko-btn').textContent = on ? '한국어 숨기기' : '한국어 보기'; }
   function win() {
     var s = STORY.scenes[index]; solved = true;
     placed = s.pieces.map(function (text, i) { return { text: text, i: i }; }); pool = []; paint();
-    $('answer').classList.add('ok'); $('status').textContent = '';
-    $('tools').hidden = true; $('hint').hidden = true; $('pool').hidden = true;
-    $('ko').textContent = s.ko; $('punch').textContent = s.punch; $('idiom-en').textContent = s.idiom[0]; $('idiom-ko').textContent = s.idiom[1];
+    $('answer').classList.add('ok'); setKo(true); $('hint').hidden = true;
+    var art = $('scene-art'); art.classList.remove('blur'); art.classList.add('clear'); $('art-caption').textContent = s.caption;
+    $('feedback').textContent = '좋아요! 문장이 장면이 되었어요.';
+    $('check-row').hidden = true; $('pool').hidden = true;
+    $('punch').textContent = s.punch; $('idiom-en').textContent = s.idiom[0]; $('idiom-ko').textContent = s.idiom[1];
     $('next').textContent = index < STORY.scenes.length - 1 ? '다음 장면' : '이야기 마치기';
-    $('reveal').hidden = false; $('next').focus();
+    $('reveal').hidden = false; $('next').focus({ preventScroll: true });
   }
   function showScene() {
     var s = STORY.scenes[index]; solved = false; misses = 0; placed = []; pool = shuffle(s.pieces);
     $('scene-step').textContent = '장면 ' + (index + 1) + ' / ' + STORY.scenes.length;
     document.querySelectorAll('.progress span').forEach(function (el, n) { el.classList.toggle('on', n <= index); });
-    var art = $('scene-art'); art.src = '/images/stories/belgium-waffle/' + s.img + '.webp'; art.alt = s.alt;
-    $('scene-lead').textContent = s.lead; $('hint').textContent = s.hint; $('hint').hidden = true;
-    $('answer').classList.remove('ok', 'no'); $('status').textContent = '';
-    $('tools').hidden = false; $('show-btn').hidden = true; $('pool').hidden = false; $('reveal').hidden = true;
-    paint(); window.scrollTo(0, 0);
+    $('scene-kicker').textContent = s.kicker; $('scene-title').textContent = s.title;
+    var art = $('scene-art'); art.classList.remove('clear'); art.classList.add('blur'); art.src = '/images/stories/belgium-waffle/' + s.img + '.webp'; art.alt = s.alt;
+    $('art-caption').textContent = '문장을 완성하면 장면이 보여요';
+    $('scene-lead').textContent = s.lead; $('ko-box').textContent = s.ko; setKo(false);
+    $('hint').textContent = s.hint; $('hint').hidden = true; $('hint-btn').setAttribute('aria-pressed', 'false');
+    $('answer').classList.remove('ok'); $('feedback').textContent = '';
+    $('check-row').hidden = false; $('show-btn').hidden = true; $('pool').hidden = false; $('reveal').hidden = true;
+    paint(); view('scene');
   }
   function finish() {
-    $('scene').hidden = true; $('done').hidden = false; window.scrollTo(0, 0);
-    $('next-q').textContent = STORY.question; $('next-q-ko').textContent = STORY.questionKo;
+    view('done');
+    $('next-q').textContent = STORY.question; $('next-q-ko').textContent = STORY.questionKo; $('copy-status').textContent = '';
     var shelf = $('shelf'); shelf.replaceChildren();
     BOOKS.forEach(function (b) {
       var d = document.createElement('div'), h = Math.min(156, 60 + b.t.replace(/\s/g, '').length * 12);
       d.className = 'spine' + (b.on ? ' new' : ' ghosty'); d.style.width = b.w + 'px'; d.style.height = h + 'px'; d.style.background = b.c;
-      d.innerHTML = '<span class="vt"></span><span style="font-size:10px;font-weight:700"></span>';
-      d.firstChild.textContent = b.t; d.lastChild.textContent = b.on ? '1장' : '?';
-      shelf.appendChild(d);
+      var title = document.createElement('span'); title.className = 'vt'; title.textContent = b.t;
+      var count = document.createElement('span'); count.style.cssText = 'font-size:10px;font-weight:700'; count.textContent = b.on ? '1장' : '?';
+      d.append(title, count); shelf.appendChild(d);
     });
   }
-  $('start').onclick = function () { $('intro').hidden = true; $('scene').hidden = false; index = 0; showScene(); };
-  $('hint-btn').onclick = function () { $('hint').hidden = !$('hint').hidden; };
-  $('reset-btn').onclick = function () { placed = []; pool = shuffle(STORY.scenes[index].pieces); $('status').textContent = ''; $('answer').classList.remove('no'); paint(); };
+  $('start').onclick = function () { index = 0; showScene(); };
+  $('to-intro').onclick = function () { view('intro'); };
+  $('ko-btn').onclick = function () { setKo($('ko-box').hidden); };
+  $('hint-btn').onclick = function () { var on = $('hint').hidden; $('hint').hidden = !on; $('hint-btn').setAttribute('aria-pressed', String(on)); };
+  $('reset-btn').onclick = function () { placed = []; pool = shuffle(STORY.scenes[index].pieces); $('feedback').textContent = ''; paint(); };
+  $('check').onclick = check;
   $('show-btn').onclick = win;
   $('next').onclick = function () { if (index < STORY.scenes.length - 1) { index++; showScene(); } else finish(); };
-  $('again').onclick = function () { $('done').hidden = true; $('intro').hidden = false; window.scrollTo(0, 0); };
+  $('again').onclick = function () { index = 0; showScene(); };
+  $('to-cover').onclick = function () { view('intro'); };
   $('copy-q').onclick = function () {
     var done = function () { $('copy-status').textContent = '복사했어요. 다음 대화에서 써 보세요!'; };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(STORY.question).then(done, function () { $('copy-status').textContent = STORY.question; });

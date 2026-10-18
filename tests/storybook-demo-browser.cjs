@@ -25,15 +25,22 @@ const root = path.resolve(__dirname, '..', 'public'), out = process.argv[2] || '
         assert.ok(pieces.length >= 5 && pieces.length <= 7, 'scene ' + (s + 1) + ' has 5-7 pieces');
         assert.equal(await page.locator('#pool .chip').count(), pieces.length);
         assert.match(await page.locator('#scene-art').getAttribute('src'), new RegExp('scene-' + (s + 1) + '\\.webp$'));
+        assert.equal(await page.locator('#scene-art').evaluate(e => e.classList.contains('blur')), true, 'art blurred before solving');
+        assert.equal(await page.locator('#check').isDisabled(), true, 'check disabled until all pieces placed');
+        await page.click('#ko-btn'); assert.equal(await page.locator('#ko-box').isVisible(), true, 'Korean toggle'); await page.click('#ko-btn');
         if (s === 0) { // wrong order first: place pieces in reversed order
-          for (const t of [...pieces].reverse()) await page.locator('#pool .chip', { hasText: t }).first().click();
-          await page.waitForFunction(() => document.getElementById('status').textContent.length > 0);
+          for (const t of [...pieces].reverse()) await page.locator('#pool .chip').filter({ hasText: t }).first().click();
+          await page.click('#check');
+          assert.ok(await page.locator('#answer .chip.wrong').count() > 0, 'wrong pieces marked pink');
           assert.equal(await page.locator('#reveal').isVisible(), false, 'wrong order does not reveal');
           await page.click('#reset-btn');
         }
         for (const t of pieces) await page.locator('#pool .chip').filter({ hasText: t }).first().click();
+        await page.click('#check');
         await page.locator('#reveal').waitFor({ state: 'visible' });
-        assert.equal(await page.locator('#ko').textContent(), story.scenes[s].ko);
+        assert.equal(await page.locator('#ko-box').textContent(), story.scenes[s].ko);
+        assert.equal(await page.locator('#ko-box').isVisible(), true, 'Korean shown after solving');
+        assert.equal(await page.locator('#scene-art').evaluate(e => e.classList.contains('clear')), true, 'art revealed');
         assert.equal(await page.locator('#answer').evaluate(e => e.classList.contains('ok')), true);
         if (out && width === 390 && (s === 1 || s === 3)) await page.screenshot({ path: path.join(out, 'sb-scene' + (s + 1) + '.png'), fullPage: true });
         assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, 'no overflow ' + width);
@@ -46,6 +53,6 @@ const root = path.resolve(__dirname, '..', 'public'), out = process.argv[2] || '
       assert.deepEqual(errors, []); assert.deepEqual(missing.filter(u => !/\/fonts\//.test(u)), []);
       await page.close();
     }
-    console.log('PASS storybook demo: 4 square scene images, 5-7 pieces, wrong order gives feedback, reveal ko/punchline/idiom, next-conversation question, shelf; 360/390/1280 no overflow, no errors');
+    console.log('PASS storybook demo (merged prototype): blur-to-reveal art, Korean toggle, check button, pink wrong pieces; 4 square scene images, 5-7 pieces, wrong order gives feedback, reveal ko/punchline/idiom, next-conversation question, shelf; 360/390/1280 no overflow, no errors');
   } finally { await browser.close(); server.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });
