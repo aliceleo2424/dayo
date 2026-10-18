@@ -16,11 +16,11 @@
 
   var UI = {
     title: { KO: '외국인 친구 Emma한테 카톡이 왔어요 ☕', EN: 'Your friend Emma just texted you ☕' },
-    introLead: { KO: '한국에 사는 외국인 친구 Emma와 주말 약속까지, 2분짜리 대화예요.', EN: 'A two-minute chat with Emma, a friend who lives in Korea, all the way to a weekend café date.' },
+    introLead: { KO: '한국 문화를 잘 아는 외국인 친구 Emma와 주말 약속까지, 2분짜리 대화예요.', EN: 'A two-minute chat with Emma, a friend who knows Korean culture well, all the way to a weekend café date.' },
     introBody: { KO: '평소 나라면 어떻게 답할지 골라 보세요. 정답도 점수도 없어요. 막히면 한국어로 물어봐도 되고, 중간에 한 번은 마이크로 직접 말해 봐요.', EN: 'Pick the reply you would really send. There are no right answers or scores. You can ask in Korean when stuck, and you will speak once with your mic.' },
     introNote: { KO: '가상의 대화예요. 말한 내용은 저장하거나 전송하지 않아요.', EN: 'This is a simulated chat. What you say is not saved or sent.' },
     start: { KO: '답장하러 가기', EN: 'Reply to Emma' },
-    emmaSub: { KO: '서울 거주 3년 · 한국어 가능', EN: 'Lives in Seoul · speaks Korean' },
+    emmaSub: { KO: '한국 문화를 잘 알아요 · 한국어 가능', EN: 'Knows Korean culture · speaks Korean' },
     opening: { KO: '토요일 오후, 카톡이 울려요', EN: 'Saturday afternoon, your phone buzzes' },
     koChance: { KO: '한국어 찬스', EN: 'Ask in Korean' },
     micLead: { KO: '이번 답장은 직접 말로 해 보세요. 마이크 연결도 함께 확인돼요.', EN: 'Answer this one out loud. It also checks that your mic works.' },
