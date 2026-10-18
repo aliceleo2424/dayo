@@ -37,7 +37,7 @@
     resultEyebrow: { KO: '나의 대화 디저트', EN: 'My conversation dessert' },
     emmaSays: { KO: 'Emma가 본 나', EN: 'What Emma noticed' },
     nextTip: { KO: '다음엔 이렇게 시작해 보세요', EN: 'Try this next time' },
-    phrases: { KO: '오늘 대화에서 바로 쓸 수 있었던 표현', EN: 'Phrases you could have used today' },
+    phrases: { KO: '실제 대화에서 이렇게 말해보세요!', EN: 'Try saying it like this in a real chat!' },
     koUsed: { KO: '한국어 찬스 {n}번', EN: 'Asked in Korean {n}×' },
     micDone: { KO: '마이크 확인 ✓', EN: 'Mic checked ✓' },
     micNot: { KO: '마이크 미확인', EN: 'Mic not checked' },
@@ -304,6 +304,7 @@
       '<h3 class="emma-type-name">' + esc(T.kind[L]) + '<br>' + esc(T.name[L]) + '</h3></div></div>' +
       '<p class="emma-type-line">' + esc(T.line[L]) + '</p>' +
       '<div class="emma-stats"><span>' + esc(u('koUsed', { n: String(r.koUsed) })) + '</span><span>' + esc(r.micOk ? u('micDone') : u('micNot')) + '</span></div>' +
+      '<div class="emma-block"><p class="quiz-result-label">' + esc(u('emmaSays')) + '</p><p lang="en">' + esc(T.emma) + '</p></div>' +
       '</div>';
   }
 
@@ -314,7 +315,6 @@
       return '<li><span lang="en">' + esc(t.phrase[0]) + '</span><em>' + esc(t.phrase[1][L]) + '</em></li>';
     }).join('');
     return '<div class="emma-result emma-result-details">' +
-      '<div class="emma-block"><p class="quiz-result-label">' + esc(u('emmaSays')) + '</p><p lang="en">' + esc(T.emma) + '</p></div>' +
       '<div class="emma-block"><p class="quiz-result-label">' + esc(u('nextTip')) + '</p><p>' + esc(T.tip[L]) + '</p></div>' +
       '<div class="emma-block"><p class="quiz-result-label">' + esc(u('phrases')) + '</p><ul class="emma-phrases">' + phrases + '</ul></div>' +
       '</div>';

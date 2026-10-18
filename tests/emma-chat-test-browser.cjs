@@ -87,8 +87,8 @@ async function run() {
       const resText = await modal.locator('.quiz-result').textContent();
       assert.ok(resText.includes(locale === 'KO' ? '마카롱' : 'Macaron'), 'all-macaron picks give macaron');
       assert.ok(resText.includes(width === 360 ? (locale === 'KO' ? '한국어 찬스 1번' : 'Asked in Korean 1×') : (locale === 'KO' ? '한국어 찬스 2번' : 'Asked in Korean 2×')), 'korean help counted');
-      const order = await page.evaluate(() => { const q = (s) => document.querySelector('#quizModal ' + s); const pos = (a, b) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING); return pos(q('.emma-result-head'), q('#quizLeadCard')) && pos(q('#quizLeadCard'), q('.emma-result-details')) && pos(q('.emma-result-details'), q('.quiz-topic-grid')); });
-      assert.ok(order, 'order: type head → guidebook → details → topics');
+      const order = await page.evaluate(() => { const q = (s) => document.querySelector('#quizModal ' + s); const pos = (a, b) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING); return pos(q('.emma-result-head'), q('.emma-result-details')) && pos(q('.emma-result-details'), q('#quizLeadCard')) && pos(q('#quizLeadCard'), q('.quiz-topic-grid')); });
+      assert.ok(order, 'order: type+Emma → tip+phrases → guidebook → topics');
       assert.equal(await modal.locator('#consentReqDetail').isVisible(), false, 'consent details folded');
       await modal.locator('[aria-controls="consentReqDetail"]').click(); assert.ok(await modal.locator('#consentReqDetail').isVisible(), 'details open');
       await modal.locator('[aria-controls="consentReqDetail"]').click(); assert.equal(await modal.locator('#consentReqDetail').isVisible(), false);

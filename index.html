@@ -4107,6 +4107,7 @@
       slide.className = 'quiz-slide active';
       slide.innerHTML = `<div class="quiz-result">
         ${window.DayOEmmaChat ? window.DayOEmmaChat.resultHeadHtml(emmaResult || { type: 'pud', picks: [], koUsed: 0, micOk: false }) : ''}
+        ${window.DayOEmmaChat ? window.DayOEmmaChat.resultDetailsHtml(emmaResult || { type: 'pud', picks: [], koUsed: 0, micOk: false }) : ''}
         <div class="quiz-lead-card" id="quizLeadCard">
           <p class="quiz-lead-title">${escapeHtml(leadTitle)}</p>
           <p class="quiz-lead-desc">${escapeHtml(t('quiz.guidebook.description'))}</p>
@@ -4144,7 +4145,6 @@
             <a class="quiz-lead-cta" href="/guidebook/level-1" target="_blank" rel="noopener">${escapeHtml(t('quiz.guidebook.open'))}</a>
           </div>
         </div>
-        ${window.DayOEmmaChat ? window.DayOEmmaChat.resultDetailsHtml(emmaResult || { type: 'pud', picks: [], koUsed: 0, micOk: false }) : ''}
         <div class="quiz-result-block">
           <p class="quiz-result-label">${escapeHtml(t('quiz.resultTopicsTitle'))}</p>
           <p class="quiz-result-topics-sub">${escapeHtml(t('quiz.resultTopicsSub'))}</p>
