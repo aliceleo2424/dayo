@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>나의 책장 · 데모 | DayO</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap">
+<style>
+/* DayO 책장 + 나라 이야기 만들기 데모 (2026-10-18). 저장·로그인·결제와 연결되지 않은 독립 페이지. */
+@font-face{font-family:'NanumSquareRound';src:url('/fonts/NanumSquareRoundR.woff2') format('woff2');font-weight:400}
+@font-face{font-family:'NanumSquareRound';src:url('/fonts/NanumSquareRoundB.woff2') format('woff2');font-weight:700}
+@font-face{font-family:'NanumSquareRound';src:url('/fonts/NanumSquareRoundEB.woff2') format('woff2');font-weight:800}
+:root{--bg:#F8F3E8;--card:#FFFDF8;--line:#EDE3D1;--ink:#3F3627;--soft:#6B6052;--sage:#5F7D63;--sage-d:#3F5A45;--butter:#F7E3A3;--wood:#B8915F;--shelf:#E3CFAE}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'NanumSquareRound','Apple SD Gothic Neo','Malgun Gothic',sans-serif}
+body{min-height:100vh;display:flex;justify-content:center}
+.app{width:100%;max-width:440px;min-height:100vh;padding:0 16px 40px;display:flex;flex-direction:column;gap:14px}
+.serif{font-family:'Gowun Batang',serif}
+header{display:flex;align-items:center;gap:8px;padding:16px 2px 4px}
+header img{height:28px;width:auto}
+.demo-tag{margin-left:auto;font-size:11.5px;font-weight:700;color:#8A5A2B;background:#FBF3D7;border-radius:999px;padding:5px 10px}
+h1{margin:6px 2px 0;font-size:24px}
+.sub{margin:0 2px;font-size:13px;color:var(--soft);line-height:1.6}
+button{font:inherit;cursor:pointer}
+.shelf{background:#EAD9BD;border-radius:16px;padding:10px 10px 0;box-shadow:inset 0 0 0 6px #D9C19C}
+.row{height:200px;display:flex;align-items:flex-end;gap:8px;padding:0 14px;border-bottom:12px solid var(--wood);background:var(--shelf)}
+.spine{border:0;border-radius:4px 4px 2px 2px;padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;box-shadow:inset 3px 0 rgba(255,255,255,.18),inset -3px 0 rgba(0,0,0,.10);transition:transform .18s ease}
+.spine:hover,.spine:focus-visible{transform:translateY(-6px)}
+.spine.on{transform:translateY(-8px);box-shadow:0 0 0 3px #FFFCF6,0 0 0 5px var(--ink)}
+.spine .vt{writing-mode:vertical-rl;font-family:'Gowun Batang',serif;font-size:13px;font-weight:700;letter-spacing:1px}
+.spine small{font-size:10px;font-weight:700}
+.spine.locked{opacity:.45;filter:saturate(.6)}
+.plus{width:40px;height:96px;border:1.5px dashed #B8A07A;border-radius:4px 4px 2px 2px;display:grid;place-items:center;color:#8A7C69;font-size:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.kicker{font-size:12px;font-weight:800;color:#8A5A2B}
+.btn{min-height:48px;border-radius:14px;border:0;background:var(--sage);color:#fff;font-size:15px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 16px}
+.btn.ghost{background:#E8EEE1;color:#2F4A33}
+.btn:disabled{background:#D9D3C7;color:#7A7166;cursor:default}
+.bubble{background:#FFFEFB;border:1px solid var(--line);border-radius:4px 16px 16px 16px;padding:12px 14px}
+.bubble .who{font-size:12px;font-weight:800;color:var(--sage-d);margin-bottom:4px}
+.en{margin:0;font-size:15.5px;line-height:1.6}
+.ko{margin:4px 0 0;font-size:13px;line-height:1.6;color:var(--soft)}
+.choices{display:flex;flex-direction:column;gap:8px}
+.choice{text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:11px 14px;color:var(--ink)}
+.choice:hover{border-color:#C9B28D}
+.choice.picked{border-color:var(--sage);background:#F1F4EC}
+.mine{align-self:flex-end;max-width:88%;background:#E8EEE1;border-radius:16px 4px 16px 16px;padding:11px 14px}
+.mine .who{font-size:12px;font-weight:800;color:var(--sage-d);margin-bottom:4px;text-align:right}
+.narr{font-size:14px;line-height:1.7;color:var(--ink);background:#FBF3D7;border-radius:14px;padding:12px 14px}
+.narr .ko{color:#6B5532}
+.progress{display:flex;gap:6px}
+.progress i{flex:1;height:5px;border-radius:5px;background:#E6DCCB}
+.progress i.on{background:var(--sage)}
+textarea{width:100%;min-height:76px;border:1.5px solid var(--line);border-radius:14px;padding:12px;font:inherit;font-size:15px;background:#fff;color:var(--ink);resize:vertical}
+textarea:focus{outline:2px solid var(--sage);outline-offset:1px}
+.link{background:none;border:0;color:var(--soft);font-size:13px;text-decoration:underline;text-underline-offset:3px;min-height:40px}
+.done{text-align:center;padding:22px 16px}
+.done svg{width:64px;height:64px;color:var(--sage)}
+.note{font-size:12px;color:#7A6E5F;text-align:center;margin:4px 0 0}
+[hidden]{display:none!important}
+svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+@media (prefers-reduced-motion:reduce){.spine{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <img src="/images/logo_header.png" alt="DayO">
+    <span class="demo-tag">데모 · 저장되지 않아요</span>
+  </header>
+
+  <!-- 1. 책장 -->
+  <section id="shelfView" aria-labelledby="shelfTitle">
+    <h1 id="shelfTitle" class="serif">나의 책장</h1>
+    <p class="sub" id="shelfSummary">대화를 마칠 때마다 파트너 나라의 이야기가 한 장씩 쌓여요.</p>
+    <div class="shelf" style="margin-top:12px">
+      <div class="row" id="books"></div>
+    </div>
+    <article class="card" id="bookCard" style="margin-top:14px"></article>
+  </section>
+
+  <!-- 2. 이야기 만들기 -->
+  <section id="storyView" hidden aria-labelledby="storyTitle">
+    <div style="display:flex;align-items:center;gap:8px;margin:6px 2px 10px">
+      <button class="link" type="button" id="backBtn" style="text-decoration:none;font-size:14px">← 책장</button>
+      <div class="progress" id="progress" style="flex:1" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    </div>
+    <span class="kicker">즐거운 벨기에 여행 · 1장</span>
+    <h1 id="storyTitle" class="serif" style="margin-top:2px">와플 대작전</h1>
+    <div id="thread" style="display:flex;flex-direction:column;gap:10px;margin-top:14px" aria-live="polite"></div>
+    <div id="step" style="margin-top:12px;display:flex;flex-direction:column;gap:10px"></div>
+  </section>
+
+  <!-- 3. 완성 -->
+  <section id="doneView" hidden>
+    <div class="card done">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h5v17H6a2 2 0 0 0-2 2z"/><path d="M20 5a2 2 0 0 0-2-2h-5v17h5a2 2 0 0 1 2 2z"/></svg>
+      <h1 class="serif" style="font-size:22px">첫 장이 책장에 꽂혔어요!</h1>
+      <p class="sub" id="doneLine" style="margin-top:6px"></p>
+      <button class="btn" type="button" id="toShelf" style="margin-top:14px">책장에서 보기</button>
+    </div>
+  </section>
+
+  <p class="note">실제 서비스에서는 대화를 마친 뒤 이 이야기가 열리고, 완성한 장이 내 책장에 저장돼요.</p>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var BOOKS=[
+    {id:'be',title:'즐거운 벨기에 여행',bg:'#5F7D63',fg:'#FFFCF6',w:46,open:true,teaser:'와플 하나에도 사건이 생기는 나라. 벨기에 파트너와 대화하면 첫 장이 열려요.'},
+    {id:'es',title:'올라 스페인',bg:'#E9C96B',fg:'#3F3627',w:42,teaser:'시에스타와 타파스 사이, 스페인의 하루가 기다리고 있어요.'},
+    {id:'fr',title:'몽 쁘띠 프랑스',bg:'#7D98AD',fg:'#FFFCF6',w:44,teaser:'바게트 한 줄을 사러 갔다가 생긴 일, 곧 읽게 될 거예요.'},
+    {id:'us',title:'헬로 USA',bg:'#C98B6B',fg:'#FFFCF6',w:40,teaser:'팁은 얼마나 줘야 할까? 미국 이야기가 이 자리를 채울 거예요.'}
+  ];
+  // 이야기: 한국 일상 배경 + 한국에 사는 외국인 친구. 정답 없음, 점수 없음. 마무리는 어떤 선택이든 같다.
+  var STORY={
+    intro:{en:'Your friend Emma from Belgium stops in front of a waffle truck in Seoul. Her eyes light up.',ko:'벨기에에서 온 친구 Emma가 서울의 와플 트럭 앞에서 멈춰요. 눈이 반짝여요.'},
+    turns:[
+      {friend:{en:'"In Belgium, we have two famous waffles: Brussels and Liège. Which one do you want?"',ko:'"벨기에엔 유명한 와플이 두 가지 있어. 브뤼셀이랑 리에주. 뭐 먹을래?"'},
+       options:[
+         {en:'"Brussels, please. Light and crispy sounds good."',ko:'"브뤼셀로 할게. 가볍고 바삭한 게 좋아."'},
+         {en:'"Liège! I love the crunchy sugar."',ko:'"리에주! 오독오독 씹히는 설탕이 좋아."'},
+         {en:'"Both. This is a research trip."',ko:'"둘 다. 이건 연구 목적이야."'}
+       ]},
+      {friend:{en:'"Good choice! Toppings? In Belgium, people often eat it plain."',ko:'"좋아! 토핑은? 벨기에에선 그냥 먹는 사람도 많아."'},
+       options:[
+         {en:'"Then plain, like a real Belgian."',ko:'"그럼 그냥, 진짜 벨기에 사람처럼."'},
+         {en:'"Whipped cream and strawberries, please!"',ko:'"생크림이랑 딸기 올려 주세요!"'},
+         {en:'"Everything. Chocolate, ice cream, the whole menu."',ko:'"전부 다. 초콜릿, 아이스크림, 메뉴 전부."'}
+       ]}
+    ],
+    ending:{en:'Emma laughs and takes a photo of your waffle. "Next time, let\'s find the best waffle in Seoul together!"',ko:'Emma가 웃으며 내 와플 사진을 찍어요. "다음엔 서울에서 제일 맛있는 와플 같이 찾자!"'}
+  };
+  var state={pick:'be',chapters:0,myLine:''};
+  var $=function(id){return document.getElementById(id);};
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function show(view){['shelfView','storyView','doneView'].forEach(function(v){$(v).hidden=v!==view;});window.scrollTo(0,0);}
+
+  function renderShelf(){
+    $('shelfSummary').innerHTML=state.chapters?'나라별 이야기책 <strong>1권</strong> · 이야기 <strong>'+state.chapters+'편</strong>':'대화를 마칠 때마다 파트너 나라의 이야기가 한 장씩 쌓여요.';
+    $('books').innerHTML=BOOKS.map(function(b){
+      var count=b.id==='be'?state.chapters+'장':'?';
+      var h=Math.min(180,64+b.title.replace(/\s/g,'').length*13);
+      return '<button type="button" class="spine'+(b.id===state.pick?' on':'')+(b.open?'':' locked')+'" data-book="'+b.id+'" aria-pressed="'+(b.id===state.pick)+'" aria-label="'+esc(b.title)+'" style="width:'+b.w+'px;height:'+h+'px;background:'+b.bg+';color:'+b.fg+'"><span class="vt">'+esc(b.title)+'</span><small>'+count+'</small></button>';
+    }).join('')+'<span class="plus" aria-hidden="true">+</span>';
+    var b=BOOKS.filter(function(x){return x.id===state.pick;})[0];
+    var card=$('bookCard');
+    if(b.id==='be'&&state.chapters){
+      card.innerHTML='<span class="kicker">1장 · 오늘 · Emma</span><strong class="serif" style="font-size:18px">즐거운 벨기에 여행</strong><span class="sub" style="margin:0">최근 이야기 · 와플 대작전</span>'+(state.myLine?'<div class="mine" style="align-self:stretch;max-width:none"><div class="who" style="text-align:left">내 한 줄</div><p class="en">'+esc(state.myLine)+'</p></div>':'')+'<div style="display:flex;gap:8px"><button class="btn" type="button" data-start style="flex:1">다시 읽기</button></div>';
+    }else if(b.open){
+      card.innerHTML='<span class="kicker">아직 0장</span><strong class="serif" style="font-size:18px">'+esc(b.title)+'</strong><p class="sub" style="margin:0">'+esc(b.teaser)+'</p><button class="btn" type="button" data-start>첫 장 열어 보기</button>';
+    }else{
+      card.innerHTML='<span class="kicker">아직 잠겨 있어요</span><strong class="serif" style="font-size:18px">'+esc(b.title)+'</strong><p class="sub" style="margin:0">'+esc(b.teaser)+'</p><p class="sub" style="margin:0;font-size:12px">데모에서는 벨기에 책만 열 수 있어요.</p>';
+    }
+  }
+
+  var turn=0,picks=[];
+  function bubble(line,who){return '<div class="bubble"><div class="who">'+who+'</div><p class="en">'+esc(line.en)+'</p><p class="ko">'+esc(line.ko)+'</p></div>';}
+  function mine(line){return '<div class="mine"><div class="who">나</div><p class="en">'+esc(line.en)+'</p><p class="ko">'+esc(line.ko)+'</p></div>';}
+  function setProgress(n){Array.prototype.forEach.call($('progress').children,function(el,i){el.classList.toggle('on',i<n);});}
+  function startStory(){
+    turn=0;picks=[];
+    $('thread').innerHTML='<div class="narr"><p class="en" style="font-size:14.5px">'+esc(STORY.intro.en)+'</p><p class="ko">'+esc(STORY.intro.ko)+'</p></div>';
+    show('storyView');nextTurn();
+  }
+  function nextTurn(){
+    setProgress(turn+1);
+    if(turn<STORY.turns.length){
+      var t=STORY.turns[turn];
+      $('thread').insertAdjacentHTML('beforeend',bubble(t.friend,'Emma'));
+      $('step').innerHTML='<span class="kicker" style="color:var(--soft)">나라면 뭐라고 할까요? 정답은 없어요.</span><div class="choices">'+t.options.map(function(o,i){return '<button type="button" class="choice" data-choice="'+i+'"><p class="en" style="font-size:15px">'+esc(o.en)+'</p><p class="ko">'+esc(o.ko)+'</p></button>';}).join('')+'</div>';
+      return;
+    }
+    $('thread').insertAdjacentHTML('beforeend','<div class="narr"><p class="en" style="font-size:14.5px">'+esc(STORY.ending.en)+'</p><p class="ko">'+esc(STORY.ending.ko)+'</p></div>');
+    $('step').innerHTML='<label for="myLine" class="kicker" style="color:var(--soft)">내 한 줄 (영어로 써도, 건너뛰어도 괜찮아요)</label><textarea id="myLine" maxlength="160" placeholder="예: I want to try a real waffle in Brussels someday."></textarea><button class="btn" type="button" data-finish>이야기 완성하기</button><button class="link" type="button" data-skip>건너뛰고 완성하기</button>';
+  }
+  function choose(i){
+    var t=STORY.turns[turn];picks.push(i);
+    $('thread').insertAdjacentHTML('beforeend',mine(t.options[i]));
+    $('step').innerHTML='';turn++;
+    setTimeout(nextTurn,250);
+  }
+  function finish(line){
+    state.chapters=1;state.myLine=(line||'').trim();state.pick='be';setProgress(4);
+    $('doneLine').textContent=state.myLine?'"'+state.myLine+'"':'즐거운 벨기에 여행 · 1장 「와플 대작전」';
+    show('doneView');
+  }
+
+  document.addEventListener('click',function(e){
+    var b=e.target.closest('[data-book]');if(b){state.pick=b.getAttribute('data-book');renderShelf();return;}
+    if(e.target.closest('[data-start]')){startStory();return;}
+    var c=e.target.closest('[data-choice]');if(c){c.classList.add('picked');choose(+c.getAttribute('data-choice'));return;}
+    if(e.target.closest('[data-finish]')){finish($('myLine').value);return;}
+    if(e.target.closest('[data-skip]')){finish('');return;}
+  });
+  $('backBtn').addEventListener('click',function(){renderShelf();show('shelfView');});
+  $('toShelf').addEventListener('click',function(){renderShelf();show('shelfView');});
+  renderShelf();
+})();
+</script>
+</body>
+</html>
