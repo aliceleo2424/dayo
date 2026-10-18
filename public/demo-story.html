@@ -58,6 +58,15 @@ textarea:focus{outline:2px solid var(--sage);outline-offset:1px}
 .done{text-align:center;padding:22px 16px}
 .done svg{width:64px;height:64px;color:var(--sage)}
 .note{font-size:12px;color:#7A6E5F;text-align:center;margin:4px 0 0}
+.slot{min-height:60px;border:1.5px dashed #C9B28D;border-radius:14px;background:#FFFEFB;padding:8px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.slot-hint{font-size:12.5px;color:#9A8E7E;padding:0 6px}
+.pool{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:44px;padding:0 14px;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--ink);font-size:15.5px;font-weight:700}
+.chip.on{background:#E8EEE1;border-color:#C6D1BC;color:#2F4A33}
+.chip.used{visibility:hidden}
+.shake{animation:shake .35s ease}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}}
 [hidden]{display:none!important}
 svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 @media (prefers-reduced-motion:reduce){.spine{transition:none}}
@@ -176,9 +185,46 @@ svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-l
     $('thread').insertAdjacentHTML('beforeend','<div class="narr"><p class="en" style="font-size:14.5px">'+esc(STORY.ending.en)+'</p><p class="ko">'+esc(STORY.ending.ko)+'</p></div>');
     $('step').innerHTML='<label for="myLine" class="kicker" style="color:var(--soft)">내 한 줄 (영어로 써도, 건너뛰어도 괜찮아요)</label><textarea id="myLine" maxlength="160" placeholder="예: I want to try a real waffle in Brussels someday."></textarea><button class="btn" type="button" data-finish>이야기 완성하기</button><button class="link" type="button" data-skip>건너뛰고 완성하기</button>';
   }
+  // 고른 대답을 섞인 단어 블록으로 보여주고, 눌러서 순서대로 다시 맞추게 한다. 점수 없음.
+  var arrange=null;
+  function shuffle(words){
+    var a=words.map(function(w,i){return {w:w,i:i};});
+    for(var tries=0;tries<20;tries++){
+      for(var k=a.length-1;k>0;k--){var j=Math.floor(Math.random()*(k+1));var tmp=a[k];a[k]=a[j];a[j]=tmp;}
+      if(a.length<2||a.some(function(x,idx){return x.i!==idx;}))break;
+    }
+    return a;
+  }
   function choose(i){
     var t=STORY.turns[turn];picks.push(i);
-    $('thread').insertAdjacentHTML('beforeend',mine(t.options[i]));
+    var line=t.options[i],words=line.en.replace(/^"|"$/g,'').split(/\s+/);
+    arrange={line:line,words:words,pool:shuffle(words),placed:[],wrong:0};
+    renderArrange();
+  }
+  function renderArrange(){
+    var a=arrange,used={};a.placed.forEach(function(p){used[p]=true;});
+    var built=a.placed.map(function(p,n){return '<button type="button" class="chip on" data-unplace="'+n+'">'+esc(a.pool[p].w)+'</button>';}).join('');
+    var pool=a.pool.map(function(x,p){return '<button type="button" class="chip'+(used[p]?' used':'')+'" data-place="'+p+'"'+(used[p]?' disabled aria-hidden="true"':'')+'>'+esc(x.w)+'</button>';}).join('');
+    $('step').innerHTML='<span class="kicker" style="color:var(--soft)">단어를 눌러 문장을 다시 만들어 보세요</span>'+
+      '<p class="ko" style="margin:0">'+esc(a.line.ko)+'</p>'+
+      '<div class="slot'+(a.shake?' shake':'')+'" aria-live="polite">'+(built||'<span class="slot-hint">여기에 순서대로 놓여요</span>')+'</div>'+
+      (a.placed.length<a.words.length?'<div class="pool">'+pool+'</div>':'')+
+      (a.msg?'<p class="ko" style="margin:0;color:#8A5A2B">'+a.msg+'</p>':'')+
+      '<div style="display:flex;gap:8px;align-items:center"><button class="link" type="button" data-reset>다시 섞기</button><button class="link" type="button" data-reveal style="margin-left:auto">문장 보기</button></div>';
+    a.shake=false;
+  }
+  function place(p){
+    var a=arrange;if(a.placed.indexOf(p)>=0)return;a.placed.push(p);a.msg='';
+    if(a.placed.length===a.words.length){
+      var made=a.placed.map(function(q){return a.pool[q].w;}).join(' ');
+      if(made===a.words.join(' ')){acceptLine();return;}
+      a.wrong++;a.shake=true;a.msg=a.wrong>1?'거의 다 왔어요! 막히면 "문장 보기"를 눌러도 괜찮아요.':'순서를 조금만 바꿔 볼까요? 놓인 단어를 누르면 빠져요.';
+    }
+    renderArrange();
+  }
+  function acceptLine(){
+    var line=arrange.line;arrange=null;
+    $('thread').insertAdjacentHTML('beforeend',mine(line));
     $('step').innerHTML='';turn++;
     setTimeout(nextTurn,250);
   }
@@ -192,6 +238,10 @@ svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-l
     var b=e.target.closest('[data-book]');if(b){state.pick=b.getAttribute('data-book');renderShelf();return;}
     if(e.target.closest('[data-start]')){startStory();return;}
     var c=e.target.closest('[data-choice]');if(c){c.classList.add('picked');choose(+c.getAttribute('data-choice'));return;}
+    var pl=e.target.closest('[data-place]');if(pl&&arrange){place(+pl.getAttribute('data-place'));return;}
+    var up=e.target.closest('[data-unplace]');if(up&&arrange){arrange.placed.splice(+up.getAttribute('data-unplace'),1);arrange.msg='';renderArrange();return;}
+    if(e.target.closest('[data-reset]')&&arrange){arrange.pool=shuffle(arrange.words);arrange.placed=[];arrange.msg='';renderArrange();return;}
+    if(e.target.closest('[data-reveal]')&&arrange){acceptLine();return;}
     if(e.target.closest('[data-finish]')){finish($('myLine').value);return;}
     if(e.target.closest('[data-skip]')){finish('');return;}
   });
