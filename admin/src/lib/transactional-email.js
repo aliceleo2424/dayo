@@ -37,7 +37,7 @@ function renderWelcomeUser({language, title, intro, lines, link, cta}) {
     '<body style="margin:0;background:#F6EFE3;color:#40362F;font-family:Arial,\'Apple SD Gothic Neo\',\'Malgun Gothic\',sans-serif">' +
     '<table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center" style="padding:24px 12px">' +
     '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;background:#FFFBF4;border-radius:20px;overflow:hidden">' +
-    '<tr><td style="background:#FFF4CC;padding:14px 24px;border-bottom:1px solid #F1E3A6"><img src="https://www.dayotalk.com/images/logo_header.png" width="86" height="48" alt="DayO 돼요" style="display:block;border:0;height:48px;width:auto"></td></tr>' +
+    '<tr><td style="background:#FFFFFF;padding:14px 24px;border-bottom:3px solid #FFF4CC"><img src="https://www.dayotalk.com/images/logo_header.png" width="86" height="48" alt="DayO 돼요" style="display:block;border:0;height:48px;width:auto"></td></tr>' +
     '<tr><td style="padding:24px">' +
     '<p style="margin:0 0 6px;font-size:15px">' + escapeHtml(intro) + '</p>' +
     '<h1 style="margin:0 0 16px;font-size:23px;line-height:1.4">' + escapeHtml(title) + '</h1>' +
