@@ -24,6 +24,34 @@ function renderEmail({language, title, intro, lines, link, cta}) {
     '<p style="font-size:13px;line-height:1.6">' + (language === 'en' ? 'Contact: ' : '문의: ') + '<a href="mailto:hello@dayotalk.com" style="color:#5F7D63">hello@dayotalk.com</a></p>' +
     '</td></tr></table></td></tr></table></body></html>';
 }
+// Learner welcome: same copy as before, laid out in the DayO card design (sage + butter on cream).
+function renderWelcomeUser({language, title, intro, lines, link, cta}) {
+  const en = language === 'en';
+  const [lead, ...rest] = lines;
+  const offerIdx = rest.findIndex(line => /9,900/.test(line));
+  const offer = offerIdx >= 0 ? rest.splice(offerIdx, 1)[0] : '';
+  const ctaLead = rest.length > 1 ? rest.pop() : '';
+  const check = rest.map(line => '<tr><td style="padding:8px 0;vertical-align:top;width:16px;color:#5F7D63;font-weight:bold">&#10003;</td>' +
+    '<td style="padding:8px 0 8px 8px;font-size:14px;line-height:1.6;color:#40362F">' + escapeHtml(line) + '</td></tr>').join('');
+  return '<!doctype html><html lang="' + language + '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>' +
+    '<body style="margin:0;background:#F6EFE3;color:#40362F;font-family:Arial,\'Apple SD Gothic Neo\',\'Malgun Gothic\',sans-serif">' +
+    '<table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center" style="padding:24px 12px">' +
+    '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;background:#FFFBF4;border-radius:20px;overflow:hidden">' +
+    '<tr><td style="background:#FFFFFF;padding:14px 24px;border-bottom:3px solid #FFF4CC"><img src="https://www.dayotalk.com/images/logo_header.png" width="86" height="48" alt="DayO 돼요" style="display:block;border:0;height:48px;width:auto"></td></tr>' +
+    '<tr><td style="padding:24px">' +
+    '<p style="margin:0 0 6px;font-size:15px">' + escapeHtml(intro) + '</p>' +
+    '<h1 style="margin:0 0 16px;font-size:23px;line-height:1.4">' + escapeHtml(title) + '</h1>' +
+    '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#ffffff;border:1px solid #E7DDD0;border-radius:18px"><tr><td style="padding:22px">' +
+    '<p style="margin:0 0 6px;font-size:13px;color:#5F7D63;font-weight:bold">' + (en ? 'How conversations work on DayO' : 'DayO에서는 이렇게 대화해요') + '</p>' +
+    '<p style="margin:0 0 10px;font-size:15px;line-height:1.6">' + escapeHtml(lead) + '</p>' +
+    '<table role="presentation" width="100%" cellspacing="0" cellpadding="0">' + check + '</table>' +
+    (offer ? '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#FFF4CC;border-radius:14px;margin-top:12px"><tr><td style="padding:14px 16px;font-size:14px;line-height:1.6;font-weight:bold">' + escapeHtml(offer) + '</td></tr></table>' : '') +
+    '</td></tr></table>' +
+    (ctaLead ? '<p style="text-align:center;margin:22px 0 0;font-size:14px;color:#5F574F">' + escapeHtml(ctaLead) + '</p>' : '') +
+    '<p style="text-align:center;margin:12px 0 8px"><a href="' + link + '" style="display:inline-block;background:#5F7D63;color:#ffffff;padding:14px 30px;border-radius:14px;text-decoration:none;font-weight:bold;font-size:16px">' + escapeHtml(cta) + '</a></p>' +
+    '<p style="font-size:12px;line-height:1.6;color:#706259;border-top:1px solid #E7DDD0;padding-top:14px;margin:20px 0 0">' + (en ? 'Contact: ' : '문의: ') + '<a href="mailto:hello@dayotalk.com" style="color:#5F7D63">hello@dayotalk.com</a></p>' +
+    '</td></tr></table></td></tr></table></body></html>';
+}
 function buildWelcomeMessage(nickname, role, language, from) {
   const en = language === 'en', partner = role === 'partner';
   const name = nickname && nickname !== '회원' ? nickname : (en ? 'there' : '회원');
@@ -62,7 +90,7 @@ function buildWelcomeMessage(nickname, role, language, from) {
   const link = partner ? 'https://www.dayotalk.com/partner#pd-sessions' : 'https://www.dayotalk.com/#how';
   const cta = partner ? (en ? 'Open your first times' : '첫 대화 시간 열기') : (en ? 'Explore DayO' : 'DayO 둘러보기');
   return {from: sender(from), reply_to: REPLY_TO, subject: '[DayO] ' + title,
-    html: renderEmail({language, title, intro, lines, link, cta}),
+    html: (partner ? renderEmail : renderWelcomeUser)({language, title, intro, lines, link, cta}),
     text: [intro, '', ...lines, '', cta + ': ' + link, '', (en ? 'Contact: ' : '문의: ') + REPLY_TO, 'DayO'].join('\n')};
 }
 module.exports = {FROM, REPLY_TO, locale, recipientLocale, sender, escapeHtml, renderEmail, buildWelcomeMessage};
