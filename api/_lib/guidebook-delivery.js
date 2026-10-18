@@ -1,6 +1,7 @@
 const { REPLY_TO, sender } = require('./transactional-email');
 // Guidebook delivery and optional marketing consent are independent.
 const { createHash, randomUUID } = require('node:crypto');
+const guidebookEmail = require('./guidebook-email');
 const GUIDE = 'https://www.dayotalk.com/guidebook/level-1';
 const SOURCE = 'speaking_sense_guidebook';
 const SUBJECT = '첫 대화 전, 이 가이드북부터 가볍게 읽어보세요 ☕';
@@ -67,6 +68,8 @@ module.exports = async function guidebook(body, email, res, { json, getSupabase 
       if (optedIn.error) throw Error('storage-unavailable');
     }
     saved = true;
+    // Ad content only for an explicit opt-in in this same request.
+    const mail = guidebookEmail.build({ type: guidebookEmail.typeOf(body.dessertType), ad: body.marketingConsent === true, unsubscribe });
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -74,7 +77,7 @@ module.exports = async function guidebook(body, email, res, { json, getSupabase 
         'Content-Type': 'application/json',
         'Idempotency-Key': 'guidebook/level-1/' + createHash('sha256').update(email).digest('hex')
       },
-      body: JSON.stringify({ from, reply_to: REPLY_TO, to: [email], subject: SUBJECT, text: text + '\n광고성 이메일 수신 거부: ' + unsubscribe, html: html.replace('</div>\n</div>', '<p style="font-size:12px"><a href="' + unsubscribe + '" style="color:#4F7C59">수신 거부</a></p></div>\n</div>'), tags: [{ name: 'source', value: SOURCE }] }),
+      body: JSON.stringify({ from, reply_to: REPLY_TO, to: [email], subject: mail.subject, text: mail.text, html: mail.html, tags: [{ name: 'source', value: SOURCE }] }),
       signal: AbortSignal.timeout(7000)
     });
     if (!response.ok) throw Error('delivery-failed');

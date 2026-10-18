@@ -4280,7 +4280,7 @@
 
         fetch('/api/send-lead-email', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ kind: 'guidebook', email: fullEmail, consent: true, marketingConsent: !!slide.querySelector('#guidebook-marketing').checked }),
+          body: JSON.stringify({ kind: 'guidebook', email: fullEmail, consent: true, marketingConsent: !!slide.querySelector('#guidebook-marketing').checked, dessertType: (typeof emmaResult !== 'undefined' && emmaResult) ? emmaResult.type : null }),
           signal: AbortSignal.timeout(15000)
         }).then(async (response) => {
           const result = await response.json();
