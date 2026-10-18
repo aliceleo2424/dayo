@@ -129,6 +129,23 @@
 
 - 다음 대화에서 물어보기: *"Have you ever been told you were eating something "the wrong way"?"*
 
+## 9-1. 이야기 5편과 로그인 샘플 (2026-10-18)
+
+- 데모 첫 화면은 **나라별 이야기책 목록**이다. 「와플 대작전」은 **로그인 없이 해 볼 수 있는 샘플**이고, 나머지 4편은 로그인한 브라우저에서만 열린다. 잠긴 카드는 그림이 흐릿하고 "로그인" 표시가 붙으며, 누르면 "로그인하러 가기"가 나온다. (데모의 로그인 확인은 이 브라우저에 저장된 세션 여부만 본다. 실제 기능에서는 사이트 로그인 창으로 연결한다.)
+- 그림: Owner가 만든 정사각형 4장씩 `public/images/stories/<에피소드>/scene-1~4.webp` (원본 png는 로컬 보관).
+- 주인공: 이야기마다 다른 아시아 여성, 한 이야기 안에서는 같은 인물.
+
+| 에피소드 | 책 | 톤 | 장면 (kicker) | 다음 대화 질문 |
+| --- | --- | --- | --- | --- |
+| `belgium-waffle` 와플 대작전 | 즐거운 벨기에 여행 | 위트 | 도착 · 경고 · 유혹 · 반전 | Have you ever been told you were eating something "the wrong way"? |
+| `mexico-one-more-plate` 하나 더 놓인 접시 | 멕시코 | 감동 | 초대 · 이야기 · 웃음 · 밤 | Is there a family dish that reminds you of someone? |
+| `spain-siesta` 시에스타 대소동 | 올라 스페인 | 위트 | 오후 두 시 · 엿보기 · 초대 · 반전 | Do you take naps? Where is your favorite place to nap? |
+| `france-baguette` 바게트 한 줄 | 몽 쁘띠 프랑스 | 위트 | 심부름 · 차례 · 유혹 · 반전 | What’s a snack you can never resist? |
+| `usa-tip` 팁은 얼마나? | 헬로 USA | 위트·따뜻함 | 첫 브런치 · 위기 · 구원 · 반전 | Is tipping common in your country? How do you feel about it? |
+
+- 멕시코 그림 1~3장의 나이 든 여성은 **할머니의 여동생 "티아 로사"**로 설정했다(돌아가신 할머니와 구분). 4장의 빛나는 모습이 할머니다.
+- 대본 원문(조각 · 한국어 · 힌트 · 펀치라인 · 오늘의 표현 · 그림 설명)은 `public/storybook-demo.html`의 `STORIES` 데이터가 기준이다.
+
 ## 10. 다음 작업 (Owner 확인 후)
 
 1. 「와플 대작전」 개정 대본(4장 기준) → Owner 검토.

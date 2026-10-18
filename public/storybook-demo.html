@@ -8,9 +8,9 @@
 <link rel="icon" type="image/png" href="/images/logo-square.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap">
 <style>
-/* Owner-preferred original concept (docs/STORY_BOOKSHELF_ORIGINAL_CONCEPT.md), merged with the owner's
-   "DayO Story Play" prototype (blur-to-reveal art, Korean toggle, check button, wrong-piece marks, coming episodes).
-   Demo only: not linked from menus, nothing is saved. */
+/* Owner-preferred original concept (docs/STORY_BOOKSHELF_ORIGINAL_CONCEPT.md) merged with the owner's
+   "DayO Story Play" prototype. Demo only: not linked from menus, nothing is saved.
+   One sample story (Belgium) is open without login; the others open for signed-in visitors. */
 @font-face{font-family:'NanumSquareRound';src:url('/fonts/NanumSquareRoundR.woff2') format('woff2');font-weight:400}
 @font-face{font-family:'NanumSquareRound';src:url('/fonts/NanumSquareRoundB.woff2') format('woff2');font-weight:700}
 @font-face{font-family:'NanumSquareRound';src:url('/fonts/NanumSquareRoundEB.woff2') format('woff2');font-weight:800}
@@ -18,21 +18,36 @@
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--cream);color:var(--ink);font-family:'NanumSquareRound','Apple SD Gothic Neo','Malgun Gothic',sans-serif;-webkit-text-size-adjust:100%}
 .serif{font-family:'Gowun Batang',serif}
-button{font:inherit;color:inherit}
+button,a{font:inherit;color:inherit}
 .wrap{max-width:560px;margin:0 auto;padding:16px 16px calc(32px + env(safe-area-inset-bottom))}
 .top{display:flex;align-items:center;gap:10px;min-height:48px}
 .top img{height:28px;width:auto}
 .badge{margin-left:auto;font-size:11.5px;font-weight:700;color:#8A5A2B;background:var(--butter-soft);border-radius:999px;padding:5px 10px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px}
-.btn{min-height:50px;border:0;border-radius:14px;background:var(--sage);color:#fff;font-weight:800;font-size:15px;cursor:pointer;padding:0 18px;width:100%}
+.btn{display:flex;align-items:center;justify-content:center;min-height:50px;border:0;border-radius:14px;background:var(--sage);color:#fff;font-weight:800;font-size:15px;cursor:pointer;padding:0 18px;width:100%;text-decoration:none}
 .btn[disabled]{opacity:.4;cursor:default}
-.btn:focus-visible,.chip:focus-visible,.ghost:focus-visible,.pill:focus-visible{outline:3px solid var(--sage);outline-offset:2px}
-.ghost{min-height:44px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--soft);font-weight:700;font-size:13.5px;cursor:pointer;padding:0 14px}
+.btn:focus-visible,.chip:focus-visible,.ghost:focus-visible,.pill:focus-visible,.book:focus-visible{outline:3px solid var(--sage);outline-offset:2px}
+.ghost{display:inline-flex;align-items:center;justify-content:center;min-height:44px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--soft);font-weight:700;font-size:13.5px;cursor:pointer;padding:0 14px;text-decoration:none}
 .pill{min-height:36px;border:1px solid var(--line);border-radius:999px;background:#fff;color:var(--soft);font-size:12.5px;font-weight:700;padding:0 12px;cursor:pointer}
 .stack{display:flex;flex-direction:column;gap:14px}
 .eyebrow{font-size:12px;font-weight:800;color:#8A5A2B}
 .small{margin:0;font-size:12.5px;color:var(--muted);line-height:1.6}
 .lead{margin:0;font-size:14.5px;line-height:1.75;color:var(--soft)}
+h1,h2,h3{margin:0}
+/* Library */
+.feature{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:center}
+.feature img{width:120px;height:120px;object-fit:cover;border-radius:14px;border:4px solid #fff;box-shadow:0 4px 12px rgba(84,70,48,.12)}
+.sample{display:inline-flex;align-self:flex-start;font-size:11px;font-weight:800;color:var(--sage-dark);background:var(--sage-soft);border-radius:999px;padding:4px 10px}
+.books{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.book{position:relative;display:flex;flex-direction:column;gap:6px;text-align:left;border:1px solid var(--line);border-radius:16px;background:var(--card);padding:10px;cursor:pointer}
+.book img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px}
+.book .country{font-size:11px;font-weight:800;color:var(--muted)}
+.book h3{font-family:'Gowun Batang',serif;font-size:15.5px;line-height:1.35}
+.book.locked img{filter:blur(6px) saturate(.5);opacity:.8}
+.lock{position:absolute;left:18px;top:18px;display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;color:var(--soft);background:rgba(255,253,248,.92);border-radius:999px;padding:4px 9px}
+.lock svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.done-mark{position:absolute;right:18px;top:18px;font-size:11px;font-weight:800;color:#fff;background:var(--sage);border-radius:999px;padding:4px 9px}
+.login-box{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:16px;background:var(--butter-soft)}
 /* Art: blurred until the sentence is complete (from the prototype). */
 .art-wrap{position:relative;border-radius:16px;overflow:hidden;border:6px solid #fff;box-shadow:0 8px 22px rgba(84,70,48,.12);background:#efe8da;aspect-ratio:1/1}
 .art{width:100%;height:100%;object-fit:cover;display:block}
@@ -64,14 +79,9 @@ button{font:inherit;color:inherit}
 .punch{margin:0;font-family:'Gowun Batang',serif;font-size:17px;line-height:1.7;color:var(--sage-dark)}
 .idiom{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;padding:10px 12px;border-radius:12px;background:var(--sage-soft);font-size:13.5px;line-height:1.55}
 .idiom b{color:var(--sage-dark)}
-.coming{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.coming article{border:1px dashed #D9CBB0;border-radius:16px;padding:14px;background:rgba(255,253,248,.55);min-height:104px;display:flex;flex-direction:column;gap:4px}
-.coming .country{font-size:11px;font-weight:800;color:var(--muted)}
-.coming h3{margin:2px 0 0;font-family:'Gowun Batang',serif;font-size:16px;color:var(--soft)}
-.coming p{margin:0;font-size:12px;color:var(--muted);line-height:1.5}
 .shelf{background:#EAD9BD;border-radius:16px;padding:10px 10px 0;box-shadow:inset 0 0 0 6px #D9C19C}
-.shelf-row{height:170px;display:flex;align-items:flex-end;gap:6px;padding:0 12px;border-bottom:12px solid #B8915F;background:#E3CFAE}
-.spine{border-radius:4px 4px 2px 2px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:10px 0 8px;color:#FFFCF6;box-shadow:inset 3px 0 rgba(255,255,255,.18),inset -3px 0 rgba(0,0,0,.10)}
+.shelf-row{height:170px;display:flex;align-items:flex-end;gap:6px;padding:0 12px;border-bottom:12px solid #B8915F;background:#E3CFAE;overflow:hidden}
+.spine{flex:0 0 auto;border-radius:4px 4px 2px 2px;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:10px 0 8px;color:#FFFCF6;box-shadow:inset 3px 0 rgba(255,255,255,.18),inset -3px 0 rgba(0,0,0,.10)}
 .spine .vt{writing-mode:vertical-rl;font-family:'Gowun Batang',serif;font-size:12.5px;font-weight:700;letter-spacing:1px}
 .spine.ghosty{opacity:.35;border:1.5px dashed rgba(255,252,246,.8)}
 .spine.new{animation:slide .7s cubic-bezier(.2,.8,.2,1)}
@@ -83,31 +93,47 @@ button{font:inherit;color:inherit}
 </head>
 <body>
 <div class="wrap">
-  <header class="top"><img src="/images/logo_header.png" alt="DayO"><span class="badge">원안 데모 · 저장 안 됨</span></header>
+  <header class="top"><a href="/" aria-label="DayO 홈"><img src="/images/logo_header.png" alt="DayO"></a><span class="badge">원안 데모 · 저장 안 됨</span></header>
 
-  <!-- 1. 표지 -->
-  <section id="intro" class="stack" aria-labelledby="intro-title">
-    <div class="art-wrap"><img class="art" src="/images/stories/belgium-waffle/scene-1.webp" alt="브뤼셀 광장에서 와플을 떠올리며 들뜬 여행자"><span class="tag">오늘의 이야기</span></div>
-    <div class="card stack">
-      <span class="eyebrow">즐거운 벨기에 여행 · 1장</span>
-      <h1 id="intro-title" class="serif" style="margin:0;font-size:26px">와플 대작전</h1>
-      <p class="lead">완벽한 와플 하나를 먹으러 브뤼셀까지 온 나. 그런데 와플 가게 아저씨에게는 아주 진지한 규칙이 있는데…</p>
-      <p class="small">영어 조각을 순서대로 놓으면 흐릿했던 장면이 선명해지고, 이야기가 한 문장씩 이어져요. 점수는 없어요.</p>
-      <button class="btn" type="button" id="start">이야기 펼치기</button>
+  <!-- 1. 나라별 이야기책 목록 -->
+  <section id="library" class="stack" aria-labelledby="lib-title">
+    <div class="stack" style="gap:6px">
+      <span class="eyebrow">나라별 이야기책</span>
+      <h1 id="lib-title" class="serif" style="font-size:25px;line-height:1.4">문장을 만들면,<br>이야기가 돼요.</h1>
+      <p class="lead">영어 조각을 순서대로 놓으면 흐릿했던 장면이 선명해지고, 이야기가 한 문장씩 이어져요. 대화를 마칠 때마다 한 편씩, 그날 파트너의 나라 이야기부터 펼쳐져요.</p>
     </div>
-    <div class="stack" style="gap:10px">
-      <span class="eyebrow">다음 이야기도 준비 중이에요</span>
-      <div class="coming">
-        <article><span class="country">멕시코</span><h3>하나 더 놓인 접시</h3><p>저녁 식탁에 놓인 빈 접시 하나의 비밀</p></article>
-        <article><span class="country">올라 스페인</span><h3>시에스타 대소동</h3><p>오후 두 시, 온 동네가 문을 닫았다</p></article>
-        <article><span class="country">몽 쁘띠 프랑스</span><h3>바게트 한 줄</h3><p>빵 한 줄 사러 갔다가 생긴 일</p></article>
-        <article><span class="country">헬로 USA</span><h3>팁은 얼마나?</h3><p>계산서 앞에서 멈춘 계산기</p></article>
+    <article class="card stack" aria-labelledby="sample-title">
+      <span class="sample">로그인 없이 바로 해 보기</span>
+      <div class="feature">
+        <img id="sample-img" src="" alt="">
+        <div class="stack" style="gap:4px"><span class="small" id="sample-book"></span><h2 id="sample-title" class="serif" style="font-size:21px"></h2><p class="small" id="sample-blurb"></p></div>
       </div>
-      <p class="small">그날 대화한 파트너의 나라 이야기가 먼저 펼쳐져요.</p>
+      <button class="btn" type="button" id="sample-start">이야기 펼치기</button>
+    </article>
+    <div class="stack" style="gap:10px">
+      <span class="eyebrow">더 많은 나라 이야기</span>
+      <div class="books" id="books"></div>
+      <div class="login-box" id="login-box" hidden>
+        <p class="small" style="color:var(--soft)">나머지 이야기는 로그인하면 열려요. 대화를 마칠 때마다 한 편씩 내 책장에 쌓여요.</p>
+        <a class="ghost" href="/" id="login-link">로그인하러 가기</a>
+      </div>
     </div>
   </section>
 
-  <!-- 2. 장면 -->
+  <!-- 2. 표지 -->
+  <section id="intro" class="stack" hidden aria-labelledby="intro-title">
+    <div class="actions"><button class="pill" type="button" data-to-library>← 이야기 목록</button></div>
+    <div class="art-wrap"><img class="art" id="cover-art" src="" alt=""><span class="tag">오늘의 이야기</span></div>
+    <div class="card stack">
+      <span class="eyebrow" id="cover-book"></span>
+      <h1 id="intro-title" class="serif" style="font-size:26px"></h1>
+      <p class="lead" id="cover-blurb"></p>
+      <p class="small">영어 조각을 순서대로 놓으면 흐릿했던 장면이 선명해져요. 점수는 없어요.</p>
+      <button class="btn" type="button" id="start">이야기 펼치기</button>
+    </div>
+  </section>
+
+  <!-- 3. 장면 -->
   <section id="scene" class="stack" hidden>
     <div class="actions" style="justify-content:space-between"><button class="pill" type="button" id="to-intro">← 이야기 표지</button><span class="small" id="scene-step"></span></div>
     <div class="progress" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
@@ -130,12 +156,12 @@ button{font:inherit;color:inherit}
     </div>
   </section>
 
-  <!-- 3. 마무리 -->
+  <!-- 4. 마무리 -->
   <section id="done" class="stack" hidden aria-labelledby="done-title">
-    <div class="art-wrap"><img class="art" src="/images/stories/belgium-waffle/scene-4.webp" alt="플레인 와플을 먹고 감동한 여행자와 웃는 아저씨"><span class="tag">이야기 완성</span></div>
+    <div class="art-wrap"><img class="art" id="done-art" src="" alt=""><span class="tag">이야기 완성</span></div>
     <div class="card stack">
-      <h2 id="done-title" class="serif" style="margin:0;font-size:23px;line-height:1.45">토핑은 졌지만,<br>여행은 이겼어요.</h2>
-      <p class="lead">벨기에 책에 1장이 꽂혔어요. 오늘 만든 문장으로 다음 파트너와 이야기를 이어가 볼까요?</p>
+      <h2 id="done-title" class="serif" style="font-size:23px;line-height:1.45"></h2>
+      <p class="lead" id="done-lead"></p>
       <div class="shelf" aria-label="나의 책장"><div class="shelf-row" id="shelf"></div></div>
     </div>
     <div class="card stack">
@@ -145,49 +171,147 @@ button{font:inherit;color:inherit}
       <button class="ghost" type="button" id="copy-q">질문 복사하기</button>
       <p class="small" id="copy-status" role="status"></p>
     </div>
-    <div class="actions"><button class="ghost" type="button" id="again" style="flex:1">다시 해 보기</button><button class="btn" type="button" id="to-cover" style="flex:1">다른 이야기 보기</button></div>
+    <div class="actions"><button class="ghost" type="button" id="again" style="flex:1">다시 해 보기</button><button class="btn" type="button" data-to-library style="flex:1">다른 이야기 보기</button></div>
   </section>
 </div>
 
 <script>
 (function () {
   'use strict';
-  // Revised script (2026-10-18): bigger twist, 5–6 pieces, one idiom per scene. Owner's square pictures.
-  var STORY = {
-    question: 'Have you ever been told you were eating something "the wrong way"?',
-    questionKo: '음식을 "잘못된 방법"으로 먹는다는 말을 들어 본 적 있어요?',
-    scenes: [
-      { img: 'scene-1', kicker: '도착', title: '브뤼셀에 온 단 하나의 이유', alt: '브뤼셀 광장에서 와플을 떠올리며 들뜬 여행자',
-        lead: '브뤼셀 그랑플라스. 당신의 여행 일정표에는 딱 한 줄이 적혀 있어요.', caption: '여행 일정표: 와플. 끝.',
-        pieces: ['I couldn’t wait', 'to try', 'the waffle', 'I had been dreaming of', 'for months.'],
-        ko: '몇 달 동안 꿈꿔 온 그 와플을 빨리 먹어 보고 싶어서 견딜 수가 없었다.',
-        hint: 'couldn’t wait to + 동사 = ~하고 싶어 못 견디다 · had been dreaming of = 계속 꿈꿔 왔던',
-        punch: '도착 10분 만에, 관광은 뒷전이 됐다.', idiom: ['couldn’t wait to ~', '~하고 싶어 못 견디다'] },
-      { img: 'scene-2', kicker: '경고', title: '와플 가게의 진지한 규칙', alt: '날개 달린 와플들이 떠다니고, 콧수염 아저씨가 토핑 금지 손짓을 하는 장면',
-        lead: '주문하려는 순간, 가게 주인 아저씨가 손가락을 들었어요.', caption: '와플 천사들도 고개를 끄덕여요',
-        pieces: ['“Take my word for it,”', 'he said,', '“a real Belgian waffle', 'doesn’t need', 'any help.”'],
-        ko: '"내 말 믿어요." 아저씨가 말했다. "진짜 벨기에 와플은 아무 도움도 필요 없어요."',
-        hint: 'Take my word for it = 내 말 믿어 봐 · doesn’t need any ~ = ~가 하나도 필요 없다',
-        punch: '그 순간 날개 달린 와플들이 고개를 끄덕인 것 같았다. 기분 탓이겠지.', idiom: ['Take my word for it.', '내 말 믿어 봐.'] },
-      { img: 'scene-3', kicker: '유혹', title: '참을 수 없는 토핑 산', alt: '딸기와 생크림이 산처럼 쌓인 와플 앞에서 신난 여행자와 땀 흘리는 아저씨',
-        lead: '하지만 메뉴판의 토핑 사진이 너무 반짝였어요.', caption: '아저씨 이마에 땀 한 방울…',
-        pieces: ['I couldn’t help it,', 'so I ordered', 'strawberries, cream, chocolate,', 'and everything else', 'they had.'],
-        ko: '참을 수가 없었다. 그래서 딸기, 생크림, 초콜릿, 그리고 가게에 있는 건 전부 주문했다.',
-        hint: 'couldn’t help it = 어쩔 수 없었다(참을 수 없었다) · 여러 개를 말할 땐 A, B, and C',
-        punch: '아저씨 이마에 땀 한 방울. 와플은 토핑에 묻혀 보이지도 않았다.', idiom: ['I couldn’t help it.', '참을 수가 없었어요.'] },
-      { img: 'scene-4', kicker: '반전', title: '옆으로 밀어 준 접시 하나', alt: '플레인 와플을 한입 먹고 감동한 여행자와 흐뭇하게 웃는 아저씨',
-        lead: '토핑 산을 반쯤 무너뜨렸을 때, 아저씨가 조용히 접시 하나를 밀어 줬어요.', caption: '여행 최고의 한 입',
-        pieces: ['He slid me', 'a plain one', 'on the side,', 'and it turned out', 'to be', 'the best bite of my trip.'],
-        ko: '아저씨가 옆으로 플레인 와플 하나를 슬쩍 건넸는데, 알고 보니 그게 여행 최고의 한 입이었다.',
-        hint: 'turn out to be = 알고 보니 ~였다 · on the side = 곁들여서',
-        punch: '토핑 탑은 사진용, 진짜 와플은 마음에. 아저씨는 아무 말 없이 웃었다.', idiom: ['turn out to be ~', '알고 보니 ~였다'] }
-    ]
-  };
-  var BOOKS = [ { t: '즐거운 벨기에 여행', c: '#5F7D63', w: 46, on: true }, { t: '올라 스페인', c: '#E9C96B', w: 42 }, { t: '몽 쁘띠 프랑스', c: '#7D98AD', w: 44 }, { t: '헬로 USA', c: '#C98B6B', w: 40 } ];
+  // Scripts written 2026-10-18 for the owner's square pictures. 4 scenes, 4–6 pieces, one idiom per scene.
+  var STORIES = [
+    { id: 'belgium-waffle', book: '즐거운 벨기에 여행', country: '벨기에', color: '#5F7D63', title: '와플 대작전', sample: true,
+      blurb: '완벽한 와플 하나를 먹으러 브뤼셀까지 온 나. 그런데 와플 가게 아저씨에게는 아주 진지한 규칙이 있는데…',
+      endTitle: '토핑은 졌지만,<br>여행은 이겼어요.',
+      question: 'Have you ever been told you were eating something "the wrong way"?', questionKo: '음식을 "잘못된 방법"으로 먹는다는 말을 들어 본 적 있어요?',
+      scenes: [
+        { kicker: '도착', title: '브뤼셀에 온 단 하나의 이유', alt: '브뤼셀 광장에서 와플을 떠올리며 들뜬 여행자', lead: '브뤼셀 그랑플라스. 당신의 여행 일정표에는 딱 한 줄이 적혀 있어요.', caption: '여행 일정표: 와플. 끝.',
+          pieces: ['I couldn’t wait', 'to try', 'the waffle', 'I had been dreaming of', 'for months.'], ko: '몇 달 동안 꿈꿔 온 그 와플을 빨리 먹어 보고 싶어서 견딜 수가 없었다.',
+          hint: 'couldn’t wait to + 동사 = ~하고 싶어 못 견디다 · had been dreaming of = 계속 꿈꿔 왔던', punch: '도착 10분 만에, 관광은 뒷전이 됐다.', idiom: ['couldn’t wait to ~', '~하고 싶어 못 견디다'] },
+        { kicker: '경고', title: '와플 가게의 진지한 규칙', alt: '날개 달린 와플들이 떠다니고, 콧수염 아저씨가 토핑 금지 손짓을 하는 장면', lead: '주문하려는 순간, 가게 주인 아저씨가 손가락을 들었어요.', caption: '와플 천사들도 고개를 끄덕여요',
+          pieces: ['“Take my word for it,”', 'he said,', '“a real Belgian waffle', 'doesn’t need', 'any help.”'], ko: '"내 말 믿어요." 아저씨가 말했다. "진짜 벨기에 와플은 아무 도움도 필요 없어요."',
+          hint: 'Take my word for it = 내 말 믿어 봐 · doesn’t need any ~ = ~가 하나도 필요 없다', punch: '그 순간 날개 달린 와플들이 고개를 끄덕인 것 같았다. 기분 탓이겠지.', idiom: ['Take my word for it.', '내 말 믿어 봐.'] },
+        { kicker: '유혹', title: '참을 수 없는 토핑 산', alt: '딸기와 생크림이 산처럼 쌓인 와플 앞에서 신난 여행자와 땀 흘리는 아저씨', lead: '하지만 메뉴판의 토핑 사진이 너무 반짝였어요.', caption: '아저씨 이마에 땀 한 방울…',
+          pieces: ['I couldn’t help it,', 'so I ordered', 'strawberries, cream, chocolate,', 'and everything else', 'they had.'], ko: '참을 수가 없었다. 그래서 딸기, 생크림, 초콜릿, 그리고 가게에 있는 건 전부 주문했다.',
+          hint: 'couldn’t help it = 어쩔 수 없었다(참을 수 없었다) · 여러 개를 말할 땐 A, B, and C', punch: '아저씨 이마에 땀 한 방울. 와플은 토핑에 묻혀 보이지도 않았다.', idiom: ['I couldn’t help it.', '참을 수가 없었어요.'] },
+        { kicker: '반전', title: '옆으로 밀어 준 접시 하나', alt: '플레인 와플을 한입 먹고 감동한 여행자와 흐뭇하게 웃는 아저씨', lead: '토핑 산을 반쯤 무너뜨렸을 때, 아저씨가 조용히 접시 하나를 밀어 줬어요.', caption: '여행 최고의 한 입',
+          pieces: ['He slid me', 'a plain one', 'on the side,', 'and it turned out', 'to be', 'the best bite of my trip.'], ko: '아저씨가 옆으로 플레인 와플 하나를 슬쩍 건넸는데, 알고 보니 그게 여행 최고의 한 입이었다.',
+          hint: 'turn out to be = 알고 보니 ~였다 · on the side = 곁들여서', punch: '토핑 탑은 사진용, 진짜 와플은 마음에. 아저씨는 아무 말 없이 웃었다.', idiom: ['turn out to be ~', '알고 보니 ~였다'] }
+      ] },
+    { id: 'mexico-one-more-plate', book: '멕시코', country: '멕시코', color: '#C9714F', title: '하나 더 놓인 접시',
+      blurb: '홈스테이 둘째 날 저녁, 식탁에 접시가 하나 남아요. 아무도 앉지 않는 그 자리는 누구의 것일까요?',
+      endTitle: '만난 적 없는 할머니가,<br>자리를 남겨 두었어요.',
+      question: 'Is there a family dish that reminds you of someone?', questionKo: '누군가를 떠올리게 하는 가족 음식이 있어요?',
+      scenes: [
+        { kicker: '초대', title: '접시가 하나 더', alt: '멕시코 가족 저녁 식탁에 둘러앉은 홈스테이 가족과 주인공', lead: '멕시코 홈스테이 둘째 날 저녁. 식탁을 세어 보니 접시가 하나 남아요.', caption: '빈 접시 옆 금잔화 한 송이',
+          pieces: ['My host family', 'set the table', 'for seven,', 'but only six of us', 'were sitting down.'], ko: '홈스테이 가족은 일곱 명분 식탁을 차렸는데, 앉은 사람은 우리 여섯뿐이었다.',
+          hint: 'set the table = 식탁을 차리다 · for seven = 일곱 명분', punch: '누가 늦게 오는 걸까? 이상하게도 아무도 기다리지 않았다.', idiom: ['set the table', '식탁을 차리다'] },
+        { kicker: '이야기', title: '티아 로사의 설명', alt: '촛불과 금잔화로 꾸민 제단 앞에서 이모할머니가 이야기를 들려주는 장면', lead: '할머니의 여동생 티아 로사가 당신을 제단 앞으로 데려가요.', caption: '제단 위 할머니의 미소',
+          pieces: ['“That seat is for my sister,”', 'Tía Rosa said.', '“She passed away', 'two years ago,', 'but she never misses', 'this night.”'], ko: '"저 자리는 내 언니 거야." 티아 로사가 말했다. "2년 전에 세상을 떠났지만, 이 밤만큼은 절대 빠지지 않거든."',
+          hint: 'pass away = 돌아가시다(부드러운 표현) · never miss ~ = ~을 절대 빠뜨리지 않다', punch: '오늘은 망자의 날, Día de Muertos. 그리운 사람이 집에 다녀가는 밤이에요.', idiom: ['never miss ~', '~을 절대 빠뜨리지 않다'] },
+        { kicker: '웃음', title: '울음 대신 웃음', alt: '음식을 나누며 크게 웃는 홈스테이 가족과 주인공', lead: '누군가 할머니의 매운 몰레 이야기를 꺼내자 식탁이 들썩였어요.', caption: '식탁 가득한 웃음소리',
+          pieces: ['Instead of crying,', 'everyone kept', 'telling stories', 'that made us', 'laugh until we cried.'], ko: '다들 울기는커녕 계속 이야기를 꺼냈고, 우리는 눈물이 날 때까지 웃었다.',
+          hint: 'instead of + -ing = ~하는 대신 · keep + -ing = 계속 ~하다', punch: '할머니 몰레가 너무 매워서, 결혼식 날 신랑 쪽 친척이 다 물을 찾아 뛰어다녔대요.', idiom: ['laugh until you cry', '눈물 나게 웃다'] },
+        { kicker: '밤', title: '만난 적 없는 할머니', alt: '별이 뜬 밤 창가에서 미소 짓는 주인공과 따뜻하게 빛나는 할머니의 모습', lead: '모두 잠든 밤, 창가에 앉은 당신 곁으로 금잔화 꽃잎이 날아들어요.', caption: '창가에 내려앉은 따뜻한 빛',
+          pieces: ['I had never met her,', 'but that night', 'it felt like', 'she had saved', 'a seat', 'just for me.'], ko: '한 번도 만난 적 없지만, 그날 밤엔 할머니가 나를 위해 자리를 하나 남겨 둔 것 같았다.',
+          hint: 'it felt like + 문장 = ~인 것 같았다 · save a seat = 자리를 맡아 두다', punch: '기억하는 사람이 있는 한, 누구도 완전히 떠나지 않아요.', idiom: ['save a seat for ~', '~를 위해 자리를 맡아 두다'] }
+      ] },
+    { id: 'spain-siesta', book: '올라 스페인', country: '스페인', color: '#E9C96B', title: '시에스타 대소동',
+      blurb: '오후 두 시, 배고파서 광장에 나왔더니 온 동네가 문을 닫았어요. 깨어 있는 건 나와 고양이뿐…',
+      endTitle: '시에스타를 비웃던 나,<br>제일 푹 잤어요.',
+      question: 'Do you take naps? Where is your favorite place to nap?', questionKo: '낮잠 자요? 낮잠 자기 제일 좋은 곳은 어디예요?',
+      scenes: [
+        { kicker: '오후 두 시', title: '문 닫은 도시', alt: '셔터가 모두 내려진 한낮의 스페인 광장에서 지도를 든 주인공', lead: '세비야의 오후 두 시. 배는 고픈데, 광장이 이상하리만치 조용해요.', caption: '깨어 있는 건 고양이뿐',
+          pieces: ['I was starving,', 'but every shop', 'in the square', 'had pulled down', 'its shutters.'], ko: '배가 너무 고팠는데, 광장의 모든 가게가 셔터를 내리고 있었다.',
+          hint: 'be starving = 배고파 죽겠다 · pull down = 끌어내리다', punch: '깨어 있는 건 나와 벤치 위 고양이뿐. 고양이도 반쯤 자고 있었다.', idiom: ['I’m starving.', '배고파 죽겠어요.'] },
+        { kicker: '엿보기', title: '셔터 너머의 코골이', alt: '빵집 셔터 틈을 엿보는 주인공과 안에서 자는 제빵사', lead: '빵집 셔터 틈으로 살짝 들여다보니…', caption: '쿨쿨, 시에스타 중',
+          pieces: ['I peeked', 'through the gap', 'and found the baker', 'sound asleep', 'behind his own counter.'], ko: '틈새로 들여다보니, 빵집 주인이 자기 계산대 뒤에서 곤히 자고 있었다.',
+          hint: 'peek through = 틈으로 엿보다 · sound asleep = 곤히 잠든', punch: '문에 걸린 시계 그림이 말해 줬다. "다섯 시에 봐요."', idiom: ['sound asleep', '곤히 잠든'] },
+        { kicker: '초대', title: '할아버지의 긴 점심', alt: '마당에서 긴 점심을 먹는 스페인 가족과 손짓하는 할아버지', lead: '그때 맞은편 마당에서 할아버지가 손짓했어요.', caption: '파에야 냄새가 솔솔',
+          pieces: ['“You look lost,”', 'the old man laughed.', '“Come join us —', 'lunch here', 'takes three hours.”'], ko: '"길 잃은 얼굴이구먼." 할아버지가 웃었다. "같이 먹어요. 여기 점심은 세 시간이 걸리거든."',
+          hint: 'You look lost = 길 잃은 것 같네요 · take + 시간 = (시간이) 걸리다', punch: '파에야 한 판이 나오기까지, 이미 한 시간이 지나 있었다. 아무도 서두르지 않았다.', idiom: ['You look lost.', '길 잃은 것 같아요.'] },
+        { kicker: '반전', title: '나도 모르게 시에스타', alt: '낮잠에서 깨어나 활기를 되찾은 저녁 광장을 바라보는 주인공', lead: '배불리 먹고 의자에 잠깐 기댔을 뿐인데…', caption: '다섯 시, 광장이 깨어났어요',
+          pieces: ['I only meant', 'to rest my eyes,', 'but when I woke up,', 'the whole town', 'had come back to life.'], ko: '잠깐 눈만 붙이려 했는데, 깨어 보니 온 동네가 다시 살아나 있었다.',
+          hint: 'mean to ~ = ~하려고 하다 · come back to life = 다시 살아나다', punch: '시에스타를 비웃던 나, 스페인에 와서 처음으로 제일 푹 잤다.', idiom: ['rest my eyes', '잠깐 눈 붙이다'] }
+      ] },
+    { id: 'france-baguette', book: '몽 쁘띠 프랑스', country: '프랑스', color: '#7D98AD', title: '바게트 한 줄',
+      blurb: '홈스테이 엄마의 아침 부탁은 딱 하나, 바게트 한 줄. 그런데 집에 도착한 바게트는 조금 짧아져 있었어요.',
+      endTitle: '바게트 끝은,<br>집에 가는 길 간식이래요.',
+      question: 'What’s a snack you can never resist?', questionKo: '절대 못 참는 간식이 뭐예요?',
+      scenes: [
+        { kicker: '심부름', title: '바게트 한 줄 사 오기', alt: '파리 빵집 앞 긴 줄에 서서 말을 연습하는 주인공', lead: '홈스테이 엄마의 아침 부탁은 딱 하나. 바게트 한 줄.', caption: '고소한 냄새가 줄을 따라와요',
+          pieces: ['I practiced', '“Une baguette, s’il vous plaît”', 'over and over', 'while I waited', 'in line.'], ko: '줄을 서서 기다리는 동안 "바게트 하나 주세요"를 계속 연습했다.',
+          hint: 'over and over = 몇 번이고 · wait in line = 줄 서서 기다리다', punch: '열 번째 연습쯤엔 내 앞 할머니까지 따라 했다.', idiom: ['over and over', '몇 번이고 계속'] },
+        { kicker: '차례', title: '머릿속이 하얘졌다', alt: '빵집 계산대 앞에서 얼어붙은 주인공과 웃으며 기다리는 제빵사', lead: '드디어 내 차례. 콧수염 제빵사가 미소를 지으며 기다려요.', caption: '물음표가 둥둥',
+          pieces: ['When it was my turn,', 'my mind', 'went completely blank,', 'so I just pointed', 'and smiled.'], ko: '막상 내 차례가 되자 머릿속이 완전히 하얘져서, 그냥 손가락으로 가리키며 웃었다.',
+          hint: 'my turn = 내 차례 · go blank = 머릿속이 하얘지다', punch: '제빵사는 아무렇지 않게 윙크했다. 하루에 열 번은 보는 표정이겠지.', idiom: ['My mind went blank.', '머릿속이 하얘졌어요.'] },
+        { kicker: '유혹', title: '따끈한 끝부분', alt: '파리 거리에서 바게트 끝을 몰래 베어 먹는 주인공과 지켜보는 비둘기', lead: '집으로 가는 길, 종이봉투 사이로 김이 모락모락 올라와요.', caption: '비둘기 목격자',
+          pieces: ['The bread was', 'so warm and crispy', 'that I couldn’t resist', 'tearing off', 'the end.'], ko: '빵이 너무 따끈하고 바삭해서, 끝부분을 뜯어 먹지 않고는 못 배겼다.',
+          hint: 'so ~ that = 너무 ~해서 · can’t resist + -ing = ~하지 않고는 못 배기다', punch: '다리 위 비둘기가 모든 걸 지켜봤다. 비밀은 지켜 주겠지?', idiom: ['I couldn’t resist.', '참을 수가 없었어요.'] },
+        { kicker: '반전', title: '다들 그래', alt: '반쯤 먹은 바게트를 든 주인공과 똑같이 끝이 없는 바게트를 든 홈스테이 엄마', lead: '반쯤 없어진 바게트를 내밀자, 홈스테이 엄마가 자기 바게트를 들어 보였어요.', caption: '똑같이 사라진 끝부분',
+          pieces: ['She laughed', 'and showed me hers —', 'it was missing', 'its end', 'too.'], ko: '그녀는 웃으며 자기 바게트를 보여 줬다. 거기도 끝부분이 없었다.',
+          hint: 'show A B = A에게 B를 보여 주다 · be missing = 없어지다, 빠져 있다', punch: '프랑스에서 바게트 끝은 "집에 가는 길 간식"이래요. 다들 그렇대요.', idiom: ['be missing ~', '~가 빠져 있다'] }
+      ] },
+    { id: 'usa-tip', book: '헬로 USA', country: 'USA', color: '#C98B6B', title: '팁은 얼마나?',
+      blurb: '뉴욕에서의 첫 브런치. 팬케이크는 완벽했는데, 계산서 맨 아래 빈칸 하나가 나를 멈춰 세웠어요.',
+      endTitle: '팁은 내가 냈는데,<br>선물은 내가 받았어요.',
+      question: 'Is tipping common in your country? How do you feel about it?', questionKo: '당신 나라에서는 팁 문화가 흔해요? 어떻게 생각해요?',
+      scenes: [
+        { kicker: '첫 브런치', title: '뉴욕 다이너에서', alt: '빨간 소파가 있는 뉴욕 다이너에서 팬케이크 브런치에 신난 주인공', lead: '뉴욕에서의 첫 아침. 빨간 소파가 있는 오래된 다이너에 들어왔어요.', caption: '버터가 사르르',
+          pieces: ['My first brunch', 'in New York', 'came with', 'a stack of pancakes', 'taller than my phone.'], ko: '뉴욕에서의 첫 브런치에는 내 휴대폰보다 높은 팬케이크 탑이 나왔다.',
+          hint: 'come with = ~이 함께 나오다 · taller than = ~보다 높은', punch: '사진을 찍는 사이, 버터가 반쯤 녹아내렸다.', idiom: ['come with ~', '~이 딸려 나오다'] },
+        { kicker: '위기', title: '계산서 앞의 수학 시험', alt: '휴대폰 계산기를 들고 팁 비율 앞에서 당황한 주인공', lead: '계산서가 왔어요. 그런데 맨 아래 빈칸이 하나 있어요. 바로 팁.', caption: '15? 18? 20?',
+          pieces: ['I stared at the bill,', 'wondering if I should leave', 'fifteen, eighteen,', 'or twenty', 'percent.'], ko: '15%를 놓을지, 18%, 아니면 20%를 놓을지 고민하며 계산서만 뚫어지게 봤다.',
+          hint: 'stare at = 뚫어지게 보다 · wonder if = ~할지 고민하다 · leave a tip = 팁을 남기다', punch: '휴대폰 계산기를 세 번 두드려도, 답은 매번 달랐다.', idiom: ['leave a tip', '팁을 남기다'] },
+        { kicker: '구원', title: '커피 리필과 작은 비법', alt: '커피를 채워 주며 팁 계산을 도와주는 웨이트리스와 주인공', lead: '그때 커피 주전자를 든 웨이트리스가 다가왔어요.', caption: '커피는 무한 리필',
+          pieces: ['“Don’t sweat it, honey,”', 'she said,', 'topping off my coffee.', '“Just move the decimal', 'and double it.”'], ko: '"걱정 마요, 자기." 그녀가 커피를 채워 주며 말했다. "소수점을 한 칸 옮기고 두 배 하면 돼요."',
+          hint: 'Don’t sweat it = 걱정 마 · top off = (잔을) 가득 채우다', punch: '10%의 두 배는 20%. 수학 시험이 3초 만에 끝났다.', idiom: ['Don’t sweat it.', '걱정 마요.'] },
+        { kicker: '반전', title: '영수증 위의 스마일', alt: '웨이트리스가 남긴 스마일 그림 영수증을 들고 감동한 주인공', lead: '팁을 남기고 일어서려는데, 영수증 뒷면에 뭔가 그려져 있어요.', caption: '영수증 속 작은 선물',
+          pieces: ['On the back of the receipt,', 'she had drawn', 'a little smiley face', 'and written,', '“Come back soon!”'], ko: '영수증 뒷면에 그녀가 작은 스마일을 그리고 "또 와요!"라고 적어 두었다.',
+          hint: 'had drawn = (이미) 그려 두었다 · Come back soon = 또 와요', punch: '팁은 내가 냈는데, 선물은 내가 받았다.', idiom: ['Come back soon!', '또 와요!'] }
+      ] }
+  ];
   var $ = function (id) { return document.getElementById(id); };
-  var index = 0, placed = [], pool = [], misses = 0, solved = false;
+  var story = null, index = 0, placed = [], pool = [], misses = 0, solved = false, finished = {};
 
-  function view(name) { ['intro', 'scene', 'done'].forEach(function (v) { $(v).hidden = v !== name; }); window.scrollTo(0, 0); }
+  // Signed-in check for the demo only: a stored Supabase session in this browser. Content is not secret.
+  function signedIn() {
+    try {
+      return Object.keys(localStorage).some(function (k) {
+        if (k.indexOf('sb-') !== 0 || k.indexOf('-auth-token') < 0) return false;
+        var s = JSON.parse(localStorage.getItem(k) || 'null'), e = s && (s.expires_at || (s.currentSession && s.currentSession.expires_at));
+        return !!(s && (s.access_token || (s.currentSession && s.currentSession.access_token))) && (!e || e * 1000 > Date.now());
+      });
+    } catch (_) { return false; }
+  }
+  function img(s, n) { return '/images/stories/' + s.id + '/scene-' + n + '.webp'; }
+  function view(name) { ['library', 'intro', 'scene', 'done'].forEach(function (v) { $(v).hidden = v !== name; }); window.scrollTo(0, 0); }
+
+  function renderLibrary() {
+    var open = signedIn(), sample = STORIES[0];
+    $('sample-img').src = img(sample, 1); $('sample-img').alt = sample.scenes[0].alt;
+    $('sample-book').textContent = sample.book + ' · 1장'; $('sample-title').textContent = sample.title; $('sample-blurb').textContent = sample.blurb;
+    var box = $('books'); box.replaceChildren();
+    STORIES.slice(1).forEach(function (s) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'book' + (open ? '' : ' locked'); b.dataset.story = s.id;
+      b.setAttribute('aria-label', s.book + ' · ' + s.title + (open ? '' : ', 로그인하면 열려요'));
+      var pic = document.createElement('img'); pic.src = img(s, 1); pic.alt = '';
+      var c = document.createElement('span'); c.className = 'country'; c.textContent = s.book;
+      var h = document.createElement('h3'); h.textContent = s.title;
+      b.append(pic, c, h);
+      if (!open) { var l = document.createElement('span'); l.className = 'lock'; l.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>로그인'; b.appendChild(l); }
+      if (finished[s.id]) { var d = document.createElement('span'); d.className = 'done-mark'; d.textContent = '완성'; b.appendChild(d); }
+      b.onclick = function () { if (open) openStory(s); else { $('login-box').hidden = false; $('login-link').focus(); } };
+      box.appendChild(b);
+    });
+    $('login-box').hidden = true;
+    view('library');
+  }
+  function openStory(s) {
+    story = s; $('cover-art').src = img(s, 1); $('cover-art').alt = s.scenes[0].alt;
+    $('cover-book').textContent = s.book + ' · 1장'; $('intro-title').textContent = s.title; $('cover-blurb').textContent = s.blurb;
+    view('intro');
+  }
   function shuffle(list) {
     var a = list.map(function (text, i) { return { text: text, i: i }; });
     do { for (var k = a.length - 1; k > 0; k--) { var j = Math.floor(Math.random() * (k + 1)); var t = a[k]; a[k] = a[j]; a[j] = t; } }
@@ -215,29 +339,28 @@ button{font:inherit;color:inherit}
   function check() {
     if (placed.every(function (p, n) { return p.i === n; })) return win();
     misses++;
-    var nodes = $('answer').querySelectorAll('.chip');
-    nodes.forEach(function (el, n) { el.classList.remove('wrong'); if (placed[n].i !== n) { void el.offsetWidth; el.classList.add('wrong'); } });
+    $('answer').querySelectorAll('.chip').forEach(function (el, n) { el.classList.remove('wrong'); if (placed[n].i !== n) { void el.offsetWidth; el.classList.add('wrong'); } });
     $('feedback').textContent = misses >= 2 ? '분홍색 조각만 다시 놓아 보세요. 정답 보기를 써도 괜찮아요.' : '분홍색으로 깜빡이는 조각을 확인해 보세요.';
     $('show-btn').hidden = misses < 2;
   }
   function setKo(on) { $('ko-box').hidden = !on; $('ko-btn').setAttribute('aria-pressed', String(on)); $('ko-btn').textContent = on ? '한국어 숨기기' : '한국어 보기'; }
   function win() {
-    var s = STORY.scenes[index]; solved = true;
+    var s = story.scenes[index]; solved = true;
     placed = s.pieces.map(function (text, i) { return { text: text, i: i }; }); pool = []; paint();
     $('answer').classList.add('ok'); setKo(true); $('hint').hidden = true;
     var art = $('scene-art'); art.classList.remove('blur'); art.classList.add('clear'); $('art-caption').textContent = s.caption;
     $('feedback').textContent = '좋아요! 문장이 장면이 되었어요.';
     $('check-row').hidden = true; $('pool').hidden = true;
     $('punch').textContent = s.punch; $('idiom-en').textContent = s.idiom[0]; $('idiom-ko').textContent = s.idiom[1];
-    $('next').textContent = index < STORY.scenes.length - 1 ? '다음 장면' : '이야기 마치기';
+    $('next').textContent = index < story.scenes.length - 1 ? '다음 장면' : '이야기 마치기';
     $('reveal').hidden = false; $('next').focus({ preventScroll: true });
   }
   function showScene() {
-    var s = STORY.scenes[index]; solved = false; misses = 0; placed = []; pool = shuffle(s.pieces);
-    $('scene-step').textContent = '장면 ' + (index + 1) + ' / ' + STORY.scenes.length;
+    var s = story.scenes[index]; solved = false; misses = 0; placed = []; pool = shuffle(s.pieces);
+    $('scene-step').textContent = story.title + ' · 장면 ' + (index + 1) + ' / ' + story.scenes.length;
     document.querySelectorAll('.progress span').forEach(function (el, n) { el.classList.toggle('on', n <= index); });
     $('scene-kicker').textContent = s.kicker; $('scene-title').textContent = s.title;
-    var art = $('scene-art'); art.classList.remove('clear'); art.classList.add('blur'); art.src = '/images/stories/belgium-waffle/' + s.img + '.webp'; art.alt = s.alt;
+    var art = $('scene-art'); art.classList.remove('clear'); art.classList.add('blur'); art.src = img(story, index + 1); art.alt = s.alt;
     $('art-caption').textContent = '문장을 완성하면 장면이 보여요';
     $('scene-lead').textContent = s.lead; $('ko-box').textContent = s.ko; setKo(false);
     $('hint').textContent = s.hint; $('hint').hidden = true; $('hint-btn').setAttribute('aria-pressed', 'false');
@@ -246,33 +369,38 @@ button{font:inherit;color:inherit}
     paint(); view('scene');
   }
   function finish() {
-    view('done');
-    $('next-q').textContent = STORY.question; $('next-q-ko').textContent = STORY.questionKo; $('copy-status').textContent = '';
+    finished[story.id] = true; view('done');
+    $('done-art').src = img(story, 4); $('done-art').alt = story.scenes[3].alt;
+    $('done-title').innerHTML = story.endTitle;
+    $('done-lead').textContent = story.book + ' 책에 1장이 꽂혔어요. 오늘 만든 문장으로 다음 파트너와 이야기를 이어가 볼까요?';
+    $('next-q').textContent = story.question; $('next-q-ko').textContent = story.questionKo; $('copy-status').textContent = '';
     var shelf = $('shelf'); shelf.replaceChildren();
-    BOOKS.forEach(function (b) {
-      var d = document.createElement('div'), h = Math.min(156, 60 + b.t.replace(/\s/g, '').length * 12);
-      d.className = 'spine' + (b.on ? ' new' : ' ghosty'); d.style.width = b.w + 'px'; d.style.height = h + 'px'; d.style.background = b.c;
-      var title = document.createElement('span'); title.className = 'vt'; title.textContent = b.t;
-      var count = document.createElement('span'); count.style.cssText = 'font-size:10px;font-weight:700'; count.textContent = b.on ? '1장' : '?';
-      d.append(title, count); shelf.appendChild(d);
+    STORIES.forEach(function (s) {
+      var d = document.createElement('div'), h = Math.min(156, 60 + s.book.replace(/\s/g, '').length * 12);
+      d.className = 'spine' + (s.id === story.id ? ' new' : finished[s.id] ? '' : ' ghosty'); d.style.width = '40px'; d.style.height = Math.max(96, h) + 'px'; d.style.background = s.color;
+      var t = document.createElement('span'); t.className = 'vt'; t.textContent = s.book;
+      var n = document.createElement('span'); n.style.cssText = 'font-size:10px;font-weight:700'; n.textContent = finished[s.id] ? '1장' : '?';
+      d.append(t, n); shelf.appendChild(d);
     });
   }
+  $('sample-start').onclick = function () { openStory(STORIES[0]); };
+  document.querySelectorAll('[data-to-library]').forEach(function (b) { b.onclick = renderLibrary; });
   $('start').onclick = function () { index = 0; showScene(); };
   $('to-intro').onclick = function () { view('intro'); };
   $('ko-btn').onclick = function () { setKo($('ko-box').hidden); };
   $('hint-btn').onclick = function () { var on = $('hint').hidden; $('hint').hidden = !on; $('hint-btn').setAttribute('aria-pressed', String(on)); };
-  $('reset-btn').onclick = function () { placed = []; pool = shuffle(STORY.scenes[index].pieces); $('feedback').textContent = ''; paint(); };
+  $('reset-btn').onclick = function () { placed = []; pool = shuffle(story.scenes[index].pieces); $('feedback').textContent = ''; paint(); };
   $('check').onclick = check;
   $('show-btn').onclick = win;
-  $('next').onclick = function () { if (index < STORY.scenes.length - 1) { index++; showScene(); } else finish(); };
+  $('next').onclick = function () { if (index < story.scenes.length - 1) { index++; showScene(); } else finish(); };
   $('again').onclick = function () { index = 0; showScene(); };
-  $('to-cover').onclick = function () { view('intro'); };
   $('copy-q').onclick = function () {
-    var done = function () { $('copy-status').textContent = '복사했어요. 다음 대화에서 써 보세요!'; };
-    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(STORY.question).then(done, function () { $('copy-status').textContent = STORY.question; });
-    else $('copy-status').textContent = STORY.question;
+    var q = story.question, done = function () { $('copy-status').textContent = '복사했어요. 다음 대화에서 써 보세요!'; };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(q).then(done, function () { $('copy-status').textContent = q; });
+    else $('copy-status').textContent = q;
   };
-  window.DayOStorybookDemo = { story: STORY };
+  window.DayOStorybookDemo = { stories: STORIES, story: STORIES[0], signedIn: signedIn };
+  renderLibrary();
 })();
 </script>
 </body>
