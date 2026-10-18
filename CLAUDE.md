@@ -8,4 +8,6 @@ The same strict limits apply in Claude Code as Codex: never change out-of-scope 
 
 For customer-screen design ideas (bottom tabs, 내 대화, 편지함, 책장, ticket stamps, 나를 소개해요), read `docs/DAYO_UX_IDEAS_LETTERBOX_BOOKSHELF.md` before changing those screens.
 
+Recent shipped changes are summarized in `docs/DAYO_CHANGELOG.md` (newest first); add an entry there for every release.
+
 When asked for independent review, remain **read-only**: report scope violations, regressions and missing E2E verification without editing any files.
