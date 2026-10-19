@@ -17,6 +17,7 @@ import { supabase } from "@/lib/supabase";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
 import { ArrowLeft, Send } from "lucide-react";
 import { RoleActions } from "@/components/admin/role-actions";
+import { ContactPhoneField } from "@/components/admin/contact-phone-field";
 
 type OrderRow = {
   id: string;
@@ -151,6 +152,10 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
                 <div>
                   <span className="text-muted-foreground">이메일 / 식별 정보</span>
                   <p>{user.email || (user.provider === "kakao" ? <KakaoPrivateEmailHint /> : "미등록")}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">휴대폰 (예약 알림)</span>
+                  <div className="mt-1"><ContactPhoneField userId={user.user_id || user.id} /></div>
                 </div>
                 <div>
                   <span className="text-muted-foreground">권한 관리</span>

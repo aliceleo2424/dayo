@@ -1,5 +1,6 @@
 "use client";
 import { ProfileImage } from "@/components/admin/profile-image";
+import { ContactPhoneField } from "@/components/admin/contact-phone-field";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PartnerPayoutDialog } from "@/components/admin/partner-payout-dialog";
@@ -140,6 +141,7 @@ export function PartnerManagementTable() {
       ),
     },
     { key: "nationality", header: "국적 / 출신", render: (row) => String(row.nationality || "미등록") },
+    { key: "mobile_phone", header: "알림 번호", render: (row) => <ContactPhoneField userId={String(row.user_id || row.id)} compact /> },
     { key: "languages", header: "담당 언어", render: (row) => String(row.languages || "미등록") },
     {
       key: "average_rating", header: "평균 평점", sortable: true,
