@@ -166,3 +166,18 @@ body[data-customer-page="landing"] .lv-close a { margin-top: 2px; }
 /* Korean text wraps between words, never inside a word. */
 body[data-customer-page="landing"] .lv-story, body[data-customer-page="landing"] .lv-close, body[data-customer-page="landing"] .lv-question { word-break: keep-all; overflow-wrap: break-word; }
 body[data-customer-page="landing"] .lv-question .lv-question-hint { font-size: 14px; line-height: 1.55; }
+
+/* Hero: full-width band like the story/closing sections below (owner request 2026-10-20).
+   Same image, copy and buttons; only the rounded box is removed. */
+body[data-customer-page="landing"] .hero { position: relative; isolation: isolate; overflow: hidden; padding: 0; background: #fff1c4; }
+body[data-customer-page="landing"] .hero-grid { position: static; isolation: auto; border-radius: 0; overflow: visible; }
+body[data-customer-page="landing"] .hero .home-stage-inner { max-width: 1080px; }
+body[data-customer-page="landing"] .hero-copy { padding-left: 0; padding-right: 0; }
+@media (max-width: 767px) {
+  body[data-customer-page="landing"] .hero-grid { background: transparent; border-radius: 0; }
+  body[data-customer-page="landing"] .hero-media { position: relative; width: calc(100% + 32px); margin: 0 -16px; }
+  body[data-customer-page="landing"] .hero-copy { padding: 18px 0 32px; }
+}
+@media (min-width: 1051px) {
+  body[data-customer-page="landing"] .hero-grid { min-height: clamp(540px, 34vw, 640px); }
+}

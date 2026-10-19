@@ -3,7 +3,7 @@
 body[data-customer-page="landing"] { background: #fbf7ea !important; }
 
 /* Hero: butter fade over the existing watercolor image */
-body[data-customer-page="landing"] .hero-media::after { background: linear-gradient(90deg,rgba(255,242,198,.97) 0%,rgba(255,242,198,.88) 34%,rgba(255,242,198,.1) 60%,transparent 72%); }
+body[data-customer-page="landing"] .hero-media::after { background: linear-gradient(90deg,rgba(255,242,198,.97) 0%,rgba(255,242,198,.88) calc(max(32px, 50% - 540px) + min(367px, 34% - 22px)),rgba(255,242,198,.1) calc(max(32px, 50% - 540px) + min(648px, 60% - 38px)),transparent calc(max(32px, 50% - 540px) + min(778px, 72% - 46px))); }
 
 /* Talk card section: sage band, butter card */
 body[data-customer-page="landing"] .lv-story { background: #e8f1e4; }
