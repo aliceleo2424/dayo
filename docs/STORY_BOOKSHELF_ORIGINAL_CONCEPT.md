@@ -138,7 +138,7 @@
 | 에피소드 | 책 | 톤 | 장면 (kicker) | 다음 대화 질문 |
 | --- | --- | --- | --- | --- |
 | `belgium-waffle` 와플 대작전 | 즐거운 벨기에 여행 | 위트 | 도착 · 경고 · 유혹 · 반전 | Have you ever been told you were eating something "the wrong way"? |
-| `mexico-one-more-plate` 하나 더 놓인 접시 | 멕시코 | 감동 | 초대 · 이야기 · 웃음 · 밤 | Is there a family dish that reminds you of someone? |
+| `mexico-one-more-plate` 하나 더 놓인 접시 | 비바 멕시코 | 감동 | 초대 · 이야기 · 웃음 · 밤 | Is there a family dish that reminds you of someone? |
 | `spain-siesta` 시에스타 대소동 | 올라 스페인 | 위트 | 오후 두 시 · 엿보기 · 초대 · 반전 | Do you take naps? Where is your favorite place to nap? |
 | `france-baguette` 바게트 한 줄 | 몽 쁘띠 프랑스 | 위트 | 심부름 · 차례 · 유혹 · 반전 | What’s a snack you can never resist? |
 | `usa-tip` 팁은 얼마나? | 헬로 USA | 위트·따뜻함 | 첫 브런치 · 위기 · 구원 · 반전 | Is tipping common in your country? How do you feel about it? |
