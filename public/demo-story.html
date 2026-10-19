@@ -64,9 +64,12 @@ textarea:focus{outline:2px solid var(--sage);outline-offset:1px}
 .chip{min-height:44px;padding:0 14px;border-radius:12px;border:1.5px solid var(--line);background:#fff;color:var(--ink);font-size:15.5px;font-weight:700}
 .chip.on{background:#E8EEE1;border-color:#C6D1BC;color:#2F4A33}
 .chip.used{visibility:hidden}
-.shake{animation:shake .35s ease}
-@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-@media (prefers-reduced-motion:reduce){.shake{animation:none}}
+/* 다 놓은 뒤 순서가 틀리면 칸이 분홍색으로 두 번 깜빡인다. */
+.shake{animation:pinkBlink .9s ease}
+.shake .chip.on{animation:pinkChip .9s ease}
+@keyframes pinkBlink{0%,100%{background:#FFFEFB;border-color:#C9B28D}20%,60%{background:#FDE4E8;border-color:#F2A7B5}40%,80%{background:#FFF4F6;border-color:#F7C9D2}}
+@keyframes pinkChip{0%,100%{background:#E8EEE1;border-color:#C6D1BC;color:#2F4A33}20%,60%{background:#FBD3DB;border-color:#F2A7B5;color:#8A2E44}40%,80%{background:#FDE4E8;border-color:#F7C9D2;color:#8A2E44}}
+@media (prefers-reduced-motion:reduce){.shake{animation:none;background:#FDE4E8;border-color:#F2A7B5}.shake .chip.on{animation:none}}
 [hidden]{display:none!important}
 svg{fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 @media (prefers-reduced-motion:reduce){.spine{transition:none}}
