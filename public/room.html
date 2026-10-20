@@ -7240,6 +7240,7 @@
       preview:['This is a preview. No Letter was sent.','미리보기입니다. 레터를 보내지 않았어요.'],
       invalid_booking:['This booking could not be verified. Please reopen the conversation.','예약을 확인하지 못했습니다. 대화를 다시 열어 주세요.'],
       validation:['Write a Letter of 1–1,000 characters before sending.','1~1,000자 이내로 레터를 작성해 주세요.'],
+      draft_unchecked:['Please check the AI draft for anything that was not said, then tick the box before sending.','AI 초안에 대화에 없던 내용이 없는지 확인하고 체크한 뒤 보내 주세요.'],
       too_short:['Please write at least 400 characters (spaces included) before sending.','공백 포함 400자 이상 작성해야 보낼 수 있어요.'],
       image_required:['Please choose words and press “Create illustration”, or choose “Send with the DayO picture”.','단어를 골라 “그림 만들기”를 누르거나, “기본 그림으로 보내기”를 선택해 주세요.'],
       image_busy:['The illustration is still being drawn. Please wait a moment, then send.','그림을 그리고 있어요. 잠시 후 보내 주세요.'],
@@ -7417,6 +7418,10 @@
         // Owner decision 2026-10-15: minimum 400 characters, spaces and punctuation included.
         if (Array.from(cardData.partnerComment).length < 400) {
           setPartnerReportSubmitStatus('too_short', false); return;
+        }
+        // Owner decision 2026-10-20: a Letter that started from the AI draft is sent only after the Partner confirms the check.
+        if (window.DayOPartnerReport && typeof window.DayOPartnerReport.draftChecked === 'function' && !window.DayOPartnerReport.draftChecked()) {
+          setPartnerReportSubmitStatus('draft_unchecked', false); return;
         }
         // Owner decision 2026-10-17: the Partner must decide about the image (create one, "Don't use", or
         // "Send with the DayO picture"). An image failure never blocks: that choice is always available.
@@ -7781,7 +7786,7 @@
   <div id="partner-report-popup" style="display:none;position:fixed;inset:0;z-index:99999999;justify-content:center;align-items:center" role="dialog" aria-modal="true" aria-labelledby="pr-title">
     <div class="pr-dialog">
       <header><h2 id="pr-title">Partner Letter</h2><p class="pr-intro">Write about one real thing this user shared and what you would like to hear next time. Please don’t invent anything.</p></header>
-      <section class="pr-section pr-letter-compose"><label class="pr-field" for="popup-partner-comment">Your personal message<textarea id="popup-partner-comment" rows="6" maxlength="1000" placeholder="What did they tell you today? What genuinely interested you? What would you ask them next time?"></textarea></label><div id="pr-letter-count" class="pr-letter-count" aria-live="polite"></div><div id="pr-letter-selected" class="pr-letter-selected"></div></section>
+      <section class="pr-section pr-letter-compose"><div id="pr-draft" class="pr-draft" hidden><p id="pr-draft-status" class="pr-hint" aria-live="polite"></p><div id="pr-draft-check" class="pr-draft-check" hidden><p class="pr-draft-warning">Please check that nothing in the draft was not said in your conversation.</p><details class="pr-draft-evidence"><summary>What the user said that the draft used</summary><ul id="pr-draft-evidence"></ul></details><label class="pr-draft-confirm"><input type="checkbox" id="pr-draft-confirm"> <span>I checked the draft and fixed anything that was not said.</span></label></div><div class="pr-letter-tools"><button type="button" id="pr-draft-insert" hidden>Use the AI draft</button><button type="button" id="pr-draft-retry" hidden>Write the draft again (once)</button></div></div><label class="pr-field" for="popup-partner-comment">Your letter to the user<textarea id="popup-partner-comment" rows="8" maxlength="1000" placeholder="Dear …, write to them directly, like a letter: “I loved hearing about … Next time, tell me about …” — your name"></textarea></label><div id="pr-letter-count" class="pr-letter-count" aria-live="polite"></div><div id="pr-letter-selected" class="pr-letter-selected"></div></section>
       <details class="pr-section pr-optional" open><summary>Add a conversation keepsake (optional)</summary><div class="pr-keyword-layout"><div><p id="pr-keyword-hint" class="pr-hint"></p><div id="pr-keyword-options" class="pr-chips" aria-label="Suggested conversation themes"></div><div class="pr-letter-tools"><button type="button" id="pr-image-make" disabled>Create illustration</button><button type="button" id="pr-keyword-more" hidden>Show other words</button><button type="button" id="pr-image-skip" class="pr-image-skip" aria-pressed="false">Send with the DayO picture</button></div><div id="pr-custom-keyword-field" hidden><label class="pr-field">Write a short topic or phrase<input type="text" id="pr-custom-keyword" maxlength="60" placeholder="e.g. Seoul Forest cafés"></label><button type="button" id="pr-use-keyword">Use theme</button></div><p id="pr-keyword-value" class="pr-hint" aria-live="polite"></p></div><figure class="pr-preview"><img id="pr-illustration" alt="Conversation keepsake illustration" hidden><figcaption id="pr-image-status" aria-live="polite">Choose a theme for your illustration. Image generation is optional.</figcaption><button type="button" id="pr-image-retry">Try illustration again</button></figure></div></details>
       <details class="pr-transcript"><summary>View conversation transcript — reference only</summary><div id="popup-transcript-list"></div></details>
       <footer class="pr-actions"><p id="partner-report-submit-status" role="status" aria-live="polite" hidden></p><button type="button" id="btn-final-partner-submit" onclick="executePartnerPayoutAndExit()">Send letter and finish</button></footer>

@@ -2,6 +2,7 @@
  * Partner raw speech never leaves this server. Private image access uses participant JWT; generation stays disabled. */
 const recap = require('../public/conversation-recap.js');
 const partnerLetter = require('./_lib/partner-letter.js');
+const partnerLetterDraft = require('./_lib/partner-letter-draft.js');
 const illustration = require('./_lib/partner-illustration-cloudflare.js');
 const keepsake = require('./_lib/keepsake-safety.js');
 const illustrationTest = require('./_lib/keepsake-test-runtime.js');
@@ -41,7 +42,7 @@ function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot
     const url = String(env.NEXT_PUBLIC_SUPABASE_URL || env.SUPABASE_URL || '').trim().replace(/\/rest\/v1\/?$/i, '').replace(/\/+$/, '');
     const anon = String(env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
     if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url) || !anon) return json(res, 503, { error: 'source_unavailable' });
-    const partnerAction = ['partner_letter_topics', 'partner_letter_blocks', 'partner_illustration_status', 'partner_illustration_generate', 'partner_illustration_choices'].includes(input.action);
+    const partnerAction = ['partner_letter_topics', 'partner_letter_blocks', 'partner_illustration_status', 'partner_illustration_generate', 'partner_illustration_choices', 'partner_letter_draft', 'partner_letter_draft_retry'].includes(input.action);
     if (input.request_id!=null && (input.action!=='partner_illustration_generate'||!uuid(input.request_id))) return json(res,400,{error:'invalid_request'});
     const assetAction=input.action==='keepsake_image';
     const transcriptAction=input.action==='conversation_transcript';
@@ -88,6 +89,7 @@ function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot
       if (partnerAction) {
         let result;
         if(input.action==='partner_illustration_choices'){result=await illustration.choices({input,read,user,env,signal:controller.signal,fetchImpl});}
+        else if(input.action==='partner_letter_draft'||input.action==='partner_letter_draft_retry'){result=await partnerLetterDraft.handle({input,read,user,env,signal:controller.signal,fetchImpl});}
         else if (input.action === 'partner_illustration_generate') {
           // Canonical booking Partner ownership precedes any service-role client.
           const configured = illustrationPilot || illustrationTest.createPilot({env,fetchImpl});
