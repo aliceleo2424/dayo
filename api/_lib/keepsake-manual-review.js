@@ -33,7 +33,9 @@ async function handle({db,input}){
   if(!asset)return {image:null,managed:await rpc(db,'dayo_keepsake_beta_access',{p_booking_id:input.booking_id})===true};
   if(asset.approved!==true)throw fail('image_access_unavailable');
   const bytes=await readBytes(db,asset,input.booking_id);
-  return {managed:true,image:{booking_id:input.booking_id,asset,approved:true,data:bytes.toString('base64'),content_type:'image/png'}};
+  // SHA/size checks run on the original PNG above; customers get a small WebP copy (2.7MB base64 JSON stalled the page).
+  const small=await require('sharp')(bytes,{limitInputPixels:1024*1024}).resize(640,640).webp({quality:82}).toBuffer();
+  return {managed:true,image:{booking_id:input.booking_id,asset,approved:true,data:small.toString('base64'),content_type:'image/webp'}};
  }
  if(['approve','reject','revoke'].includes(input.action)){
   if(!UUID.test(input.booking_id||'')||!UUID.test(input.attempt_id||''))throw fail('invalid_request');

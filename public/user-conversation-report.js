@@ -28,20 +28,28 @@ function keepsakeURL(r){
  if(r&&r.__dayoKeepsakeManaged)return '';
  var legacy=imageURL(r&&r.illust_url);return /dayo-keepsakes/.test(legacy)?'':legacy;
 }
+// 2026-10-20: one read per booking per page (Letterbox + report modal share it); shared blob URLs are never revoked.
+var keepsakeReads=typeof WeakMap==='function'?new WeakMap():null,keepsakeShared=new Set();
+async function readKeepsake(send,token,bookingId){
+ var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},10000);
+ try{var response=await send('/api/conversation-recap',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({action:'keepsake_review',review:{action:'read',booking_id:bookingId}}),signal:controller.signal});
+ if(!response.ok)throw Error('keepsake-unavailable');var payload=await response.json(),image=payload&&payload.image,result={managed:payload.managed===true,image:null};
+ if(!image||image.approved!==true||image.booking_id!==bookingId||!['image/webp','image/png'].includes(image.content_type)||typeof image.data!=='string'||image.data.length>4194304||!image.asset||image.asset.bucket!=='dayo-keepsakes'||!image.asset.object_path.startsWith(bookingId+'/')||typeof URL.createObjectURL!=='function')return result;
+ var decoded=atob(image.data),bytes=new Uint8Array(decoded.length);for(var i=0;i<decoded.length;i++)bytes[i]=decoded.charCodeAt(i);
+ result.image={approved:true,booking_id:image.booking_id,asset:image.asset,url:URL.createObjectURL(new Blob([bytes],{type:image.content_type}))};return result;
+ }finally{clearTimeout(timer);}
+}
 async function refreshKeepsakeImage(db,report,fetchImpl){
  if(!report||!report.booking_id||!db.auth||!db.auth.getSession)return report;
  var base=Object.assign({},report),old=base.__dayoKeepsakeImage;
- if(old&&/^blob:/.test(old.url)&&typeof URL.revokeObjectURL==='function')URL.revokeObjectURL(old.url);
+ if(old&&/^blob:/.test(old.url)&&!keepsakeShared.has(old.url)&&typeof URL.revokeObjectURL==='function')URL.revokeObjectURL(old.url);
  delete base.__dayoKeepsakeImage;
  try{var auth=await db.auth.getSession(),token=auth.data&&auth.data.session&&auth.data.session.access_token;if(auth.error||!token)return base;
  var send=fetchImpl||(typeof fetch==='function'?fetch:null);if(!send)return base;
- var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},10000);
- try{var response=await send('/api/conversation-recap',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({action:'keepsake_review',review:{action:'read',booking_id:report.booking_id}}),signal:controller.signal});
- if(!response.ok)return base;var payload=await response.json(),image=payload&&payload.image;base.__dayoKeepsakeManaged=payload.managed===true;
- if(!image||image.approved!==true||image.booking_id!==report.booking_id||image.content_type!=='image/png'||typeof image.data!=='string'||image.data.length>4194304||!image.asset||image.asset.bucket!=='dayo-keepsakes'||!image.asset.object_path.startsWith(report.booking_id+'/')||typeof URL.createObjectURL!=='function')return base;
- var decoded=atob(image.data),bytes=new Uint8Array(decoded.length);for(var i=0;i<decoded.length;i++)bytes[i]=decoded.charCodeAt(i);
- base.__dayoKeepsakeImage={approved:true,booking_id:image.booking_id,asset:image.asset,url:URL.createObjectURL(new Blob([bytes],{type:'image/png'}))};return base;
- }finally{clearTimeout(timer);}}catch(_){return base;}
+ var cache=keepsakeReads&&(keepsakeReads.get(send)||keepsakeReads.set(send,new Map()).get(send)),key=report.booking_id,pending=cache&&cache.get(key);
+ if(!pending){pending=readKeepsake(send,token,key);if(cache){cache.set(key,pending);pending.then(function(r){if(r.image)keepsakeShared.add(r.image.url);else cache.delete(key);},function(){cache.delete(key);});}}
+ var result=await pending;base.__dayoKeepsakeManaged=result.managed;if(result.image)base.__dayoKeepsakeImage=Object.assign({},result.image);return base;
+ }catch(_){return base;}
 }
 function hideIllustration(img){img.hidden=true;img.onerror=null;var block=img.closest('.ucr-block');if(block&&!block.querySelector('.ucr-theme'))block.hidden=true;}
 function heading(title,content){return content?'<div class="ucr-block"><h4>'+esc(title)+'</h4>'+content+'</div>':'';}

@@ -21,6 +21,7 @@
 | 나의 작은 편지함 (봉투 카드, 열면 그림 + 편지) | **배포됨** | `public/letterbox.js` (bcd6e75, a8b9fe0) · 마이페이지 맨 위 `#dayo-letterbox` |
 | 빈 편지함 안내 (눌러 보는 빈 칸) | **배포됨** | `public/letterbox.js` `EMPTY_TIP` |
 | 비로그인 편지함 = 예시 편지 1통 (봉투 → 그림 + 편지) | **배포됨** (2026-10-20 `dc9b9eb`, 운영 비로그인 화면에서 확인) | `public/letterbox-sample.js`, `public/customer-navigation.js` `openLetterSample`, `public/letterbox.css`, 그림 `public/images/letter-sample.webp`. 아래 5절 참고 |
+| 승인된 편지 그림이 고객 마이페이지·편지함에 실제로 보이게 (기본 그림으로 떨어지던 문제) | **코드 완료 · 운영 배포 전** (2026-10-20 Owner 승인) — 운영 화면 확인 전 | 서버 `api/_lib/keepsake-manual-review.js` 고객 읽기는 원본 PNG 검사 후 640px WebP로 작게 보냄. 화면 `public/user-conversation-report.js` `refreshKeepsakeImage`는 같은 예약 그림을 한 번만 받아 편지함과 리포트 창이 같이 씀. 승인 안 된 그림은 그대로 기본 그림 |
 | 편지 그림 자동 생성 (파트너가 레터 창을 열면 고객이 말한 단어로 그림 한 장을 미리 그림) | **배포됨** — 실제 그림 생성은 운영에서 아직 확인 전 | `public/partner-report.js` `autoIllustrate`, `public/keepsake-partner-review.js` `hasImage` (커밋 "feat(partner-letter): draw one picture automatically when the Letter opens"). 이미 그림이 있으면 그리지 않고, 같은 기기에서는 예약당 한 번만 자동으로 그린다. 파트너는 다시 그리기(서버 기준 예약당 2번까지) 또는 기본 그림으로 바꿀 수 있다 |
 | 나의 대화 티켓 스탬프 카드 (10칸, 하트) | **배포됨** | `public/ticket-stamps.js` (5cb991b, c12cae2) · 마이페이지 "다음 대화" 카드 바로 아래 |
 | 승인된 파트너 → 파트너 라운지 우선 | **배포됨** | `public/role-switch.js`, `public/supabase-client.js`, `mypage.html` (acee039) |
