@@ -3,7 +3,7 @@
  * Load after the room's inline openQuizModalImmediately (which renders the
  * recap into #quiz-content-box) and BEFORE memory-game.js, which keeps that
  * function as its originalOpen. After every recap render this appends an
- * optional "이야기 한 장면 만들기" card. The recap and quiz code are not
+ * optional "대화 한 컷" card (renamed 2026-10-17 → 2026-10-20; formerly "이야기 한 장면 만들기"). The recap and quiz code are not
  * modified; any missing data or error simply leaves the card out.
  */
 (function () {
@@ -101,7 +101,7 @@
       '.dsb-badge{display:inline-block;margin:0 44px 10px 0;padding:4px 10px;border-radius:999px;background:#FFF1EC;color:var(--coral-dark,#4B6650);font-size:12px;font-weight:800;}',
       '.dsb-title{margin:0 0 6px;font-size:19px;font-weight:800;line-height:1.35;}',
       '.dsb-sub{margin:0 0 16px;font-size:13px;color:#78716C;line-height:1.6;white-space:pre-line;}',
-      '.dsb-img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:14px;margin:0 0 14px;background:#FAF8F5;}',
+      '.dsb-img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;object-position:center 30%;border-radius:14px;margin:0 0 14px;background:#FAF8F5;}',
       '.dsb-en{margin:0;font-size:15px;font-weight:700;line-height:1.5;}',
       '.dsb-ko{margin:2px 0 0;font-size:13px;color:#78716C;line-height:1.5;}',
       '.dsb-bubble{margin:0 0 14px;padding:12px 14px;border-radius:14px;background:#FAF8F5;}',
@@ -129,8 +129,11 @@
       '</div>';
   }
 
+  // Owner 2026-10-20: one friendly friend in four shared pictures, picked by the scene's topic.
+  var TALK_CUT = { travel: 'street', 'fashion-beauty': 'street', 'food-cafe': 'cafe', 'work-school': 'cafe', exercise: 'park', pets: 'park' };
   function imageHtml(scene) {
-    return '<img class="dsb-img" alt="" src="images/stories/' + escapeHtml(scene.id) + '.webp" onerror="this.remove()">';
+    var topic = String(scene.id || '').replace(/-\d+$/, ''), pic = TALK_CUT[topic] || 'home';
+    return '<img class="dsb-img" alt="" src="images/talk-cut/' + pic + '.webp" onerror="this.remove()">';
   }
 
   function openOverlay() {
@@ -216,7 +219,7 @@
     function showEnding(errorText, draft) {
       var card = render(
         '<span class="dsb-badge">' + escapeHtml(scene.title) + ' · 마무리</span>' +
-        '<h3 class="dsb-title" id="dsb-title">장면 완성!</h3>' +
+        '<h3 class="dsb-title" id="dsb-title">한 컷 완성!</h3>' +
         lineHtml(scene.ending) +
         '<p class="dsb-en" lang="en" style="margin-top:4px;">' + escapeHtml(scene.myLinePrompt.en) + '</p>' +
         '<p class="dsb-ko" style="margin-bottom:8px;">' + escapeHtml(scene.myLinePrompt.ko) + ' (선택)</p>' +
@@ -225,7 +228,7 @@
         (errorText ? '<p class="dsb-error" role="alert">' + escapeHtml(errorText) + '</p>' : '') +
         '<div class="dsb-actions">' +
         '<button type="button" class="dsb-btn dsb-btn--ghost" data-dsb-skip>' + (errorText ? '그냥 닫기' : '저장 안 하고 닫기') + '</button>' +
-        '<button type="button" class="dsb-btn dsb-btn--primary" data-dsb-save>책장에 꽂기 📚</button>' +
+        '<button type="button" class="dsb-btn dsb-btn--primary" data-dsb-save>저장하기</button>' +
         '</div>'
       );
       if (!card) return finish();
@@ -283,9 +286,9 @@
     function showSaved() {
       onSaved();
       var card = render(
-        '<span class="dsb-badge">📚 책장</span>' +
-        '<h3 class="dsb-title" id="dsb-title">책장에 꽂았어요!</h3>' +
-        '<p class="dsb-sub">마이페이지 책장에서 언제든 다시 볼 수 있어요.</p>' +
+        '<span class="dsb-badge">💬 대화 한 컷</span>' +
+        '<h3 class="dsb-title" id="dsb-title">저장했어요!</h3>' +
+        '<p class="dsb-sub">오늘 대화의 한 컷이 차곡차곡 쌓였어요.</p>' +
         '<div class="dsb-actions"><button type="button" class="dsb-btn dsb-btn--primary" data-dsb-done data-dsb-focus>리캡으로 돌아가기</button></div>'
       );
       if (!card) return finish();
@@ -297,11 +300,11 @@
 
   function entryHtml(context) {
     if (context.saved) {
-      return '<section class="dsb-card-entry" data-story-entry><p class="dsb-entry-done">📚 이 대화의 이야기 장면은 책장에 꽂혀 있어요.</p></section>';
+      return '<section class="dsb-card-entry" data-story-entry><p class="dsb-entry-done">💬 이 대화의 한 컷을 완성했어요.</p></section>';
     }
     return '<section class="dsb-card-entry" data-story-entry>' +
-      '<h4>📖 이야기 한 장면 만들기 (선택)</h4>' +
-      '<p>1분이면 끝나요. 정답도 점수도 없어요. 완성한 장면은 마이페이지 책장에 꽂혀요.</p>' +
+      '<h4>💬 대화 한 컷 (선택)</h4>' +
+      '<p>친구가 말을 걸어왔어요. 뭐라고 대답할까요? 1분이면 끝나요. 정답도 점수도 없어요.</p>' +
       '<button type="button" class="recap-primary" data-story-start>시작하기</button>' +
       '</section>';
   }
