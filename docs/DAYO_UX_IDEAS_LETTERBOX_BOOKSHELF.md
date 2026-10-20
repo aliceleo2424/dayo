@@ -220,11 +220,11 @@
 **지금 있는 파트너 입장 전 체크리스트 (2026-10-20 Owner 결정)**
 - 파트너가 룸에 들어가기 전에 "Before you enter" 창이 뜨고, 4개를 모두 체크해야 [Enter conversation]이 켜진다. 코드: `public/partner-pre-session.js`.
 - 문구 (영어 그대로 노출):
-  1. I'll let the user finish speaking before I help.
+  1. I'll welcome the user with a smile, help them relax, and jump in to help whenever they get stuck.
   2. This is a conversation, not a lesson. I'll correct gently and naturally.
   3. For safety, I won't share or ask for personal details (address, phone number, social media), and I'll keep our contact on DayO only.
   4. I'll keep what the user shares confidential.
-- 바뀐 점: "Talk Cards를 쓰겠다"는 사용 팁이라 뺐고, "직접 레터를 쓰겠다"는 AI 레터 초안이 생겨서 뺐다. 안전 문구(내 개인정보를 말하지도, 상대에게 묻지도 않기 · 연락은 DayO 안에서만)를 새로 넣었다.
+- 바뀐 점: 1번은 "말을 끝까지 듣고 돕겠다"에서 "웃으며 긴장을 풀어주고, 막히면 바로 돕겠다"로 바꿨다(Owner 선택). "Talk Cards를 쓰겠다"는 사용 팁이라 뺐고, "직접 레터를 쓰겠다"는 AI 레터 초안이 생겨서 뺐다. 안전 문구(내 개인정보를 말하지도, 상대에게 묻지도 않기 · 연락은 DayO 안에서만)를 새로 넣었다.
 - 나중에 Prepare 화면을 만들 때 이 체크리스트와 합칠지는 그때 정한다.
 
 ---

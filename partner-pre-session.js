@@ -2,7 +2,7 @@
   'use strict';
 
   var reminders = [
-    'I\'ll let the user finish speaking before I help.',
+    'I\'ll welcome the user with a smile, help them relax, and jump in to help whenever they get stuck.',
     'This is a conversation, not a lesson. I\'ll correct gently and naturally.',
     'For safety, I won\'t share or ask for personal details (address, phone number, social media), and I\'ll keep our contact on DayO only.',
     'I\'ll keep what the user shares confidential.'
