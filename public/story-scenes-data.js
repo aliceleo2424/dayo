@@ -9,7 +9,7 @@
       "title": "정주행 추천",
       "steps": [
         {
-          "speaker": "Emma",
+          "speaker": "Ava",
           "line": {
             "en": "I want to start a new K-drama tonight. Any ideas?",
             "ko": "오늘 밤 새 K-드라마 시작하고 싶어. 추천해 줄래?"
@@ -33,7 +33,7 @@
           ]
         },
         {
-          "speaker": "Emma",
+          "speaker": "Ava",
           "line": {
             "en": "How many episodes should we watch?",
             "ko": "몇 화까지 볼까?"
@@ -58,8 +58,8 @@
         }
       ],
       "intro": {
-        "en": "Your friend Emma is on your sofa, scrolling through a streaming app for twenty minutes.",
-        "ko": "Emma가 당신 집 소파에서 20분째 OTT 앱만 넘기고 있어요."
+        "en": "Your friend Ava is on your sofa, scrolling through a streaming app for twenty minutes.",
+        "ko": "Ava가 당신 집 소파에서 20분째 OTT 앱만 넘기고 있어요."
       },
       "ending": {
         "en": "At 3 a.m., you both say, \"Okay, really the last one.\"",
@@ -77,7 +77,7 @@
       "title": "촬영지 발견",
       "steps": [
         {
-          "speaker": "Lucas",
+          "speaker": "Ava",
           "line": {
             "en": "Wait, isn't this from that drama?",
             "ko": "잠깐, 여기 그 드라마에 나온 곳 아니야?"
@@ -95,13 +95,13 @@
             },
             {
               "id": "c",
-              "en": "It's just a bus stop, Lucas.",
-              "ko": "Lucas, 그냥 버스 정류장이야."
+              "en": "It's just a bus stop, Ava.",
+              "ko": "Ava, 그냥 버스 정류장이야."
             }
           ]
         },
         {
-          "speaker": "Lucas",
+          "speaker": "Ava",
           "line": {
             "en": "Do you want to copy the famous scene?",
             "ko": "그 유명한 장면 따라 해 볼래?"
@@ -126,8 +126,8 @@
         }
       ],
       "intro": {
-        "en": "Walking in Seoul, you and your friend Lucas find a filming spot from a famous drama.",
-        "ko": "서울을 걷다가 당신과 Lucas가 유명 드라마 촬영지를 발견해요."
+        "en": "Walking in Seoul, you and your friend Ava find a filming spot from a famous drama.",
+        "ko": "서울을 걷다가 당신과 Ava가 유명 드라마 촬영지를 발견해요."
       },
       "ending": {
         "en": "A grandmother passing by claps for you. Best review ever.",
@@ -145,7 +145,7 @@
       "title": "영화관 좌석",
       "steps": [
         {
-          "speaker": "Sofia",
+          "speaker": "Ava",
           "line": {
             "en": "Where should we sit?",
             "ko": "어디 앉을까?"
@@ -169,7 +169,7 @@
           ]
         },
         {
-          "speaker": "Sofia",
+          "speaker": "Ava",
           "line": {
             "en": "Popcorn: sweet or salty?",
             "ko": "팝콘은 달콤한 거, 짭짤한 거?"
@@ -194,8 +194,8 @@
         }
       ],
       "intro": {
-        "en": "You and your friend Sofia are buying movie tickets at the kiosk.",
-        "ko": "당신과 Sofia가 키오스크에서 영화표를 사고 있어요."
+        "en": "You and your friend Ava are buying movie tickets at the kiosk.",
+        "ko": "당신과 Ava가 키오스크에서 영화표를 사고 있어요."
       },
       "ending": {
         "en": "The popcorn is gone before the ads even finish.",
@@ -213,7 +213,7 @@
       "title": "엔딩 이후",
       "steps": [
         {
-          "speaker": "Daniel",
+          "speaker": "Ava",
           "line": {
             "en": "So, what did you think?",
             "ko": "어땠어?"
@@ -237,7 +237,7 @@
           ]
         },
         {
-          "speaker": "Daniel",
+          "speaker": "Ava",
           "line": {
             "en": "Who was your favorite character?",
             "ko": "제일 좋았던 캐릭터는?"
@@ -262,8 +262,8 @@
         }
       ],
       "intro": {
-        "en": "The movie just ended. You and your friend Daniel walk out of the theater.",
-        "ko": "영화가 막 끝났어요. 당신과 Daniel이 영화관을 나서요."
+        "en": "The movie just ended. You and your friend Ava walk out of the theater.",
+        "ko": "영화가 막 끝났어요. 당신과 Ava가 영화관을 나서요."
       },
       "ending": {
         "en": "You argue about the ending all the way to the subway — and agree on nothing.",
@@ -281,7 +281,7 @@
       "title": "알고리즘 공유",
       "steps": [
         {
-          "speaker": "Hana",
+          "speaker": "Ava",
           "line": {
             "en": "This channel is my favorite right now.",
             "ko": "요즘 제일 좋아하는 채널이야."
@@ -305,7 +305,7 @@
           ]
         },
         {
-          "speaker": "Hana",
+          "speaker": "Ava",
           "line": {
             "en": "What do you usually watch on YouTube?",
             "ko": "너는 유튜브에서 주로 뭐 봐?"
@@ -330,8 +330,8 @@
         }
       ],
       "intro": {
-        "en": "Your friend Hana shows you a video on her phone, already laughing before it starts.",
-        "ko": "Hana가 영상이 시작하기도 전에 웃으면서 휴대폰을 내밀어요."
+        "en": "Your friend Ava shows you a video on her phone, already laughing before it starts.",
+        "ko": "Ava가 영상이 시작하기도 전에 웃으면서 휴대폰을 내밀어요."
       },
       "ending": {
         "en": "One hour later, your algorithm has completely changed.",
@@ -349,7 +349,7 @@
       "title": "브이로그 촬영",
       "steps": [
         {
-          "speaker": "Leo",
+          "speaker": "Ava",
           "line": {
             "en": "Can you help me film?",
             "ko": "촬영 좀 도와줄래?"
@@ -373,7 +373,7 @@
           ]
         },
         {
-          "speaker": "Leo",
+          "speaker": "Ava",
           "line": {
             "en": "What should we show first?",
             "ko": "뭐부터 찍을까?"
@@ -398,12 +398,12 @@
         }
       ],
       "intro": {
-        "en": "Your friend Leo wants to film a vlog at a market in Seoul.",
-        "ko": "Leo가 서울 시장에서 브이로그를 찍고 싶어 해요."
+        "en": "Your friend Ava wants to film a vlog at a market in Seoul.",
+        "ko": "Ava가 서울 시장에서 브이로그를 찍고 싶어 해요."
       },
       "ending": {
-        "en": "The video gets 12 views. Eleven are from Leo's mom.",
-        "ko": "영상 조회수는 12회. 그중 11회는 Leo의 엄마예요."
+        "en": "The video gets 12 views. Eleven are from Ava's mom.",
+        "ko": "영상 조회수는 12회. 그중 11회는 Ava의 엄마예요."
       },
       "myLinePrompt": {
         "en": "If you made a vlog, what would it be about?",
@@ -417,7 +417,7 @@
       "title": "노래방",
       "steps": [
         {
-          "speaker": "Chris",
+          "speaker": "Ava",
           "line": {
             "en": "You choose the first song!",
             "ko": "첫 곡은 네가 골라!"
@@ -441,7 +441,7 @@
           ]
         },
         {
-          "speaker": "Chris",
+          "speaker": "Ava",
           "line": {
             "en": "Are you going to dance too?",
             "ko": "춤도 출 거야?"
@@ -485,7 +485,7 @@
       "title": "플레이리스트 교환",
       "steps": [
         {
-          "speaker": "Mia",
+          "speaker": "Ava",
           "line": {
             "en": "Want to listen to my playlist?",
             "ko": "내 플레이리스트 들어볼래?"
@@ -509,7 +509,7 @@
           ]
         },
         {
-          "speaker": "Mia",
+          "speaker": "Ava",
           "line": {
             "en": "When do you listen to music the most?",
             "ko": "음악은 주로 언제 들어?"
@@ -534,12 +534,12 @@
         }
       ],
       "intro": {
-        "en": "On a long bus ride, your friend Mia offers you one of her earphones.",
-        "ko": "긴 버스 여행 중에 Mia가 당신에게 이어폰 한쪽을 건네요."
+        "en": "On a long bus ride, your friend Ava offers you one of her earphones.",
+        "ko": "긴 버스 여행 중에 Ava가 당신에게 이어폰 한쪽을 건네요."
       },
       "ending": {
-        "en": "Mia's playlist goes from jazz to heavy metal to a baby shark remix.",
-        "ko": "Mia의 플레이리스트는 재즈에서 헤비메탈, 그리고 상어가족 리믹스로 이어져요."
+        "en": "Ava's playlist goes from jazz to heavy metal to a baby shark remix.",
+        "ko": "Ava의 플레이리스트는 재즈에서 헤비메탈, 그리고 상어가족 리믹스로 이어져요."
       },
       "myLinePrompt": {
         "en": "Which song always makes you feel better?",
@@ -553,7 +553,7 @@
       "title": "주말 여행 계획",
       "steps": [
         {
-          "speaker": "Noah",
+          "speaker": "Ava",
           "line": {
             "en": "Where should we go this weekend?",
             "ko": "이번 주말에 어디 갈까?"
@@ -577,7 +577,7 @@
           ]
         },
         {
-          "speaker": "Noah",
+          "speaker": "Ava",
           "line": {
             "en": "How should we get there?",
             "ko": "어떻게 갈까?"
@@ -602,8 +602,8 @@
         }
       ],
       "intro": {
-        "en": "You and your friend Noah are planning a weekend trip in Korea.",
-        "ko": "당신과 Noah가 한국 안에서 주말 여행을 계획하고 있어요."
+        "en": "You and your friend Ava are planning a weekend trip in Korea.",
+        "ko": "당신과 Ava가 한국 안에서 주말 여행을 계획하고 있어요."
       },
       "ending": {
         "en": "The plan has three restaurants, two cafés, and zero tourist sights.",
@@ -689,7 +689,7 @@
       "title": "카페 주문",
       "steps": [
         {
-          "speaker": "Olivia",
+          "speaker": "Ava",
           "line": {
             "en": "What are you getting?",
             "ko": "뭐 마실 거야?"
@@ -713,7 +713,7 @@
           ]
         },
         {
-          "speaker": "Olivia",
+          "speaker": "Ava",
           "line": {
             "en": "Should we share a dessert?",
             "ko": "디저트 하나 나눠 먹을까?"
@@ -738,8 +738,8 @@
         }
       ],
       "intro": {
-        "en": "You and your friend Olivia walk into a cozy café in Seongsu.",
-        "ko": "당신과 Olivia가 성수동의 아늑한 카페에 들어가요."
+        "en": "You and your friend Ava walk into a cozy café in Seongsu.",
+        "ko": "당신과 Ava가 성수동의 아늑한 카페에 들어가요."
       },
       "ending": {
         "en": "You take thirty photos of the cake before the first bite.",
@@ -757,7 +757,7 @@
       "title": "처음 먹는 한식",
       "steps": [
         {
-          "speaker": "Ethan",
+          "speaker": "Ava",
           "line": {
             "en": "What should I order?",
             "ko": "뭐 시켜야 해?"
@@ -781,7 +781,7 @@
           ]
         },
         {
-          "speaker": "Ethan",
+          "speaker": "Ava",
           "line": {
             "en": "Wow, why are there so many side dishes?",
             "ko": "와, 반찬이 왜 이렇게 많아?"
@@ -806,12 +806,12 @@
         }
       ],
       "intro": {
-        "en": "Your friend Ethan is trying Korean food for the first time at a small restaurant.",
-        "ko": "Ethan이 작은 식당에서 처음으로 한식을 먹어 봐요."
+        "en": "Your friend Ava is trying Korean food for the first time at a small restaurant.",
+        "ko": "Ava가 작은 식당에서 처음으로 한식을 먹어 봐요."
       },
       "ending": {
-        "en": "Ethan drinks three glasses of water, then asks for more kimchi.",
-        "ko": "Ethan이 물을 세 잔 마시더니, 김치를 더 달라고 해요."
+        "en": "Ava drinks three glasses of water, then asks for more kimchi.",
+        "ko": "Ava가 물을 세 잔 마시더니, 김치를 더 달라고 해요."
       },
       "myLinePrompt": {
         "en": "What Korean food would you recommend to a first-timer?",
@@ -825,7 +825,7 @@
       "title": "한강 러닝",
       "steps": [
         {
-          "speaker": "Jake",
+          "speaker": "Ava",
           "line": {
             "en": "How far do you want to run?",
             "ko": "얼마나 달릴까?"
@@ -849,7 +849,7 @@
           ]
         },
         {
-          "speaker": "Jake",
+          "speaker": "Ava",
           "line": {
             "en": "What should we do after?",
             "ko": "끝나고 뭐 할까?"
@@ -874,8 +874,8 @@
         }
       ],
       "intro": {
-        "en": "Early in the morning, you meet your friend Jake by the Han River to go running.",
-        "ko": "이른 아침, 당신은 한강에서 Jake를 만나 함께 달려요."
+        "en": "Early in the morning, you meet your friend Ava by the Han River to go running.",
+        "ko": "이른 아침, 당신은 한강에서 Ava를 만나 함께 달려요."
       },
       "ending": {
         "en": "You burn 200 calories and eat 600 calories of ramyeon. Perfect balance.",
@@ -893,7 +893,7 @@
       "title": "등산 정상",
       "steps": [
         {
-          "speaker": "Grace",
+          "speaker": "Ava",
           "line": {
             "en": "I'm so tired. How much farther?",
             "ko": "너무 힘들어. 얼마나 남았어?"
@@ -917,7 +917,7 @@
           ]
         },
         {
-          "speaker": "Grace",
+          "speaker": "Ava",
           "line": {
             "en": "Wow, look at the view!",
             "ko": "와, 경치 좀 봐!"
@@ -942,8 +942,8 @@
         }
       ],
       "intro": {
-        "en": "You and your friend Grace are hiking Bukhansan on a clear autumn day.",
-        "ko": "맑은 가을날, 당신과 Grace가 북한산을 오르고 있어요."
+        "en": "You and your friend Ava are hiking Bukhansan on a clear autumn day.",
+        "ko": "맑은 가을날, 당신과 Ava가 북한산을 오르고 있어요."
       },
       "ending": {
         "en": "At the top, a 70-year-old hiker passes you both, not even sweating.",
@@ -961,7 +961,7 @@
       "title": "PC방 첫 방문",
       "steps": [
         {
-          "speaker": "Ryan",
+          "speaker": "Ava",
           "line": {
             "en": "What game do you want to play?",
             "ko": "무슨 게임 할래?"
@@ -985,7 +985,7 @@
           ]
         },
         {
-          "speaker": "Ryan",
+          "speaker": "Ava",
           "line": {
             "en": "Do you want to order food here?",
             "ko": "여기서 음식 시킬래?"
@@ -1010,8 +1010,8 @@
         }
       ],
       "intro": {
-        "en": "Your friend Ryan takes you to a PC bang for the first time.",
-        "ko": "Ryan이 당신을 처음으로 PC방에 데려가요."
+        "en": "Your friend Ava takes you to a PC bang for the first time.",
+        "ko": "Ava가 당신을 처음으로 PC방에 데려가요."
       },
       "ending": {
         "en": "You lose ten games in a row, but the ramyeon is a total win.",
@@ -1029,7 +1029,7 @@
       "title": "보드게임 카페",
       "steps": [
         {
-          "speaker": "Nina",
+          "speaker": "Ava",
           "line": {
             "en": "Which game should we try?",
             "ko": "무슨 게임 해볼까?"
@@ -1053,7 +1053,7 @@
           ]
         },
         {
-          "speaker": "Nina",
+          "speaker": "Ava",
           "line": {
             "en": "Oh no, I'm losing again!",
             "ko": "아 또 지고 있어!"
@@ -1082,8 +1082,8 @@
         "ko": "비 오는 토요일, 당신은 친구들과 보드게임 카페에 왔어요."
       },
       "ending": {
-        "en": "Nina asks for \"one more game\" seven times.",
-        "ko": "Nina가 \"한 판만 더\"를 일곱 번 외쳐요."
+        "en": "Ava asks for \"one more game\" seven times.",
+        "ko": "Ava가 \"한 판만 더\"를 일곱 번 외쳐요."
       },
       "myLinePrompt": {
         "en": "Are you a winner or a fun-maker in games?",
@@ -1097,7 +1097,7 @@
       "title": "쇼핑 고민",
       "steps": [
         {
-          "speaker": "Chloe",
+          "speaker": "Ava",
           "line": {
             "en": "Which one looks better on me?",
             "ko": "어느 게 나한테 더 잘 어울려?"
@@ -1115,13 +1115,13 @@
             },
             {
               "id": "c",
-              "en": "They look exactly the same, Chloe.",
-              "ko": "Chloe, 둘이 완전 똑같아."
+              "en": "They look exactly the same, Ava.",
+              "ko": "Ava, 둘이 완전 똑같아."
             }
           ]
         },
         {
-          "speaker": "Chloe",
+          "speaker": "Ava",
           "line": {
             "en": "What's your style?",
             "ko": "너는 어떤 스타일이야?"
@@ -1146,8 +1146,8 @@
         }
       ],
       "intro": {
-        "en": "You and your friend Chloe are shopping for clothes in Myeongdong.",
-        "ko": "당신과 Chloe가 명동에서 옷 쇼핑을 하고 있어요."
+        "en": "You and your friend Ava are shopping for clothes in Myeongdong.",
+        "ko": "당신과 Ava가 명동에서 옷 쇼핑을 하고 있어요."
       },
       "ending": {
         "en": "You came for one T-shirt and leave with four bags.",
@@ -1165,7 +1165,7 @@
       "title": "화장품 매장",
       "steps": [
         {
-          "speaker": "Isabel",
+          "speaker": "Ava",
           "line": {
             "en": "There are too many products. Help!",
             "ko": "제품이 너무 많아. 도와줘!"
@@ -1189,7 +1189,7 @@
           ]
         },
         {
-          "speaker": "Isabel",
+          "speaker": "Ava",
           "line": {
             "en": "Do you have a favorite product?",
             "ko": "좋아하는 제품 있어?"
@@ -1214,12 +1214,12 @@
         }
       ],
       "intro": {
-        "en": "Your friend Isabel needs help choosing skincare at a beauty store.",
-        "ko": "Isabel이 뷰티 매장에서 스킨케어 고르는 걸 도와달래요."
+        "en": "Your friend Ava needs help choosing skincare at a beauty store.",
+        "ko": "Ava가 뷰티 매장에서 스킨케어 고르는 걸 도와달래요."
       },
       "ending": {
-        "en": "Isabel finds her new favorite — and somehow, you buy more than she does.",
-        "ko": "Isabel은 새 최애템을 찾았고, 어쩐 일인지 당신이 더 많이 샀어요."
+        "en": "Ava finds her new favorite — and somehow, you buy more than she does.",
+        "ko": "Ava는 새 최애템을 찾았고, 어쩐 일인지 당신이 더 많이 샀어요."
       },
       "myLinePrompt": {
         "en": "What's one thing you can't live without in your bag?",
@@ -1233,7 +1233,7 @@
       "title": "강아지 산책",
       "steps": [
         {
-          "speaker": "Tom",
+          "speaker": "Ava",
           "line": {
             "en": "Bori loves to run. Are you ready?",
             "ko": "Bori는 뛰는 걸 좋아해. 준비됐어?"
@@ -1257,7 +1257,7 @@
           ]
         },
         {
-          "speaker": "Tom",
+          "speaker": "Ava",
           "line": {
             "en": "Look, Bori made a new friend!",
             "ko": "봐, Bori가 새 친구를 사귀었어!"
@@ -1282,8 +1282,8 @@
         }
       ],
       "intro": {
-        "en": "Your friend Tom asks you to walk his dog, Bori, in the park.",
-        "ko": "Tom이 당신에게 강아지 Bori 산책을 부탁해요."
+        "en": "Your friend Ava asks you to walk her dog, Bori, in the park.",
+        "ko": "Ava가 당신에게 강아지 Bori 산책을 부탁해요."
       },
       "ending": {
         "en": "Bori comes home happy. You come home with mud on your shoes.",
@@ -1301,7 +1301,7 @@
       "title": "고양이 카페",
       "steps": [
         {
-          "speaker": "Lily",
+          "speaker": "Ava",
           "line": {
             "en": "That cat won't come to me!",
             "ko": "저 고양이가 나한테 안 와!"
@@ -1325,7 +1325,7 @@
           ]
         },
         {
-          "speaker": "Lily",
+          "speaker": "Ava",
           "line": {
             "en": "Are you a cat person or a dog person?",
             "ko": "너는 고양이파야, 강아지파야?"
@@ -1350,12 +1350,12 @@
         }
       ],
       "intro": {
-        "en": "You and your friend Lily visit a cat café on a lazy afternoon.",
-        "ko": "나른한 오후, 당신과 Lily가 고양이 카페에 가요."
+        "en": "You and your friend Ava visit a cat café on a lazy afternoon.",
+        "ko": "나른한 오후, 당신과 Ava가 고양이 카페에 가요."
       },
       "ending": {
-        "en": "The cat ignores Lily for an hour, then falls asleep on your lap.",
-        "ko": "고양이는 한 시간 내내 Lily를 무시하더니, 당신 무릎에서 잠들어요."
+        "en": "The cat ignores Ava for an hour, then falls asleep on your lap.",
+        "ko": "고양이는 한 시간 내내 Ava를 무시하더니, 당신 무릎에서 잠들어요."
       },
       "myLinePrompt": {
         "en": "What animal is most like you?",
@@ -1369,7 +1369,7 @@
       "title": "웹툰 추천",
       "steps": [
         {
-          "speaker": "Max",
+          "speaker": "Ava",
           "line": {
             "en": "You have to read this webtoon!",
             "ko": "이 웹툰 꼭 봐야 해!"
@@ -1393,7 +1393,7 @@
           ]
         },
         {
-          "speaker": "Max",
+          "speaker": "Ava",
           "line": {
             "en": "Do you read webtoons or books more?",
             "ko": "웹툰이랑 책 중에 뭘 더 많이 봐?"
@@ -1418,8 +1418,8 @@
         }
       ],
       "intro": {
-        "en": "On the subway, your friend Max is reading a webtoon and laughing out loud.",
-        "ko": "지하철에서 Max가 웹툰을 보며 소리 내어 웃고 있어요."
+        "en": "On the subway, your friend Ava is reading a webtoon and laughing out loud.",
+        "ko": "지하철에서 Ava가 웹툰을 보며 소리 내어 웃고 있어요."
       },
       "ending": {
         "en": "The story is so good that you both miss your stop. Twice.",
@@ -1437,7 +1437,7 @@
       "title": "북카페",
       "steps": [
         {
-          "speaker": "Zoe",
+          "speaker": "Ava",
           "line": {
             "en": "What are you reading?",
             "ko": "뭐 읽고 있어?"
@@ -1461,7 +1461,7 @@
           ]
         },
         {
-          "speaker": "Zoe",
+          "speaker": "Ava",
           "line": {
             "en": "Should we start a little book club?",
             "ko": "우리 작은 북클럽 해볼까?"
@@ -1486,8 +1486,8 @@
         }
       ],
       "intro": {
-        "en": "You and your friend Zoe spend a quiet afternoon at a book café.",
-        "ko": "당신과 Zoe가 북카페에서 조용한 오후를 보내요."
+        "en": "You and your friend Ava spend a quiet afternoon at a book café.",
+        "ko": "당신과 Ava가 북카페에서 조용한 오후를 보내요."
       },
       "ending": {
         "en": "Your book club's first rule: snacks are more important than books.",
@@ -1505,7 +1505,7 @@
       "title": "점심 메뉴",
       "steps": [
         {
-          "speaker": "Ben",
+          "speaker": "Ava",
           "line": {
             "en": "What do you feel like eating?",
             "ko": "뭐 먹고 싶어?"
@@ -1529,7 +1529,7 @@
           ]
         },
         {
-          "speaker": "Ben",
+          "speaker": "Ava",
           "line": {
             "en": "How's your week going?",
             "ko": "이번 주 어때?"
@@ -1554,8 +1554,8 @@
         }
       ],
       "intro": {
-        "en": "It's lunchtime, and your coworker Ben asks you to eat together.",
-        "ko": "점심시간, 동료 Ben이 같이 밥 먹자고 해요."
+        "en": "It's lunchtime, and your coworker Ava asks you to eat together.",
+        "ko": "점심시간, 동료 Ava가 같이 밥 먹자고 해요."
       },
       "ending": {
         "en": "You spend 10 minutes eating and 50 minutes deciding where to eat.",
@@ -1573,7 +1573,7 @@
       "title": "시험 끝",
       "steps": [
         {
-          "speaker": "Julia",
+          "speaker": "Ava",
           "line": {
             "en": "It's finally over! How did it go?",
             "ko": "드디어 끝났다! 어땠어?"
@@ -1597,7 +1597,7 @@
           ]
         },
         {
-          "speaker": "Julia",
+          "speaker": "Ava",
           "line": {
             "en": "Let's celebrate. What should we do?",
             "ko": "축하하자. 뭐 할까?"
@@ -1622,8 +1622,8 @@
         }
       ],
       "intro": {
-        "en": "You and your classmate Julia just finished a big exam.",
-        "ko": "당신과 반 친구 Julia가 큰 시험을 막 끝냈어요."
+        "en": "You and your classmate Ava just finished a big exam.",
+        "ko": "당신과 반 친구 Ava가 큰 시험을 막 끝냈어요."
       },
       "ending": {
         "en": "You promise to study earlier next time. You both know that's a lie.",
