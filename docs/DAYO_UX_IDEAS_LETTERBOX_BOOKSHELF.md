@@ -32,6 +32,7 @@
 | 내 대화 탭 화면 | **미구현** | — |
 | 책장 = 나라별 이야기책 (책등 · 장) | **미구현** (지금 데이터는 관심사별 장면) — 주인님 확인 필요 | — |
 | 나를 소개해요 (학습자) + 파트너 Prepare 화면 | **미구현** | — |
+| 파트너 입장 전 체크리스트 "Before you enter" (4개, 안전 문구 포함) | **배포 전** (2026-10-20 Owner 승인 문구) | `public/partner-pre-session.js` (이 줄을 추가한 커밋). 9절 참고 |
 
 > 위 표는 2026-10-17 밤에 다시 확인했다. 확인 방법: 최신 main(`6873a0f`)의 코드, 각 커밋이 main에 포함되어 있는지(`git merge-base`), 운영 www.dayotalk.com에서 파일 응답(모두 200)과 마이페이지 · 룸이 실제로 불러오는 스크립트. 로그인한 고객 화면을 직접 눌러 본 확인은 아니다. 작업 전 반드시 최신 main과 운영 화면을 다시 확인한다.
 
@@ -215,6 +216,16 @@
 - 개인정보다. 해당 예약의 파트너에게만 보여야 하고(RLS), 학습자가 수정·삭제할 수 있어야 한다.
 - 새 테이블이나 컬럼이 필요하면 마이그레이션 파일만 만들고, 적용은 Owner 확인 후 한다.
 - 첫 질문 자동 생성에 유료 AI를 쓰려면 비용을 Owner에게 먼저 확인한다.
+
+**지금 있는 파트너 입장 전 체크리스트 (2026-10-20 Owner 결정)**
+- 파트너가 룸에 들어가기 전에 "Before you enter" 창이 뜨고, 4개를 모두 체크해야 [Enter conversation]이 켜진다. 코드: `public/partner-pre-session.js`.
+- 문구 (영어 그대로 노출):
+  1. I'll let the user finish speaking before I help.
+  2. This is a conversation, not a lesson. I'll correct gently and naturally.
+  3. For safety, I won't share or ask for personal details (address, phone number, social media), and I'll keep our contact on DayO only.
+  4. I'll keep what the user shares confidential.
+- 바뀐 점: "Talk Cards를 쓰겠다"는 사용 팁이라 뺐고, "직접 레터를 쓰겠다"는 AI 레터 초안이 생겨서 뺐다. 안전 문구(내 개인정보를 말하지도, 상대에게 묻지도 않기 · 연락은 DayO 안에서만)를 새로 넣었다.
+- 나중에 Prepare 화면을 만들 때 이 체크리스트와 합칠지는 그때 정한다.
 
 ---
 

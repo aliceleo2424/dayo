@@ -2,11 +2,10 @@
   'use strict';
 
   var reminders = [
-    'I will let the user finish speaking before I help.',
-    'I will correct naturally without turning the conversation into a lesson.',
-    'I will use Talk Cards when the conversation slows down.',
-    'I will keep everything the user shares confidential.',
-    'I will write a personal Partner Letter based on today’s actual conversation.'
+    'I\'ll let the user finish speaking before I help.',
+    'This is a conversation, not a lesson. I\'ll correct gently and naturally.',
+    'For safety, I won\'t share or ask for personal details (address, phone number, social media), and I\'ll keep our contact on DayO only.',
+    'I\'ll keep what the user shares confidential.'
   ];
 
   window.DayOPartnerPreSession = {

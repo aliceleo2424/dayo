@@ -82,17 +82,17 @@ async function main() {
     }
     async function pending() {
       await page.locator('dialog[open]').waitFor();
-      assert.equal(await page.locator('input[type=checkbox]').count(),5);
+      assert.equal(await page.locator('input[type=checkbox]').count(),4);
       assert.equal(await page.locator('[data-enter]').isDisabled(),true);
       assert.deepEqual(await page.evaluate(()=>[DayORoomAccess.allowed,qa.ready,qa.events.length,qa.rpc.filter(x=>x.name==='log_session_event').length]),[false,0,0,0]);
     }
     async function complete(failTracking=false) {
       const url=page.url();
-      for(let i=0;i<5;i++)await page.locator('input[type=checkbox]').nth(i).check();
+      for(let i=0;i<4;i++)await page.locator('input[type=checkbox]').nth(i).check();
       assert.equal(await page.locator('[data-enter]').isEnabled(),true);
-      await page.locator('input[type=checkbox]').nth(4).uncheck();
+      await page.locator('input[type=checkbox]').nth(3).uncheck();
       assert.equal(await page.locator('[data-enter]').isDisabled(),true);
-      await page.locator('input[type=checkbox]').nth(4).check();
+      await page.locator('input[type=checkbox]').nth(3).check();
       if(failTracking)await page.evaluate(()=>{const emit=document.dispatchEvent.bind(document);document.dispatchEvent=event=>{if(event.type==='partner_pre_session_checklist_completed')throw Error('fixture analytics failure');return emit(event);};});
       await page.locator('[data-enter]').click();
       await page.waitForFunction(()=>qa.ready===1);
