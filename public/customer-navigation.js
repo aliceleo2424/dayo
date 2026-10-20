@@ -68,6 +68,18 @@
       });
       // The letters view (letterbox.js) replaces My Page content; no archive scroll.
     }
+    // Loads letterbox.css + letterbox-sample.js on demand; falls back to the login modal if either fails.
+    function openLetterSample(openLogin) {
+      var show = function () { window.DayOLetterboxSample.open({ login: openLogin }); };
+      if (window.DayOLetterboxSample) { show(); return; }
+      if (!document.querySelector('link[href^="letterbox.css"], link[href^="/letterbox.css"]')) {
+        var css = document.createElement('link'); css.rel = 'stylesheet'; css.href = '/letterbox.css?v=20261020-sample'; document.head.appendChild(css);
+      }
+      var s = document.createElement('script'); s.src = '/letterbox-sample.js?v=20261020';
+      s.onload = function () { if (window.DayOLetterboxSample) show(); else openLogin(); };
+      s.onerror = openLogin;
+      document.head.appendChild(s);
+    }
     // Delegate view routing before the old hash-scroll handler. Existing drawer API owns locking.
     document.addEventListener('click', function (event) {
       var a = event.target.closest('a[data-customer-route]');
@@ -81,7 +93,9 @@
         event.preventDefault();
         event.stopImmediatePropagation();
         if (window.DayOMobileNav) window.DayOMobileNav.close();
-        openLogin();
+        // Logged-out 편지함 shows one sample letter first (Owner 2026-10-20); its login button keeps the same flow.
+        if (a.dataset.customerRoute === 'letters') openLetterSample(openLogin);
+        else openLogin();
         return;
       }
       if (page === 'landing' && url.origin === location.origin && ['/', '/index.html', '/index'].indexOf(url.pathname) !== -1 && !url.search && window.DayOLandingViews) {
