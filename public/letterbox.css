@@ -61,3 +61,13 @@ body[data-mypage-view="letters"] .mypage-container > :not(#dayo-letterbox) { dis
 .lb-record { border: none; background: #e8eee1; color: var(--lb-sage-dark); }
 .lb-close { border: 1px solid #ddd3c1; background: #fff; color: #544b40; }
 .lb-actions button:focus-visible { outline: 3px solid var(--lb-sage); outline-offset: 2px; }
+
+/* 예시 편지 (logged-out 편지함, letterbox-sample.js). Reuses the sheet + envelope styles above. */
+.lb-sample-card { color: var(--lb-ink, #3f3627); --lb-ink: #3f3627; --lb-soft: #6b6052; --lb-sage: #5f7d63; --lb-sage-dark: #2f4a33; }
+.lb-sample-card .lb-head { margin-bottom: 4px; }
+.lb-grid--sample { grid-template-columns: minmax(0, 220px); justify-content: center; }
+.lb-sample-tag { background: #8a5a2b; color: #fffcf6; }
+.lb-sample-badge { align-self: flex-start; padding: 3px 10px; border-radius: 999px; background: #f3e3cf; color: #7a4d22; font-size: 12px; font-weight: 800; }
+.lb-sample-note { margin: 0; font-size: 13px; line-height: 1.6; color: var(--lb-soft); }
+.lb-actions a { flex: 1; display: inline-flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 13px; font: 700 14px/1.3 inherit; font-family: inherit; text-decoration: none; text-align: center; }
+.lb-actions a:focus-visible { outline: 3px solid var(--lb-sage); outline-offset: 2px; }
