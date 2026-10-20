@@ -543,7 +543,7 @@
     return '/mypage.html';
   }
 
-  function buttonFor(role) {
+  function buttonFor(role, forceAccount) {
     var name = getUserName();
     var loggedIn = checkUserLoggedIn();
 
@@ -556,7 +556,8 @@
       };
     }
 
-    if (isLandingPage()) {
+    // forceAccount: a slot placed in the desktop header shows the account menu, not the landing My Page link.
+    if (isLandingPage() && !forceAccount) {
       return {
         href: '/mypage.html',
         icon: '👤',
@@ -650,10 +651,11 @@
     }
 
     var html = markup(buttonFor(role));
+    var accountHtml = checkUserLoggedIn() ? markup(buttonFor(role, true)) : html;
     var slots = document.querySelectorAll('[data-mode-switch]');
     Array.prototype.forEach.call(slots, function (slot) {
       slot.classList.toggle('ms-slot-guest', !checkUserLoggedIn());
-      slot.innerHTML = html;
+      slot.innerHTML = slot.closest('.nav-drawer') ? html : accountHtml;
     });
     applyI18n();
     if (window.DayOTicketWallet && typeof window.DayOTicketWallet.syncUI === 'function') {
