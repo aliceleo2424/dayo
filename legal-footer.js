@@ -16,7 +16,7 @@
     style.textContent = [
       '.dayo-legal-footer{background:#FAF8F5;border-top:1px solid #EDE4D5;padding:36px 20px;color:#78716C;font-size:12px;line-height:1.7;text-align:center;}',
       '.dayo-legal-footer a{color:#57534E;font-weight:700;text-decoration:none;}',
-      '.dayo-legal-footer a:hover{text-decoration:underline;color:#E85B48;}',
+      '.dayo-legal-footer a:hover{text-decoration:underline;color:var(--coral-dark,#4B6650);}',
       '.dayo-legal-footer__links{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 10px;margin:0 0 16px;font-size:12px;}',
       '.dayo-legal-footer__sep{color:#D6D3D1;user-select:none;}',
       '.dayo-legal-footer__biz{max-width:920px;margin:0 auto 14px;display:grid;gap:4px;}',

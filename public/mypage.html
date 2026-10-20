@@ -68,9 +68,9 @@
       --partner-butter: #FFEAA7;
       --partner-butter-deep: #966914;
       --partner-butter-soft: #FFF9E8;
-      --coral: #FF6B57;
-      --coral-dark: #E85B48;
-      --coral-pale: #FFE9E4;
+      --coral: #5F7D63;
+      --coral-dark: #4B6650;
+      --coral-pale: #E9F0E7;
       --text: #594842;
       --muted: #927E77;
       --line: rgba(146, 126, 119, 0.14);
@@ -343,7 +343,7 @@
     .edit-profile-modal {
       width: min(400px, 100%);
       background: #FFFCFA;
-      border: 1px solid #FFE8E3;
+      border: 1px solid #E9F0E7;
       border-radius: 22px;
       padding: 24px 22px 20px;
       box-shadow: 0 20px 48px rgba(113, 83, 72, 0.18);
@@ -360,7 +360,7 @@
       font-size: 15px;
       margin-bottom: 10px;
     }
-    .edit-profile-error { min-height: 18px; margin: 0 0 12px; font-size: 12px; color: #E55A45; }
+    .edit-profile-error { min-height: 18px; margin: 0 0 12px; font-size: 12px; color: #A8472F; }
     .edit-profile-actions { display: flex; gap: 8px; justify-content: flex-end; }
     .edit-profile-actions button {
       border: none;
@@ -406,11 +406,11 @@
       width: 100%;
       padding: 12px 14px;
       border-radius: 14px;
-      background: #FF6B57;
+      background: #5F7D63;
       color: #fff;
       font-weight: 800;
       text-decoration: none;
-      box-shadow: 0 3px 0 #E55A45;
+      box-shadow: 0 3px 0 #4B6650;
     }
     .partner-apply-close {
       width: 100%;
@@ -1029,7 +1029,7 @@
       -webkit-tap-highlight-color: transparent;
     }
     .dayo-fortune-cookie:focus-visible {
-      outline: 3px solid rgba(255, 107, 87, 0.55);
+      outline: 3px solid rgba(95, 125, 99, 0.55);
       outline-offset: 4px;
       border-radius: 16px;
     }
@@ -1142,7 +1142,7 @@
       padding: 0.85rem 0.95rem;
       border-radius: 16px;
       background: #FFF8F5;
-      border: 1px solid #FFE8E3;
+      border: 1px solid #E9F0E7;
       text-align: left;
     }
     .dayo-fortune-modal-label {
@@ -1150,7 +1150,7 @@
       font-size: 0.72rem;
       font-weight: 800;
       letter-spacing: 0.04em;
-      color: #FF6B57;
+      color: #5F7D63;
       margin-bottom: 0.35rem;
     }
     .dayo-fortune-modal-original {
@@ -1174,7 +1174,7 @@
       padding: 0.95rem 1rem;
       border-radius: 16px;
       background: linear-gradient(135deg, rgba(255, 209, 220, 0.7), rgba(255, 244, 214, 0.9));
-      border: 1px dashed rgba(255, 107, 87, 0.4);
+      border: 1px dashed rgba(95, 125, 99, 0.4);
       text-align: center;
       color: #5C4A42;
     }
@@ -1196,8 +1196,8 @@
       font-size: 0.86rem;
       font-weight: 800;
       color: #fff;
-      background: linear-gradient(135deg, #FF7A68, #FF6B57 55%, #FF8A4C);
-      box-shadow: 0 3px 0 #E55A45;
+      background: linear-gradient(135deg, #FF7A68, #5F7D63 55%, #FF8A4C);
+      box-shadow: 0 3px 0 #4B6650;
     }
     .dayo-fortune-modal-actions {
       display: flex;
@@ -1214,15 +1214,15 @@
       cursor: pointer;
     }
     .dayo-fortune-btn-close {
-      border: 1px solid #FFE8E3;
+      border: 1px solid #E9F0E7;
       background: #FFF8F5;
       color: #9A8580;
     }
     .dayo-fortune-btn-copy {
       border: none;
-      background: #FF6B57;
+      background: #5F7D63;
       color: #fff;
-      box-shadow: 0 3px 0 #E55A45;
+      box-shadow: 0 3px 0 #4B6650;
     }
 
     .dayo-tea-table {
@@ -1392,7 +1392,7 @@
     .library-item:hover {
       transform: translateY(-1px);
       border-color: var(--coral);
-      box-shadow: 0 10px 22px rgba(255, 107, 87, 0.12);
+      box-shadow: 0 10px 22px rgba(95, 125, 99, 0.12);
     }
 
     .library-icon {
@@ -1417,10 +1417,10 @@
       display: grid;
       gap: 0.35rem;
       padding: 1.15rem 1.2rem 1.2rem;
-      border: 1px solid rgba(255, 107, 87, 0.22);
+      border: 1px solid rgba(95, 125, 99, 0.22);
       border-radius: 22px;
-      background: linear-gradient(145deg, #FFF6F2, #FFE9E4 55%, #FFF9F0);
-      box-shadow: 0 10px 24px rgba(255, 107, 87, 0.08);
+      background: linear-gradient(145deg, #FFF6F2, #E9F0E7 55%, #FFF9F0);
+      box-shadow: 0 10px 24px rgba(95, 125, 99, 0.08);
     }
     .coupon-item__eyebrow {
       color: var(--coral);
@@ -1664,7 +1664,7 @@
   <style>/* PRICE-02: unconfirmed trial sales only; other coupons remain visible. */
     [data-coupon-wallet]:not([data-trial-eligible="true"]) [data-coupon-code="WELCOME_9900"], [data-coupon-wallet]:not([data-trial-eligible="true"]) [data-coupon-code="WELCOME9900"] { display: none !important; }
   </style>
-<link rel="stylesheet" href="/customer-navigation.css?v=20261014-letterbox">
+<link rel="stylesheet" href="/customer-navigation.css?v=20261020-account">
 </head>
 <body data-customer-page="mypage" data-dayo-role="member">
   <script>
@@ -1967,7 +1967,7 @@
   <script src="mobile-nav.js"></script>
   <script src="auth.js?v=20260916-auth-strict"></script>
   <script src="terms-mini-modal.js"></script>
-  <script src="mode-switch.js?v=20260916-gnb-minimal"></script>
+  <script src="mode-switch.js?v=20261020-account"></script>
   <script src="ticket-wallet.js"></script>
   <script src="ticket-payment.js?v=20260921-admin-test-1000"></script>
   <script src="tickets-modal.js?v=20260921-admin-test-1000"></script>
@@ -1992,7 +1992,7 @@
   <script>
     if (typeof window.loadUserReports === 'function') window.loadUserReports();
   </script>
-<script src="/customer-navigation.js?v=20261014-letterbox"></script>
+<script src="/customer-navigation.js?v=20261020-account"></script>
 <script src="saved-sentences.js?v=20261014"></script>
 <script src="letterbox.js?v=20261016"></script>
 <script src="ticket-stamps.js?v=20261016-hearts"></script>
