@@ -1069,9 +1069,9 @@ export async function fetchSessionTranscriptBundle(
 }
 
 export async function updateProfileRole(
-  row: { id: string; user_id?: string | null },
+  row: { id: string; user_id?: string | null; email?: string | null; nickname?: string | null },
   nextRole: "partner" | "user"
-) {
+): Promise<{ welcomeSent: boolean }> {
   const uid = row.user_id || row.id;
   const result = await supabase.rpc("admin_set_user_role", {
     p_user_id: uid,
@@ -1079,4 +1079,17 @@ export async function updateProfileRole(
   });
   if (result.error) throw new Error(result.error.message);
   if (!result.data) throw new Error("프로필 권한을 변경하지 못했습니다.");
+  // Granting partner access also sends the partner welcome email (profile setup + availability steps).
+  // A mail failure never undoes the role change.
+  if (nextRole !== "partner" || !row.email) return { welcomeSent: false };
+  try {
+    const response = await fetch("/api/send-welcome", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: row.email, nickname: row.nickname || "", recipientRole: "partner" }),
+    });
+    return { welcomeSent: response.ok };
+  } catch {
+    return { welcomeSent: false };
+  }
 }

@@ -240,10 +240,10 @@ export default function DashboardPage() {
     setBusyId(row.id);
     setMembers((prev) => prev.map((item) => (item.id === row.id ? { ...item, role: nextRole } : item)));
     try {
-      await updateProfileRole(row, nextRole);
+      const roleResult = await updateProfileRole(row, nextRole);
       setNotice(
         nextRole === "partner"
-          ? "성공적으로 파트너 권한이 부여되었습니다."
+          ? (roleResult.welcomeSent ? "성공적으로 파트너 권한이 부여되었습니다. 파트너 환영 메일(프로필 설정 안내 포함)을 보냈습니다." : "성공적으로 파트너 권한이 부여되었습니다. 환영 메일은 보내지 못했습니다 — 회원 상세에서 웰컴 이메일을 다시 보내 주세요.")
           : "일반 유저로 변경되었습니다."
       );
     } catch (err) {

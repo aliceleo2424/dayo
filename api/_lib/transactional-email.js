@@ -87,7 +87,9 @@ function buildPartnerApprovalMessage({name, email, signupLink}, from) {
   const title = "You passed the DayO Partner Test 🎉";
   const intro = 'Hi ' + (name || 'there') + '!';
   const weekly = ['Partner Lounge → Sessions → Availability', 'Open the "Weekly Template" tab', 'Pick a day and tap the times you can talk', 'Press "Save weekly availability" — these times repeat every week'];
-  const steps = ['Sign up on DayO with the same email you used in your application (' + email + '). Your partner access will be activated automatically.', 'Open your first available times so learners can book you: ' + lounge];
+  const steps = ['Sign up on DayO with the same email you used in your application (' + email + '). Your partner access will be activated automatically.',
+    'Complete your Partner Profile in Partner Lounge: add a profile photo, your languages and weekly capacity. Tap "Complete Profile" on the banner — it takes about 2 minutes.',
+    'Open your first available times so learners can book you: ' + lounge];
   const note = 'Need a change on one specific day? Use "Monthly Calendar" to close that date or set custom times. Your weekly times stay as they are. Times are in Korea time (KST), in 30-minute slots.';
   const html = renderPartnerCard({language: 'en', title, intro,
     lead: "We're happy to let you know that you've passed the DayO Partner Test. The next step is a short onboarding and account setup.",
@@ -95,7 +97,7 @@ function buildPartnerApprovalMessage({name, email, signupLink}, from) {
     sections: [{eyebrow: 'Next steps', items: steps, numbered: true}, {eyebrow: 'How to set times that repeat every week', items: weekly, numbered: true}],
     ctaLead: 'Start with step 1:', link: signupLink, cta: 'Sign up on DayO', note, closing: 'Welcome to DayO!'});
   const text = [intro, '', "We're happy to let you know that you've passed the DayO Partner Test.", '', 'Your session rate is:', '₩6,000 per completed 30-minute session.', '',
-    'The next step is a short onboarding and account setup.', '', steps[0], '', signupLink, '', 'Once your account is ready, please open your first available times so learners can book you:', lounge, '',
+    'The next step is a short onboarding and account setup.', '', steps[0], '', signupLink, '', steps[1], '', 'Once your account is ready, please open your first available times so learners can book you:', lounge, '',
     'How to set times that repeat every week:', ...weekly.map((w, i) => (i + 1) + '. ' + w), '', note, '', 'Welcome to DayO!', '', 'Contact: ' + REPLY_TO].join('\n');
   return {from: sender(from), reply_to: REPLY_TO, subject: '[DayO] ' + title, html, text};
 }
@@ -107,14 +109,16 @@ function buildWelcomeMessage(nickname, role, language, from) {
   const intro = en ? 'Hello, ' + name + '!' : '안녕하세요, ' + name + '님!';
   const lines = partner ? (en ? [
     'Share interests and everyday stories through relaxed 1:1 global conversations.',
-    'Your first step: open your available times. Users can only book the times you open.',
+    'First, complete your Partner Profile in Partner Lounge: add a profile photo, your languages and weekly capacity. Tap "Complete Profile" on the banner — it takes about 2 minutes.',
+    'Next, open your available times. Users can only book the times you open.',
     'Set times that repeat every week: Partner Lounge → Sessions → Availability → "Weekly Template". Pick a day, tap the times you can talk, then press "Save weekly availability". These times repeat every week.',
     'Need a change on one specific day? Use "Monthly Calendar" to close that date or set custom times. Your weekly times stay as they are.',
     'Times are in Korea time (KST), in 30-minute slots.',
     'Check your profile and Partner Guide in Partner Lounge.'
   ] : [
     '취향과 일상을 나누는 편안한 1:1 글로벌 대화에 함께해 주세요.',
-    '첫 단계는 대화 가능 시간 열기예요. 고객은 파트너가 열어 둔 시간에만 예약할 수 있어요.',
+    '먼저 Partner Lounge에서 파트너 프로필을 완성해 주세요. 배너의 "Complete Profile"을 눌러 프로필 사진, 대화 언어, 주간 가능 시간을 입력하면 돼요(약 2분).',
+    '다음은 대화 가능 시간 열기예요. 고객은 파트너가 열어 둔 시간에만 예약할 수 있어요.',
     '매주 반복되는 시간 설정: Partner Lounge → 세션 → Availability → "Weekly Template"에서 요일을 고르고 가능한 시간을 누른 뒤 "반복 가능시간 저장"을 눌러 주세요. 저장한 시간은 매주 반복돼요.',
     '특정 날짜만 바꾸고 싶다면 "Monthly Calendar"에서 그날을 닫거나 시간을 따로 정할 수 있어요. 매주 반복 시간은 그대로 유지돼요.',
     '시간은 한국 시간(KST) 기준이며 30분 단위로 열려요.',
