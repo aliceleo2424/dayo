@@ -35,3 +35,19 @@
 
 /* Exact-image Partner decisions only; Letter actions remain independent. */
 .pr-keepsake-review .pr-preview{display:block}.pr-keepsake-review .pr-preview img{width:100%;max-width:420px;margin:auto}.pr-keepsake-review .pr-letter-tools{margin-top:10px}.pr-keepsake-review .pr-letter-tools button{flex:1 1 130px;min-width:0;min-height:44px;white-space:normal;overflow-wrap:break-word}
+/* AI Letter draft for Partner review (owner decision 2026-10-20). */
+.pr-draft{margin:0 0 12px;padding:12px;border:1px solid #ded1c1;border-radius:12px;background:#fffbf4}.pr-draft .pr-hint{margin:0 0 8px}
+.pr-draft-check{margin:0 0 10px}.pr-draft-warning{margin:0 0 8px;padding:8px 10px;border-radius:10px;background:#fdf1dc;color:#7a4b12;font-weight:700;font-size:.88rem;line-height:1.45}
+.pr-draft-evidence summary{cursor:pointer;font-size:.84rem;color:#466A8A;min-height:32px}.pr-draft-evidence ul{margin:6px 0 0;padding-left:18px;font-size:.84rem;line-height:1.5;color:#55635A}.pr-draft-evidence li{margin-bottom:6px;overflow-wrap:anywhere}.pr-draft-evidence li span{display:block;color:#796b61}
+.pr-draft-confirm{display:flex;gap:8px;align-items:flex-start;margin-top:8px;font-size:.88rem;line-height:1.45;color:#3E4A42;cursor:pointer}.pr-draft-confirm input{width:20px;height:20px;flex:0 0 auto;margin-top:1px;accent-color:#5f7d63}
+/* One picture area (owner decision 2026-10-20): picture first, then "draw again with other words" or "send with the DayO picture". */
+#partner-report-popup .pr-optional .pr-keyword-layout{display:block}
+#partner-report-popup .pr-optional .pr-preview{display:block;border:0;background:none;padding:0;margin-top:6px;min-height:0}
+#partner-report-popup .pr-optional .pr-preview figcaption{font-size:.84rem;color:#796b61;text-align:left}
+#partner-report-popup #pr-image-retry{display:none!important}
+#partner-report-popup .pr-optional .pr-keepsake-review{border:0;padding:0;margin:4px 0 8px}
+#partner-report-popup .pr-optional .pr-keepsake-review h3,#partner-report-popup .pr-keepsake-review [data-keepsake-action]{display:none!important}
+#partner-report-popup.pr-image-skipped .pr-keepsake-review{display:none!important}
+#partner-report-popup .pr-image-choices{margin-top:8px}
+#partner-report-popup #pr-image-words{margin-bottom:4px}
+#partner-report-popup .pr-optional .pr-keepsake-review>.pr-hint{display:none}

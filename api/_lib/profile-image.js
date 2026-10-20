@@ -26,6 +26,7 @@ function originAllowed(req) {
   if (!origin) return true;
   const allowed = ['https://www.dayotalk.com', 'https://dayotalk.com', 'https://dayo-sufk.vercel.app'];
   if (process.env.VERCEL_URL) allowed.push('https://' + process.env.VERCEL_URL);
+  if (process.env.VERCEL_BRANCH_URL) allowed.push('https://' + process.env.VERCEL_BRANCH_URL);
   return allowed.includes(origin);
 }
 async function body(req) {

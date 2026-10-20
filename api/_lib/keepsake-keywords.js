@@ -7,7 +7,10 @@ const recap=require('../../public/conversation-recap.js');
 const MODEL='@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 const MAX_RETURNED=8; // Partner sees a few at a time and can rotate to the rest.
 const MAX_PICK=2;     // One illustration combines at most two keywords.
-const MAX_INPUT=6000;
+// Owner report 2026-10-20: mochi/tanghulu came late in a 25-minute session (~7,000 chars of User speech) and the
+// picture fell back to a generic "Food" theme. Read the whole session and leave room for the full answer.
+const MAX_INPUT=12000;
+const MAX_TOKENS=1400;
 const CONTACT=/[\w.+-]+@[\w-]+\.[\w.]+|https?:\/\/\S+|www\.\S+|@[A-Za-z0-9_.]{2,}|\+?\d[\d\s().-]{6,}\d/g;
 // Visual phrases must stay drawable objects/places: no people, writing or unsafe subjects.
 const BLOCKED=/\b(?:person|people|man|men|woman|women|girl|boy|child|children|kid|baby|face|portrait|selfie|student|teacher|friend|family|couple|human|body|nude|naked|sex\w*|blood|gun|weapon|knife|drug|cigarette|text|word|letter|writing|sign|logo|brand|label|poster|book\s+cover|screen|number)s?\b/i;
@@ -46,9 +49,11 @@ async function learnerSource({input,read,user,env}){
   partnerRows=(recap.rows(Array.isArray(plogs)&&plogs[0],b.id,b.partner_user_id,'partner')||[]).slice(0,500);}catch(_){/* Partner fallback is optional. */}}
  return {booking:b,rows:all,partnerRows,version:recap.sourceVersion(b.id,(log&&log.id)||'saved-chat',all.concat(partnerRows))};
 }
+// A reply cut off at the token limit still keeps every complete keyword object before the cut.
+function salvage(text){const out=[],at=text.indexOf('[');if(at<0)return out;for(const m of text.slice(at).matchAll(/\{[^{}]*\}/g)){try{out.push(JSON.parse(m[0]));}catch(_){}}return out;}
 function parse(result){
  let value=result&&result.response;
- if(typeof value==='string'){const start=value.indexOf('{'),end=value.lastIndexOf('}');if(start<0||end<start)return [];try{value=JSON.parse(value.slice(start,end+1));}catch(_){return [];}}
+ if(typeof value==='string'){const start=value.indexOf('{'),end=value.lastIndexOf('}');if(start<0)return [];try{if(end<start)throw 0;value=JSON.parse(value.slice(start,end+1));}catch(_){return salvage(value.slice(start));}}
  return value&&Array.isArray(value.keywords)?value.keywords:[];
 }
 // Keep only keywords the learner really said, drawable and free of contact details.
@@ -70,9 +75,9 @@ async function extract({rows,env,fetchImpl=fetch,signal}){
  if(!/^[a-f0-9]{32}$/.test(account)||!token)throw failure('provider_unavailable');
  const text=rows.map(r=>mask(r.text)).join('\n').slice(0,MAX_INPUT);
  if(text.trim().length<2)return [];
- const timeout=AbortSignal.timeout(15000);let response;
+ const timeout=AbortSignal.timeout(20000);let response;
  try{response=await fetchImpl('https://api.cloudflare.com/client/v4/accounts/'+account+'/ai/run/'+MODEL,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
-  body:JSON.stringify({messages:[{role:'system',content:SYSTEM},{role:'user',content:text}],max_tokens:700,temperature:0.2}),signal:signal?AbortSignal.any([signal,timeout]):timeout});}
+  body:JSON.stringify({messages:[{role:'system',content:SYSTEM},{role:'user',content:text}],max_tokens:MAX_TOKENS,temperature:0.2}),signal:signal?AbortSignal.any([signal,timeout]):timeout});}
  catch(_){throw failure('provider_request_failed');}
  if(!response.ok)throw failure('provider_http_'+response.status);
  let json;try{json=await response.json();}catch(_){throw failure('provider_http_error');}

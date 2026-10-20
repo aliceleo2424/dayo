@@ -70,7 +70,7 @@ var human=note?'<blockquote>'+esc(note)+'</blockquote>':'<p class="ucr-letter-pe
 // Canonical stories already show grounded topics. Keep legacy theme and valid image; stored Treat is untouched.
 // Owner decision 2026-10-14: a sent Letter without an approved keepsake shows the DayO default illustration.
 var shown=img||(note?DEFAULT_KEEPSAKE:'');
-if(theme||shown)human+='<div class="ucr-block ucr-letter-theme">'+(theme?'<p class="ucr-theme">'+esc(theme)+'</p>':'')+(shown?'<img class="ucr-illustration'+(img?'':' ucr-default-keepsake')+'" hidden onload="this.hidden=false" src="'+esc(shown)+'" alt="" referrerpolicy="no-referrer" onerror="DayOUserConversationReport.hideIllustration(this)">':'')+'</div>';
+if(theme||shown)human+='<div class="ucr-block ucr-letter-theme">'+(theme?'<p class="ucr-theme"><span class="ucr-theme-tag">'+(locale==='ko'?'오늘 대화에 등장했어요':'From today’s conversation')+'</span>'+esc(theme)+'</p>':'')+(shown?'<img class="ucr-illustration'+(img?'':' ucr-default-keepsake')+'" hidden onload="this.hidden=false" src="'+esc(shown)+'" alt="" referrerpolicy="no-referrer" onerror="DayOUserConversationReport.hideIllustration(this)">':'')+'</div>';
 return '<section id="insta-card-capture" class="ucr-section ucr-human"'+memoryAttribute(r,locale)+'><h3>Letter from '+esc(name)+'</h3>'+human+'</section>';}
 function renderLegacy(r,locale){
 var l=labels[locale]||labels.en, parts=heading(l.summary,summary(r)?'<p>'+esc(summary(r))+'</p>':'');

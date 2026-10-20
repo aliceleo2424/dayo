@@ -2,6 +2,7 @@
  * Partner raw speech never leaves this server. Private image access uses participant JWT; generation stays disabled. */
 const recap = require('../public/conversation-recap.js');
 const partnerLetter = require('./_lib/partner-letter.js');
+const partnerLetterDraft = require('./_lib/partner-letter-draft.js');
 const illustration = require('./_lib/partner-illustration-cloudflare.js');
 const keepsake = require('./_lib/keepsake-safety.js');
 const illustrationTest = require('./_lib/keepsake-test-runtime.js');
@@ -9,18 +10,20 @@ const cleanup = require('./_lib/keepsake-cleanup.js');
 const quizHistory = require('./_lib/quiz-history.js');
 const uuid = v => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
 function json(res, status, body) { res.statusCode = status; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', 'private, no-store'); res.end(JSON.stringify(body)); }
-function originAllowed(origin, vercelUrl) {
+// 2026-10-20: the Preview branch alias (VERCEL_BRANCH_URL) is allowed too, so a Preview can be tested end to end.
+function originAllowed(origin, vercelUrl, branchUrl) {
   if (!origin) return true;
-  try { const u = new URL(origin); return u.protocol === 'https:' && ['dayotalk.com', 'www.dayotalk.com', 'dayo-black.vercel.app', String(vercelUrl || '')].includes(u.host); } catch (_) { return false; }
+  try { const u = new URL(origin); return u.protocol === 'https:' && ['dayotalk.com', 'www.dayotalk.com', 'dayo-black.vercel.app', String(vercelUrl || ''), String(branchUrl || '')].filter(Boolean).includes(u.host); } catch (_) { return false; }
 }
 async function body(req) {
   if (req.body && typeof req.body === 'object') return req.body;
-  if (typeof req.body === 'string') { if (req.body.length > 1024) throw Error('size'); return JSON.parse(req.body); }
-  let raw = ''; for await (const chunk of req) { raw += chunk; if (raw.length > 1024) throw Error('size'); } return JSON.parse(raw || '{}');
+  // Two server-signed picture keywords (up to 800 chars each) must fit.
+  if (typeof req.body === 'string') { if (req.body.length > 4096) throw Error('size'); return JSON.parse(req.body); }
+  let raw = ''; for await (const chunk of req) { raw += chunk; if (raw.length > 4096) throw Error('size'); } return JSON.parse(raw || '{}');
 }
 function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot = null, clock = Date.now } = {}) {
   return async function handler(req, res) {
-    if (!originAllowed(req.headers && req.headers.origin, env.VERCEL_URL)) return json(res, 403, { error: 'origin_not_allowed' });
+    if (!originAllowed(req.headers && req.headers.origin, env.VERCEL_URL, env.VERCEL_BRANCH_URL)) return json(res, 403, { error: 'origin_not_allowed' });
     if (req.method !== 'POST') return json(res, 405, { error: 'method_not_allowed' });
     // Scheduler sends parsed application/json. Separate server secret; never participant JWT.
     if (req.body && req.body.action === 'keepsake_cleanup') return cleanup.createHandler({env,fetchImpl})(req,res);
@@ -36,12 +39,14 @@ function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot
       if(Object.keys(input).some(k=>!['action','review'].includes(k)))return json(res,400,{error:'invalid_request'});
       return require('./_lib/keepsake-review-handler.js').createHandler({env,fetchImpl})({method:req.method,headers:req.headers,body:input.review},res);
     }
-    if (!input || Array.isArray(input) || !uuid(input.booking_id) || Object.keys(input).some(k => !['booking_id', 'learner_version', 'action', 'topic_id', 'source_version', 'request_id'].includes(k))) return json(res, 400, { error: 'invalid_request' });
+    if (!input || Array.isArray(input) || !uuid(input.booking_id) || Object.keys(input).some(k => !['booking_id', 'learner_version', 'action', 'topic_id', 'source_version', 'request_id', 'keywords'].includes(k))) return json(res, 400, { error: 'invalid_request' });
+    // 2026-10-20: picture keywords (server-signed tokens) were rejected here, so keyword pictures never reached the generator.
+    if (input.keywords != null && (input.action !== 'partner_illustration_generate' || !Array.isArray(input.keywords) || input.keywords.length < 1 || input.keywords.length > 2 || input.keywords.some(k => typeof k !== 'string' || k.length > 800))) return json(res, 400, { error: 'invalid_request' });
     if (input.learner_version != null && (typeof input.learner_version !== 'string' || input.learner_version.length > 100)) return json(res, 400, { error: 'invalid_request' });
     const url = String(env.NEXT_PUBLIC_SUPABASE_URL || env.SUPABASE_URL || '').trim().replace(/\/rest\/v1\/?$/i, '').replace(/\/+$/, '');
     const anon = String(env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();
     if (!/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url) || !anon) return json(res, 503, { error: 'source_unavailable' });
-    const partnerAction = ['partner_letter_topics', 'partner_letter_blocks', 'partner_illustration_status', 'partner_illustration_generate', 'partner_illustration_choices'].includes(input.action);
+    const partnerAction = ['partner_letter_topics', 'partner_letter_blocks', 'partner_illustration_status', 'partner_illustration_generate', 'partner_illustration_choices', 'partner_letter_draft', 'partner_letter_draft_retry'].includes(input.action);
     if (input.request_id!=null && (input.action!=='partner_illustration_generate'||!uuid(input.request_id))) return json(res,400,{error:'invalid_request'});
     const assetAction=input.action==='keepsake_image';
     const transcriptAction=input.action==='conversation_transcript';
@@ -88,6 +93,7 @@ function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot
       if (partnerAction) {
         let result;
         if(input.action==='partner_illustration_choices'){result=await illustration.choices({input,read,user,env,signal:controller.signal,fetchImpl});}
+        else if(input.action==='partner_letter_draft'||input.action==='partner_letter_draft_retry'){result=await partnerLetterDraft.handle({input,read,user,env,signal:controller.signal,fetchImpl});}
         else if (input.action === 'partner_illustration_generate') {
           // Canonical booking Partner ownership precedes any service-role client.
           const configured = illustrationPilot || illustrationTest.createPilot({env,fetchImpl});

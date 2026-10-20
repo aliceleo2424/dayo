@@ -6,6 +6,7 @@ function createHandler({env=process.env,fetchImpl=fetch,clientFactory=S.particip
   const origin=String(req.headers?.origin||'');
   const origins=['https://www.dayotalk.com','https://dayotalk.com','https://dayo-sufk.vercel.app'];
   if(env.VERCEL_URL)origins.push('https://'+env.VERCEL_URL);
+  if(env.VERCEL_BRANCH_URL)origins.push('https://'+env.VERCEL_BRANCH_URL);
   const send=(status,data)=>{res.statusCode=status;res.setHeader('Content-Type','application/json');res.end(JSON.stringify(data));};
   if(origin&&!origins.includes(origin))return send(403,{error:'origin_not_allowed'});
   if(origin){res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Access-Control-Allow-Headers','Authorization, Content-Type');res.setHeader('Access-Control-Allow-Methods','POST, OPTIONS');}

@@ -47,3 +47,5 @@
 /* Typed chat inside the conversation record (owner decision 2026-10-14). */
 .ucr-chat-typed{font-size:11px;font-weight:700;color:#5f7d63;margin-left:4px}
 .ucr-chat-line.is-chat .ucr-chat-bubble{border:1.5px dashed #b9c9b6}
+/* 2026-10-20: words on the picture are labelled as coming from today’s conversation. */
+.ucr-theme-tag{display:inline-block;margin-right:8px;padding:3px 9px;border-radius:999px;background:#e8eee1;color:#3f5a43;font-size:11px;font-weight:700;vertical-align:1px}

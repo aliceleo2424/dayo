@@ -1,0 +1,34 @@
+// One picture area (owner decision 2026-10-20): picture first; only "draw again with other words" and "send with the DayO picture".
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const {JSDOM}=require('jsdom');
+const room=fs.readFileSync('public/room.html','utf8');
+const start=room.indexOf('<div id="partner-report-popup"'),end=room.indexOf('<div id="early-exit-modal"');
+(async()=>{
+ const dom=new JSDOM('<!doctype html><body>'+room.slice(start,end)+'</body>',{runScripts:'outside-only',url:'https://dayotalk.com/room'});
+ const w=dom.window,d=w.document,calls=[];let decision='none';
+ w.supabaseClient={auth:{getSession:async()=>({data:{session:{access_token:'jwt'}}})}};
+ w.fetch=async(url,opts)=>{const b=JSON.parse(opts.body);calls.push(b.action);
+  const body=b.action==='partner_illustration_choices'?{mode:'keywords',max_pick:2,source_version:'v',choices:[{id:'a',label:'Han River',token:'t1'},{id:'b',label:'dog',token:'t2'},{id:'c',label:'tiny bakery',token:'t3'}]}:b.action==='partner_illustration_generate'?(decision='shown',{status:'pending_review'}):{status:'no_canonical_source',letter:'',facts:[]};
+  return {ok:true,json:async()=>body};};
+ w.DayOKeepsakePartnerReview={open:async(booking,host)=>{if(!host.querySelector('.pr-keepsake-review')){const s=d.createElement('section');s.className='pr-section pr-keepsake-review';host.querySelector('.pr-optional').after(s);}},hasImage:async()=>false,decision:()=>decision};
+ w.eval(fs.readFileSync('public/partner-report-contract.js','utf8'));
+ w.eval(fs.readFileSync('public/partner-report.js','utf8'));
+ w.DayOPartnerReport.open({bookingId:'ea5289f9-41fe-4b94-9677-bd3b038c87eb'});
+ for(let i=0;i<30;i++)await new Promise(r=>setTimeout(r,5));
+ const area=d.querySelector('.pr-optional'),review=d.querySelector('.pr-keepsake-review');
+ assert(calls.includes('partner_illustration_generate'),'picture drawn automatically from the user words');
+ assert.equal(review.parentNode,area,'picture sits inside the one picture area');
+ assert.equal(review.nextElementSibling,area.querySelector('.pr-keyword-layout'),'picture comes before the controls');
+ assert.equal(d.getElementById('pr-image-words').hidden,true,'word chips are tucked away while a picture is shown');
+ assert.equal(d.getElementById('pr-image-redraw').hidden,false,'draw again with other words');
+ assert(/Han River, dog/.test(d.getElementById('pr-keyword-hint').textContent),'hint names the words the picture used');
+ d.getElementById('pr-image-redraw').click();
+ assert.equal(d.getElementById('pr-image-words').hidden,false,'redraw opens the word chips');
+ assert.equal(d.getElementById('pr-image-redraw').hidden,true);
+ d.getElementById('pr-image-skip').click();
+ assert(d.getElementById('partner-report-popup').classList.contains('pr-image-skipped'),'DayO picture replaces the drawn one');
+ assert.equal(w.DayOPartnerReport.imageDecision(),'skip');
+ assert.equal(d.getElementById('pr-image-words').hidden,true);
+ assert(!/Don’t use|Don't use|사용하지 않기/.test(fs.readFileSync('public/keepsake-partner-review.js','utf8').match(/pending:'[^']*'/g).join(' ')),'no separate "Don’t use" instruction');
+ console.log('partner-letter-picture-area: ok');
+})().catch(e=>{console.error(e);process.exit(1);});
