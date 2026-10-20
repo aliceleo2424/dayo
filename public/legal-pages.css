@@ -128,7 +128,7 @@
 .legal-translation-note {
   margin: 0 0 24px;
   padding: 12px 14px;
-  border-left: 3px solid #E85B48;
+  border-left: 3px solid var(--coral-dark,#4B6650);
   background: #FFF5F2;
   color: #685953;
   font-size: 0.83rem;
@@ -191,7 +191,7 @@
 }
 
 .legal-main a {
-  color: #E85B48;
+  color: var(--coral-dark,#4B6650);
   font-weight: 700;
   text-decoration: underline;
   text-underline-offset: 2px;
