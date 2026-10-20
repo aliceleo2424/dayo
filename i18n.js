@@ -1496,6 +1496,7 @@
     'room.endedTitle': { KO: "이미 종료된 대화예요.", EN: "This conversation has ended." },
     'room.partnerEndedBody': { KO: "지금까지의 대화 기록은 보존돼요. 파트너 라운지에서 세션을 확인해 주세요.", EN: "Your saved conversation is preserved. Return to Partner Lounge to review the session." },
     'room.backToPartnerLounge': { KO: "파트너 라운지로 돌아가기", EN: "Back to Partner Lounge" },
+    'room.writeLetter': { KO: "레터 쓰기", EN: "Write your Letter" },
     'room.recapBack': { KO: "대화 기록으로 돌아가기", EN: "Back to recap" },
     'room.endTechIssue': { KO: '🛠️ 음성/연결 오류로 종료', EN: '🛠️ Audio or connection issue' },
     'room.end': {

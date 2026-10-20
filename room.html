@@ -20,6 +20,8 @@
     #room-access-screen p { margin: 0 0 22px; font-size: 15px; line-height: 1.6; }
     #room-access-screen a { display: inline-block; padding: 11px 20px; border-radius: 12px; background: #FF6B57; color: white; text-decoration: none; font-weight: 700; }
     body.room-access-granted #room-access-screen { display: none; }
+    body.room-letter-only #room-access-screen { display: none; }
+    #room-access-screen button { display: block; margin: 0 auto 12px; padding: 11px 20px; border: 0; border-radius: 12px; background: #5C4A42; color: white; font: inherit; font-weight: 700; cursor: pointer; }
     .dayo-inapp-blocker { position: fixed; inset: 0; z-index: 2147483647; display: grid; place-items: center; padding: 24px; background: #FFF8F5; color: #5C4A42; text-align: center; font-family: 'Gowun Dodum', sans-serif; }
     .dayo-inapp-blocker__box { width: min(100%, 380px); padding: 26px 22px; border: 1px solid #FFD1DC; border-radius: 22px; background: #fff; box-shadow: 0 18px 48px rgba(92,74,66,.14); }
     .dayo-inapp-blocker h1 { margin: 0 0 12px; font-size: 21px; }
@@ -148,7 +150,9 @@
               }
               return showAccess({ allowed: false, sessionEnded: true, titleKey: 'room.endedTitle', messageKey: 'room.partnerEndedBody',
                 copyLang: 'EN', title: 'This conversation has ended.', message: 'Your saved conversation is preserved. Return to Partner Lounge to review the session.',
-                link: 'partner.html#pd-sessions', linkKey: 'room.backToPartnerLounge', linkLabel: 'Back to Partner Lounge' });
+                link: 'partner.html#pd-sessions', linkKey: 'room.backToPartnerLounge', linkLabel: 'Back to Partner Lounge',
+                // Owner decision 2026-10-20: lets the ended screen offer the Letter window while no Letter is saved.
+                letterReopen: { bookingId: booking.id, learnerId: booking.learner_id, partnerId: booking.partner_user_id || booking.partner_id, language: booking.language || 'en' } });
             }
           }
           if (booking.status !== 'confirmed') {
@@ -7366,6 +7370,36 @@
         partnerReportSubmitPending = false; setPartnerReportSubmitBusy(partnerReportSubmitComplete);
       }
     };
+    // Letter reopen (2026-10-20): after a reload or closed tab the ended screen offers the Letter window
+    // while this booking has no saved Letter. Letter only: the room, media and pre-session check stay closed.
+    window.offerPartnerLetterReopen = async function () {
+      var ended = window.DayORoomAccess || {};
+      var reopen = ended.sessionEnded && ended.letterReopen;
+      if (!reopen || document.getElementById('room-letter-reopen')) return false;
+      try {
+        var auth = await window.supabaseClient.auth.getUser();
+        var user = auth && auth.data && auth.data.user;
+        if (!user || user.id !== reopen.partnerId) return false;
+        // Only a confirmed "no Letter saved" offers the button; unknown status keeps the ended screen.
+        var state = await existingPartnerLetter(reopen.bookingId);
+        if (!state || state.letter_sent !== false) return false;
+      } catch (_) { return false; }
+      var box = document.querySelector('#room-access-screen .room-access-box');
+      if (!box || window.DayORoomAccess !== ended) return false;
+      var button = document.createElement('button');
+      button.type = 'button'; button.id = 'room-letter-reopen';
+      button.textContent = window.DayOI18n ? window.DayOI18n.t('room.writeLetter', ended.copyLang) : 'Write your Letter';
+      button.onclick = function () {
+        window.DayORoomAccess = { allowed: true, letterOnly: true, adminTest: false, observer: false, role: 'partner',
+          bookingId: reopen.bookingId, learnerId: reopen.learnerId, partnerId: reopen.partnerId, language: reopen.language };
+        document.body.classList.add('room-letter-only');
+        window.openPartnerReportPopup();
+      };
+      box.insertBefore(button, document.getElementById('room-access-link'));
+      return true;
+    };
+    // End letter reopen
+    if (window.DayORoomAccessReady) window.DayORoomAccessReady.then(function () { return window.offerPartnerLetterReopen(); }).catch(function () {});
     document.addEventListener('dayo:langchange', function () {
       if (partnerLetterStatus) setPartnerReportSubmitStatus(partnerLetterStatus.code, partnerLetterStatus.success);
       setPartnerReportSubmitBusy(partnerReportSubmitPending || partnerReportSubmitComplete);
@@ -7439,7 +7473,9 @@
         window.dayoSessionEnded = true;
         setPartnerReportSubmitStatus('sending', true);
         if (window.DayOPartnerIllustration) window.DayOPartnerIllustration.reportSubmitting(bookingId, cardData.illustrationToken);
-        var transcriptPromise = Promise.resolve().then(persistTranscript).catch(function () { return {ok:false}; });
+        // A reopened Letter window has no live transcript; never rewrite the saved conversation record.
+        var transcriptPromise = (window.DayORoomAccess || {}).letterOnly ? Promise.resolve({ ok: true, skipped: true })
+          : Promise.resolve().then(persistTranscript).catch(function () { return {ok:false}; });
         var reportSave;
         try {
           reportSave = await partnerLetterWait(function () {
