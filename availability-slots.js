@@ -72,13 +72,13 @@
         var style = document.createElement('style');
         style.id = 'dayo-booking-window-style';
         style.textContent = '.dayo-booking-window-overlay{position:fixed;inset:0;z-index:980;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(70,52,48,.48);box-sizing:border-box}' +
-          '.dayo-booking-window-dialog{position:relative;width:min(100%,440px);padding:28px;border:1px solid #ffe8e3;border-radius:22px;background:#fffcfa;box-shadow:0 24px 64px rgba(70,52,48,.2);color:#5c4a42;box-sizing:border-box}' +
+          '.dayo-booking-window-dialog{position:relative;width:min(100%,440px);padding:28px;border:1px solid #E9F0E7;border-radius:22px;background:#fffcfa;box-shadow:0 24px 64px rgba(70,52,48,.2);color:#5c4a42;box-sizing:border-box}' +
           '.dayo-booking-window-dialog h2{margin:0 32px 12px 0;font-size:1.18rem;line-height:1.4}' +
           '.dayo-booking-window-dialog p{margin:0 0 24px;font-size:.9rem;line-height:1.6;white-space:pre-line}' +
           '.dayo-booking-window-close{position:absolute;top:12px;right:14px;border:0;background:none;font-size:1.5rem;color:#9a8580;cursor:pointer}' +
           '.dayo-booking-window-actions{display:flex;gap:10px}.dayo-booking-window-actions button{flex:1;min-height:44px;padding:10px;border-radius:12px;font:inherit;font-weight:700;cursor:pointer}' +
-          '.dayo-booking-window-back{border:1px solid #ffe8e3;background:#fff8f5;color:#5c4a42}' +
-          '.dayo-booking-window-confirm{border:0;background:#ff6b57;color:#fff}' +
+          '.dayo-booking-window-back{border:1px solid #E9F0E7;background:#fff8f5;color:#5c4a42}' +
+          '.dayo-booking-window-confirm{border:0;background:#5F7D63;color:#fff}' +
           '@media(max-width:480px){.dayo-booking-window-dialog{padding:24px 20px}.dayo-booking-window-actions{flex-direction:column-reverse}}';
         document.head.appendChild(style);
       }

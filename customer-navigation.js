@@ -20,19 +20,27 @@
     body.appendChild(bottom);
     var drawer = document.getElementById('mobileNav');
     var toggle = document.getElementById('menuToggle');
-    // Keep My Page's account/logout control reachable: the drawer on phones; on desktop the Account
-    // tab, or the header actions in the letters view (which hides the Account tab).
+    // One account control ("Alice ▾", with tickets / My Page / logout) in the same desktop header spot on every
+    // customer page; phones keep it at the top of the drawer. Logged-out visitors keep it in the drawer.
     var accountControl = drawer && drawer.querySelector('[data-mode-switch]');
-    var accountPanel = page === 'mypage' && document.getElementById('ud-account');
-    var headerActions = page === 'mypage' && document.querySelector('body > header .topbar-right');
+    var headerActions = document.querySelector('body > header .header-actions, body > header .topbar-right');
+    var accountClasses = accountControl ? accountControl.className : '';
     function accountPlacement() {
-      if (!accountControl || !accountPanel) return;
-      var letters = page === 'mypage' && (location.hash === '#talkArchiveTitle' || location.hash === '#letters');
-      if (innerWidth < 768) { if (accountControl.parentNode !== drawer) drawer.insertBefore(accountControl, drawer.firstChild); return; }
-      if (accountPanel && !letters) { if (accountControl.parentNode !== accountPanel) accountPanel.appendChild(accountControl); return; }
-      if (headerActions && accountControl.parentNode !== headerActions) headerActions.insertBefore(accountControl, headerActions.querySelector('.header-cta') || headerActions.firstChild);
+      if (!accountControl || !headerActions) return;
+      var loggedIn = typeof window.checkUserLoggedIn === 'function' && window.checkUserLoggedIn();
+      var inHeader = innerWidth >= 768 && loggedIn;
+      if (inHeader && accountControl.parentNode !== headerActions) {
+        accountControl.className = 'customer-account';
+        headerActions.insertBefore(accountControl, headerActions.querySelector('.header-cta') || headerActions.firstChild);
+      } else if (!inHeader && accountControl.parentNode !== drawer) {
+        accountControl.className = accountClasses;
+        drawer.insertBefore(accountControl, drawer.firstChild);
+      } else return;
+      if (window.DayOMode && typeof window.DayOMode.refresh === 'function') window.DayOMode.refresh();
     }
     accountPlacement();
+    setTimeout(accountPlacement, 1500);
+    document.addEventListener('dayo:authchange', accountPlacement);
     if (drawer && toggle) {
       function syncDrawer() {
         var open = toggle.getAttribute('aria-expanded') === 'true';
@@ -95,7 +103,7 @@
       accountPlacement();
     });
     // Desktop logout outside My Page (owner request 2026-10-15): reuses auth.js handleLogout; phones keep the drawer button.
-    var logoutHost = page !== 'mypage' && document.querySelector('body > header .header-actions, body > header .topbar-right');
+    var logoutHost = page !== 'mypage' && !accountControl && document.querySelector('body > header .header-actions, body > header .topbar-right');
     if (logoutHost && typeof window.handleLogout === 'function') {
       var logoutButton = document.createElement('button');
       logoutButton.type = 'button'; logoutButton.className = 'customer-logout'; logoutButton.hidden = true;
