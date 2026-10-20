@@ -52,6 +52,53 @@ function renderWelcomeUser({language, title, intro, lines, link, cta}) {
     '<p style="font-size:12px;line-height:1.6;color:#706259;border-top:1px solid #E7DDD0;padding-top:14px;margin:20px 0 0">' + (en ? 'Contact: ' : '문의: ') + '<a href="mailto:hello@dayotalk.com" style="color:#5F7D63">hello@dayotalk.com</a></p>' +
     '</td></tr></table></td></tr></table></body></html>';
 }
+// Partner emails in the same DayO card design: logo header, sections with checklist or numbered steps.
+const LOGO_ROW = '<tr><td style="background:#FFFFFF;padding:14px 24px;border-bottom:3px solid #FFF4CC"><img src="https://www.dayotalk.com/images/logo_header.png" width="86" height="48" alt="DayO" style="display:block;border:0;height:48px;width:auto"></td></tr>';
+function renderPartnerCard({language, title, intro, lead, highlight, sections, ctaLead, link, cta, note, closing}) {
+  const en = language === 'en';
+  const block = ({eyebrow, items, numbered}) => '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#ffffff;border:1px solid #E7DDD0;border-radius:18px;margin-top:14px"><tr><td style="padding:20px 22px">' +
+    (eyebrow ? '<p style="margin:0 0 8px;font-size:13px;color:#5F7D63;font-weight:bold">' + escapeHtml(eyebrow) + '</p>' : '') +
+    '<table role="presentation" width="100%" cellspacing="0" cellpadding="0">' + items.map((item, i) =>
+      '<tr><td style="padding:7px 0;vertical-align:top;width:24px">' + (numbered
+        ? '<span style="display:inline-block;width:20px;height:20px;line-height:20px;border-radius:10px;background:#E8F1E4;color:#3F5A45;font-size:12px;font-weight:bold;text-align:center">' + (i + 1) + '</span>'
+        : '<span style="color:#5F7D63;font-weight:bold">&#10003;</span>') +
+      '</td><td style="padding:7px 0 7px 8px;font-size:14px;line-height:1.6;color:#40362F">' + escapeHtml(item) + '</td></tr>').join('') +
+    '</table></td></tr></table>';
+  return '<!doctype html><html lang="' + language + '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>' +
+    '<body style="margin:0;background:#F6EFE3;color:#40362F;font-family:Arial,\'Apple SD Gothic Neo\',\'Malgun Gothic\',sans-serif">' +
+    '<table role="presentation" width="100%" cellspacing="0" cellpadding="0"><tr><td align="center" style="padding:24px 12px">' +
+    '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;background:#FFFBF4;border-radius:20px;overflow:hidden">' + LOGO_ROW +
+    '<tr><td style="padding:24px">' +
+    '<p style="margin:0 0 6px;font-size:15px">' + escapeHtml(intro) + '</p>' +
+    '<h1 style="margin:0 0 10px;font-size:23px;line-height:1.4">' + escapeHtml(title) + '</h1>' +
+    (lead ? '<p style="margin:0;font-size:15px;line-height:1.6;color:#5F574F">' + escapeHtml(lead) + '</p>' : '') +
+    (highlight ? '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#FFF4CC;border:1px solid #F1E3A6;border-radius:14px;margin-top:14px"><tr><td style="padding:14px 16px"><span style="font-size:12px;color:#6B5D3F">' + escapeHtml(highlight.label) + '</span><br><b style="font-size:18px;color:#40362F">' + escapeHtml(highlight.value) + '</b></td></tr></table>' : '') +
+    sections.map(block).join('') +
+    (ctaLead ? '<p style="text-align:center;margin:22px 0 0;font-size:14px;color:#5F574F">' + escapeHtml(ctaLead) + '</p>' : '') +
+    (link ? '<p style="text-align:center;margin:12px 0 8px"><a href="' + link + '" style="display:inline-block;background:#5F7D63;color:#ffffff;padding:14px 30px;border-radius:14px;text-decoration:none;font-weight:bold;font-size:16px">' + escapeHtml(cta) + '</a></p>' : '') +
+    (note ? '<p style="margin:16px 0 0;font-size:13px;line-height:1.6;color:#5F574F">' + escapeHtml(note) + '</p>' : '') +
+    (closing ? '<p style="margin:16px 0 0;font-size:15px;font-weight:bold;color:#3F5A45">' + escapeHtml(closing) + '</p>' : '') +
+    '<p style="font-size:12px;line-height:1.6;color:#706259;border-top:1px solid #E7DDD0;padding-top:14px;margin:20px 0 0">' + (en ? 'Contact: ' : '문의: ') + '<a href="mailto:hello@dayotalk.com" style="color:#5F7D63">hello@dayotalk.com</a></p>' +
+    '</td></tr></table></td></tr></table></body></html>';
+}
+// Partner Test pass email (English). Same facts as the admin copy/paste message.
+function buildPartnerApprovalMessage({name, email, signupLink}, from) {
+  const lounge = 'https://www.dayotalk.com/partner#pd-sessions';
+  const title = "You passed the DayO Partner Test 🎉";
+  const intro = 'Hi ' + (name || 'there') + '!';
+  const weekly = ['Partner Lounge → Sessions → Availability', 'Open the "Weekly Template" tab', 'Pick a day and tap the times you can talk', 'Press "Save weekly availability" — these times repeat every week'];
+  const steps = ['Sign up on DayO with the same email you used in your application (' + email + '). Your partner access will be activated automatically.', 'Open your first available times so learners can book you: ' + lounge];
+  const note = 'Need a change on one specific day? Use "Monthly Calendar" to close that date or set custom times. Your weekly times stay as they are. Times are in Korea time (KST), in 30-minute slots.';
+  const html = renderPartnerCard({language: 'en', title, intro,
+    lead: "We're happy to let you know that you've passed the DayO Partner Test. The next step is a short onboarding and account setup.",
+    highlight: {label: 'Your session rate', value: '₩6,000 per completed 30-minute session'},
+    sections: [{eyebrow: 'Next steps', items: steps, numbered: true}, {eyebrow: 'How to set times that repeat every week', items: weekly, numbered: true}],
+    ctaLead: 'Start with step 1:', link: signupLink, cta: 'Sign up on DayO', note, closing: 'Welcome to DayO!'});
+  const text = [intro, '', "We're happy to let you know that you've passed the DayO Partner Test.", '', 'Your session rate is:', '₩6,000 per completed 30-minute session.', '',
+    'The next step is a short onboarding and account setup.', '', steps[0], '', signupLink, '', 'Once your account is ready, please open your first available times so learners can book you:', lounge, '',
+    'How to set times that repeat every week:', ...weekly.map((w, i) => (i + 1) + '. ' + w), '', note, '', 'Welcome to DayO!', '', 'Contact: ' + REPLY_TO].join('\n');
+  return {from: sender(from), reply_to: REPLY_TO, subject: '[DayO] ' + title, html, text};
+}
 function buildWelcomeMessage(nickname, role, language, from) {
   const en = language === 'en', partner = role === 'partner';
   const name = nickname && nickname !== '회원' ? nickname : (en ? 'there' : '회원');
@@ -90,7 +137,9 @@ function buildWelcomeMessage(nickname, role, language, from) {
   const link = partner ? 'https://www.dayotalk.com/partner#pd-sessions' : 'https://www.dayotalk.com/#how';
   const cta = partner ? (en ? 'Open your first times' : '첫 대화 시간 열기') : (en ? 'Explore DayO' : 'DayO 둘러보기');
   return {from: sender(from), reply_to: REPLY_TO, subject: '[DayO] ' + title,
-    html: (partner ? renderEmail : renderWelcomeUser)({language, title, intro, lines, link, cta}),
+    html: partner
+      ? renderPartnerCard({language, title, intro, lead: lines[0], sections: [{eyebrow: en ? 'Getting started' : '시작하기', items: lines.slice(1), numbered: true}], link, cta})
+      : renderWelcomeUser({language, title, intro, lines, link, cta}),
     text: [intro, '', ...lines, '', cta + ': ' + link, '', (en ? 'Contact: ' : '문의: ') + REPLY_TO, 'DayO'].join('\n')};
 }
-module.exports = {FROM, REPLY_TO, locale, recipientLocale, sender, escapeHtml, renderEmail, buildWelcomeMessage};
+module.exports = {FROM, REPLY_TO, locale, recipientLocale, sender, escapeHtml, renderEmail, buildWelcomeMessage, buildPartnerApprovalMessage};

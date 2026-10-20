@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { AdminHeader } from '@/components/admin/header';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/lib/supabase';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { actionChanges, applicationAccount, applicationMedia, applicationMessage, applicationResidence, emptyFilters, listApplications, markApplicationViewed, profileSummary, selectApplications, shortlistApplication, sourceLabels, updateApplication, type Application, type ApplicationFilters, type ApplicationSort, type ReviewAction } from '@/lib/partner-applications';
 
@@ -52,6 +53,8 @@ export default function PartnerApplicationsPage() {
   const [testLink, setTestLink] = useState('');
   const [onboardingLink, setOnboardingLink] = useState('');
   const [message, setMessage] = useState('');
+  const [approvalReady, setApprovalReady] = useState<{ id: string; link: string } | null>(null);
+  const [mailBusy, setMailBusy] = useState(false);
   const [detailStatus, setDetailStatus] = useState('');
   const [account, setAccount] = useState('');
   const load = useCallback(async () => {
@@ -102,7 +105,7 @@ export default function PartnerApplicationsPage() {
     if ((action === 'invite' || action === 'approve') && !validLink(link)) {
       setDetailStatus('메시지에 넣을 올바른 링크를 먼저 입력하세요.'); return;
     }
-    setBusy(true); setDetailStatus(''); setMessage('');
+    setBusy(true); setDetailStatus(''); setMessage(''); setApprovalReady(null);
     try {
       const updated = await updateApplication(selected.id, {
         ...(noteOnly ? {} : { test_status: testStatus }), review_note: note, ...(action ? actionChanges(action) : {}),
@@ -111,9 +114,26 @@ export default function PartnerApplicationsPage() {
       setSelected(previous => previous?.id === updated.id ? updated : previous);
       if (!noteOnly) setTestStatus(updated.test_status);
       if (action) setMessage(applicationMessage(action, updated, link));
+      if (action === 'approve') setApprovalReady({ id: updated.id, link });
       setDetailStatus('저장했습니다.');
     } catch { setDetailStatus('저장하지 못했습니다. 다시 시도하세요.'); }
     finally { setBusy(false); }
+  }
+  async function sendApprovalEmail() {
+    if (!approvalReady || mailBusy) return;
+    setMailBusy(true); setDetailStatus('');
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) { setDetailStatus('관리자 로그인이 필요합니다.'); return; }
+      const response = await fetch('/api/send-partner-approval', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ applicationId: approvalReady.id, signupLink: approvalReady.link }),
+      });
+      const result = await response.json().catch(() => ({})) as { error?: string };
+      setDetailStatus(response.ok ? '합격 안내 메일을 보냈습니다.' : (result.error || '메일을 보내지 못했습니다.'));
+    } catch { setDetailStatus('메일을 보내지 못했습니다. 다시 시도하세요.'); }
+    finally { setMailBusy(false); }
   }
   async function copy() {
     try { await navigator.clipboard.writeText(message); setDetailStatus('메시지를 복사했습니다.'); }
@@ -203,7 +223,7 @@ export default function PartnerApplicationsPage() {
             <label className="text-sm">Onboarding link<input type="url" className={inputClass} value={onboardingLink} onChange={event => setOnboardingLink(event.target.value)} placeholder="https://…" disabled={busy} /></label>
             <div className="flex flex-wrap gap-2">{(Object.keys(actionLabels) as ReviewAction[]).map(action => <Button key={action} variant="outline" disabled={busy} onClick={() => void save(action)}>{actionLabels[action]}</Button>)}</div>
             <p role="status" aria-live="polite">{detailStatus}</p>
-            {message && <><label>Message<textarea className={inputClass} rows={12} value={message} readOnly /></label><Button onClick={() => void copy()}>Copy</Button></>}
+            {message && <><label>Message<textarea className={inputClass} rows={12} value={message} readOnly /></label><div className="flex flex-wrap gap-2"><Button onClick={() => void copy()}>Copy</Button>{approvalReady && <Button onClick={() => void sendApprovalEmail()} disabled={mailBusy}>{mailBusy ? 'Sending…' : 'Send email (designed)'}</Button>}</div></>}
           </>}
         </DialogContent>
       </Dialog>
