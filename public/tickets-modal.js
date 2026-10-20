@@ -410,10 +410,14 @@
     var visible = canShowTrialPurchase();
     var trial = findPlan('trial');
     renderLandingTicketCards();
-    // Landing closing section: show the first-trial price only to people who can buy it (signed out or eligible).
+    // Landing closing section: the HTML starts on the first-trial price, so most
+    // visitors (signed out or eligible) never see a swap. Only a settled answer
+    // that this person cannot buy the trial switches it to the plain copy; while
+    // eligibility is still loading or failed, the current state stays.
     var offerVisible = !!trial && (visible || trialState.status === 'loggedout');
+    var settled = trialState.status !== 'loading' && trialState.status !== 'error';
     document.querySelectorAll('[data-trial-offer]').forEach(function (node) {
-      var next = offerVisible ? 'offer' : 'plain';
+      var next = offerVisible ? 'offer' : settled ? 'plain' : node.getAttribute('data-trial-offer-state');
       if (node.getAttribute('data-trial-offer-state') !== next) node.setAttribute('data-trial-offer-state', next);
       var price = node.querySelector('[data-trial-price]');
       if (price && trial) { var label = priceText(trial.priceValue); if (price.textContent !== label) price.textContent = label; }
