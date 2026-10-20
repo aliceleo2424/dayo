@@ -24,7 +24,7 @@ async function popup(reply){
  assert(calls.includes('partner_letter_draft'),'draft requested when the Letter opens');
  assert.equal(area.value,LETTER,'empty Letter box is filled with the draft');
  assert.equal(d.getElementById('pr-draft-check').hidden,false,'check box shown for a draft');
- assert(/nothing in the draft was not said/.test(d.querySelector('.pr-draft-warning').textContent));
+ assert(/can contain mistakes/.test(d.querySelector('.pr-draft-warning').textContent),'AI-mistake warning shown');
  assert(d.getElementById('pr-draft-evidence').textContent.includes('I bought my mom mochi'),'evidence shows what the user said');
  assert.equal(w.DayOPartnerReport.draftChecked(),false,'cannot send the draft before confirming the check');
  assert.equal(d.getElementById('pr-letter-selected').children.length,0,'no duplicate per-line list under a draft');

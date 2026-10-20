@@ -138,7 +138,7 @@
   el('pr-draft-check').hidden=!draftUsed;
  }
  function useDraft(){var area=el('popup-partner-comment');area.value=draftText;draftUsed=true;el('pr-draft-confirm').checked=false;showSelected();paintDraftTools();
-  draftStatus('This is an AI draft from what the user said. Read it, fix or remove anything that was not said, and add your own words.','고객이 한 말을 바탕으로 AI가 쓴 초안이에요. 고치고 내 말도 더해서 보내 주세요.');}
+  draftStatus('An AI draft based on what the user said is in your letter below. Edit it in your own words.','고객이 한 말을 바탕으로 AI가 쓴 초안을 아래 편지에 넣었어요. 내 말투로 고쳐 주세요.');}
  function showDraft(data){
   draftText=typeof data.letter==='string'?data.letter:'';draftLeft=Number(data.attempts_left)||0;paintDraftEvidence(data.facts);
   if(!draftText){draftStatus('There isn’t enough saved conversation for a draft. Please write the letter yourself.','초안을 쓸 만큼 저장된 대화가 없어요. 직접 편지를 써 주세요.');paintDraftTools();return;}
@@ -219,7 +219,7 @@
   t('.pr-letter-warning','Please avoid generic lines like “I enjoyed talking to you today.” Never invent a story or pretend the user said something you did not hear.','“오늘 즐거웠어요” 같은 누구에게나 쓸 수 있는 문장은 피해 주세요. 고객이 하지 않은 이야기를 지어내지 마세요.');
   var label=q('label[for="popup-partner-comment"]');if(label&&label.firstChild&&label.firstChild.nodeType===3)label.firstChild.nodeValue=ko?'고객에게 보내는 편지':'Your letter to the user';
   var area=el('popup-partner-comment');if(area)area.placeholder=ko?'Dear …, 로 시작해 고객에게 직접 편지처럼 써 주세요. 예: “I loved hearing about … Next time, tell me about …” — 내 이름':'Dear …, write to them directly, like a letter: “I loved hearing about … Next time, tell me about …” — your name';
-  t('.pr-draft-warning','Please check that nothing in the draft was not said in your conversation.','대화에 없던 내용이 없는지 확인해 주세요.');
+  t('.pr-draft-warning','AI wrote this draft, so it can contain mistakes. Please read it carefully and fix anything that is wrong or was not said in your conversation before sending.','AI가 쓴 초안이라 실수가 있을 수 있어요. 보내기 전에 꼭 읽어 보고, 틀리거나 대화에 없던 내용은 고쳐 주세요.');
   t('.pr-draft-evidence summary','What the user said that the draft used','초안이 참고한 고객의 말');
   t('.pr-draft-confirm span','I checked the draft and fixed anything that was not said.','초안을 확인했고, 대화에 없던 내용은 고쳤어요.');
   t('.pr-letter-assist summary','Optional: find details in the saved conversation','선택: 저장된 대화에서 이야기 찾기');
