@@ -16,8 +16,9 @@ function originAllowed(origin, vercelUrl) {
 }
 async function body(req) {
   if (req.body && typeof req.body === 'object') return req.body;
-  if (typeof req.body === 'string') { if (req.body.length > 1024) throw Error('size'); return JSON.parse(req.body); }
-  let raw = ''; for await (const chunk of req) { raw += chunk; if (raw.length > 1024) throw Error('size'); } return JSON.parse(raw || '{}');
+  // Two server-signed picture keywords (up to 800 chars each) must fit.
+  if (typeof req.body === 'string') { if (req.body.length > 4096) throw Error('size'); return JSON.parse(req.body); }
+  let raw = ''; for await (const chunk of req) { raw += chunk; if (raw.length > 4096) throw Error('size'); } return JSON.parse(raw || '{}');
 }
 function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot = null, clock = Date.now } = {}) {
   return async function handler(req, res) {
@@ -37,7 +38,9 @@ function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot
       if(Object.keys(input).some(k=>!['action','review'].includes(k)))return json(res,400,{error:'invalid_request'});
       return require('./_lib/keepsake-review-handler.js').createHandler({env,fetchImpl})({method:req.method,headers:req.headers,body:input.review},res);
     }
-    if (!input || Array.isArray(input) || !uuid(input.booking_id) || Object.keys(input).some(k => !['booking_id', 'learner_version', 'action', 'topic_id', 'source_version', 'request_id'].includes(k))) return json(res, 400, { error: 'invalid_request' });
+    if (!input || Array.isArray(input) || !uuid(input.booking_id) || Object.keys(input).some(k => !['booking_id', 'learner_version', 'action', 'topic_id', 'source_version', 'request_id', 'keywords'].includes(k))) return json(res, 400, { error: 'invalid_request' });
+    // 2026-10-20: picture keywords (server-signed tokens) were rejected here, so keyword pictures never reached the generator.
+    if (input.keywords != null && (input.action !== 'partner_illustration_generate' || !Array.isArray(input.keywords) || input.keywords.length < 1 || input.keywords.length > 2 || input.keywords.some(k => typeof k !== 'string' || k.length > 800))) return json(res, 400, { error: 'invalid_request' });
     if (input.learner_version != null && (typeof input.learner_version !== 'string' || input.learner_version.length > 100)) return json(res, 400, { error: 'invalid_request' });
     const url = String(env.NEXT_PUBLIC_SUPABASE_URL || env.SUPABASE_URL || '').trim().replace(/\/rest\/v1\/?$/i, '').replace(/\/+$/, '');
     const anon = String(env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '').trim();

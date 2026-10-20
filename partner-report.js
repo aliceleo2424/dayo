@@ -163,7 +163,8 @@
  function showSelected(){
   paintLetterCount();
   var host=el('pr-letter-selected');if(!host)return;host.replaceChildren();
-  var parts=sentenceParts();if(parts.length<2)return;
+  // A draft-based Letter is edited in the box itself; the per-line list would only repeat it.
+  var parts=sentenceParts();if(parts.length<2||draftUsed)return;
   parts.forEach(function(sentence,i){var row=document.createElement('div'),text=document.createElement('p');text.textContent=sentence;row.append(text);
    [['Move up',-1],['Move down',1],['Remove',0]].forEach(function(action){var button=document.createElement('button');button.type='button';button.textContent=action[0];button.disabled=action[1]!==0&&(i+action[1]<0||i+action[1]>=parts.length);button.onclick=function(){var next=sentenceParts();if(action[1]===0)next.splice(i,1);else {var j=i+action[1];[next[i],next[j]]=[next[j],next[i]];}el('popup-partner-comment').value=next.join('\n');showSelected();};row.append(button);});host.append(row);});
  }

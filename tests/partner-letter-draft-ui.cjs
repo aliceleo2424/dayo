@@ -27,6 +27,7 @@ async function popup(reply){
  assert(/nothing in the draft was not said/.test(d.querySelector('.pr-draft-warning').textContent));
  assert(d.getElementById('pr-draft-evidence').textContent.includes('I bought my mom mochi'),'evidence shows what the user said');
  assert.equal(w.DayOPartnerReport.draftChecked(),false,'cannot send the draft before confirming the check');
+ assert.equal(d.getElementById('pr-letter-selected').children.length,0,'no duplicate per-line list under a draft');
  area.value=LETTER.replace('sweet idea','kind idea');area.dispatchEvent(new w.Event('input'));
  assert.equal(w.DayOPartnerReport.draftChecked(),false,'editing alone does not replace the check');
  d.getElementById('pr-draft-confirm').checked=true;
