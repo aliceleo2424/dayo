@@ -10,9 +10,10 @@ const cleanup = require('./_lib/keepsake-cleanup.js');
 const quizHistory = require('./_lib/quiz-history.js');
 const uuid = v => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
 function json(res, status, body) { res.statusCode = status; res.setHeader('Content-Type', 'application/json; charset=utf-8'); res.setHeader('Cache-Control', 'private, no-store'); res.end(JSON.stringify(body)); }
-function originAllowed(origin, vercelUrl) {
+// 2026-10-20: the Preview branch alias (VERCEL_BRANCH_URL) is allowed too, so a Preview can be tested end to end.
+function originAllowed(origin, vercelUrl, branchUrl) {
   if (!origin) return true;
-  try { const u = new URL(origin); return u.protocol === 'https:' && ['dayotalk.com', 'www.dayotalk.com', 'dayo-black.vercel.app', String(vercelUrl || '')].includes(u.host); } catch (_) { return false; }
+  try { const u = new URL(origin); return u.protocol === 'https:' && ['dayotalk.com', 'www.dayotalk.com', 'dayo-black.vercel.app', String(vercelUrl || ''), String(branchUrl || '')].filter(Boolean).includes(u.host); } catch (_) { return false; }
 }
 async function body(req) {
   if (req.body && typeof req.body === 'object') return req.body;
@@ -22,7 +23,7 @@ async function body(req) {
 }
 function createHandler({ env = process.env, fetchImpl = fetch, illustrationPilot = null, clock = Date.now } = {}) {
   return async function handler(req, res) {
-    if (!originAllowed(req.headers && req.headers.origin, env.VERCEL_URL)) return json(res, 403, { error: 'origin_not_allowed' });
+    if (!originAllowed(req.headers && req.headers.origin, env.VERCEL_URL, env.VERCEL_BRANCH_URL)) return json(res, 403, { error: 'origin_not_allowed' });
     if (req.method !== 'POST') return json(res, 405, { error: 'method_not_allowed' });
     // Scheduler sends parsed application/json. Separate server secret; never participant JWT.
     if (req.body && req.body.action === 'keepsake_cleanup') return cleanup.createHandler({env,fetchImpl})(req,res);

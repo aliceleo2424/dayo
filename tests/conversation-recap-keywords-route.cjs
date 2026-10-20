@@ -16,5 +16,14 @@ function call(body){return new Promise(resolve=>{const res={headers:{},setHeader
  assert.equal(r.status,400,'keywords only for picture generation');
  r=await call({booking_id:B,keywords:['tok']});
  assert.equal(r.status,400,'not on the customer recap');
+ // Preview branch alias is an allowed origin; any other vercel.app host is not.
+ const env={VERCEL_URL:'dayo-abc.vercel.app',VERCEL_BRANCH_URL:'dayo-git-x.vercel.app'};
+ const viaOrigin=origin=>new Promise(resolve=>{const res={setHeader(){},end(t){resolve(this.statusCode);}};createHandler({env})({method:'POST',headers:{origin,authorization:'Bearer a.b.c'},body:{booking_id:B}},res);});
+ assert.equal(await viaOrigin('https://dayo-git-x.vercel.app'),503);
+ assert.equal(await viaOrigin('https://dayo-abc.vercel.app'),503);
+ assert.equal(await viaOrigin('https://www.dayotalk.com'),503);
+ assert.equal(await viaOrigin('https://evil.vercel.app'),403);
+ const noBranch=await new Promise(resolve=>{const res={setHeader(){},end(){resolve(this.statusCode);}};createHandler({env:{VERCEL_URL:'dayo-abc.vercel.app'}})({method:'POST',headers:{origin:'https://dayo-git-x.vercel.app',authorization:'Bearer a.b.c'},body:{booking_id:B}},res);});
+ assert.equal(noBranch,403,'no branch alias configured -> still blocked');
  console.log('conversation-recap-keywords-route: ok');
 })().catch(e=>{console.error(e);process.exit(1);});
