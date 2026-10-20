@@ -131,8 +131,10 @@
 
   // Owner 2026-10-20: one friendly friend in four shared pictures, picked by the scene's topic.
   var TALK_CUT = { travel: 'street', 'fashion-beauty': 'street', 'food-cafe': 'cafe', 'work-school': 'cafe', exercise: 'park', pets: 'park' };
+  // Owner 2026-10-20: scenes get their own picture as the owner adds them; the rest keep the shared topic picture.
+  var OWN_PICTURE = { 'drama-01': 1, 'drama-02': 1, 'movies-01': 1, 'movies-02': 1, 'youtube-01': 1, 'youtube-02': 1 };
   function imageHtml(scene) {
-    var topic = String(scene.id || '').replace(/-\d+$/, ''), pic = TALK_CUT[topic] || 'home';
+    var id = String(scene.id || ''), topic = id.replace(/-\d+$/, ''), pic = OWN_PICTURE[id] ? id : (TALK_CUT[topic] || 'home');
     return '<img class="dsb-img" alt="" src="images/talk-cut/' + pic + '.webp" onerror="this.remove()">';
   }
 

@@ -18,7 +18,7 @@ const page = interest => '<!doctype html><html lang="ko"><head><meta charset="ut
   await new Promise(r => server.listen(0, '127.0.0.1', r)); const base = 'http://127.0.0.1:' + server.address().port;
   const browser = await chromium.launch({ channel: 'chrome', headless: true });
   try {
-    for (const [interest, pic] of [['travel', 'street'], ['food_cafe', 'cafe'], ['exercise', 'park'], ['drama', 'home']]) {
+    for (const [interest, pic] of [['travel', 'street'], ['food_cafe', 'cafe'], ['exercise', 'park'], ['music', 'home'], ['drama', 'drama-0[12]'], ['youtube', 'youtube-0[12]']]) {
       const p = await browser.newPage({ viewport: { width: 390, height: 844 } }), errors = [], missing = [];
       p.on('pageerror', e => errors.push(e.message)); p.on('response', r => { if (r.status() >= 400) missing.push(r.url()); });
       await p.goto(base + '/?i=' + interest);
@@ -34,6 +34,6 @@ const page = interest => '<!doctype html><html lang="ko"><head><meta charset="ut
       assert.deepEqual(errors, []); assert.deepEqual(missing, []);
       await p.close();
     }
-    console.log('PASS 대화 한 컷 card: renamed copy without bookshelf wording; topic picture travel->street, food_cafe->cafe, exercise->park, other->home; images load; no errors');
+    console.log('PASS 대화 한 컷 card: renamed copy without bookshelf wording; topic picture travel->street, food_cafe->cafe, exercise->park, other->home; own scene pictures (drama, youtube) used when available; images load; no errors');
   } finally { await browser.close(); server.close(); }
 })().catch(e => { console.error(e); process.exitCode = 1; });
