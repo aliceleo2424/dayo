@@ -113,7 +113,8 @@
       '<p class="lb-letter">' + esc(l.body) + '</p>' +
       '<div class="lb-actions"><button type="button" class="lb-record">' + t('이 대화 기록 보기', 'View this conversation') + '</button><button type="button" class="lb-close">' + t('편지함으로', 'Back to letters') + '</button></div></div>';
     el.querySelector('.lb-close').onclick = closeLetter;
-    el.querySelector('.lb-record').onclick = function () { closeLetter(true); if (typeof window.openReportDetailModal === 'function') window.openReportDetailModal('report-' + (l.index + 1)); };
+    if (document.body.getAttribute('data-customer-page') === 'letters-demo') el.querySelector('.lb-record').remove();
+    else el.querySelector('.lb-record').onclick = function () { closeLetter(true); if (typeof window.openReportDetailModal === 'function') window.openReportDetailModal('report-' + (l.index + 1)); };
     el.hidden = false; document.body.style.overflow = 'hidden';
     el.querySelector('.lb-close').focus();
     if (l.unread) { markRead(l.id); l.unread = false; }
@@ -133,8 +134,21 @@
   }
   function load(reports) { loaded = true; renderRun++; letters = collect(reports); render(); loadImages(renderRun); }
 
+  // Sample letters for the logged-out "예시 편지함" page (/letters-demo.html). Not real data; shown with a "sample" notice.
+  function demoReports() {
+    var day = 864e5, now = Date.now();
+    return [
+      { id: 'demo-1', partner_name: 'Mia', scheduled_at: new Date(now - 2 * day).toISOString(),
+        partner_comment: 'Dear Jiwon,\n\nThank you for telling me about your weekend trip to Busan! I loved how you described the sea at sunrise, and your story about the fish market made me smile. You kept going even when you needed a moment to find the right word, and that is exactly how a real conversation grows.\n\nNext time, tell me what you ate there. I want to hear everything.\n\n— Mia' },
+      { id: 'demo-2', partner_name: 'Lucas', scheduled_at: new Date(now - 20 * day).toISOString(),
+        partner_comment: 'Dear Jiwon,\n\nIt was so nice meeting you today. You told me about your favorite cafe near your office, and now I want to visit Seoul just to try that latte. Your sentences were clear and kind, and your questions made me feel at home.\n\nSee you at our next talk!\n\n— Lucas' }
+    ];
+  }
+
   function init() {
-    if (document.body.getAttribute('data-customer-page') !== 'mypage' || !root()) return;
+    var pageName = document.body.getAttribute('data-customer-page');
+    var demo = pageName === 'letters-demo';
+    if ((pageName !== 'mypage' && !demo) || !root()) return;
     root().addEventListener('click', function (e) {
       var b = e.target.closest('[data-letter]'); if (b) { openLetter(Number(b.getAttribute('data-letter'))); return; }
       var g = e.target.closest('[data-ghost]'); if (g) showGhostTip(g);
@@ -143,7 +157,8 @@
     document.addEventListener('dayo:langchange', render);
     window.addEventListener('hashchange', syncView);
     syncView();
-    if (Array.isArray(window.__dayoTalkAlbum)) load(window.__dayoTalkAlbum); else render();
+    if (demo) { load(demoReports()); return; }
+        if (Array.isArray(window.__dayoTalkAlbum)) load(window.__dayoTalkAlbum); else render();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
   window.DayOLetterbox = { collect: collect };

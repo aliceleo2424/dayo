@@ -56,7 +56,7 @@ body[data-customer-page] .tk-price-bonus { font-size: 11px; line-height: 1.5; co
   body[data-customer-page] .header-actions > [data-i18n-lang], body[data-customer-page] .topbar-right > [data-i18n-lang], body[data-customer-page] .faq-language, body[data-customer-page] .admin-dash-link { display: none; }
   body[data-customer-page] .header-cta { display: inline-flex !important; min-height: 42px; padding: 10px 12px; font-size: 12px; border-radius: 11px; }
   body[data-customer-page] .menu-toggle { display: inline-flex; width: 38px; height: 42px; background: transparent; color: #4c634e; border: none; border-radius: 10px; }
-  body[data-customer-page] .customer-bottom-nav { position: fixed; z-index: 210; inset: auto 0 0; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); background: #fffcf8; border-top: 1px solid #e7e4d9; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); box-sizing: border-box; }
+  body[data-customer-page] .customer-bottom-nav { position: fixed; z-index: 210; inset: auto 0 0; display: grid; grid-template-columns: repeat(auto-fit,minmax(0,1fr)); grid-auto-flow: column; background: #fffcf8; border-top: 1px solid #e7e4d9; padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); box-sizing: border-box; }
   body[data-customer-page] .customer-bottom-nav a { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 5px; min-height: 54px; padding: 4px 0; text-decoration: none; color: #8b7d70; font: 600 11px/1.2 -apple-system, BlinkMacSystemFont, sans-serif; border-radius: 10px; }
   body[data-customer-page] .customer-bottom-nav svg { width: 23px; height: 23px; }
   body[data-customer-page] .customer-bottom-nav a { border-radius: 14px; }
@@ -65,3 +65,15 @@ body[data-customer-page] .tk-price-bonus { font-size: 11px; line-height: 1.5; co
   body[data-customer-page] .tk-overlay { padding-bottom: env(safe-area-inset-bottom); }
   body[data-customer-page] .tk-discount strong { font-size: 13px; }
 }
+body[data-customer-page] [hidden] { display: none !important; }
+/* Header login button for logged-out visitors (PC): text instead of the drawer's icon-only button. */
+body[data-customer-page] .customer-account .ms-login-trigger { width: auto !important; height: 42px; padding: 0 18px; border: 1px solid #5f7d63; border-radius: 999px; background: #fff; color: #4b6650; font: 700 14px/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif; box-shadow: none; }
+body[data-customer-page] .customer-account .ms-login-trigger > span:not([aria-hidden="true"]) { display: inline !important; }
+body[data-customer-page] .customer-account .ms-login-trigger > span[aria-hidden="true"] { display: none !important; }
+body[data-customer-page] .customer-account.ms-slot-guest { min-width: 0 !important; }
+body[data-customer-page="letters-demo"] #dayo-letterbox { display: block; }
+.letters-demo-main { width: min(880px, calc(100% - 2rem)); margin: 0 auto; padding: 2rem 0 5.5rem; }
+.letters-demo-note { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; margin: 0 0 18px; padding: 14px 18px; border: 1px dashed #c9b98f; border-radius: 16px; background: #fffbea; color: #5b4f3f; font-size: 14px; line-height: 1.6; }
+.letters-demo-note strong { display: inline-block; padding: 3px 10px; border-radius: 999px; background: #f7e3a3; color: #3f3627; font-size: 12px; font-weight: 800; }
+.letters-demo-note a { margin-left: auto; display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 12px; background: #5f7d63; color: #fff; font-weight: 700; text-decoration: none; }
+.letters-demo-note > span { flex: 1 1 320px; }
