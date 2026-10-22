@@ -3,7 +3,7 @@ import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
 import { buildPartnerApprovalMessage } from '@/lib/transactional-email';
 
-// Sends the Partner Test pass email for one approved application.
+// Sends the partner approval (welcome to the DayO team) email for one approved application.
 // Only a signed-in admin may call it; the recipient always comes from the stored application, never the request.
 export async function POST(req: NextRequest) {
   try {

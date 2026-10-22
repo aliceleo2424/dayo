@@ -1,11 +1,11 @@
 'use strict';
-// Partner welcome + Partner Test pass email in the DayO card design. No mail is sent.
+// Partner welcome + partner approval (welcome to the team) email in the DayO card design. No mail is sent.
 const assert = require('node:assert/strict'), fs = require('node:fs'), path = require('node:path');
 const root = path.join(__dirname, '..');
 const mail = require('../api/_lib/transactional-email.js');
 assert.equal(fs.readFileSync(path.join(root, 'api/_lib/transactional-email.js'), 'utf8'), fs.readFileSync(path.join(root, 'admin/src/lib/transactional-email.js'), 'utf8'), 'admin mirror identical');
 const a = mail.buildPartnerApprovalMessage({ name: 'Ana <b>', email: 'ana@example.com', signupLink: 'https://www.dayotalk.com/signup' });
-assert.match(a.subject, /Partner Test/); assert.equal(a.reply_to, mail.REPLY_TO);
+assert.match(a.subject, /Welcome to the DayO team/); assert.doesNotMatch(a.html + a.text, /passed the DayO Partner Test/); assert.equal(a.reply_to, mail.REPLY_TO);
 for (const body of [a.html, a.text]) {
   assert.ok(body.includes('₩6,000 per completed 30-minute session'));
   assert.ok(body.includes('ana@example.com')); assert.ok(body.includes('https://www.dayotalk.com/signup'));

@@ -81,10 +81,10 @@ function renderPartnerCard({language, title, intro, lead, highlight, sections, c
     '<p style="font-size:12px;line-height:1.6;color:#706259;border-top:1px solid #E7DDD0;padding-top:14px;margin:20px 0 0">' + (en ? 'Contact: ' : '문의: ') + '<a href="mailto:hello@dayotalk.com" style="color:#5F7D63">hello@dayotalk.com</a></p>' +
     '</td></tr></table></td></tr></table></body></html>';
 }
-// Partner Test pass email (English). Same facts as the admin copy/paste message.
+// Partner approval email: welcome to the DayO team (English). Same facts as the admin copy/paste message.
 function buildPartnerApprovalMessage({name, email, signupLink}, from) {
   const lounge = 'https://www.dayotalk.com/partner#pd-sessions';
-  const title = "You passed the DayO Partner Test 🎉";
+  const title = "Welcome to the DayO team! 🎉";
   const intro = 'Hi ' + (name || 'there') + '!';
   const weekly = ['Partner Lounge → Sessions → Availability', 'Open the "Weekly Template" tab', 'Pick a day and tap the times you can talk', 'Press "Save weekly availability" — these times repeat every week'];
   const steps = ['Sign up on DayO with the same email you used in your application (' + email + '). Your partner access will be activated automatically.',
@@ -92,11 +92,11 @@ function buildPartnerApprovalMessage({name, email, signupLink}, from) {
     'Open your first available times so learners can book you: ' + lounge];
   const note = 'Need a change on one specific day? Use "Monthly Calendar" to close that date or set custom times. Your weekly times stay as they are. Times are in Korea time (KST), in 30-minute slots.';
   const html = renderPartnerCard({language: 'en', title, intro,
-    lead: "We're happy to let you know that you've passed the DayO Partner Test. The next step is a short onboarding and account setup.",
+    lead: "We're so glad to have you join DayO as a conversation partner. The next step is a short onboarding and account setup.",
     highlight: {label: 'Your session rate', value: '₩6,000 per completed 30-minute session'},
     sections: [{eyebrow: 'Next steps', items: steps, numbered: true}, {eyebrow: 'How to set times that repeat every week', items: weekly, numbered: true}],
     ctaLead: 'Start with step 1:', link: signupLink, cta: 'Sign up on DayO', note, closing: 'Welcome to DayO!'});
-  const text = [intro, '', "We're happy to let you know that you've passed the DayO Partner Test.", '', 'Your session rate is:', '₩6,000 per completed 30-minute session.', '',
+  const text = [intro, '', "Welcome to the DayO team! We're so glad to have you join DayO as a conversation partner.", '', 'Your session rate is:', '₩6,000 per completed 30-minute session.', '',
     'The next step is a short onboarding and account setup.', '', steps[0], '', signupLink, '', steps[1], '', 'Once your account is ready, please open your first available times so learners can book you:', lounge, '',
     'How to set times that repeat every week:', ...weekly.map((w, i) => (i + 1) + '. ' + w), '', note, '', 'Welcome to DayO!', '', 'Contact: ' + REPLY_TO].join('\n');
   return {from: sender(from), reply_to: REPLY_TO, subject: '[DayO] ' + title, html, text};
