@@ -25,6 +25,18 @@ body[data-customer-page="landing"] .home-cta-btn { min-height: 52px; border: 0; 
 body[data-customer-page="landing"] .home-quiz-link { border: 0; padding: 0; background: transparent; font: inherit; font-size: 13px; color: #425b45; cursor: pointer; text-decoration: underline; text-underline-offset: 5px; }
 body[data-customer-page="landing"] .lv-eyebrow { color: #5b7354; font-size: 12px; letter-spacing: .1em; font-weight: 700; }
 body[data-customer-page="landing"] .lv-story { padding: 32px 0 68px; }
+/* Storybook entry (owner 2026-10-22): links to /storybook-demo; Belgium story opens without login. */
+body[data-customer-page="landing"] .lv-storybook { padding: 64px 0; background: #fbf6ea; }
+body[data-customer-page="landing"] .lv-storybook-grid { display: grid; grid-template-columns: minmax(0, 360px) minmax(0, 1fr); gap: 56px; align-items: center; }
+body[data-customer-page="landing"] .lv-storybook-art img { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 22px; border: 8px solid #fff; box-shadow: 0 12px 28px #40362f1a; transform: rotate(-1.5deg); }
+body[data-customer-page="landing"] .lv-storybook h2 { font-size: clamp(25px,2.7vw,34px); line-height: 1.5; letter-spacing: -.04em; white-space: pre-line; margin: 16px 0; }
+body[data-customer-page="landing"] .lv-storybook p { font-size: 15px; line-height: 1.8; white-space: pre-line; }
+body[data-customer-page="landing"] .lv-storybook a:not(.lv-storybook-art) { display: inline-flex; align-items: center; min-height: 44px; color: #4c6850; font-size: 14px; font-weight: 700; margin-top: 8px; text-underline-offset: 5px; }
+@media (max-width: 767px) {
+  body[data-customer-page="landing"] .lv-storybook { padding: 40px 0; }
+  body[data-customer-page="landing"] .lv-storybook-grid { grid-template-columns: 1fr; gap: 24px; }
+  body[data-customer-page="landing"] .lv-storybook-art { display: block; max-width: 260px; margin: 0 auto; }
+}
 body[data-customer-page="landing"] .lv-story-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; }
 body[data-customer-page="landing"] .lv-story h2,
 body[data-customer-page="landing"] .lv-close h2 { font-size: clamp(25px,2.7vw,34px); line-height: 1.5; letter-spacing: -.04em; white-space: pre-line; margin: 16px 0; }

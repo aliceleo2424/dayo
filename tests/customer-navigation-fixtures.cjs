@@ -16,7 +16,7 @@ async function navigationChecks() {
   w.eval(read('public/landing-views.js'));
   d.dispatchEvent(new w.Event('DOMContentLoaded'));
   const shown = () => [...d.querySelectorAll('[data-home-content],[data-detail-view]')].filter(e => !e.hidden);
-  assert.equal(shown().length, 3); assert(shown().every(e => e.hasAttribute('data-home-content')));
+  assert.equal(shown().length, 4); /* hero, talk-card story, storybook entry (2026-10-22), closing offer */ assert(shown().every(e => e.hasAttribute('data-home-content')));
   for (const id of ['pricing','about','how']) {
     d.querySelector('.customer-desktop-nav [data-customer-route='+id+']').click();
     assert.deepEqual(shown().map(e => e.id), [id]);
@@ -28,7 +28,7 @@ async function navigationChecks() {
   d.querySelector('#mobileNav [data-customer-route=about]').click();
   assert.equal(d.querySelector('#menuToggle').getAttribute('aria-expanded'),'false');
   d.querySelector('.customer-bottom-nav [data-customer-route=home]').click();
-  assert.equal(w.location.hash,''); assert.equal(shown().length,3);
+  assert.equal(w.location.hash,''); assert.equal(shown().length,4);
   const question = d.querySelector('[data-story-ko]'), first = question.textContent;
   d.querySelector('[data-story-next]').click(); assert.notEqual(question.textContent, first);
   d.querySelector('[data-story-prev]').click(); assert.equal(question.textContent, first);

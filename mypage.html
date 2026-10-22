@@ -1659,7 +1659,7 @@
   <link rel="stylesheet" href="availability-calendar.css">
   <link rel="stylesheet" href="/english-typography.css?v=20261005-en">
   <link rel="stylesheet" href="/brand-surfaces.css?v=20261005-logo-palette">
-  <link rel="stylesheet" href="user-dashboard.css?v=20261012-role-left-yellow">
+  <link rel="stylesheet" href="user-dashboard.css?v=20261022-storybook">
 <style>/* Treat remains stored; hidden on the new User surface. */ #ud-treats,.dayo-tea-table{display:none!important}</style>
   <style>/* PRICE-02: unconfirmed trial sales only; other coupons remain visible. */
     [data-coupon-wallet]:not([data-trial-eligible="true"]) [data-coupon-code="WELCOME_9900"], [data-coupon-wallet]:not([data-trial-eligible="true"]) [data-coupon-code="WELCOME9900"] { display: none !important; }
@@ -1764,6 +1764,7 @@
         <div id="ud-next-empty"><p id="ud-next-empty-copy" data-ud-copy="loading">Loading your next conversation…</p><button id="ud-empty-book" type="button" class="ud-primary" hidden data-ud-copy="book">Book a conversation</button></div>
       </section>
       <section id="ud-ticket-stamps" class="ud-card ud-stamp-card" aria-labelledby="ud-stamp-title" hidden></section>
+      <section class="ud-card ud-storybook-card" aria-labelledby="ud-storybook-title"><img src="/images/stories/belgium-waffle/scene-1.webp" alt="" width="1000" height="1000" loading="lazy"><div><p class="ud-storybook-eyebrow" data-i18n="mypage.storybook.eyebrow">나의 이야기책</p><h2 id="ud-storybook-title" data-i18n="mypage.storybook.title">파트너의 나라에서 온 이야기 5편</h2><p data-i18n="mypage.storybook.copy">영어 조각을 맞추면 흐릿한 장면이 선명해져요.</p></div><a class="ud-storybook-cta" href="/storybook-demo" data-i18n="mypage.storybook.cta">이야기책 펼치기</a></section>
       <nav class="ud-tabs" role="tablist" aria-label="My Page" data-ud-aria="tabs">
         <button id="ud-tab-sessions" type="button" role="tab" aria-selected="true" aria-controls="ud-sessions" data-ud-tab="sessions" data-ud-copy="sessions">Sessions</button>
         <button id="ud-tab-progress" type="button" role="tab" aria-selected="false" aria-controls="ud-progress" data-ud-tab="progress" data-ud-copy="progress" tabindex="-1">Progress</button>
@@ -1959,7 +1960,7 @@
     </div>
   </div>
 
-  <script src="i18n.js?v=20260914-starter3"></script>
+  <script src="i18n.js?v=20261022-storybook"></script>
   <script src="materials.js"></script>
   <script src="supabase-env.js"></script>
   <script src="profile-image-resolver.js"></script>

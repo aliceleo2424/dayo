@@ -12,6 +12,14 @@
   padding: 30px 24px 48px !important;
 }
 .ud-dashboard [hidden] { display: none !important; }
+/* Storybook entry (owner 2026-10-22). */
+.ud-dashboard .ud-storybook-card { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; align-items: center; gap: 16px; margin-bottom: 22px; }
+.ud-dashboard .ud-storybook-card img { width: 72px; height: 72px; object-fit: cover; border-radius: 14px; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(64,54,47,.12); }
+.ud-dashboard .ud-storybook-card h2 { font-size: 17px; margin: 2px 0 0; }
+.ud-dashboard .ud-storybook-card p { margin: 4px 0 0; }
+.ud-dashboard .ud-storybook-card .ud-storybook-eyebrow { margin: 0; font-size: 12px; font-weight: 800; color: #8a5a2b; }
+.ud-dashboard .ud-storybook-cta { box-sizing: border-box; min-height: 44px; padding: 0 16px; border-radius: 12px; background: var(--ud-primary); color: #fff; font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; white-space: nowrap; }
+@media (max-width: 560px) { .ud-dashboard .ud-storybook-card { grid-template-columns: 64px minmax(0, 1fr); } .ud-dashboard .ud-storybook-card img { width: 64px; height: 64px; } .ud-dashboard .ud-storybook-cta { grid-column: 1 / -1; width: 100%; } }
 .ud-dashboard .mypage-main-grid { display: block !important; margin: 0; }
 .ud-dashboard .ud-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 22px; }
 .ud-dashboard .ud-mode { background: var(--ud-butter); color: var(--ud-text); border-radius: 999px; padding: 7px 12px; font-size: 11px; font-weight: 800; letter-spacing: .06em; }
