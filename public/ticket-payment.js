@@ -130,6 +130,147 @@
     return true;
   }
 
+  /* ---- 무통장입금 안내 (PortOne 미연동 기간 전용) ----
+     PortOne SDK와 고객사 식별코드가 준비되면 이 카드는 더 이상 뜨지 않고
+     기존 결제창 흐름이 그대로 동작한다. 아래 상수만 바꾸면 계좌 정보가 바뀐다. */
+  var BANK_TRANSFER = {
+    bank: '카카오뱅크',
+    account: '3333-3852-49984',
+    holder: '여승현(88드래곤즈)',
+    confirmWindow: { KO: '영업일 기준 12시간 이내', EN: 'within 12 business hours' },
+    contactEmail: 'hello@dayotalk.com'
+  };
+
+  function portoneAvailable() {
+    var IMP = window.IMP;
+    if (!IMP || typeof IMP.init !== 'function' || typeof IMP.request_pay !== 'function') return false;
+    return isPortoneConfigured(String(PORTONE_IMP_CODE || '').trim());
+  }
+
+  function uiLang() {
+    try { return window.DayOI18n && window.DayOI18n.getLang() === 'EN' ? 'EN' : 'KO'; } catch (e) { return 'KO'; }
+  }
+
+  function escapeHtml(value) {
+    return String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function wonText(amount) {
+    return '₩' + Number(amount || 0).toLocaleString('ko-KR');
+  }
+
+  var bankNoticeStyled = false;
+  function ensureBankNoticeStyle() {
+    if (bankNoticeStyled) return;
+    bankNoticeStyled = true;
+    var style = document.createElement('style');
+    style.setAttribute('data-dayo-bank-notice', '1');
+    style.textContent =
+      '.bk-overlay{position:fixed;inset:0;z-index:970;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(64,54,47,.45);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .18s ease}' +
+      '.bk-overlay.is-open{opacity:1;visibility:visible;pointer-events:auto}' +
+      '.bk-card{position:relative;width:min(440px,100%);max-height:min(92vh,92dvh);overflow:auto;box-sizing:border-box;padding:22px 20px 18px;border:1px solid #E7DDD0;border-radius:24px;background:#FFFBF4;color:#40362F;box-shadow:0 18px 48px rgba(64,54,47,.18);text-align:left;font-size:14px;line-height:1.65}' +
+      '.bk-kicker{margin:0 0 6px;font-size:12px;font-weight:800;letter-spacing:.08em;color:#5F7D63}' +
+      '.bk-title{margin:0 0 12px;font-size:20px;line-height:1.3;font-weight:800;color:#263F35;padding-right:36px;word-break:keep-all}' +
+      '.bk-close{position:absolute;top:12px;right:12px;width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:#64776B;font-size:18px;cursor:pointer}' +
+      '.bk-close:hover{background:#F4F6E9}' +
+      '.bk-order{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin:0 0 14px;padding:12px 14px;border-radius:14px;background:#FFF4CC;color:#40362F}' +
+      '.bk-order strong{font-size:22px;white-space:nowrap}' +
+      '.bk-account{margin:0 0 12px;padding:14px;border:1px solid #DDE5D9;border-radius:16px;background:white}' +
+      '.bk-account dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 12px}' +
+      '.bk-account dt{margin:0;color:#64776B;font-size:12px;font-weight:700}' +
+      '.bk-account dd{margin:0;font-weight:700;color:#263F35;overflow-wrap:anywhere}' +
+      '.bk-account dd.bk-number{font-size:18px;letter-spacing:.02em}' +
+      '.bk-copy{margin-top:10px;width:100%;min-height:44px;border:1px solid #5F7D63;border-radius:12px;background:white;color:#435F4C;font:inherit;font-weight:700;cursor:pointer}' +
+      '.bk-copy.is-done{background:#EEF3EA}' +
+      '.bk-steps{margin:0 0 14px;padding:0 0 0 18px;color:#5C4A42}' +
+      '.bk-steps li{margin:4px 0;word-break:keep-all}' +
+      '.bk-steps b{color:#263F35}' +
+      '.bk-actions{display:flex;flex-direction:column;gap:8px}' +
+      '.bk-primary{display:block;box-sizing:border-box;width:100%;min-height:48px;padding:13px 16px;border:0;border-radius:14px;background:#5F7D63;color:white;font:inherit;font-weight:800;text-align:center;text-decoration:none;cursor:pointer}' +
+      '.bk-primary:hover{background:#516B55}' +
+      '.bk-secondary{display:block;box-sizing:border-box;width:100%;min-height:44px;padding:11px 16px;border:1px solid #DDE5D9;border-radius:14px;background:white;color:#435F4C;font:inherit;font-weight:700;cursor:pointer}' +
+      '.bk-foot{margin:12px 0 0;font-size:12px;color:#64776B}' +
+      '.bk-card button:focus-visible,.bk-card a:focus-visible{outline:3px solid #5F7D63;outline-offset:3px}' +
+      '@media(max-width:430px){.bk-card{padding:18px 16px 16px;border-radius:20px}.bk-title{font-size:18px}.bk-order strong{font-size:20px}}';
+    document.head.appendChild(style);
+  }
+
+  var bankNotice = null;
+  function hideBankNotice() {
+    if (!bankNotice) return;
+    bankNotice.classList.remove('is-open');
+    bankNotice.setAttribute('aria-hidden', 'true');
+  }
+
+  function bankTransferMailto(product, contact, lang) {
+    var subject = lang === 'EN'
+      ? '[DayO] Bank transfer sent - ' + product.name + ' ' + wonText(product.price)
+      : '[DayO] 무통장입금 완료 - ' + product.name + ' ' + wonText(product.price);
+    var body = lang === 'EN'
+      ? ['Product: ' + product.name, 'Amount: ' + wonText(product.price), 'Depositor name (as shown in your bank app): ',
+         'Contact email: ' + (contact && contact.contact_email || ''), 'Phone: ' + (contact && contact.mobile_phone || ''), '',
+         'Please credit my tickets after confirming the transfer. Thank you!'].join('\n')
+      : ['상품: ' + product.name, '입금 금액: ' + wonText(product.price), '입금자명(은행 앱에 표시된 이름): ',
+         '연락 이메일: ' + (contact && contact.contact_email || ''), '휴대폰: ' + (contact && contact.mobile_phone || ''), '',
+         '입금 확인 후 티켓 충전 부탁드립니다. 감사합니다!'].join('\n');
+    return 'mailto:' + BANK_TRANSFER.contactEmail + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+  }
+
+  function showBankTransferNotice(product, contact) {
+    preopenDebug('SHOW_CALL', { source: 'ticket-payment', reason: 'bank-transfer' });
+    var lang = uiLang();
+    var EN = lang === 'EN';
+    ensureBankNoticeStyle();
+    if (!bankNotice) {
+      bankNotice = document.createElement('div');
+      bankNotice.className = 'bk-overlay';
+      bankNotice.setAttribute('data-bank-notice', '1');
+      bankNotice.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(bankNotice);
+      bankNotice.addEventListener('click', function (e) {
+        if (e.target === bankNotice || e.target.closest('[data-bk-close]')) { hideBankNotice(); return; }
+        var copy = e.target.closest('[data-bk-copy]');
+        if (copy) {
+          var text = BANK_TRANSFER.account;
+          var done = function () { copy.classList.add('is-done'); copy.textContent = copy.getAttribute('data-done-label'); };
+          if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, function () { window.prompt(copy.getAttribute('data-fallback-label'), text); });
+          else window.prompt(copy.getAttribute('data-fallback-label'), text);
+        }
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && bankNotice.classList.contains('is-open')) hideBankNotice();
+      });
+    }
+    bankNotice.innerHTML =
+      '<div class="bk-card" role="dialog" aria-modal="true" aria-labelledby="bkTitle">' +
+        '<button type="button" class="bk-close" data-bk-close aria-label="' + (EN ? 'Close' : '닫기') + '">✕</button>' +
+        '<p class="bk-kicker">' + (EN ? 'BANK TRANSFER' : '무통장입금 안내') + '</p>' +
+        '<h2 class="bk-title" id="bkTitle">' + (EN ? 'Card payment is being set up.<br>Please pay by bank transfer for now ☕' : '카드 결제 준비 중이에요.<br>지금은 계좌이체로 받고 있어요 ☕') + '</h2>' +
+        '<div class="bk-order"><span>' + escapeHtml(product.name) + '</span><strong>' + wonText(product.price) + '</strong></div>' +
+        '<div class="bk-account"><dl>' +
+          '<dt>' + (EN ? 'Bank' : '은행') + '</dt><dd>' + escapeHtml(BANK_TRANSFER.bank) + '</dd>' +
+          '<dt>' + (EN ? 'Account' : '계좌번호') + '</dt><dd class="bk-number">' + escapeHtml(BANK_TRANSFER.account) + '</dd>' +
+          '<dt>' + (EN ? 'Holder' : '예금주') + '</dt><dd>' + escapeHtml(BANK_TRANSFER.holder) + '</dd>' +
+        '</dl>' +
+        '<button type="button" class="bk-copy" data-bk-copy data-done-label="' + (EN ? 'Copied ✓' : '복사했어요 ✓') + '" data-fallback-label="' + (EN ? 'Copy this account number' : '계좌번호를 복사해 주세요') + '">' + (EN ? 'Copy account number' : '계좌번호 복사') + '</button></div>' +
+        '<ol class="bk-steps">' +
+          '<li>' + (EN ? 'Transfer <b>exactly ' + wonText(product.price) + '</b> to the account above.' : '위 계좌로 <b>' + wonText(product.price) + '</b>을 정확히 입금해 주세요.') + '</li>' +
+          '<li>' + (EN ? 'Use <b>your real name</b> as the depositor name.' : '입금자명은 <b>본인 실명</b>으로 해 주세요.') + '</li>' +
+          '<li>' + (EN ? 'Tap <b>I’ve sent it</b> below — your contact details are filled in for you.' : '아래 <b>입금했어요</b>를 눌러 알려주세요. 연락처는 미리 채워져 있어요.') + '</li>' +
+          '<li>' + (EN ? 'Tickets are credited ' + BANK_TRANSFER.confirmWindow.EN + ' after we confirm the transfer.' : '입금 확인 후 ' + BANK_TRANSFER.confirmWindow.KO + '에 티켓을 충전해 드려요.') + '</li>' +
+        '</ol>' +
+        '<div class="bk-actions">' +
+          '<a class="bk-primary" href="' + bankTransferMailto(product, contact, lang) + '">' + (EN ? 'I’ve sent it — notify DayO' : '입금했어요 — DayO에 알리기') + '</a>' +
+          '<button type="button" class="bk-secondary" data-bk-close>' + (EN ? 'Close' : '닫기') + '</button>' +
+        '</div>' +
+        '<p class="bk-foot">' + (EN ? 'Questions: ' : '문의: ') + escapeHtml(BANK_TRANSFER.contactEmail) + '</p>' +
+      '</div>';
+    bankNotice.setAttribute('aria-hidden', 'false');
+    bankNotice.classList.add('is-open');
+    var closeBtn = bankNotice.querySelector('.bk-close');
+    if (closeBtn) closeBtn.focus();
+  }
+
   function ensureImp() {
     var IMP = window.IMP;
     if (!IMP || typeof IMP.init !== 'function' || typeof IMP.request_pay !== 'function') {
@@ -358,6 +499,13 @@
         paying = false; return;
       }
 
+      // PortOne 미연동 기간: 결제창 대신 무통장입금 안내 (admin 테스트 상품은 기존 PRE-OPEN 안내 유지)
+      if (!portoneAvailable() && selectedProduct.id !== 'admin_test_1000') {
+        showBankTransferNotice(selectedProduct, contact);
+        paying = false;
+        return;
+      }
+
       var IMP = ensureImp();
       if (!IMP) {
         paying = false;
@@ -428,6 +576,13 @@
   window.DayOPaymentTestAccess = {
     requested: paymentTestRequested,
     isAllowed: hasAdminPaymentTestAccess
+  };
+  // 무통장입금 안내 카드 (PortOne 미연동 기간). 테스트와 다른 화면에서 재사용.
+  window.DayOBankTransfer = {
+    info: BANK_TRANSFER,
+    portoneAvailable: portoneAvailable,
+    show: showBankTransferNotice,
+    hide: hideBankNotice
   };
   window.DayOPay = window.DayOPay || {};
   window.DayOPay.request = function (payload) {
