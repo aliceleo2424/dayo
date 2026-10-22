@@ -1,0 +1,20 @@
+# DayO — public pages are open to search engines; signed-in areas are not.
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /room
+Disallow: /room.html
+Disallow: /mypage
+Disallow: /mypage.html
+Disallow: /partner$
+Disallow: /partner.html
+Disallow: /session-recap
+Disallow: /auth-confirmed
+Disallow: /reset-password
+Disallow: /unsubscribe
+Disallow: /keepsake-beta
+Disallow: /cheat-sheet
+Disallow: /demo-story
+Disallow: /storybook-demo
+
+Sitemap: https://www.dayotalk.com/sitemap.xml

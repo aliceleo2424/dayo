@@ -363,6 +363,7 @@
     'landing.faq.a3': { KO: '네. 정기결제나 장기 등록 없이 첫 체험권 또는 1회 티켓으로 이용할 수 있어요.', EN: 'Yes. You can use a trial or single-session ticket without a subscription or long-term enrollment.' },
     'landing.faq.all': { KO: '전체 FAQ 보기', EN: 'View all FAQs' },
     'landing.faq.kakao': { KO: '카카오톡으로 문의하기', EN: 'Ask us on KakaoTalk' },
+    'support.hours': { KO: '문의 답변: 평일 10~19시 (공휴일 제외) · 24시간 안에 답변드려요', EN: 'Replies on weekdays 10:00–19:00 KST (excluding public holidays), within 24 hours' },
     'faq.meta.title': { KO: '자주 묻는 질문 | DayO', EN: 'Frequently Asked Questions | DayO' },
     'faq.meta.description': { KO: 'DayO 대화 세션 이용 전에 자주 묻는 질문을 확인하세요.', EN: 'Find answers to common questions before your DayO conversation session.' },
     'faq.homeAria': { KO: 'DayO 홈으로', EN: 'Go to the DayO home page' },

@@ -64,7 +64,9 @@ assert.match(opening, /raise exception 'Expected pre-open booking INSERT policy 
 // Quiz topic CTA now follows the ordinary booking request path, not a notice.
 assert.match(landing, /dayo_quiz_topic[\s\S]*?closeQuizModal\(\);[\s\S]*?DayOBooking\.requestOpen\(\)/);
 for (const match of landing.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
-  if (!/\bsrc\s*=/.test(match[1])) new Function(match[2]);
+  // Structured data (2026-10-22) is JSON, not JavaScript: check it parses instead.
+  if (/type\s*=\s*["']application\/ld\+json["']/i.test(match[1])) JSON.parse(match[2]);
+  else if (!/\bsrc\s*=/.test(match[1])) new Function(match[2]);
 }
 
 for (const name of ['booking-modal.js', 'availability-slots.js', 'supabase-client.js', 'index.html']) {
