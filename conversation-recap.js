@@ -152,6 +152,20 @@
     ['work_school','일·학교','Work & school',/\b(work|working|office|colleagues?|career|school|university|college|homework)\b/i]
   ];
   function normalizeSpeech(s) { return words(s).join(' ').toLowerCase(); }
+  // Korean sessions (2026-10-24): count space-separated words (어절) in any script; English sessions keep words().
+  function spokenWords(s) { return String(s || '').match(/[\p{L}\p{N}]+(?:['’][\p{L}\p{N}]+)*/gu) || []; }
+  var KO_FILLER = /^(?:네|예|응|아니요|아뇨|음+|어+|아+|그래요|맞아요|감사합니다|고맙습니다|안녕하세요|안녕히\s*(?:가|계)세요)[\s,.!?~]*$/;
+  // Korean "expressions I actually used": the user's own Korean sentences (pause fragments joined, long rows split).
+  function koreanExpressions(speech, logId, version) {
+    var seen = new Set(), out = [];
+    sentenceUnits(speech).filter(function (r) {
+      var t = r.text.trim(), n = spokenWords(t).length, hangul = (t.match(/[가-힣]/g) || []).length;
+      return r.id && hangul >= 4 && n >= 2 && n <= 30 && t.length <= 160 && !/@|https?:|www\.|[<>�]/i.test(t) && !KO_FILLER.test(t);
+    }).map(function (r, i) { return { r: r, i: i, score: Math.min(spokenWords(r.text).length, 10) }; })
+      .sort(function (a, b) { return b.score - a.score || a.i - b.i; })
+      .forEach(function (x) { var key = x.r.text.replace(/[\s.,!?~]/g, ''); if (seen.has(key) || out.length >= 3) return; seen.add(key); out.push(x.r); });
+    return out.map(function (r) { return { text: r.text, source_utterance_id: r.id, source_timestamp: r.timestamp, source_log_id: logId, source_role: 'learner', source_version: version, topic_keys: [] }; });
+  }
   function greeting(s) {
     return /^(?:(?:hello|hi|hey|nice to meet you|how are you|goodbye|bye|see you|thank you|thanks|good morning|good afternoon|good evening)[\s,.!?]*)+$/i.test(s.trim());
   }
@@ -311,23 +325,24 @@
     var o = options || {}, bookingId = String(o.bookingId || ''), lang = language(o.language);
     var userRows = rows(o.learnerLog, bookingId, o.learnerId, 'learner');
     var partnerRows = rows(o.partnerLog, bookingId, o.partnerId, 'partner');
-    var supported = lang === 'en';
-    var count = function (speech) { return speech.reduce(function (n, r) { return n + words(r.text).length; }, 0); };
+    var korean = lang === 'ko';
+    var supported = lang === 'en' || korean;
+    var count = function (speech) { return speech.reduce(function (n, r) { return n + (korean ? spokenWords(r.text) : words(r.text)).length; }, 0); };
     var u = userRows || [], p = partnerRows || [];
     var learnerWords = supported && userRows ? count(u) : null;
     var partnerWords = supported && partnerRows ? count(p) : null;
     var ratio = learnerWords != null && partnerWords != null && learnerWords + partnerWords > 0 ? learnerWords / (learnerWords + partnerWords) : null;
     var chat=chatEvidence(o.chatMessages,bookingId,o.learnerId,o.partnerId);
     var chatCandidates=chat.filter(function(m){return meaningful(m)&&learner.isQuizQualityCandidate(m.text)&&!/[0-9@]|https?:|www\.|\b(?:address|phone|password|passport|diagnosis|medication|bank|salary|credit card|social security)\b/i.test(m.text);});
-    var expansion = supported && o.quizHistoryStatus !== 'unavailable' ? expand(u.concat(chatCandidates), o.quizExcludedWords) : [];
+    var expansion = supported && !korean && o.quizHistoryStatus !== 'unavailable' ? expand(u.concat(chatCandidates), o.quizExcludedWords) : [];
     expansion.forEach(function(v){v.source_evidence=u.concat(chatCandidates).filter(function(r){return v.source_utterance_ids.includes(r.id);}).map(function(r){return {id:r.id,role:r.speaker,medium:r.medium||'speech'};});});
     var learnerVersion = userRows ? sourceVersion(bookingId, o.learnerLog.id, u) : '';
     var partnerVersion = partnerRows ? sourceVersion(bookingId, o.partnerLog.id, p) : '';
     var fingerprint = learner.contentFingerprint(bookingId, VERSION, [lang, learnerVersion, partnerVersion]);
     var context = {interests:[],cards:[]};
     var storyVersion = learner.contentFingerprint(bookingId,STORY_VERSION,[learnerVersion,partnerVersion,context]);
-    var displayed = supported ? stories(u.concat(p),context,storyVersion,{learner:o.learnerLog && o.learnerLog.id,partner:o.partnerLog && o.partnerLog.id}) : [];
-    var ex = supported ? storyExpressions(u,displayed,o.learnerLog && o.learnerLog.id,storyVersion) : [];
+    var displayed = supported && !korean ? stories(u.concat(p),context,storyVersion,{learner:o.learnerLog && o.learnerLog.id,partner:o.partnerLog && o.partnerLog.id}) : [];
+    var ex = !supported ? [] : korean ? koreanExpressions(u, o.learnerLog && o.learnerLog.id, storyVersion) : storyExpressions(u,displayed,o.learnerLog && o.learnerLog.id,storyVersion);
     return { kind: 'conversation_recap', schema_version: 1, generator: VERSION, booking_id: bookingId, language: lang, supported: supported,
       source: { learner_log_id: userRows ? o.learnerLog.id : '', learner_version: learnerVersion, fingerprint: fingerprint, learner_available: !!userRows, partner_available: !!partnerRows },
       metrics: { user_word_count: learnerWords, user_utterance_count: userRows ? u.length : null, partner_word_count: partnerWords, partner_utterance_count: partnerRows ? p.length : null, user_participation_ratio: ratio },
@@ -364,14 +379,14 @@
     var delta = previous == null ? null : count - previous;
     var html = '<section class="recap-volume recap-section"><h4>' + (ko ? '내 대화량' : 'My conversation volume') + '</h4><div class="recap-metrics">' +
       '<div class="recap-spoken"><strong>' + esc(count == null ? '—' : count + (ko ? '단어' : ' words')) + '</strong><span>' + (ko ? '말했어요' : 'spoken') + '</span></div></div>';
-    html += '<p class="recap-volume-change">' + (delta == null ? (r.volume_history_status === 'test_session' ? (ko ? 'TEST 세션은 성장 추이에 포함하지 않아요.' : 'TEST sessions are not included in your progress trend.') : previousMissing ? (ko ? '직전 완료 세션의 발화 기록이 없어 비교할 수 없어요.' : 'Your previous completed session has no comparable speech record.') : r.volume_history_status !== 'available' ? (ko ? '이전 기록을 불러오지 못했어요.' : 'Previous records are unavailable.') : (ko ? '첫 기록이에요' : 'Your first record')) : (ko ? '직전 완료 세션 대비 ' : 'Since your previous completed session: ') + (delta > 0 ? '+' : '') + delta + (ko ? '단어' : ' words')) + '</p>';
+    html += '<p class="recap-volume-change">' + (delta == null && r.language === 'ko' && r.volume_history_status !== 'test_session' ? (ko ? '한국어 대화 기록이에요.' : 'Your Korean conversation record.') : delta == null ? (r.volume_history_status === 'test_session' ? (ko ? 'TEST 세션은 성장 추이에 포함하지 않아요.' : 'TEST sessions are not included in your progress trend.') : previousMissing ? (ko ? '직전 완료 세션의 발화 기록이 없어 비교할 수 없어요.' : 'Your previous completed session has no comparable speech record.') : r.volume_history_status !== 'available' ? (ko ? '이전 기록을 불러오지 못했어요.' : 'Previous records are unavailable.') : (ko ? '첫 기록이에요' : 'Your first record')) : (ko ? '직전 완료 세션 대비 ' : 'Since your previous completed session: ') + (delta > 0 ? '+' : '') + delta + (ko ? '단어' : ' words')) + '</p>';
     if (history.length > 1) {
       var max = Math.max(1, ...history.map(function (item) { return item.word_count; }));
       var pts = history.map(function (item, i) { return { x: 12 + i * 256 / (history.length - 1), y: 68 - item.word_count / max * 56 }; });
       var caption = (ko ? '최근 기록 · 최대 5개 세션' : 'Recent records · up to 5 sessions');
       html += '<svg class="recap-volume-chart" viewBox="0 0 280 84" role="img" aria-label="' + esc(caption + ': ' + history.map(function (x) { return x.word_count; }).join(' → ')) + '"><path class="recap-volume-axis" d="M12 68H268"/><polyline points="' + pts.map(function (p) { return p.x + ',' + p.y; }).join(' ') + '"/>' + pts.map(function (p) { return '<circle cx="' + p.x + '" cy="' + p.y + '" r="3.5"/>'; }).join('') + '</svg><small>' + esc(caption) + '</small>';
     }
-    return html + renderRatio(r,locale) + '<small class="recap-volume-basis">' + (ko ? '음성으로 기록된 대화를 기준으로 보여드려요.' : 'Counts words in your saved English transcript. Speech that was not captured is not counted.') + '</small></section>';
+    return html + renderRatio(r,locale) + '<small class="recap-volume-basis">' + (r.language === 'ko' ? (ko ? '한국어 음성 기록의 어절 수를 기준으로 보여드려요.' : 'Counts words in your saved Korean transcript. Speech that was not captured is not counted.') : ko ? '음성으로 기록된 대화를 기준으로 보여드려요.' : 'Counts words in your saved English transcript. Speech that was not captured is not counted.') + '</small></section>';
   }
   function render(recap, locale, options) {
     var r = recap, l = labels(locale), o = options || {};

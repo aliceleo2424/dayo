@@ -26,7 +26,8 @@ const emptyWords = build([row('yeah uh the like')], partner);
 assert.equal(emptyWords.word_expansion.length, 0); assert.equal(emptyWords.questions.length, 0);
 const missing = build(own, null); assert.equal(missing.metrics.partner_word_count, null); assert.equal(missing.metrics.user_participation_ratio, null);
 assert.equal(build([], []).metrics.user_participation_ratio, null);
-for (const lang of ['ko', 'fr', 'es', '']) { const r = build(own, partner, lang); assert.equal(r.supported, false); assert.equal(r.questions.length, 0); assert.equal(r.metrics.user_word_count, null); }
+// Korean recaps are supported since 2026-10-24 (tests/recap-korean.cjs).
+for (const lang of ['fr', 'es', '']) { const r = build(own, partner, lang); assert.equal(r.supported, false); assert.equal(r.questions.length, 0); assert.equal(r.metrics.user_word_count, null); }
 assert.equal(model.rows({ ...log(own), booking_id: OTHER }, B, L, 'learner'), null);
 assert.equal(model.rows(log(partner, 'partner'), B, L, 'learner'), null);
 assert.equal(build([own[0], own[0]], []).metrics.user_utterance_count, 1);
