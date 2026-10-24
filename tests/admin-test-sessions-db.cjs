@@ -188,5 +188,23 @@ const booking = '55555555-5555-4555-8555-555555555555', cancelled = '66666666-66
   await db.exec('reset role');
   assert.equal((await db.query('select count(*)::int n from partner_cancellation_penalty_offsets')).rows[0].n,1);
   assert.equal((await db.query('select point_balance from profiles where id=$1',[partner])).rows[0].point_balance,18000);
+  // 124 (2026-10-24): a Partner account may sit in the User seat of an admin test session.
+  const partner2='55555555-5555-4555-8555-555555555555', dual='eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
+  await db.query("insert into profiles(id,role,nickname,ticket_count,point_balance) values($1,'partner','QA Partner Two',0,0)",[partner2]);
+  const later=(await db.query("select (now()+interval '2 days')::text as t")).rows[0].t, koCreate=`select admin_create_test_session($1,$2,'ko',$3,$4) as data`;
+  await assert.rejects(as(admin,koCreate,[partner2,partner,later,dual]),/User profile required/,'093 still rejects Partner as User');
+  await db.exec('reset role');await db.exec(fs.readFileSync(path.join(root,'supabase/migrations/124_test_session_partner_as_user.sql'),'utf8'));
+  for (const actor of [uid,partner,partner2]) await assert.rejects(as(actor,koCreate,[partner2,partner,later,dual]),/Admin access required/);
+  await assert.rejects(as(admin,koCreate,[partner,partner,later,dual]),/Invalid test session fields/,'no self-booking');
+  await assert.rejects(as(admin,koCreate,[admin,partner,later,dual]),/User profile required/,'admin still not a User seat');
+  await assert.rejects(as(admin,koCreate,[uid,partner2.replace(/^5/,'9'),later,dual]),/Partner profile required/);
+  const dualMade=(await as(admin,koCreate,[partner2,partner,later,dual])).rows[0].data.booking;
+  assert.equal(dualMade.learner_id,partner2);assert.equal(dualMade.partner_user_id,partner);assert.equal(dualMade.language,'ko');
+  assert.equal(dualMade.is_test_session,true);assert.equal(dualMade.ticket_deducted,false);assert.equal(dualMade.partner_rewarded,false);
+  await as(admin,koCreate,[partner2,partner,later,dual]);
+  assert.equal((await as(admin,'select count(*)::int n from bookings where id=$1',[dual])).rows[0].n,1,'124 idempotent');
+  await db.exec('reset role');
+  assert.equal((await db.query('select ticket_count from profiles where id=$1',[partner2])).rows[0].ticket_count,0);
+  console.log('PASS 124: Partner account accepted in the User seat; admin-only, no self-booking, idempotent, zero ticket/reward.');
   await db.close();console.log('PASS: actual catalog SQL: admin-only/RLS, retry, timing, transcript/report, TEST zero financial/email effects, capacity/cutoff, strict drift abort, exact post-091 bodies, ordinary cancellation/refund/outbox and reward-offset retry'+(ownershipPath?', 092 ownership preserved.':'.'));
 })().catch(e=>{console.error(e.stack?.split('\n').slice(0,5).join('\n'), e.where || '', e.detail || '');process.exit(1);});
