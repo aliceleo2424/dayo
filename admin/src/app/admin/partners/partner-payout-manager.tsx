@@ -187,6 +187,9 @@ export function PartnerManagementTable() {
   );
 }
 
+// Owner rule 2026-10-24: partners can withdraw once the final payout reaches ₩50,000.
+const WITHDRAW_MIN = 50000;
+
 export function PartnerSettlementTable() {
   const [rows, setRows] = useState<PayoutSummary[]>([]);
   const [loading, setLoading] = useState(true), [error, setError] = useState("");
@@ -202,13 +205,16 @@ export function PartnerSettlementTable() {
     pending: rows.filter(row => row.can_record).reduce((sum,row) => sum + row.amount, 0),
     settled: rows.reduce((sum,row) => sum + row.paid_total, 0),
     unresolved: rows.filter(row => row.status === "unpaid" || row.status === "needs_review").length,
+    withdrawable: rows.filter(row => row.status !== "needs_review" && row.amount >= WITHDRAW_MIN).length,
   }), [rows]);
   const columns: Column<PayoutSummary & Record<string, unknown>>[] = [
     { key: "partner_name", header: "파트너명", sortable: true },
     { key: "session_count", header: "미지급 완료 세션", render: row => `${row.session_count}회` },
     { key: "point_balance", header: "미지급 포인트", render: row => `${row.point_balance.toLocaleString("ko-KR")} P` },
     { key: "offset_amount", header: "반영된 패널티 상계", render: row => formatCurrency(row.offset_amount) },
-    { key: "amount", header: "최종 지급액", render: row => row.status === "needs_review" ? "확인 필요" : <strong>{formatCurrency(row.amount)}</strong> },
+    { key: "amount", header: "최종 지급액", render: row => row.status === "needs_review" ? "확인 필요" : row.amount >= WITHDRAW_MIN
+      ? <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-1 font-bold text-emerald-800 ring-1 ring-emerald-300">{formatCurrency(row.amount)}<span className="text-[11px] font-semibold">인출 가능</span></span>
+      : <strong>{formatCurrency(row.amount)}</strong> },
     { key: "status", header: "정산 상태", render: row => <Badge variant={row.status === "paid" ? "success" : row.status === "no_rewards" ? "default" : "warning"}>{payoutStatusLabel(row.status)}</Badge> },
     { key: "paid_total", header: "누적 지급액", render: row => formatCurrency(row.paid_total) },
     { key: "record", header: "처리 / 이력", render: row => <Button size="sm" variant="outline" onClick={() => setSelectedId(row.partner_user_id)}>정산 내역 / 지급 기록</Button> },
@@ -220,6 +226,9 @@ export function PartnerSettlementTable() {
         <CardContent><p className="text-2xl font-bold">{value}</p></CardContent></Card>)}
     </section>
     <p className="text-sm text-muted-foreground">미지급 보상 근거와 포인트 잔액을 대조합니다. 실제 지급 후 방법·대상·일시를 기록해 주세요.</p>
+    <p className={summary.withdrawable ? "rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800" : "text-sm text-muted-foreground"}>
+      {summary.withdrawable ? `💸 인출 가능(₩50,000 이상) 파트너 ${summary.withdrawable}명` : "최종 지급액이 ₩50,000 이상이 되면 초록색 \"인출 가능\"으로 표시돼요."}
+    </p>
     {error ? <div role="alert"><p className="text-sm text-red-600">{error}</p><Button variant="outline" onClick={() => void load()}>다시 불러오기</Button></div> : null}
     {loading ? <div className="h-40 animate-pulse rounded-xl bg-muted"/> : !error && !rows.length ? <PartnerEmpty message="정산 대상 파트너가 없습니다."/> : !error ? <DataTable
       data={rows as (PayoutSummary & Record<string, unknown>)[]} columns={columns}
